@@ -169,7 +169,7 @@ namespace Game.Movement
                         owner.UpdateAllowedPositionZ(x, y, ref z);
 
                     bool success = _path.CalculatePath(x, y, z, owner.CanFly());
-                    if (!success || _path.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
+                    if (!success || _path.GetPathType().HasAnyFlag(PathType.NoPath))
                     {
                         if (cOwner)
                             cOwner.SetCannotReachTarget(true);

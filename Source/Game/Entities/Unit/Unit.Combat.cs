@@ -856,7 +856,12 @@ namespace Game.Entities
             {
                 Pet pet = player.GetPet();
                 if (pet != null && pet.IsAlive() && pet.IsControlled())
-                    pet.GetAI().KilledUnit(victim);
+                {
+                    if (pet.IsAIEnabled())
+                        pet.GetAI().KilledUnit(victim);
+                    else
+                        Log.outError(LogFilter.Unit, "Pet doesn't have any AI in Unit.Kill()");
+                }
             }
 
             // 10% durability loss on death
