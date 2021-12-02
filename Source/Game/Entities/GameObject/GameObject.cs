@@ -831,17 +831,15 @@ namespace Game.Entities
                     if (m_respawnDelayTime == 0)
                         return;
 
-                    if (m_spawnedByDefault && m_spawnId != 0)
-                    {
-                        m_respawnTime = 0;
-                        DestroyForNearbyPlayers();
-                        return;
-                    }
-
                     if (!m_spawnedByDefault)
                     {
                         m_respawnTime = 0;
-                        Delete();
+
+                        if (m_spawnId != 0)
+                            DestroyForNearbyPlayers();
+                        else
+                            Delete();
+
                         return;
                     }
 
