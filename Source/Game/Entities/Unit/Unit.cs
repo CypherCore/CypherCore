@@ -2366,10 +2366,10 @@ namespace Game.Entities
             // Hook for OnDamage Event
             Global.ScriptMgr.OnDamage(attacker, victim, ref damage);
 
-            if (victim.IsTypeId(TypeId.Player) && attacker != victim)
+            if (victim.IsTypeId(TypeId.Player))
             {
                 // Signal to pets that their owner was attacked - except when DOT.
-                if (damagetype != DamageEffectType.DOT)
+                if (attacker != victim && damagetype != DamageEffectType.DOT)
                 {
                     foreach (Unit controlled in victim.m_Controlled)
                     {
