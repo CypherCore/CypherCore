@@ -368,6 +368,11 @@ namespace Scripts.Spells.Items
         //Tauntflag
         public const uint TauntFlag = 51657;
 
+        //MirrensDrinkingHat
+        public const uint LochModanLager = 29827;
+        public const uint StouthammerLite = 29828;
+        public const uint AeriePeakPaleAle = 29829;
+
         //MindControlCap
         public const uint GnomishMindControlCap = 13181;
         public const uint Dullard = 67809;
@@ -450,11 +455,6 @@ namespace Scripts.Spells.Items
         public const uint HeartCandy6 = 21823;
         public const uint HeartCandy7 = 21822;
         public const uint HeartCandy8 = 21820;
-
-        //MirrensDrinkingHat
-        public const uint LochModanLager = 23584;
-        public const uint StouthammerLite = 23585;
-        public const uint AeriePeakPaleAle = 23586;
     }
 
     struct QuestIds
@@ -3275,24 +3275,28 @@ namespace Scripts.Spells.Items
     {
         void HandleScriptEffect(uint effIndex)
         {
-            uint itemId = 0;
+            uint spellId = 0;
             switch (RandomHelper.URand(1, 6))
             {
                 case 1:
                 case 2:
                 case 3:
-                    itemId = ItemIds.LochModanLager;
+                    spellId = SpellIds.LochModanLager;
                     break;
                 case 4:
                 case 5:
-                    itemId = ItemIds.StouthammerLite;
+                    spellId = SpellIds.StouthammerLite;
                     break;
                 case 6:
-                    itemId = ItemIds.AeriePeakPaleAle;
+                    spellId = SpellIds.AeriePeakPaleAle;
                     break;
+                default:
+                    return;
             }
-            if (itemId != 0)
-                CreateItem(itemId, ItemContext.None);
+
+            Unit caster = GetCaster();
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                .SetOriginalCastId(GetSpell().m_castId));
         }
 
         public override void Register()
