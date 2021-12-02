@@ -388,11 +388,11 @@ namespace Game.AI
 
         // Called when hit by a spell
         public virtual void SpellHit(Unit caster, SpellInfo spellInfo) { }
-        public virtual void SpellHit(GameObject caster, SpellInfo spellInfo) { }
+        public virtual void SpellHitByGameObject(GameObject caster, SpellInfo spellInfo) { }
 
         // Called when spell hits a target
         public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
-        public virtual void SpellHitTarget(GameObject target, SpellInfo spellInfo) { }
+        public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
 
         public virtual bool IsEscorted() { return false; }
 

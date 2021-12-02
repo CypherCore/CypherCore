@@ -8029,7 +8029,7 @@ namespace Game.Spells
                     if (hitTargetAI != null)
                     {
                         if (spell.GetCaster().IsGameObject())
-                            hitTargetAI.SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
+                            hitTargetAI.SpellHitByGameObject(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
                         else
                             hitTargetAI.SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
                     }
@@ -8088,15 +8088,15 @@ namespace Game.Spells
             if (go.GetAI() != null)
             {
                 if (spell.GetCaster().IsGameObject())
-                    go.GetAI().SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
+                    go.GetAI().SpellHitByGameObject(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
                 else
                     go.GetAI().SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
             }
 
             if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled())
-                spell.GetCaster().ToCreature().GetAI().SpellHitTarget(go, spell.m_spellInfo);
+                spell.GetCaster().ToCreature().GetAI().SpellHitTargetGameObject(go, spell.m_spellInfo);
             else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
-                spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(go, spell.m_spellInfo);
+                spell.GetCaster().ToGameObject().GetAI().SpellHitTargetGameObject(go, spell.m_spellInfo);
 
             spell.CallScriptOnHitHandlers();
             spell.CallScriptAfterHitHandlers();
