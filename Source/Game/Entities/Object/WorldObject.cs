@@ -381,7 +381,7 @@ namespace Game.Entities
             }
 
             if (flags.Rotation)
-                data.WriteInt64(ToGameObject().GetPackedWorldRotation());                 // Rotation
+                data.WriteInt64(ToGameObject().GetPackedLocalRotation());                 // Rotation
 
             if (go)
             {

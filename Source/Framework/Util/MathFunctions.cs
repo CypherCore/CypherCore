@@ -16,7 +16,9 @@
  */
 
 using Framework.Constants;
+using Framework.GameMath;
 using System;
+using System.Numerics;
 
 public static class MathFunctions
 {
@@ -265,5 +267,21 @@ public static class MathFunctions
     public static ushort MakePair16(uint l, uint h)
     {
         return (ushort)((byte)l | (ushort)h << 8);
+    }
+
+    //3d math
+    public static Box toWorldSpace(Matrix4x4 rotation, Vector3 translation, Box box)
+    {
+        if (!box.isFinite())
+            return box;
+
+        box._center = new(rotation.M11 * box._center.GetAt(0) + rotation.M12 * box._center.GetAt(1) + rotation.M13 * box._center.GetAt(2) + translation.GetAt(0),
+            rotation.M21 * box._center.GetAt(0) + rotation.M22 * box._center.GetAt(1) + rotation.M23 * box._center.GetAt(2) + translation.GetAt(1),
+            rotation.M31 * box._center.GetAt(0) + rotation.M32 * box._center.GetAt(1) + rotation.M33 * box._center.GetAt(2) + translation.GetAt(2));
+
+        for (int i = 0; i < 3; ++i)
+            box._edgeVector[i] = Vector3.Transform(box._edgeVector[i], rotation);
+
+        return box;
     }
 }

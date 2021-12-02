@@ -5736,10 +5736,6 @@ namespace Game.Spells
             if (m_spellInfo.RangeEntry != null && m_spellInfo.RangeEntry.Flags != SpellRangeFlag.Melee && !strict)
                 maxRange += Math.Min(3.0f, maxRange * 0.1f); // 10% but no more than 3.0f
 
-            // save the original values before squaring them
-            float origMinRange = minRange;
-            float origMaxRange = maxRange;
-
             // get square values for sqr distance checks
             minRange *= minRange;
             maxRange *= maxRange;
@@ -5762,10 +5758,7 @@ namespace Game.Spells
             GameObject goTarget = m_targets.GetGOTarget();
             if (goTarget != null)
             {
-                if (origMinRange > 0.0f && goTarget.IsInRange(m_caster.GetPositionX(), m_caster.GetPositionY(), m_caster.GetPositionZ(), origMinRange))
-                    return SpellCastResult.OutOfRange;
-
-                if (!goTarget.IsInRange(m_caster.GetPositionX(), m_caster.GetPositionY(), m_caster.GetPositionZ(), origMaxRange))
+                if (!goTarget.IsAtInteractDistance(m_caster.ToPlayer(), m_spellInfo))
                     return SpellCastResult.OutOfRange;
             }
 

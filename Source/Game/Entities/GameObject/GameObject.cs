@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.GameMath;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Collision;
@@ -242,7 +243,7 @@ namespace Game.Entities
                 return false;
             }
 
-            SetWorldRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
+            SetLocalRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
             GameObjectAddon gameObjectAddon = Global.ObjectMgr.GetGameObjectAddon(GetSpawnId());
 
             // For most of gameobjects is (0, 0, 0, 1) quaternion, there are only some transports with not standard rotation
@@ -883,7 +884,7 @@ namespace Game.Entities
 
             return m_goTemplateAddon;
         }
-        
+
         public void Refresh()
         {
             // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
@@ -1025,7 +1026,7 @@ namespace Game.Entities
 
             data.Id = GetEntry();
             data.spawnPoint.WorldRelocate(this);
-            data.rotation = m_worldRotation;
+            data.rotation = m_localRotation;
             data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();
             data.goState = GetGoState();
@@ -1054,10 +1055,10 @@ namespace Game.Entities
             stmt.AddValue(index++, GetPositionY());
             stmt.AddValue(index++, GetPositionZ());
             stmt.AddValue(index++, GetOrientation());
-            stmt.AddValue(index++, m_worldRotation.X);
-            stmt.AddValue(index++, m_worldRotation.Y);
-            stmt.AddValue(index++, m_worldRotation.Z);
-            stmt.AddValue(index++, m_worldRotation.W);
+            stmt.AddValue(index++, m_localRotation.X);
+            stmt.AddValue(index++, m_localRotation.Y);
+            stmt.AddValue(index++, m_localRotation.Z);
+            stmt.AddValue(index++, m_localRotation.W);
             stmt.AddValue(index++, m_respawnDelayTime);
             stmt.AddValue(index++, GetGoAnimProgress());
             stmt.AddValue(index++, (byte)GetGoState());
@@ -2207,22 +2208,22 @@ namespace Game.Entities
             const int PACK_YZ_MASK = (PACK_YZ << 1) - 1;
             const int PACK_X_MASK = (PACK_X << 1) - 1;
 
-            sbyte w_sign = (sbyte)(m_worldRotation.W >= 0.0f ? 1 : -1);
-            long x = (int)(m_worldRotation.X * PACK_X) * w_sign & PACK_X_MASK;
-            long y = (int)(m_worldRotation.Y * PACK_YZ) * w_sign & PACK_YZ_MASK;
-            long z = (int)(m_worldRotation.Z * PACK_YZ) * w_sign & PACK_YZ_MASK;
+            sbyte w_sign = (sbyte)(m_localRotation.W >= 0.0f ? 1 : -1);
+            long x = (int)(m_localRotation.X * PACK_X) * w_sign & PACK_X_MASK;
+            long y = (int)(m_localRotation.Y * PACK_YZ) * w_sign & PACK_YZ_MASK;
+            long z = (int)(m_localRotation.Z * PACK_YZ) * w_sign & PACK_YZ_MASK;
             m_packedRotation = z | (y << 21) | (x << 42);
         }
 
-        public void SetWorldRotation(float qx, float qy, float qz, float qw)
+        public void SetLocalRotation(float qx, float qy, float qz, float qw)
         {
             Quaternion rotation = new Quaternion(qx, qy, qz, qw);
             rotation = Quaternion.Multiply(rotation, 1.0f / MathF.Sqrt(Quaternion.Dot(rotation, rotation)));
 
-            m_worldRotation.X = rotation.X;
-            m_worldRotation.Y = rotation.Y;
-            m_worldRotation.Z = rotation.Z;
-            m_worldRotation.W = rotation.W;
+            m_localRotation.X = rotation.X;
+            m_localRotation.Y = rotation.Y;
+            m_localRotation.Z = rotation.Z;
+            m_localRotation.W = rotation.W;
             UpdatePackedRotation();
         }
 
@@ -2231,12 +2232,158 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), rotation);
         }
 
-        public void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
+        public void SetLocalRotationAngles(float z_rot, float y_rot, float x_rot)
         {
             Quaternion quat = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(z_rot, y_rot, x_rot));
-            SetWorldRotation(quat.X, quat.Y, quat.Z, quat.W);
+            SetLocalRotation(quat.X, quat.Y, quat.Z, quat.W);
         }
 
+        public Quaternion GetWorldRotation()
+        {
+            Quaternion localRotation = GetLocalRotation();
+
+            Transport transport = GetTransport();
+            if (transport != null)
+            {
+                Quaternion worldRotation = transport.GetWorldRotation();
+
+                Quaternion worldRotationQuat = new(worldRotation.X, worldRotation.Y, worldRotation.Z, worldRotation.W);
+                Quaternion localRotationQuat = new(localRotation.X, localRotation.Y, localRotation.Z, localRotation.W);
+
+                Quaternion resultRotation = localRotationQuat * worldRotationQuat;
+
+                return resultRotation;
+            }
+
+            return localRotation;
+        }
+
+        public bool IsAtInteractDistance(Player player, SpellInfo spell)
+        {
+            if (spell != null || (spell = GetSpellForLock(player)) != null)
+            {
+                float maxRange = spell.GetMaxRange(spell.IsPositive());
+
+                if (GetGoType() == GameObjectTypes.SpellFocus)
+                    return maxRange * maxRange >= GetExactDistSq(player);
+
+                var displayInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(GetGoInfo().displayId);
+                if (displayInfo != null)
+                    return IsAtInteractDistance(player, maxRange);
+            }
+
+            float distance;
+            switch (GetGoType())
+            {
+                case GameObjectTypes.AreaDamage:
+                    distance = 0.0f;
+                    break;
+                case GameObjectTypes.QuestGiver:
+                case GameObjectTypes.Text:
+                case GameObjectTypes.FlagStand:
+                case GameObjectTypes.FlagDrop:
+                case GameObjectTypes.MiniGame:
+                    distance = 5.5555553f;
+                    break;
+                case GameObjectTypes.Binder:
+                    distance = 10.0f;
+                    break;
+                case GameObjectTypes.Chair:
+                case GameObjectTypes.BarberChair:
+                    distance = 3.0f;
+                    break;
+                case GameObjectTypes.FishingNode:
+                    distance = 100.0f;
+                    break;
+                case GameObjectTypes.Camera:
+                case GameObjectTypes.MapObject:
+                case GameObjectTypes.DungeonDifficulty:
+                case GameObjectTypes.DestructibleBuilding:
+                case GameObjectTypes.Door:
+                default:
+                    distance = 5.0f;
+                    break;
+
+                // Following values are not blizzlike
+                case GameObjectTypes.Mailbox:
+                    // Successful mailbox interaction is rather critical to the client, failing it will start a minute-long cooldown until the next mail query may be executed.
+                    // And since movement info update is not sent with mailbox interaction query, server may find the player outside of interaction range. Thus we increase it.
+                    distance = 10.0f; // 5.0f is blizzlike
+                    break;
+            }
+
+            return IsAtInteractDistance(player, distance);
+        }
+
+        bool IsAtInteractDistance(Position pos, float radius)
+        {
+            var displayInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(GetGoInfo().displayId);
+            if (displayInfo != null)
+            {
+                float scale = GetObjectScale();
+
+                float minX = displayInfo.GeoBoxMin.X * scale - radius;
+                float minY = displayInfo.GeoBoxMin.Y * scale - radius;
+                float minZ = displayInfo.GeoBoxMin.Z * scale - radius;
+                float maxX = displayInfo.GeoBoxMax.X * scale + radius;
+                float maxY = displayInfo.GeoBoxMax.Y * scale + radius;
+                float maxZ = displayInfo.GeoBoxMax.Z * scale + radius;
+
+                Quaternion localRotation = GetLocalRotation();
+
+                //Todo Test this. Needs checked.
+                var worldSpaceBox = MathFunctions.toWorldSpace(Matrix4x4.CreateFromQuaternion(localRotation), new Vector3(GetPositionX(), GetPositionY(), GetPositionZ()), new Box(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ)));
+                return worldSpaceBox.Contains(new Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()));
+            }
+
+            return GetExactDist(pos) <= radius;
+        }
+
+        SpellInfo GetSpellForLock(Player player)
+        {
+            if (!player)
+                return null;
+
+            uint lockId = GetGoInfo().GetLockId();
+            if (lockId == 0)
+                return null;
+
+            var lockEntry = CliDB.LockStorage.LookupByKey(lockId);
+            if (lockEntry == null)
+                return null;
+
+            for (byte i = 0; i < SharedConst.MaxLockCase; ++i)
+            {
+                if (lockEntry.LockType[i] == 0)
+                    continue;
+
+                if (lockEntry.LockType[i] == (byte)LockKeyType.Skill)
+                {
+                    SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)lockEntry.Index[i], GetMap().GetDifficultyID());
+                    if (spell != null)
+                        return spell;
+                }
+
+                if (lockEntry.LockType[i] != (byte)LockKeyType.Skill)
+                    break;
+
+                foreach (var playerSpell in player.GetSpellMap())
+                {
+                    SpellInfo spell = Global.SpellMgr.GetSpellInfo(playerSpell.Key, GetMap().GetDifficultyID());
+                    if (spell != null)
+                    {
+                        foreach (var effect in spell.GetEffects())
+                            if (effect.Effect == SpellEffectName.OpenLock && effect.MiscValue == lockEntry.Index[i])
+                                if (effect.CalcValue(player) >= lockEntry.Skill[i])
+                                    return spell;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        
         public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
             if (m_goValue.Building.MaxHealth == 0 || change == 0)
@@ -2729,7 +2876,8 @@ namespace Game.Entities
 
         public ulong GetSpawnId() { return m_spawnId; }
 
-        public long GetPackedWorldRotation() { return m_packedRotation; }
+        public Quaternion GetLocalRotation() { return m_localRotation; }
+        public long GetPackedLocalRotation() { return m_packedRotation; }
 
         public void SetOwnerGUID(ObjectGuid owner)
         {
@@ -2900,7 +3048,7 @@ namespace Game.Entities
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
         long m_packedRotation;
-        Quaternion m_worldRotation;
+        Quaternion m_localRotation;
         public Position StationaryPosition { get; set; }
 
         GameObjectAI m_AI;

@@ -555,7 +555,7 @@ namespace Game.Chat
             Map map = obj.GetMap();
 
             obj.Relocate(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
-            obj.SetWorldRotationAngles(oz, oy, ox);
+            obj.SetLocalRotationAngles(oz, oy, ox);
             obj.SaveToDB();
 
             // Generate a completely new spawn with new guid
