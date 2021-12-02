@@ -122,6 +122,8 @@ namespace Game.AI
 
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
+
+            Reset();
         }
 
         void ReturnToLastPoint()
