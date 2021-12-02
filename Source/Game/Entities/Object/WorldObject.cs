@@ -912,7 +912,7 @@ namespace Game.Entities
 
             m_isActive = on;
 
-            if (!IsInWorld)
+            if (on && !IsInWorld)
                 return;
 
             Map map = GetMap();
