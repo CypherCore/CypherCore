@@ -703,10 +703,14 @@ namespace Game.Movement
                 ulong[] visited = new ulong[MAX_VISIT_POLY];
 
                 int nvisited = 0;
-                _navMeshQuery.moveAlongSurface(polys[0], iterPos, moveTgt, _filter, result, visited, ref nvisited, MAX_VISIT_POLY);
+                if (Detour.dtStatusFailed(_navMeshQuery.moveAlongSurface(polys[0], iterPos, moveTgt, _filter, result, visited, ref nvisited, MAX_VISIT_POLY)))
+                    return Detour.DT_FAILURE;
+
                 npolys = FixupCorridor(polys, npolys, 74, visited, nvisited);
 
-                _navMeshQuery.getPolyHeight(polys[0], result, ref result[1]);
+                if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(polys[0], result, ref result[1])))
+                    return Detour.DT_FAILURE;
+
                 result[1] += 0.5f;
                 Detour.dtVcopy(iterPos, result);
 
@@ -752,7 +756,9 @@ namespace Game.Movement
                         }
                         // Move position at the other side of the off-mesh link.
                         Detour.dtVcopy(iterPos, connectionEndPos);
-                        _navMeshQuery.getPolyHeight(polys[0], iterPos, ref iterPos[1]);
+                        if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(polys[0], iterPos, ref iterPos[1])))
+                            return Detour.DT_FAILURE;
+
                         iterPos[1] += 0.5f;
                     }
                 }

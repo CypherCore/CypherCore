@@ -25,7 +25,7 @@ namespace Game.Maps
     {
         public static bool IsValidMapCoord(float c)
         {
-            return !float.IsInfinity(c) && (Math.Abs(c) <= (MapConst.MapHalfSize - 0.5f));
+            return !float.IsFinite(c) && (Math.Abs(c) <= (MapConst.MapHalfSize - 0.5f));
         }
 
         public static bool IsValidMapCoord(float x, float y)
@@ -40,7 +40,7 @@ namespace Game.Maps
 
         public static bool IsValidMapCoord(float x, float y, float z, float o)
         {
-            return IsValidMapCoord(x, y, z) && !float.IsInfinity(o);
+            return IsValidMapCoord(x, y, z) && float.IsFinite(o);
         }
 
         public static bool IsValidMapCoord(uint mapid, float x, float y)

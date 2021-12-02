@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 /**
     @typedef dtPolyRef
     @par
@@ -725,68 +726,84 @@ public static partial class Detour
             }
         }
 
-        public void closestPointOnPoly(dtPolyRef polyRef, float[] pos, int posStart, float[] closest, ref bool posOverPoly)
+        void closestPointOnDetailEdges(bool onlyBoundary, dtMeshTile tile, dtPoly poly, float[] pos, float[] closest)
         {
-            dtMeshTile tile = null;
-            dtPoly poly = null;
-            uint ip = 0;
-            getTileAndPolyByRefUnsafe(polyRef, ref tile, ref poly, ref ip);
-
-            // Off-mesh connections don't have detail polygons.
-            if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                //const float* v0 = &tile.verts[poly.verts[0]*3];
-                //const float* v1 = &tile.verts[poly.verts[1]*3];
-                int v0Start = poly.verts[0] * 3;
-                int v1Start = poly.verts[1] * 3;
-                float d0 = dtVdist(pos, posStart, tile.verts, v0Start);
-                float d1 = dtVdist(pos, posStart, tile.verts, v1Start);
-                float u = d0 / (d0 + d1);
-                dtVlerp(closest, 0, tile.verts, v0Start, tile.verts, v1Start, u);
-
-                posOverPoly = false;
-                return;
-            }
-
-            //uint ip = (uint)(poly - tile.polys);
+            uint ip = (uint)tile.polys.ToList().IndexOf(poly);
             dtPolyDetail pd = tile.detailMeshes[ip];
 
-            // Clamp point to be inside the polygon.
+            float dmin = float.MaxValue;
+            float tmin = 0;
+            int pmin = 0;
+            int pmax = 0;
+            float[] v = new float[0];
+
+            for (int i = 0; i < pd.triCount; i++)
+            {
+                int trisIndex = (int)((pd.triBase + i) * 4);
+                const int ANY_BOUNDARY_EDGE =
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 0) |
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 2) |
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 4);
+                if (onlyBoundary && (tile.detailTris[trisIndex + 3] & ANY_BOUNDARY_EDGE) == 0)
+                    continue;
+
+                v = new float[3];
+                for (int j = 0; j < 3; ++j)
+                {
+                    if (tile.detailTris[trisIndex + j] < poly.vertCount)
+                        v[j] = tile.verts[poly.verts[tile.detailTris[trisIndex + j]] * 3];
+                    else
+                        v[j] = tile.detailVerts[(pd.vertBase + (tile.detailTris[trisIndex + j] - poly.vertCount)) * 3];
+                }
+
+                for (int k = 0, j = 2; k < 3; j = k++)
+                {
+                    if ((dtGetDetailTriEdgeFlags(tile.detailTris[trisIndex + 3], j) & (int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
+                        (onlyBoundary || tile.detailTris[trisIndex + j] < tile.detailTris[trisIndex + k]))
+                    {
+                        // Only looking at boundary edges and this is internal, or
+                        // this is an inner edge that we will see again or have already seen.
+                        continue;
+                    }
+
+                    float t = 0;
+                    float d = dtDistancePtSegSqr2D(pos, 0, v, j, v, k, ref t);
+                    if (d < dmin)
+                    {
+                        dmin = d;
+                        tmin = t;
+                        pmin = j;
+                        pmax = k;
+                    }
+                }
+            }
+
+            dtVlerp(closest, 0, v, pmin, v, pmax, tmin);
+        }
+
+        public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, float height)
+        {
+            // Off-mesh connections do not have detail polys and getting height
+            // over them does not make sense.
+            if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+                return false;
+
+            uint ip = (uint)tile.polys.ToList().IndexOf(poly);
+            dtPolyDetail pd = tile.detailMeshes[ip];
+
             float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
-            float[] edged = new float[DT_VERTS_PER_POLYGON];
-            float[] edget = new float[DT_VERTS_PER_POLYGON];
+
             int nv = poly.vertCount;
             for (int i = 0; i < nv; ++i)
             {
                 dtVcopy(verts, i * 3, tile.verts, poly.verts[i] * 3);
             }
 
-            dtVcopy(closest, 0, pos, posStart);
-            if (!dtDistancePtPolyEdgesSqr(pos, posStart, verts, nv, edged, edget))
-            {
-                // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = float.MaxValue;
-                int imin = -1;
-                for (int i = 0; i < nv; ++i)
-                {
-                    if (edged[i] < dmin)
-                    {
-                        dmin = edged[i];
-                        imin = i;
-                    }
-                }
-                //float[] va = &verts[imin*3];
-                //const float* vb = &verts[((imin+1)%nv)*3];
-                int vaStart = imin * 3;
-                int vbStart = ((imin + 1) % nv) * 3;
-                dtVlerp(closest, 0, verts, vaStart, verts, vbStart, edget[imin]);
+            if (!dtPointInPolygon(pos, verts, nv))
+                return false;
 
-                posOverPoly = false;
-            }
-            else
-            {
-                posOverPoly = true;
-            }
+            if (height == 0)
+                return true;
 
             // Find height at the location.
             for (int j = 0; j < pd.triCount; ++j)
@@ -812,12 +829,54 @@ public static partial class Detour
                     }
                 }
                 float h = .0f;
-                if (dtClosestHeightPointTriangle(closest, posStart, vArrays[0], vIndices[0], vArrays[1], vIndices[1], vArrays[2], vIndices[2], ref h))
+                if (dtClosestHeightPointTriangle(pos, 0, vArrays[0], vIndices[0], vArrays[1], vIndices[1], vArrays[2], vIndices[2], ref h))
                 {
-                    closest[1] = h;
-                    break;
+                    height = h;
+                    return true;
                 }
             }
+
+            // If all triangle checks failed above (can happen with degenerate triangles
+            // or larger floating point values) the point is on an edge, so just select
+            // closest. This should almost never happen so the extra iteration here is
+            // ok.
+            float[] closest = new float[3];
+            closestPointOnDetailEdges(false, tile, poly, pos, closest);
+            height = closest[1];
+            return true;
+        }
+
+        public void closestPointOnPoly(dtPolyRef polyRef, float[] pos, float[] closest, ref bool posOverPoly)
+        {
+
+            dtMeshTile tile = new();
+            dtPoly poly = new();
+            getTileAndPolyByRefUnsafe(polyRef, ref tile, ref poly);
+
+            dtVcopy(closest, pos);
+            if (getPolyHeight(tile, poly, pos, closest[1]))
+            {
+                if (posOverPoly)
+                    posOverPoly = true;
+                return;
+            }
+
+            if (posOverPoly)
+                posOverPoly = false;
+
+            // Off-mesh connections don't have detail polygons.
+            if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            {
+                int v0 = poly.verts[0] * 3;
+                int v1 = poly.verts[1] * 3;
+                float t = 0;
+                dtDistancePtSegSqr2D(pos, 0, tile.verts, v0, tile.verts, v1, ref t);
+                dtVlerp(closest, 0, tile.verts, v0, tile.verts, v1, t);
+                return;
+            }
+
+            // Outside poly that is not an offmesh connection.
+            closestPointOnDetailEdges(true, tile, poly, pos, closest);
         }
 
         public dtPolyRef findNearestPolyInTile(dtMeshTile tile, float[] center, int centerStart, float[] halfExtents, float[] nearestPt)
@@ -841,7 +900,7 @@ public static partial class Detour
                 float[] diff = new float[3];
                 bool posOverPoly = false;
                 float d = 0;
-                closestPointOnPoly(polyRef, center, centerStart, closestPtPoly, ref posOverPoly);
+                closestPointOnPoly(polyRef, center, closestPtPoly, ref posOverPoly);
 
                 // If a point is directly over a polygon and closer than
                 // climb height, favor that instead of straight line nearest point.
@@ -996,7 +1055,7 @@ public static partial class Detour
 
             // Make sure the location is free.
             if (getTileAt(header.x, header.y, header.layer) != null)
-                return DT_FAILURE;
+                return DT_FAILURE | DT_ALREADY_OCCUPIED;
 
             // Allocate a tile.
             dtMeshTile tile = null;

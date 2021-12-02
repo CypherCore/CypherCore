@@ -37,7 +37,7 @@ namespace Framework.GameMath
 
             for (int i = 0; i < 3; ++i)
             {
-                if (!float.IsInfinity(_edgeVector[i].Length()))
+                if (!float.IsFinite(_edgeVector[i].Length()))
                 {
                     finiteExtent = false;
                     // If the extent is infinite along an axis, make the center zero to avoid NaNs
@@ -95,7 +95,7 @@ namespace Framework.GameMath
 
         public bool isFinite()
         {
-            return float.IsInfinity(_volume);
+            return float.IsFinite(_volume);
         }
     }
 }

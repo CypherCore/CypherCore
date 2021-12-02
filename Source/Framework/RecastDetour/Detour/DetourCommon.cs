@@ -211,6 +211,8 @@ public static partial class Detour
     ///  @param[out]	h		The resulting height.
     public static bool dtClosestHeightPointTriangle(float[] p, int pStart, float[] a, int aStart, float[] b, int bStart, float[] c, int cStart, ref float h)
     {
+        const float EPS = 1e-6f;
+
         float[] v0 = new float[3];
         float[] v1 = new float[3];
         float[] v2 = new float[3];
@@ -218,25 +220,24 @@ public static partial class Detour
         dtVsub(v1, 0, b, bStart, a, aStart);
         dtVsub(v2, 0, p, pStart, a, aStart);
 
-        float dot00 = dtVdot2D(v0, v0);
-        float dot01 = dtVdot2D(v0, v1);
-        float dot02 = dtVdot2D(v0, v2);
-        float dot11 = dtVdot2D(v1, v1);
-        float dot12 = dtVdot2D(v1, v2);
+        // Compute scaled barycentric coordinates
+        float denom = v0[0] * v1[2] - v0[2] * v1[0];
+        if (MathF.Abs(denom) < EPS)
+            return false;
 
-        // Compute barycentric coordinates
-        float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-        float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-        float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+        float u = v1[2] * v2[0] - v1[0] * v2[2];
+        float v = v0[0] * v2[2] - v0[2] * v2[0];
 
-        // The (sloppy) epsilon is needed to allow to get height of points which
-        // are interpolated along the edges of the triangles.
-        const float EPS = 1e-4f;
-
-        // If point lies inside the triangle, return interpolated ycoord.
-        if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+        if (denom < 0)
         {
-            h = a[aStart + 1] + v0[1] * u + v1[1] * v;
+            denom = -denom;
+            u = -u;
+            v = -v;
+        }
+
+        if (u >= 0.0f && v >= 0.0f && (u + v) <= denom)
+        {
+            h = a[1] + (v0[1] * u + v1[1] * v) / denom;
             return true;
         }
 
@@ -779,6 +780,30 @@ public static partial class Detour
         float d = dtVdistSqr(p0, p0Start, p1, p1Start);
         return d < thr;
     }
+
+    /// Checks that the specified vector's components are all finite.
+    ///  @param[in]		v	A point. [(x, y, z)]
+    /// @return True if all of the point's components are finite, i.e. not NaN
+    /// or any of the infinities.
+    public static bool dtVisfinite(float[] v)
+    {
+
+        bool result =
+            float.IsFinite(v[0]) &&
+            float.IsFinite(v[1]) &&
+            float.IsFinite(v[2]);
+
+        return result;
+    }
+
+    /// Checks that the specified vector's 2D components are finite.
+    ///  @param[in]		v	A point. [(x, y, z)]
+    public static bool dtVisfinite2D(float[] v)
+    {
+        bool result = float.IsFinite(v[0]) && float.IsFinite(v[2]);
+        return result;
+    }
+
     /// Derives the dot product of two vectors on the xz-plane. (@p u . @p v)
     ///  @param[in]		u		A vector [(x, y, z)]
     ///  @param[in]		v		A vector [(x, y, z)]

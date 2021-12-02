@@ -239,28 +239,28 @@ namespace Game.DataStorage
 
                     orbitInfo.StartDelay = circularMovementInfos.Read<uint>(1);
                     orbitInfo.Radius = circularMovementInfos.Read<float>(2);
-                    if (!float.IsInfinity(orbitInfo.Radius))
+                    if (!float.IsFinite(orbitInfo.Radius))
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid Radius ({orbitInfo.Radius}), set to 0!");
                         orbitInfo.Radius = 0.0f;
                     }
 
                     orbitInfo.BlendFromRadius = circularMovementInfos.Read<float>(3);
-                    if (!float.IsInfinity(orbitInfo.BlendFromRadius))
+                    if (!float.IsFinite(orbitInfo.BlendFromRadius))
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid BlendFromRadius ({orbitInfo.BlendFromRadius}), set to 0!");
                         orbitInfo.BlendFromRadius = 0.0f;
                     }
 
                     orbitInfo.InitialAngle = circularMovementInfos.Read<float>(4);
-                    if (!float.IsInfinity(orbitInfo.InitialAngle))
+                    if (!float.IsFinite(orbitInfo.InitialAngle))
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid InitialAngle ({orbitInfo.InitialAngle}), set to 0!");
                         orbitInfo.InitialAngle = 0.0f;
                     }
 
                     orbitInfo.ZOffset = circularMovementInfos.Read<float>(5);
-                    if (!float.IsInfinity(orbitInfo.ZOffset))
+                    if (!float.IsFinite(orbitInfo.ZOffset))
                     {
                         Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {areaTriggerCreatePropertiesId}) with invalid ZOffset ({orbitInfo.ZOffset}), set to 0!");
                         orbitInfo.ZOffset = 0.0f;

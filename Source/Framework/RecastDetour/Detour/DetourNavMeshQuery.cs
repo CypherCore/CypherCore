@@ -36,6 +36,7 @@ using System;
 using System.Diagnostics;
 using dtPolyRef = System.UInt64;
 using dtStatus = System.UInt32;
+using System.Collections.Generic;
 
 // Define DT_VIRTUAL_QUERYFILTER if you wish to derive a custom filter from dtQueryFilter.
 // On certain platforms indirect or virtual function call is expensive. The default
@@ -310,6 +311,9 @@ public static partial class Detour
         {
             Debug.Assert(m_nav != null);
 
+            if (filter == null || frand == null || randomPt == null)
+                return DT_FAILURE | DT_INVALID_PARAM;
+
             // Randomly pick one tile. Assume that all tiles cover roughly the same area.
             dtMeshTile tile = null;
             float tsum = 0.0f;
@@ -409,14 +413,17 @@ public static partial class Detour
         ///  @param[out]	randomRef		The reference id of the random location.
         ///  @param[out]	randomPt		The random location. [(x, y, z)]
         // @returns The status flags for the query.
-        public dtStatus findRandomPointAroundCircle(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
+        public dtStatus findRandomPointAroundCircle(dtPolyRef startRef, float[] centerPos, float maxRadius, dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
             Debug.Assert(m_openList != null);
 
             // Validate input
-            if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                centerPos == null || !dtVisfinite(centerPos) ||
+                maxRadius < 0 || !float.IsFinite(maxRadius) ||
+                filter == null || frand == null || randomPt == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             dtMeshTile startTile = null;
@@ -439,7 +446,7 @@ public static partial class Detour
 
             dtStatus status = DT_SUCCESS;
 
-            float radiusSqr = dtSqr(radius);
+            float radiusSqr = dtSqr(maxRadius);
             float areaSum = 0.0f;
 
             dtMeshTile randomTile = null;
@@ -617,104 +624,13 @@ public static partial class Detour
         public dtStatus closestPointOnPoly(dtPolyRef polyRef, float[] pos, float[] closest, ref bool posOverPoly)
         {
             Debug.Assert(m_nav != null);
-            dtMeshTile tile = null;
-            dtPoly poly = null;
-            uint ip = 0;
-            if (dtStatusFailed(m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly, ref ip)))
-                return DT_FAILURE | DT_INVALID_PARAM;
-            if (tile == null)
+            
+            if (!m_nav.isValidPolyRef(polyRef) ||
+                pos == null || !dtVisfinite(pos) ||
+                closest == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            // Off-mesh connections don't have detail polygons.
-            if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                //const float* v0 = &tile.verts[poly.verts[0]*3];
-                //const float* v1 = &tile.verts[poly.verts[1]*3];
-                int v0Start = poly.verts[0] * 3;
-                int v1Start = poly.verts[1] * 3;
-                float d0 = dtVdist(pos, 0, tile.verts, v0Start);
-                float d1 = dtVdist(pos, 0, tile.verts, v1Start);
-                float u = d0 / (d0 + d1);
-                dtVlerp(closest, 0, tile.verts, v0Start, tile.verts, v1Start, u);
-                //if (posOverPoly)
-                posOverPoly = false;
-                return DT_SUCCESS;
-            }
-
-            //uint ip = (uint)(poly - tile.polys);
-            dtPolyDetail pd = tile.detailMeshes[ip];
-
-            // Clamp point to be inside the polygon.
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
-            float[] edged = new float[DT_VERTS_PER_POLYGON];
-            float[] edget = new float[DT_VERTS_PER_POLYGON];
-            int nv = poly.vertCount;
-            for (int i = 0; i < nv; ++i)
-            {
-                dtVcopy(verts, i * 3, tile.verts, poly.verts[i] * 3);
-            }
-
-            dtVcopy(closest, pos);
-            if (!dtDistancePtPolyEdgesSqr(pos, 0, verts, nv, edged, edget))
-            {
-                // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = float.MaxValue;
-                int imin = -1;
-                for (int i = 0; i < nv; ++i)
-                {
-                    if (edged[i] < dmin)
-                    {
-                        dmin = edged[i];
-                        imin = i;
-                    }
-                }
-                //const float* va = &verts[imin*3];
-                //const float* vb = &verts[((imin+1)%nv)*3];
-                int vaStart = imin * 3;
-                int vbStart = ((imin + 1) % nv) * 3;
-                dtVlerp(closest, 0, verts, vaStart, verts, vbStart, edget[imin]);
-
-                //if (posOverPoly)
-                posOverPoly = false;
-            }
-            else
-            {
-                //if (posOverPoly)
-                posOverPoly = true;
-            }
-
-            // Find height at the location.
-            for (int j = 0; j < pd.triCount; ++j)
-            {
-                //byte[] t = &tile.detailTris[(pd.triBase+j)*4];
-                //const float* v[3];
-                int tStart = (int)(pd.triBase + j) * 4;
-                int[] vStarts = new int[3];
-                float[][] vSrc = new float[3][];
-                for (int k = 0; k < 3; ++k)
-                {
-                    byte tk = tile.detailTris[tStart + k];
-                    byte vCount = poly.vertCount;
-                    if (tk < vCount)
-                    {
-                        //v[k] = &tile.verts[poly.verts[tile.detailTris[tStart + k]]*3];
-                        vStarts[k] = poly.verts[tk] * 3;
-                        vSrc[k] = tile.verts;
-                    }
-                    else
-                    {
-                        //v[k] = &tile.detailVerts[(pd.vertBase+(t[k]-poly.vertCount))*3];
-                        vStarts[k] = (int)(pd.vertBase + (tk - vCount)) * 3;
-                        vSrc[k] = tile.detailVerts;
-                    }
-                }
-                float h = .0f;
-                if (dtClosestHeightPointTriangle(closest, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
-                {
-                    closest[1] = h;
-                    break;
-                }
-            }
+            m_nav.closestPointOnPoly(polyRef, pos, closest, ref posOverPoly);
 
             return DT_SUCCESS;
         }
@@ -743,6 +659,9 @@ public static partial class Detour
             dtMeshTile tile = null;
             dtPoly poly = null;
             if (dtStatusFailed(m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            if (pos == null || !dtVisfinite(pos) || closest == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             // Collect vertices.
@@ -792,10 +711,10 @@ public static partial class Detour
         // @returns The status flags for the query.
         // @par
         ///
-        /// Will return #DT_FAILURE if the provided position is outside the xz-bounds 
+        /// Will return #DT_FAILURE | DT_INVALID_PARAM if the provided position is outside the xz-bounds 
         /// of the polygon.
         /// 
-		public dtStatus getPolyHeight(dtPolyRef polyRef, float[] pos, ref float height)
+        public dtStatus getPolyHeight(dtPolyRef polyRef, float[] pos, ref float height)
         {
             Debug.Assert(m_nav != null);
 
@@ -805,57 +724,26 @@ public static partial class Detour
             if (dtStatusFailed(m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly, ref ip)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
+            if (pos == null || !dtVisfinite2D(pos))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            // We used to return success for offmesh connections, but the
+            // getPolyHeight in DetourNavMesh does not do this, so special
+            // case it here.
             if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
                 //const float* v0 = &tile.verts[poly.verts[0]*3];
                 //const float* v1 = &tile.verts[poly.verts[1]*3];
                 int v0Start = poly.verts[0] * 3;
                 int v1Start = poly.verts[1] * 3;
-                float d0 = dtVdist2D(pos, 0, tile.verts, v0Start);
-                float d1 = dtVdist2D(pos, 0, tile.verts, v1Start);
-                float u = d0 / (d0 + d1);
+                float t = 0;
+                dtDistancePtSegSqr2D(pos, 0, tile.verts, v0Start, tile.verts, v1Start, ref t);
                 //if (height)
-                height = tile.verts[v0Start + 1] + (tile.verts[v1Start + 1] - tile.verts[v0Start + 1]) * u;
+                height = tile.verts[v0Start + 1] + (tile.verts[v1Start + 1] - tile.verts[v0Start + 1]) * t;
                 return DT_SUCCESS;
             }
-            else
-            {
-                //const uint ip = (uint)(poly - tile.polys);
-                dtPolyDetail pd = tile.detailMeshes[ip];
-                for (int j = 0; j < pd.triCount; ++j)
-                {
-                    //byte[] t =  tile.detailTris[(pd.triBase+j)*4] ;
-                    //float* v[3];
-                    int tStart = (int)(pd.triBase + j) * 4;
-                    int[] vStarts = new int[3];
-                    float[][] vSrc = new float[3][];
 
-                    for (int k = 0; k < 3; ++k)
-                    {
-                        if (tile.detailTris[tStart + k] < poly.vertCount)
-                        {
-                            //v[k] = &tile.verts[poly.verts[tile.detailTris[tStart + k]]*3];
-                            vStarts[k] = poly.verts[tile.detailTris[tStart + k]] * 3;
-                            vSrc[k] = tile.verts;
-                        }
-                        else
-                        {
-                            //v[k] = &tile.detailVerts[(pd.vertBase+(tile.detailTris[tStart + k]-poly.vertCount))*3];
-                            vStarts[k] = (int)(pd.vertBase + (tile.detailTris[tStart + k] - poly.vertCount)) * 3;
-                            vSrc[k] = tile.detailVerts;
-                        }
-                    }
-                    float h = .0f;
-                    if (dtClosestHeightPointTriangle(pos, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
-                    {
-                        //if (height)
-                        height = h;
-                        return DT_SUCCESS;
-                    }
-                }
-            }
-
-            return DT_FAILURE | DT_INVALID_PARAM;
+            return m_nav.getPolyHeight(tile, poly, pos, height) ? DT_SUCCESS : DT_FAILURE | DT_INVALID_PARAM;
         }
 
         // @}
@@ -883,6 +771,8 @@ public static partial class Detour
             Debug.Assert(m_nav != null);
 
             nearestRef = 0;
+
+            // queryPolygons below will check rest of params
 
             dtFindNearestPolyQuery query = new(this, center);
 
@@ -1049,6 +939,13 @@ public static partial class Detour
         {
             Debug.Assert(m_nav != null);
 
+            if (center == null || !dtVisfinite(center) ||
+                halfExtents == null || !dtVisfinite(halfExtents) ||
+                filter == null || query == null)
+            {
+                return DT_FAILURE | DT_INVALID_PARAM;
+            }
+
             float[] bmin = new float[3];
             float[] bmax = new float[3];
             dtVsub(bmin, center, halfExtents);
@@ -1106,12 +1003,11 @@ public static partial class Detour
 
             pathCount = 0;
 
-            if (maxPath <= 0)
-                return DT_FAILURE | DT_INVALID_PARAM;
-
             // Validate input
             if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef) ||
-                startPos == null || endPos == null || filter == null || maxPath <= 0 || path == null)
+                startPos == null || !dtVisfinite(startPos) ||
+                endPos == null || !dtVisfinite(endPos) ||
+                filter == null || path == null || maxPath <= 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             if (startRef == endRef)
@@ -1372,11 +1268,10 @@ public static partial class Detour
             m_query.options = options;
             m_query.raycastLimitSqr = float.MaxValue;
 
-            if (startRef == 0 || endRef == 0)
-                return DT_FAILURE | DT_INVALID_PARAM;
-
             // Validate input
-            if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef))
+            if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef) ||
+                startPos == null || !dtVisfinite(startPos) ||
+                endPos == null || !dtVisfinite(endPos) || filter == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             // trade quality with performance?
@@ -1646,6 +1541,9 @@ public static partial class Detour
         {
             pathCount = 0;
 
+            if (path == null || maxPath <= 0)
+                return DT_FAILURE | DT_INVALID_PARAM;
+
             if (dtStatusFailed(m_query.status))
             {
                 // Reset query.
@@ -1747,10 +1645,8 @@ public static partial class Detour
         {
             pathCount = 0;
 
-            if (existingSize == 0)
-            {
-                return DT_FAILURE;
-            }
+            if (existing == null || existingSize <= 0 || path == null || maxPath <= 0)
+                return DT_FAILURE | DT_INVALID_PARAM;
 
             if (dtStatusFailed(m_query.status))
             {
@@ -1971,10 +1867,10 @@ public static partial class Detour
 
             straightPathCount = 0;
 
-            if (maxStraightPath == 0)
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            if (path[0] == 0)
+            if (startPos == null || !dtVisfinite(startPos) ||
+                endPos == null || !dtVisfinite(endPos) ||
+                path == null || pathSize <= 0 || path[0] == 0 ||
+                maxStraightPath <= 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             dtStatus stat = 0;
@@ -2225,9 +2121,11 @@ public static partial class Detour
             visitedCount = 0;
 
             // Validate input
-            if (startRef == 0)
-                return DT_FAILURE | DT_INVALID_PARAM;
-            if (!m_nav.isValidPolyRef(startRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                startPos == null || !dtVisfinite(startPos) ||
+                endPos == null || !dtVisfinite(endPos) ||
+                filter == null || resultPos == null || visited == null ||
+                maxVisitedSize <= 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             dtStatus status = DT_SUCCESS;
@@ -2578,7 +2476,6 @@ public static partial class Detour
         ///
         public dtStatus raycast(dtPolyRef startRef, float[] startPos, float[] endPos, dtQueryFilter filter, ref float t, float[] hitNormal, dtPolyRef[] path, ref uint pathCount, int maxPath)
         {
-
             dtRaycastHit hit = new();
             hit.path = path;
             hit.maxPath = maxPath;
@@ -2647,15 +2544,19 @@ public static partial class Detour
         {
             Debug.Assert(m_nav != null);
 
+            if (hit == null)
+                return DT_FAILURE | DT_INVALID_PARAM;
+
             hit.t = 0;
             hit.pathCount = 0;
             hit.pathCost = 0;
 
             // Validate input
-            if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            if (prevRef != 0 && !m_nav.isValidPolyRef(prevRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                startPos == null || !dtVisfinite(startPos) ||
+                endPos == null || !dtVisfinite(endPos) ||
+                filter == null ||
+                (prevRef != 0 && !m_nav.isValidPolyRef(prevRef)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             float[] dir = new float[3];
@@ -2925,7 +2826,10 @@ public static partial class Detour
             resultCount = 0;
 
             // Validate input
-            if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                centerPos == null || !dtVisfinite(centerPos) ||
+                radius < 0 || !float.IsFinite(radius) ||
+                filter == null || maxResult < 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             m_nodePool.clear();
@@ -3112,6 +3016,11 @@ public static partial class Detour
             Debug.Assert(m_openList != null);
 
             resultCount = 0;
+
+            if (!m_nav.isValidPolyRef(startRef) ||
+                verts == null || nverts < 3 ||
+                filter == null || maxResult < 0)
+                return DT_FAILURE | DT_INVALID_PARAM;
 
             // Validate input
             if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
@@ -3305,8 +3214,10 @@ public static partial class Detour
 
             resultCount = 0;
 
-            // Validate input
-            if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                centerPos == null || !dtVisfinite(centerPos) ||
+                radius < 0 || !float.IsFinite(radius) ||
+                filter == null || maxResult < 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             const int MAX_STACK = 48;
@@ -3543,6 +3454,9 @@ public static partial class Detour
             if (dtStatusFailed(m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
+            if (filter == null || segmentVerts == null || maxSegments < 0)
+                return DT_FAILURE | DT_INVALID_PARAM;
+
             int n = 0;
             const int MAX_INTERVAL = 16;
             dtSegInterval[] ints = new dtSegInterval[MAX_INTERVAL];
@@ -3705,7 +3619,10 @@ public static partial class Detour
             Debug.Assert(m_openList != null);
 
             // Validate input
-            if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
+            if (!m_nav.isValidPolyRef(startRef) ||
+                centerPos == null || !dtVisfinite(centerPos) ||
+                maxRadius < 0 || !float.IsFinite(maxRadius) ||
+                filter == null || hitPos == null || hitNormal == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             m_nodePool.clear();

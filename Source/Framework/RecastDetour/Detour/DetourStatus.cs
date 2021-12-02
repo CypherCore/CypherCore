@@ -16,7 +16,7 @@ public static partial class Detour
     public const uint DT_BUFFER_TOO_SMALL = 1 << 4;	// Result buffer for the query was too small to store all results.
     public const uint DT_OUT_OF_NODES = 1 << 5;		// Query ran out of nodes during search.
     public const uint DT_PARTIAL_RESULT = 1 << 6;	// Query did not reach the end location, returning best guess. 
-
+    public const uint DT_ALREADY_OCCUPIED = 1 << 7;	// A tile has already been assigned to the given x,y coordinate
 
     // Returns true of status is success.
     public static bool dtStatusSucceed(dtStatus status)
