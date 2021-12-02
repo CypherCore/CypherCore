@@ -35,18 +35,30 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
                 return false;
 
-            string guildname = handler.ExtractQuotedArg(args.NextString());
-            if (string.IsNullOrEmpty(guildname))
+            string guildName = handler.ExtractQuotedArg(args.NextString());
+            if (string.IsNullOrEmpty(guildName))
                 return false;
 
             if (target.GetGuildId() != 0)
             {
                 handler.SendSysMessage(CypherStrings.PlayerInGuild);
-                return true;
+                return false;
+            }
+
+            if (Global.GuildMgr.GetGuildByName(guildName))
+            {
+                handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists);
+                return false;
+            }
+
+            if (Global.ObjectMgr.IsReservedName(guildName) || !ObjectManager.IsValidCharterName(guildName))
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
             }
 
             Guild guild = new();
-            if (!guild.Create(target, guildname))
+            if (!guild.Create(target, guildName))
             {
                 handler.SendSysMessage(CypherStrings.GuildNotCreated);
                 return false;
