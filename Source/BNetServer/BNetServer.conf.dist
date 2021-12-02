@@ -44,7 +44,7 @@ RealmsStateUpdateDelay = 10
 
 #
 #    WrongPass.MaxCount
-#        Description: Number of login attemps with wrong password before the account or IP will be
+#        Description: Number of login attempts with wrong password before the account or IP will be
 #                     banned.
 #        Default:     0  - (Disabled)
 #                     1+ - (Enabled)
@@ -178,7 +178,7 @@ Updates.CleanDeadRefMaxCount = 3
 LogsDir = "Logs"
 
 #
-#  Appender config values: Given a appender "name"
+#  Appender config values: Given an appender "name"
 #    Appender.name
 #        Description: Defines 'where to log'
 #        Format:      Type,LogLevel,Flags,optional1,optional2,optional3
