@@ -463,6 +463,10 @@ namespace Scripts.World.NpcSpecial
     [Script]
     class npc_air_force_bots : ScriptedAI
     {
+        SpawnAssociation SpawnAssoc;
+        ObjectGuid SpawnedGUID;
+        List<ObjectGuid> inLineOfSightSinceLastUpdate = new();
+
         public npc_air_force_bots(Creature creature) : base(creature)
         {
             SpawnAssoc = null;
@@ -492,9 +496,6 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        SpawnAssociation SpawnAssoc;
-        ObjectGuid SpawnedGUID;
-
         public override void Reset() { }
 
         Creature SummonGuard()
@@ -521,6 +522,13 @@ namespace Scripts.World.NpcSpecial
             return null;
         }
 
+        public void UpdateAI(uint diff)
+        {
+            base.UpdateAI(diff);
+
+            inLineOfSightSinceLastUpdate.Clear();
+        }
+
         public override void MoveInLineOfSight(Unit who)
         {
             if (SpawnAssoc == null)
@@ -543,55 +551,61 @@ namespace Scripts.World.NpcSpecial
                 switch (SpawnAssoc.spawnType)
                 {
                     case SpawnType.AlarmBot:
+                    {
+                        // handle only 1 change for world update for each target
+                        if (inLineOfSightSinceLastUpdate.Contains(who.GetGUID()))
+                            return;
+
+                        inLineOfSightSinceLastUpdate.Add(who.GetGUID());
+
+                        if (!who.IsWithinDistInMap(me, Misc.RangeGuardsMark))
+                            return;
+
+                        Aura markAura = who.GetAura(SpellIds.GuardsMark);
+                        if (markAura != null)
                         {
-                            if (!who.IsWithinDistInMap(me, Misc.RangeGuardsMark))
-                                return;
-
-                            Aura markAura = who.GetAura(SpellIds.GuardsMark);
-                            if (markAura != null)
+                            // the target wasn't able to move out of our range within 25 seconds
+                            if (!lastSpawnedGuard)
                             {
-                                // the target wasn't able to move out of our range within 25 seconds
-                                if (!lastSpawnedGuard)
-                                {
-                                    lastSpawnedGuard = SummonGuard();
-
-                                    if (!lastSpawnedGuard)
-                                        return;
-                                }
-
-                                if (markAura.GetDuration() < Misc.AuraDurationTimeLeft)
-                                    if (!lastSpawnedGuard.GetVictim())
-                                        lastSpawnedGuard.GetAI().AttackStart(who);
-                            }
-                            else
-                            {
-                                if (!lastSpawnedGuard)
-                                    lastSpawnedGuard = SummonGuard();
+                                lastSpawnedGuard = SummonGuard();
 
                                 if (!lastSpawnedGuard)
                                     return;
-
-                                lastSpawnedGuard.CastSpell(who, SpellIds.GuardsMark, true);
                             }
-                            break;
-                        }
-                    case SpawnType.TripwireRooftop:
-                        {
-                            if (!who.IsWithinDistInMap(me, Misc.RangeTripwire))
-                                return;
 
+                            if (markAura.GetDuration() < Misc.AuraDurationTimeLeft)
+                                if (!lastSpawnedGuard.GetVictim())
+                                    lastSpawnedGuard.GetAI().AttackStart(who);
+                        }
+                        else
+                        {
                             if (!lastSpawnedGuard)
                                 lastSpawnedGuard = SummonGuard();
 
                             if (!lastSpawnedGuard)
                                 return;
 
-                            // ROOFTOP only triggers if the player is on the ground
-                            if (!playerTarget.IsFlying() && !lastSpawnedGuard.GetVictim())
-                                lastSpawnedGuard.GetAI().AttackStart(who);
-
-                            break;
+                            lastSpawnedGuard.CastSpell(who, SpellIds.GuardsMark, true);
                         }
+                        break;
+                    }
+                    case SpawnType.TripwireRooftop:
+                    {
+                        if (!who.IsWithinDistInMap(me, Misc.RangeTripwire))
+                            return;
+
+                        if (!lastSpawnedGuard)
+                            lastSpawnedGuard = SummonGuard();
+
+                        if (!lastSpawnedGuard)
+                            return;
+
+                        // ROOFTOP only triggers if the player is on the ground
+                        if (!playerTarget.IsFlying() && !lastSpawnedGuard.GetVictim())
+                            lastSpawnedGuard.GetAI().AttackStart(who);
+
+                        break;
+                    }
                 }
             }
         }
