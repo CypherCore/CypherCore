@@ -31,24 +31,5 @@ namespace Game
             response.Time = GameTime.GetGameTime();
             SendPacket(response);
         }
-
-        [WorldPacketHandler(ClientOpcodes.TimeSyncResponse, Processing = PacketProcessing.Inplace)]
-        void HandleTimeSyncResponse(TimeSyncResponse packet)
-        {
-            Log.outDebug(LogFilter.Network, "CMSG_TIME_SYNC_RESP");
-
-            if (packet.SequenceIndex != _player.m_timeSyncQueue.FirstOrDefault())
-                Log.outError(LogFilter.Network, "Wrong time sync counter from player {0} (cheater?)", _player.GetName());
-
-            Log.outDebug(LogFilter.Network, "Time sync received: counter {0}, client ticks {1}, time since last sync {2}", packet.SequenceIndex, packet.ClientTime, packet.ClientTime - _player.m_timeSyncClient);
-
-            uint ourTicks = packet.ClientTime + (GameTime.GetGameTimeMS() - _player.m_timeSyncServer);
-
-            // diff should be small
-            Log.outDebug(LogFilter.Network, "Our ticks: {0}, diff {1}, latency {2}", ourTicks, ourTicks - packet.ClientTime, GetLatency());
-
-            _player.m_timeSyncClient = packet.ClientTime;
-            _player.m_timeSyncQueue.Pop();
-        }
     }
 }

@@ -212,10 +212,6 @@ namespace Game.Entities
         // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
         public Unit m_unitMovedByMe;
         Team m_team;
-        public Stack<uint> m_timeSyncQueue = new();
-        uint m_timeSyncTimer;
-        public uint m_timeSyncClient;
-        public uint m_timeSyncServer;
         ReputationMgr reputationMgr;
         QuestObjectiveCriteriaManager m_questObjectiveCriteriaMgr;
         public AtLoginFlags atLoginFlags;

@@ -220,7 +220,11 @@ namespace Game.Networking
 
         public uint GetOpcode() { return opcode; }
 
+        public DateTime GetReceivedTime() { return m_receivedTime; }
+        public void SetReceiveTime(DateTime receivedTime) { m_receivedTime = receivedTime; }
+
         uint opcode;
+        DateTime m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
     }
 
     public class PacketHeader

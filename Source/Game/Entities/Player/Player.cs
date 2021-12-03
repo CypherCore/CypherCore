@@ -74,8 +74,6 @@ namespace Game.Entities
             m_logintime = GameTime.GetGameTime();
             m_Last_tick = m_logintime;
 
-            m_timeSyncServer = GameTime.GetGameTimeMS();
-
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
@@ -533,13 +531,6 @@ namespace Game.Entities
                 else
                     m_zoneUpdateTimer -= diff;
             }
-            if (m_timeSyncTimer > 0 && !IsBeingTeleportedFar())
-            {
-                if (diff >= m_timeSyncTimer)
-                    SendTimeSync();
-                else
-                    m_timeSyncTimer -= diff;
-            }
 
             if (IsAlive())
             {
@@ -846,29 +837,6 @@ namespace Game.Entities
         public void SendPacket(ServerPacket data)
         {
             Session.SendPacket(data);
-        }
-
-        //Time
-        void ResetTimeSync()
-        {
-            m_timeSyncTimer = 0;
-            m_timeSyncClient = 0;
-            m_timeSyncServer = GameTime.GetGameTimeMS();
-        }
-        void SendTimeSync()
-        {
-            m_timeSyncQueue.Push(m_movementCounter++);
-
-            TimeSyncRequest packet = new();
-            packet.SequenceIndex = m_timeSyncQueue.Last();
-            SendPacket(packet);
-
-            // Schedule next sync in 10 sec
-            m_timeSyncTimer = 10000;
-            m_timeSyncServer = GameTime.GetGameTimeMS();
-
-            if (m_timeSyncQueue.Count > 3)
-                Log.outError(LogFilter.Network, "Not received CMSG_TIME_SYNC_RESP for over 30 seconds from player {0} ({1}), possible cheater", GetGUID().ToString(), GetName());
         }
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
@@ -5460,10 +5428,10 @@ namespace Game.Entities
             if (!m_teleport_options.HasAnyFlag(TeleportToOptions.Seamless))
             {
                 m_movementCounter = 0;
-                ResetTimeSync();
+                GetSession().ResetTimeSync();
             }
 
-            SendTimeSync();
+            GetSession().SendTimeSync();
 
             GetSocial().SendSocialList(this, SocialFlag.All);
 

@@ -26,6 +26,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -140,14 +141,8 @@ namespace Game
             if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim || opcode == ClientOpcodes.MoveSetFly)
                 mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
 
-            uint mstime = GameTime.GetGameTimeMS();
-
-            if (m_clientTimeDelay == 0)
-                m_clientTimeDelay = mstime - movementInfo.Time;
-
-            movementInfo.Time = movementInfo.Time + m_clientTimeDelay;
-
             movementInfo.Guid = mover.GetGUID();
+            movementInfo.Time = AdjustClientMovementTime(movementInfo.Time);
             mover.m_movementInfo = movementInfo;
 
             // Some vehicles allow the passenger to turn by himself
@@ -205,7 +200,7 @@ namespace Game
                     plrMover.RemovePlayerFlag(PlayerFlags.IsOutOfBounds);
 
                 if (opcode == ClientOpcodes.MoveJump)
-                { 
+                {
                     plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Jump); // Mind Control
                     Unit.ProcSkillsAndAuras(plrMover, null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
@@ -347,7 +342,7 @@ namespace Game
 
             // resurrect character at enter into instance where his corpse exist after add to map
             if (mapEntry.IsDungeon() && !player.IsAlive())
-            { 
+            {
                 if (player.GetCorpseLocation().GetMapId() == mapEntry.Id)
                 {
                     player.ResurrectPlayer(0.5f, false);
@@ -619,7 +614,7 @@ namespace Game
                 return;
             }
 
-            moveApplyMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
+            moveApplyMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveApplyMovementForceAck.Ack.Status.Time);
 
             MoveUpdateApplyMovementForce updateApplyMovementForce = new();
             updateApplyMovementForce.Status = moveApplyMovementForceAck.Ack.Status;
@@ -641,7 +636,7 @@ namespace Game
                 return;
             }
 
-            moveRemoveMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
+            moveRemoveMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveRemoveMovementForceAck.Ack.Status.Time);
 
             MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
             updateRemoveMovementForce.Status = moveRemoveMovementForceAck.Ack.Status;
@@ -683,7 +678,7 @@ namespace Game
                 }
             }
 
-            setModMovementForceMagnitudeAck.Ack.Status.Time += m_clientTimeDelay;
+            setModMovementForceMagnitudeAck.Ack.Status.Time = AdjustClientMovementTime(setModMovementForceMagnitudeAck.Ack.Status.Time);
 
             MoveUpdateSpeed updateModMovementForceMagnitude = new(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
             updateModMovementForceMagnitude.Status = setModMovementForceMagnitudeAck.Ack.Status;
@@ -758,6 +753,75 @@ namespace Game
             GetPlayer().SetFallInformation(0, GetPlayer().GetPositionZ());
             if (GetPlayer().pvpInfo.IsHostile)
                 GetPlayer().CastSpell(GetPlayer(), 2479, true);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TimeSyncResponse, Processing = PacketProcessing.ThreadSafe)]
+        void HandleTimeSyncResponse(TimeSyncResponse timeSyncResponse)
+        {
+            if (!_pendingTimeSyncRequests.ContainsKey(timeSyncResponse.SequenceIndex))
+                return;
+
+            uint serverTimeAtSent = _pendingTimeSyncRequests.LookupByKey(timeSyncResponse.SequenceIndex);
+            _pendingTimeSyncRequests.Remove(timeSyncResponse.SequenceIndex);
+
+            // time it took for the request to travel to the client, for the client to process it and reply and for response to travel back to the server.
+            // we are going to make 2 assumptions:
+            // 1) we assume that the request processing time equals 0.
+            // 2) we assume that the packet took as much time to travel from server to client than it took to travel from client to server.
+            uint roundTripDuration = Time.GetMSTimeDiff(serverTimeAtSent, timeSyncResponse.GetReceivedTime());
+            uint lagDelay = roundTripDuration / 2;
+
+            /*
+            clockDelta = serverTime - clientTime
+            where
+            serverTime: time that was displayed on the clock of the SERVER at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+            clientTime:  time that was displayed on the clock of the CLIENT at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+
+            Once clockDelta has been computed, we can compute the time of an event on server clock when we know the time of that same event on the client clock,
+            using the following relation:
+            serverTime = clockDelta + clientTime
+            */
+            long clockDelta = (long)(serverTimeAtSent + lagDelay) - (long)timeSyncResponse.ClientTime;
+            _timeSyncClockDeltaQueue.PushFront(Tuple.Create(clockDelta, roundTripDuration));
+            ComputeNewClockDelta();
+        }
+
+        void ComputeNewClockDelta()
+        {
+            // implementation of the technique described here: https://web.archive.org/web/20180430214420/http://www.mine-control.com/zack/timesync/timesync.html
+            // to reduce the skew induced by dropped TCP packets that get resent.
+
+            //accumulator_set < uint32, features < tag::mean, tag::median, tag::variance(lazy) > > latencyAccumulator;
+            List<uint> latencyList = new();
+            foreach (var pair in _timeSyncClockDeltaQueue)
+                latencyList.Add(pair.Item2);
+
+            uint latencyMedian = (uint)Math.Round(latencyList.Average(p => p));//median(latencyAccumulator));
+            uint latencyStandardDeviation = (uint)Math.Round(Math.Sqrt(latencyList.Variance()));//variance(latencyAccumulator)));
+
+            //accumulator_set<long, features<tag::mean>> clockDeltasAfterFiltering;
+            List<long> clockDeltasAfterFiltering = new();
+            uint sampleSizeAfterFiltering = 0;
+            foreach (var pair in _timeSyncClockDeltaQueue)
+            {
+                if (pair.Item2 < latencyStandardDeviation + latencyMedian)
+                {
+                    clockDeltasAfterFiltering.Add(pair.Item1);
+                    sampleSizeAfterFiltering++;
+                }
+            }
+
+            if (sampleSizeAfterFiltering != 0)
+            {
+                long meanClockDelta = (long)(Math.Round(clockDeltasAfterFiltering.Average()));
+                if (Math.Abs(meanClockDelta - _timeSyncClockDelta) > 25)
+                    _timeSyncClockDelta = meanClockDelta;
+            }
+            else if (_timeSyncClockDelta == 0)
+            {
+                var back = _timeSyncClockDeltaQueue.Back();
+                _timeSyncClockDelta = back.Item1;
+            }
         }
     }
 }

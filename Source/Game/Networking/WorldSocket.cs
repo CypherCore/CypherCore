@@ -340,6 +340,9 @@ namespace Game.Networking
                             break;
                         }
 
+                        if (opcode == ClientOpcodes.TimeSyncResponse)
+                            packet.SetReceiveTime(DateTime.Now);
+
                         // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
                         _worldSession.ResetTimeOutTime(false);
 
@@ -812,10 +815,7 @@ namespace Game.Networking
             lock (_worldSessionLock)
             {
                 if (_worldSession != null)
-                {
                     _worldSession.SetLatency(ping.Latency);
-                    _worldSession.ResetClientTimeDelay();
-                }
                 else
                 {
                     Log.outError(LogFilter.Network, "WorldSocket:HandlePing: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = {0}", GetRemoteIpAddress());

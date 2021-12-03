@@ -275,6 +275,8 @@ namespace Game.Networking.Packets
             ClientTime = _worldPacket.ReadUInt32();
         }
 
+        public DateTime GetReceivedTime() { return _worldPacket.GetReceivedTime(); }
+
         public uint ClientTime; // Client ticks in ms
         public uint SequenceIndex; // Same index as in request
     }

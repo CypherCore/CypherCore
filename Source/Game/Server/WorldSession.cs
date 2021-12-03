@@ -15,8 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
+using Framework.Realm;
 using Game.Accounts;
 using Game.BattleGrounds;
 using Game.BattlePets;
@@ -32,7 +34,6 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Framework.Realm;
 
 namespace Game
 {
@@ -330,6 +331,18 @@ namespace Game
 
             if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
                 _warden.Update();
+
+            if (!updater.ProcessUnsafe()) // <=> updater is of type MapSessionFilter
+            {
+                // Send time sync packet every 10s.
+                if (_timeSyncTimer > 0)
+                {
+                    if (diff >= _timeSyncTimer)
+                        SendTimeSync();
+                    else
+                        _timeSyncTimer -= diff;
+                }
+            }
 
             ProcessQueryCallbacks();
 
@@ -828,12 +841,42 @@ namespace Game
             }
         }
 
+        public void ResetTimeSync()
+        {
+            _timeSyncNextCounter = 0;
+            _pendingTimeSyncRequests.Clear();
+        }
+
+        public void SendTimeSync()
+        {
+            TimeSyncRequest timeSyncRequest = new();
+            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
+            SendPacket(timeSyncRequest);
+
+            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+
+            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
+            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
+            _timeSyncNextCounter++;
+        }
+
+        uint AdjustClientMovementTime(uint time)
+        {
+            long movementTime = (long)time + _timeSyncClockDelta;
+            if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
+            {
+                Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
+                return GameTime.GetGameTimeMS();
+            }
+            else
+                return (uint)movementTime;
+        }
+        
         public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
         public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
 
         public uint GetLatency() { return m_latency; }
         public void SetLatency(uint latency) { m_latency = latency; }
-        public void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         public void ResetTimeOutTime(bool onlyActive)
         {
             if (GetPlayer())
@@ -893,7 +936,6 @@ namespace Game
         Locale m_sessionDbcLocale;
         Locale m_sessionDbLocaleIndex;
         uint m_latency;
-        uint m_clientTimeDelay;
         AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
         TutorialsFlag tutorialsChanged;
@@ -915,6 +957,13 @@ namespace Game
         RBACData _RBACData;
 
         ObjectGuid m_currentBankerGUID;
+
+        CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
+        long _timeSyncClockDelta;
+
+        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
+        uint _timeSyncNextCounter;
+        uint _timeSyncTimer;
 
         CollectionMgr _collectionMgr;
 

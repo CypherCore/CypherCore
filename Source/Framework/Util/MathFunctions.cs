@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.GameMath;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 public static class MathFunctions
@@ -267,6 +268,22 @@ public static class MathFunctions
     public static ushort MakePair16(uint l, uint h)
     {
         return (ushort)((byte)l | (ushort)h << 8);
+    }
+
+    public static double Variance(this IEnumerable<uint> source)
+    {
+        int n = 0;
+        double mean = 0;
+        double M2 = 0;
+
+        foreach (var x in source)
+        {
+            n = n + 1;
+            double delta = x - mean;
+            mean = mean + delta / n;
+            M2 += delta * (x - mean);
+        }
+        return M2 / (n - 1);
     }
 
     //3d math

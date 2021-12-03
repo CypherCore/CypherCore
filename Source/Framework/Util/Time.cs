@@ -82,6 +82,12 @@ public static class Time
             return newMSTime - oldMSTime;
     }
 
+    public static uint GetMSTimeDiff(uint oldMSTime, DateTime newTime)
+    {
+        uint newMSTime = (uint)(newTime - ApplicationStartTime).TotalMilliseconds;
+        return GetMSTimeDiff(oldMSTime, newMSTime);
+    }
+
     public static uint GetMSTimeDiffToNow(uint oldMSTime)
     {
         var newMSTime = GetMSTime();
