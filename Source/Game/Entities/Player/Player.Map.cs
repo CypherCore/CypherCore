@@ -787,9 +787,6 @@ namespace Game.Entities
 
         public override void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
         {
-            if (IsFlying())
-                return;
-
             // process liquid auras using generic unit code
             base.ProcessTerrainStatusUpdate(status, liquidData);
 
