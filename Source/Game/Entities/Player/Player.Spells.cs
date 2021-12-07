@@ -1205,9 +1205,6 @@ namespace Game.Entities
 
                 if (newVal != 0)
                 {
-                    UpdateCriteria(CriteriaType.SkillRaised, id);
-                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
-
                     // temporary bonuses
                     foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill))
                         if (auraEffect.GetMiscValue() == id)
@@ -1224,6 +1221,8 @@ namespace Game.Entities
 
                     // Learn all spells for skill
                     LearnSkillRewardedSpells(id, newVal);
+                    UpdateCriteria(CriteriaType.SkillRaised, id);
+                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
                 }
             }
         }
