@@ -282,8 +282,10 @@ namespace Game.Entities
             SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
 
             // Load creature equipment
-            if (data == null || data.equipmentId == 0)
-                LoadEquipment(); // use default equipment (if available)
+            if (data == null)
+                LoadEquipment();  // use default equipment (if available) for summons
+            else if (data.equipmentId == 0)
+                LoadEquipment(0); // 0 means no equipment for creature table
             else
             {
                 m_originalEquipmentId = data.equipmentId;
