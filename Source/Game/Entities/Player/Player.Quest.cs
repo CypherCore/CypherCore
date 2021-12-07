@@ -700,7 +700,9 @@ namespace Game.Entities
                     Item item = (Item)questGiver;
                     Global.ScriptMgr.OnQuestAccept(this, item, quest);
 
-                    // destroy not required for quest finish quest starting item
+                    // There are two cases where the source item is not destroyed when the quest is accepted:
+                    // - It is required to finish the quest, and is an unique item
+                    // - It is the same item present in the source item field (item that would be given on quest accept)
                     bool destroyItem = true;
                     foreach (QuestObjective obj in quest.Objectives)
                     {
@@ -710,6 +712,9 @@ namespace Game.Entities
                             break;
                         }
                     }
+
+                    if (quest.SourceItemId == item.GetEntry())
+                        destroyItem = false;
 
                     if (destroyItem)
                         DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
@@ -1693,6 +1698,11 @@ namespace Game.Entities
             uint srcitem = quest.SourceItemId;
             if (srcitem > 0)
             {
+                // Don't give source item if it is the same item used to start the quest
+                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(srcitem);
+                if (quest.Id == itemTemplate.GetStartQuest())
+                    return true;
+
                 uint count = quest.SourceItemIdCount;
                 if (count <= 0)
                     count = 1;
@@ -1730,10 +1740,9 @@ namespace Game.Entities
                     if (count <= 0)
                         count = 1;
 
-                    // exist two cases when destroy source quest item not possible:
-                    // a) non un-equippable item (equipped non-empty bag, for example)
-                    // b) when quest is started from an item and item also is needed in
-                    // the end as RequiredItemId
+                    // There are two cases where the source item is not destroyed:
+                    // - Item cannot be unequipped (example: non-empty bags)
+                    // - The source item is the item that started the quest, so the player is supposed to keep it (otherwise it was already destroyed in AddQuestAndCheckCompletion())
                     InventoryResult res = CanUnequipItems(srcItemId, count);
                     if (res != InventoryResult.Ok)
                     {
@@ -1742,15 +1751,7 @@ namespace Game.Entities
                         return false;
                     }
 
-                    bool destroyItem = true;
-                    if (item.GetStartQuest() == questId)
-                    {
-                        foreach (QuestObjective obj in quest.Objectives)
-                            if (obj.Type == QuestObjectiveType.Item && srcItemId == obj.ObjectID)
-                                destroyItem = false;
-                    }
-
-                    if (destroyItem)
+                    if (item.GetStartQuest() != questId)
                         DestroyItemCount(srcItemId, count, true, true);
                 }
             }
