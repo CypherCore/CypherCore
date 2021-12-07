@@ -860,6 +860,10 @@ namespace Game.Movement
             if (Math.Abs(_owner.GetPositionZ() - tz) < 0.1f)
                 return;
 
+            // rooted units don't move (also setting falling+root flag causes client freezes)
+                if (_owner.HasUnitState(UnitState.Root))
+                    return;
+
             _owner.SetFall(true);
 
             // Don't run spline movement for players
