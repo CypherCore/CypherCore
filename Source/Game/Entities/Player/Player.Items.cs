@@ -1267,7 +1267,7 @@ namespace Game.Entities
             {
                 ItemAddedQuestCheck(itemId, count);
                 UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
-                UpdateCriteria(CriteriaType.AcquireItem, itemId, 1);
+                UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
                 item.AddItemFlag(ItemFieldFlags.NewItem);
 
