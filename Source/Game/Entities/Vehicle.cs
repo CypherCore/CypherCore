@@ -228,12 +228,26 @@ namespace Game.Entities
             if (seat == null)
                 return null;
 
-            foreach (var sea in Seats)
+            var newSeatId = seatId;
+            while (!seat.IsEmpty() || HasPendingEventForSeat(newSeatId) || (!seat.SeatInfo.CanEnterOrExit() && !seat.SeatInfo.IsUsableByOverride()))
             {
-                if (!seat.IsEmpty() || (!seat.SeatInfo.CanEnterOrExit() && !seat.SeatInfo.IsUsableByOverride()))
-                    continue;
+                if (next)
+                {
+                    if (!Seats.ContainsKey(++newSeatId))
+                        newSeatId = 0;
+                }
+                else
+                {
+                    if (!Seats.ContainsKey(newSeatId))
+                        newSeatId = SharedConst.MaxVehicleSeats;
+                    --newSeatId;
+                }
 
-                seat = sea.Value;
+                // Make sure we don't loop indefinetly
+                if (newSeatId == seatId)
+                    return null;
+
+                seat = Seats[newSeatId];
             }
 
             return seat;
@@ -291,7 +305,7 @@ namespace Game.Entities
                 foreach (var _seat in Seats)
                 {
                     seat = _seat;
-                    if (seat.Value.IsEmpty() && (_seat.Value.SeatInfo.CanEnterOrExit() || _seat.Value.SeatInfo.IsUsableByOverride()))
+                    if (seat.Value.IsEmpty() && !HasPendingEventForSeat(seat.Key) && (_seat.Value.SeatInfo.CanEnterOrExit() || _seat.Value.SeatInfo.IsUsableByOverride()))
                         break;
                 }
 
@@ -445,7 +459,7 @@ namespace Game.Entities
         {
             byte ret = 0;
             foreach (var pair in Seats)
-                if (pair.Value.IsEmpty() && (pair.Value.SeatInfo.CanEnterOrExit() || pair.Value.SeatInfo.IsUsableByOverride()))
+                if (pair.Value.IsEmpty() && !HasPendingEventForSeat(pair.Key) && (pair.Value.SeatInfo.CanEnterOrExit() || pair.Value.SeatInfo.IsUsableByOverride()))
                     ++ret;
 
             return ret;
@@ -503,6 +517,17 @@ namespace Game.Entities
             }
         }
 
+        bool HasPendingEventForSeat(sbyte seatId)
+        {
+            for (var i = 0; i < _pendingJoinEvents.Count; ++i)
+            {
+                var joinEvent = _pendingJoinEvents[i];
+                if (joinEvent.Seat.Key == seatId)
+                    return true;
+            }
+            return false;
+        }
+        
         public TimeSpan GetDespawnDelay()
         {
             VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
