@@ -86,6 +86,9 @@ namespace Game
                 return;
             }
 
+            if (!mover.MoveSpline.Finalized())
+                return;
+
             // stop some emotes at player move
             if (plrMover && (plrMover.GetEmoteState() != 0))
                 plrMover.SetEmoteState(Emote.OneshotNone);
