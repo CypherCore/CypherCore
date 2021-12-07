@@ -2882,38 +2882,22 @@ namespace Game.Entities
 
         public bool HasQuestForGO(int GOId)
         {
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.GameObject, GOId)))
             {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveStatusData.QuestStatusPair.QuestID);
+                QuestObjective objective = objectiveStatusData.Objective;
+                if (!IsQuestObjectiveCompletable(objectiveStatusData.QuestStatusPair.Status.Slot, qInfo, objective))
                     continue;
 
-                var qs = m_QuestStatus.LookupByKey(questid);
-                if (qs == null)
-                    continue;
-
-                if (qs.Status == QuestStatus.Incomplete)
-                {
-                    Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                    if (qInfo == null)
+                // hide quest if player is in raid-group and quest is no raid quest
+                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                         continue;
 
-                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                        continue;
-
-                    foreach (QuestObjective obj in qInfo.Objectives)
-                    {
-                        if (obj.Type != QuestObjectiveType.GameObject) //skip non GO case
-                            continue;
-
-                        if (!IsQuestObjectiveCompletable(i, qInfo, obj))
-                            continue;
-
-                        if (GOId == obj.ObjectID && GetQuestSlotObjectiveData(i, obj) < obj.Amount)
-                            return true;
-                    }
-                }
+                if (!IsQuestObjectiveComplete(objectiveStatusData.QuestStatusPair.Status.Slot, qInfo, objective))
+                    return true;
             }
+
             return false;
         }
 
