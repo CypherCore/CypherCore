@@ -3573,7 +3573,8 @@ namespace Game.Spells
                     case AuraType.ModAttackerMeleeCritChance:
                     case AuraType.ModAttackerRangedCritChance:
                     case AuraType.ModAttackerSpellAndWeaponCritChance:
-                        // have positive and negative spells, check target
+                    case AuraType.Dummy:
+                        // check target for positive and negative spells
                         if (!_isPositiveTarget(effect))
                             return false;
                         break;
