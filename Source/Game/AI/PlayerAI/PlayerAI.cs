@@ -1278,8 +1278,10 @@ namespace Game.AI
                             _isFollowing = true;
                             me.AttackStop();
                             me.CastStop();
-                            me.StopMoving();
-                            me.GetMotionMaster().Clear();
+
+                            if (me.HasUnitState(UnitState.Chase))
+                                me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
                             me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
                         }
                         return;
@@ -1343,8 +1345,10 @@ namespace Game.AI
                 _isFollowing = true;
                 me.AttackStop();
                 me.CastStop();
-                me.StopMoving();
-                me.GetMotionMaster().Clear();
+
+                if (me.HasUnitState(UnitState.Chase))
+                    me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
                 me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
             }
         }
@@ -1355,17 +1359,16 @@ namespace Game.AI
             {
                 me.CastStop();
                 me.AttackStop();
-                me.StopMoving();
-                me.GetMotionMaster().Clear();
-                me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // force re-sync of current position for all clients
+
+                if (me.GetMotionMaster().Size() <= 1) // if there is no current movement (we dont want to erase/overwrite any existing stuff)
+                    me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // force re-sync of current position for all clients
             }
             else
             {
                 me.CastStop();
                 me.AttackStop();
-                // @todo only voluntary movement (don't cancel stuff like death grip or charge mid-animation)
-                me.GetMotionMaster().Clear();
-                me.StopMoving();
+
+                me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
             }
 
             base.OnCharmed(isNew);
