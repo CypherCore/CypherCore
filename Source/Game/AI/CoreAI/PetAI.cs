@@ -34,38 +34,6 @@ namespace Game.AI
             UpdateAllies();
         }
 
-        bool NeedToStop()
-        {
-            // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-            if (me.IsCharmed() && me.GetVictim() == me.GetCharmer())
-                return true;
-
-            // dont allow pets to follow targets far away from owner
-            Unit owner = me.GetCharmerOrOwner();
-            if (owner)
-                if (owner.GetExactDist(me) >= (owner.GetVisibilityRange() - 10.0f))
-                    return true;
-
-            return !me.IsValidAttackTarget(me.GetVictim());
-        }
-
-        void StopAttack()
-        {
-            if (!me.IsAlive())
-            {
-                me.GetMotionMaster().Clear();
-                me.GetMotionMaster().MoveIdle();
-                me.CombatStop();
-                return;
-            }
-
-            me.AttackStop();
-            me.InterruptNonMeleeSpells(false);
-            me.GetCharmInfo().SetIsCommandAttack(false);
-            ClearCharmInfoFlags();
-            HandleReturnMovement();
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (!me.IsAlive() || me.GetCharmInfo() == null)
@@ -240,47 +208,6 @@ namespace Game.AI
             me.UpdateSpeed(UnitMoveType.Run);
             me.UpdateSpeed(UnitMoveType.Walk);
             me.UpdateSpeed(UnitMoveType.Flight);
-        }
-
-        void UpdateAllies()
-        {
-            _updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
-
-            Unit owner = me.GetCharmerOrOwner();
-            if (!owner)
-                return;
-
-            Group group = null;
-            Player player = owner.ToPlayer();
-            if (player)
-                group = player.GetGroup();
-
-            //only pet and owner/not in group.ok
-            if (_allySet.Count == 2 && !group)
-                return;
-
-            //owner is in group; group members filled in already (no raid . subgroupcount = whole count)
-            if (group && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
-                return;
-
-            _allySet.Clear();
-            _allySet.Add(me.GetGUID());
-            if (group)                                              //add group
-            {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-                {
-                    Player target = refe.GetSource();
-                    if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
-                        continue;
-
-                    if (target.GetGUID() == owner.GetGUID())
-                        continue;
-
-                    _allySet.Add(target.GetGUID());
-                }
-            }
-            else                                                    //remove group
-                _allySet.Add(owner.GetGUID());
         }
 
         public override void KilledUnit(Unit victim)
@@ -611,6 +538,79 @@ namespace Game.AI
                             me.HandleEmoteCommand( Emote.OneshotOmnicastGhoul);
                         break;
                 }
+        }
+
+        bool NeedToStop()
+        {
+            // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
+            if (me.IsCharmed() && me.GetVictim() == me.GetCharmer())
+                return true;
+
+            // dont allow pets to follow targets far away from owner
+            Unit owner = me.GetCharmerOrOwner();
+            if (owner)
+                if (owner.GetExactDist(me) >= (owner.GetVisibilityRange() - 10.0f))
+                    return true;
+
+            return !me.IsValidAttackTarget(me.GetVictim());
+        }
+
+        void StopAttack()
+        {
+            if (!me.IsAlive())
+            {
+                me.GetMotionMaster().Clear();
+                me.GetMotionMaster().MoveIdle();
+                me.CombatStop();
+                return;
+            }
+
+            me.AttackStop();
+            me.InterruptNonMeleeSpells(false);
+            me.GetCharmInfo().SetIsCommandAttack(false);
+            ClearCharmInfoFlags();
+            HandleReturnMovement();
+        }
+
+        void UpdateAllies()
+        {
+            _updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
+
+            Unit owner = me.GetCharmerOrOwner();
+            if (!owner)
+                return;
+
+            Group group = null;
+            Player player = owner.ToPlayer();
+            if (player)
+                group = player.GetGroup();
+
+            //only pet and owner/not in group.ok
+            if (_allySet.Count == 2 && !group)
+                return;
+
+            //owner is in group; group members filled in already (no raid . subgroupcount = whole count)
+            if (group && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
+                return;
+
+            _allySet.Clear();
+            _allySet.Add(me.GetGUID());
+            if (group)                                              //add group
+            {
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                {
+                    Player target = refe.GetSource();
+                    if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
+                        continue;
+
+                    if (target.GetGUID() == owner.GetGUID())
+                        continue;
+
+                    _allySet.Add(target.GetGUID());
+                }
+            }
+            else                                                    //remove group
+                _allySet.Add(owner.GetGUID());
         }
 
         void ClearCharmInfoFlags()
