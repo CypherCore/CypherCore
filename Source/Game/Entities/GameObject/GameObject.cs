@@ -2258,7 +2258,7 @@ namespace Game.Entities
             return localRotation;
         }
 
-        public bool IsAtInteractDistance(Player player, SpellInfo spell)
+        public bool IsAtInteractDistance(Player player, SpellInfo spell = null)
         {
             if (spell != null || (spell = GetSpellForLock(player)) != null)
             {
@@ -2267,52 +2267,11 @@ namespace Game.Entities
                 if (GetGoType() == GameObjectTypes.SpellFocus)
                     return maxRange * maxRange >= GetExactDistSq(player);
 
-                var displayInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(GetGoInfo().displayId);
-                if (displayInfo != null)
+                if (CliDB.GameObjectDisplayInfoStorage.ContainsKey(GetGoInfo().displayId))
                     return IsAtInteractDistance(player, maxRange);
             }
 
-            float distance;
-            switch (GetGoType())
-            {
-                case GameObjectTypes.AreaDamage:
-                    distance = 0.0f;
-                    break;
-                case GameObjectTypes.QuestGiver:
-                case GameObjectTypes.Text:
-                case GameObjectTypes.FlagStand:
-                case GameObjectTypes.FlagDrop:
-                case GameObjectTypes.MiniGame:
-                    distance = 5.5555553f;
-                    break;
-                case GameObjectTypes.Binder:
-                    distance = 10.0f;
-                    break;
-                case GameObjectTypes.Chair:
-                case GameObjectTypes.BarberChair:
-                    distance = 3.0f;
-                    break;
-                case GameObjectTypes.FishingNode:
-                    distance = 100.0f;
-                    break;
-                case GameObjectTypes.Camera:
-                case GameObjectTypes.MapObject:
-                case GameObjectTypes.DungeonDifficulty:
-                case GameObjectTypes.DestructibleBuilding:
-                case GameObjectTypes.Door:
-                default:
-                    distance = 5.0f;
-                    break;
-
-                // Following values are not blizzlike
-                case GameObjectTypes.Mailbox:
-                    // Successful mailbox interaction is rather critical to the client, failing it will start a minute-long cooldown until the next mail query may be executed.
-                    // And since movement info update is not sent with mailbox interaction query, server may find the player outside of interaction range. Thus we increase it.
-                    distance = 10.0f; // 5.0f is blizzlike
-                    break;
-            }
-
-            return IsAtInteractDistance(player, distance);
+            return IsAtInteractDistance(player, GetInteractionDistance());
         }
 
         bool IsAtInteractDistance(Position pos, float radius)
@@ -2329,17 +2288,22 @@ namespace Game.Entities
                 float maxY = displayInfo.GeoBoxMax.Y * scale + radius;
                 float maxZ = displayInfo.GeoBoxMax.Z * scale + radius;
 
-                Quaternion localRotation = GetLocalRotation();
+                Quaternion worldRotation = GetLocalRotation();
 
                 //Todo Test this. Needs checked.
-                var worldSpaceBox = MathFunctions.toWorldSpace(Matrix4x4.CreateFromQuaternion(localRotation), new Vector3(GetPositionX(), GetPositionY(), GetPositionZ()), new Box(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ)));
+                var worldSpaceBox = MathFunctions.toWorldSpace(Matrix4x4.CreateFromQuaternion(worldRotation), new Vector3(GetPositionX(), GetPositionY(), GetPositionZ()), new Box(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ)));
                 return worldSpaceBox.Contains(new Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()));
             }
 
             return GetExactDist(pos) <= radius;
         }
 
-        SpellInfo GetSpellForLock(Player player)
+        public bool IsWithinDistInMap(Player player)
+        {
+            return IsInMap(player) && IsInPhase(player) && IsAtInteractDistance(player);
+        }
+        
+        public SpellInfo GetSpellForLock(Player player)
         {
             if (!player)
                 return null;
@@ -2357,7 +2321,7 @@ namespace Game.Entities
                 if (lockEntry.LockType[i] == 0)
                     continue;
 
-                if (lockEntry.LockType[i] == (byte)LockKeyType.Skill)
+                if (lockEntry.LockType[i] == (byte)LockKeyType.Spell)
                 {
                     SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)lockEntry.Index[i], GetMap().GetDifficultyID());
                     if (spell != null)
@@ -2807,14 +2771,33 @@ namespace Game.Entities
         {
             switch (GetGoType())
             {
-                // @todo find out how the client calculates the maximal usage distance to spellless working
-                // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
+                case GameObjectTypes.AreaDamage:
+                    return 0.0f;
+                case GameObjectTypes.QuestGiver:
+                case GameObjectTypes.Text:
+                case GameObjectTypes.FlagStand:
+                case GameObjectTypes.FlagDrop:
+                case GameObjectTypes.MiniGame:
+                    return 5.5555553f;
+                case GameObjectTypes.Chair:
+                case GameObjectTypes.BarberChair:
+                    return 3.0f;
+                case GameObjectTypes.FishingNode:
+                    return 100.0f;
+                case GameObjectTypes.FishingHole:
+                    return 20.0f + SharedConst.ContactDistance; // max spell range
+                case GameObjectTypes.Camera:
+                case GameObjectTypes.MapObject:
+                case GameObjectTypes.DungeonDifficulty:
+                case GameObjectTypes.DestructibleBuilding:
+                case GameObjectTypes.Door:
+                    return 5.0f;
+                // Following values are not blizzlike
                 case GameObjectTypes.GuildBank:
                 case GameObjectTypes.Mailbox:
-                    return 10.0f;
-                case GameObjectTypes.FishingHole:
-                case GameObjectTypes.FishingNode:
-                    return 20.0f + SharedConst.ContactDistance; // max spell range
+                    // Successful mailbox interaction is rather critical to the client, failing it will start a minute-long cooldown until the next mail query may be executed.
+                    // And since movement info update is not sent with mailbox interaction query, server may find the player outside of interaction range. Thus we increase it.
+                    return 10.0f; // 5.0f is blizzlike
                 default:
                     return SharedConst.InteractionDistance;
             }

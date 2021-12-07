@@ -6029,7 +6029,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        if (lootType != LootType.Fishinghole && ((lootType != LootType.Fishing && lootType != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID()) && !go.IsWithinDistInMap(this, SharedConst.InteractionDistance))
+                        if (lootType != LootType.Fishinghole && ((lootType != LootType.Fishing && lootType != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID()) && !go.IsWithinDistInMap(this))
                             return true;
 
                         if (lootType == LootType.Corpse && go.GetRespawnTime() != 0 && go.IsSpawnedByDefault())

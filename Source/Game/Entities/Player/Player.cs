@@ -5405,7 +5405,7 @@ namespace Game.Entities
             if (go == null)
                 return null;
 
-            if (!go.IsWithinDistInMap(this, go.GetInteractionDistance()))
+            if (!go.IsWithinDistInMap(this))
                 return null;
 
             return go;

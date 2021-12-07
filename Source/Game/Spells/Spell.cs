@@ -6892,6 +6892,11 @@ namespace Game.Spells
 
                         return SpellCastResult.SpellCastOk;
                     }
+                    case LockKeyType.Spell:
+                        if (m_spellInfo.Id == lockInfo.Index[j])
+                            return SpellCastResult.SpellCastOk;
+                        reqKey = true;
+                        break;
                 }
             }
 

@@ -297,9 +297,36 @@ namespace Game
                 caster = GetPlayer();
             }
 
+            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
+
+            // client provided targets
+            SpellCastTargets targets = new(caster, cast.Cast);
+
             // check known spell or raid marker spell (which not requires player to know it)
             if (caster.IsTypeId(TypeId.Player) && !caster.ToPlayer().HasActiveSpell(spellInfo.Id) && !spellInfo.HasEffect(SpellEffectName.ChangeRaidMarker) && !spellInfo.HasAttribute(SpellAttr8.RaidMarker))
-                return;
+            {
+                bool allow = false;
+
+
+                // allow casting of unknown spells for special lock cases
+                GameObject go = targets.GetGOTarget();
+                if (go != null)
+                    if (go.GetSpellForLock(caster.ToPlayer()) == spellInfo)
+                        allow = true;
+
+                // TODO: Preparation for #23204
+                // allow casting of spells triggered by clientside periodic trigger auras
+                /*
+                 if (caster->HasAuraTypeWithTriggerSpell(SPELL_AURA_PERIODIC_TRIGGER_SPELL_FROM_CLIENT, spellId))
+                {
+                    allow = true;
+                    triggerFlag = TRIGGERED_FULL_MASK;
+                }
+                */
+
+                if (!allow)
+                    return;
+            }
 
             // Check possible spell cast overrides
             spellInfo = caster.GetCastSpellInfo(spellInfo);
@@ -307,9 +334,6 @@ namespace Game
             // can't use our own spells when we're in possession of another unit,
             if (GetPlayer().IsPossessing())
                 return;
-
-            // client provided targets
-            SpellCastTargets targets = new(caster, cast.Cast);
 
             // Client is resending autoshot cast opcode when other spell is cast during shoot rotation
             // Skip it to prevent "interrupt" message
@@ -335,7 +359,7 @@ namespace Game
             if (cast.Cast.MoveUpdate.HasValue)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate.Value);
 
-            Spell spell = new(caster, spellInfo, TriggerCastFlags.None);
+            Spell spell = new(caster, spellInfo, triggerFlag);
 
             SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = cast.Cast.CastID;
