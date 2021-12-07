@@ -45,6 +45,10 @@ namespace Game.Spells
                 _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
+            // Correct EffectIndex for blank effects
+            for (int i = 0; i < _effects.Count; ++i)
+                _effects[i].EffectIndex = (uint)i;
+
             SpellName = spellName.Name;
 
             SpellMiscRecord _misc = data.Misc;
@@ -258,6 +262,10 @@ namespace Game.Spells
                 _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
                 _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
+
+            // Correct EffectIndex for blank effects
+            for (int i = 0; i < _effects.Count; ++i)
+                _effects[i].EffectIndex = (uint)i;
         }
 
         public bool HasEffect(SpellEffectName effect)
