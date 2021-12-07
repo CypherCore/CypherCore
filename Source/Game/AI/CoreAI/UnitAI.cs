@@ -241,7 +241,7 @@ namespace Game.AI
             return targetList;
         }
 
-        public void DoCast(uint spellId)
+        public SpellCastResult DoCast(uint spellId)
         {
             Unit target = null;
             AITarget aiTargetType = AITarget.Self;
@@ -293,27 +293,31 @@ namespace Game.AI
             }
 
             if (target != null)
-                me.CastSpell(target, spellId, false);
+                return me.CastSpell(target, spellId, false);
+
+            return SpellCastResult.BadTargets;
         }
 
-        public void DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null)
+        public SpellCastResult DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null)
         {
             if (me.HasUnitState(UnitState.Casting) && !args.TriggerFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress))
-                return;
+                return SpellCastResult.SpellInProgress;
 
-            me.CastSpell(victim, spellId, args);
+            return me.CastSpell(victim, spellId, args);
         }
 
-        public void DoCastSelf(uint spellId, CastSpellExtraArgs args = null) { DoCast(me, spellId, args); }
+        public SpellCastResult DoCastSelf(uint spellId, CastSpellExtraArgs args = null) { return DoCast(me, spellId, args); }
 
-        public void DoCastVictim(uint spellId, CastSpellExtraArgs args = null)
+        public SpellCastResult DoCastVictim(uint spellId, CastSpellExtraArgs args = null)
         {
             Unit victim = me.GetVictim();
             if (victim != null)
-                DoCast(victim, spellId, args);
+                return DoCast(victim, spellId, args);
+
+            return SpellCastResult.BadTargets;
         }
 
-        public void DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { DoCast(null, spellId, args); }
+        public SpellCastResult DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { return DoCast(null, spellId, args); }
         
         public static void FillAISpellInfo()
         {

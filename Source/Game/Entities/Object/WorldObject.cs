@@ -2178,19 +2178,19 @@ namespace Game.Entities
             return my_faction.IsNeutralToAll();
         }
 
-        public void CastSpell(WorldObject target, uint spellId, bool triggered = false)
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, bool triggered = false)
         {
             CastSpellExtraArgs args = new(triggered);
-            CastSpell(target, spellId, args);
+            return CastSpell(target, spellId, args);
         }
 
-        public void CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
+        public SpellCastResult CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
         {
             SpellInfo info = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
             if (info == null)
             {
                 Log.outError(LogFilter.Unit, $"CastSpell: unknown spell {spellId} by caster {GetGUID()}");
-                return;
+                return SpellCastResult.SpellUnavailable;
             }
 
             Spell spell = new(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
@@ -2198,10 +2198,10 @@ namespace Game.Entities
                 spell.SetSpellValue(pair.Key, pair.Value);
 
             spell.m_CastItem = args.CastItem;
-            spell.Prepare(targets, args.TriggeringAura);
+            return spell.Prepare(targets, args.TriggeringAura);
         }
 
-        public void CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args)
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args)
         {
             SpellCastTargets targets = new();
             if (target)
@@ -2217,11 +2217,12 @@ namespace Game.Entities
                     else
                     {
                         Log.outError(LogFilter.Unit, $"CastSpell: Invalid target {target.GetGUID()} passed to spell cast by {GetGUID()}");
-                        return;
+                        return SpellCastResult.BadTargets;
                     }
                 }
             }
-            CastSpell(targets, spellId, args);
+            
+            return CastSpell(targets, spellId, args);
         }
 
         public void CastSpell(Position dest, uint spellId, CastSpellExtraArgs args)

@@ -2218,7 +2218,7 @@ namespace Game.Spells
             return channelTargetEffectMask == 0;
         }
 
-        public void Prepare(SpellCastTargets targets, AuraEffect triggeredByAura = null)
+        public SpellCastResult Prepare(SpellCastTargets targets, AuraEffect triggeredByAura = null)
         {
             if (m_CastItem != null)
             {
@@ -2234,7 +2234,7 @@ namespace Game.Spells
                 {
                     SendCastResult(SpellCastResult.EquippedItem);
                     Finish(false);
-                    return;
+                    return SpellCastResult.EquippedItem;
                 }
             }
 
@@ -2257,7 +2257,7 @@ namespace Game.Spells
             {
                 SendCastResult(SpellCastResult.SpellUnavailable);
                 Finish(false);
-                return;
+                return SpellCastResult.SpellUnavailable;
             }
 
             // Prevent casting at cast another spell (ServerSide check)
@@ -2265,7 +2265,7 @@ namespace Game.Spells
             {
                 SendCastResult(SpellCastResult.SpellInProgress);
                 Finish(false);
-                return;
+                return SpellCastResult.SpellInProgress;
             }
 
             LoadScripts();
@@ -2302,7 +2302,7 @@ namespace Game.Spells
                     SendCastResult(result);
 
                 Finish(false);
-                return;
+                return result;
             }
 
             // Prepare data for triggers
@@ -2333,7 +2333,7 @@ namespace Game.Spells
                 {
                     SendCastResult(SpellCastResult.Moving);
                     Finish(false);
-                    return;
+                    return SpellCastResult.Moving;
                 }
             }
 
@@ -2387,6 +2387,8 @@ namespace Game.Spells
                 if (m_casttime == 0 && /*m_spellInfo.StartRecoveryTime == 0 && */ GetCurrentContainer() == CurrentSpellTypes.Generic)
                     Cast(true);
             }
+
+            return SpellCastResult.SpellCastOk;
         }
 
         public void Cancel()
