@@ -84,35 +84,14 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who)
         {
+            // TODO: what in the world is this?
             if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.IsTargetableForAttack() && who.IsInAccessiblePlaceFor(me))
-            {
-                if (HasFollowState(FollowState.Inprogress) && AssistPlayerInCombatAgainst(who))
-                    return;
+                return;
 
-                if (!me.CanFly() && me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
-                    return;
+            if (HasFollowState(FollowState.Inprogress) && AssistPlayerInCombatAgainst(who))
+                return;
 
-                if (me.IsHostileTo(who))
-                {
-                    float fAttackRadius = me.GetAttackDistance(who);
-                    if (me.IsWithinDistInMap(who, fAttackRadius) && me.IsWithinLOSInMap(who))
-                    {
-                        if (!me.GetVictim())
-                        {
-                            // Clear distracted state on combat
-                            if (me.HasUnitState(UnitState.Distracted))
-                            {
-                                me.ClearUnitState(UnitState.Distracted);
-                                me.GetMotionMaster().Clear();
-                            }
-
-                            AttackStart(who);
-                        }
-                        else if (me.GetMap().IsDungeon())
-                            me.EngageWithTarget(who);
-                    }
-                }
-            }
+            base.MoveInLineOfSight(who);
         }
 
         public override void JustDied(Unit killer)
@@ -290,7 +269,7 @@ namespace Game.AI
             Log.outDebug(LogFilter.Scripts, "FollowerAI start follow {0} ({1})", player.GetName(), _leaderGUID.ToString());
         }
 
-        void SetFollowPaused(bool paused)
+        public void SetFollowPaused(bool paused)
         {
             if (!HasFollowState(FollowState.Inprogress) || HasFollowState(FollowState.Complete))
                 return;
@@ -312,7 +291,7 @@ namespace Game.AI
             }
         }
 
-        public void SetFollowComplete(bool bWithEndEvent = false)
+        public void SetFollowComplete(bool withEndEvent = false)
         {
             if (me.HasUnitState(UnitState.Follow))
             {
@@ -323,7 +302,7 @@ namespace Game.AI
                 me.GetMotionMaster().MoveIdle();
             }
 
-            if (bWithEndEvent)
+            if (withEndEvent)
                 AddFollowState(FollowState.PostEvent);
             else
             {
