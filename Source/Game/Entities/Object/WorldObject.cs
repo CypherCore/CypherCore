@@ -156,8 +156,11 @@ namespace Game.Entities
 
             Unit unit = ToUnit();
             if (unit)
+            {
+                flags.PlayHoverAnim = unit.IsPlayingHoverAnim();
                 if (unit.GetVictim())
                     flags.CombatVictim = true;
+            }
 
             WorldPacket buffer = new();
             buffer.WriteUInt8((byte)updateType);

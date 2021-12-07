@@ -1611,8 +1611,12 @@ namespace Game.Entities
             }
         }
 
-        void SendSetPlayHoverAnim(bool enable)
+        public bool IsPlayingHoverAnim() { return _playHoverAnim; }
+        
+        void SetPlayHoverAnim(bool enable)
         {
+            _playHoverAnim = enable;
+
             SetPlayHoverAnim data = new();
             data.UnitGUID = GetGUID();
             data.PlayHoverAnim = enable;

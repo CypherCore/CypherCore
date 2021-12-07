@@ -128,6 +128,8 @@ namespace Game.Entities
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
         bool _instantCast;
 
+        bool _playHoverAnim;
+
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
