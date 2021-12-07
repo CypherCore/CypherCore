@@ -134,27 +134,25 @@ namespace Game.AI
 
         public override void EnterEvadeMode(EvadeReason why)
         {
+            if (!me.IsAlive())
+                return;
+
             me.RemoveAllAuras();
             me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.SetLootRecipient(null);
+            me.SetCannotReachTarget(false);
+            me.DoNotReacquireTarget();
 
             if (HasFollowState(FollowState.Inprogress))
             {
                 Log.outDebug(LogFilter.Scripts, "FollowerAI left combat, returning to CombatStartPosition.");
 
-                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Chase)
-                {
-                    float fPosX, fPosY, fPosZ;
-                    me.GetPosition(out fPosX, out fPosY, out fPosZ);
-                    me.GetMotionMaster().MovePoint(0xFFFFFF, fPosX, fPosY, fPosZ);
-                }
+                if (me.HasUnitState(UnitState.Chase))
+                    me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
             }
             else
-            {
-                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Chase)
-                    me.GetMotionMaster().MoveTargetedHome();
-            }
+                me.GetMotionMaster().MoveTargetedHome();
 
             Reset();
         }
@@ -252,12 +250,8 @@ namespace Game.AI
 
             _questForFollow = quest;
 
-            if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
-            {
-                me.GetMotionMaster().Clear();
-                me.GetMotionMaster().MoveIdle();
-                Log.outDebug(LogFilter.Scripts, "FollowerAI start with WAYPOINT_MOTION_TYPE, set to MoveIdle.");
-            }
+            me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+            me.PauseMovement();
 
             me.SetNpcFlags(NPCFlags.None);
             me.SetNpcFlags2(NPCFlags2.None);
@@ -294,13 +288,7 @@ namespace Game.AI
         public void SetFollowComplete(bool withEndEvent = false)
         {
             if (me.HasUnitState(UnitState.Follow))
-            {
-                me.ClearUnitState(UnitState.Follow);
-
-                me.StopMoving();
-                me.GetMotionMaster().Clear();
-                me.GetMotionMaster().MoveIdle();
-            }
+                me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
 
             if (withEndEvent)
                 AddFollowState(FollowState.PostEvent);
