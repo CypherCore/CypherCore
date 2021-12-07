@@ -292,7 +292,7 @@ namespace Game.AI
 
             // Clear target just in case. May help problem where health / focus / mana
             // regen gets stuck. Also resets attack command.
-            // Can't use _stopAttack() because that activates movement handlers and ignores
+            // Can't use StopAttack() because that activates movement handlers and ignores
             // next target selection
             me.AttackStop();
             me.InterruptNonMeleeSpells(false);
@@ -437,7 +437,10 @@ namespace Game.AI
                     me.GetCharmInfo().GetStayPosition(out x, out y, out z);
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsReturning(true);
-                    me.GetMotionMaster().Clear();
+
+                    if (me.HasUnitState(UnitState.Chase))
+                        me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
                     me.GetMotionMaster().MovePoint((uint)me.GetGUID().GetCounter(), x, y, z);
                 }
             }
@@ -447,7 +450,10 @@ namespace Game.AI
                 {
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsReturning(true);
-                    me.GetMotionMaster().Clear();
+
+                    if (me.HasUnitState(UnitState.Chase))
+                        me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
                     me.GetMotionMaster().MoveFollow(me.GetCharmerOrOwner(), SharedConst.PetFollowDist, me.GetFollowAngle());
                 }
             }
@@ -473,14 +479,20 @@ namespace Game.AI
                     bool oldCmdAttack = me.GetCharmInfo().IsCommandAttack(); // This needs to be reset after other flags are cleared
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsCommandAttack(oldCmdAttack); // For passive pets commanded to attack so they will use spells
-                    me.GetMotionMaster().Clear();
+
+                    if (me.HasUnitState(UnitState.Follow))
+                        me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
+
                     me.GetMotionMaster().MoveChase(target, me.GetPetChaseDistance(), MathF.PI);
                 }
                 else
                 {
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsAtStay(true);
-                    me.GetMotionMaster().Clear();
+
+                    if (me.HasUnitState(UnitState.Follow))
+                        me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
+
                     me.GetMotionMaster().MoveIdle();
                 }
             }
