@@ -106,7 +106,9 @@ namespace Framework.Constants
         ClientSession = 46,
         Cast = 47,
         ClientConnection = 48,
-        ClubFinder = 49
+        ClubFinder = 49,
+
+        Count
     }
 
     public enum NotifyFlags
