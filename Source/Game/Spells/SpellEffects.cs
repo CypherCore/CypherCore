@@ -5533,7 +5533,7 @@ namespace Game.Spells
 
             float speed = jumpParams.Speed;
             if (jumpParams.TreatSpeedAsMoveTimeSeconds)
-                speed = unitCaster.GetExactDist2d(destTarget) / jumpParams.Speed;
+                speed = unitCaster.GetExactDist(destTarget) / jumpParams.Speed;
 
             Optional<JumpArrivalCastArgs> arrivalCast = new();
             if (effectInfo.TriggerSpell != 0)
