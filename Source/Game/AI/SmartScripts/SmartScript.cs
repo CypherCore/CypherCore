@@ -2725,6 +2725,16 @@ namespace Game.AI
                     break;
                 case SmartTargets.CreatureRange:
                 {
+                    WorldObject refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
+
+                    if (refObj == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_CREATURE_RANGE: {e} is missing base object or invoker.");
+                        break;
+                    }
+
                     List<WorldObject> units = GetWorldObjectsInDist(e.Target.unitRange.maxDist);
                     foreach (var obj in units)
                     {
@@ -2734,7 +2744,7 @@ namespace Game.AI
                         if (_me != null && _me == obj)
                             continue;
 
-                        if ((e.Target.unitRange.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitRange.creature) && baseObject.IsInRange(obj, e.Target.unitRange.minDist, e.Target.unitRange.maxDist))
+                        if ((e.Target.unitRange.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitRange.creature) && refObj.IsInRange(obj, e.Target.unitRange.minDist, e.Target.unitRange.maxDist))
                             targets.Add(obj);
                     }
 
@@ -2782,6 +2792,16 @@ namespace Game.AI
                 }
                 case SmartTargets.GameobjectRange:
                 {
+                    WorldObject refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
+
+                    if (refObj == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_GAMEOBJECT_RANGE: {e} is missing base object or invoker.");
+                        break;
+                    }
+
                     List<WorldObject> units = GetWorldObjectsInDist(e.Target.goRange.maxDist);
                     foreach (var obj in units)
                     {
@@ -2791,7 +2811,7 @@ namespace Game.AI
                         if (_go != null && _go == obj)
                             continue;
 
-                        if ((e.Target.goRange.entry == 0 && obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && baseObject.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
+                        if ((e.Target.goRange.entry == 0 && obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && refObj.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
                             targets.Add(obj);
                     }
 
@@ -2803,7 +2823,7 @@ namespace Game.AI
                 {
                     if (scriptTrigger == null && baseObject == null)
                     {
-                        Log.outError(LogFilter.Sql, "SMART_TARGET_CREATURE_GUID can not be used without invoker");
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_CREATURE_GUID {e} can not be used without invoker");
                         break;
                     }
 
@@ -2817,7 +2837,7 @@ namespace Game.AI
                 {
                     if (scriptTrigger == null && baseObject == null)
                     {
-                        Log.outError(LogFilter.Sql, "SMART_TARGET_GAMEOBJECT_GUID can not be used without invoker");
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_GAMEOBJECT_GUID {e} can not be used without invoker");
                         break;
                     }
 
@@ -2847,41 +2867,71 @@ namespace Game.AI
                 }
                 case SmartTargets.Stored:
                 {
-                    if (baseObject == null)
-                        baseObject = scriptTrigger;
+                    WorldObject refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
 
-                    if (baseObject != null)
+                    if (refObj == null)
                     {
-                        var stored = GetStoredTargetList(e.Target.stored.id, baseObject);
-                        if (stored != null)
-                            targets.AddRange(stored);
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_STORED: {e} is missing base object or invoker.");
+                        break;
                     }
+
+                    var stored = GetStoredTargetList(e.Target.stored.id, refObj);
+                    if (stored != null)
+                        targets.AddRange(stored);
 
                     break;
                 }
                 case SmartTargets.ClosestCreature:
                 {
-                    Creature target = baseObject.FindNearestCreature(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100, e.Target.closest.dead == 0);
+                    WorldObject  refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
+
+                    if (refObj == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_CLOSEST_CREATURE: {e} is missing base object or invoker.");
+                        break;
+                    }
+
+                    Creature target = refObj.FindNearestCreature(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100, e.Target.closest.dead == 0);
                     if (target)
                         targets.Add(target);
                     break;
                 }
                 case SmartTargets.ClosestGameobject:
                 {
-                    GameObject target = baseObject.FindNearestGameObject(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100);
+                    WorldObject refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
+
+                    if (refObj == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_CLOSEST_GAMEOBJECT: {e} is missing base object or invoker.");
+                        break;
+                    }
+
+                    GameObject target = refObj.FindNearestGameObject(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100);
                     if (target)
                         targets.Add(target);
                     break;
                 }
                 case SmartTargets.ClosestPlayer:
                 {
-                    WorldObject obj = GetBaseObject();
-                    if (obj != null)
+                    WorldObject refObj = baseObject;
+                    if (refObj == null)
+                        refObj = scriptTrigger;
+
+                    if (refObj == null)
                     {
-                        Player target = obj.SelectNearestPlayer(e.Target.playerDistance.dist);
-                        if (target)
-                            targets.Add(target);
+                        Log.outError(LogFilter.Sql, $"SMART_TARGET_CLOSEST_PLAYER: {e} is missing base object or invoker.");
+                        break;
                     }
+
+                    Player target = refObj.SelectNearestPlayer(e.Target.playerDistance.dist);
+                    if (target)
+                        targets.Add(target);
                     break;
                 }
                 case SmartTargets.OwnerOrSummoner:
