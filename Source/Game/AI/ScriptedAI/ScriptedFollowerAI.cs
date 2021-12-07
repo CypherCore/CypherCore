@@ -67,19 +67,7 @@ namespace Game.AI
 
         public override void AttackStart(Unit who)
         {
-            if (!who)
-                return;
-
-            if (me.Attack(who, true))
-            {
-                me.EngageWithTarget(who); // in case it doesn't have threat+combat yet
-
-                if (me.HasUnitState(UnitState.Follow))
-                    me.ClearUnitState(UnitState.Follow);
-
-                if (IsCombatMovementAllowed())
-                    me.GetMotionMaster().MoveChase(who);
-            }
+            base.AttackStart(who);
         }
 
         public override void MoveInLineOfSight(Unit who)
