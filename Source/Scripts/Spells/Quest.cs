@@ -1057,7 +1057,7 @@ namespace Scripts.Spells.Quest
         {
             Unit caster = GetCaster();
 
-            if (RandomHelper.randChance(80))
+            if (RandomHelper.randChance(50))
                 caster.CastSpell(caster, SpellIds.SummonDeepJormungar, true);
             else
                 caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
