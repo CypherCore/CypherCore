@@ -2915,6 +2915,12 @@ namespace Game.Entities
                     GameObject obj = ObjectAccessor.GetGameObject(this, guid);
                     if (obj != null)
                     {
+                        ObjectFieldData objMask = new();
+                        GameObjectFieldData goMask = new();
+
+                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)obj.GetEntry())))
+                            objMask.MarkChanged(obj.m_objectData.DynamicFlags);
+
                         switch (obj.GetGoType())
                         {
                             case GameObjectTypes.QuestGiver:
@@ -2922,16 +2928,14 @@ namespace Game.Entities
                             case GameObjectTypes.Goober:
                             case GameObjectTypes.Generic:
                                 if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
-                                {
-                                    ObjectFieldData objMask = new();
-                                    GameObjectFieldData goMask = new();
                                     objMask.MarkChanged(obj.m_objectData.DynamicFlags);
-                                    obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, goMask._changesMask, this);
-                                }
                                 break;
                             default:
                                 break;
                         }
+
+                        if (objMask.GetUpdateMask().IsAnySet() || goMask.GetUpdateMask().IsAnySet())
+                            obj.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), this);
                     }
                 }
                 else if (guid.IsCreatureOrVehicle())
