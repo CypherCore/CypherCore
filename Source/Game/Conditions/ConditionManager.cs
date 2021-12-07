@@ -161,7 +161,8 @@ namespace Game
                     sourceType == ConditionSourceType.SmartEvent ||
                     sourceType == ConditionSourceType.NpcVendor ||
                     sourceType == ConditionSourceType.Phase ||
-                    sourceType == ConditionSourceType.AreaTrigger);
+                    sourceType == ConditionSourceType.AreaTrigger ||
+                    sourceType == ConditionSourceType.TrainerSpell);
         }
 
         public bool CanHaveSourceIdSet(ConditionSourceType sourceType)
@@ -270,7 +271,7 @@ namespace Game
                 var conditions = multiMap.LookupByKey(itemId);
                 if (!conditions.Empty())
                 {
-                    Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendorEvent: found conditions for creature entry {0} item {1}", creatureId, itemId);
+                    Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendor: found conditions for creature entry {0} item {1}", creatureId, itemId);
                     ConditionSourceInfo sourceInfo = new(player, vendor);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
@@ -281,6 +282,21 @@ namespace Game
         public List<Condition> GetConditionsForAreaTrigger(uint areaTriggerId, bool isServerSide)
         {
             return areaTriggerConditionContainerStorage.LookupByKey(Tuple.Create(areaTriggerId, isServerSide));
+        }
+
+        public bool IsObjectMeetingTrainerSpellConditions(uint trainerId, uint spellId, Player player)
+        {
+            var multiMap = trainerSpellConditionContainerStorage.LookupByKey(trainerId);
+            if (multiMap != null)
+            {
+                var conditionList = multiMap.LookupByKey(spellId);
+                if (!conditionList.Empty())
+                {
+                    Log.outDebug(LogFilter.Condition, $"GetConditionsForTrainerSpell: found conditions for trainer id {trainerId} spell {spellId}");
+                    return IsObjectMeetToConditions(player, conditionList);
+                }
+            }
+            return true;
         }
         
         public void LoadConditions(bool isReload = false)
@@ -512,6 +528,15 @@ namespace Game
                             areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
                             ++count;
                             continue;
+                        case ConditionSourceType.TrainerSpell:
+                        {
+                            if (!trainerSpellConditionContainerStorage.ContainsKey(cond.SourceGroup))
+                                trainerSpellConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
+
+                            trainerSpellConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            ++count;
+                            continue;
+                        }
                         default:
                             break;
                     }
@@ -947,7 +972,7 @@ namespace Game
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.db2`, ignoring.", cond.ToString());
                         return false;
                     }
 
@@ -1014,7 +1039,7 @@ namespace Game
                     SpellInfo spellProto = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
                     if (spellProto == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.db2`, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -1029,26 +1054,26 @@ namespace Game
                 case ConditionSourceType.VehicleSpell:
                     if (Global.ObjectMgr.GetCreatureTemplate(cond.SourceGroup) == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
                         return false;
                     }
 
                     if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.db2`, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
                 case ConditionSourceType.SpellClickEvent:
                     if (Global.ObjectMgr.GetCreatureTemplate(cond.SourceGroup) == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
                         return false;
                     }
 
                     if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.db2`, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -1056,7 +1081,7 @@ namespace Game
                 {
                     if (Global.ObjectMgr.GetCreatureTemplate(cond.SourceGroup) == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
                         return false;
                     }
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
@@ -1070,14 +1095,14 @@ namespace Game
                 case ConditionSourceType.TerrainSwap:
                     if (!CliDB.MapStorage.ContainsKey((uint)cond.SourceEntry))
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in Map.dbc, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in Map.db2, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
                 case ConditionSourceType.Phase:
                     if (cond.SourceEntry != 0 && !CliDB.AreaTableStorage.ContainsKey(cond.SourceEntry))
                     {
-                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in AreaTable.dbc, ignoring.", cond.ToString());
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in AreaTable.db2, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -1118,6 +1143,20 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionSourceType.TrainerSpell:
+                {
+                    if (Global.ObjectMgr.GetTrainer(cond.SourceGroup) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, does not exist in `trainer`, ignoring.");
+                        return false;
+                    }
+                    if (Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table does not exist in `Spell.db2`, ignoring.");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     return false;
@@ -1660,6 +1699,10 @@ namespace Game
             spellClickEventConditionStorage.Clear();
 
             npcVendorConditionContainerStorage.Clear();
+
+            areaTriggerConditionContainerStorage.Clear();
+
+            trainerSpellConditionContainerStorage.Clear();
         }
 
         static bool PlayerConditionCompare(int comparisonType, int value1, int value2)
@@ -2442,6 +2485,7 @@ namespace Game
         Dictionary<uint, MultiMap<uint, Condition>> npcVendorConditionContainerStorage = new();
         Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> smartEventConditionStorage = new();
         MultiMap<Tuple<uint, bool>, Condition> areaTriggerConditionContainerStorage = new();
+        Dictionary<uint, MultiMap<uint, Condition>> trainerSpellConditionContainerStorage = new();
 
         public string[] StaticSourceTypeData =
         {
@@ -2473,7 +2517,10 @@ namespace Game
             "Terrain Swap",
             "Phase",
             "Graveyard",
-            "AreaTrigger"
+            "AreaTrigger",
+            "ConversationLine",
+            "AreaTrigger Client Triggered",
+            "Trainer Spell"
         };
 
         public ConditionTypeInfo[] StaticConditionTypeData =

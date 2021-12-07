@@ -45,6 +45,12 @@ namespace Game.Entities
                 if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
                     continue;
 
+                if (!Global.ConditionMgr.IsObjectMeetingTrainerSpellConditions(_id, trainerSpell.SpellId, player))
+                {
+                    Log.outDebug(LogFilter.Condition, $"SendSpells: conditions not met for trainer id {_id} spell {trainerSpell.SpellId} player '{player.GetName()}' ({player.GetGUID()})");
+                    continue;
+                }
+
                 TrainerListSpell trainerListSpell = new();
                 trainerListSpell.SpellID = trainerSpell.SpellId;
                 trainerListSpell.MoneyCost = (uint)(trainerSpell.MoneyCost * reputationDiscount);

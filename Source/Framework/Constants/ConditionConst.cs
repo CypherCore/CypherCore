@@ -108,6 +108,7 @@ namespace Framework.Constants
         AreaTrigger = 28,
         ConversationLine = 29,
         AreatriggerClientTriggered = 30,
+        TrainerSpell = 31,
         Max
     }
 
