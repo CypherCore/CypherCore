@@ -120,8 +120,8 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger splines. DB table `areatrigger_create_properties_spline_point` is empty.");
             }
 
-            //                                            0   1             2      3
-            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Flags, ScriptName FROM `areatrigger_template`");
+            //                                            0   1             2
+            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Flags FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {
                 do
@@ -137,7 +137,6 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(3));
                     areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
 
                     _areaTriggerTemplateStore[areaTriggerTemplate.Id] = areaTriggerTemplate;
@@ -147,8 +146,8 @@ namespace Game.DataStorage
 
             //                                                              0   1              2            3             4             5              6       7          8                  9             10
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, " +
-                //11     12          13          14          15          16          17
-                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5 FROM `areatrigger_create_properties`");
+                //11     12          13          14          15          16          17          18
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
                 do
@@ -202,6 +201,8 @@ namespace Game.DataStorage
                         for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
                             createProperties.Shape.DefaultDatas.Data[i] = areatriggerCreateProperties.Read<float>(12 + i);
                     }
+
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(18));
 
                     if (shape == AreaTriggerTypes.Polygon)
                         if (createProperties.Shape.PolygonDatas.Height <= 0.0f)
@@ -287,8 +288,8 @@ namespace Game.DataStorage
             // Load area trigger positions (to put them on the server)
             //                                            0        1              2             3      4     5     6     7            8              9        10
             SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
-                //11     12          13          14          15          16          17
-                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5 FROM `areatrigger`");
+                //11     12          13          14          15          16          17          18
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ScriptName FROM `areatrigger`");
             if (!templates.IsEmpty())
             {
                 do
@@ -331,6 +332,8 @@ namespace Game.DataStorage
                         for (var i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
                             spawn.Shape.DefaultDatas.Data[i] = templates.Read<float>(12 + i);
                     }
+
+                    spawn.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(18));
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
                     CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());

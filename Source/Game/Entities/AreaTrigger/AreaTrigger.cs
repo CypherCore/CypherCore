@@ -225,6 +225,8 @@ namespace Game.Entities
 
         public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
+            _spawnId = spawnId;
+
             AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
             if (position == null)
                 return false;
@@ -499,7 +501,13 @@ namespace Game.Entities
 
         public uint GetScriptId()
         {
-            return GetTemplate() != null ? GetTemplate().ScriptId : 0;
+            if (_spawnId != 0)
+                return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
+
+            if (GetCreateProperties() != null)
+                return GetCreateProperties().ScriptId;
+
+            return 0;
         }
 
         public Unit GetCaster()
@@ -1050,6 +1058,8 @@ namespace Game.Entities
         public Optional<AreaTriggerOrbitInfo> GetCircularMovementInfo() { return _orbitInfo; }
 
         AreaTriggerFieldData m_areaTriggerData;
+
+        ulong _spawnId;
 
         ObjectGuid _targetGuid;
 

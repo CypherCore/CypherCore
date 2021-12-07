@@ -252,7 +252,6 @@ namespace Game.Entities
     {
         public AreaTriggerId Id;
         public AreaTriggerFlags Flags;
-        public uint ScriptId;
 
         public List<AreaTriggerAction> Actions = new();
 
@@ -316,6 +315,8 @@ namespace Game.Entities
         public List<Vector2> PolygonVerticesTarget = new();
         public List<Vector3> SplinePoints = new();
         public Optional<AreaTriggerOrbitInfo> OrbitInfo;
+
+        public uint ScriptId;
     }
 
     public class AreaTriggerSpawn
@@ -328,6 +329,8 @@ namespace Game.Entities
         public byte PhaseUseFlags;
 
         public AreaTriggerShapeInfo Shape = new();
+
+        public uint ScriptId;
     }
 
     public struct AreaTriggerAction
