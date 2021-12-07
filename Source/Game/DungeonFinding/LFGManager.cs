@@ -1349,11 +1349,19 @@ namespace Game.DungeonFinding
                 }
 
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player || player.GetMap() != currMap)
+                if (player == null)
                 {
                     Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} not found in world");
                     continue;
                 }
+
+                if (player.GetMap() != currMap)
+                {
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} is in a different map");
+                    continue;
+                }
+
+                player.RemoveAurasDueToSpell(SharedConst.LFGSpellDungeonCooldown);
 
                 LFGDungeonData dungeonDone = GetLFGDungeon(dungeonId);
                 uint mapId = dungeonDone != null ? dungeonDone.map : 0;
