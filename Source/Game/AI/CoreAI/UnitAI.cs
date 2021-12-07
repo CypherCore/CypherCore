@@ -79,21 +79,13 @@ namespace Game.AI
             //Make sure our attack is ready and we aren't currently casting before checking distance
             if (me.IsAttackReady())
             {
-                if (ShouldSparWith(victim))
-                    me.FakeAttackerStateUpdate(victim);
-                else
-                    me.AttackerStateUpdate(victim);
-
+                me.AttackerStateUpdate(victim);
                 me.ResetAttackTimer();
             }
 
             if (me.HaveOffhandWeapon() && me.IsAttackReady(WeaponAttackType.OffAttack))
             {
-                if (ShouldSparWith(victim))
-                    me.FakeAttackerStateUpdate(victim, WeaponAttackType.OffAttack);
-                else
-                    me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
-
+                me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
                 me.ResetAttackTimer(WeaponAttackType.OffAttack);
             }
         }

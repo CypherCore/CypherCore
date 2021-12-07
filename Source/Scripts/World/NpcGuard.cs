@@ -142,10 +142,8 @@ namespace Scripts.World.NpcGuard
                         return;
                     }
                 }
-                if (ShouldSparWith(victim))
-                    me.FakeAttackerStateUpdate(victim);
-                else
-                    me.AttackerStateUpdate(victim);
+
+                me.AttackerStateUpdate(victim);
                 me.ResetAttackTimer();
                 task.Repeat();
             });

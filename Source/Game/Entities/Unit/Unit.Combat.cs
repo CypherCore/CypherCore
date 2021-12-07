@@ -574,52 +574,6 @@ namespace Game.Entities
             }
         }
 
-        public void FakeAttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack)
-        {
-            if (HasUnitState(UnitState.CannotAutoattack) || HasUnitFlag(UnitFlags.Pacified))
-                return;
-
-            if (!victim.IsAlive())
-                return;
-
-            if ((attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.OffAttack) && !IsWithinLOSInMap(victim))
-                return;
-
-            AttackedTarget(victim, true);
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Attacking);
-
-            if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
-                return;                                             // ignore ranged case
-
-            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.Possessed) && !HasUnitFlag2(UnitFlags2.DisableTurn))
-                SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
-
-            CalcDamageInfo damageInfo = new();
-            damageInfo.Attacker = this;
-            damageInfo.Target = victim;
-
-            damageInfo.DamageSchoolMask = (uint)GetMeleeDamageSchoolMask();
-            damageInfo.OriginalDamage = 0;
-            damageInfo.Damage = 0;
-            damageInfo.Absorb = 0;
-            damageInfo.Resist = 0;
-
-            damageInfo.AttackType = attType;
-            damageInfo.CleanDamage = 0;
-            damageInfo.Blocked = 0;
-
-            damageInfo.TargetState = VictimState.Hit;
-            damageInfo.HitInfo = HitInfo.AffectsVictim | HitInfo.NormalSwing | HitInfo.FakeDamage;
-            if (attType == WeaponAttackType.OffAttack)
-                damageInfo.HitInfo |= HitInfo.OffHand;
-
-            damageInfo.ProcAttacker = ProcFlags.None;
-            damageInfo.ProcVictim = ProcFlags.None;
-            damageInfo.HitOutCome = MeleeHitOutcome.Normal;
-
-            SendAttackStateUpdate(damageInfo);
-        }
-
         public void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value) { m_weaponDamage[(int)attType][(int)damageRange] = value; }
 
         public Unit GetMeleeHitRedirectTarget(Unit victim, SpellInfo spellInfo = null)
