@@ -409,10 +409,9 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
             }
 
-            if (GetMovementTemplate().IsRooted())
-                SetControlled(true, UnitState.Root);
+            LoadTemplateRoot();
+            InitializeMovementFlags();
 
-            UpdateMovementFlags();
             LoadCreaturesAddon();
 
             LoadTemplateImmunities();
@@ -1565,6 +1564,12 @@ namespace Game.Entities
             SetHealth((m_deathState == DeathState.Alive || m_deathState == DeathState.JustRespawned) ? curhealth : 0);
         }
 
+        void LoadTemplateRoot()
+        {
+            if (GetMovementTemplate().IsRooted())
+                SetControlled(true, UnitState.Root);
+        }
+
         public override bool HasQuest(uint quest_id)
         {
             var qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(GetEntry());
@@ -2439,6 +2444,52 @@ namespace Game.Entities
 
         bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
 
+        void InitializeMovementFlags()
+        {
+            // It does the same, for now
+            UpdateMovementFlags();
+        }
+
+        public void UpdateMovementFlags()
+        {
+            // Do not update movement flags if creature is controlled by a player (charm/vehicle)
+            if (m_playerMovingMe != null)
+                return;
+
+            // Creatures with CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE should control MovementFlags in your own scripts
+            if (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoMoveFlagsUpdate))
+                return;
+
+            // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
+            float ground = GetFloorZ();
+
+            bool canHover = CanHover();
+            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + (canHover ? m_unitData.HoverHeight : 0.0f) + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
+
+            if (GetMovementTemplate().IsFlightAllowed() && isInAir && !IsFalling())
+            {
+                if (GetMovementTemplate().Flight == CreatureFlightMovementType.CanFly)
+                    SetCanFly(true);
+                else
+                    SetDisableGravity(true);
+
+                if (!HasAuraType(AuraType.Hover))
+                    SetHover(false);
+            }
+            else
+            {
+                SetCanFly(false);
+                SetDisableGravity(false);
+                if (IsAlive() && (CanHover() || HasAuraType(AuraType.Hover)))
+                    SetHover(true);
+            }
+
+            if (!isInAir)
+                SetFall(false);
+
+            SetSwim(GetMovementTemplate().IsSwimAllowed() && IsInWater());
+        }
+
         public CreatureMovementData GetMovementTemplate()
         {
             CreatureMovementData movementOverride = Global.ObjectMgr.GetCreatureMovementOverride(m_spawnId);
@@ -2792,46 +2843,6 @@ namespace Game.Entities
             var searcher = new UnitSearcher(this, u_check);
             Cell.VisitGridObjects(this, searcher, SharedConst.MaxAggroRadius);
             return searcher.GetTarget();
-        }
-
-        public void UpdateMovementFlags()
-        {
-            // Do not update movement flags if creature is controlled by a player (charm/vehicle)
-            if (m_playerMovingMe != null)
-                return;
-
-            // Creatures with CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE should control MovementFlags in your own scripts
-            if (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoMoveFlagsUpdate))
-                return;
-
-            // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
-            float ground = GetFloorZ();
-
-            bool canHover = CanHover();
-            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + (canHover ? m_unitData.HoverHeight : 0.0f) + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
-
-            if (GetMovementTemplate().IsFlightAllowed() && isInAir && !IsFalling())
-            {
-                if (GetMovementTemplate().Flight == CreatureFlightMovementType.CanFly)
-                    SetCanFly(true);
-                else
-                    SetDisableGravity(true);
-
-                if (!HasAuraType(AuraType.Hover))
-                    SetHover(false);
-            }
-            else
-            {
-                SetCanFly(false);
-                SetDisableGravity(false);
-                if (IsAlive() && (CanHover() || HasAuraType(AuraType.Hover)))
-                    SetHover(true);
-            }
-
-            if (!isInAir)
-                SetFall(false);
-
-            SetSwim(GetMovementTemplate().IsSwimAllowed() && IsInWater());
         }
 
         public override void SetObjectScale(float scale)
