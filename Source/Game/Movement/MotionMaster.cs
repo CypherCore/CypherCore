@@ -59,16 +59,29 @@ namespace Game.Movement
 
     class MotionMasterDelayedAction
     {
+        Func<bool> Validator;
         public Action Action;
         public MotionMasterDelayedActionType Type;
+
+        public MotionMasterDelayedAction(Action action, Func<bool> validator, MotionMasterDelayedActionType type)
+        {
+            Action = action;
+            Validator = validator;
+            Type = type;
+        }
 
         public MotionMasterDelayedAction(Action action, MotionMasterDelayedActionType type)
         {
             Action = action;
+            Validator = () => true;
             Type = type;
         }
 
-        public void Resolve() { Action(); }
+        public void Resolve()
+        {
+            if (Validator())
+                Action();
+        }
     }
 
     public class MotionMaster
@@ -112,7 +125,7 @@ namespace Game.Movement
             return _defaultGenerator == null && _generators.Empty();
         }
 
-        int Size()
+        public int Size()
         {
             return _defaultGenerator != null ? 1 : 0 + _generators.Count;
         }
