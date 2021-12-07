@@ -75,6 +75,8 @@ namespace Game.AI
                 owner.SetWalk(true);
                 owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
+                if (owner.IsVehicle())
+                    owner.GetVehicleKit().Reset(true);
                 owner.GetAI().JustReachedHome();
             }
         }
