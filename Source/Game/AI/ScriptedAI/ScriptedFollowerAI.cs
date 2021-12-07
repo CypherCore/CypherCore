@@ -48,6 +48,23 @@ namespace Game.AI
             _questForFollow = null;
         }
 
+        public override void MovementInform(MovementGeneratorType motionType, uint pointId)
+        {
+            if (motionType != MovementGeneratorType.Point || !HasFollowState(FollowState.Inprogress))
+                return;
+
+            if (pointId == 0xFFFFFF)
+            {
+                if (GetLeaderForFollower())
+                {
+                    if (!HasFollowState(FollowState.Paused))
+                        AddFollowState(FollowState.Returning);
+                }
+                else
+                    me.DespawnOrUnsummon();
+            }
+        }
+
         public override void AttackStart(Unit who)
         {
             if (!who)
@@ -63,36 +80,6 @@ namespace Game.AI
                 if (IsCombatMovementAllowed())
                     me.GetMotionMaster().MoveChase(who);
             }
-        }
-
-        //This part provides assistance to a player that are attacked by who, even if out of normal aggro range
-        //It will cause me to attack who that are attacking _any_ player (which has been confirmed may happen also on offi)
-        //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
-        bool AssistPlayerInCombatAgainst(Unit who)
-        {
-            if (!who || !who.GetVictim())
-                return false;
-
-            //experimental (unknown) flag not present
-            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
-                return false;
-
-            //not a player
-            if (!who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself())
-                return false;
-
-            //never attack friendly
-            if (me.IsFriendlyTo(who))
-                return false;
-
-            //too far away and no free sight?
-            if (me.IsWithinDistInMap(who, 100.0f) && me.IsWithinLOSInMap(who))
-            {
-                me.EngageWithTarget(who);
-                return true;
-            }
-
-            return false;
         }
 
         public override void MoveInLineOfSight(Unit who)
@@ -264,23 +251,6 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
-        public override void MovementInform(MovementGeneratorType motionType, uint pointId)
-        {
-            if (motionType != MovementGeneratorType.Point || !HasFollowState(FollowState.Inprogress))
-                return;
-
-            if (pointId == 0xFFFFFF)
-            {
-                if (GetLeaderForFollower())
-                {
-                    if (!HasFollowState(FollowState.Paused))
-                        AddFollowState(FollowState.Returning);
-                }
-                else
-                    me.DespawnOrUnsummon();
-            }
-        }
-
         public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
             if (me.GetVictim())
@@ -320,34 +290,26 @@ namespace Game.AI
             Log.outDebug(LogFilter.Scripts, "FollowerAI start follow {0} ({1})", player.GetName(), _leaderGUID.ToString());
         }
 
-        Player GetLeaderForFollower()
+        void SetFollowPaused(bool paused)
         {
-            Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
-            if (player)
-            {
-                if (player.IsAlive())
-                    return player;
-                else
-                {
-                    Group group = player.GetGroup();
-                    if (group)
-                    {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
-                        {
-                            Player member = groupRef.GetSource();
-                            if (member &&  me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
-                            {
-                                Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader changed and returned new leader.");
-                                _leaderGUID = member.GetGUID();
-                                return member;
-                            }
-                        }
-                    }
-                }
-            }
+            if (!HasFollowState(FollowState.Inprogress) || HasFollowState(FollowState.Complete))
+                return;
 
-            Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader can not find suitable leader.");
-            return null;
+            if (paused)
+            {
+                AddFollowState(FollowState.Paused);
+
+                if (me.HasUnitState(UnitState.Follow))
+                    me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
+            }
+            else
+            {
+                RemoveFollowState(FollowState.Paused);
+
+                Player leader = GetLeaderForFollower();
+                if (leader != null)
+                    me.GetMotionMaster().MoveFollow(leader, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+            }
         }
 
         public void SetFollowComplete(bool bWithEndEvent = false)
@@ -370,6 +332,83 @@ namespace Game.AI
             }
 
             AddFollowState(FollowState.Complete);
+        }
+
+        Player GetLeaderForFollower()
+        {
+            Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
+            if (player)
+            {
+                if (player.IsAlive())
+                    return player;
+                else
+                {
+                    Group group = player.GetGroup();
+                    if (group)
+                    {
+                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        {
+                            Player member = groupRef.GetSource();
+                            if (member && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
+                            {
+                                Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader changed and returned new leader.");
+                                _leaderGUID = member.GetGUID();
+                                return member;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader can not find suitable leader.");
+            return null;
+        }
+
+        //This part provides assistance to a player that are attacked by who, even if out of normal aggro range
+        //It will cause me to attack who that are attacking _any_ player (which has been confirmed may happen also on offi)
+        //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
+        bool AssistPlayerInCombatAgainst(Unit who)
+        {
+            if (!who || !who.GetVictim())
+                return false;
+
+            if (me.HasReactState(ReactStates.Passive))
+                return false;
+
+            //experimental (unknown) flag not present
+            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
+                return false;
+
+            //not a player
+            if (!who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself())
+                return false;
+
+            if (!who.IsInAccessiblePlaceFor(me))
+                return false;
+
+            if (!CanAIAttack(who))
+                return false;
+
+            // we cannot attack in evade mode
+            if (me.IsInEvadeMode())
+                return false;
+
+            // or if enemy is in evade mode
+            if (who.GetTypeId() == TypeId.Unit && who.ToCreature().IsInEvadeMode())
+                return false;
+
+            //never attack friendly
+            if (me.IsFriendlyTo(who))
+                return false;
+
+            //too far away and no free sight?
+            if (me.IsWithinDistInMap(who, 100.0f) && me.IsWithinLOSInMap(who))
+            {
+                me.EngageWithTarget(who);
+                return true;
+            }
+
+            return false;
         }
 
         bool HasFollowState(FollowState uiFollowState) { return (_followState & uiFollowState) != 0; }
