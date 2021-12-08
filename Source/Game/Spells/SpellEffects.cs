@@ -938,6 +938,12 @@ namespace Game.Spells
             float healMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
 
             m_damage += damage;
+
+            DamageInfo damageInfo = new(unitCaster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+            Unit.CalcAbsorbResist(damageInfo);
+            uint absorb = damageInfo.GetAbsorb();
+            damage -= (int)absorb;
+
             // get max possible damage, don't count overkill for heal
             uint healthGain = (uint)(-unitTarget.GetHealthGain(-damage) * healMultiplier);
 
