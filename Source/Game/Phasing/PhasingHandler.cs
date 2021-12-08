@@ -540,12 +540,13 @@ namespace Game
                 string personal = Global.ObjectMgr.GetCypherString(CypherStrings.PhaseFlagPersonal, chat.GetSessionDbcLocale());
                 foreach (var pair in phaseShift.Phases)
                 {
-                    phases.Append(pair.Key);
+                    phases.Append("\r\n");
+                    phases.Append("   ");
+                    phases.Append($"{pair.Key} ({Global.ObjectMgr.GetPhaseName(pair.Key)})'");
                     if (pair.Value.Flags.HasFlag(PhaseFlags.Cosmetic))
                         phases.Append(' ' + '(' + cosmetic + ')');
                     if (pair.Value.Flags.HasFlag(PhaseFlags.Personal))
                         phases.Append(' ' + '(' + personal + ')');
-                    phases.Append(", ");
                 }
 
                 chat.SendSysMessage(CypherStrings.PhaseshiftPhases, phases.ToString());

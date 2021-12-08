@@ -9923,7 +9923,33 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Jump Charge Params in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+        public void LoadPhaseNames()
+        {
+            uint oldMSTime = Time.GetMSTime();
+            _phaseNameStorage.Clear();
+
+            //                                          0     1
+            SQLResult result = DB.World.Query("SELECT `ID`, `Name` FROM `phase_name`");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 phase names. DB table `phase_name` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint phaseId = result.Read<uint>(0);
+                string name = result.Read<string>(1);
+
+                _phaseNameStorage[phaseId] = name;
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public MailLevelReward GetMailLevelReward(uint level, ulong raceMask)
@@ -10297,26 +10323,26 @@ namespace Game
             }
             return null;
         }
-
         public SceneTemplate GetSceneTemplate(uint sceneId)
         {
             return _sceneTemplateStorage.LookupByKey(sceneId);
         }
-
         public List<TempSummonData> GetSummonGroup(uint summonerId, SummonerType summonerType, byte group)
         {
             Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
             return _tempSummonDataStorage.LookupByKey(key);
         }
-
         public bool IsReservedName(string name)
         {
             return _reservedNamesStorage.Contains(name.ToLower());
         }
-
         public JumpChargeParams GetJumpChargeParams(int id)
         {
             return _jumpChargeParams.LookupByKey(id);
+        }
+        public string GetPhaseName(uint phaseId)
+        {
+            return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
         }
         
         //Vehicles
@@ -10477,6 +10503,7 @@ namespace Game
         List<string> _reservedNamesStorage = new();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
         Dictionary<int, JumpChargeParams> _jumpChargeParams = new();
+        Dictionary<uint, string> _phaseNameStorage = new();
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
         List<RaceClassAvailability> _classExpansionRequirementStorage = new();

@@ -1079,6 +1079,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading scenario poi data");
             Global.ScenarioMgr.LoadScenarioPOI();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
+            Global.ObjectMgr.LoadPhaseNames();
+
             // Preload all cells, if required for the base maps
             if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
             {
