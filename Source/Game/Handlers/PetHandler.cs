@@ -136,12 +136,11 @@ namespace Game
 
             switch (flag)
             {
-                case ActiveStates.Command:                                   //0x07
+                case ActiveStates.Command: //0x07
                     switch ((CommandStates)spellid)
                     {
-                        case CommandStates.Stay:                          //flat=1792  //STAY
-                            pet.StopMoving();
-                            pet.GetMotionMaster().Clear();
+                        case CommandStates.Stay: // flat = 1792  //STAY
+                            pet.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
                             pet.GetMotionMaster().MoveIdle();
                             charmInfo.SetCommandState(CommandStates.Stay);
 
@@ -152,7 +151,7 @@ namespace Game
                             charmInfo.SetIsReturning(false);
                             charmInfo.SaveStayPosition();
                             break;
-                        case CommandStates.Follow:                        //spellid=1792  //FOLLOW
+                        case CommandStates.Follow: // spellid = 1792  //FOLLOW
                             pet.AttackStop();
                             pet.InterruptNonMeleeSpells(false);
                             pet.GetMotionMaster().MoveFollow(GetPlayer(), SharedConst.PetFollowDist, pet.GetFollowAngle());
@@ -164,7 +163,7 @@ namespace Game
                             charmInfo.SetIsCommandFollow(true);
                             charmInfo.SetIsFollowing(false);
                             break;
-                        case CommandStates.Attack:                        //spellid=1792  //ATTACK
+                        case CommandStates.Attack: // spellid = 1792  //ATTACK
                         {
                             // Can't attack if owner is pacified
                             if (GetPlayer().HasAuraType(AuraType.ModPacify))
@@ -183,7 +182,6 @@ namespace Game
                                 if (!owner.IsValidAttackTarget(TargetUnit))
                                     return;
 
-                            pet.ClearUnitState(UnitState.Follow);
                             // This is true if pet has no target or has target but targets differs.
                             if (pet.GetVictim() != TargetUnit || !pet.GetCharmInfo().IsCommandAttack())
                             {
@@ -213,7 +211,7 @@ namespace Game
                                         pet.SendPetAIReaction(guid1);
                                     }
                                 }
-                                else                                // charmed player
+                                else // charmed player
                                 {
                                     charmInfo.SetIsCommandAttack(true);
                                     charmInfo.SetIsAtStay(false);
@@ -227,7 +225,7 @@ namespace Game
                             }
                             break;
                         }
-                        case CommandStates.Abandon:                       // abandon (hunter pet) or dismiss (summoned pet)
+                        case CommandStates.Abandon: // abandon (hunter pet) or dismiss (summoned pet)
                             if (pet.GetCharmerGUID() == GetPlayer().GetGUID())
                                 GetPlayer().StopCastingCharm();
                             else if (pet.GetOwnerGUID() == GetPlayer().GetGUID())
@@ -264,22 +262,22 @@ namespace Game
                             break;
                     }
                     break;
-                case ActiveStates.Reaction:                                  // 0x6
+                case ActiveStates.Reaction: // 0x6
                     switch ((ReactStates)spellid)
                     {
-                        case ReactStates.Passive:                         //passive
+                        case ReactStates.Passive: //passive
                             pet.AttackStop();
                             goto case ReactStates.Defensive;
-                        case ReactStates.Defensive:                       //recovery
-                        case ReactStates.Aggressive:                      //activete
+                        case ReactStates.Defensive: //recovery
+                        case ReactStates.Aggressive: //activete
                             if (pet.IsTypeId(TypeId.Unit))
                                 pet.ToCreature().SetReactState((ReactStates)spellid);
                             break;
                     }
                     break;
-                case ActiveStates.Disabled:                                  // 0x81    spell (disabled), ignore
-                case ActiveStates.Passive:                                   // 0x01
-                case ActiveStates.Enabled:                                   // 0xC1    spell
+                case ActiveStates.Disabled: // 0x81    spell (disabled), ignore
+                case ActiveStates.Passive: // 0x01
+                case ActiveStates.Enabled: // 0xC1    spell
                 {
                     Unit unit_target = null;
 
@@ -367,7 +365,6 @@ namespace Game
                             // This is true if pet has no target or has target but targets differs.
                             if (pet.GetVictim() != unit_target)
                             {
-                                pet.GetMotionMaster().Clear();
                                 CreatureAI ai = pet.ToCreature().GetAI();
                                 if (ai != null)
                                 {
@@ -686,7 +683,6 @@ namespace Game
                 return;
 
             SpellCastTargets targets = new(caster, petCastSpell.Cast);
-            caster.ClearUnitState(UnitState.Follow);
 
             Spell spell = new(caster, spellInfo, TriggerCastFlags.None);
             spell.m_fromClient = true;
