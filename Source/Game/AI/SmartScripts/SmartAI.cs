@@ -1179,6 +1179,16 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SpellHit, unit, 0, 0, false, spellInfo);
         }
 
+        public override void JustSummoned(Creature creature)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SummonedUnit, creature);
+        }
+
+        public override void SummonedCreatureDespawn(Creature unit)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SummonDespawned, unit, unit.GetEntry());
+        }
+
         public void SetGossipReturn(bool val) { _gossipReturn = val; }
 
         public SmartScript GetScript() { return _script; }
