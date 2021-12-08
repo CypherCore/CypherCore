@@ -876,10 +876,14 @@ namespace Game.Entities
                 TempSummon summon = creature.ToTempSummon();
                 if (summon != null)
                 {
-                    Unit summoner = summon.GetSummoner();
+                    WorldObject summoner = summon.GetSummoner();
                     if (summoner != null)
-                        if (summoner.IsTypeId(TypeId.Unit) && summoner.IsAIEnabled())
-                            summoner.ToCreature().GetAI().SummonedCreatureDies(creature, attacker);
+                    {
+                        if (summoner.IsCreature())
+                            summoner.ToCreature().GetAI()?.SummonedCreatureDies(creature, attacker);
+                        else if (summoner.IsGameObject())
+                            summoner.ToGameObject().GetAI()?.SummonedCreatureDies(creature, attacker);
+                    }
                 }
 
                 // Dungeon specific stuff, only applies to players killing creatures

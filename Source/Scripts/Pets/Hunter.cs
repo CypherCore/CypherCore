@@ -72,7 +72,7 @@ namespace Scripts.Pets
 
                 if (me.IsSummon() && !me.GetThreatManager().GetFixateTarget())
                 { // find new target
-                    Unit summoner = me.ToTempSummon().GetSummoner();
+                    Unit summoner = me.ToTempSummon().GetSummonerUnit();
 
                     List<Unit> targets = new();
                     foreach (var pair in summoner.GetCombatManager().GetPvPCombatRefs())

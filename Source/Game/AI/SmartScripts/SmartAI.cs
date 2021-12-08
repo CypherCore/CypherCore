@@ -689,9 +689,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.ReceiveEmote, player, (uint)emoteId);
         }
 
-        public override void IsSummonedBy(Unit summoner)
+        public override void IsSummonedBy(WorldObject summoner)
         {
-            GetScript().ProcessEventsFor(SmartEvents.JustSummoned, summoner);
+            GetScript().ProcessEventsFor(SmartEvents.JustSummoned, summoner.ToUnit(), 0, 0, false, null, summoner.ToGameObject());
         }
 
         public override void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType)

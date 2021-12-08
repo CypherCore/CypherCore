@@ -522,7 +522,7 @@ namespace Scripts.World.NpcSpecial
             return null;
         }
 
-        public void UpdateAI(uint diff)
+        public override void UpdateAI(uint diff)
         {
             base.UpdateAI(diff);
 
@@ -2044,7 +2044,7 @@ namespace Scripts.World.NpcSpecial
             summonerGUID.Clear();
         }
 
-        public override void IsSummonedBy(Unit summoner)
+        public override void IsSummonedBy(WorldObject summoner)
         {
             if (summoner.IsTypeId(TypeId.Player))
             {

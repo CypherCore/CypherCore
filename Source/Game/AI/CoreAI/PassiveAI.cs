@@ -119,7 +119,7 @@ namespace Game.AI
     {
         public TriggerAI(Creature c) : base(c) { }
 
-        public override void IsSummonedBy(Unit summoner)
+        public override void IsSummonedBy(WorldObject summoner)
         {
             if (me.m_spells[0] != 0)
             {

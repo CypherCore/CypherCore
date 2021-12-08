@@ -916,7 +916,7 @@ namespace Game.Spells
                         TempSummon casterSummon = unitCaster.ToTempSummon();
                         if (casterSummon != null)
                         {
-                            Unit summoner = casterSummon.GetSummoner();
+                            WorldObject summoner = casterSummon.GetSummoner();
                             if (summoner != null)
                                 dest = new SpellDestination(summoner);
                         }
@@ -1059,7 +1059,7 @@ namespace Game.Spells
                     Unit unitCaster = m_caster.ToUnit();
                     if (unitCaster != null)
                         if (unitCaster.IsSummon())
-                            target = unitCaster.ToTempSummon().GetSummoner();
+                            target = unitCaster.ToTempSummon().GetSummonerUnit();
                     break;
                 }
                 case Targets.UnitVehicle:

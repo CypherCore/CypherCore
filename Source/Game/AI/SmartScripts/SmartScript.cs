@@ -2944,7 +2944,7 @@ namespace Game.AI
                             TempSummon tempSummon = _me.ToTempSummon();
                             if (tempSummon)
                             {
-                                Unit summoner = tempSummon.GetSummoner();
+                                WorldObject summoner = tempSummon.GetSummoner();
                                 if (summoner)
                                     charmerOrOwnerGuid = summoner.GetGUID();
                             }
@@ -2953,7 +2953,7 @@ namespace Game.AI
                         if (charmerOrOwnerGuid.IsEmpty())
                             charmerOrOwnerGuid = _me.GetCreatorGUID();
 
-                        Unit owner = Global.ObjAccessor.GetUnit(_me, charmerOrOwnerGuid);
+                        WorldObject owner = Global.ObjAccessor.GetWorldObject(_me, charmerOrOwnerGuid);
                         if (owner != null)
                             targets.Add(owner);
                     }
@@ -2967,7 +2967,7 @@ namespace Game.AI
                     // Get owner of owner
                     if (e.Target.owner.useCharmerOrOwner != 0 && !targets.Empty())
                     {
-                        Unit owner = targets.First().ToUnit();
+                        WorldObject owner = targets.First();
                         targets.Clear();
 
                         Unit unitBase = Global.ObjAccessor.GetUnit(owner, owner.GetCharmerOrOwnerGUID());

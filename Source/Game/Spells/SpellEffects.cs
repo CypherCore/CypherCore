@@ -1707,7 +1707,7 @@ namespace Game.Spells
                                 uint faction = properties.Faction;
                                 if (properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
                                 {
-                                    Unit summoner = summon.GetSummoner();
+                                    WorldObject summoner = summon.GetSummoner();
                                     if (summoner != null)
                                         faction = summoner.GetFaction();
                                 }

@@ -24,7 +24,7 @@ namespace Game.Entities
 {
     public class TempSummon : Creature
     {
-        public TempSummon(SummonPropertiesRecord properties, Unit owner, bool isWorldObject) : base(isWorldObject)
+        public TempSummon(SummonPropertiesRecord properties, WorldObject owner, bool isWorldObject) : base(isWorldObject)
         {
             m_Properties = properties;
             m_type = TempSummonType.ManualDespawn;
@@ -33,14 +33,32 @@ namespace Game.Entities
             UnitTypeMask |= UnitTypeMask.Summon;
         }
 
-        public Unit GetSummoner()
+        public WorldObject GetSummoner()
         {
-            return !m_summonerGUID.IsEmpty() ? Global.ObjAccessor.GetUnit(this, m_summonerGUID) : null;
+            return !m_summonerGUID.IsEmpty() ? Global.ObjAccessor.GetWorldObject(this, m_summonerGUID) : null;
         }
 
+        public Unit GetSummonerUnit()
+        {
+            WorldObject summoner = GetSummoner();
+            if (summoner != null)
+                return summoner.ToUnit();
+
+            return null;
+        }
+        
         public Creature GetSummonerCreatureBase()
         {
             return !m_summonerGUID.IsEmpty() ? ObjectAccessor.GetCreature(this, m_summonerGUID) : null;
+        }
+
+        public GameObject GetSummonerGameObject()
+        {
+            WorldObject summoner = GetSummoner();
+            if (summoner != null)
+                return summoner.ToGameObject();
+
+            return null;
         }
         
         public override void Update(uint diff)
@@ -167,8 +185,7 @@ namespace Game.Entities
             if (m_type == TempSummonType.ManualDespawn)
                 m_type = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
 
-            Unit owner = GetSummoner();
-
+            Unit owner = GetSummonerUnit();
             if (owner != null && IsTrigger() && m_spells[0] != 0)
             {
                 SetLevel(owner.GetLevel());
@@ -206,11 +223,14 @@ namespace Game.Entities
 
         public virtual void InitSummon()
         {
-            Unit owner = GetSummoner();
+            WorldObject owner = GetSummoner();
             if (owner != null)
             {
-                if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled())
-                    owner.ToCreature().GetAI().JustSummoned(this);
+                if (owner.IsCreature())
+                        owner.ToCreature().GetAI()?.JustSummoned(this);
+                else if (owner.IsGameObject())
+                        owner.ToGameObject().GetAI()?.JustSummoned(this);
+
                 if (IsAIEnabled())
                     GetAI().IsSummonedBy(owner);
             }
@@ -244,9 +264,14 @@ namespace Game.Entities
                 return;
             }
 
-            Unit owner = GetSummoner();
-            if (owner != null && owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled())
-                owner.ToCreature().GetAI().SummonedCreatureDespawn(this);
+            WorldObject owner = GetSummoner();
+            if (owner != null)
+            {
+                if (owner.IsCreature())
+                    owner.ToCreature().GetAI()?.SummonedCreatureDespawn(this);
+                else if (owner.IsGameObject())
+                    owner.ToGameObject().GetAI()?.SummonedCreatureDespawn(this);
+            }
 
             AddObjectToRemoveList();
         }
@@ -261,7 +286,7 @@ namespace Game.Entities
                 int slot = m_Properties.Slot;
                 if (slot > 0)
                 {
-                    Unit owner = GetSummoner();
+                    Unit owner = GetSummonerUnit();
                     if (owner != null)
                         if (owner.m_SummonSlot[slot] == GetGUID())
                             owner.m_SummonSlot[slot].Clear();

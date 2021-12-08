@@ -75,7 +75,7 @@ namespace Game
             response.CreatureID = summonedBattlePet.GetEntry();
             response.Timestamp = summonedBattlePet.GetBattlePetCompanionNameTimestamp();
 
-            Unit petOwner = summonedBattlePet.ToTempSummon().GetSummoner();
+            Unit petOwner = summonedBattlePet.ToTempSummon().GetSummonerUnit();
             if (!petOwner.IsPlayer())
             {
                 SendPacket(response);

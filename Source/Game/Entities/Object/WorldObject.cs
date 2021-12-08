@@ -1415,7 +1415,7 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), spellId, vehId, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, this, spellId, vehId, privateObjectOwner);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);

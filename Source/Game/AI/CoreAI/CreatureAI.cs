@@ -28,7 +28,7 @@ namespace Game.AI
 {
     public class CreatureAI : UnitAI
     {
-        bool _moveInLineOfSightLocked;
+        bool _moveInLOSLocked;
         List<AreaBoundary> _boundary = new();
         bool _negateBoundary;
 
@@ -41,7 +41,7 @@ namespace Game.AI
         public CreatureAI(Creature _creature) : base(_creature)
         {
             me = _creature;
-            _moveInLineOfSightLocked = false;
+            _moveInLOSLocked = false;
         }
 
         public override void OnCharmed(bool isNew)
@@ -101,12 +101,12 @@ namespace Game.AI
 
         public virtual void MoveInLineOfSight_Safe(Unit who)
         {
-            if (_moveInLineOfSightLocked)
+            if (_moveInLOSLocked)
                 return;
 
-            _moveInLineOfSightLocked = true;
+            _moveInLOSLocked = true;
             MoveInLineOfSight(who);
-            _moveInLineOfSightLocked = false;
+            _moveInLOSLocked = false;
         }
 
         public virtual void MoveInLineOfSight(Unit who)
@@ -366,7 +366,7 @@ namespace Game.AI
 
         // Called when the creature summon successfully other creature
         public virtual void JustSummoned(Creature summon) { }
-        public virtual void IsSummonedBy(Unit summoner) { }
+        public virtual void IsSummonedBy(WorldObject summoner) { }
 
         public virtual void SummonedCreatureDespawn(Creature summon) { }
         public virtual void SummonedCreatureDies(Creature summon, Unit killer) { }

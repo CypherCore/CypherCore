@@ -101,5 +101,11 @@ namespace Game.AI
         // Called when spell hits a target
         public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
         public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
+
+        // Called when the gameobject summon successfully other creature
+        public virtual void JustSummoned(Creature summon) { }
+
+        public virtual void SummonedCreatureDespawn(Creature summon) { }
+        public virtual void SummonedCreatureDies(Creature summon, Unit killer) { }
     }
 }

@@ -55,9 +55,13 @@ namespace Scripts.Pets
         {
             public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
 
-            public override void IsSummonedBy(Unit summoner)
+            public override void IsSummonedBy(WorldObject summoner)
             {
-                if (summoner.HasAura(SpellIds.GlyphOfShadowFiend))
+                Unit unitSummoner = summoner.ToUnit();
+                if (unitSummoner == null)
+                    return;
+
+                if (unitSummoner.HasAura(SpellIds.GlyphOfShadowFiend))
                     DoCastAOE(SpellIds.ShadowFiendDeath);
             }
         }

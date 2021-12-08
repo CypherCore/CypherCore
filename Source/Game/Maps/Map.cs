@@ -3947,7 +3947,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -3997,23 +3997,25 @@ namespace Game.Maps
                 }
             }
 
+            Unit summonerUnit = summoner != null ? summoner.ToUnit() : null;
+
             TempSummon summon;
             switch (mask)
             {
                 case UnitTypeMask.Summon:
-                    summon = new TempSummon(properties, summoner, false);
+                    summon = new TempSummon(properties, summonerUnit, false);
                     break;
                 case UnitTypeMask.Guardian:
-                    summon = new Guardian(properties, summoner, false);
+                    summon = new Guardian(properties, summonerUnit, false);
                     break;
                 case UnitTypeMask.Puppet:
-                    summon = new Puppet(properties, summoner);
+                    summon = new Puppet(properties, summonerUnit);
                     break;
                 case UnitTypeMask.Totem:
-                    summon = new Totem(properties, summoner);
+                    summon = new Totem(properties, summonerUnit);
                     break;
                 case UnitTypeMask.Minion:
-                    summon = new Minion(properties, summoner, false);
+                    summon = new Minion(properties, summonerUnit, false);
                     break;
                 default:
                     return null;

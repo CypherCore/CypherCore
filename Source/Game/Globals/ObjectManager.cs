@@ -10957,7 +10957,7 @@ namespace Game
             Unit summoner = null;
             // Check summoners for party
             if (clickee.IsSummon())
-                summoner = clickee.ToTempSummon().GetSummoner();
+                summoner = clickee.ToTempSummon().GetSummonerUnit();
             if (summoner == null)
                 summoner = clickee;
 

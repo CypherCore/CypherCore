@@ -311,10 +311,14 @@ namespace Scripts.World.EmeraldDragons
 
         public npc_spirit_shade(Creature creature) : base(creature) { }
 
-        public override void IsSummonedBy(Unit summoner)
+        public override void IsSummonedBy(WorldObject summoner)
         {
+            Unit unitSummoner = summoner.ToUnit();
+            if (unitSummoner == null)
+                return;
+
             _summonerGuid = summoner.GetGUID();
-            me.GetMotionMaster().MoveFollow(summoner, 0.0f, 0.0f);
+            me.GetMotionMaster().MoveFollow(unitSummoner, 0.0f, 0.0f);
         }
 
         public override void MovementInform(MovementGeneratorType moveType, uint data)
