@@ -3821,6 +3821,29 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
         }
     }
+
+    [Script] // Used for some spells cast by vehicles or charmed creatures that do not send a cooldown event on their own
+    class spell_gen_charmed_unit_spell_cooldown : SpellScript
+    {
+        void HandleCast()
+        {
+            Unit caster = GetCaster();
+            Player owner = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (owner != null)
+            {
+                SpellCooldownPkt spellCooldown = new();
+                spellCooldown.Caster = owner.GetGUID();
+                spellCooldown.Flags = SpellCooldownFlags.None;
+                spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(GetSpellInfo().Id, GetSpellInfo().RecoveryTime));
+                owner.SendPacket(spellCooldown);
+            }
+        }
+
+        public override void Register()
+        {
+            OnCast.Add(new CastHandler(HandleCast));
+        }
+    }
     
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript

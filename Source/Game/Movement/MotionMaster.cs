@@ -57,20 +57,20 @@ namespace Game.Movement
         }
     }
 
-    class MotionMasterDelayedAction
+    class DelayedAction
     {
+        Action Action;
         Func<bool> Validator;
-        public Action Action;
-        public MotionMasterDelayedActionType Type;
+        MotionMasterDelayedActionType Type;
 
-        public MotionMasterDelayedAction(Action action, Func<bool> validator, MotionMasterDelayedActionType type)
+        public DelayedAction(Action action, Func<bool> validator, MotionMasterDelayedActionType type)
         {
             Action = action;
             Validator = validator;
             Type = type;
         }
 
-        public MotionMasterDelayedAction(Action action, MotionMasterDelayedActionType type)
+        public DelayedAction(Action action, MotionMasterDelayedActionType type)
         {
             Action = action;
             Validator = () => true;
@@ -96,7 +96,7 @@ namespace Game.Movement
         SortedSet<MovementGenerator> _generators { get; } = new(new MovementGeneratorComparator());
 
         MultiMap<uint, MovementGenerator> _baseUnitStatesMap { get; } = new();
-        Queue<MotionMasterDelayedAction> _delayedActions { get; } = new();
+        Queue<DelayedAction> _delayedActions { get; } = new();
         MotionMasterFlags _flags { get; set; }
 
         public MotionMaster(Unit unit)
@@ -108,7 +108,7 @@ namespace Game.Movement
         {
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Initialize(), MotionMasterDelayedActionType.Initialize));
+                _delayedActions.Enqueue(new DelayedAction(() => Initialize(), MotionMasterDelayedActionType.Initialize));
                 return;
             }
 
@@ -331,7 +331,7 @@ namespace Game.Movement
                 return;
 
             if (HasFlag(MotionMasterFlags.Update))
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
+                _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
             else
                 DirectAdd(movement, slot);
         }
@@ -343,7 +343,7 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Remove(movement, slot), MotionMasterDelayedActionType.Remove));
+                _delayedActions.Enqueue(new DelayedAction(() => Remove(movement, slot), MotionMasterDelayedActionType.Remove));
                 return;
             }
 
@@ -375,7 +375,7 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
+                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
                 return;
             }
 
@@ -405,7 +405,7 @@ namespace Game.Movement
         {
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Clear(), MotionMasterDelayedActionType.Clear));
+                _delayedActions.Enqueue(new DelayedAction(() => Clear(), MotionMasterDelayedActionType.Clear));
                 return;
             }
 
@@ -420,7 +420,7 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Clear(slot), MotionMasterDelayedActionType.ClearSlot));
+                _delayedActions.Enqueue(new DelayedAction(() => Clear(slot), MotionMasterDelayedActionType.ClearSlot));
                 return;
             }
 
@@ -444,7 +444,7 @@ namespace Game.Movement
         {
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Clear(mode), MotionMasterDelayedActionType.ClearMode));
+                _delayedActions.Enqueue(new DelayedAction(() => Clear(mode), MotionMasterDelayedActionType.ClearMode));
                 return;
             }
 
@@ -459,7 +459,7 @@ namespace Game.Movement
 
             if (HasFlag(MotionMasterFlags.Update))
             {
-                _delayedActions.Enqueue(new MotionMasterDelayedAction(() => Clear(priority), MotionMasterDelayedActionType.ClearPriority));
+                _delayedActions.Enqueue(new DelayedAction(() => Clear(priority), MotionMasterDelayedActionType.ClearPriority));
                 return;
             }
 

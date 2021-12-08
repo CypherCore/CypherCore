@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 <Import Project="..\..\default.props" />
 <PropertyGroup>
   <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="4.0.0-rc2" />
-    <PackageReference Include="MySqlConnector" Version="1.3.9" />
+    <PackageReference Include="MySqlConnector" Version="2.1.0" />
   </ItemGroup>
 
 </Project>

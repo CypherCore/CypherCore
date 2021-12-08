@@ -3597,6 +3597,62 @@ namespace Game.Entities
                 });
             });
 
+            // Tag Greater Felfire Diemetradon
+            ApplySpellFix(new[] { 
+                37851, // Tag Greater Felfire Diemetradon
+                37918  // Arcano-pince
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 3000;
+            });
+
+            // Jormungar Strike
+            ApplySpellFix(new[] { 56513 }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 2000;
+            });
+
+            ApplySpellFix(new[] {
+                54997, // Cast Net (tooltip says 10s but sniffs say 6s)
+                56524  // Acid Breath
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 6000;
+            });
+
+            ApplySpellFix(new[] {
+                47911, // EMP
+                48620, // Wing Buffet
+                51752  // Stampy's Stompy-Stomp
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 10000;
+            });
+
+            ApplySpellFix(new[] {
+                37727, // Touch of Darkness
+                54996  // Ice Slick (tooltip says 20s but sniffs say 12s)
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 12000;
+            });
+
+            // Signal Helmet to Attack
+            ApplySpellFix(new[] { 51748 }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 15000;
+            });
+
+            // Charge
+            ApplySpellFix(new[] {
+                51756, // Charge
+                37919, //Arcano-dismantle
+                37917  //Arcano-Cloak
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 20000;
+            });
+
             //
             // VIOLET HOLD SPELLS
             //

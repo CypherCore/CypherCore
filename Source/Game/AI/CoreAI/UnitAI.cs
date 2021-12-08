@@ -520,11 +520,11 @@ namespace Game.AI
     // default predicate function to select target based on distance, player and/or aura criteria
     public class DefaultTargetSelector : ICheck<Unit>
     {
-        Unit me;
-        float m_dist;
-        bool m_playerOnly;
-        Unit except;
-        int m_aura;
+        Unit _me;
+        float _dist;
+        bool _playerOnly;
+        Unit _exception;
+        int _aura;
 
         /// <param name="unit">the reference unit</param>
         /// <param name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
@@ -533,43 +533,43 @@ namespace Game.AI
         /// <param name="aura">if 0: ignored, if > 0: the target shall have the aura, if < 0, the target shall NOT have the aura</param>
         public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, bool withTank, int aura)
         {
-            me = unit;
-            m_dist = dist;
-            m_playerOnly = playerOnly;
-            except = !withTank ? me.GetThreatManager().GetCurrentVictim() : null;
-            m_aura = aura;
+            _me = unit;
+            _dist = dist;
+            _playerOnly = playerOnly;
+            _exception = !withTank ? _me.GetThreatManager().GetCurrentVictim() : null;
+            _aura = aura;
         }
 
         public bool Invoke(Unit target)
         {
-            if (me == null)
+            if (_me == null)
                 return false;
 
             if (target == null)
                 return false;
 
-            if (except != null && target == except)
+            if (_exception != null && target == _exception)
                 return false;
 
-            if (m_playerOnly && !target.IsTypeId(TypeId.Player))
+            if (_playerOnly && !target.IsTypeId(TypeId.Player))
                 return false;
 
-            if (m_dist > 0.0f && !me.IsWithinCombatRange(target, m_dist))
+            if (_dist > 0.0f && !_me.IsWithinCombatRange(target, _dist))
                 return false;
 
-            if (m_dist < 0.0f && me.IsWithinCombatRange(target, -m_dist))
+            if (_dist < 0.0f && _me.IsWithinCombatRange(target, -_dist))
                 return false;
 
-            if (m_aura != 0)
+            if (_aura != 0)
             {
-                if (m_aura > 0)
+                if (_aura > 0)
                 {
-                    if (!target.HasAura((uint)m_aura))
+                    if (!target.HasAura((uint)_aura))
                         return false;
                 }
                 else
                 {
-                    if (target.HasAura((uint)-m_aura))
+                    if (target.HasAura((uint)-_aura))
                         return false;
                 }
             }
