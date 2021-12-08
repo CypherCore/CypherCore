@@ -438,7 +438,6 @@ namespace Game.AI
                         {
                             ClearCharmInfoFlags();
                             me.GetCharmInfo().SetIsAtStay(true);
-                            me.GetMotionMaster().Clear();
                             me.GetMotionMaster().MoveIdle();
                         }
                         break;
