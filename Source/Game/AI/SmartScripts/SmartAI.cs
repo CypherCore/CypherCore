@@ -701,7 +701,7 @@ namespace Game.AI
 
         public override void SummonedCreatureDespawn(Creature summon)
         {
-            GetScript().ProcessEventsFor(SmartEvents.SummonDespawned, summon);
+            GetScript().ProcessEventsFor(SmartEvents.SummonDespawned, summon, summon.GetEntry());
         }
 
         public override void CorpseRemoved(long respawnDelay)
