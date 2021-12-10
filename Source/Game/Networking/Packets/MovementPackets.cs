@@ -292,7 +292,7 @@ namespace Game.Networking.Packets
         {
             data.WritePackedGuid(movementForce.ID);
             data.WriteVector3(movementForce.Origin);
-            if (movementForce.Type == 1 && objectPosition != null) // gravity
+            if (movementForce.Type == MovementForceType.Gravity && objectPosition != null) // gravity
             {
                 Vector3 direction = Vector3.Zero;
                 if (movementForce.Magnitude != 0.0f)
@@ -322,7 +322,7 @@ namespace Game.Networking.Packets
 
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
-            data.WriteBits(movementForce.Type, 2);
+            data.WriteBits((byte)movementForce.Type, 2);
             data.WriteBit(movementForce.Unused910 != 0);
             data.FlushBits();
 

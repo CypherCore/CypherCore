@@ -1481,7 +1481,7 @@ namespace Game.Entities
 
         public MovementForces GetMovementForces() { return _movementForces; }
 
-        void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, byte type, Vector3 direction, ObjectGuid transportGuid = default)
+        void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, MovementForceType type, Vector3 direction, ObjectGuid transportGuid = default)
         {
             if (_movementForces == null)
                 _movementForces = new MovementForces();
