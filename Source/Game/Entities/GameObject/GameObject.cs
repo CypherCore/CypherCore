@@ -1448,6 +1448,9 @@ namespace Game.Entities
             Player playerUser = user.ToPlayer();
             if (playerUser != null)
             {
+                if (m_goInfo.GetNoDamageImmune() != 0 && playerUser.HasUnitFlag(UnitFlags.Immune))
+                    return;
+
                 if (!m_goInfo.IsUsableMounted())
                     playerUser.RemoveAurasByType(AuraType.Mounted);
 

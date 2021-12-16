@@ -1324,6 +1324,10 @@ namespace Game.Spells
             if (gameObjTarget != null)
             {
                 GameObjectTemplate goInfo = gameObjTarget.GetGoInfo();
+
+                if (goInfo.GetNoDamageImmune() != 0 && player.HasUnitFlag(UnitFlags.Immune))
+                    return;
+
                 // Arathi Basin banner opening. // @todo Verify correctness of this check
                 if ((goInfo.type == GameObjectTypes.Button && goInfo.Button.noDamageImmune != 0) ||
                     (goInfo.type == GameObjectTypes.Goober && goInfo.Goober.requireLOS != 0))

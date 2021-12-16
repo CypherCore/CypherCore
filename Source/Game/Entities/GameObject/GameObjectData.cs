@@ -352,7 +352,37 @@ namespace Game.Entities
             }
         }
 
-        // despawn at uses amount
+        /// <summary>
+        /// Cannot be used/activated/looted by players under immunity effects (example: Divine Shield)
+        /// </summary>
+        /// <returns></returns>
+        public uint GetNoDamageImmune()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.Door:
+                    return Door.noDamageImmune;
+                case GameObjectTypes.Button:
+                    return Button.noDamageImmune;
+                case GameObjectTypes.QuestGiver:
+                    return QuestGiver.noDamageImmune;
+                case GameObjectTypes.Chest:
+                    return 1;
+                case GameObjectTypes.Goober:
+                    return Goober.noDamageImmune;
+                case GameObjectTypes.FlagStand:
+                    return FlagStand.noDamageImmune;
+                case GameObjectTypes.FlagDrop:
+                    return FlagDrop.noDamageImmune;
+                default:
+                    return 0;
+            }
+        }
+        
+        /// <summary>
+        /// despawn at uses amount
+        /// </summary>
+        /// <returns></returns>
         public uint GetCharges()
         {
             switch (type)

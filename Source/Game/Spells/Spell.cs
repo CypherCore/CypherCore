@@ -4365,6 +4365,13 @@ namespace Game.Spells
             if (m_caster.ToUnit() && !m_caster.ToUnit().IsAlive() && !m_spellInfo.IsPassive() && !(m_spellInfo.HasAttribute(SpellAttr0.CastableWhileDead) || (IsTriggered() && m_triggeredByAuraSpell == null)))
                 return SpellCastResult.CasterDead;
 
+            // Prevent cheating in case the player has an immunity effect and tries to interact with a non-allowed gameobject. The error message is handled by the client so we don't report anything here
+            if (m_caster.IsPlayer() && m_targets.GetGOTarget() != null)
+            {
+                if (m_targets.GetGOTarget().GetGoInfo().GetNoDamageImmune() != 0 && m_caster.ToUnit().HasUnitFlag(UnitFlags.Immune))
+                    return SpellCastResult.DontReport;
+            }
+
             // check cooldowns to prevent cheating
             if (!m_spellInfo.IsPassive())
             {

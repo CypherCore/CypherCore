@@ -79,7 +79,7 @@ namespace Framework.Constants
         Unk28 = 0x10000000,
         Unk29 = 0x20000000,
         Sheathe = 0x40000000,
-        Unk31 = 0x80000000
+        Immune = 0x80000000
     }
 
     public enum UnitFlags2 : uint

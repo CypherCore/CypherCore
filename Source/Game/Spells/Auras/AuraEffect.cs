@@ -2799,7 +2799,18 @@ namespace Game.Spells
             }
 
             if (apply)
+            {
+                target.AddUnitFlag(UnitFlags.Immune);
                 target.GetThreatManager().EvaluateSuppressed();
+            }
+            else
+            {
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit
+                if (target.HasAuraType(GetAuraType()))
+                    return;
+
+                target.RemoveUnitFlag(UnitFlags.Immune);
+            }
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
