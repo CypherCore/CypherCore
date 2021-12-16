@@ -303,6 +303,9 @@ namespace Game.Scripting
 
         // Called when Spell Damage is being Dealt
         public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo) { }
+
+        // Called when an unit exits a vehicle
+        public virtual void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos) { }
     }
 
     public class GenericCreatureScript<AI> : CreatureScript where AI : CreatureAI

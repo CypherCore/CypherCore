@@ -994,17 +994,22 @@ namespace Game.Entities
 
             SetControlled(false, UnitState.Root);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
-            Position pos;
-            if (exitPosition == null)                          // Exit position not specified
-                pos = vehicle.GetBase().GetPosition();  // This should use passenger's current position, leaving it as it is now
-            // because we calculate positions incorrect (sometimes under map)
-            else
-                pos = exitPosition;
-
             AddUnitState(UnitState.Move);
 
             if (player != null)
                 player.SetFallInformation(0, GetPositionZ());
+
+            Position pos;
+            // If we ask for a specific exit position, use that one. Otherwise allow scripts to modify it
+            if (exitPosition != null)
+                pos = exitPosition;
+            else
+            {
+                // Set exit position to vehicle position and use the current orientation
+                pos = vehicle.GetBase().GetPosition();
+                pos.SetOrientation(GetOrientation());
+                Global.ScriptMgr.ModifyVehiclePassengerExitPos(this, vehicle, pos);
+            }
 
             float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
 
@@ -1015,7 +1020,7 @@ namespace Game.Entities
                 init.SetFall();
 
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
-            init.SetFacing(GetOrientation());
+            init.SetFacing(pos.GetOrientation());
             init.SetTransportExit();
             GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementGeneratorPriority.Highest);
 
