@@ -121,6 +121,8 @@ namespace Game.Entities
             m_bgData = new BGData();
 
             _restMgr = new RestMgr(this);
+
+            m_groupUpdateTimer = new(5000);
         }
 
         public override void Dispose()
@@ -610,7 +612,12 @@ namespace Game.Entities
             }
 
             // group update
-            SendUpdateToOutOfRangeGroupMembers();
+            m_groupUpdateTimer.Update((int)diff);
+            if (m_groupUpdateTimer.Passed())
+            {
+                SendUpdateToOutOfRangeGroupMembers();
+                m_groupUpdateTimer.Reset(5000);
+            }
 
             Pet pet = GetPet();
             if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.IsPossessed())
