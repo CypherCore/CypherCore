@@ -69,6 +69,13 @@ namespace Game.Movement
                 return;
             }
 
+            if (_nextIndex >= _chainSize)
+            {
+                Log.outWarn(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: couldn't initialize generator, _nextIndex is >= _chainSize ({owner.GetGUID()})");
+                _msToNext = 0;
+                return;
+            }
+
             if (_nextFirstWP != 0) // this is a resumed movegen that has to start with a partial spline
             {
 
