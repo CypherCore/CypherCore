@@ -1642,7 +1642,7 @@ namespace Framework.Constants
         DontDisplayInAuraBar = 0x10000000, // 28 Client Doesn'T Display These Spells In Aura Bar
         ChannelDisplaySpellName = 0x20000000, // 29 Spell Name Is Displayed In Cast Bar Instead Of 'Channeling' Text
         EnableAtDodge = 0x40000000, // 30 Overpower
-        Unk31 = 0x80000000  // 31
+        CastWhenLearned = 0x80000000  // 31
     }
     public enum SpellAttr2 : uint
     {

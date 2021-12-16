@@ -2542,6 +2542,8 @@ namespace Game.Entities
                 CastSpell(this, spellId, true);
                 return false;
             }
+            else if (spellInfo.HasAttribute(SpellAttr1.CastWhenLearned))
+                CastSpell(this, spellId, true);
 
             // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
             uint freeProfs = GetFreePrimaryProfessionPoints();
