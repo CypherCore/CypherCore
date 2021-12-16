@@ -358,6 +358,9 @@ namespace Game
             if (!group.IsLeader(GetPlayer().GetGUID()))
                 return;
 
+            if (group.IsLFGGroup())
+                return;
+
             switch (packet.LootMethod)
             {
                 case LootMethod.FreeForAll:
