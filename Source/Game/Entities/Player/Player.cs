@@ -6154,6 +6154,9 @@ namespace Game.Entities
                 RemoveAurasWithAttribute(SpellAttr0.OutdoorsOnly);
 
             uint areaId = GetAreaId();
+            if (areaId == 0)
+                return;
+
             var areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (areaEntry == null)
             {
