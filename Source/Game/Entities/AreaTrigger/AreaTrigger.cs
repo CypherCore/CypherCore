@@ -223,6 +223,11 @@ namespace Game.Entities
             return at;
         }
 
+        public static ObjectGuid CreateNewMovementForceId(Map map, uint areaTriggerId)
+        {
+            return ObjectGuid.Create(HighGuid.AreaTrigger, map.GetId(), areaTriggerId, map.GenerateLowGuid(HighGuid.AreaTrigger));
+        }
+
         public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             _spawnId = spawnId;
