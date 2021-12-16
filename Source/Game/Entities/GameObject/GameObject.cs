@@ -789,7 +789,9 @@ namespace Game.Entities
                             m_usetimes = 0;
                         }
 
-                        SetGoState(GameObjectState.Ready);
+                        // Only goobers with a lock id or a reset time may reset their go state
+                        if (GetGoInfo().GetLockId() != 0 || GetGoInfo().GetAutoCloseTime() != 0)
+                            SetGoState(GameObjectState.Ready);
 
                         //any return here in case Battleground traps
                         GameObjectOverride goOverride = GetGameObjectOverride();
