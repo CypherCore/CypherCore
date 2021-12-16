@@ -2172,7 +2172,7 @@ namespace Game.AI
         }
         public struct GossipHello
         {
-            public uint noReportUse;
+            public uint filter;
         }
         public struct Gossip
         {

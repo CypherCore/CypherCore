@@ -3272,8 +3272,26 @@ namespace Game.AI
                     break;
                 case SmartEvents.GossipHello:
                 {
-                    if (e.Event.gossipHello.noReportUse != 0 && var0 != 0)
-                        return;
+                    switch (e.Event.gossipHello.filter)
+                    {
+                        case 0:
+                            // no filter set, always execute action
+                            break;
+                        case 1:
+                            // OnGossipHello only filter set, skip action if OnReportUse
+                            if (var0 != 0)
+                                return;
+                            break;
+                        case 2:
+                            // OnReportUse only filter set, skip action if OnGossipHello
+                            if (var0 == 0)
+                                return;
+                            break;
+                        default:
+                            // Ignore any other value
+                            break;
+                    }
+
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                     break;
                 }
