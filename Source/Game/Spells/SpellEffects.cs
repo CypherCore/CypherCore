@@ -5270,12 +5270,12 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
+            if (unitTarget == null || !unitTarget.IsPlayer())
                 return;
 
-            Player plr = unitTarget.ToPlayer();
-            plr.AddPlayerFlag(PlayerFlags.PetBattlesUnlocked);
-            plr.GetSession().GetBattlePetMgr().UnlockSlot(0);
+            Player player = unitTarget.ToPlayer();
+            player.AddPlayerFlag(PlayerFlags.PetBattlesUnlocked);
+            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot0);
         }
 
         [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]

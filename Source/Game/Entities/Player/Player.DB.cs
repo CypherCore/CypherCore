@@ -3332,6 +3332,10 @@ namespace Game.Entities
                 _restMgr.AddRestBonus(RestTypes.XP, time_diff * _restMgr.CalcExtraPerSec(RestTypes.XP, bubble));
             }
 
+            // Unlock battle pet system if it's enabled in bnet account
+            if (GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
+                LearnSpell(SharedConst.SpellBattlePetTraining, false);
+
             m_achievementSys.CheckAllAchievementCriteria(this);
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
 

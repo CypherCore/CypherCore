@@ -31,7 +31,7 @@ namespace Game.BattlePets
         public BattlePetMgr(WorldSession owner)
         {
             _owner = owner;
-            for (byte i = 0; i < SharedConst.MaxPetBattleSlots; ++i)
+            for (byte i = 0; i < (int)BattlePetSlots.Count; ++i)
             {
                 BattlePetSlot slot = new();
                 slot.Index = i;
@@ -510,15 +510,19 @@ namespace Game.BattlePets
             return (uint)speciesIds.Count;
         }
         
-        public void UnlockSlot(byte slot)
+        public void UnlockSlot(BattlePetSlots slot)
         {
-            if (!_slots[slot].Locked)
+            if (slot >= BattlePetSlots.Count)
                 return;
 
-            _slots[slot].Locked = false;
+            byte slotIndex = (byte)slot;
+            if (!_slots[slotIndex].Locked)
+                return;
+
+            _slots[slotIndex].Locked = false;
 
             PetBattleSlotUpdates updates = new();
-            updates.Slots.Add(_slots[slot]);
+            updates.Slots.Add(_slots[slotIndex]);
             updates.AutoSlotted = false; // what's this?
             updates.NewSlot = true; // causes the "new slot unlocked" bubble to appear
             _owner.SendPacket(updates);
@@ -609,11 +613,11 @@ namespace Game.BattlePets
             if (speciesEntry == null)
                 return;
 
-            // TODO: set proper CreatureID for spell DEFAULT_SUMMON_BATTLE_PET_SPELL (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
+            // TODO: set proper CreatureID for spell SPELL_SUMMON_BATTLE_PET (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
             Player player = _owner.GetPlayer();
             player.SetSummonedBattlePetGUID(guid);
             player.SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
-            player.CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
+            player.CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.SpellSummonBattlePet);
         }
 
         public void DismissPet()
@@ -680,7 +684,7 @@ namespace Game.BattlePets
             return Global.WorldMgr.IsBattlePetJournalLockAcquired(_owner.GetBattlenetAccountGUID());
         }
         
-        public BattlePetSlot GetSlot(byte slot) { return slot < _slots.Count ? _slots[slot] : null; }
+        public BattlePetSlot GetSlot(BattlePetSlots slot) { return slot < BattlePetSlots.Count ? _slots[(byte)slot] : null; }
         WorldSession GetOwner() { return _owner; }
 
         public ushort GetTrapLevel() { return _trapLevel; }
@@ -688,7 +692,9 @@ namespace Game.BattlePets
 
         public bool HasJournalLock() { return _hasJournalLock; }
         public void ToggleJournalLock(bool on) { _hasJournalLock = on; }
-        
+
+        public bool IsBattlePetSystemEnabled() { return GetSlot(BattlePetSlots.Slot0).Locked != true; }
+
         WorldSession _owner;
         bool _hasJournalLock;
         ushort _trapLevel;
