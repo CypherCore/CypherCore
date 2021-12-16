@@ -95,19 +95,19 @@ namespace WorldServer
             Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
             Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
 
-            //- Launch CliRunnable thread
-            if (ConfigMgr.GetDefaultValue("Console.Enable", true))
-            {
-                Thread commandThread = new(CommandManager.InitConsole);
-                commandThread.Start();
-            }
-
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
             uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
             Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
+
+            //- Launch CliRunnable thread
+            if (ConfigMgr.GetDefaultValue("Console.Enable", true))
+            {
+                Thread commandThread = new(CommandManager.InitConsole);
+                commandThread.Start();
+            }
 
             WorldUpdateLoop();
 
