@@ -1190,7 +1190,8 @@ namespace Game
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
 
                     // Spawn if necessary (loaded grids only)
-                    Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                    Map map = Global.MapMgr.CreateBaseMap(data.spawnPoint.GetMapId());
+                    map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
                     // We use spawn coords to spawn
                     if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                         Creature.CreateCreatureFromDB(guid, map);
@@ -1213,7 +1214,8 @@ namespace Game
                     Global.ObjectMgr.AddGameObjectToGrid(guid, data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
-                    Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                    Map map = Global.MapMgr.CreateBaseMap(data.spawnPoint.GetMapId());
+                    map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
                     // We use current coords to unspawn, not spawn coords since creature can have changed grid
                     if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                     {
@@ -1265,6 +1267,7 @@ namespace Game
 
                     Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
                     {
+                        map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
                         var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
                         foreach (var creature in creatureBounds)
                             creature.AddObjectToRemoveList();
@@ -1292,6 +1295,7 @@ namespace Game
 
                     Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
                     {
+                        map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
                         var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
                         foreach (var go in gameobjectBounds)
                             go.AddObjectToRemoveList();
