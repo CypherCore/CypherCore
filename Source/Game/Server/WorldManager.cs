@@ -366,6 +366,8 @@ namespace Game
         {
             LoadRealmInfo();
 
+            Log.SetRealmId(_realm.Id.Index);
+
             LoadConfigSettings();
 
             // Initialize Allowed Security Level
@@ -1094,8 +1096,6 @@ namespace Game
                     }
                 });
             }
-
-            Log.SetRealmId(_realm.Id.Index);
         }
 
         public void LoadConfigSettings(bool reload = false)
