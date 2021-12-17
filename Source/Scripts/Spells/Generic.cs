@@ -31,49 +31,49 @@ namespace Scripts.Spells.Generic
 {
     struct SpellIds
     {
-        //Adaptivewarding
+        // Adaptivewarding
         public const uint GenAdaptiveWardingFire = 28765;
         public const uint GenAdaptiveWardingNature = 28768;
         public const uint GenAdaptiveWardingFrost = 28766;
         public const uint GenAdaptiveWardingShadow = 28769;
         public const uint GenAdaptiveWardingArcane = 28770;
 
-        //Animalbloodpoolspell
+        // Animalbloodpoolspell
         public const uint AnimalBlood = 46221;
         public const uint SpawnBloodPool = 63471;
 
-        //Serviceuniform
+        // Serviceuniform
         public const uint ServiceUniform = 71450;
 
-        //Genericbandage
+        // Genericbandage
         public const uint RecentlyBandaged = 11196;
 
-        //Bloodreserve
+        // Bloodreserve
         public const uint BloodReserveAura = 64568;
         public const uint BloodReserveHeal = 64569;
 
-        //Bonked
+        // Bonked
         public const uint Bonked = 62991;
         public const uint FormSwordDefeat = 62994;
         public const uint Onguard = 62972;
 
-        //Breakshieldspells
+        // Breakshieldspells
         public const uint BreakShieldDamage2k = 62626;
         public const uint BreakShieldDamage10k = 64590;
         public const uint BreakShieldTriggerFactionMounts = 62575; // Also On Toc5 Mounts
         public const uint BreakShieldTriggerCampaingWarhorse = 64595;
         public const uint BreakShieldTriggerUnk = 66480;
 
-        //Cannibalizespells
+        // Cannibalizespells
         public const uint CannibalizeTriggered = 20578;
 
-        //Chaosblast
+        // Chaosblast
         public const uint ChaosBlast = 37675;
 
-        //Clone
+        // Clone
         public const uint NightmareFigmentMirrorImage = 57528;
 
-        //Cloneweaponspells        
+        // Cloneweaponspells        
         public const uint WeaponAura = 41054;
         public const uint Weapon2Aura = 63418;
         public const uint Weapon3Aura = 69893;
@@ -83,11 +83,11 @@ namespace Scripts.Spells.Generic
 
         public const uint RangedAura = 57594;
 
-        //Createlancespells
+        // Createlancespells
         public const uint CreateLanceAlliance = 63914;
         public const uint CreateLanceHorde = 63919;
 
-        //Dalarandisguisespells        
+        // Dalarandisguisespells        
         public const uint SunreaverTrigger = 69672;
         public const uint SunreaverFemale = 70973;
         public const uint SunreaverMale = 70974;
@@ -96,51 +96,51 @@ namespace Scripts.Spells.Generic
         public const uint SilverCovenantFemale = 70971;
         public const uint SilverCovenantMale = 70972;
 
-        //Defendvisuals
+        // Defendvisuals
         public const uint VisualShield1 = 63130;
         public const uint VisualShield2 = 63131;
         public const uint VisualShield3 = 63132;
 
-        //Divinestormspell
+        // Divinestormspell
         public const uint DivineStorm = 53385;
 
-        //Elunecandle
+        // Elunecandle
         public const uint OmenHead = 26622;
         public const uint OmenChest = 26624;
         public const uint OmenHandR = 26625;
         public const uint OmenHandL = 26649;
         public const uint Normal = 26636;
 
-        //EtherealPet
+        // EtherealPet
         public const uint ProcTriggerOnKillAura = 50051;
         public const uint EtherealPetAura = 50055;
         public const uint CreateToken = 50063;
         public const uint StealEssenceVisual = 50101;
 
-        //Fishingspells
+        // Fishingspells
         public const uint FishingNoFishingPole = 131476;
         public const uint FishingWithPole = 131490;
 
-        //Transporterbackfires
+        // Transporterbackfires
         public const uint TransporterMalfunctionPolymorph = 23444;
         public const uint TransporterEviltwin = 23445;
         public const uint TransporterMalfunctionMiss = 36902;
 
-        //Gnomishtransporter
+        // Gnomishtransporter
         public const uint TransporterSuccess = 23441;
         public const uint TransporterFailure = 23446;
 
-        //Interrupt
+        // Interrupt
         public const uint GenThrowInterrupt = 32747;
 
-        //Genericlifebloomspells        
+        // Genericlifebloomspells        
         public const uint HexlordMalacrass = 43422;
         public const uint TurragePaw = 52552;
         public const uint CenarionScout = 53692;
         public const uint TwistedVisage = 57763;
         public const uint FactionChampionsDru = 66094;
 
-        //Chargespells        
+        // Chargespells        
         public const uint Damage8k5 = 62874;
         public const uint Damage20k = 68498;
         public const uint Damage45k = 64591;
@@ -156,16 +156,16 @@ namespace Scripts.Spells.Generic
 
         public const uint MissEffect = 62977;
 
-        //MossCoveredFeet
+        // MossCoveredFeet
         public const uint FallDown = 6869;
 
-        //Netherbloom
+        // Netherbloom
         public const uint NetherBloomPollen1 = 28703;
 
-        //Nightmarevine
+        // Nightmarevine
         public const uint NightmarePollen = 28721;
 
-        //Obsidianarmorspells        
+        // Obsidianarmorspells        
         public const uint Holy = 27536;
         public const uint Fire = 27533;
         public const uint Nature = 27538;
@@ -173,7 +173,7 @@ namespace Scripts.Spells.Generic
         public const uint Shadow = 27535;
         public const uint Arcane = 27540;
 
-        //Tournamentpennantspells
+        // Tournamentpennantspells
         public const uint StormwindAspirant = 62595;
         public const uint StormwindValiant = 62596;
         public const uint StormwindChampion = 62594;
@@ -211,82 +211,85 @@ namespace Scripts.Spells.Generic
         public const uint EbonbladeValiant = 63608;
         public const uint EbonbladeChampion = 63609;
 
-        //Orcdisguisespells
+        // Orcdisguisespells
         public const uint OrcDisguiseTrigger = 45759;
         public const uint OrcDisguiseMale = 45760;
         public const uint OrcDisguiseFemale = 45762;
 
-        //Paralytic Poison
+        // Paralytic Poison
         public const uint Paralysis = 35202;
 
-        //Parachutespells
+        // Parachutespells
         public const uint Parachute = 45472;
         public const uint ParachuteBuff = 44795;
 
-        //Trinketspells
+        // Trinketspells
         public const uint PvpTrinketAlliance = 97403;
         public const uint PvpTrinketHorde = 97404;
 
-        //Replenishment
+        // Replenishment
         public const uint Replenishment = 57669;
         public const uint InfiniteReplenishment = 61782;
 
-        //Runningwild
+        // Runningwild
         public const uint AlteredForm = 97709;
 
-        //Seaforiumspells
+        // Seaforiumspells
         public const uint PlantChargesCreditAchievement = 60937;
 
-        //Summonelemental
+        // Summonelemental
         public const uint SummonFireElemental = 8985;
         public const uint SummonEarthElemental = 19704;
 
-        //Tournamentmountsspells
+        // Tournamentmountsspells
         public const uint LanceEquipped = 62853;
 
-        //Mountedduelspells
+        // Mountedduelspells
         public const uint OnTournamentMount = 63034;
         public const uint MountedDuel = 62875;
 
-        //Pvptrinkettriggeredspells
+        // Pvptrinkettriggeredspells
         public const uint WillOfTheForsakenCooldownTrigger = 72752;
         public const uint WillOfTheForsakenCooldownTriggerWotf = 72757;
 
-        //Friendorfowl
+        // Friendorfowl
         public const uint TurkeyVengeance = 25285;
 
-        //Vampirictouch
+        // Vampirictouch
         public const uint VampiricTouchHeal = 52724;
 
-        //Vehiclescaling
+        // Vehiclescaling
         public const uint GearScaling = 66668;
 
-        //Whispergulchyoggsaronwhisper
+        // Whispergulchyoggsaronwhisper
         public const uint YoggSaronWhisperDummy = 29072;
 
-        //Gmfreeze
+        // Gmfreeze
         public const uint GmFreeze = 9454;
 
-        //Landmineknockbackachievement        
+        // Landmineknockbackachievement        
         public const uint LandmineKnockbackAchievement = 57064;
 
-        //Ponyspells
+        // Ponyspells
         public const uint AchievementPonyup = 3736;
         public const uint MountPony = 29736;
 
-        //CorruptinPlagueEntrys
+        // CorruptinPlagueEntrys
         public const uint CorruptingPlague = 40350;
 
-        //SiegeTankControl
+        // StasisFieldEntrys
+        public const uint StasisField = 40307;
+
+        // SiegeTankControl
         public const uint SiegeTankControl = 47963;
 
-        //FreezingCircleMisc
+        // FreezingCircleMisc
         public const uint FreezingCirclePitOfSaronNormal = 69574;
         public const uint FreezingCirclePitOfSaronHeroic = 70276;
         public const uint FreezingCircle = 34787;
         public const uint FreezingCircleScenario = 141383;
 
-        //Kazrogalhellfiremark
+        // Kazrogalhellfiremark
         public const uint MarkOfKazrogalHellfire = 189512;
         public const uint MarkOfKazrogalDamageHellfire = 189515;
 
@@ -294,20 +297,20 @@ namespace Scripts.Spells.Generic
         public const uint FaceRage = 99947;
         public const uint ImpatientMind = 187213;
 
-        //enum DefenderOfAzerothData
+        // DefenderOfAzerothData
         public const uint DeathGateTeleportStormwind = 316999;
         public const uint DeathGateTeleportOrgrimmar = 317000;
     }
 
     struct CreatureIds
     {
-        //EluneCandle
+        // EluneCandle
         public const uint Omen = 15467;
 
-        //EtherealPet
+        // EtherealPet
         public const uint EtherealSoulTrader = 27914;
 
-        //TournamentMounts
+        // TournamentMounts
         public const uint StormwindSteed = 33217;
         public const uint IronforgeRam = 33316;
         public const uint GnomereganMechanostrider = 33317;
@@ -322,12 +325,12 @@ namespace Scripts.Spells.Generic
         public const uint ArgentSteedAspirant = 33845;
         public const uint ArgentHawkstriderAspirant = 33844;
 
-        //PetSummoned
+        // PetSummoned
         public const uint Doomguard = 11859;
         public const uint Infernal = 89;
         public const uint Imp = 416;
 
-        //VendorBarkTrigger
+        // VendorBarkTrigger
         public const uint AmphitheaterVendor = 30098;
 
         //CorruptinPlagueEntrys
@@ -335,7 +338,10 @@ namespace Scripts.Spells.Generic
         public const uint ShardHideBoar = 22180;
         public const uint AetherRay = 22181;
 
-        //DefenderOfAzerothData
+        // StasisFieldEntrys
+        public const uint DaggertailLizard = 22255;
+
+        // DefenderOfAzerothData
         public const uint Nazgrim = 161706;
         public const uint Trollbane = 161707;
         public const uint Whitemane = 161708;
@@ -566,7 +572,7 @@ namespace Scripts.Spells.Generic
             OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
         }
     }
-    
+
     [Script]
     class spell_gen_arcane_charge : SpellScript
     {
@@ -1697,7 +1703,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script] // 131474 - Fishing
     class spell_gen_fishing : SpellScript
     {
@@ -2467,7 +2473,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     // 23493 - Restoration
     [Script] // 24379 - Restoration
     class spell_gen_restoration : AuraScript
@@ -3777,6 +3783,35 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 40306 - Stasis Field
+    class spell_stasis_field_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StasisField);
+        }
+
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            Unit owner = GetTarget();
+
+            List<Creature> targets = new();
+            StasisFieldSearcher creature_check = new(owner, 15.0f);
+            CreatureListSearcher creature_searcher = new(owner, targets, creature_check);
+            Cell.VisitGridObjects(owner, creature_searcher, 15.0f);
+
+            if (!targets.Empty())
+                return;
+
+            PreventDefaultAction();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
     [Script]
     class spell_gen_vehicle_control_link : AuraScript
     {
@@ -3790,7 +3825,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 34779 - Freezing Circle
     class spell_freezing_circle : SpellScript
     {
@@ -3844,7 +3879,7 @@ namespace Scripts.Spells.Generic
             OnCast.Add(new CastHandler(HandleCast));
         }
     }
-    
+
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {
@@ -4037,6 +4072,29 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 40307 - Stasis Field
+    class StasisFieldSearcher : ICheck<Unit>
+    {
+        Unit _unit;
+        float _distance;
+
+        public StasisFieldSearcher(Unit obj, float distance)
+        {
+            _unit = obj;
+            _distance = distance;
+        }
+
+        public bool Invoke(Unit u)
+        {
+            if (_unit.GetDistance2d(u) < _distance &&
+                (u.GetEntry() == CreatureIds.ApexisFlayer || u.GetEntry() == CreatureIds.ShardHideBoar || u.GetEntry() == CreatureIds.AetherRay || u.GetEntry() == CreatureIds.DaggertailLizard) &&
+                !u.HasAura(SpellIds.StasisField))
+                return true;
+
+            return false;
         }
     }
 }
