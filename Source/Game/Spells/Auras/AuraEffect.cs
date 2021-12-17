@@ -4843,6 +4843,11 @@ namespace Game.Spells
         void HandlePeriodicTriggerSpellAuraTick(Unit target, Unit caster)
         {
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            if (triggerSpellId == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+                return;
+            }
 
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
@@ -4855,12 +4860,18 @@ namespace Game.Spells
                 }
             }
             else
-                Log.outWarn(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+                Log.outError(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
         }
 
         void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
         {
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            if (triggerSpellId == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+                return;
+            }
+
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
@@ -4876,7 +4887,7 @@ namespace Game.Spells
                 }
             }
             else
-                Log.outWarn(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+                Log.outError(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
         }
 
         void HandlePeriodicDamageAurasTick(Unit target, Unit caster)
@@ -5407,6 +5418,12 @@ namespace Game.Spells
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            if (triggerSpellId == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+                return;
+            }
+
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
@@ -5414,7 +5431,7 @@ namespace Game.Spells
                 triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo.Id, new CastSpellExtraArgs(this));
             }
             else if (triggerSpellId != 0 && GetAuraType() != AuraType.Dummy)
-                Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Could not trigger spell {triggerSpellId} from aura {GetId()} proc, because the spell does not have an entry in Spell.dbc.");
+                Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Spell {GetId()} has non-existent spell {triggerSpellId} in EffectTriggered[{GetEffIndex()}] and is therefore not triggered.");
         }
 
         void HandleProcTriggerSpellWithValueAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
@@ -5423,6 +5440,12 @@ namespace Game.Spells
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            if (triggerSpellId == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+                return;
+            }
+
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
@@ -5432,7 +5455,7 @@ namespace Game.Spells
                 Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Triggering spell {0} with value {1} from aura {2} proc", triggeredSpellInfo.Id, GetAmount(), GetId());
             }
             else
-                Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Could not trigger spell {0} from aura {1} proc, because the spell does not have an entry in Spell.dbc.", triggerSpellId, GetId());
+                Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Spell {GetId()} has non-existent spell {triggerSpellId} in EffectTriggered[{GetEffIndex()}] and is therefore not triggered.");
         }
 
         void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)

@@ -251,6 +251,12 @@ namespace Game.Spells
                 }
             }
 
+            if (triggered_spell_id == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"Spell::EffectTriggerSpell: Spell {m_spellInfo.Id} [EffectIndex: {effectInfo.EffectIndex}] does not have triggered spell.");
+                return;
+            }
+
             // normal case
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
@@ -312,6 +318,11 @@ namespace Game.Spells
                 return;
 
             uint triggered_spell_id = effectInfo.TriggerSpell;
+            if (triggered_spell_id == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"Spell::EffectTriggerMissileSpell: Spell {m_spellInfo.Id} [EffectIndex: {effectInfo.EffectIndex}] does not have triggered spell.");
+                return;
+            }
 
             // normal case
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
@@ -371,6 +382,11 @@ namespace Game.Spells
                 return;
 
             uint triggered_spell_id = effectInfo.TriggerSpell;
+            if (triggered_spell_id == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"Spell::EffectForceCast: Spell {m_spellInfo.Id} [EffectIndex: {effectInfo.EffectIndex}] does not have triggered spell.");
+                return;
+            }
 
             // normal case
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
@@ -427,10 +443,16 @@ namespace Game.Spells
                 return;
 
             uint triggered_spell_id = effectInfo.TriggerSpell;
+            if (triggered_spell_id == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"Spell::EffectTriggerRitualOfSummoning: Spell {m_spellInfo.Id} [EffectIndex: {effectInfo.EffectIndex}] does not have triggered spell.");
+                return;
+            }
+
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Spells, "EffectTriggerRitualOfSummoning of spell {0}: triggering unknown spell id {1}", m_spellInfo.Id, triggered_spell_id);
+                Log.outError(LogFilter.Spells, $"EffectTriggerRitualOfSummoning of spell {m_spellInfo.Id}: triggering unknown spell id {triggered_spell_id}");
                 return;
             }
 
