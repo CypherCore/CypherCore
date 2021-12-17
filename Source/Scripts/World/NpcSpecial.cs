@@ -112,6 +112,12 @@ namespace Scripts.World.NpcSpecial
         public const uint TheStuffingChair = 34819;
         public const uint TheSweetPotatoChair = 34824;
         public const uint ThePieChair = 34822;
+
+        // TravelerTundraMammothNPCs
+        public const uint HakmudOfArgus = 32638;
+        public const uint Gnimo = 32639;
+        public const uint DrixBlackwrench = 32641;
+        public const uint Mojodishu = 32642;
     }
 
     struct GameobjectIds
@@ -2345,6 +2351,32 @@ namespace Scripts.World.NpcSpecial
         }
     }
 
+    [Script]
+    class npc_traveler_tundra_mammoth_exit_pos : UnitScript
+    {
+        public npc_traveler_tundra_mammoth_exit_pos() : base("npc_traveler_tundra_mammoth_exit_pos") { }
+
+        public override void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos)
+        {
+            if (passenger.IsCreature())
+            {
+                switch (passenger.GetEntry())
+                {
+                    // Right side
+                    case CreatureIds.DrixBlackwrench:
+                    case CreatureIds.Gnimo:
+                        pos.RelocateOffset(new Position(-2.0f, -2.0f, 0.0f, 0.0f));
+                        break;
+                    // Left side
+                    case CreatureIds.Mojodishu:
+                    case CreatureIds.HakmudOfArgus:
+                        pos.RelocateOffset(new Position(-2.0f, 2.0f, 0.0f, 0.0f));
+                        break;
+                }
+            }
+        }
+    }
+    
     class CastFoodSpell : BasicEvent
     {
         Unit _owner;
