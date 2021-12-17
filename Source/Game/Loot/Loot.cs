@@ -43,7 +43,7 @@ namespace Game.Loots
             randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
         }
 
-        public bool AllowedForPlayer(Player player)
+        public bool AllowedForPlayer(Player player, bool isGivenByMasterLooter = false)
         {
             // DB conditions check
             if (!Global.ConditionMgr.IsObjectMeetToConditions(player, conditions))
@@ -53,16 +53,51 @@ namespace Game.Loots
             if (pProto == null)
                 return false;
 
-            // not show loot for players without profession or those who already know the recipe
-            if (pProto.GetFlags().HasAnyFlag(ItemFlags.HideUnusableRecipe) && (!player.HasSkill((SkillType)pProto.GetRequiredSkill()) || player.HasSpell((uint)pProto.Effects[1].SpellID)))
-                return false;
-
             // not show loot for not own team
             if (pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && player.GetTeam() != Team.Horde)
                 return false;
 
             if (pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionAlliance) && player.GetTeam() != Team.Alliance)
                 return false;
+
+            // Master looter can see certain items even if the character can't loot them
+            if (!isGivenByMasterLooter && player.GetGroup() && player.GetGroup().GetMasterLooterGuid() == player.GetGUID())
+            {
+                // check quest requirements
+                if (!pProto.FlagsCu.HasFlag(ItemFlagsCustom.IgnoreQuestStatus) && (needs_quest || pProto.GetStartQuest() != 0))
+                    return false;
+
+                return true;
+            }
+
+            // Don't allow loot for players without profession or those who already know the recipe
+            if (pProto.GetFlags().HasFlag(ItemFlags.HideUnusableRecipe))
+            {
+                if (!player.HasSkill((SkillType)pProto.GetRequiredSkill()))
+                    return false;
+
+                foreach (var itemEffect in pProto.Effects)
+                {
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                        continue;
+
+                    if (player.HasSpell((uint)itemEffect.SpellID))
+                        return false;
+                }
+            }
+
+            // Don't allow to loot soulbound recipes that the player has already learned
+            if (pProto.GetClass() == ItemClass.Recipe && pProto.GetBonding() == ItemBondingType.OnAcquire)
+            {
+                foreach (var itemEffect in pProto.Effects)
+                {
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                        continue;
+
+                    if (player.HasSpell((uint)itemEffect.SpellID))
+                        return false;
+                }
+            }
 
             // check quest requirements
             if (!pProto.FlagsCu.HasAnyFlag(ItemFlagsCustom.IgnoreQuestStatus)

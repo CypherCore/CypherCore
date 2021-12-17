@@ -521,7 +521,7 @@ namespace Game
 
                 List<ItemPosCount> dest = new();
                 InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
-                if (item.follow_loot_rules && !item.AllowedForPlayer(target))
+                if (!item.AllowedForPlayer(target, true))
                     msg = InventoryResult.CantEquipEver;
                 if (msg != InventoryResult.Ok)
                 {
@@ -532,7 +532,6 @@ namespace Game
                     else
                         _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterOther);
 
-                    target.SendEquipError(msg, null, null, item.itemid);
                     return;
                 }
 

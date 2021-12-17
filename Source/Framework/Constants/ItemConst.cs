@@ -1016,6 +1016,7 @@ namespace Framework.Constants
         NoSpellEffectTooltipPrefixes = 0x20000
     }
 
+    [Flags]
     public enum ItemFlagsCustom
     {
         Unused = 0x0001,
