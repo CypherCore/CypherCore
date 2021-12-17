@@ -185,6 +185,19 @@ namespace Game.Spells
             return true;
         }
 
+        public static bool HasDiscoveredAnySpell(uint spellId, Player player)
+        {
+            var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);
+            if (tab.Empty())
+                return false;
+
+            foreach (var item_iter in tab)
+                if (player.HasSpell(item_iter.spellId))
+                    return true;
+
+            return false;
+        }
+
         public static uint GetSkillDiscoverySpell(uint skillId, uint spellId, Player player)
         {
             uint skillvalue = skillId != 0 ? (uint)player.GetSkillValue((SkillType)skillId) : 0;

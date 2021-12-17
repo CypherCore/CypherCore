@@ -223,6 +223,9 @@ namespace Scripts.Spells.Generic
         public const uint Parachute = 45472;
         public const uint ParachuteBuff = 44795;
 
+        // ProfessionResearch
+        public const uint NorthrendInscriptionResearch = 61177;
+
         // Trinketspells
         public const uint PvpTrinketAlliance = 97403;
         public const uint PvpTrinketHorde = 97404;
@@ -2388,7 +2391,9 @@ namespace Scripts.Spells.Generic
 
         SpellCastResult CheckRequirement()
         {
-            if (SkillDiscovery.HasDiscoveredAllSpells(GetSpellInfo().Id, GetCaster().ToPlayer()))
+            Player player = GetCaster().ToPlayer();
+
+            if (SkillDiscovery.HasDiscoveredAllSpells(GetSpellInfo().Id, player))
             {
                 SetCustomCastResultMessage(SpellCustomErrors.NothingToDiscover);
                 return SpellCastResult.CustomError;
@@ -2402,12 +2407,21 @@ namespace Scripts.Spells.Generic
             Player caster = GetCaster().ToPlayer();
             uint spellId = GetSpellInfo().Id;
 
-            // learn random explicit discovery recipe (if any)
+            // Learn random explicit discovery recipe (if any)
+            // Players will now learn 3 recipes the very first time they perform Northrend Inscription Research (3.3.0 patch notes)
+            if (spellId == SpellIds.NorthrendInscriptionResearch && !SkillDiscovery.HasDiscoveredAnySpell(spellId, caster))
+            {
+                for (int i = 0; i < 2; ++i)
+                {
+                    uint _discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+                    if (_discoveredSpellId != 0)
+                        caster.LearnSpell(_discoveredSpellId, false);
+                }
+            }
+
             uint discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId != 0)
                 caster.LearnSpell(discoveredSpellId, false);
-
-            caster.UpdateCraftSkill(spellId);
         }
 
         public override void Register()
