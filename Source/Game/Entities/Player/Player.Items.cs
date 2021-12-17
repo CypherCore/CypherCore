@@ -5774,8 +5774,8 @@ namespace Game.Entities
                 pItem.SetState(ItemUpdateState.Changed, this);
             }
         }
-        public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
-        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false)
+        public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
+        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
         {
             Loot loot = new();
             loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
@@ -5798,7 +5798,7 @@ namespace Game.Entities
                 }
 
                 Item pItem = StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
-                SendNewItem(pItem, lootItem.count, false, false, broadcast);
+                SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
             }
         }
 
