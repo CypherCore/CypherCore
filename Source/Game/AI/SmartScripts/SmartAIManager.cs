@@ -2682,6 +2682,8 @@ namespace Game.AI
         public struct RemoveAura
         {
             public uint spell;
+            public uint charges;
+            public uint onlyOwnedAuras;
         }
         public struct Follow
         {

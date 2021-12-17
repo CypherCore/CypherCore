@@ -779,10 +779,26 @@ namespace Game.AI
                         if (!IsUnit(target))
                             continue;
 
-                        if (e.Action.removeAura.spell == 0)
-                            target.ToUnit().RemoveAllAuras();
-                        else
+                        if (e.Action.removeAura.spell != 0)
+                        {
+                            ObjectGuid casterGUID = default;
+                            if (e.Action.removeAura.onlyOwnedAuras != 0)
+                            {
+                                if (_me == null)
+                                    break;
+                                casterGUID = _me.GetGUID();
+                            }
+
+                            if (e.Action.removeAura.charges != 0)
+                            {
+                                Aura aur = target.ToUnit().GetAura(e.Action.removeAura.spell, casterGUID);
+                                if (aur != null)
+                                    aur.ModCharges(-(int)e.Action.removeAura.charges, AuraRemoveMode.Expire);
+                            }
                             target.ToUnit().RemoveAurasDueToSpell(e.Action.removeAura.spell);
+                        }
+                        else
+                            target.ToUnit().RemoveAllAuras();
 
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_REMOVEAURASFROMSPELL: Unit {0}, spell {1}",
                             target.GetGUID().ToString(), e.Action.removeAura.spell);
