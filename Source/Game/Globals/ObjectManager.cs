@@ -1879,16 +1879,15 @@ namespace Game
             {
                 uint creatureID = result.Read<uint>(0);
                 SpellSchools school = (SpellSchools)result.Read<byte>(1);
-
                 if (school == SpellSchools.Normal || school >= SpellSchools.Max)
                 {
-                    Log.outInfo(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this school {school} doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this school {school} doesn't exist");
                     continue;
                 }
 
                 if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
-                    Log.outInfo(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
                     continue;
                 }
 
@@ -1922,7 +1921,7 @@ namespace Game
 
                 if (index >= SharedConst.MaxCreatureSpells)
                 {
-                    Log.outInfo(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} with a incorrect index {index}");
+                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} with a incorrect index {index}");
                     continue;
                 }
 
