@@ -205,6 +205,29 @@ namespace Game.Loots
                 lootItems.Add(generatedLoot);
                 count -= proto.GetMaxStackSize();
 
+                // In some cases, a dropped item should be visible/lootable only for some players in group
+                bool canSeeItemInLootWindow = false;
+                Player player = Global.ObjAccessor.FindPlayer(lootOwnerGUID);
+                if (player != null)
+                {
+                    Group group = player.GetGroup();
+                    if (group != null)
+                    {
+                        for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                        {
+                            Player member = itr.GetSource();
+                            if (member != null)
+                                if (generatedLoot.AllowedForPlayer(member))
+                                    canSeeItemInLootWindow = true;
+                        }
+                    }
+                    else if (generatedLoot.AllowedForPlayer(player))
+                        canSeeItemInLootWindow = true;
+                }
+
+                if (!canSeeItemInLootWindow)
+                    continue;
+
                 // non-conditional one-player only items are counted here,
                 // free for all items are counted in FillFFALoot(),
                 // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
@@ -231,6 +254,8 @@ namespace Game.Loots
             // Must be provided
             if (lootOwner == null)
                 return false;
+
+            lootOwnerGUID = lootOwner.GetGUID();
 
             LootTemplate tab = store.GetLootFor(lootId);
             if (tab == null)
@@ -851,6 +876,7 @@ namespace Game.Loots
         public uint gold;
         public byte unlootedCount;
         public ObjectGuid roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
+        ObjectGuid lootOwnerGUID;
         public LootType loot_type;                                     // required for achievement system
         public byte maxDuplicates;                                    // Max amount of items with the same entry that can drop (default is 1; on 25 man raid mode 3)
 
