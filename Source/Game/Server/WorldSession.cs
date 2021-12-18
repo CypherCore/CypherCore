@@ -188,16 +188,14 @@ namespace Game
                 // If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
                 _player.UninviteFromGroup();
 
-                // remove player from the group if he is:
-                // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-                if (_player.GetGroup() && !_player.GetGroup().IsRaidGroup() && m_Socket[(int)ConnectionType.Realm] != null)
-                    _player.RemoveFromGroup();
-
                 //! Send update to group and reset stored max enchanting level
-                if (_player.GetGroup())
+                var group = _player.GetGroup();
+                if (group != null)
                 {
-                    _player.GetGroup().SendUpdate();
-                    _player.GetGroup().ResetMaxEnchantingLevel();
+                    group.SendUpdate();
+                    group.ResetMaxEnchantingLevel();
+                    if (group.GetLeaderGUID() == _player.GetGUID())
+                        group.StartLeaderOfflineTimer();
                 }
 
                 //! Broadcast a logout message to the player's friends

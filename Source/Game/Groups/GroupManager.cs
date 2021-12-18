@@ -89,6 +89,12 @@ namespace Game.Groups
             return GroupStore.LookupByKey(groupId.GetCounter());
         }
 
+        public void Update(uint diff)
+        {
+            foreach (var group in GroupStore.Values)
+                    group.Update(diff);
+        }
+
         public void AddGroup(Group group)
         {
             GroupStore[group.GetGUID().GetCounter()] = group;
@@ -219,15 +225,6 @@ namespace Game.Groups
                 while (result.NextRow());
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group-instance saves in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-            }
-        }
-
-        public void Update(uint diff)
-        {
-            foreach (var group in GroupStore.Values)
-            {
-                if (group)
-                    group.Update(diff);
             }
         }
 

@@ -861,6 +861,8 @@ namespace Game
             {
                 group.SendUpdate();
                 group.ResetMaxEnchantingLevel();
+                if (group.GetLeaderGUID() == pCurrChar.GetGUID())
+                    group.StopLeaderOfflineTimer();
             }
 
             // friend status

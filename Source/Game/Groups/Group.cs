@@ -44,6 +44,63 @@ namespace Game.Groups
             m_lootThreshold = ItemQuality.Uncommon;
         }
 
+        public void Update(uint diff)
+        {
+            if (_isLeaderOffline)
+            {
+                _leaderOfflineTimer.Update((int)diff);
+                if (_leaderOfflineTimer.Passed())
+                {
+                    SelectNewPartyOrRaidLeader();
+                    _isLeaderOffline = false;
+                }
+            }
+
+            UpdateReadyCheck(diff);
+        }
+
+        void SelectNewPartyOrRaidLeader()
+        {
+            Player newLeader = null;
+
+            // Attempt to give leadership to main assistant first
+            if (IsRaidGroup())
+            {
+                foreach (var memberSlot in m_memberSlots)
+                {
+                    if (memberSlot.flags.HasFlag(GroupMemberFlags.Assistant))
+                    {
+                        Player player = Global.ObjAccessor.FindPlayer(memberSlot.guid);
+                        if (player != null)
+                        {
+                            newLeader = player;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If there aren't assistants in raid, or if the group is not a raid, pick the first available member
+            if (!newLeader)
+            {
+                foreach (var memberSlot in m_memberSlots)
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(memberSlot.guid);
+                    if (player != null)
+                    {
+                        newLeader = player;
+                        break;
+                    }
+                }
+            }
+
+            if (newLeader)
+            {
+                ChangeLeader(newLeader.GetGUID());
+                SendUpdate();
+            }
+        }
+
         public bool Create(Player leader)
         {
             ObjectGuid leaderGuid = leader.GetGUID();
@@ -2150,11 +2207,6 @@ namespace Game.Groups
             return slot.roles;
         }
 
-        public void Update(uint diff)
-        {
-            UpdateReadyCheck(diff);
-        }
-
         void UpdateReadyCheck(uint diff)
         {
             if (!m_readyCheckStarted)
@@ -2567,6 +2619,17 @@ namespace Game.Groups
                 slot.flags &= ~flag;
         }
 
+        public void StartLeaderOfflineTimer()
+        {
+            _isLeaderOffline = true;
+            _leaderOfflineTimer.Reset(2 * Time.Minute * Time.InMilliseconds);
+        }
+
+        public void StopLeaderOfflineTimer()
+        {
+            _isLeaderOffline = false;
+        }
+
         public void SetEveryoneIsAssistant(bool apply)
         {
             if (apply)
@@ -2620,6 +2683,8 @@ namespace Game.Groups
         ObjectGuid m_guid;
         uint m_maxEnchantingLevel;
         uint m_dbStoreId;
+        bool _isLeaderOffline;
+        TimeTrackerSmall _leaderOfflineTimer = new();
 
         // Ready Check
         bool m_readyCheckStarted;
