@@ -22,11 +22,11 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.Networking.Packets;
 
 namespace Game.DungeonFinding
 {
@@ -1052,6 +1052,15 @@ namespace Game.DungeonFinding
                         break;
                 }
 
+                // Store the number of players that were present in group when joining RFD, used for achievement purposes
+                Player _player = Global.ObjAccessor.FindConnectedPlayer(pguid);
+                if (_player != null)
+                {
+                    Group group = _player.GetGroup();
+                    if (group != null)
+                        PlayersStore[pguid].SetNumberOfPartyMembersAtJoin((byte)group.GetMembersCount());
+                }
+
                 SetState(pguid, LfgState.Dungeon);
             }
 
@@ -1374,7 +1383,15 @@ namespace Game.DungeonFinding
 
                 // Update achievements
                 if (dungeon.difficulty == Difficulty.Heroic)
-                    player.UpdateCriteria(CriteriaType.CompletedLFGDungeonWithStrangers, 1);
+                {
+                    byte lfdRandomPlayers = 0;
+                    byte numParty = PlayersStore[guid].GetNumberOfPartyMembersAtJoin();
+                    if (numParty != 0)
+                        lfdRandomPlayers = (byte)(5 - numParty);
+                    else
+                        lfdRandomPlayers = 4;
+                    player.UpdateCriteria(CriteriaType.CompletedLFGDungeonWithStrangers, lfdRandomPlayers);
+                }
 
                 LfgReward reward = GetRandomDungeonReward(rDungeonId, player.GetLevel());
                 if (reward == null)

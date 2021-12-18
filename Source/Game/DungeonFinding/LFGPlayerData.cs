@@ -116,6 +116,16 @@ namespace Game.DungeonFinding
             return m_SelectedDungeons;
         }
 
+        public void SetNumberOfPartyMembersAtJoin(byte count)
+        {
+            m_NumberOfPartyMembersAtJoin = count;
+        }
+
+        public byte GetNumberOfPartyMembersAtJoin()
+        {
+            return m_NumberOfPartyMembersAtJoin;
+        }
+
         // General
         RideTicket m_Ticket;
         LfgState m_State;
@@ -127,5 +137,8 @@ namespace Game.DungeonFinding
         // Queue
         LfgRoles m_Roles;
         List<uint> m_SelectedDungeons = new();
+
+        // Achievement-related
+        byte m_NumberOfPartyMembersAtJoin;
     }
 }
