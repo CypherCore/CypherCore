@@ -1721,6 +1721,8 @@ namespace Game.Entities
                     ITransport transport = GetDirectTransport();
                     if (transport != null)
                         transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    else
+                        return;
                 }
                 if (HasUnitState(UnitState.CannotTurn))
                     o = GetOrientation();
