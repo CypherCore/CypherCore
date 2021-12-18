@@ -6094,33 +6094,49 @@ namespace Game.Spells
                     case SpellEffectName.CreateLoot:
                     {
                         // m_targets.GetUnitTarget() means explicit cast, otherwise we dont check for possible equip error
-                        Unit target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : player;
-                        if (target.IsPlayer() && !IsTriggered() && spellEffectInfo.ItemType != 0)
+                        Unit target = m_targets.GetUnitTarget() ?? player;
+                        if (target.IsPlayer() && !IsTriggered())
                         {
-                            List<ItemPosCount> dest = new();
-                            InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, 1);
-                            if (msg != InventoryResult.Ok)
+
+                            // SPELL_EFFECT_CREATE_ITEM_2 differs from SPELL_EFFECT_CREATE_ITEM in that it picks the random item to create from a pool of potential items,
+                            // so we need to make sure there is at least one free space in the player's inventory
+                            if (spellEffectInfo.Effect == SpellEffectName.CreateLoot)
                             {
-                                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
-                                // @todo Needs review
-                                if (itemTemplate != null && itemTemplate.GetItemLimitCategory() == 0)
+                                if (target.ToPlayer().GetFreeInventorySpace() == 0)
                                 {
-                                    player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);
+                                    player.SendEquipError(InventoryResult.InvFull, null, null, spellEffectInfo.ItemType);
                                     return SpellCastResult.DontReport;
                                 }
-                                else
+                            }
+
+                            if (spellEffectInfo.ItemType != 0)
+                            {
+                                List<ItemPosCount> dest = new();
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, 1);
+                                if (msg != InventoryResult.Ok)
                                 {
-                                    // Conjure Food/Water/Refreshment spells
-                                    if (!(m_spellInfo.SpellFamilyName == SpellFamilyNames.Mage && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
-                                        return SpellCastResult.TooManyOfItem;
-                                    else if (!target.ToPlayer().HasItemCount(spellEffectInfo.ItemType))
+                                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
+                                    /// @todo Needs review
+                                    if (itemTemplate != null && itemTemplate.GetItemLimitCategory() == 0)
                                     {
                                         player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);
                                         return SpellCastResult.DontReport;
                                     }
-                                    else if (m_spellInfo.GetEffects().Count > 1)
-                                        player.CastSpell(m_caster, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs().SetOriginalCastId(m_castId));        // move this to anywhere
-                                    return SpellCastResult.DontReport;
+                                    else
+                                    {
+                                        // Conjure Food/Water/Refreshment spells
+                                        if (m_spellInfo.SpellFamilyName != SpellFamilyNames.Mage || (!m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
+                                            return SpellCastResult.TooManyOfItem;
+                                        else if (!(target.ToPlayer().HasItemCount(spellEffectInfo.ItemType)))
+                                        {
+                                            player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);
+                                            return SpellCastResult.DontReport;
+                                        }
+                                        else if (m_spellInfo.GetEffects().Count > 1)
+                                            player.CastSpell(player, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs()
+                                                .SetOriginalCastId(m_castId));        // move this to anywhere
+                                        return SpellCastResult.DontReport;
+                                    }
                                 }
                             }
                         }

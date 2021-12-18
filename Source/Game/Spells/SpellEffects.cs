@@ -1098,32 +1098,21 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
 
-            uint item_id = effectInfo.ItemType;
             ItemContext context = m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None;
 
-            if (item_id != 0)
-                DoCreateItem(item_id, context);
-
-            // special case: fake item replaced by generate using spell_loot_template
+            // Pick a random item from spell_loot_template
             if (m_spellInfo.IsLootCrafting())
             {
-                if (item_id != 0)
-                {
-                    if (!player.HasItemCount(item_id))
-                        return;
-
-                    // remove reagent
-                    uint count = 1;
-                    player.DestroyItemCount(item_id, count, true);
-
-                    // create some random items
-                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context);
-                }
-                else
-                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context);    // create some random items
-
+                player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context, false, true);
                 player.UpdateCraftSkill(m_spellInfo.Id);
             }
+            else // If there's no random loot entries for this spell, pick the item associated with this spell
+            {
+                uint itemId = effectInfo.ItemType;
+                if (itemId != 0)
+                    DoCreateItem(itemId, context);
+            }
+
             // @todo ExecuteLogEffectCreateItem(i, GetEffect(i].ItemType);
         }
 

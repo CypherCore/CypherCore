@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Groups;
@@ -30,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.BattleFields;
 
 namespace Game.Entities
 {
@@ -1796,25 +1796,25 @@ namespace Game.Entities
                 {
                     case InventoryResult.CantEquipLevelI:
                     case InventoryResult.PurchaseLevelTooLow:
-                        {
-                            failure.Level = (item1 ? item1.GetRequiredLevel() : 0);
-                            break;
-                        }
+                    {
+                        failure.Level = (item1 ? item1.GetRequiredLevel() : 0);
+                        break;
+                    }
                     case InventoryResult.EventAutoequipBindConfirm:    // no idea about this one...
-                        {
-                            //failure.SrcContainer
-                            //failure.SrcSlot
-                            //failure.DstContainer
-                            break;
-                        }
+                    {
+                        //failure.SrcContainer
+                        //failure.SrcSlot
+                        //failure.DstContainer
+                        break;
+                    }
                     case InventoryResult.ItemMaxLimitCategoryCountExceededIs:
                     case InventoryResult.ItemMaxLimitCategorySocketedExceededIs:
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
-                        {
-                            ItemTemplate proto = item1 ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
-                            failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
-                            break;
-                        }
+                    {
+                        ItemTemplate proto = item1 ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
+                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3480,7 +3480,7 @@ namespace Game.Entities
                         if (itemTemplate != null)
                             if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
                                 Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
-                        
+
                         pItem.SetState(ItemUpdateState.Removed, this);
                     }
                 }
@@ -3566,7 +3566,7 @@ namespace Game.Entities
             ApplyItemEquipSpell(item, apply);
 
             if (updateItemAuras)
-            { 
+            {
                 ApplyItemDependentAuras(item, apply);
                 WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
                 if (attackType != WeaponAttackType.Max)
@@ -3622,9 +3622,9 @@ namespace Game.Entities
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
                     //case ItemModType.Spirit:                           //modify spirit
-                        //HandleStatModifier(UnitMods.StatSpirit, UnitModifierType.BaseValue, (float)val, apply);
-                        //ApplyStatBuffMod(Stats.Spirit, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatSpirit, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        //break;
+                    //HandleStatModifier(UnitMods.StatSpirit, UnitModifierType.BaseValue, (float)val, apply);
+                    //ApplyStatBuffMod(Stats.Spirit, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatSpirit, UnitModifierType.BasePCTExcludeCreate)), apply);
+                    //break;
                     case ItemModType.Stamina:                          //modify stamina
                         GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(itemLevel);
                         if (staminaMult != null)
@@ -4514,7 +4514,30 @@ namespace Game.Entities
 
             return freeSlotCount;
         }
-        
+
+        public uint GetFreeInventorySpace()
+        {
+            uint freeSpace = 0;
+
+            // Check backpack
+            for (byte slot = InventorySlots.ItemStart; slot < InventorySlots.ItemEnd; ++slot)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, slot);
+                if (item == null)
+                    freeSpace += 1;
+            }
+
+            // Check bags
+            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
+            {
+                Bag bag = GetBagByPos(i);
+                if (bag != null)
+                    freeSpace += bag.GetFreeSlots();
+            }
+
+            return freeSpace;
+        }
+
         //Bags
         public Bag GetBagByPos(byte bag)
         {
@@ -4681,15 +4704,15 @@ namespace Game.Entities
                     slots[0] = EquipmentSlot.Cloak;
                     break;
                 case InventoryType.Weapon:
-                    {
-                        slots[0] = EquipmentSlot.MainHand;
+                {
+                    slots[0] = EquipmentSlot.MainHand;
 
-                        // suggest offhand slot only if know dual wielding
-                        // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
-                        if (CanDualWield())
-                            slots[1] = EquipmentSlot.OffHand;
-                        break;
-                    }
+                    // suggest offhand slot only if know dual wielding
+                    // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
+                    if (CanDualWield())
+                        slots[1] = EquipmentSlot.OffHand;
+                    break;
+                }
                 case InventoryType.Shield:
                     slots[0] = EquipmentSlot.OffHand;
                     break;
@@ -5462,7 +5485,7 @@ namespace Game.Entities
                         // equipment visual show
                         SetVisibleItemSlot(slot, null);
                     }
-                    
+
                     m_items[slot] = null;
                 }
                 else if ((pBag = GetBagByPos(bag)) != null)
@@ -5802,7 +5825,7 @@ namespace Game.Entities
             }
         }
 
-        public byte GetInventorySlotCount() { return m_activePlayerData.NumBackpackSlots;    }
+        public byte GetInventorySlotCount() { return m_activePlayerData.NumBackpackSlots; }
         public void SetInventorySlotCount(byte slots)
         {
             //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
@@ -5951,7 +5974,7 @@ namespace Game.Entities
         }
 
         public Dictionary<ObjectGuid, ObjectGuid> GetAELootView() { return m_AELootView; }
-        
+
         /// <summary>
         /// if in a Battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
         /// Called by remove insignia spell effect
@@ -6559,7 +6582,7 @@ namespace Game.Entities
         {
             if (oldSlot >= SharedConst.VoidStorageMaxSlot || newSlot >= SharedConst.VoidStorageMaxSlot || oldSlot == newSlot)
                 return false;
-            
+
             _voidStorageItems.Swap(newSlot, oldSlot);
             return true;
         }
