@@ -1748,6 +1748,9 @@ namespace Game
                 LoadCreatureTemplate(result.GetFields());
             } while (result.NextRow());
 
+            LoadCreatureTemplateResistances();
+            LoadCreatureTemplateSpells();
+
             // We load the creature models after loading but before checking
             LoadCreatureTemplateModels();
 
@@ -1807,57 +1810,136 @@ namespace Game
             creature.SkinLootId = fields.Read<uint>(40);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                creature.Resistance[i] = fields.Read<int>(41 + i - 1);
+                creature.Resistance[i] = 0;
 
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-                creature.Spells[i] = fields.Read<uint>(47 + i);
+                creature.Spells[i] = 0;
 
-            creature.VehicleId = fields.Read<uint>(55);
-            creature.MinGold = fields.Read<uint>(56);
-            creature.MaxGold = fields.Read<uint>(57);
-            creature.AIName = fields.Read<string>(58);
-            creature.MovementType = fields.Read<uint>(59);
+            creature.VehicleId = fields.Read<uint>(41);
+            creature.MinGold = fields.Read<uint>(42);
+            creature.MaxGold = fields.Read<uint>(43);
+            creature.AIName = fields.Read<string>(44);
+            creature.MovementType = fields.Read<uint>(45);
 
-            if (!fields.IsNull(60))
-                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(60);
+            if (!fields.IsNull(46))
+                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(46);
 
-            if (!fields.IsNull(61))
-                creature.Movement.Swim = fields.Read<bool>(61);
+            if (!fields.IsNull(47))
+                creature.Movement.Swim = fields.Read<bool>(47);
 
-            if (!fields.IsNull(62))
-                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(62);
+            if (!fields.IsNull(48))
+                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(48);
 
-            if (!fields.IsNull(63))
-                creature.Movement.Rooted = fields.Read<bool>(63);
+            if (!fields.IsNull(49))
+                creature.Movement.Rooted = fields.Read<bool>(49);
 
-            if (!fields.IsNull(64))
-                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(64);
+            if (!fields.IsNull(50))
+                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(50);
 
-            if (!fields.IsNull(65))
-                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(65);
+            if (!fields.IsNull(51))
+                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(51);
 
-            creature.HoverHeight = fields.Read<float>(66);
-            creature.ModHealth = fields.Read<float>(67);
-            creature.ModHealthExtra = fields.Read<float>(68);
-            creature.ModMana = fields.Read<float>(69);
-            creature.ModManaExtra = fields.Read<float>(70);
-            creature.ModArmor = fields.Read<float>(71);
-            creature.ModDamage = fields.Read<float>(72);
-            creature.ModExperience = fields.Read<float>(73);
-            creature.RacialLeader = fields.Read<bool>(74);
-            creature.MovementId = fields.Read<uint>(75);
-            creature.CreatureDifficultyID = fields.Read<int>(76);
-            creature.WidgetSetID = fields.Read<int>(77);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(78);
-            creature.RegenHealth = fields.Read<bool>(79);
-            creature.MechanicImmuneMask = fields.Read<uint>(80);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(81);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(82);
-            creature.ScriptID = GetScriptId(fields.Read<string>(83));
+            creature.HoverHeight = fields.Read<float>(52);
+            creature.ModHealth = fields.Read<float>(53);
+            creature.ModHealthExtra = fields.Read<float>(54);
+            creature.ModMana = fields.Read<float>(55);
+            creature.ModManaExtra = fields.Read<float>(56);
+            creature.ModArmor = fields.Read<float>(57);
+            creature.ModDamage = fields.Read<float>(58);
+            creature.ModExperience = fields.Read<float>(59);
+            creature.RacialLeader = fields.Read<bool>(60);
+            creature.MovementId = fields.Read<uint>(61);
+            creature.CreatureDifficultyID = fields.Read<int>(62);
+            creature.WidgetSetID = fields.Read<int>(63);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(64);
+            creature.RegenHealth = fields.Read<bool>(65);
+            creature.MechanicImmuneMask = fields.Read<uint>(66);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(67);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(68);
+            creature.ScriptID = GetScriptId(fields.Read<string>(69));
 
             creatureTemplateStorage[entry] = creature;
         }
 
+        void LoadCreatureTemplateResistances()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0           1       2
+            SQLResult result = DB.World.Query("SELECT CreatureID, School, Resistance FROM creature_template_resistance");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template resistance definitions. DB table `creature_template_resistance` is empty.");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint creatureID = result.Read<uint>(0);
+                SpellSchools school = (SpellSchools)result.Read<byte>(1);
+
+                if (school == SpellSchools.Normal || school >= SpellSchools.Max)
+                {
+                    Log.outInfo(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this school {school} doesn't exist");
+                    continue;
+                }
+
+                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                {
+                    Log.outInfo(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
+                    continue;
+                }
+
+                creatureTemplate.Resistance[(int)school] = result.Read<ushort>(2);
+
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template resistances in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        void LoadCreatureTemplateSpells()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0           1       2
+            SQLResult result = DB.World.Query("SELECT CreatureID, `Index`, Spell FROM creature_template_spell");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template spell definitions. DB table `creature_template_spell` is empty.");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint creatureID = result.Read<uint>(0);
+                byte index = result.Read<byte>(1);
+
+                if (index >= SharedConst.MaxCreatureSpells)
+                {
+                    Log.outInfo(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} with a incorrect index {index}");
+                    continue;
+                }
+
+                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                {
+                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} but this creature doesn't exist");
+                    continue;
+                }
+
+                creatureTemplate.Spells[index] = result.Read<uint>(2);
+
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         void LoadCreatureTemplateModels()
         {
             uint oldMSTime = Time.GetMSTime();
