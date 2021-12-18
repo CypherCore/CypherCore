@@ -2892,6 +2892,10 @@ namespace Game.Entities
             if (_focusSpell != null)
                 return;
 
+            // Prevent dead creatures from setting a focus target, so they won't turn
+            if (!IsAlive())
+                return;
+
             // some spells shouldn't track targets
             if (focusSpell.IsFocusDisabled())
                 return;
