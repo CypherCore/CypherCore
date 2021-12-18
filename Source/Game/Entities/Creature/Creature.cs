@@ -2892,8 +2892,12 @@ namespace Game.Entities
             if (_focusSpell != null)
                 return;
 
-            // Prevent dead creatures from setting a focus target, so they won't turn
-            if (!IsAlive())
+            // Prevent dead/feigning death creatures from setting a focus target, so they won't turn
+            if (!IsAlive() || HasUnitFlag2(UnitFlags2.FeignDeath) || HasAuraType(AuraType.FeignDeath))
+                return;
+
+            // Don't allow stunned creatures to set a focus target
+            if (HasUnitFlag(UnitFlags.Stunned))
                 return;
 
             // some spells shouldn't track targets
