@@ -4996,7 +4996,7 @@ namespace Game.Entities
 
             return msg;
         }
-        public InventoryResult CanEquipUniqueItem(Item pItem, byte eslot, uint limit_count = 1)
+        public InventoryResult CanEquipUniqueItem(Item pItem, byte eslot = ItemConst.NullSlot, uint limit_count = 1)
         {
             ItemTemplate pProto = pItem.GetTemplate();
 
@@ -5022,7 +5022,7 @@ namespace Game.Entities
 
             return InventoryResult.Ok;
         }
-        public InventoryResult CanEquipUniqueItem(ItemTemplate itemProto, byte except_slot, uint limit_count = 1)
+        public InventoryResult CanEquipUniqueItem(ItemTemplate itemProto, byte except_slot = ItemConst.NullSlot, uint limit_count = 1)
         {
             // check unique-equipped on item
             if (Convert.ToBoolean(itemProto.GetFlags() & ItemFlags.UniqueEquippable))

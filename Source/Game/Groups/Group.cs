@@ -871,13 +871,14 @@ namespace Game.Groups
             p.SendPacket(startLootRoll);
         }
 
-        void SendLootRoll(ObjectGuid playerGuid, int rollNumber, RollType rollType, Roll roll)
+        void SendLootRoll(ObjectGuid playerGuid, int rollNumber, RollType rollType, Roll roll, bool autoPass = false)
         {
             LootRollBroadcast lootRoll = new();
             lootRoll.LootObj = roll.GetTarget().GetGUID();
             lootRoll.Player = playerGuid;
             lootRoll.Roll = rollNumber;
             lootRoll.RollType = rollType;
+            lootRoll.Autopassed = autoPass;
             roll.FillPacket(lootRoll.Item);
 
             foreach (var pair in roll.playerVote)
@@ -964,6 +965,23 @@ namespace Game.Groups
             BroadcastPacket(lootList, false);
         }
 
+        public bool CanRollOnItem(LootItem item, Player player)
+        {
+            // Players can't roll on unique items if they already reached the maximum quantity of that item
+            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
+            if (proto == null)
+                return false;
+
+            uint itemCount = player.GetItemCount(item.itemid);
+            if ((proto.GetMaxCount() > 0 && itemCount >= proto.GetMaxCount()) || (player.CanEquipUniqueItem(proto) != InventoryResult.Ok))
+                return false;
+
+            if (!item.AllowedForPlayer(player))
+                return false;
+
+            return true;
+        }
+        
         public void GroupLoot(Loot loot, WorldObject lootedObject)
         {
             byte itemSlot = 0;
@@ -988,18 +1006,17 @@ namespace Game.Groups
                         if (!playerToRoll || playerToRoll.GetSession() == null)
                             continue;
 
-                        bool allowedForPlayer = lootItem.AllowedForPlayer(playerToRoll);
-                        if (allowedForPlayer && playerToRoll.IsAtGroupRewardDistance(lootedObject))
+                        if (playerToRoll.IsAtGroupRewardDistance(lootedObject))
                         {
                             r.totalPlayersRolling++;
-                            if (playerToRoll.GetPassOnGroupLoot())
+                            RollType vote = playerToRoll.GetPassOnGroupLoot() ? RollType.Pass : RollType.NotEmitedYet;
+                            if (!CanRollOnItem(lootItem, playerToRoll))
                             {
-                                r.playerVote[playerToRoll.GetGUID()] = RollType.Pass;
-                                r.totalPass++;
-                                // can't broadcast the pass now. need to wait until all rolling players are known.
+                                vote = RollType.Pass;
+                                r.totalPass++; // Can't broadcast the pass now. need to wait until all rolling players are known
                             }
-                            else
-                                r.playerVote[playerToRoll.GetGUID()] = RollType.NotEmitedYet;
+
+                            r.playerVote[playerToRoll.GetGUID()] = vote;
                         }
                     }
 
@@ -1021,7 +1038,7 @@ namespace Game.Groups
                                 continue;
 
                             if (pair.Value == RollType.Pass)
-                                SendLootRoll(p.GetGUID(), -1, RollType.Pass, r);
+                                SendLootRoll(p.GetGUID(), -1, RollType.Pass, r, true);
                             else
                                 SendLootStartRollToPlayer(60000, lootedObject.GetMapId(), p, p.CanRollForItemInLFG(item, lootedObject) == InventoryResult.Ok, r);
                         }
@@ -1059,11 +1076,16 @@ namespace Game.Groups
                     if (!playerToRoll || playerToRoll.GetSession() == null)
                         continue;
 
-                    bool allowedForPlayer = i.AllowedForPlayer(playerToRoll);
-                    if (allowedForPlayer && playerToRoll.IsAtGroupRewardDistance(lootedObject))
+                    if (playerToRoll.IsAtGroupRewardDistance(lootedObject))
                     {
                         r.totalPlayersRolling++;
-                        r.playerVote[playerToRoll.GetGUID()] = RollType.NotEmitedYet;
+                        RollType vote = RollType.NotEmitedYet;
+                        if (!CanRollOnItem(i, playerToRoll))
+                        {
+                            vote = RollType.Pass;
+                            ++r.totalPass;
+                        }
+                        r.playerVote[playerToRoll.GetGUID()] = vote;
                     }
                 }
 
@@ -1082,7 +1104,7 @@ namespace Game.Groups
                             continue;
 
                         if (pair.Value == RollType.Pass)
-                            SendLootRoll(p.GetGUID(), -1, RollType.Pass, r);
+                            SendLootRoll(p.GetGUID(), -1, RollType.Pass, r, true);
                         else
                             SendLootStartRollToPlayer(60000, lootedObject.GetMapId(), p, p.CanRollForItemInLFG(item, lootedObject) == InventoryResult.Ok, r);
                     }
