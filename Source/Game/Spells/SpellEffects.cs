@@ -2962,21 +2962,6 @@ namespace Game.Spells
                                 }
                             }
                             return;
-                        case 59317:                                 // Teleporting
-                        {
-
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
-                                return;
-
-                            // return from top
-                            if (unitTarget.ToPlayer().GetAreaId() == 4637)
-                                unitTarget.CastSpell(unitTarget, 59316, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            // teleport atop
-                            else
-                                unitTarget.CastSpell(unitTarget, 59314, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-
-                            return;
-                        }
                         case 62482: // Grab Crate
                         {
                             if (unitCaster == null)
@@ -2996,39 +2981,6 @@ namespace Game.Spells
                                     }
                                 }
                             }
-                            return;
-                        }
-                        case 60123: // Lightwell
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Unit) || !m_caster.ToCreature().IsSummon())
-                                return;
-
-                            uint spell_heal;
-
-                            switch (m_caster.GetEntry())
-                            {
-                                case 31897: spell_heal = 7001; break;
-                                case 31896: spell_heal = 27873; break;
-                                case 31895: spell_heal = 27874; break;
-                                case 31894: spell_heal = 28276; break;
-                                case 31893: spell_heal = 48084; break;
-                                case 31883: spell_heal = 48085; break;
-                                default:
-                                    Log.outError(LogFilter.Spells, "Unknown Lightwell spell caster {0}", m_caster.GetEntry());
-                                    return;
-                            }
-
-                            // proc a spellcast
-                            Aura chargesAura = m_caster.ToCreature().GetAura(59907);
-                            if (chargesAura != null)
-                            {
-                                m_caster.CastSpell(unitTarget, spell_heal, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                                    .SetOriginalCaster(m_caster.ToCreature().ToTempSummon().GetSummonerGUID())
-                                    .SetOriginalCastId(m_castId));
-                                if (chargesAura.ModCharges(-1))
-                                    m_caster.ToCreature().ToTempSummon().UnSummon();
-                            }
-
                             return;
                         }
                         case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster

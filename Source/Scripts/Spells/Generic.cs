@@ -251,6 +251,10 @@ namespace Scripts.Spells.Generic
         public const uint OnTournamentMount = 63034;
         public const uint MountedDuel = 62875;
 
+        // Teleporting
+        public const uint TeleportSpireDown = 59316;
+        public const uint TeleportSpireUp = 59314;
+
         // Pvptrinkettriggeredspells
         public const uint WillOfTheForsakenCooldownTrigger = 72752;
         public const uint WillOfTheForsakenCooldownTriggerWotf = 72757;
@@ -417,11 +421,14 @@ namespace Scripts.Spells.Generic
 
     struct Misc
     {
-        //FungalDecay
+        // FungalDecay
         public const int AuraDuration = 12600; // found in sniffs, there is no duration entry we can possibly use
 
-        //FreezingCircleMisc
+        // FreezingCircleMisc
         public const uint MapIdBloodInTheSnowScenario = 1130;
+
+        // Teleporting
+        public const uint AreaVioletCitadelSpire = 4637;
     }
 
     [Script]
@@ -2987,6 +2994,29 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_teleporting : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (!target.IsPlayer())
+                return;
+
+            // return from top
+            if (target.ToPlayer().GetAreaId() == Misc.AreaVioletCitadelSpire)
+                target.CastSpell(target, SpellIds.TeleportSpireDown, true);
+            // teleport atop
+            else
+                target.CastSpell(target, SpellIds.TeleportSpireUp, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script]
     class spell_gen_trigger_exclude_caster_aura_spell : SpellScript
     {
