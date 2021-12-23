@@ -133,7 +133,10 @@ namespace Game.Movement
                 // this prevent cheating with landing  point at lags
                 // when client side flight end early in comparison server side
                 owner.StopMoving();
-                owner.SetFallInformation(0, owner.GetPositionZ());
+                float mapHeight = owner.GetMap().GetHeight(owner.GetPhaseShift(), _path[(int)GetCurrentNode()].Loc.X, _path[(int)GetCurrentNode()].Loc.Y, _path[(int)GetCurrentNode()].Loc.Z);
+                owner.SetFallInformation(0, mapHeight);
+                // When the player reaches the last flight point, teleport to destination at map height
+                owner.TeleportTo(_path[(int)GetCurrentNode()].ContinentID, _path[(int)GetCurrentNode()].Loc.X, _path[(int)GetCurrentNode()].Loc.Y, mapHeight, owner.GetOrientation());
             }
 
             owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
