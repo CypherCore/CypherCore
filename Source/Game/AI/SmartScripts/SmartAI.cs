@@ -89,12 +89,6 @@ namespace Game.AI
 
         public void StartPath(bool run = false, uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
         {
-            if (me.IsInCombat())// no wp movement in combat
-            {
-                Log.outError(LogFilter.Server, $"SmartAI.StartPath: Creature entry {me.GetEntry()} wanted to start waypoint movement while in combat, ignoring.");
-                return;
-            }
-
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
 
