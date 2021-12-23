@@ -6072,7 +6072,8 @@ namespace Game.Entities
 
                 // loot was generated and respawntime has passed since then, allow to recreate loot
                 // to avoid bugs, this rule covers spawned gameobjects only
-                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
+                // Don't allow to regenerate chest loot inside instances and raids, to avoid exploits with duplicate boss loot being given for some encounters
+                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && !go.GetMap().Instanceable() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
                     go.SetLootState(LootState.Ready);
 
                 if (go.GetLootState() == LootState.Ready)
