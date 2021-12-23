@@ -2035,7 +2035,43 @@ namespace Game.Groups
                 {
                     // do not reset the instance, just unbind if others are permanently bound to it
                     if (instanceSave.CanReset())
+                    {
+                        if (map != null && IsRaidGroup() && map.IsDungeon() && SendMsgTo)
+                        {
+                            AreaTriggerStruct instanceEntrance = Global.ObjectMgr.GetGoBackTrigger(map.GetId());
+
+                            if (instanceEntrance == null)
+                                Log.outDebug(LogFilter.Misc, $"Instance entrance not found for map {map.GetId()}");
+                            else
+                            {
+                                WorldSafeLocsEntry graveyardLocation = Global.ObjectMgr.GetClosestGraveYard(
+                                    new WorldLocation(instanceEntrance.target_mapId, instanceEntrance.target_X, instanceEntrance.target_Y, instanceEntrance.target_Z),
+                                    SendMsgTo.GetTeam(), null);
+                                uint zoneId = Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, graveyardLocation.Loc.GetMapId(),
+                                    graveyardLocation.Loc.GetPositionX(), graveyardLocation.Loc.GetPositionY(), graveyardLocation.Loc.GetPositionZ());
+
+                                foreach (MemberSlot member in GetMemberSlots())
+                                {
+                                    if (!Global.ObjAccessor.FindConnectedPlayer(member.guid))
+                                    {
+                                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_POSITION_BY_MAPID);
+
+                                        stmt.AddValue(0, graveyardLocation.Loc.GetPositionX());
+                                        stmt.AddValue(1, graveyardLocation.Loc.GetPositionY());
+                                        stmt.AddValue(2, graveyardLocation.Loc.GetPositionZ());
+                                        stmt.AddValue(3, instanceEntrance.target_Orientation);
+                                        stmt.AddValue(4, graveyardLocation.Loc.GetMapId());
+                                        stmt.AddValue(5, zoneId);
+                                        stmt.AddValue(6, member.guid.GetCounter());
+                                        stmt.AddValue(7, map.GetId());
+
+                                        DB.Characters.Execute(stmt);
+                                    }
+                                }
+                            }
+                        }
                         instanceSave.DeleteFromDB();
+                    }
                     else
                     {
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GROUP_INSTANCE_BY_INSTANCE);

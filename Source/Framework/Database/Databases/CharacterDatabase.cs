@@ -528,6 +528,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHARACTER_SOCIAL, "DELETE FROM character_social WHERE guid = ? AND friend = ?");
             PrepareStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE, "UPDATE character_social SET note = ? WHERE guid = ? AND friend = ?");
             PrepareStatement(CharStatements.UPD_CHARACTER_POSITION, "UPDATE characters SET position_x = ?, position_y = ?, position_z = ?, orientation = ?, map = ?, zone = ?, trans_x = 0, trans_y = 0, trans_z = 0, transguid = 0, taxi_path = '', cinematic = 1 WHERE guid = ?");
+            PrepareStatement(CharStatements.UPD_CHARACTER_POSITION_BY_MAPID, "UPDATE characters SET position_x = ?, position_y = ?, position_z = ?, orientation = ?, map = ?, zone = ?, trans_x = 0, trans_y = 0, trans_z = 0, transguid = 0, taxi_path = '', cinematic = 1 WHERE guid = ? AND map = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN, "SELECT characters.name, character_aura.remainTime FROM characters LEFT JOIN character_aura ON (characters.guid = character_aura.guid) WHERE character_aura.spell = 9454");
             PrepareStatement(CharStatements.SEL_CHARACTER_ONLINE, "SELECT name, account, map, zone FROM characters WHERE online > 0");
             PrepareStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID, "SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND guid = ?");
@@ -1191,6 +1192,7 @@ namespace Framework.Database
         DEL_CHARACTER_SOCIAL,
         UPD_CHARACTER_SOCIAL_NOTE,
         UPD_CHARACTER_POSITION,
+        UPD_CHARACTER_POSITION_BY_MAPID,
 
         INS_LFG_DATA,
         DEL_LFG_DATA,
