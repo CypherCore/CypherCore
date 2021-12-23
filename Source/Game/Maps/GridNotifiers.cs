@@ -2351,7 +2351,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range) && u.CheckPrivateObjectOwnerVisibility(i_obj))
+            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && u.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(u, i_range) && u.CheckPrivateObjectOwnerVisibility(i_obj))
             {
                 i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                 return true;
@@ -2740,7 +2740,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetEntry() == i_entry && i_obj.IsWithinDistInMap(go, i_range))
+            if (go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(go, i_range))
             {
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
