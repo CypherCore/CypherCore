@@ -404,6 +404,7 @@ namespace Game
     {
         Fine = 0,
         Fog = 1, // Used in some instance encounters.
+        Drizzle = 2,
         LightRain = 3,
         MediumRain = 4,
         HeavyRain = 5,

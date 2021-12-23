@@ -4251,6 +4251,12 @@ namespace Game.Entities
                 spellInfo.ProcChance = 10;
             });
 
+            // Baron Rivendare (Stratholme) - Unholy Aura
+            ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.NoInitialAggro;
+            });
+
             //
             // FIRELANDS SPELLS
             //

@@ -3026,6 +3026,7 @@ namespace Game.Entities
         {
             m_shouldReacquireTarget = false;
             m_suppressedTarget = ObjectGuid.Empty;
+            SetTarget(ObjectGuid.Empty);
             m_suppressedOrientation = 0.0f;
         }
 

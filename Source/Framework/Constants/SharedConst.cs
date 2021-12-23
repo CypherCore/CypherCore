@@ -50,11 +50,13 @@ namespace Framework.Constants
         /// BattlePets Const
         /// </summary>
         public const int MaxBattlePetSpeciesId = 3159;
-        public const int MaxPetBattleSlots = 3;
         public const int DefaultMaxBattlePetsPerSpecies = 3;
         public const int BattlePetCageItemId = 82800;
-        public const int DefaultSummonBattlePetSpell = 118301;
         public const int SpellVisualUncagePet = 222;
+
+        public const int SpellBattlePetTraining = 125610;
+        public const int SpellReviveBattlePets = 125439;
+        public const int SpellSummonBattlePet = 118301;
 
         /// <summary>
         /// Lfg Const
@@ -2910,6 +2912,15 @@ namespace Framework.Constants
         Ability2Selection = 0x40,
         FanfareNeeded = 0x80,
         DisplayOverridden = 0x100
+    }
+
+    public enum BattlePetSlots
+    {
+        Slot0 = 0,
+        Slot1 = 1,
+        Slot2 = 2,
+
+        Count
     }
 
     public enum SceneType

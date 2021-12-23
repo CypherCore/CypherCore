@@ -68,6 +68,9 @@ namespace Game.Entities
                 // Register the pet for guid lookup
                 base.AddToWorld();
                 InitializeAI();
+                ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
+                if (zoneScript != null)
+                    zoneScript.OnCreatureCreate(this);
             }
 
             // Prevent stuck pets when zoning. Pets default to "follow" when added to world

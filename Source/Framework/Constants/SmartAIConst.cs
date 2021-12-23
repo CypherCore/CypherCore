@@ -181,8 +181,8 @@ namespace Framework.Constants
         FriendlyMissingBuff = 16,      // Spellid, Radius, Repeatmin, Repeatmax
         SummonedUnit = 17,      // Creatureid(0 All), Cooldownmin, Cooldownmax
         TargetManaPct = 18,      // Manamin%, Manamax%, Repeatmin, Repeatmax
-        AcceptedQuest = 19,      // Questid(0any)
-        RewardQuest = 20,      // Questid(0any)
+        AcceptedQuest = 19,      // QuestID (0 = any), CooldownMin, CooldownMax
+        RewardQuest = 20,      // QuestID (0 = any), CooldownMin, CooldownMax
         ReachedHome = 21,      // None
         ReceiveEmote = 22,      // Emoteid, Cooldownmin, Cooldownmax, Condition, Val1, Val2, Val3
         HasAura = 23,      // Param1 = Spellid, Param2 = Stack Amount, Param3/4 Repeatmin, Repeatmax
