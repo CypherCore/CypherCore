@@ -907,7 +907,7 @@ namespace Game.AI
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            GetScript().SetScript9(e, entry, invoker);
+            GetScript().SetTimedActionList(e, entry, invoker);
         }
 
         public override void OnGameEvent(bool start, ushort eventId)
@@ -1156,7 +1156,7 @@ namespace Game.AI
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            GetScript().SetScript9(e, entry, invoker);
+            GetScript().SetTimedActionList(e, entry, invoker);
         }
 
         public override void OnGameEvent(bool start, ushort eventId)
@@ -1217,7 +1217,7 @@ namespace Game.AI
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            GetScript().SetScript9(e, entry, invoker);
+            GetScript().SetTimedActionList(e, entry, invoker);
         }
 
         public SmartScript GetScript() { return _script; }

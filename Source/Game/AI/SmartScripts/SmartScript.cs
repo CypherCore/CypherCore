@@ -4161,28 +4161,31 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
+            // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
+            if (!_timedActionList.Empty())
+                return;
+
             _timedActionList.Clear();
             _timedActionList = Global.SmartAIMgr.GetScript((int)entry, SmartScriptType.TimedActionlist);
             if (_timedActionList.Empty())
                 return;
 
             mTimedActionListInvoker = invoker != null ? invoker.GetGUID() : ObjectGuid.Empty;
-            int i = 0;
-            foreach (var holder in _timedActionList.ToList())
+            for (var i = 0; i < _timedActionList.Count; ++i)
             {
-                if (i++ == 0)
-                {
-                    holder.EnableTimed = true;//enable processing only for the first action
-                }
-                else holder.EnableTimed = false;
+                var scriptHolder = _timedActionList[i];
+                scriptHolder.EnableTimed = i == 0;//enable processing only for the first action
 
-                if (e.Action.timedActionList.timerType == 1)
-                    holder.Event.type = SmartEvents.UpdateIc;
+                if (e.Action.timedActionList.timerType == 0)
+                    scriptHolder.Event.type = SmartEvents.UpdateOoc;
+                else if (e.Action.timedActionList.timerType == 1)
+                    scriptHolder.Event.type = SmartEvents.UpdateIc;
                 else if (e.Action.timedActionList.timerType > 1)
-                    holder.Event.type = SmartEvents.Update;
-                InitTimer(holder);
+                    scriptHolder.Event.type = SmartEvents.Update;
+
+                InitTimer(scriptHolder);
             }
         }
 
