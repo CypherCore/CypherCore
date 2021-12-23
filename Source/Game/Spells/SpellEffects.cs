@@ -4285,15 +4285,15 @@ namespace Game.Spells
                     // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
                     // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
                     int lastSec = 0;
-                    switch (RandomHelper.IRand(0, 3))
+                    switch (RandomHelper.IRand(0, 2))
                     {
                         case 0: lastSec = 3; break;
                         case 1: lastSec = 7; break;
                         case 2: lastSec = 13; break;
-                        case 3: lastSec = 17; break;
                     }
 
-                    duration = duration - lastSec * Time.InMilliseconds + 5 * Time.InMilliseconds;
+                    // Duration of the fishing bobber can't be higher than the Fishing channeling duration
+                    duration = Math.Min(duration, duration - lastSec * Time.InMilliseconds + 5 * Time.InMilliseconds);
                     break;
                 }
                 case GameObjectTypes.Ritual:
