@@ -689,6 +689,9 @@ namespace Game.AI
                     case SmartEvents.RewardQuest:
                         if (e.Event.quest.questId != 0 && !IsQuestValid(e, e.Event.quest.questId))
                             return false;
+
+                        if (!IsMinMaxValid(e, e.Event.quest.cooldownMin, e.Event.quest.cooldownMax))
+                            return false;
                         break;
                     case SmartEvents.ReceiveEmote:
                     {
@@ -2097,6 +2100,8 @@ namespace Game.AI
         public struct Quest
         {
             public uint questId;
+            public uint cooldownMin;
+            public uint cooldownMax;
         }
         public struct QuestObjective
         {

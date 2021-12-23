@@ -3478,6 +3478,7 @@ namespace Game.AI
                 {
                     if (e.Event.quest.questId != 0 && var0 != e.Event.quest.questId)
                         return;
+                    RecalcTimer(e, e.Event.quest.cooldownMin, e.Event.quest.cooldownMax);
                     ProcessAction(e, unit, var0);
                     break;
                 }
