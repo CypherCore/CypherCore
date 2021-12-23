@@ -463,14 +463,30 @@ namespace Game.Spells
 
         void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out float speedXY, out float speedZ)
         {
-            if (effInfo.MiscValue != 0)
-                speedZ = (float)effInfo.MiscValue / 10;
-            else if (effInfo.MiscValueB != 0)
-                speedZ = (float)effInfo.MiscValueB / 10;
-            else
-                speedZ = 10.0f;
+            float runSpeed = unitCaster.IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)UnitMoveType.Run] : SharedConst.baseMoveSpeed[(int)UnitMoveType.Run];
+            Creature creature = unitCaster.ToCreature();
+            if (creature != null)
+                runSpeed *= creature.GetCreatureTemplate().SpeedRun;
 
-            speedXY = dist * 10.0f / speedZ;
+            float multiplier = effInfo.Amplitude;
+            if (multiplier <= 0.0f)
+                multiplier = 1.0f;
+
+            speedXY = Math.Min(runSpeed * 3.0f * multiplier, Math.Max(28.0f, unitCaster.GetSpeed(UnitMoveType.Run) * 4.0f));
+
+            float duration = dist / speedXY;
+            float durationSqr = duration * duration;
+            float minHeight = effInfo.MiscValue != 0 ? effInfo.MiscValue / 10.0f : 0.5f; // Lower bound is blizzlike
+            float maxHeight = effInfo.MiscValueB != 0 ? effInfo.MiscValueB / 10.0f : 1000.0f; // Upper bound is unknown
+            float height;
+            if (durationSqr < minHeight * 8 / MotionMaster.gravity)
+                height = minHeight;
+            else if (durationSqr > maxHeight * 8 / MotionMaster.gravity)
+                height = maxHeight;
+            else
+                height = (float)(MotionMaster.gravity * durationSqr / 8);
+
+            speedZ = MathF.Sqrt((float)(2 * MotionMaster.gravity * height));
         }
 
         [SpellEffectHandler(SpellEffectName.Jump)]
