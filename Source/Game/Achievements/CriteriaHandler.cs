@@ -70,10 +70,11 @@ namespace Game.Achievements
                 return;
             }
 
-            // disable for gamemasters with GM-mode enabled
-            if (referencePlayer.IsGameMaster())
+            // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
+            if (referencePlayer.IsGameMaster() || referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
             {
-                Log.outDebug(LogFilter.Achievement, "UpdateCriteria: [Player {0} GM mode on] {1}, {2} ({3}), {4}, {5}, {6}", referencePlayer.GetName(), GetOwnerInfo(), type, type, miscValue1, miscValue2, miscValue3);
+                Log.outDebug(LogFilter.Achievement, $"CriteriaHandler::UpdateCriteria: [Player {referencePlayer.GetName()} {(referencePlayer.IsGameMaster() ? "GM mode on" : "disallowed by RBAC")}]" +
+                    $" {GetOwnerInfo()}, {type} ({(uint)type}), {miscValue1}, {miscValue2}, {miscValue3}");
                 return;
             }
 

@@ -64,8 +64,8 @@ namespace Framework.Constants
         JoinArenas = 5,
         JoinDungeonFinder = 6,
         IgnoreIdleConnection = 7,
-        //  8 - Reuse
-        //  9 - Reuse
+        CannotEarnAchievements = 8,
+        CannotEarnRealmFirstAchievements = 9,
         UseCharacterTemplates = 10,
         LogGmTrade = 11,
         SkipCheckCharacterCreationDemonHunter = 12,

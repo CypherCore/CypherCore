@@ -88,9 +88,14 @@ namespace Game.Achievements
                 (achievement.Faction == AchievementFaction.Alliance && referencePlayer.GetTeam() != Team.Alliance))
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Wrong faction",
-            criteria.Id, criteria.Entry.Type, achievement.Id);
+                    criteria.Id, criteria.Entry.Type, achievement.Id);
                 return false;
             }
+
+            // Don't update realm first achievements if the player's account isn't allowed to do so
+            if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
+                if (referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnRealmFirstAchievements))
+                    return false;
 
             if (achievement.CovenantID != 0 && referencePlayer.m_playerData.CovenantID != achievement.CovenantID)
             {
@@ -373,8 +378,8 @@ namespace Game.Achievements
         {
             Log.outDebug(LogFilter.Achievement, $"ResetAchievementCriteria({failEvent}, {failAsset}, {evenIfCriteriaComplete})");
 
-            // disable for gamemasters with GM-mode enabled
-            if (_owner.IsGameMaster())
+            // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
+            if (_owner.IsGameMaster() || _owner.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
                 return;
 
             var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
@@ -499,8 +504,8 @@ namespace Game.Achievements
 
         public override void CompletedAchievement(AchievementRecord achievement, Player referencePlayer)
         {
-            // disable for gamemasters with GM-mode enabled
-            if (_owner.IsGameMaster())
+            // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
+            if (_owner.IsGameMaster() || _owner.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
                 return;
 
             if ((achievement.Faction == AchievementFaction.Horde && referencePlayer.GetTeam() != Team.Horde) ||
