@@ -67,7 +67,7 @@ namespace Framework.Constants
         PetType = 45,                // mask             0              0                  true if player has a pet of given type(s)
         Taxi = 46,                   // 0                0              0                  true if player is on taxi
         Queststate = 47,             // quest_id         state_mask     0                  true if player is in any of the provided quest states for the quest (1 = not taken, 2 = completed, 8 = in progress, 32 = failed, 64 = rewarded)
-        ObjectiveComplete = 48,      // ID               0              0                  true if player has ID objective complete, but quest not yet rewarded
+        ObjectiveProgress = 48,      // ID               0              0                  true if player has ID objective complete, but quest not yet rewarded
         DifficultyId = 49,           // Difficulty       0              0                  true is map has difficulty id
         Gamemaster = 50,             // canBeGM          0              0                  true if player is gamemaster (or can be gamemaster)
         ObjectEntryGuid = 51,        // TypeID           entry          guid               true if object is type TypeID and the entry is 0 or matches entry of the object or matches guid of the object

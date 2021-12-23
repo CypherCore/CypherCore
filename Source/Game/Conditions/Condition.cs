@@ -357,7 +357,7 @@ namespace Game.Conditions
                     }
                     break;
                 }
-                case ConditionTypes.ObjectiveComplete:
+                case ConditionTypes.ObjectiveProgress:
                 {
                     if (player)
                     {
@@ -373,7 +373,7 @@ namespace Game.Conditions
                         if (slot >= SharedConst.MaxQuestLogSize)
                             break;
 
-                        condMeets = (!player.GetQuestRewardStatus(questObj.QuestID) && player.IsQuestObjectiveComplete(slot, quest, questObj));
+                        condMeets = player.GetQuestSlotObjectiveData(slot, questObj) == ConditionValue3;
                     }
                     break;
                 }
@@ -502,7 +502,7 @@ namespace Game.Conditions
                         mask |= GridMapTypeMask.AreaTrigger;
                     break;
                 case ConditionTypes.DailyQuestDone:
-                case ConditionTypes.ObjectiveComplete:
+                case ConditionTypes.ObjectiveProgress:
                     mask |= GridMapTypeMask.Player;
                     break;
                 default:

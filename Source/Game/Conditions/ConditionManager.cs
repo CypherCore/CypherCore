@@ -1625,12 +1625,18 @@ namespace Game
                     }
                     break;
                 }
-                case ConditionTypes.ObjectiveComplete:
+                case ConditionTypes.ObjectiveProgress:
                 {
                     QuestObjective obj = Global.ObjectMgr.GetQuestObjective(cond.ConditionValue1);
                     if (obj == null)
                     {
                         Log.outError(LogFilter.Sql, "{0} points to non-existing quest objective ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    int limit = obj.IsStoringFlag() ? 1 : obj.Amount;
+                    if (cond.ConditionValue3 > limit)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has quest objective count {cond.ConditionValue3} in value3, but quest objective {cond.ConditionValue1} has a maximum objective count of {limit}, skipped.");
                         return false;
                     }
                     break;
@@ -2573,7 +2579,7 @@ namespace Game
             new ConditionTypeInfo("Pet type",             true, false, false),
             new ConditionTypeInfo("On Taxi",              false,false, false),
             new ConditionTypeInfo("Quest state mask",     true, true, false),
-            new ConditionTypeInfo("Objective Complete",   true, false, false),
+            new ConditionTypeInfo("Quest objective progress",   true, false, true),
             new ConditionTypeInfo("Map Difficulty",       true, false, false),
             new ConditionTypeInfo("Is Gamemaster",        true, false, false),
             new ConditionTypeInfo("Object Entry or Guid", true, true,  true),
