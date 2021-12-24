@@ -1125,12 +1125,14 @@ namespace Game.Entities
                 if (HasUnitState(state))
                     return;
 
+                if (state.HasFlag(UnitState.Controlled))
+                    CastStop();
+
                 AddUnitState(state);
                 switch (state)
                 {
                     case UnitState.Stunned:
                         SetStunned(true);
-                        CastStop();
                         break;
                     case UnitState.Root:
                         if (!HasUnitState(UnitState.Stunned))
@@ -1143,7 +1145,6 @@ namespace Game.Entities
                             SendMeleeAttackStop();
                             // SendAutoRepeatCancel ?
                             SetConfused(true);
-                            CastStop();
                         }
                         break;
                     case UnitState.Fleeing:
@@ -1153,7 +1154,6 @@ namespace Game.Entities
                             SendMeleeAttackStop();
                             // SendAutoRepeatCancel ?
                             SetFeared(true);
-                            CastStop();
                         }
                         break;
                     default:

@@ -7217,7 +7217,11 @@ namespace Game.Entities
         {
             // still affected by some aura that shouldn't allow control, only allow on last such aura to be removed
             if (allowMove && target.HasUnitState(UnitState.CantClientControl))
+            {
+                // this should never happen, otherwise m_unitBeingMoved might be left dangling!
+                Cypher.Assert(GetUnitBeingMoved() == target);
                 return;
+            }
 
             ControlUpdate packet = new();
             packet.Guid = target.GetGUID();

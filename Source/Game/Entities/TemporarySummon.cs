@@ -1043,15 +1043,6 @@ namespace Game.Entities
                 }
             }
         }
-
-        public override void RemoveFromWorld()
-        {
-            if (!IsInWorld)
-                return;
-
-            RemoveCharmedBy(null);
-            base.RemoveFromWorld();
-        }
     }
 
     public class ForcedUnsummonDelayEvent : BasicEvent
