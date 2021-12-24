@@ -506,7 +506,7 @@ namespace Game.Entities
             if ((attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.OffAttack) && !IsWithinLOSInMap(victim))
                 return;
 
-            AttackedTarget(victim, true);
+            AtTargetAttacked(victim, true);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Attacking);
 
             // ignore ranged case
@@ -643,7 +643,7 @@ namespace Game.Entities
             SendCombatLogMessage(packet);
         }
 
-        public void AttackedTarget(Unit target, bool canInitialAggro = true)
+        public void AtTargetAttacked(Unit target, bool canInitialAggro = true)
         {
             if (!target.IsEngaged() && !canInitialAggro)
                 return;

@@ -8039,7 +8039,7 @@ namespace Game.Spells
             {
                 Unit unitCaster = spell.GetCaster().ToUnit();
                 if (unitCaster != null)
-                    unitCaster.AttackedTarget(unit, spell.m_spellInfo.HasInitialAggro());
+                    unitCaster.AtTargetAttacked(unit, spell.m_spellInfo.HasInitialAggro());
 
                 if (!unit.IsStandState())
                     unit.SetStandState(UnitStandStateType.Stand);
