@@ -590,11 +590,7 @@ namespace Game.Entities
 
                     if (RegenTimer == 0)
                     {
-                        bool bInCombat = IsEngaged() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
-                                                          !GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
-                                                          !GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself().IsGameMaster()); // or the victim/owner/charmer is not a GameMaster
-
-                        if (!IsInEvadeMode() && (!bInCombat || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
+                        if (!IsInEvadeMode() && (!IsEngaged() || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
                             RegenerateHealth();
 
                         if (GetPowerType() == PowerType.Energy)
