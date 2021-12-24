@@ -590,7 +590,7 @@ namespace Game.Entities
 
                     if (RegenTimer == 0)
                     {
-                        bool bInCombat = IsInCombat() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
+                        bool bInCombat = IsEngaged() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
                                                           !GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
                                                           !GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself().IsGameMaster()); // or the victim/owner/charmer is not a GameMaster
 
