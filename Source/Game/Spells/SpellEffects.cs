@@ -1713,10 +1713,8 @@ namespace Game.Spells
                             summon.SelectLevel();       // some summoned creaters have different from 1 DB data for level/hp
                             summon.SetNpcFlags((NPCFlags)((int)summon.GetCreatureTemplate().Npcflag & 0xFFFFFFFF));
                             summon.SetNpcFlags2((NPCFlags2)((int)summon.GetCreatureTemplate().Npcflag >> 32));
-
                             summon.SetImmuneToAll(true);
 
-                            summon.GetAI().EnterEvadeMode();
                             break;
                         }
                         default:
@@ -2928,20 +2926,6 @@ namespace Game.Spells
 
                             return;
                         }
-                        case 58418:                                 // Portal to Orgrimmar
-                        case 58420:                                 // Portal to Stormwind
-                        {
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player) || effectInfo.EffectIndex != 0)
-                                return;
-
-                            uint spellID = (uint)m_spellInfo.GetEffect(0).CalcValue();
-                            uint questID = (uint)m_spellInfo.GetEffect(1).CalcValue();
-
-                            if (unitTarget.ToPlayer().GetQuestStatus(questID) == QuestStatus.Complete)
-                                unitTarget.CastSpell(unitTarget, spellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-
-                            return;
-                        }
                         case 58941:                                 // Rock Shards
                             if (unitTarget != null && m_originalCaster != null)
                             {
@@ -2983,33 +2967,7 @@ namespace Game.Spells
                             }
                             return;
                         }
-                        case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
-                        {
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit))
-                                return;
-
-                            uint[] spellPlayer = new uint[5]
-                            {
-                                        45674,                            // Bigger!
-                                        45675,                            // Shrunk
-                                        45678,                            // Yellow
-                                        45682,                            // Ghost
-                                        45684                             // Polymorph
-                            };
-
-                            uint[] spellTarget = new uint[5]
-                            {
-                                        45673,                            // Bigger!
-                                        45672,                            // Shrunk
-                                        45677,                            // Yellow
-                                        45681,                            // Ghost
-                                        45683                             // Polymorph
-                            };
-
-                            m_caster.CastSpell(m_caster, spellPlayer[RandomHelper.IRand(0, 4)], new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            unitTarget.CastSpell(unitTarget, spellTarget[RandomHelper.IRand(0, 4)], new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            break;
-                        }
+                        break;
                     }
                     break;
                 }
@@ -4473,8 +4431,8 @@ namespace Game.Spells
                 var dispellData = new SpellDispellData();
                 dispellData.SpellID = dispell.Item1;
                 dispellData.Harmful = false;      // TODO: use me
-                //dispellData.Rolled = none;        // TODO: use me
-                //dispellData.Needed = none;        // TODO: use me
+                                                  //dispellData.Rolled = none;        // TODO: use me
+                                                  //dispellData.Needed = none;        // TODO: use me
 
                 unitTarget.RemoveAurasDueToSpellBySteal(dispell.Item1, dispell.Item2, m_caster);
 
@@ -4717,8 +4675,6 @@ namespace Game.Spells
                     else
                         summon.SetDisplayId(1126);
                 }
-
-                summon.GetAI().EnterEvadeMode();
 
                 ExecuteLogEffectSummonObject(effect.Effect, summon);
             }
@@ -5502,7 +5458,6 @@ namespace Game.Spells
             playerTarget.AddHonorXP((uint)damage);
             playerTarget.SendPacket(packet);
         }
-
 
         [SpellEffectHandler(SpellEffectName.JumpCharge)]
         void EffectJumpCharge()

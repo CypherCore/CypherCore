@@ -149,6 +149,20 @@ namespace Game.AI
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
         }
 
+        // Called when creature appears in the world (spawn, respawn, grid load etc...)
+        public virtual void JustAppeared()
+        {
+            if (me.GetVehicle() == null)
+            {
+                Unit owner = me.GetCharmerOrOwner();
+                if (owner != null)
+                {
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle());
+                }
+            }
+        }
+
         // Called for reaction at stopping attack at no attackers or targets
         public virtual void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
@@ -392,9 +406,6 @@ namespace Game.AI
         public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
 
         public virtual bool IsEscorted() { return false; }
-
-        // Called when creature appears in the world (spawn, respawn, grid load etc...)
-        public virtual void JustAppeared() { }
 
         public virtual void MovementInform(MovementGeneratorType type, uint id) { }
 
