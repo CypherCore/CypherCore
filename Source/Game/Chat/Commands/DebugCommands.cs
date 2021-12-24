@@ -934,7 +934,7 @@ namespace Game.Chat
             {
                 if (!mgr.IsThreatListEmpty(true))
                 {
-                    if (mgr.IsEngaged())
+                    if (target.IsEngaged())
                         handler.SendSysMessage($"Threat list of {target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}):");
                     else
                         handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not engaged, but still has a threat list? Well, here it is:");
@@ -948,13 +948,15 @@ namespace Game.Chat
                     }
                     handler.SendSysMessage("End of threat list.");
                 }
-                else if (!mgr.IsEngaged())
+                else if (!target.IsEngaged())
                     handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not currently engaged.");
                 else
                     handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) seems to be engaged, but does not have a threat list??");
             }
+            else if (target.IsEngaged())
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) is currently engaged. (This unit cannot have a threat list.)");
             else
-                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) is not currently engaged. (This unit cannot have a threat list.)");
 
             return true;
         }

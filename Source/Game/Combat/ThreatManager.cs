@@ -32,7 +32,6 @@ namespace Game.Combat
 
         public Unit _owner;
         bool _ownerCanHaveThreatList;
-        bool _ownerEngaged;
 
         public bool NeedClientUpdate;
         uint _updateTimer;
@@ -82,7 +81,7 @@ namespace Game.Combat
 
         public void Update(uint tdiff)
         {
-            if (!CanHaveThreatList() || !IsEngaged())
+            if (!CanHaveThreatList() || IsThreatListEmpty())
                 return;
 
             if (_updateTimer <= tdiff)
@@ -190,13 +189,6 @@ namespace Game.Combat
                     pair.Value.ListNotifyChanged();
                 }
             }
-        }
-
-        static void SaveCreatureHomePositionIfNeed(Creature c)
-        {
-            MovementGeneratorType movetype = c.GetMotionMaster().GetCurrentMovementGeneratorType();
-            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (c.IsAIEnabled() && c.GetAI().IsEscorted()))
-                c.SetHomePosition(c.GetPosition());
         }
 
         public void AddThreat(Unit target, float amount, SpellInfo spell = null, bool ignoreModifiers = false, bool ignoreRedirects = false)
@@ -317,20 +309,10 @@ namespace Game.Combat
             if (newRefe.IsOnline()) // ...and if the ref is online it also gets the threat it should have
                 newRefe.AddThreat(amount);
 
-            if (!_ownerEngaged)
+            if (!_owner.IsEngaged())
             {
-                Creature cOwner = _owner.ToCreature(); // if we got here the owner can have a threat list, and must be a creature!
-                _ownerEngaged = true;
-
+                _owner.AtEngage(target);
                 UpdateVictim();
-                SaveCreatureHomePositionIfNeed(cOwner);
-                CreatureAI ownerAI = cOwner.GetAI();
-                if (ownerAI != null)
-                    ownerAI.JustEngagedWith(target);
-
-                CreatureGroup formation = cOwner.GetFormation();
-                if (formation != null)
-                    formation.MemberEngagingTarget(cOwner, target);
             }
         }
 
@@ -407,14 +389,17 @@ namespace Game.Combat
 
         public void ClearAllThreat()
         {
-            _ownerEngaged = false;
-            if (_myThreatListEntries.Empty())
-                return;
-
-            SendClearAllThreatToClients();
-            do
-                _myThreatListEntries.First().Value.UnregisterAndFree();
-            while (!_myThreatListEntries.Empty());
+            if (!_myThreatListEntries.Empty())
+            {
+                SendClearAllThreatToClients();
+                do
+                    _myThreatListEntries.FirstOrDefault().Value.UnregisterAndFree();
+                while (!_myThreatListEntries.Empty());
+            }
+            // note: i don't really like having this here
+            // (maybe engage flag should be in creature ai? it's inherently an AI property...)
+            if (_owner.IsEngaged())
+                _owner.AtDisengage();
         }
 
         public void FixateTarget(Unit target)
@@ -782,8 +767,6 @@ namespace Game.Combat
         // can our owner have a threat list?
         // identical to ThreatManager::CanHaveThreatList(GetOwner())
         public bool CanHaveThreatList() { return _ownerCanHaveThreatList; }
-
-        public bool IsEngaged() { return _ownerEngaged; }
 
         public int GetThreatListSize() { return _sortedThreatList.Count; }
 

@@ -277,11 +277,15 @@ namespace Game.Combat
             {
                 _owner.AddUnitFlag(UnitFlags.InCombat);
                 _owner.AtEnterCombat();
+                if (!_owner.CanHaveThreatList() && !_owner.IsEngaged())
+                    _owner.AtEngage(GetAnyTarget());
             }
             else
             {
                 _owner.RemoveUnitFlag(UnitFlags.InCombat);
                 _owner.AtExitCombat();
+                if (_owner.IsEngaged() && !(_owner.IsCreature() && _owner.ToCreature().IsAIEnabled()))
+                    _owner.AtDisengage();
             }
 
             Unit master = _owner.GetCharmerOrOwner();

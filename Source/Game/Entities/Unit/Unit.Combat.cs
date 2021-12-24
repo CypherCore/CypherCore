@@ -57,6 +57,9 @@ namespace Game.Entities
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
         }
 
+        public virtual void AtEngage(Unit target) { m_isEngaged = true; }
+        public virtual void AtDisengage() { m_isEngaged = false; }
+
         public void CombatStop(bool includingCast = false, bool mutualPvP = true)
         {
             if (includingCast && IsNonMeleeSpellCast(false))
@@ -144,10 +147,10 @@ namespace Game.Entities
 
         public bool CanHaveThreatList() { return m_threatManager.CanHaveThreatList(); }
 
-        // For NPCs with threat list: Whether there are any enemies on our threat list
-        // For other units: Whether we're in combat
-        // This value is different from IsInCombat when a projectile spell is midair (combat on launch - threat+aggro on impact)
-        public bool IsEngaged() { return CanHaveThreatList() ? m_threatManager.IsEngaged() : IsInCombat(); }
+        // This value can be different from IsInCombat:
+        // - when a projectile spell is midair against a creature (combat on launch - threat+aggro on impact)
+        // - when the creature has no targets left, but the AI has not yet ceased engaged logic
+        public bool IsEngaged() { return m_isEngaged; }
 
         public bool IsEngagedBy(Unit who) { return CanHaveThreatList() ? IsThreatenedBy(who) : IsInCombatWith(who); }
 

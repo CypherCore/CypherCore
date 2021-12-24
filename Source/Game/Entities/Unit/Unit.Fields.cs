@@ -54,6 +54,9 @@ namespace Game.Entities
         internal float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
 
+        // Threat+combat management
+        bool m_isEngaged;
+
         CombatManager m_combatManager;
         ThreatManager m_threatManager;
 

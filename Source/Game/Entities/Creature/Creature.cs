@@ -1042,9 +1042,9 @@ namespace Game.Entities
                 && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
         }
 
-        public override void AtEnterCombat()
+        public override void AtEngage(Unit target)
         {
-            base.AtEnterCombat();
+            base.AtEngage(target);
 
             if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.MountedCombatAllowed))
                 Dismount();
@@ -1055,11 +1055,23 @@ namespace Game.Entities
                 UpdateSpeed(UnitMoveType.Swim);
                 UpdateSpeed(UnitMoveType.Flight);
             }
+
+            MovementGeneratorType movetype = GetMotionMaster().GetCurrentMovementGeneratorType();
+            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (IsAIEnabled() && GetAI().IsEscorted()))
+                SetHomePosition(GetPosition());
+
+            CreatureAI ai = GetAI();
+            if (ai != null)
+                ai.JustEngagedWith(target);
+
+            CreatureGroup formation = GetFormation();
+            if (formation != null)
+                formation.MemberEngagingTarget(this, target);
         }
 
-        public override void AtExitCombat()
+        public override void AtDisengage()
         {
-            base.AtExitCombat();
+            base.AtDisengage();
 
             ClearUnitState(UnitState.AttackPlayer);
             if (HasDynamicFlag(UnitDynFlags.Tapped))
