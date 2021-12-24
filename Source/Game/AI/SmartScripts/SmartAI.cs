@@ -568,12 +568,6 @@ namespace Game.AI
 
             me.SetVisible(true);
 
-            if (!me.IsDead())
-            {
-                GetScript().ProcessEventsFor(SmartEvents.Respawn);
-                GetScript().OnReset();
-            }
-
             _followGuid.Clear();//do not reset follower on Reset(), we need it after combat evade
             _followDist = 0;
             _followAngle = 0;
@@ -581,6 +575,15 @@ namespace Game.AI
             _followArrivedTimer = 1000;
             _followArrivedEntry = 0;
             _followCreditType = 0;
+        }
+
+        public override void JustAppeared()
+        {
+            if (me.IsDead())
+                return;
+
+            GetScript().ProcessEventsFor(SmartEvents.Respawn);
+            GetScript().OnReset();
         }
 
         public override void JustReachedHome()
