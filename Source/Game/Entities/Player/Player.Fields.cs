@@ -209,8 +209,6 @@ namespace Game.Entities
         public List<ObjectGuid> m_clientGUIDs = new();
         public List<ObjectGuid> m_visibleTransports = new();
         public WorldObject seerView;
-        // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
-        public Unit m_unitMovedByMe;
         Team m_team;
         ReputationMgr reputationMgr;
         QuestObjectiveCriteriaManager m_questObjectiveCriteriaMgr;

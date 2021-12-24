@@ -123,7 +123,7 @@ namespace Game.Entities
                 }
             }
 
-            Player playerMover = GetPlayerBeingMoved(); // unit controlled by a player.
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer(); // unit controlled by a player.
             if (playerMover)
             {
                 // Send notification to self
@@ -244,7 +244,7 @@ namespace Game.Entities
                 if (charmer)
                 {
                     player = charmer.ToPlayer();
-                    if (player && player.m_unitMovedByMe != this)
+                    if (player && player.GetUnitBeingMoved() != this)
                         player = null;
                 }
             }
@@ -287,7 +287,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag(MovementFlag.DisableCollision);
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
@@ -322,7 +322,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanSwimToFlyTrans);
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableTransitionBetweenSwimAndFly : ServerOpcodes.MoveDisableTransitionBetweenSwimAndFly);
@@ -349,7 +349,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanTurnWhileFalling : ServerOpcodes.MoveUnsetCanTurnWhileFalling);
@@ -375,7 +375,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanDoubleJump);
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableDoubleJump : ServerOpcodes.MoveDisableDoubleJump);
@@ -672,7 +672,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.DisableGravity);
 
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableGravity : ServerOpcodes.MoveEnableGravity);
@@ -816,8 +816,8 @@ namespace Game.Entities
                 }
         }
     }
-
-    public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
+        
+        public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
             base.ProcessPositionDataChanged(data);
             ProcessTerrainStatusUpdate(data.LiquidStatus, data.LiquidInfo);
@@ -922,7 +922,7 @@ namespace Game.Entities
             if (!enable && IsTypeId(TypeId.Player))
                 ToPlayer().SetFallInformation(0, GetPositionZ());
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanFly : ServerOpcodes.MoveUnsetCanFly);
@@ -955,7 +955,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.WaterWalk);
 
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetWaterWalk : ServerOpcodes.MoveSetLandWalk);
@@ -988,7 +988,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.FallingSlow);
 
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetFeatherFall : ServerOpcodes.MoveSetNormalFall);
@@ -1036,7 +1036,7 @@ namespace Game.Entities
                 }
             }
 
-            Player playerMover = GetPlayerBeingMoved();
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetHovering : ServerOpcodes.MoveUnsetHovering);
@@ -1105,6 +1105,17 @@ namespace Game.Entities
                 UpdatePosition(pos, true);
                 UpdateObjectVisibility();
             }
+        }
+
+        public void SetMovedUnit(Unit target)
+        {
+            m_unitMovedByMe.m_playerMovingMe = null;
+            m_unitMovedByMe = target;
+            m_unitMovedByMe.m_playerMovingMe = ToPlayer();
+
+            MoveSetActiveMover packet = new();
+            packet.MoverGUID = target.GetGUID();
+            ToPlayer().SendPacket(packet);
         }
 
         public void SetControlled(bool apply, UnitState state)
@@ -1254,7 +1265,7 @@ namespace Game.Entities
                     RemoveUnitMovementFlag(MovementFlag.Root);
             }
 
-            Player playerMover = GetPlayerBeingMoved();// unit controlled by a player.
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();// unit controlled by a player.
             if (playerMover)
             {
                 MoveSetFlag packet = new(apply ? ServerOpcodes.MoveRoot : ServerOpcodes.MoveUnroot);
@@ -1624,14 +1635,7 @@ namespace Game.Entities
             SendMessageToSet(data, true);
         }
 
-        public Unit GetUnitBeingMoved()
-        {
-            Player player = ToPlayer();
-            if (player)
-                return player.m_unitMovedByMe;
-
-            return null;
-        }
+        public Unit GetUnitBeingMoved() { return m_unitMovedByMe; }
 
         Player GetPlayerBeingMoved()
         {
@@ -1759,7 +1763,8 @@ namespace Game.Entities
                 moveUpdateTeleport.MovementForces = _movementForces.GetForces();
             Unit broadcastSource = this;
 
-            Player playerMover = GetPlayerBeingMoved();
+            // should this really be the unit _being_ moved? not the unit doing the moving?
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover)
             {
                 float x, y, z, o;

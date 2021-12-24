@@ -42,8 +42,9 @@ namespace Game.Entities
         MotionMaster i_motionMaster;
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
         TimeTrackerSmall movesplineTimer;
-        public Player m_playerMovingMe;
         MovementForces _movementForces;
+        protected Unit m_unitMovedByMe;    // only ever set for players, and only for direct client control
+        protected Player m_playerMovingMe; // only set for direct client control (possess effects, vehicles and similar)
 
         //Combat
         protected List<Unit> attackerList = new();

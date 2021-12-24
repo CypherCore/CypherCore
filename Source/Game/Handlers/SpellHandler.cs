@@ -37,7 +37,7 @@ namespace Game
             Player user = GetPlayer();
 
             // ignore for remote control state
-            if (user.m_unitMovedByMe != user)
+            if (user.GetUnitBeingMoved() != user)
                 return;
 
             Item item = user.GetUseableItemByPos(packet.PackSlot, packet.Slot);
@@ -133,7 +133,7 @@ namespace Game
             Player player = GetPlayer();
 
             // ignore for remote control state
-            if (player.m_unitMovedByMe != player)
+            if (player.GetUnitBeingMoved() != player)
                 return;
 
             // additional check, client outputs message on its own
@@ -243,8 +243,8 @@ namespace Game
             if (obj)
             {
                 // ignore for remote control state
-                if (GetPlayer().m_unitMovedByMe != GetPlayer())
-                    if (!(GetPlayer().IsOnVehicle(GetPlayer().m_unitMovedByMe) || GetPlayer().IsMounted()) && !obj.GetGoInfo().IsUsableMounted())
+                if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
+                    if (!(GetPlayer().IsOnVehicle(GetPlayer().GetUnitBeingMoved()) || GetPlayer().IsMounted()) && !obj.GetGoInfo().IsUsableMounted())
                         return;
 
                 obj.Use(GetPlayer());
@@ -255,7 +255,7 @@ namespace Game
         void HandleGameobjectReportUse(GameObjReportUse packet)
         {
             // ignore for remote control state
-            if (GetPlayer().m_unitMovedByMe != GetPlayer())
+            if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
                 return;
 
             GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
@@ -272,7 +272,7 @@ namespace Game
         void HandleCastSpell(CastSpell cast)
         {
             // ignore for remote control state (for player case)
-            Unit mover = GetPlayer().m_unitMovedByMe;
+            Unit mover = GetPlayer().GetUnitBeingMoved();
             if (mover != GetPlayer() && mover.IsTypeId(TypeId.Player))
                 return;
 
@@ -472,7 +472,7 @@ namespace Game
         void HandleCancelChanneling(CancelChannelling cancelChanneling)
         {
             // ignore for remote control state (for player case)
-            Unit mover = _player.m_unitMovedByMe;
+            Unit mover = _player.GetUnitBeingMoved();
             if (mover != _player && mover.IsTypeId(TypeId.Player))
                 return;
 
@@ -483,7 +483,7 @@ namespace Game
         void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
         {
             // ignore for remote control state
-            if (GetPlayer().m_unitMovedByMe != GetPlayer())
+            if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
                 return;
 
             byte slotId = totemDestroyed.Slot;

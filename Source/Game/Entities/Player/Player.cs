@@ -4013,7 +4013,7 @@ namespace Game.Entities
         public override bool CanAlwaysSee(WorldObject obj)
         {
             // Always can see self
-            if (m_unitMovedByMe == obj)
+            if (GetUnitBeingMoved() == obj)
                 return true;
 
             ObjectGuid guid = m_activePlayerData.FarsightObject;
@@ -5544,7 +5544,7 @@ namespace Game.Entities
             initialSetup.ServerExpansionLevel = (byte)WorldConfig.GetIntValue(WorldCfg.Expansion);
             SendPacket(initialSetup);
 
-            SetMover(this);
+            SetMovedUnit(this);
         }
 
         public void SendInitialPacketsAfterAddToMap()
@@ -7228,18 +7228,7 @@ namespace Game.Entities
                 SetViewpoint(target, allowMove);
 
             if (allowMove)
-                SetMover(target);
-        }
-
-        public void SetMover(Unit target)
-        {
-            m_unitMovedByMe.m_playerMovingMe = null;
-            m_unitMovedByMe = target;
-            m_unitMovedByMe.m_playerMovingMe = this;
-
-            MoveSetActiveMover packet = new();
-            packet.MoverGUID = target.GetGUID();
-            SendPacket(packet);
+                SetMovedUnit(target);
         }
 
         public Item GetWeaponForAttack(WeaponAttackType attackType, bool useable = false)
