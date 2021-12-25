@@ -534,6 +534,13 @@ namespace Game.Entities
                             }
                             return;
                         }
+                        case GameObjectTypes.Chest:
+                            if (m_restockTime > GameTime.GetGameTime())
+                                return;
+                            // If there is no restock timer, or if the restock timer passed, the chest becomes ready to loot
+                            m_lootState = LootState.Ready;
+                            AddToObjectUpdateIfNeeded();
+                            break;
                         default:
                             m_lootState = LootState.Ready;                         // for other GOis same switched without delay to GO_READY
                             break;
@@ -717,6 +724,13 @@ namespace Game.Entities
                                 else
                                     m_groupLootTimer -= diff;
                             }
+
+                            // Gameobject was partially looted and restock time passed, restock all loot now
+                            if (GameTime.GetGameTime() >= m_restockTime)
+                            {
+                                m_lootState = LootState.Ready;
+                                AddToObjectUpdateIfNeeded();
+                            }
                             break;
                         case GameObjectTypes.Trap:
                         {
@@ -803,16 +817,21 @@ namespace Game.Entities
 
                     // Do not delete gameobjects that are not consumed on loot, while still allowing them to despawn when they expire if summoned
                     bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
-                    bool isPermanentSpawn = m_respawnDelayTime == 0;
-                    if (!GetGoInfo().IsDespawnAtAction() &&
-                        ((GetGoType() == GameObjectTypes.Goober && (!isSummonedAndExpired || isPermanentSpawn)) ||
-                        (GetGoType() == GameObjectTypes.Chest && !isSummonedAndExpired && GetGoInfo().Chest.chestRestockTime == 0))) // ToDo: chests with data2 (chestRestockTime) > 0 and data3 (consumable) = 0 should not despawn on loot
+                    if (!GetGoInfo().IsDespawnAtAction() && !isSummonedAndExpired)
                     {
-                        SetLootState(LootState.Ready);
+                        if (GetGoType() == GameObjectTypes.Chest && GetGoInfo().Chest.chestRestockTime > 0)
+                        {
+                            // Start restock timer when the chest is fully looted
+                            m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
+                            SetLootState(LootState.NotReady);
+                            AddToObjectUpdateIfNeeded();
+                        }
+                        else
+                            SetLootState(LootState.Ready);
                         UpdateObjectVisibility();
                         return;
                     }
-                    else
+                    else if (GetOwner() != null || GetSpellId() != 0)
                     {
                         SetRespawnTime(0);
                         Delete();
@@ -1321,9 +1340,13 @@ namespace Game.Entities
                     if (questStatus != QuestGiverStatus.None && questStatus != QuestGiverStatus.Future)
                         return true;
                     break;
-                // scan GO chest with loot including quest items
                 case GameObjectTypes.Chest:
                 {
+                    // Chests become inactive while not ready to be looted
+                    if (GetLootState() == LootState.NotReady)
+                        return false;
+
+                    // scan GO chest with loot including quest items
                     if (LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GetLootId(), target))
                     {
                         Battleground bg = target.GetBattleground();
@@ -2503,6 +2526,10 @@ namespace Game.Entities
             m_lootStateUnitGUID = unit ? unit.GetGUID() : ObjectGuid.Empty;
             GetAI().OnLootStateChanged((uint)state, unit);
 
+            // Start restock timer if the chest is partially looted or not looted at all
+            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0)
+                m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
+
             // only set collision for doors on SetGoState
             if (GetGoType() == GameObjectTypes.Door)
                 return;
@@ -3021,7 +3048,8 @@ namespace Game.Entities
         LootState m_lootState;
         ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
         bool m_spawnedByDefault;
-        uint m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
+        long m_restockTime;
+        long m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
         // For traps this: spell casting cooldown, for doors/buttons: reset time.
 
         Player m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
