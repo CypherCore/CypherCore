@@ -806,7 +806,7 @@ namespace Game.Entities
                     bool isPermanentSpawn = m_respawnDelayTime == 0;
                     if (!GetGoInfo().IsDespawnAtAction() &&
                         ((GetGoType() == GameObjectTypes.Goober && (!isSummonedAndExpired || isPermanentSpawn)) ||
-                        (GetGoType() == GameObjectTypes.Chest && !isSummonedAndExpired))) // ToDo: chests with data2 (chestRestockTime) > 0 and data3 (consumable) = 0 should not despawn on loot
+                        (GetGoType() == GameObjectTypes.Chest && !isSummonedAndExpired && GetGoInfo().Chest.chestRestockTime == 0))) // ToDo: chests with data2 (chestRestockTime) > 0 and data3 (consumable) = 0 should not despawn on loot
                     {
                         SetLootState(LootState.Ready);
                         UpdateObjectVisibility();
