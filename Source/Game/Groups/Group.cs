@@ -973,7 +973,7 @@ namespace Game.Groups
                 return false;
 
             uint itemCount = player.GetItemCount(item.itemid);
-            if ((proto.GetMaxCount() > 0 && itemCount >= proto.GetMaxCount()) || (player.CanEquipUniqueItem(proto) != InventoryResult.Ok))
+            if (proto.GetMaxCount() > 0 && itemCount >= proto.GetMaxCount())
                 return false;
 
             if (!item.AllowedForPlayer(player))
