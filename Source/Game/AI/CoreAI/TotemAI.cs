@@ -25,10 +25,14 @@ namespace Game.AI
     {
         ObjectGuid _victimGuid;
 
-        public TotemAI(Creature c) : base(c)
+        public TotemAI(Creature creature) : base(creature)
         {
             _victimGuid = ObjectGuid.Empty;
         }
+
+        public override void MoveInLineOfSight(Unit who) { }
+
+        public override void JustAppeared() { }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
@@ -77,5 +81,7 @@ namespace Game.AI
             else
                 _victimGuid.Clear();
         }
+
+        public override void AttackStart(Unit victim) { }
     }
 }

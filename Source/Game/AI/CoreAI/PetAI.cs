@@ -387,7 +387,7 @@ namespace Game.AI
 
             me.RemoveUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates that we're actively going after a target - we're returning, so remove it
         }
-        
+
         void DoAttack(Unit target, bool chase)
         {
             // Handles attack with or without chase and also resets flags
@@ -431,28 +431,28 @@ namespace Game.AI
             switch (type)
             {
                 case MovementGeneratorType.Point:
+                {
+                    // Pet is returning to where stay was clicked. data should be
+                    // pet's GUIDLow since we set that as the waypoint ID
+                    if (id == me.GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
                     {
-                        // Pet is returning to where stay was clicked. data should be
-                        // pet's GUIDLow since we set that as the waypoint ID
-                        if (id == me.GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
-                        {
-                            ClearCharmInfoFlags();
-                            me.GetCharmInfo().SetIsAtStay(true);
-                            me.GetMotionMaster().MoveIdle();
-                        }
-                        break;
+                        ClearCharmInfoFlags();
+                        me.GetCharmInfo().SetIsAtStay(true);
+                        me.GetMotionMaster().MoveIdle();
                     }
+                    break;
+                }
                 case MovementGeneratorType.Follow:
+                {
+                    // If data is owner's GUIDLow then we've reached follow point,
+                    // otherwise we're probably chasing a creature
+                    if (me.GetCharmerOrOwner() && me.GetCharmInfo() != null && id == me.GetCharmerOrOwner().GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
                     {
-                        // If data is owner's GUIDLow then we've reached follow point,
-                        // otherwise we're probably chasing a creature
-                        if (me.GetCharmerOrOwner() && me.GetCharmInfo() != null && id == me.GetCharmerOrOwner().GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
-                        {
-                            ClearCharmInfoFlags();
-                            me.GetCharmInfo().SetIsFollowing(true);
-                        }
-                        break;
+                        ClearCharmInfoFlags();
+                        me.GetCharmInfo().SetIsFollowing(true);
                     }
+                    break;
+                }
                 default:
                     break;
             }
@@ -534,7 +534,7 @@ namespace Game.AI
                         break;
                     case TextEmotes.Soothe:
                         if (me.IsPet() && me.ToPet().IsPetGhoul())
-                            me.HandleEmoteCommand( Emote.OneshotOmnicastGhoul);
+                            me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
                         break;
                 }
         }
@@ -637,6 +637,7 @@ namespace Game.AI
         //  default CreatureAI functions which interfere with the PetAI
         public override void MoveInLineOfSight(Unit who) { }
         public override void MoveInLineOfSight_Safe(Unit who) { }
+        public override void JustAppeared() { } // we will control following manually
         public override void EnterEvadeMode(EvadeReason why) { }
     }
 }

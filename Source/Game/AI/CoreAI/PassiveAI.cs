@@ -90,6 +90,7 @@ namespace Game.AI
         public override void MoveInLineOfSight(Unit unit) { }
         public override void AttackStart(Unit unit) { }
         public override void UpdateAI(uint diff) { }
+        public override void JustAppeared() { }
         public override void EnterEvadeMode(EvadeReason why) { }
         public override void OnCharmed(bool isNew) { }
     }
