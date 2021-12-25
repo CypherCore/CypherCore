@@ -370,7 +370,12 @@ namespace Game.Entities
             if (updateLevel)
                 SelectLevel();
             else
+            {
+                ulong previousHealth = GetHealth();
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
+                if (previousHealth > 0)
+                    SetHealth(previousHealth);
+            }
 
             SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
             SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
