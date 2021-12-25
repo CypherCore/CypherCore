@@ -579,6 +579,8 @@ namespace Game.AI
 
         public override void JustAppeared()
         {
+            base.JustAppeared();
+
             if (me.IsDead())
                 return;
 
