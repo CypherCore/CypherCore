@@ -593,59 +593,6 @@ namespace Game.Spells
                     }
                     return;
                 }
-                // Ultrasafe Transporter: Toshley's Station
-                case 36941:
-                {
-                    if (RandomHelper.randChance(50))                        // 50% success
-                    {
-                        int rand_eff = RandomHelper.IRand(1, 7);
-                        switch (rand_eff)
-                        {
-                            case 1:
-                                // soul split - evil
-                                m_caster.CastSpell(m_caster, 36900, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                            case 2:
-                                // soul split - good
-                                m_caster.CastSpell(m_caster, 36901, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                            case 3:
-                                // Increase the size
-                                m_caster.CastSpell(m_caster, 36895, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                            case 4:
-                                // Decrease the size
-                                m_caster.CastSpell(m_caster, 36893, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                            case 5:
-                            // Transform
-                            {
-                                if (m_caster.ToPlayer().GetTeam() == Team.Alliance)
-                                    m_caster.CastSpell(m_caster, 36897, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                                .SetOriginalCastId(m_castId));
-                                else
-                                    m_caster.CastSpell(m_caster, 36899, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                                .SetOriginalCastId(m_castId));
-                                break;
-                            }
-                            case 6:
-                                // chicken
-                                m_caster.CastSpell(m_caster, 36940, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                            case 7:
-                                // evil twin
-                                m_caster.CastSpell(m_caster, 23445, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId));
-                                break;
-                        }
-                    }
-                    return;
-                }
             }
         }
 
@@ -2756,11 +2703,6 @@ namespace Game.Spells
                         case 45204: // Clone Me!
                             m_caster.CastSpell(unitTarget, (uint)damage, new CastSpellExtraArgs(true));
                             break;
-                        case 55693:                                 // Remove Collapsing Cave Aura
-                            if (unitTarget == null)
-                                return;
-                            unitTarget.RemoveAurasDueToSpell((uint)effectInfo.CalcValue());
-                            break;
                         // Brittle Armor - need remove one 24575 Brittle Armor aura
                         case 24590:
                             unitTarget.RemoveAuraFromStack(24575);
@@ -2846,19 +2788,6 @@ namespace Game.Spells
                                 return;
 
                             m_originalCaster.CastSpell(m_originalCaster, (uint)damage, new CastSpellExtraArgs(false));
-                            break;
-                        }
-                        // Deathbolt from Thalgran Blightbringer
-                        // reflected by Freya's Ward
-                        // Retribution by Sevenfold Retribution
-                        case 51854:
-                        {
-                            if (unitTarget == null)
-                                return;
-                            if (unitTarget.HasAura(51845))
-                                unitTarget.CastSpell(m_caster, 51856, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            else
-                                m_caster.CastSpell(unitTarget, 51855, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             break;
                         }
                         // Summon Ghouls On Scarlet Crusade

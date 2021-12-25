@@ -171,8 +171,11 @@ namespace Scripts.Spells.Items
         public const uint ScrollOfRecallFailAlliance1 = 60323;
         public const uint ScrollOfRecallFailHorde1 = 60328;
 
-        // DimensionalRipperArea52
-        public const uint TransporterMalfunction = 36895;
+        // TransporterSpells
+        public const uint EvilTwin = 23445;
+        public const uint TransporterMalfunctionSmaller = 36893;
+        public const uint TransporterMalfunctionBigger = 36895;
+        public const uint TransporterMalfunctionChicken = 36940;
         public const uint TransformHorde = 36897;
         public const uint TransformAlliance = 36899;
         public const uint SoulSplitEvil = 36900;
@@ -1798,7 +1801,60 @@ namespace Scripts.Spells.Items
         }
     }
 
-    [Script]
+    [Script] // 36941 - Ultrasafe Transporter: Toshley's Station
+    class spell_item_ultrasafe_transporter : SpellScript
+    {
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            if (!RandomHelper.randChance(50)) // 50% success
+                return;
+
+            Unit caster = GetCaster();
+
+            uint spellId = 0;
+            switch (RandomHelper.URand(0, 6))
+            {
+                case 0:
+                    spellId = SpellIds.TransporterMalfunctionSmaller;
+                    break;
+                case 1:
+                    spellId = SpellIds.TransporterMalfunctionBigger;
+                    break;
+                case 2:
+                    spellId = SpellIds.SoulSplitEvil;
+                    break;
+                case 3:
+                    spellId = SpellIds.SoulSplitGood;
+                    break;
+                case 4:
+                    if (caster.ToPlayer().GetTeamId() == TeamId.Alliance)
+                        spellId = SpellIds.TransformHorde;
+                    else
+                        spellId = SpellIds.TransformAlliance;
+                    break;
+                case 5:
+                    spellId = SpellIds.TransporterMalfunctionChicken;
+                    break;
+                case 6:
+                    spellId = SpellIds.EvilTwin;
+                    break;
+            }
+
+            caster.CastSpell(caster, spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+        }
+    }
+    
+    [Script] // 36890 - Dimensional Ripper - Area 52
     class spell_item_dimensional_ripper_area52 : SpellScript
     {
         public override bool Load()
@@ -1817,7 +1873,7 @@ namespace Scripts.Spells.Items
             switch (RandomHelper.URand(0, 3))
             {
                 case 0:
-                    spellId = SpellIds.TransporterMalfunction;
+                    spellId = SpellIds.TransporterMalfunctionBigger;
                     break;
                 case 1:
                     spellId = SpellIds.SoulSplitEvil;
