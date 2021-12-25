@@ -156,8 +156,9 @@ namespace Game.AI
             if (!me.IsSummon())
                 return;
 
+            // Summons without SummonProperties are generally scripted summons that don't belong to any owner
             TempSummon summon = me.ToTempSummon();
-            if (summon.m_Properties.Control != SummonCategory.Unk && summon.m_Properties.Control != SummonCategory.Pet)
+            if (summon.m_Properties == null || (summon.m_Properties.Control != SummonCategory.Unk && summon.m_Properties.Control != SummonCategory.Pet))
                 return;
 
             // Not applied to vehicles
