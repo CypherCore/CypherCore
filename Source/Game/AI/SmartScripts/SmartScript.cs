@@ -1100,7 +1100,7 @@ namespace Game.AI
                         if (cTarget != null)
                         {
                             CreatureAI ai = cTarget.GetAI();
-                            if (IsSmart(cTarget))
+                            if (IsSmart(cTarget, true))
                                 ((SmartAI)ai).SetData(e.Action.setData.field, e.Action.setData.data, _me);
                             else
                                 ai.SetData(e.Action.setData.field, e.Action.setData.data);
@@ -1111,7 +1111,7 @@ namespace Game.AI
                             if (oTarget != null)
                             {
                                 GameObjectAI ai = oTarget.GetAI();
-                                if (IsSmart(oTarget))
+                                if (IsSmart(oTarget, true))
                                     ((SmartGameObjectAI)ai).SetData(e.Action.setData.field, e.Action.setData.data, _me);
                                 else
                                     ai.SetData(e.Action.setData.field, e.Action.setData.data);
