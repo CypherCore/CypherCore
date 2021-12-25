@@ -815,9 +815,9 @@ namespace Game.Entities
 
                     loot.Clear();
 
-                    // Do not delete gameobjects that are not consumed on loot, while still allowing them to despawn when they expire if summoned
+                    // Do not delete chests or goobers that are not consumed on loot, while still allowing them to despawn when they expire if summoned
                     bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
-                    if (!GetGoInfo().IsDespawnAtAction() && !isSummonedAndExpired)
+                    if ((GetGoType() == GameObjectTypes.Chest || GetGoType() == GameObjectTypes.Goober) && !GetGoInfo().IsDespawnAtAction() && !isSummonedAndExpired)
                     {
                         if (GetGoType() == GameObjectTypes.Chest && GetGoInfo().Chest.chestRestockTime > 0)
                         {
@@ -831,10 +831,11 @@ namespace Game.Entities
                         UpdateObjectVisibility();
                         return;
                     }
-                    else if (GetOwner() != null || GetSpellId() != 0)
+                    else if (!GetOwnerGUID().IsEmpty() || GetSpellId() != 0)
                     {
                         SetRespawnTime(0);
                         Delete();
+                        return;
                     }
 
                     SetLootState(LootState.NotReady);
