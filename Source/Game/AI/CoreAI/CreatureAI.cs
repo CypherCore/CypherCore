@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Combat;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
@@ -149,27 +150,54 @@ namespace Game.AI
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
         }
 
+        // adapted from logic in Spell:EFfectSummonType before commit 8499434
+        public static bool ShouldFollowOnSpawn(SummonPropertiesRecord properties)
+        {
+            // Summons without SummonProperties are generally scripted summons that don't belong to any owner
+            if (properties == null)
+                return false;
+
+            switch (properties.Control)
+            {
+                case SummonCategory.Pet:
+                    return true;
+                case SummonCategory.Wild:
+                case SummonCategory.Ally:
+                case SummonCategory.Unk:
+                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
+                        return true;
+                    switch (properties.Title)
+                    {
+                        case SummonTitle.Pet:
+                        case SummonTitle.Guardian:
+                        case SummonTitle.Runeblade:
+                        case SummonTitle.Minion:
+                        case SummonTitle.Companion:
+                            return true;
+                        default:
+                            return false;
+                    }
+                default:
+                    return false;
+            }
+        }
+
         // Called when creature appears in the world (spawn, respawn, grid load etc...)
         public virtual void JustAppeared()
         {
-            // Filter which type of summons apply the following follow handling
-            if (!me.IsSummon())
-                return;
-
-            // Summons without SummonProperties are generally scripted summons that don't belong to any owner
             TempSummon summon = me.ToTempSummon();
-            if (summon.m_Properties == null || (summon.m_Properties.Control != SummonCategory.Unk && summon.m_Properties.Control != SummonCategory.Pet))
-                return;
-
-            // Not applied to vehicles
-            if (summon.GetVehicle())
-                return;
-
-            Unit owner = summon.GetCharmerOrOwner();
-            if (owner != null)
+            if (summon != null)
             {
-                summon.GetMotionMaster().Clear();
-                summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                // Only apply this to specific types of summons
+                if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties))
+                {
+                    Unit owner = summon.GetCharmerOrOwner();
+                    if (owner != null)
+                    {
+                        summon.GetMotionMaster().Clear();
+                        summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                    }
+                }
             }
         }
 
