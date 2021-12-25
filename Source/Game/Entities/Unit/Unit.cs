@@ -3084,10 +3084,6 @@ namespace Game.Entities
             {
                 if (spellInfo.HasAttribute(SpellAttr4.IgnoreResistances))
                     return 0;
-
-                // Binary spells can't have damage part resisted
-                if (spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
-                    return 0;
             }
 
             float averageResist = CalculateAverageResistReduction(attacker, schoolMask, victim, spellInfo);
