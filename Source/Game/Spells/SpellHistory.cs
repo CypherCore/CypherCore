@@ -255,13 +255,15 @@ namespace Game.Spells
                     if (cooldownDuration.TotalMilliseconds <= 0)
                         continue;
 
-                    historyEntry.RecoveryTime = (int)cooldownDuration.TotalMilliseconds;
                     TimeSpan categoryDuration = p.Value.CategoryEnd - now;
                     if (categoryDuration.TotalMilliseconds > 0)
                     {
                         historyEntry.Category = p.Value.CategoryId;
                         historyEntry.CategoryRecoveryTime = (int)categoryDuration.TotalMilliseconds;
                     }
+
+                    if (cooldownDuration > categoryDuration)
+                        historyEntry.RecoveryTime = (int)cooldownDuration.TotalMilliseconds;
                 }
 
                 sendSpellHistory.Entries.Add(historyEntry);
@@ -517,7 +519,7 @@ namespace Game.Spells
             }
         }
 
-        public void ModifySpellCooldown(uint spellId, TimeSpan offset)
+        public void ModifySpellCooldown(uint spellId, TimeSpan offset, bool withoutCategoryCooldown = false)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
             if (offset.TotalMilliseconds == 0 || cooldownEntry == null)
@@ -525,9 +527,19 @@ namespace Game.Spells
 
             DateTime now = GameTime.GetGameTimeSystemPoint();
 
-            if (cooldownEntry.CooldownEnd + offset > now)
-                cooldownEntry.CooldownEnd += offset;
-            else
+            cooldownEntry.CooldownEnd += offset;
+
+            if (cooldownEntry.CategoryId != 0)
+            {
+                if (!withoutCategoryCooldown)
+                    cooldownEntry.CategoryEnd += offset;
+
+                // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
+                if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
+                    cooldownEntry.CooldownEnd = cooldownEntry.CategoryEnd;
+            }
+
+            if (cooldownEntry.CooldownEnd <= now)
             {
                 _categoryCooldowns.Remove(cooldownEntry.CategoryId);
                 _spellCooldowns.Remove(spellId);
@@ -540,18 +552,19 @@ namespace Game.Spells
                 modifyCooldown.IsPet = _owner != playerOwner;
                 modifyCooldown.SpellID = spellId;
                 modifyCooldown.DeltaTime = (int)offset.TotalMilliseconds;
+                modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
                 playerOwner.SendPacket(modifyCooldown);
             }
         }
 
-        public void ModifyCooldown(uint spellId, TimeSpan cooldownMod)
+        public void ModifyCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID());
             if (spellInfo != null)
-                ModifyCooldown(spellInfo, cooldownMod);
+                ModifyCooldown(spellInfo, cooldownMod, withoutCategoryCooldown);
         }
 
-        public void ModifyCooldown(SpellInfo spellInfo, TimeSpan cooldownMod)
+        public void ModifyCooldown(SpellInfo spellInfo, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
         {
             if (cooldownMod == TimeSpan.Zero)
                 return;
@@ -559,7 +572,7 @@ namespace Game.Spells
             if (GetChargeRecoveryTime(spellInfo.ChargeCategoryId) > 0 && GetMaxCharges(spellInfo.ChargeCategoryId) > 0)
                 ModifyChargeRecoveryTime(spellInfo.ChargeCategoryId, cooldownMod);
             else
-                ModifySpellCooldown(spellInfo.Id, cooldownMod);
+                ModifySpellCooldown(spellInfo.Id, cooldownMod, withoutCategoryCooldown);
         }
         
         public void ResetCooldown(uint spellId, bool update = false)
@@ -665,6 +678,28 @@ namespace Game.Spells
             return remaining;
         }
 
+        public TimeSpan GetRemainingCategoryCooldown(uint categoryId)
+        {
+            DateTime end;
+            var cooldownEntry = _categoryCooldowns.LookupByKey(categoryId);
+            if (cooldownEntry == null)
+                return TimeSpan.Zero;
+
+            end = cooldownEntry.CategoryEnd;
+
+            DateTime now = GameTime.GetGameTimeSystemPoint();
+            if (end < now)
+                return TimeSpan.Zero;
+
+            TimeSpan remaining = end - now;
+            return remaining;
+        }
+
+        public TimeSpan GetRemainingCategoryCooldown(SpellInfo spellInfo)
+        {
+            return GetRemainingCategoryCooldown(spellInfo.GetCategory());
+        }
+        
         public void LockSpellSchool(SpellSchoolMask schoolMask, TimeSpan lockoutTime)
         {
             DateTime now = GameTime.GetGameTimeSystemPoint();

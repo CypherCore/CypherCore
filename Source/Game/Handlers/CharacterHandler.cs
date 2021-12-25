@@ -845,6 +845,8 @@ namespace Game
 
             pCurrChar.SendInitialPacketsAfterAddToMap();
 
+            pCurrChar.UpdateReviveBattlePetCooldown();
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_ONLINE);
             stmt.AddValue(0, pCurrChar.GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
