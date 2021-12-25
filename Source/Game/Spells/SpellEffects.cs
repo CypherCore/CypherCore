@@ -2473,7 +2473,18 @@ namespace Game.Spells
 
             // this effect use before aura Taunt apply for prevent taunt already attacking target
             // for spell as marked "non effective at already attacking target"
-            if (unitTarget == null || !unitTarget.CanHaveThreatList())
+            if (!unitTarget || unitTarget.IsTotem())
+            {
+                SendCastResult(SpellCastResult.DontReport);
+                return;
+            }
+
+            // Hand of Reckoning can hit some entities that can't have a threat list (including players' pets)
+            if (m_spellInfo.Id == 62124)
+                if (!unitTarget.IsPlayer() && unitTarget.GetTarget() != unitCaster.GetGUID())
+                    unitCaster.CastSpell(unitTarget, 67485, true);
+
+            if (!unitTarget.CanHaveThreatList())
             {
                 SendCastResult(SpellCastResult.DontReport);
                 return;
@@ -2967,7 +2978,6 @@ namespace Game.Spells
                             }
                             return;
                         }
-                        break;
                     }
                     break;
                 }

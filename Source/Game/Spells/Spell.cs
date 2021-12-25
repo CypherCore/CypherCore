@@ -7790,6 +7790,10 @@ namespace Game.Spells
             else if (MissCondition == SpellMissInfo.Reflect && ReflectResult == SpellMissInfo.None)
                 _spellHitTarget = spell.GetCaster().ToUnit();
 
+            // Ensure that a player target is put in combat by a taunt, even if they result immune clientside
+            if ((MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2) && spell.GetCaster().IsPlayer() && unit.IsPlayer() && spell.GetCaster().IsValidAttackTarget(unit, spell.GetSpellInfo()))
+                unit.SetInCombatWith(spell.GetCaster().ToPlayer());
+
             _enablePVP = false; // need to check PvP state before spell effects, but act on it afterwards
             if (_spellHitTarget)
             {
