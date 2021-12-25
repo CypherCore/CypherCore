@@ -48,15 +48,15 @@ namespace Game.AI
             {
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop(true);
-                me.GetThreatManager().ClearAllThreat();
+                me.GetThreatManager().NotifyDisengaged();
                 return;
             }
 
             Log.outDebug(LogFilter.Unit, "Guard entry: {0} enters evade mode.", me.GetEntry());
 
             me.RemoveAllAuras();
-            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
+            me.GetThreatManager().NotifyDisengaged();
 
             me.GetMotionMaster().MoveTargetedHome();
         }

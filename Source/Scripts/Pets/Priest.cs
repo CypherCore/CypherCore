@@ -44,8 +44,8 @@ namespace Scripts.Pets
                 if (!me.IsAlive())
                     return;
 
-                me.GetThreatManager().ClearAllThreat();
                 me.CombatStop(true);
+                me.GetThreatManager().NotifyDisengaged();
                 me.ResetPlayerDamageReq();
             }
         }

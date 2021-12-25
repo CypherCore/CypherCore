@@ -216,7 +216,6 @@ namespace Game.Maps
                 if (creature.IsInCombat())
                 {
                     creature.CombatStop();
-                    creature.GetThreatManager().ClearAllThreat();
                     if (creature.IsAIEnabled())
                         creature.GetAI().EnterEvadeMode();
                 }

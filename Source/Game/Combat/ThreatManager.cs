@@ -396,6 +396,14 @@ namespace Game.Combat
                     _myThreatListEntries.FirstOrDefault().Value.UnregisterAndFree();
                 while (!_myThreatListEntries.Empty());
             }
+        }
+
+        /// <summary>
+        /// THIS SHOULD ONLY BE CALLED FROM A CREATURE'S AI (typically in EnterEvadeMode)
+        /// notify the unit that the AI has disengaged
+        /// </summary>
+        public void NotifyDisengaged()
+        {
             // note: i don't really like having this here
             // (maybe engage flag should be in creature ai? it's inherently an AI property...)
             if (_owner.IsEngaged())

@@ -134,8 +134,8 @@ namespace Game.AI
         public override void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
             me.RemoveAllAuras();
-            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
+            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
 
             if (HasEscortState(EscortState.Escorting))

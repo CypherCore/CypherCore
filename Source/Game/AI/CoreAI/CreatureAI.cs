@@ -224,18 +224,15 @@ namespace Game.AI
             me.RemoveAurasOnEvade();
 
             // sometimes bosses stuck in combat?
-            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
+            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireTarget();
 
-            if (me.IsInEvadeMode())
-                return false;
-
-            return true;
+            return !me.IsInEvadeMode();
         }
 
         public CypherStrings VisualizeBoundary(int duration, Unit owner = null, bool fill = false)

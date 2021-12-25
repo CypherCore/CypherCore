@@ -1405,7 +1405,6 @@ namespace Game.Entities
             if (s != DeathState.Alive && s != DeathState.JustRespawned)
             {
                 CombatStop();
-                GetThreatManager().ClearAllThreat();
 
                 if (IsNonMeleeSpellCast(false))
                     InterruptNonMeleeSpells(false);

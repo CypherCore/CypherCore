@@ -126,8 +126,8 @@ namespace Game.AI
                 return;
 
             me.RemoveAllAuras();
-            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
+            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireTarget();
