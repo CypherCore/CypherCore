@@ -2221,7 +2221,7 @@ namespace Game.Entities
                     }
                 }
             }
-            
+
             return CastSpell(targets, spellId, args);
         }
 
@@ -2231,6 +2231,118 @@ namespace Game.Entities
             targets.SetDst(dest);
             CastSpell(targets, spellId, args);
         }
+
+        public void SendPlaySpellVisual(WorldObject target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        {
+            PlaySpellVisual playSpellVisual = new();
+            playSpellVisual.Source = GetGUID();
+            playSpellVisual.Target = target.GetGUID();
+            playSpellVisual.TargetPosition = target.GetPosition();
+            playSpellVisual.SpellVisualID = spellVisualId;
+            playSpellVisual.TravelSpeed = travelSpeed;
+            playSpellVisual.MissReason = missReason;
+            playSpellVisual.ReflectStatus = reflectStatus;
+            playSpellVisual.SpeedAsTime = speedAsTime;
+            SendMessageToSet(playSpellVisual, true);
+        }
+
+        public void SendPlaySpellVisual(Position targetPosition, float launchDelay, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        {
+            PlaySpellVisual playSpellVisual = new();
+            playSpellVisual.Source = GetGUID();
+            playSpellVisual.TargetPosition = targetPosition;
+            playSpellVisual.LaunchDelay = launchDelay;
+            playSpellVisual.SpellVisualID = spellVisualId;
+            playSpellVisual.TravelSpeed = travelSpeed;
+            playSpellVisual.MissReason = missReason;
+            playSpellVisual.ReflectStatus = reflectStatus;
+            playSpellVisual.SpeedAsTime = speedAsTime;
+            SendMessageToSet(playSpellVisual, true);
+        }
+
+        void SendCancelSpellVisual(uint id)
+        {
+            CancelSpellVisual cancelSpellVisual = new();
+            cancelSpellVisual.Source = GetGUID();
+            cancelSpellVisual.SpellVisualID = id;
+            SendMessageToSet(cancelSpellVisual, true);
+        }
+
+        void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
+            playOrphanSpellVisual.SourceLocation = GetPosition();
+            if (withSourceOrientation)
+            {
+                if (IsGameObject())
+                {
+                    var rotation = ToGameObject().GetWorldRotation();
+                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
+                        out playOrphanSpellVisual.SourceRotation.Y,
+                        out playOrphanSpellVisual.SourceRotation.X);
+                }
+                else
+                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
+            }
+
+            playOrphanSpellVisual.Target = target; // exclusive with TargetLocation
+            playOrphanSpellVisual.SpellVisualID = spellVisualId;
+            playOrphanSpellVisual.TravelSpeed = travelSpeed;
+            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
+            SendMessageToSet(playOrphanSpellVisual, true);
+        }
+
+        void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
+            playOrphanSpellVisual.SourceLocation = GetPosition();
+            if (withSourceOrientation)
+            {
+                if (IsGameObject())
+                {
+                    var rotation = ToGameObject().GetWorldRotation();
+                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
+                        out playOrphanSpellVisual.SourceRotation.Y,
+                        out playOrphanSpellVisual.SourceRotation.X);
+                }
+                else
+                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
+            }
+
+            playOrphanSpellVisual.TargetLocation = targetLocation; // exclusive with Target
+            playOrphanSpellVisual.SpellVisualID = spellVisualId;
+            playOrphanSpellVisual.TravelSpeed = travelSpeed;
+            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
+            SendMessageToSet(playOrphanSpellVisual, true);
+        }
+
+        void SendCancelOrphanSpellVisual(uint id)
+        {
+            CancelOrphanSpellVisual cancelOrphanSpellVisual = new();
+            cancelOrphanSpellVisual.SpellVisualID = id;
+            SendMessageToSet(cancelOrphanSpellVisual, true);
+        }
+
+        public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
+        {
+            PlaySpellVisualKit playSpellVisualKit = new();
+            playSpellVisualKit.Unit = GetGUID();
+            playSpellVisualKit.KitRecID = id;
+            playSpellVisualKit.KitType = type;
+            playSpellVisualKit.Duration = duration;
+            SendMessageToSet(playSpellVisualKit, true);
+        }
+
+        void SendCancelSpellVisualKit(uint id)
+        {
+            CancelSpellVisualKit cancelSpellVisualKit = new();
+            cancelSpellVisualKit.Source = GetGUID();
+            cancelSpellVisualKit.SpellVisualKitID = id;
+            SendMessageToSet(cancelSpellVisualKit, true);
+        }
+
 
         // function based on function Unit::CanAttack from 13850 client
         public bool IsValidAttackTarget(WorldObject target, SpellInfo bySpell = null)
