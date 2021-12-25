@@ -801,22 +801,21 @@ namespace Game.Entities
 
                     loot.Clear();
 
-                    //! If this is summoned by a spell with ie. SPELL_EFFECT_SUMMON_OBJECT_WILD, with or without owner, we check respawn criteria based on spell
-                    //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
-                    if (GetSpellId() != 0 || !GetOwnerGUID().IsEmpty())
+                    // Do not delete gameobjects that are not consumed on loot, while still allowing them to despawn when they expire if summoned
+                    bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
+                    bool isPermanentSpawn = m_respawnDelayTime == 0;
+                    if (!GetGoInfo().IsDespawnAtAction() &&
+                        ((GetGoType() == GameObjectTypes.Goober && (!isSummonedAndExpired || isPermanentSpawn)) ||
+                        (GetGoType() == GameObjectTypes.Chest && !isSummonedAndExpired))) // ToDo: chests with data2 (chestRestockTime) > 0 and data3 (consumable) = 0 should not despawn on loot
                     {
-                        //Don't delete spell spawned chests, which are not consumed on loot
-                        if (m_respawnTime > 0 && GetGoType() == GameObjectTypes.Chest && !GetGoInfo().IsDespawnAtAction())
-                        {
-                            UpdateObjectVisibility();
-                            SetLootState(LootState.Ready);
-                        }
-                        else
-                        {
-                            SetRespawnTime(0);
-                            Delete();
-                        }
+                        SetLootState(LootState.Ready);
+                        UpdateObjectVisibility();
                         return;
+                    }
+                    else
+                    {
+                        SetRespawnTime(0);
+                        Delete();
                     }
 
                     SetLootState(LootState.NotReady);
