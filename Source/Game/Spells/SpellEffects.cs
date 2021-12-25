@@ -646,39 +646,6 @@ namespace Game.Spells
                     }
                     return;
                 }
-                // Dimensional Ripper - Area 52
-                case 36890:
-                {
-                    if (RandomHelper.randChance(50))                        // 50% success
-                    {
-                        int rand_eff = RandomHelper.IRand(1, 4);
-                        switch (rand_eff)
-                        {
-                            case 1:
-                                // soul split - evil
-                                m_caster.CastSpell(m_caster, 36900, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                                break;
-                            case 2:
-                                // soul split - good
-                                m_caster.CastSpell(m_caster, 36901, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                                break;
-                            case 3:
-                                // Increase the size
-                                m_caster.CastSpell(m_caster, 36895, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                                break;
-                            case 4:
-                            // Transform
-                            {
-                                if (m_caster.ToPlayer().GetTeam() == Team.Alliance)
-                                    m_caster.CastSpell(m_caster, 36897, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                                else
-                                    m_caster.CastSpell(m_caster, 36899, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                                break;
-                            }
-                        }
-                    }
-                    return;
-                }
             }
         }
 

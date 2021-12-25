@@ -171,6 +171,13 @@ namespace Scripts.Spells.Items
         public const uint ScrollOfRecallFailAlliance1 = 60323;
         public const uint ScrollOfRecallFailHorde1 = 60328;
 
+        // DimensionalRipperArea52
+        public const uint TransporterMalfunction = 36895;
+        public const uint TransformHorde = 36897;
+        public const uint TransformAlliance = 36899;
+        public const uint SoulSplitEvil = 36900;
+        public const uint SoulSplitGood = 36901;
+
         //Shadowsfate
         public const uint SoulFeast = 71203;
 
@@ -1791,6 +1798,50 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script]
+    class spell_item_dimensional_ripper_area52 : SpellScript
+    {
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            if (!RandomHelper.randChance(50)) // 50% success
+                return;
+
+            Unit caster = GetCaster();
+
+            uint spellId = 0;
+            switch (RandomHelper.URand(0, 3))
+            {
+                case 0:
+                    spellId = SpellIds.TransporterMalfunction;
+                    break;
+                case 1:
+                    spellId = SpellIds.SoulSplitEvil;
+                    break;
+                case 2:
+                    spellId = SpellIds.SoulSplitGood;
+                    break;
+                case 3:
+                    if (caster.ToPlayer().GetTeamId() == TeamId.Alliance)
+                        spellId = SpellIds.TransformHorde;
+                    else
+                        spellId = SpellIds.TransformAlliance;
+                    break;
+            }
+
+            caster.CastSpell(caster, spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+        }
+    }
+    
     [Script] // 71169 - Shadow's Fate (Shadowmourne questline)
     class spell_item_unsated_craving : AuraScript
     {
