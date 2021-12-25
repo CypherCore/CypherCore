@@ -7862,192 +7862,192 @@ namespace Game.Spells
             // Get original caster (if exist) and calculate damage/healing from him data
             // Skip if m_originalCaster not available
             Unit caster = spell.GetOriginalCaster() ? spell.GetOriginalCaster() : spell.GetCaster().ToUnit();
-            if (caster == null)
-                return;
-
-            // Fill base trigger info
-            ProcFlags procAttacker = spell.m_procAttacker;
-            ProcFlags procVictim = spell.m_procVictim;
-            ProcFlagsSpellType procSpellType = ProcFlagsSpellType.None;
-            ProcFlagsHit hitMask = ProcFlagsHit.None;
-
-            // Spells with this flag cannot trigger if effect is cast on self
-            bool canEffectTrigger = !spell.m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && spell.unitTarget.CanProc() &&
-                (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
-
-            // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
-            if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
+            if (caster != null)
             {
-                bool positive = true;
-                if (spell.m_damage > 0)
-                    positive = false;
-                else if (spell.m_healing == 0)
-                {
-                    for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                    {
-                        // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
-                        if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
-                            continue;
+                // Fill base trigger info
+                ProcFlags procAttacker = spell.m_procAttacker;
+                ProcFlags procVictim = spell.m_procVictim;
+                ProcFlagsSpellType procSpellType = ProcFlagsSpellType.None;
+                ProcFlagsHit hitMask = ProcFlagsHit.None;
 
-                        if (!spell.m_spellInfo.IsPositiveEffect(i))
+                // Spells with this flag cannot trigger if effect is cast on self
+                bool canEffectTrigger = !spell.m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && spell.unitTarget.CanProc() &&
+                    (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
+
+                // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
+                if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
+                {
+                    bool positive = true;
+                    if (spell.m_damage > 0)
+                        positive = false;
+                    else if (spell.m_healing == 0)
+                    {
+                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
                         {
-                            positive = false;
-                            break;
+                            // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
+                            if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
+                                continue;
+
+                            if (!spell.m_spellInfo.IsPositiveEffect(i))
+                            {
+                                positive = false;
+                                break;
+                            }
                         }
+                    }
+
+                    switch (spell.m_spellInfo.DmgClass)
+                    {
+                        case SpellDmgClass.Magic:
+                            if (positive)
+                            {
+                                procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
+                                procVictim |= ProcFlags.TakenSpellMagicDmgClassPos;
+                            }
+                            else
+                            {
+                                procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
+                                procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
+                            }
+                            break;
+                        case SpellDmgClass.None:
+                            if (positive)
+                            {
+                                procAttacker |= ProcFlags.DoneSpellNoneDmgClassPos;
+                                procVictim |= ProcFlags.TakenSpellNoneDmgClassPos;
+                            }
+                            else
+                            {
+                                procAttacker |= ProcFlags.DoneSpellNoneDmgClassNeg;
+                                procVictim |= ProcFlags.TakenSpellNoneDmgClassNeg;
+                            }
+                            break;
                     }
                 }
 
-                switch (spell.m_spellInfo.DmgClass)
+                // All calculated do it!
+                // Do healing
+                DamageInfo spellDamageInfo = null;
+                HealInfo healInfo = null;
+                if (spell.m_healing > 0)
                 {
-                    case SpellDmgClass.Magic:
-                        if (positive)
-                        {
-                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
-                            procVictim |= ProcFlags.TakenSpellMagicDmgClassPos;
-                        }
-                        else
-                        {
-                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
-                            procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
-                        }
-                        break;
-                    case SpellDmgClass.None:
-                        if (positive)
-                        {
-                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassPos;
-                            procVictim |= ProcFlags.TakenSpellNoneDmgClassPos;
-                        }
-                        else
-                        {
-                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassNeg;
-                            procVictim |= ProcFlags.TakenSpellNoneDmgClassNeg;
-                        }
-                        break;
+                    int addhealth = spell.m_healing;
+                    if (IsCrit)
+                    {
+                        hitMask |= ProcFlagsHit.Critical;
+                        addhealth = Unit.SpellCriticalHealingBonus(caster, spell.m_spellInfo, addhealth, null);
+                    }
+                    else
+                        hitMask |= ProcFlagsHit.Normal;
+
+                    healInfo = new(caster, spell.unitTarget, (uint)addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
+                    caster.HealBySpell(healInfo, IsCrit);
+                    spell.unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, spell.m_spellInfo);
+                    spell.m_healing = (int)healInfo.GetEffectiveHeal();
+
+                    procSpellType |= ProcFlagsSpellType.Heal;
                 }
-            }
 
-            // All calculated do it!
-            // Do healing
-            DamageInfo spellDamageInfo = null;
-            HealInfo healInfo = null;
-            if (spell.m_healing > 0)
-            {
-                int addhealth = spell.m_healing;
-                if (IsCrit)
+                // Do damage
+                if (spell.m_damage > 0)
                 {
-                    hitMask |= ProcFlagsHit.Critical;
-                    addhealth = Unit.SpellCriticalHealingBonus(caster, spell.m_spellInfo, addhealth, null);
+                    // Fill base damage struct (unitTarget - is real spell target)
+                    SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
+                    // Check damage immunity
+                    if (spell.unitTarget.IsImmunedToDamage(spell.m_spellInfo))
+                    {
+                        hitMask = ProcFlagsHit.Immune;
+                        spell.m_damage = 0;
+
+                        // no packet found in sniffs
+                    }
+                    else
+                    {
+                        // Add bonuses and fill damageInfo struct
+                        caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit);
+                        Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+
+                        hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
+                        procVictim |= ProcFlags.TakenDamage;
+
+                        spell.m_damage = (int)damageInfo.damage;
+
+                        caster.DealSpellDamage(damageInfo, true);
+
+                        // Send log damage message to client
+                        caster.SendSpellNonMeleeDamageLog(damageInfo);
+                    }
+
+                    // Do triggers for unit
+                    if (canEffectTrigger)
+                    {
+                        spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, hitMask);
+                        procSpellType |= ProcFlagsSpellType.Damage;
+
+                        if (caster.IsPlayer() && !spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
+                            (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged))
+                            caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
+                    }
                 }
-                else
-                    hitMask |= ProcFlagsHit.Normal;
 
-                healInfo = new(caster, spell.unitTarget, (uint)addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
-                caster.HealBySpell(healInfo, IsCrit);
-                spell.unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, spell.m_spellInfo);
-                spell.m_healing = (int)healInfo.GetEffectiveHeal();
-
-                procSpellType |= ProcFlagsSpellType.Heal;
-            }
-
-            // Do damage
-            if (spell.m_damage > 0)
-            {
-                // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
-                // Check damage immunity
-                if (spell.unitTarget.IsImmunedToDamage(spell.m_spellInfo))
+                // Passive spell hits/misses or active spells only misses (only triggers)
+                if (spell.m_damage <= 0 && spell.m_healing <= 0)
                 {
-                    hitMask = ProcFlagsHit.Immune;
-                    spell.m_damage = 0;
-
-                    // no packet found in sniffs
-                }
-                else
-                {
-                    // Add bonuses and fill damageInfo struct
-                    caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit);
-                    Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
-
+                    // Fill base damage struct (unitTarget - is real spell target)
+                    SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask);
                     hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
-                    procVictim |= ProcFlags.TakenDamage;
+                    // Do triggers for unit
+                    if (canEffectTrigger)
+                    {
+                        spellDamageInfo = new(damageInfo, DamageEffectType.NoDamage, spell.m_attackType, hitMask);
+                        procSpellType |= ProcFlagsSpellType.NoDmgHeal;
+                    }
 
-                    spell.m_damage = (int)damageInfo.damage;
-
-                    caster.DealSpellDamage(damageInfo, true);
-
-                    // Send log damage message to client
-                    caster.SendSpellNonMeleeDamageLog(damageInfo);
+                    // Failed Pickpocket, reveal rogue
+                    if (MissCondition == SpellMissInfo.Resist && spell.m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && spell.unitTarget.IsCreature())
+                    {
+                        Unit unitCaster = spell.GetCaster().ToUnit();
+                        unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+                        spell.unitTarget.ToCreature().EngageWithTarget(unitCaster);
+                    }
                 }
 
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
-                    spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, hitMask);
-                    procSpellType |= ProcFlagsSpellType.Damage;
+                    Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
 
-                    if (caster.IsPlayer() && !spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
-                        (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged))
-                        caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
-                }
-            }
-
-            // Passive spell hits/misses or active spells only misses (only triggers)
-            if (spell.m_damage <= 0 && spell.m_healing <= 0)
-            {
-                // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask);
-                hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
-                // Do triggers for unit
-                if (canEffectTrigger)
-                {
-                    spellDamageInfo = new(damageInfo, DamageEffectType.NoDamage, spell.m_attackType, hitMask);
-                    procSpellType |= ProcFlagsSpellType.NoDmgHeal;
+                    // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
+                    if (caster.IsPlayer() && procSpellType.HasAnyFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
+                    {
+                        if (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged)
+                            if (!spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs))
+                                caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
+                    }
                 }
 
-                // Failed Pickpocket, reveal rogue
-                if (MissCondition == SpellMissInfo.Resist && spell.m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && spell.unitTarget.IsCreature())
+                // set hitmask for finish procs
+                spell.m_hitMask |= hitMask;
+
+                // Do not take combo points on dodge and miss
+                if (MissCondition != SpellMissInfo.None && spell.m_needComboPoints && spell.m_targets.GetUnitTargetGUID() == TargetGUID)
+                    spell.m_needComboPoints = false;
+
+                // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
+                if (MissCondition != SpellMissInfo.Evade && _spellHitTarget && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)))
                 {
                     Unit unitCaster = spell.GetCaster().ToUnit();
-                    unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
-                    spell.unitTarget.ToCreature().EngageWithTarget(unitCaster);
+                    if (unitCaster != null)
+                        unitCaster.AtTargetAttacked(unit, spell.m_spellInfo.HasInitialAggro());
+
+                    if (!unit.IsStandState())
+                        unit.SetStandState(UnitStandStateType.Stand);
                 }
+
+                // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
+                if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
+                    caster.CastSpell(unit, 32747, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(spell.m_castId));
             }
-
-            // Do triggers for unit
-            if (canEffectTrigger)
-            {
-                Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
-
-                // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
-                if (caster.IsPlayer() && procSpellType.HasAnyFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
-                {
-                    if (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged)
-                        if (!spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs))
-                            caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
-                }
-            }
-
-            // set hitmask for finish procs
-            spell.m_hitMask |= hitMask;
-
-            // Do not take combo points on dodge and miss
-            if (MissCondition != SpellMissInfo.None && spell.m_needComboPoints && spell.m_targets.GetUnitTargetGUID() == TargetGUID)
-                spell.m_needComboPoints = false;
-
-            // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
-            if (MissCondition != SpellMissInfo.Evade && _spellHitTarget && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)))
-            {
-                Unit unitCaster = spell.GetCaster().ToUnit();
-                if (unitCaster != null)
-                    unitCaster.AtTargetAttacked(unit, spell.m_spellInfo.HasInitialAggro());
-
-                if (!unit.IsStandState())
-                    unit.SetStandState(UnitStandStateType.Stand);
-            }
-
-            // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
-            if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
-                caster.CastSpell(unit, 32747, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(spell.m_castId));
 
             if (_spellHitTarget)
             {

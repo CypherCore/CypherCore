@@ -662,11 +662,21 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SpellHit, caster, 0, 0, false, spellInfo);
         }
 
+        public override void SpellHitByGameObject(GameObject obj, SpellInfo spellInfo)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SpellHit, null, 0, 0, false, spellInfo, obj);
+        }
+        
         public override void SpellHitTarget(Unit target, SpellInfo spellInfo)
         {
             GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, target, 0, 0, false, spellInfo);
         }
 
+        public override void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, null, 0, 0, false, spellInfo, target);
+        }
+        
         public override void DamageTaken(Unit attacker, ref uint damage)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);
