@@ -538,6 +538,7 @@ namespace Game.Entities
                             if (m_restockTime > GameTime.GetGameTime())
                                 return;
                             // If there is no restock timer, or if the restock timer passed, the chest becomes ready to loot
+                            m_restockTime = 0;
                             m_lootState = LootState.Ready;
                             AddToObjectUpdateIfNeeded();
                             break;
@@ -725,9 +726,10 @@ namespace Game.Entities
                                     m_groupLootTimer -= diff;
                             }
 
-                            // Gameobject was partially looted and restock time passed, restock all loot now
-                            if (GameTime.GetGameTime() >= m_restockTime)
+                            // Non-consumable chest was partially looted and restock time passed, restock all loot now
+                            if (GetGoInfo().Chest.consumable == 0 && GameTime.GetGameTime() >= m_restockTime)
                             {
+                                m_restockTime = 0;
                                 m_lootState = LootState.Ready;
                                 AddToObjectUpdateIfNeeded();
                             }
