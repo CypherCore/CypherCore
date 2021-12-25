@@ -2899,6 +2899,7 @@ namespace Game.AI
         {
             public uint id;
             public uint timerType;
+            public uint allowOverride;
         }
         public struct RandTimedActionList
         {

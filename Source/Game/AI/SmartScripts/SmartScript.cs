@@ -4165,7 +4165,7 @@ namespace Game.AI
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
             // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
-            if (!_timedActionList.Empty())
+            if (e.Action.timedActionList.allowOverride == 0 && !_timedActionList.Empty())
                 return;
 
             _timedActionList.Clear();
