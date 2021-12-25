@@ -1804,6 +1804,11 @@ namespace Scripts.Spells.Items
     [Script] // 36941 - Ultrasafe Transporter: Toshley's Station
     class spell_item_ultrasafe_transporter : SpellScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TransporterMalfunctionSmaller, SpellIds.TransporterMalfunctionBigger, SpellIds.SoulSplitEvil, SpellIds.SoulSplitGood, SpellIds.TransformHorde, SpellIds.TransformAlliance, SpellIds.TransporterMalfunctionChicken, SpellIds.EvilTwin);
+        }
+
         public override bool Load()
         {
             return GetCaster().IsPlayer();
@@ -1857,6 +1862,11 @@ namespace Scripts.Spells.Items
     [Script] // 36890 - Dimensional Ripper - Area 52
     class spell_item_dimensional_ripper_area52 : SpellScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TransporterMalfunctionBigger, SpellIds.SoulSplitEvil, SpellIds.SoulSplitGood, SpellIds.TransformHorde, SpellIds.TransformAlliance);
+        }
+
         public override bool Load()
         {
             return GetCaster().IsPlayer();

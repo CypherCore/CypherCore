@@ -3268,7 +3268,9 @@ namespace Game.Entities
                 45907, // Torch Target Picker
                 52953, // Torch
                 58121, // Torch
-                43109  // Throw Torch
+                43109, // Throw Torch
+                58552, // Return to Orgrimmar
+                58533  // Return to Stormwind
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;

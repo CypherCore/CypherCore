@@ -935,7 +935,6 @@ namespace Game.Spells
                 case 2584:          // Waiting to Resurrect
                 case 22011:         // Spirit Heal Channel
                 case 22012:         // Spirit Heal
-                case 24171:         // Resurrection Impact Visual
                 case 42792:         // Recently Dropped Flag
                 case 43681:         // Inactive
                 case 44535:         // Spirit Heal (mana)

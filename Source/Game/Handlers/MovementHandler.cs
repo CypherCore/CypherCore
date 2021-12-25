@@ -67,7 +67,7 @@ namespace Game
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
-            Unit mover = GetPlayer().m_unitMovedByMe;
+            Unit mover = GetPlayer().GetUnitBeingMoved();
             Player plrMover = mover.ToPlayer();
 
             if (plrMover && plrMover.IsBeingTeleported())
@@ -423,7 +423,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTeleportAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveTeleportAck(MoveTeleportAck packet)
         {
-            Player plMover = GetPlayer().m_unitMovedByMe.ToPlayer();
+            Player plMover = GetPlayer().GetUnitBeingMoved().ToPlayer();
 
             if (!plMover || !plMover.IsBeingTeleportedNear())
                 return;
@@ -551,8 +551,8 @@ namespace Game
         {
             if (GetPlayer().IsInWorld)
             {
-                if (_player.m_unitMovedByMe.GetGUID() != packet.ActiveMover)
-                    Log.outError(LogFilter.Network, "HandleSetActiveMover: incorrect mover guid: mover is {0} and should be {1},", packet.ActiveMover.ToString(), _player.m_unitMovedByMe.GetGUID().ToString());
+                if (_player.GetUnitBeingMoved().GetGUID() != packet.ActiveMover)
+                    Log.outError(LogFilter.Network, "HandleSetActiveMover: incorrect mover guid: mover is {0} and should be {1},", packet.ActiveMover.ToString(), _player.GetUnitBeingMoved().GetGUID().ToString());
             }
         }
 
@@ -561,7 +561,7 @@ namespace Game
         {
             GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
 
-            if (GetPlayer().m_unitMovedByMe.GetGUID() != movementAck.Ack.Status.Guid)
+            if (GetPlayer().GetUnitBeingMoved().GetGUID() != movementAck.Ack.Status.Guid)
                 return;
 
             GetPlayer().m_movementInfo = movementAck.Ack.Status;
@@ -606,7 +606,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            Unit mover = _player.GetUnitBeingMoved();
             Cypher.Assert(mover != null);
             _player.ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status);
 
@@ -628,7 +628,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            Unit mover = _player.GetUnitBeingMoved();
             Cypher.Assert(mover != null);
             _player.ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status);
 
@@ -650,7 +650,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            Unit mover = _player.GetUnitBeingMoved();
             Cypher.Assert(mover != null);                      // there must always be a mover
             _player.ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status);
 
@@ -692,7 +692,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
         void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
         {
-            Unit mover = GetPlayer().m_unitMovedByMe;
+            Unit mover = GetPlayer().GetUnitBeingMoved();
             if (mover == null)
             {
                 Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong mover state from the unit moved by {GetPlayer().GetGUID()}");

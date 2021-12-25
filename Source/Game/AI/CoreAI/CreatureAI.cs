@@ -150,7 +150,7 @@ namespace Game.AI
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
         }
 
-        // adapted from logic in Spell:EFfectSummonType before commit 8499434
+        // adapted from logic in Spell:EffectSummonType
         public static bool ShouldFollowOnSpawn(SummonPropertiesRecord properties)
         {
             // Summons without SummonProperties are generally scripted summons that don't belong to any owner

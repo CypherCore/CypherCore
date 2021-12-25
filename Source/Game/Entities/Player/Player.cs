@@ -1661,8 +1661,7 @@ namespace Game.Entities
             SetUnitMovementFlags(GetUnitMovementFlags() & MovementFlag.MaskHasPlayerStatusOpcode);
             m_movementInfo.ResetJump();
             DisableSpline();
-            if (!IsInFlight())
-                GetMotionMaster().Clear();
+            GetMotionMaster().Remove(MovementGeneratorType.Effect);
 
             Transport transport = GetTransport();
             if (transport)
