@@ -17,8 +17,10 @@
 
 using Framework.Constants;
 using Game.AI;
+using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -322,26 +324,27 @@ namespace Game.Entities
             _oldFactionId = GetFaction();
             SetFaction(charmer.GetFaction());
 
+            // Pause any Idle movement
+            PauseMovement(0, 0, false);
+
+            // Remove any active voluntary movement
+            GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+            // Stop any remaining spline, if no involuntary movement is found
+            Func<MovementGenerator, bool> criteria = movement => movement.Priority == MovementGeneratorPriority.Highest;
+            if (!GetMotionMaster().HasMovementGenerator(criteria))
+                StopMoving();
+
             // Set charmed
             charmer.SetCharm(this, true);
 
-            if (IsTypeId(TypeId.Unit))
+            Player player = ToPlayer();
+            if (player)
             {
-                PauseMovement(0, 0, false);
-                GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+                if (player.IsAFK())
+                    player.ToggleAFK();
 
-                StopMoving();
-            }
-            else
-            {
-                Player player = ToPlayer();
-                if (player)
-                {
-                    if (player.IsAFK())
-                        player.ToggleAFK();
-
-                    player.SetClientControl(this, false);
-                }
+                player.SetClientControl(this, false);
             }
 
             // charm is set by aura, and aura effect remove handler was called during apply handler execution
