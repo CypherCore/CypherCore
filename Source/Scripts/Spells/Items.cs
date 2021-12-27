@@ -59,6 +59,9 @@ namespace Scripts.Spells.Items
         public const uint DementiaPos = 41406;
         public const uint DementiaNeg = 41409;
 
+        // BrittleArmor
+        public const uint BrittleArmor = 24575;
+
         //Blessingofancientkings
         public const uint ProtectionOfAncientKings = 64413;
 
@@ -134,6 +137,9 @@ namespace Scripts.Spells.Items
 
         //Markofconquest
         public const uint MarkOfConquestEnergize = 39599;
+
+        // MercurialShield
+        public const uint MercurialShield = 26464;
 
         //Necrotictouch
         public const uint ItemNecroticTouchProc = 71879;
@@ -769,6 +775,25 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script]// 24590 - Brittle Armor
+    class spell_item_brittle_armor : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BrittleArmor);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAuraFromStack(SpellIds.BrittleArmor);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 64411 - Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
     class spell_item_blessing_of_ancient_kings : AuraScript
     {
@@ -1433,6 +1458,25 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
+    [Script]// 26465 - Mercurial Shield
+    class spell_item_mercurial_shield : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MercurialShield);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAuraFromStack(SpellIds.MercurialShield);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
