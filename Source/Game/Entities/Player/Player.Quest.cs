@@ -574,10 +574,6 @@ namespace Game.Entities
 
         public bool CanRewardQuest(Quest quest, LootItemType rewardType, uint rewardId, bool msg)
         {
-            // prevent receive reward with quest items in bank or for not completed quest
-            if (!CanRewardQuest(quest, msg))
-                return false;
-
             List<ItemPosCount> dest = new();
             if (quest.GetRewChoiceItemsCount() > 0)
             {

@@ -350,14 +350,16 @@ namespace Game
                 return;
             }
 
-            if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true))
+            if (GetPlayer().CanRewardQuest(quest, true)) // First, check if player is allowed to turn the quest in (all objectives completed). If not, we send players to the offer reward screen
             {
-                GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
-
-                switch (obj.GetTypeId())
+                if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
                 {
-                    case TypeId.Unit:
-                    case TypeId.Player:
+                    GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
+
+                    switch (obj.GetTypeId())
+                    {
+                        case TypeId.Unit:
+                        case TypeId.Player:
                         {
                             //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
                             // Send next quest
@@ -380,7 +382,7 @@ namespace Game
                                 creatureQGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
-                    case TypeId.GameObject:
+                        case TypeId.GameObject:
                         {
                             GameObject questGiver = obj.ToGameObject();
                             // Send next quest
@@ -401,8 +403,9 @@ namespace Game
                             questGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
                 }
             }
             else
