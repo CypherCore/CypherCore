@@ -527,12 +527,20 @@ namespace Game.Entities
 
         public bool CanRewardQuest(Quest quest, bool msg)
         {
+            // quest is disabled
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, this))
+                return false;
+
             // not auto complete quest and not completed quest (only cheating case, then ignore without message)
             if (!quest.IsDFQuest() && !quest.IsAutoComplete() && GetQuestStatus(quest.Id) != QuestStatus.Complete)
                 return false;
 
             // daily quest can't be rewarded (25 daily quest already completed)
             if (!SatisfyQuestDay(quest, true) || !SatisfyQuestWeek(quest, true) || !SatisfyQuestMonth(quest, true) || !SatisfyQuestSeasonal(quest, true))
+                return false;
+
+            // player no longer satisfies the quest's requirements (skill level etc.)
+            if (!SatisfyQuestLevel(quest, true) || !SatisfyQuestSkill(quest, true) || !SatisfyQuestReputation(quest, true))
                 return false;
 
             // rewarded and not repeatable quest (only cheating case, then ignore without message)
