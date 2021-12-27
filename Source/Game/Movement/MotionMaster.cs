@@ -127,7 +127,7 @@ namespace Game.Movement
 
         public int Size()
         {
-            return _defaultGenerator != null ? 1 : 0 + _generators.Count;
+            return (_defaultGenerator != null ? 1 : 0) + _generators.Count;
         }
 
         public List<MovementGeneratorInformation> GetMovementGeneratorsInformation()
