@@ -2708,9 +2708,9 @@ namespace Game.Maps
                 }
 
                 long respawnTime = GetRespawnTime(data.type, data.spawnId);
-                if (respawnTime != 0 && respawnTime > GameTime.GetGameTime())
+                if (respawnTime != 0)
                 {
-                    if (!force && !ignoreRespawn)
+                    if (!force && !ignoreRespawn && respawnTime > GameTime.GetGameTime())
                         continue;
 
                     // we need to remove the respawn time, otherwise we'd end up double spawning

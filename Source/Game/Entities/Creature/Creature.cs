@@ -3163,14 +3163,32 @@ namespace Game.Entities
 
             if (m_respawnTime == 0 && !map.IsSpawnGroupActive(data.spawnGroupData.groupId))
             {
-                // @todo pools need fixing! this is just a temporary crashfix, but they violate dynspawn principles
-                Cypher.Assert(m_respawnCompatibilityMode || Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) != 0, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group {data.spawnGroupData.name}.");
+                if (!m_respawnCompatibilityMode)
+                {
+                    // @todo pools need fixing! this is just a temporary thing, but they violate dynspawn principles
+                    if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
+                    {
+                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group '{data.spawnGroupData.name}'");
+                        return false;
+                    }
+                }
+
                 m_respawnTime = GameTime.GetGameTime() + RandomHelper.URand(4, 7);
             }
 
-            if (m_respawnTime != 0)                          // respawn on UpdateLoadCreatureFromDB
+            if (m_respawnTime != 0)
             {
-                Cypher.Assert(m_respawnCompatibilityMode || Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) != 0, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress.");
+                if (!m_respawnCompatibilityMode)
+                {
+                    // @todo same as above
+                    if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
+                    {
+                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress");
+                        return false;
+                    }
+                }
+
+                // compatibility mode creatures will be respawned in ::Update()
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
