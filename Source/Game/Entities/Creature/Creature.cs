@@ -1721,22 +1721,25 @@ namespace Game.Entities
 
         public float GetAttackDistance(Unit player)
         {
-            // WoW Wiki: the minimum radius seems to be 5 yards, while the maximum range is 45 yards
-            float maxRadius = (45.0f * WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro));
-            float minRadius = (5.0f * WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro));
             float aggroRate = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
-            byte expansionMaxLevel = (byte)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
+            if (aggroRate == 0)
+                return 0.0f;
 
+            // WoW Wiki: the minimum radius seems to be 5 yards, while the maximum range is 45 yards
+            float maxRadius = 45.0f * aggroRate;
+            float minRadius = 5.0f * aggroRate;
+
+            uint expansionMaxLevel = Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
             uint playerLevel = player.GetLevelForTarget(this);
             uint creatureLevel = GetLevelForTarget(player);
-
-            if (aggroRate == 0.0f)
-                return 0.0f;
+            uint levelDifference = creatureLevel - playerLevel;
 
             // The aggro radius for creatures with equal level as the player is 20 yards.
             // The combatreach should not get taken into account for the distance so we drop it from the range (see Supremus as expample)
             float baseAggroDistance = 20.0f - GetCombatReach();
-            float aggroRadius = baseAggroDistance;
+
+            // + - 1 yard for each level difference between player and creature
+            float aggroRadius = baseAggroDistance + (float)levelDifference;
 
             // detect range auras
             if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -1747,12 +1750,9 @@ namespace Game.Entities
 
             // The aggro range of creatures with higher levels than the total player level for the expansion should get the maxlevel treatment
             // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
-            // The following code is used for blizzlike behavior such as skipable bosses (e.g. Commander Springvale at level 85)
+            // The following code is used for blizzlike behaviour such as skippable bosses
             if (creatureLevel > expansionMaxLevel)
-                aggroRadius += (float)expansionMaxLevel - (float)playerLevel;
-            // + - 1 yard for each level difference between player and creature
-            else
-                aggroRadius += (float)creatureLevel - (float)playerLevel;
+                aggroRadius = baseAggroDistance + (float)(expansionMaxLevel - playerLevel);
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)
