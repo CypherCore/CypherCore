@@ -566,7 +566,7 @@ namespace Game.Entities
                                         SetRespawnTime(Time.Week);
                                     else
                                         m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
-                                    SaveRespawnTime(); // also save to DB immediately
+                                    SaveRespawnTime();
                                     return;
                                 }
 
@@ -625,7 +625,7 @@ namespace Game.Entities
 
                     // Set respawn timer
                     if (!m_respawnCompatibilityMode && m_respawnTime > 0)
-                        SaveRespawnTime(0, false);
+                        SaveRespawnTime();
 
                     if (IsSpawned())
                     {
@@ -875,22 +875,13 @@ namespace Game.Entities
 
                     // if option not set then object will be saved at grid unload
                     // Otherwise just save respawn time to map object memory
-                    if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                        SaveRespawnTime();
+                    SaveRespawnTime();
 
-                    if (!m_respawnCompatibilityMode)
-                    {
-                        // Respawn time was just saved if set to save to DB
-                        // If not, we save only to map memory
-                        if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                            SaveRespawnTime(0, false);
-
-                        // Then despawn
+                    if (m_respawnCompatibilityMode)
+                        DestroyForNearbyPlayers();
+                    else
                         AddObjectToRemoveList();
-                        return;
-                    }
 
-                    DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
                     break;
                 }
             }
@@ -1274,7 +1265,7 @@ namespace Game.Entities
 
         public Transport ToTransport() { return GetGoInfo().type == GameObjectTypes.MapObjTransport ? (this as Transport) : null; }
 
-        public override void SaveRespawnTime(uint forceDelay = 0, bool savetodb = true)
+        public void SaveRespawnTime(uint forceDelay = 0)
         {
             if (m_goData != null && (forceDelay != 0 || m_respawnTime > GameTime.GetGameTime()) && m_spawnedByDefault)
             {
@@ -1285,7 +1276,7 @@ namespace Game.Entities
                 }
 
                 long thisRespawnTime = forceDelay != 0 ? GameTime.GetGameTime() + forceDelay : m_respawnTime;
-                GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData && savetodb);
+                GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId());
             }
         }
 

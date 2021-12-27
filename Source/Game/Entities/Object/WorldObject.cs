@@ -2821,8 +2821,6 @@ namespace Game.Entities
 
         public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
 
-        public virtual void SaveRespawnTime(uint forceDelay = 0, bool saveToDB = true) { }
-
         public ZoneScript GetZoneScript() { return m_zoneScript; }
 
         public void AddToNotify(NotifyFlags f) { m_notifyflags |= f; }

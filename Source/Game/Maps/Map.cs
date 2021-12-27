@@ -965,12 +965,7 @@ namespace Game.Maps
             obj.ResetMap();
 
             if (remove)
-            {
-                // if option set then object already saved at this moment
-                if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                    obj.SaveRespawnTime();
                 DeleteFromWorld(obj);
-            }
         }
 
         public void RemoveFromMap(Transport obj, bool remove)
@@ -1002,12 +997,7 @@ namespace Game.Maps
 
             obj.ResetMap();
             if (remove)
-            {
-                // if option set then object already saved at this moment
-                if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                    obj.SaveRespawnTime();
                 DeleteFromWorld(obj);
-            }
         }
 
         bool CheckGridIntegrity<T>(T obj, bool moved) where T : WorldObject

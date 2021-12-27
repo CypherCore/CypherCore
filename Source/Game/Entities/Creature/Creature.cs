@@ -208,7 +208,7 @@ namespace Game.Entities
                     uint respawnDelay = m_respawnDelay;
                     m_respawnTime = Math.Max(GameTime.GetGameTime() + respawnDelay, m_respawnTime);
 
-                    SaveRespawnTime(0, false);
+                    SaveRespawnTime();
                 }
 
                 TempSummon summon = ToTempSummon();
@@ -1802,12 +1802,8 @@ namespace Game.Entities
                     else
                         m_respawnTime = GameTime.GetGameTime() + respawnDelay;
                 }
-
-                // always save boss respawn time at death to prevent crash cheating
-                if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately) || IsWorldBoss())
-                    SaveRespawnTime();
-                else if (!m_respawnCompatibilityMode)
-                    SaveRespawnTime(0, false);
+                
+                SaveRespawnTime();
 
                 ReleaseFocus(null, false);               // remove spellcast focus
                 DoNotReacquireTarget(); // cancel delayed re-target
@@ -2265,7 +2261,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override void SaveRespawnTime(uint forceDelay = 0, bool saveToDb = true)
+        public void SaveRespawnTime(uint forceDelay = 0)
         {
             if (IsSummon() || m_spawnId == 0 || (m_creatureData != null && !m_creatureData.dbData))
                 return;
@@ -2277,7 +2273,7 @@ namespace Game.Entities
             }
 
             long thisRespawnTime = forceDelay != 0 ? GameTime.GetGameTime() + forceDelay : m_respawnTime;
-            GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId(), saveToDb && m_creatureData != null && m_creatureData.dbData);
+            GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId());
         }
 
         public bool CanCreatureAttack(Unit victim, bool force = true)

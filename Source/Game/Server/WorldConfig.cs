@@ -623,13 +623,6 @@ namespace Game
                 Values[WorldCfg.MaxOverspeedPings] = 2;
             }
 
-            Values[WorldCfg.SaveRespawnTimeImmediately] = GetDefaultValue("SaveRespawnTimeImmediately", true);
-            if (!(bool)Values[WorldCfg.SaveRespawnTimeImmediately])
-            {
-                Log.outWarn(LogFilter.ServerLoading, "SaveRespawnTimeImmediately triggers assertions when Disabled, overridden to Enabled");
-                Values[WorldCfg.SaveRespawnTimeImmediately] = true;
-            }
-
             Values[WorldCfg.Weather] = GetDefaultValue("ActivateWeather", true);
 
             Values[WorldCfg.DisableBreathing] = GetDefaultValue("DisableWaterBreath", (int)AccountTypes.Console);

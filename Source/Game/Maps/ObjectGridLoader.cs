@@ -280,9 +280,6 @@ namespace Game.Maps
                 if (obj.IsTypeId(TypeId.Corpse))
                     continue;
 
-                // if option set then object already saved at this moment
-                if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                    obj.SaveRespawnTime();
                 //Some creatures may summon other temp summons in CleanupsBeforeDelete()
                 //So we need this even after cleaner (maybe we can remove cleaner)
                 //Example: Flame Leviathan Turret 33139 is summoned when a creature is deleted

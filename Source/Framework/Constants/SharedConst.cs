@@ -1678,7 +1678,6 @@ namespace Framework.Constants
         RespawnMinCheckIntervalMs,
         RespawnRestartQuietTime,
         RestrictedLfgChannel,
-        SaveRespawnTimeImmediately,
         SessionAddDelay,
         ShowBanInWorld,
         ShowKickInWorld,
