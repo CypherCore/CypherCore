@@ -87,6 +87,7 @@ namespace Game.Chat.Commands
             stmt.AddValue(2, player.GetPositionX());
             stmt.AddValue(3, player.GetPositionY());
             stmt.AddValue(4, player.GetPositionZ());
+            stmt.AddValue(5, player.GetOrientation());
 
             DB.World.Execute(stmt);
 
@@ -579,8 +580,9 @@ namespace Game.Chat.Commands
                 stmt.AddValue(0, chr.GetPositionX());
                 stmt.AddValue(1, chr.GetPositionY());
                 stmt.AddValue(2, chr.GetPositionZ());
-                stmt.AddValue(3, pathid);
-                stmt.AddValue(4, point);
+                stmt.AddValue(3, chr.GetOrientation());
+                stmt.AddValue(4, pathid);
+                stmt.AddValue(5, point);
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage(CypherStrings.WaypointChanged);
@@ -753,14 +755,14 @@ namespace Game.Chat.Commands
                     float x = result.Read<float>(1);
                     float y = result.Read<float>(2);
                     float z = result.Read<float>(3);
+                    float o = result.Read<float>(4);
 
                     uint id = 1;
 
                     Player chr = handler.GetSession().GetPlayer();
                     Map map = chr.GetMap();
-                    Position pos = new(x, y, z, chr.GetOrientation());
 
-                    Creature creature = Creature.CreateCreature(id, map, pos);
+                    Creature creature = Creature.CreateCreature(id, map, new Position(x, y, z, o));
                     if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
@@ -821,12 +823,12 @@ namespace Game.Chat.Commands
                 float x = result.Read<float>(0);
                 float y = result.Read<float>(1);
                 float z = result.Read<float>(2);
+                float o = result.Read<float>(3);
 
                 Player chr = handler.GetSession().GetPlayer();
                 Map map = chr.GetMap();
-                Position pos = new(x, y, z, chr.GetOrientation());
 
-                Creature creature = Creature.CreateCreature(1, map, pos);
+                Creature creature = Creature.CreateCreature(1, map, new Position(x, y, z, 0));
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);

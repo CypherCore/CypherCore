@@ -1114,7 +1114,7 @@ namespace Game.Chat
         {
             Player player = handler.GetSession().GetPlayer();
 
-            Log.outInfo(LogFilter.SqlDev, "(@PATH, XX, {0}, {1}, {2}, 0, 0, 0, 100, 0),", player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+            Log.outInfo(LogFilter.SqlDev, $"(@PATH, XX, {player.GetPositionX():3F}, {player.GetPositionY():3F}, {player.GetPositionZ():5F}, {player.GetOrientation():5F}, 0, 0, 0, 100, 0)");
 
             handler.SendSysMessage("Waypoint SQL written to SQL Developer log");
             return true;
