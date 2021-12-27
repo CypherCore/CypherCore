@@ -639,34 +639,7 @@ namespace Game.Maps
         {
             var playerList = instance.GetPlayers();
             foreach (var player in playerList)
-            {
-                player.RemoveAurasDueToSpell(spell);
-
-                if (!includePets)
-                    continue;
-
-                for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
-                {
-                    ObjectGuid summonGUID = player.m_SummonSlot[i];
-                    if (!summonGUID.IsEmpty())
-                    {
-                        Creature summon = instance.GetCreature(summonGUID);
-                        if (summon != null)
-                            summon.RemoveAurasDueToSpell(spell);
-                    }
-                }
-
-                if (!includeControlled)
-                    continue;
-
-                for (var i = 0; i < player.m_Controlled.Count; ++i)
-                {
-                    Unit controlled = player.m_Controlled[i];
-                    if (controlled != null)
-                        if (controlled.IsInWorld && controlled.IsCreature())
-                            controlled.RemoveAurasDueToSpell(spell);
-                }
-            }
+                DoRemoveAurasDueToSpellOnPlayer(player, spell, includePets, includeControlled);
         }
 
         public void DoRemoveAurasDueToSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
@@ -707,34 +680,7 @@ namespace Game.Maps
         {
             var playerList = instance.GetPlayers();
             foreach (var player in playerList)
-            {
-                player.CastSpell(player, spell, true);
-
-                if (!includePets)
-                    continue;
-
-                for (var i = 0; i < SharedConst.MaxSummonSlot; ++i)
-                {
-                    ObjectGuid summonGUID = player.m_SummonSlot[i];
-                    if (!summonGUID.IsEmpty())
-                    {
-                        Creature summon = instance.GetCreature(summonGUID);
-                        if (summon != null)
-                            summon.CastSpell(player, spell, true);
-                    }
-                }
-
-                if (!includeControlled)
-                    continue;
-
-                for (var i = 0; i < player.m_Controlled.Count; ++i)
-                {
-                    Unit controlled = player.m_Controlled[i];
-                    if (controlled != null)
-                        if (controlled.IsInWorld && controlled.IsCreature())
-                            controlled.CastSpell(player, spell, true);
-                }
-            }
+                DoCastSpellOnPlayer(player, spell, includePets, includeControlled);
         }
 
         public void DoCastSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)

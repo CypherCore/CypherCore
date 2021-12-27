@@ -3543,6 +3543,7 @@ namespace Game.Entities
             });
 
             ApplySpellFix(new[] {
+                15538, // Gout of Flame
                 42490, // Energized!
                 42492, // Cast Energized
                 43115  // Plague Vial
@@ -3654,6 +3655,12 @@ namespace Game.Entities
             }, spellInfo =>
             {
                 spellInfo.RecoveryTime = 20000;
+            });
+
+            // Summon Frigid Bones
+            ApplySpellFix(new[] { 53525 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(4); // 2 minutes
             });
 
             //
@@ -4258,6 +4265,13 @@ namespace Game.Entities
             ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
             {
                 spellInfo.AttributesEx3 |= SpellAttr3.NoInitialAggro;
+            });
+
+            // Spore - Spore Visual
+            ApplySpellFix(new[] { 42525 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DeathPersistent;
+                spellInfo.AttributesEx2 |= SpellAttr2.CanTargetDead;
             });
 
             //

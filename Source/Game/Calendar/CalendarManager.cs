@@ -311,7 +311,7 @@ namespace Game
             return eventId;
         }
 
-        void FreeInviteId(ulong id)
+        public void FreeInviteId(ulong id)
         {
             if (id == _maxInviteId)
                 --_maxInviteId;

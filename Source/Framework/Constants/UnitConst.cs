@@ -487,7 +487,6 @@ namespace Framework.Constants
         Unattackable = InFlight,
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,
         Controlled = Confused | Stunned | Fleeing,
-        CantClientControl = Charmed | Fleeing | Confused | Possessed,
         LostControl = Controlled | Possessed | Jumping | Charging,
         CannotAutoattack = Controlled | Charging | Casting,
         Sightless = LostControl | Evade,

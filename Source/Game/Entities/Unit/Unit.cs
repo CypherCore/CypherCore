@@ -921,17 +921,10 @@ namespace Game.Entities
 
                 if (vehicle.GetBase().IsCreature())
                 {
-                    // If a player entered a vehicle that is part of a formation, remove it from said formation and replace current movement generator with MoveIdle (no movement)
+                    // If a player entered a vehicle that is part of a formation, remove it from said formation
                     CreatureGroup creatureGroup = vehicle.GetBase().ToCreature().GetFormation();
                     if (creatureGroup != null)
-                    {
                         creatureGroup.RemoveMember(vehicle.GetBase().ToCreature());
-                        vehicle.GetBase().GetMotionMaster().MoveIdle();
-                    }
-
-                    // If the vehicle has the random movement generator active, replace it with MoveIdle (no movement) so it won't override player control
-                    if (vehicle.GetBase().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Random)
-                        vehicle.GetBase().GetMotionMaster().MoveIdle();
                 }
             }
 
@@ -1040,13 +1033,7 @@ namespace Game.Entities
             GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementGeneratorPriority.Highest);
 
             if (player != null)
-            {
                 player.ResummonPetTemporaryUnSummonedIfAny();
-
-                // When a player exits a creature vehicle, restore its default motion generator (if any)
-                if (vehicle.GetBase().IsCreature())
-                    vehicle.GetBase().GetMotionMaster().InitializeDefault();
-            }
 
             if (vehicle.GetBase().HasUnitTypeMask(UnitTypeMask.Minion) && vehicle.GetBase().IsTypeId(TypeId.Unit))
                 if (((Minion)vehicle.GetBase()).GetOwner() == this)

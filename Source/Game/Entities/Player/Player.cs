@@ -7393,8 +7393,8 @@ namespace Game.Entities
             }
         }
 
-        public Gender GetNativeGender() { return (Gender)(byte)m_playerData.NativeSex; }
-        public void SetNativeGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
+        public override Gender GetNativeGender() { return (Gender)(byte)m_playerData.NativeSex; }
+        public override void SetNativeGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
         public void SetPvpTitle(byte pvpTitle) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PvpTitle), pvpTitle); }
         public void SetArenaFaction(byte arenaFaction) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ArenaFaction), arenaFaction); }
         public void ApplyModFakeInebriation(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FakeInebriation), mod, apply); }
