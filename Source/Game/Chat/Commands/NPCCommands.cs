@@ -869,7 +869,7 @@ namespace Game.Chat
             [Command("", RBACPermissions.CommandNpcDelete)]
             static bool HandleNpcDeleteCommand(StringArguments args, CommandHandler handler)
             {
-                Creature creature;
+                ulong spawnId;
 
                 if (!args.Empty())
                 {
@@ -881,34 +881,36 @@ namespace Game.Chat
                     if (!ulong.TryParse(cId, out ulong guidLow) || guidLow == 0)
                         return false;
 
-                    // force respawn to make sure we find something
-                    handler.GetSession().GetPlayer().GetMap().ForceRespawn(SpawnObjectType.Creature, guidLow);
-                    // then try to find it
-                    creature = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
+                    spawnId = guidLow;
                 }
                 else
-                    creature = handler.GetSelectedCreature();
-
-                if (!creature || creature.IsPet() || creature.IsTotem())
                 {
-                    handler.SendSysMessage(CypherStrings.SelectCreature);
-                    return false;
+                    Creature creature = handler.GetSelectedCreature();
+
+                    if (!creature || creature.IsPet() || creature.IsTotem())
+                    {
+                        handler.SendSysMessage(CypherStrings.SelectCreature);
+                        return false;
+                    }
+
+                    TempSummon summon = creature.ToTempSummon();
+                    if (summon != null)
+                    {
+                        summon.UnSummon();
+                        handler.SendSysMessage(CypherStrings.CommandDelcreatmessage);
+                        return true;
+                    }
+                    spawnId = creature.GetSpawnId();
                 }
 
-                TempSummon summon = creature.ToTempSummon();
-                if (summon != null)
-                    summon.UnSummon();
-                else
+                if (Creature.DeleteFromDB(spawnId))
                 {
-                    // Delete the creature
-                    creature.CombatStop();
-                    creature.DeleteFromDB();
-                    creature.AddObjectToRemoveList();
+                    handler.SendSysMessage(CypherStrings.CommandDelcreatmessage);
+                    return true;
                 }
 
-                handler.SendSysMessage(CypherStrings.CommandDelcreatmessage);
-
-                return true;
+                handler.SendSysMessage(CypherStrings.CommandCreatguidnotfound, spawnId);
+                return false;
             }
 
             [Command("item", RBACPermissions.CommandNpcDeleteItem)]

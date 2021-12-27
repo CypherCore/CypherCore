@@ -512,21 +512,27 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp modify del, PathID: |r|cff00ffff{0}|r", pathid);
 
-                target.DeleteFromDB();
-                target.AddObjectToRemoveList();
+                if (Creature.DeleteFromDB(target.GetSpawnId()))
+                {
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_DATA);
-                stmt.AddValue(0, pathid);
-                stmt.AddValue(1, point);
-                DB.World.Execute(stmt);
+                    stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_DATA);
+                    stmt.AddValue(0, pathid);
+                    stmt.AddValue(1, point);
+                    DB.World.Execute(stmt);
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POINT);
-                stmt.AddValue(0, pathid);
-                stmt.AddValue(1, point);
-                DB.World.Execute(stmt);
+                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POINT);
+                    stmt.AddValue(0, pathid);
+                    stmt.AddValue(1, point);
+                    DB.World.Execute(stmt);
 
-                handler.SendSysMessage(CypherStrings.WaypointRemoved);
-                return true;
+                    handler.SendSysMessage(CypherStrings.WaypointRemoved);
+                    return true;
+                }
+                else
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointNotremoved);
+                    return false;
+                }
             }                                                       // del
 
             if (show == "move")
@@ -538,8 +544,11 @@ namespace Game.Chat.Commands
                 // What to do:
                 // Move the visual spawnpoint
                 // Respawn the owner of the waypoints
-                target.DeleteFromDB();
-                target.AddObjectToRemoveList();
+                if (!Creature.DeleteFromDB(target.GetSpawnId()))
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                    return false;
+                }
 
                 // re-create
                 Creature creature = Creature.CreateCreature(1, map, chr.GetPosition());
@@ -721,21 +730,10 @@ namespace Game.Chat.Commands
                     {
                         ulong wpguid = result2.Read<ulong>(0);
 
-                        Creature creature = handler.GetCreatureFromPlayerMapByDbGuid(wpguid);
-                        if (!creature)
+                        if (!Creature.DeleteFromDB(wpguid))
                         {
                             handler.SendSysMessage(CypherStrings.WaypointNotremoved, wpguid);
                             hasError = true;
-
-                            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
-                            stmt.AddValue(0, wpguid);
-                            DB.World.Execute(stmt);
-                        }
-                        else
-                        {
-                            creature.CombatStop();
-                            creature.DeleteFromDB();
-                            creature.AddObjectToRemoveList();
                         }
 
                     }
@@ -931,21 +929,10 @@ namespace Game.Chat.Commands
                 {
                     ulong lowguid = result.Read<ulong>(0);
 
-                    Creature creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
-                    if (!creature)
+                    if (!Creature.DeleteFromDB(lowguid))
                     {
                         handler.SendSysMessage(CypherStrings.WaypointNotremoved, lowguid);
                         hasError = true;
-
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
-                        stmt.AddValue(0, lowguid);
-                        DB.World.Execute(stmt);
-                    }
-                    else
-                    {
-                        creature.CombatStop();
-                        creature.DeleteFromDB();
-                        creature.AddObjectToRemoveList();
                     }
                 }
                 while (result.NextRow());

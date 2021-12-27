@@ -2443,9 +2443,9 @@ namespace Game.Maps
             }
         }
 
-        void Respawn(RespawnInfo info, bool force = false, SQLTransaction dbTrans = null)
+        void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
         {
-            if (!force && !CheckRespawn(info))
+            if (!CheckRespawn(info))
             {
                 if (info.respawnTime != 0)
                     SaveRespawnTime(info.type, info.spawnId, info.entry, info.respawnTime, info.zoneId, info.gridId, true, true, dbTrans);
@@ -2463,11 +2463,11 @@ namespace Game.Maps
             DoRespawn(type, spawnId, gridId);
         }
 
-        void Respawn(List<RespawnInfo> respawnData, bool force, SQLTransaction dbTrans)
+        void Respawn(List<RespawnInfo> respawnData, SQLTransaction dbTrans)
         {
             SQLTransaction trans = dbTrans != null ? dbTrans : new SQLTransaction();
             foreach (RespawnInfo info in respawnData)
-                Respawn(info, force, trans);
+                Respawn(info, trans);
 
             if (dbTrans == null)
                 DB.Characters.CommitTransaction(trans);
@@ -2543,13 +2543,6 @@ namespace Game.Maps
 
             //respawn heap
             _respawnTimes.Remove(info);
-        }
-
-        public void ForceRespawn(SpawnObjectType type, ulong spawnId)
-        {
-            RespawnInfo info = GetRespawnInfo(type, spawnId);
-            if (info != null)
-                Respawn(info, true);
         }
 
         public void RemoveRespawnTime(RespawnInfo info, bool doRespawn = false, SQLTransaction dbTrans = null)

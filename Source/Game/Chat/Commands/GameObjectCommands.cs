@@ -69,39 +69,35 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out ulong spawnId) || spawnId == 0)
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
-            // force respawn to make sure we find something
-            player.GetMap().ForceRespawn(SpawnObjectType.GameObject, guidLow);
-            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-            if (!obj)
+            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
+            if (obj != null)
             {
-                handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
-                return false;
-            }
-
-            ObjectGuid ownerGuid = obj.GetOwnerGUID();
-            if (!ownerGuid.IsEmpty())
-            {
-                Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
-                if (!owner || !ownerGuid.IsPlayer())
+                Player player = handler.GetSession().GetPlayer();
+                ObjectGuid ownerGuid = obj.GetOwnerGUID();
+                if (!ownerGuid.IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.CommandDelobjrefercreature, ownerGuid.ToString(), obj.GetGUID().ToString());
-                    return false;
-                }
+                    Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
+                    if (!owner || !ownerGuid.IsPlayer())
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandDelobjrefercreature, ownerGuid.ToString(), obj.GetGUID().ToString());
+                        return false;
+                    }
 
-                owner.RemoveGameObject(obj, false);
+                    owner.RemoveGameObject(obj, false);
+                }
             }
 
-            obj.SetRespawnTime(0);                                 // not save respawn time
-            obj.Delete();
-            obj.DeleteFromDB();
+            if (GameObject.DeleteFromDB(spawnId))
+            {
+                handler.SendSysMessage(CypherStrings.CommandDelobjmessage, spawnId);
+                return true;
+            }
 
-            handler.SendSysMessage(CypherStrings.CommandDelobjmessage, obj.GetGUID().ToString());
-
-            return true;
+            handler.SendSysMessage(CypherStrings.CommandObjnotfound, obj.GetGUID().ToString());
+            return false;
         }
 
         [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]

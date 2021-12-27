@@ -1155,46 +1155,68 @@ namespace Game.Entities
             return true;
         }
 
-        public void DeleteFromDB()
+        public static bool DeleteFromDB(ulong spawnId)
         {
-            GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
-            Global.ObjectMgr.DeleteGameObjectData(m_spawnId);
+            GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
+            if (data == null)
+                return false;
 
             SQLTransaction trans = new();
 
+            Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+            {
+                // despawn all active objects, and remove their respawns
+                List<GameObject> toUnload = new();
+                foreach (var creature in map.GetGameObjectBySpawnIdStore().LookupByKey(spawnId))
+                    toUnload.Add(creature);
+
+                foreach (GameObject obj in toUnload)
+                    map.AddObjectToRemoveList(obj);
+
+                map.RemoveRespawnTime(SpawnObjectType.GameObject, spawnId, false, trans);
+            });
+
+            // delete data from memory
+            Global.ObjectMgr.DeleteGameObjectData(spawnId);
+
+            trans = new();
+
+            // ... and the database
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_EVENT_GAMEOBJECT);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToCreature);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT_ADDON);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);
+
+            return true;
         }
 
         public override bool HasQuest(uint quest_id)

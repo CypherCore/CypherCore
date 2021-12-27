@@ -434,48 +434,24 @@ namespace Game.PvP
             }
             ulong spawnId = m_Creatures[type];
 
-            var bounds = PvP.GetMap().GetCreatureBySpawnIdStore().LookupByKey(spawnId);
-            foreach (var creature in bounds)
-            {
-                // Don't save respawn time
-                creature.SetRespawnTime(0);
-                creature.DespawnOrUnsummon();
-                creature.AddObjectToRemoveList();
-            }
-
             Log.outDebug(LogFilter.Outdoorpvp, "deleting opvp creature type {0}", type);
 
-            // delete respawn time for this creature
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN);
-            stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, PvP.GetMap().GetId());
-            stmt.AddValue(2, 0);  // instance id, always 0 for world maps
-            DB.Characters.Execute(stmt);
-
-            Global.ObjectMgr.DeleteCreatureData(spawnId);
             m_CreatureTypes.Remove(spawnId);
             m_Creatures.Remove(type);
-            return true;
+
+            return Creature.DeleteFromDB(spawnId);
         }
 
         public bool DelObject(uint type)
         {
-            if (!m_Objects.ContainsKey(type))
+            ulong spawnId = m_Objects[type];
+            if (spawnId == 0)
                 return false;
 
-            ulong spawnId = m_Objects[type];
-            var bounds = PvP.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
-            foreach (var gameobject in bounds)
-            {
-                // Don't save respawn time
-                gameobject.SetRespawnTime(0);
-                gameobject.Delete();
-            }
-
-            Global.ObjectMgr.DeleteGameObjectData(spawnId);
             m_ObjectTypes.Remove(spawnId);
             m_Objects.Remove(type);
-            return true;
+
+            return GameObject.DeleteFromDB(spawnId);
         }
 
         bool DelCapturePoint()

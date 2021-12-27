@@ -1607,66 +1607,79 @@ namespace Game.Entities
             return false;
         }
 
-        public void DeleteFromDB()
+        public static bool DeleteFromDB(ulong spawnId)
         {
-            if (m_spawnId == 0)
-            {
-                Log.outError(LogFilter.Unit, "Trying to delete not saved {0}", GetGUID().ToString(), GetEntry());
-                return;
-            }
-
-            GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId);
-            Global.ObjectMgr.DeleteCreatureData(m_spawnId);
+            CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
+            if (data == null)
+                return false;
 
             SQLTransaction trans = new();
 
+            Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+            {
+                // despawn all active creatures, and remove their respawns
+                List<Creature> toUnload = new();
+                foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(spawnId))
+                    toUnload.Add(creature);
+
+                foreach (Creature creature in toUnload)
+                    map.AddObjectToRemoveList(creature);
+
+                map.RemoveRespawnTime(SpawnObjectType.Creature, spawnId, false, trans);
+            });
+
+            // delete data from memory ...
+            Global.ObjectMgr.DeleteCreatureData(spawnId);
+
+            DB.Characters.CommitTransaction(trans);
+
+            // ... and the database
+            trans = new();
+
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_SPAWNGROUP_MEMBER);
             stmt.AddValue(0, (byte)SpawnObjectType.Creature);
-            stmt.AddValue(1, m_spawnId);
+            stmt.AddValue(1, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_CREATURE);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_MODEL_EQUIP);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToCreature);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);
 
-            // then delete any active instances of the creature
-            var spawnMap = GetMap().GetCreatureBySpawnIdStore().LookupByKey(m_spawnId);
-            foreach (var creature in spawnMap.ToList())
-                creature.AddObjectToRemoveList();
+            return true;
         }
 
         public override bool IsInvisibleDueToDespawn()
