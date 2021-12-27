@@ -532,33 +532,29 @@ namespace Game.Spells
                 if (addUnit && !unit.IsHighestExclusiveAura(this, true))
                     addUnit = false;
 
+                // Dynobj auras don't hit flying targets
+                if (GetAuraType() == AuraObjectType.DynObj && unit.IsInFlight())
+                    addUnit = false;
+
+                // Do not apply aura if it cannot stack with existing auras
                 if (addUnit)
                 {
-                    // persistent area aura does not hit flying targets
-                    if (GetAuraType() == AuraObjectType.DynObj)
+                    // Allow to remove by stack when aura is going to be applied on owner
+                    if (unit != GetOwner())
                     {
-                        if (unit.IsInFlight())
-                            addUnit = false;
-                    }
-                    // unit auras can not stack with each other
-                    else // (GetAuraType() == UNIT_AURA_TYPE)
-                    {
-                        // Allow to remove by stack when aura is going to be applied on owner
-                        if (unit != m_owner)
+                        // check if not stacking aura already on target
+                        // this one prevents unwanted usefull buff loss because of stacking and prevents overriding auras periodicaly by 2 near area aura owners
+                        foreach (var iter in unit.GetAppliedAuras())
                         {
-                            // check if not stacking aura already on target
-                            // this one prevents unwanted usefull buff loss because of stacking and prevents overriding auras periodicaly by 2 near area aura owners
-                            foreach (var iter in unit.GetAppliedAuras())
+                            Aura aura = iter.Value.GetBase();
+                            if (!CanStackWith(aura))
                             {
-                                Aura aura = iter.Value.GetBase();
-                                if (!CanStackWith(aura))
-                                {
-                                    addUnit = false;
-                                    break;
-                                }
+                                addUnit = false;
+                                break;
                             }
                         }
                     }
+                    
                 }
 
                 if (!addUnit)
@@ -1496,12 +1492,16 @@ namespace Game.Spells
             if (this == existingAura)
                 return true;
 
-            // Dynobj auras always stack
-            if (GetAuraType() == AuraObjectType.DynObj || existingAura.GetAuraType() == AuraObjectType.DynObj)
-                return true;
-
-            SpellInfo existingSpellInfo = existingAura.GetSpellInfo();
             bool sameCaster = GetCasterGUID() == existingAura.GetCasterGUID();
+            SpellInfo existingSpellInfo = existingAura.GetSpellInfo();
+
+            // Dynobj auras do not stack when they come from the same spell cast by the same caster
+            if (GetAuraType() == AuraObjectType.DynObj || existingAura.GetAuraType() == AuraObjectType.DynObj)
+            {
+                if (sameCaster && m_spellInfo.Id == existingSpellInfo.Id)
+                    return false;
+                return true;
+            }
 
             // passive auras don't stack with another rank of the spell cast by same caster
             if (IsPassive() && sameCaster && (m_spellInfo.IsDifferentRankOf(existingSpellInfo) || (m_spellInfo.Id == existingSpellInfo.Id && m_castItemGuid.IsEmpty())))
