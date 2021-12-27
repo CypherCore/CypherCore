@@ -284,7 +284,7 @@ namespace Game.Combat
             {
                 _owner.RemoveUnitFlag(UnitFlags.InCombat);
                 _owner.AtExitCombat();
-                if (_owner.IsEngaged() && !(_owner.IsCreature() && _owner.ToCreature().IsAIEnabled()))
+                if (_owner.IsEngaged() && !(_owner.IsCreature() && _owner.CanHaveThreatList() && _owner.ToCreature().IsAIEnabled()))
                     _owner.AtDisengage();
             }
 
