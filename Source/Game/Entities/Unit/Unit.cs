@@ -172,7 +172,7 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().Update(diff);
 
-            if (GetAI() == null && (!IsPlayer() || IsCharmed()))
+            if (GetAI() == null && (!IsPlayer() || (IsCharmed() && GetCharmerGUID().IsCreature())))
                 UpdateCharmAI();
 
             RefreshAI();

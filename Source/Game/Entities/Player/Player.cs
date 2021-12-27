@@ -7214,24 +7214,38 @@ namespace Game.Entities
 
         public void SetClientControl(Unit target, bool allowMove)
         {
-            // still affected by some aura that shouldn't allow control, only allow on last such aura to be removed
-            if (allowMove && target.HasUnitState(UnitState.CantClientControl))
+            // a player can never client control nothing
+            Cypher.Assert(target);
+
+            // don't allow possession to be overridden
+            if (target.HasUnitState(UnitState.Charmed) && (GetGUID() != target.GetCharmerGUID()))
             {
                 // this should never happen, otherwise m_unitBeingMoved might be left dangling!
-                Cypher.Assert(GetUnitBeingMoved() == target);
+                Log.outError(LogFilter.Player, $"Player '{GetName()}' attempt to client control '{target.GetName()}', which is charmed by GUID {target.GetCharmerGUID()}");
                 return;
             }
+
+            // still affected by some aura that shouldn't allow control, only allow on last such aura to be removed
+            if (target.HasUnitState(UnitState.Controlled))
+                allowMove = false;
 
             ControlUpdate packet = new();
             packet.Guid = target.GetGUID();
             packet.On = allowMove;
             SendPacket(packet);
 
-            if (this != target)
-                SetViewpoint(target, allowMove);
+            WorldObject viewpoint = GetViewpoint();
+            if (viewpoint == null)
+                viewpoint = this;
+            if (target != viewpoint)
+            {
+                if (viewpoint != this)
+                    SetViewpoint(viewpoint, false);
+                if (target != this)
+                    SetViewpoint(target, true);
+            }
 
-            if (allowMove)
-                SetMovedUnit(target);
+            SetMovedUnit(target);
         }
 
         public Item GetWeaponForAttack(WeaponAttackType attackType, bool useable = false)
