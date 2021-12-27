@@ -511,7 +511,7 @@ namespace Game
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
             }
             else
             {
@@ -530,7 +530,7 @@ namespace Game
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
             }
             else
             {

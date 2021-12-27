@@ -3056,11 +3056,10 @@ namespace Game.Entities
 
             // set value, including drunk invisibility detection
             // calculate sobering. after 15 minutes logged out, the player will be sober again
-            byte newDrunkValue = 0;
             if (time_diff < (uint)GetDrunkValue() * 9)
-                newDrunkValue = (byte)(GetDrunkValue() - time_diff / 9);
-
-            SetDrunkValue(newDrunkValue);
+                SetDrunkValue((byte)(GetDrunkValue() - time_diff / 9));
+            else
+                SetDrunkValue(0);
 
             m_createTime = createTime;
             m_createMode = createMode;
@@ -3296,6 +3295,8 @@ namespace Game.Entities
                         break;
                 }
             }
+
+            InitPvP();
 
             // RaF stuff.
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
