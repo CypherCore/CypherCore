@@ -7226,7 +7226,7 @@ namespace Game.Entities
             }
 
             // still affected by some aura that shouldn't allow control, only allow on last such aura to be removed
-            if (target.HasUnitState(UnitState.Controlled))
+            if (target.HasUnitState(UnitState.Fleeing | UnitState.Confused))
                 allowMove = false;
 
             ControlUpdate packet = new();
