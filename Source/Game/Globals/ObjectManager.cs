@@ -7659,8 +7659,6 @@ namespace Game
                     }
                     if (qinfo.NextQuestId != 0)
                         Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb, should not unlock quest {qinfo.NextQuestId}");
-                    if (qinfo.ExclusiveGroup != 0)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb in exclusive group {qinfo.ExclusiveGroup}");
                 }
 
                 if (qinfo.ExclusiveGroup != 0)
