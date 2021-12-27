@@ -1825,6 +1825,9 @@ namespace Game.Groups
                 // offline member? don't let join
                 if (!member)
                     return GroupJoinBattlegroundResult.JoinFailed;
+                // rbac permissions
+                if (!member.CanJoinToBattleground(bgOrTemplate))
+                    return GroupJoinBattlegroundResult.JoinTimedOut;
                 // don't allow cross-faction join as group
                 if (member.GetTeam() != team)
                 {
@@ -1850,7 +1853,7 @@ namespace Game.Groups
                 if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InNonRandomBg;
                 // check for deserter debuff in case not arena queue
-                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && !member.CanJoinToBattleground(bgOrTemplate))
+                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && member.IsDeserter())
                     return GroupJoinBattlegroundResult.Deserters;
                 // check if member can join any more Battleground queues
                 if (!member.HasFreeBattlegroundQueueId())

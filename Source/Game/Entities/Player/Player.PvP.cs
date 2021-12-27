@@ -751,22 +751,17 @@ namespace Game.Entities
             }
         }
 
+        public bool IsDeserter() { return HasAura(26013); }
+        
         public bool CanJoinToBattleground(Battleground bg)
         {
-            // check Deserter debuff
-            if (HasAura(26013))
-                return false;
+            RBACPermissions perm = RBACPermissions.JoinNormalBg;
+            if (bg.IsArena())
+                perm = RBACPermissions.JoinArenas;
+            else if (bg.IsRandom())
+                perm = RBACPermissions.JoinRandomBg;
 
-            if (bg.IsArena() && !GetSession().HasPermission(RBACPermissions.JoinArenas))
-                return false;
-
-            if (bg.IsRandom() && !GetSession().HasPermission(RBACPermissions.JoinRandomBg))
-                return false;
-
-            if (!GetSession().HasPermission(RBACPermissions.JoinNormalBg))
-                return false;
-
-            return true;
+            return GetSession().HasPermission(perm);
         }
 
         public void ClearAfkReports() { m_bgData.bgAfkReporter.Clear(); }

@@ -110,14 +110,22 @@ namespace Game
                     return;
                 }
 
-                // check Deserter debuff
+                // check RBAC permissions
                 if (!GetPlayer().CanJoinToBattleground(bg))
+                {
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.JoinTimedOut);
+                    SendPacket(battlefieldStatusFailed);
+                    return;
+                }
+
+                // check Deserter debuff
+                if (GetPlayer().IsDeserter())
                 {
                     Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.Deserters);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
-
+                
                 bool isInRandomBgQueue = _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
                     || _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
                 if (bgTypeId != BattlegroundTypeId.RB && bgTypeId != BattlegroundTypeId.RandomEpic && isInRandomBgQueue)
@@ -308,7 +316,7 @@ namespace Game
             if (battlefieldPort.AcceptedInvite && bgQueue.GetQueueId().TeamSize == 0)
             {
                 //if player is trying to enter Battleground(not arena!) and he has deserter debuff, we must just remove him from queue
-                if (!GetPlayer().CanJoinToBattleground(bg))
+                if (!GetPlayer().IsDeserter())
                 {
                     // send bg command result to show nice message
                     BattlefieldStatusFailed battlefieldStatus;
@@ -545,6 +553,14 @@ namespace Game
                     Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, err, errorGuid);
                     member.SendPacket(battlefieldStatus);
                     continue;
+                }
+
+                if (!GetPlayer().CanJoinToBattleground(bg))
+                {
+                    BattlefieldStatusFailed battlefieldStatus;
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.JoinFailed, errorGuid);
+                    member.SendPacket(battlefieldStatus);
+                    return;
                 }
 
                 // add to queue
