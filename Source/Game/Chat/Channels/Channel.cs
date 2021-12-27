@@ -172,7 +172,7 @@ namespace Game.Chat
             }
         }
 
-        public void JoinChannel(Player player, string pass)
+        public void JoinChannel(Player player, string pass = "")
         {
             ObjectGuid guid = player.GetGUID();
             if (IsOn(guid))
@@ -193,7 +193,7 @@ namespace Game.Chat
                 return;
             }
 
-            if (!string.IsNullOrEmpty(_channelPassword) && pass != _channelPassword)
+            if (!CheckPassword(pass))
             {
                 var builder = new ChannelNameBuilder(this, new WrongPasswordAppend());
                 SendToOne(builder, guid);
@@ -892,11 +892,11 @@ namespace Game.Chat
         
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
         bool IsAnnounce() { return _announceEnabled; }
-        void SetAnnounce(bool nannounce) { _announceEnabled = nannounce; }
+        void SetAnnounce(bool announce) { _announceEnabled = announce; }
 
-        string GetPassword() { return _channelPassword; }
-        void SetPassword(string npassword) { _channelPassword = npassword; }
-
+        public void SetPassword(string npassword) { _channelPassword = npassword; }
+        public bool CheckPassword(string password) { return _channelPassword.IsEmpty() || (_channelPassword == password); }
+        
         public uint GetNumPlayers() { return (uint)_playersStore.Count; }
 
         public ChannelFlags GetFlags() { return _channelFlags; }

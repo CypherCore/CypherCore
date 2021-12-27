@@ -2636,7 +2636,7 @@ namespace Game.Entities
                         if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && usedChannel != null)
                             continue;                            // Already on the channel, as city channel names are not changing
 
-                        joinChannel = cMgr.GetJoinChannel(channelEntry.Id, "", current_zone);
+                        joinChannel = cMgr.GetSystemChannel(channelEntry.Id, current_zone);
                         if (usedChannel != null)
                         {
                             if (joinChannel != usedChannel)
@@ -2649,13 +2649,13 @@ namespace Game.Entities
                         }
                     }
                     else
-                        joinChannel = cMgr.GetJoinChannel(channelEntry.Id, "");
+                        joinChannel = cMgr.GetSystemChannel(channelEntry.Id);
                 }
                 else
                     removeChannel = usedChannel;
 
                 if (joinChannel != null)
-                    joinChannel.JoinChannel(this, "");          // Changed Channel: ... or Joined Channel: ...
+                    joinChannel.JoinChannel(this);          // Changed Channel: ... or Joined Channel: ...
 
                 if (removeChannel != null)
                 {

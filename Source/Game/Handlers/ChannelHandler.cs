@@ -41,7 +41,7 @@ namespace Game
                     return;
             }
 
-            if (string.IsNullOrEmpty(packet.ChannelName))
+            if (packet.ChannelName.IsEmpty())
                 return;
 
             if (packet.ChannelName.IsNumber())
@@ -50,9 +50,29 @@ namespace Game
             ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
             if (cMgr != null)
             {
-                Channel channel = cMgr.GetJoinChannel((uint)packet.ChatChannelId, packet.ChannelName, zone);
-                if (channel != null)
-                    channel.JoinChannel(GetPlayer(), packet.Password);
+                if (packet.ChatChannelId != 0)
+                {
+                    // system channel
+                    Channel channel = cMgr.GetSystemChannel((uint)packet.ChatChannelId, zone);
+                    if (channel != null)
+                        channel.JoinChannel(GetPlayer());
+                }
+                else
+                {
+                    // custom channel
+                    Channel channel = cMgr.GetCustomChannel(packet.ChannelName);
+                    if (channel != null)
+                        channel.JoinChannel(GetPlayer(), packet.Password);
+                    else
+                    {
+                        channel = cMgr.CreateCustomChannel(packet.ChannelName);
+                        if (channel != null)
+                        {
+                            channel.SetPassword(packet.Password);
+                            channel.JoinChannel(GetPlayer(), packet.Password);
+                        }
+                    }
+                }
             }
         }
 

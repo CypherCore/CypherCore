@@ -67,31 +67,33 @@ namespace Game.Chat
             return null;
         }
 
-        public Channel GetJoinChannel(uint channelId, string name, AreaTableRecord zoneEntry = null)
+        public Channel GetSystemChannel(uint channelId, AreaTableRecord zoneEntry = null)
         {
-            if (channelId != 0) // builtin
-            {
-                ObjectGuid channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
-                var channel = _channels.LookupByKey(channelGuid);
-                if (channel != null)
-                    return channel;
+            ObjectGuid channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
+            var currentChannel = _channels.LookupByKey(channelGuid);
+            if (currentChannel != null)
+                return currentChannel;
 
-                Channel newChannel = new(channelGuid, channelId, _team, zoneEntry);
-                _channels[channelGuid] = newChannel;
-                return newChannel;
-            }
-            else // custom
-            {
-                var channel = _customChannels.LookupByKey(name.ToLower());
-                if (channel != null)
-                    return channel;
-
-                Channel newChannel = new(CreateCustomChannelGuid(), name, _team);
-                _customChannels[name.ToLower()] = newChannel;
-                return newChannel;
-            }
+            Channel newChannel = new Channel(channelGuid, channelId, _team, zoneEntry);
+            _channels[channelGuid] = newChannel;
+            return newChannel;
         }
 
+        public Channel CreateCustomChannel(string name)
+        {
+            if (_customChannels.ContainsKey(name.ToLower()))
+                return null;
+
+            Channel newChannel = new(CreateCustomChannelGuid(), name, _team);
+            _customChannels[name.ToLower()] = newChannel;
+            return newChannel;
+        }
+
+        public Channel GetCustomChannel(string name)
+        {
+            return _customChannels.LookupByKey(name.ToLower());
+        }
+        
         public Channel GetChannel(uint channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)
         {
             Channel result = null;
