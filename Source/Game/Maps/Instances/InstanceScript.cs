@@ -669,6 +669,40 @@ namespace Game.Maps
             }
         }
 
+
+        void DoRemoveAurasDueToSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
+        {
+            if (!player)
+                return;
+
+            player.RemoveAurasDueToSpell(spell);
+
+            if (!includePets)
+                return;
+
+            for (var i = 0; i < SharedConst.MaxSummonSlot; ++i)
+            {
+                ObjectGuid summonGUID = player.m_SummonSlot[i];
+                if (!summonGUID.IsEmpty())
+                {
+                    Creature summon = instance.GetCreature(summonGUID);
+                    if (summon != null)
+                        summon.RemoveAurasDueToSpell(spell);
+                }
+            }
+
+            if (!includeControlled)
+                return;
+
+            for (var i = 0; i < player.m_Controlled.Count; ++i)
+            {
+                Unit controlled = player.m_Controlled[i];
+                if (controlled != null)
+                    if (controlled.IsInWorld && controlled.IsCreature())
+                        controlled.RemoveAurasDueToSpell(spell);
+            }
+        }
+
         // Cast spell on all players in instance
         public void DoCastSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {
@@ -900,8 +934,14 @@ namespace Game.Maps
         }
 
         public virtual void Initialize() { }
+
         public virtual void Update(uint diff) { }
+
+        // Called when a player successfully enters the instance.
         public virtual void OnPlayerEnter(Player player) { }
+
+        // Called when a player successfully leaves the instance.
+        public virtual void OnPlayerLeave(Player player) { }
 
         // Return wether server allow two side groups or not
         public bool ServerAllowsTwoSideGroups() { return WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup); }

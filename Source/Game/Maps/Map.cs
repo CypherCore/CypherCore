@@ -5256,10 +5256,12 @@ namespace Game.Maps
 
         public override void RemovePlayerFromMap(Player player, bool remove)
         {
-            Log.outInfo(LogFilter.Maps,
-                "MAP: Removing player '{0}' from instance '{1}' of map '{2}' before relocating to another map",
-                player.GetName(), GetInstanceId(), GetMapName());
-            //if last player set unload timer
+            Log.outInfo(LogFilter.Maps, "MAP: Removing player '{0}' from instance '{1}' of map '{2}' before relocating to another map", player.GetName(), GetInstanceId(), GetMapName());
+
+            if (i_data != null)
+                i_data.OnPlayerLeave(player);
+
+            // if last player set unload timer
             if (m_unloadTimer == 0 && GetPlayers().Count == 1)
                 m_unloadTimer = m_unloadWhenEmpty ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
 
@@ -5267,6 +5269,7 @@ namespace Game.Maps
                 i_scenario.OnPlayerExit(player);
 
             base.RemovePlayerFromMap(player, remove);
+
             // for normal instances schedule the reset after all players have left
             SetResetSchedule(true);
             Global.InstanceSaveMgr.UnloadInstanceSave(GetInstanceId());
