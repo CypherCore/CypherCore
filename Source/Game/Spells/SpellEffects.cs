@@ -576,24 +576,6 @@ namespace Game.Spells
                 Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
                 return;
             }
-
-            // post effects for TARGET_DEST_DB
-            switch (m_spellInfo.Id)
-            {
-                // Dimensional Ripper - Everlook
-                case 23442:
-                {
-                    int r = RandomHelper.IRand(0, 119);
-                    if (r >= 70)                                  // 7/12 success
-                    {
-                        if (r < 100)                              // 4/12 evil twin
-                            m_caster.CastSpell(m_caster, 23445, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                        else                                        // 1/12 fire
-                            m_caster.CastSpell(m_caster, 23449, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                    }
-                    return;
-                }
-            }
         }
 
         [SpellEffectHandler(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen)]
