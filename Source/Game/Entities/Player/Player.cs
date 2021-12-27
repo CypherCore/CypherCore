@@ -232,7 +232,7 @@ namespace Game.Entities
             SetRace(createInfo.RaceId);
             SetClass(createInfo.ClassId);
             SetGender(createInfo.Sex);
-            SetPowerType(powertype);
+            SetPowerType(powertype, false);
             InitDisplayIds();
             UpdatePositionData();
             if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
@@ -5225,7 +5225,7 @@ namespace Game.Entities
 
             _ApplyAllLevelScaleItemMods(false);
 
-            SetLevel(level);
+            SetLevel(level, false);
 
             UpdateSkillsForLevel();
             LearnDefaultSkills();
@@ -6502,9 +6502,8 @@ namespace Game.Entities
             packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
-            uint curXP = m_activePlayerData.XP;
-            uint nextLvlXP = m_activePlayerData.NextLevelXP;
-            uint newXP = curXP + xp + bonus_xp;
+            uint nextLvlXP = GetXPForNextLevel();
+            uint newXP = GetXP() + xp + bonus_xp;
 
             while (newXP >= nextLvlXP && level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
             {
@@ -6514,7 +6513,7 @@ namespace Game.Entities
                     GiveLevel(level + 1);
 
                 level = GetLevel();
-                nextLvlXP = m_activePlayerData.NextLevelXP;
+                nextLvlXP = GetXPForNextLevel();
             }
 
             SetXP(newXP);

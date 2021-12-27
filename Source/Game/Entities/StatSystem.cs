@@ -535,12 +535,15 @@ namespace Game.Entities
 
         //Powers
         public PowerType GetPowerType() { return (PowerType)(byte)m_unitData.DisplayPower; }
-        public void SetPowerType(PowerType powerType)
+        public void SetPowerType(PowerType powerType, bool sendUpdate = true)
         {
             if (GetPowerType() == powerType)
                 return;
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayPower), (byte)powerType);
+
+            if (!sendUpdate)
+                return;
 
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)

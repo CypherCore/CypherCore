@@ -3395,7 +3395,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, m_activePlayerData.XP);
+                stmt.AddValue(index++, GetXP());
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
@@ -3519,7 +3519,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, m_activePlayerData.XP);
+                stmt.AddValue(index++, GetXP());
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());

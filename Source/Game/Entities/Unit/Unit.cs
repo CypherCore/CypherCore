@@ -1674,9 +1674,12 @@ namespace Game.Entities
         }
 
         //Unit
-        public void SetLevel(uint lvl)
+        public void SetLevel(uint lvl, bool sendUpdate = true)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
+
+            if (!sendUpdate)
+                return;
 
             Player player = ToPlayer();
             if (player != null)
