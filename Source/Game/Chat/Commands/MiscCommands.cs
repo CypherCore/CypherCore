@@ -1959,7 +1959,7 @@ namespace Game.Chat
                 uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
                 foreach (RespawnInfo info in data)
                     if (info.gridId == gridId)
-                        player.GetMap().RemoveRespawnTime(info, true);
+                        player.GetMap().RemoveRespawnTime(info.type, info.spawnId);
             }
 
             return true;

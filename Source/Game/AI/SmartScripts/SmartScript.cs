@@ -2359,7 +2359,7 @@ namespace Game.AI
                         map = targets.First().GetMap();
 
                     if (map)
-                        map.RemoveRespawnTime((SpawnObjectType)e.Action.respawnData.spawnType, e.Action.respawnData.spawnId, true);
+                        map.Respawn((SpawnObjectType)e.Action.respawnData.spawnType, e.Action.respawnData.spawnId);
                     else
                         Log.outError(LogFilter.Sql, $"SmartScript.ProcessAction: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()}, Event {e.EventId} - tries to respawn by spawnId but does not provide a map");
                     break;

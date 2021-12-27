@@ -1164,7 +1164,7 @@ namespace Game.Entities
                 foreach (GameObject obj in toUnload)
                     map.AddObjectToRemoveList(obj);
 
-                map.RemoveRespawnTime(SpawnObjectType.GameObject, spawnId, false, trans);
+                map.RemoveRespawnTime(SpawnObjectType.GameObject, spawnId, trans);
             });
 
             // delete data from memory
@@ -1271,7 +1271,11 @@ namespace Game.Entities
             {
                 if (m_respawnCompatibilityMode)
                 {
-                    GetMap().SaveRespawnTimeDB(SpawnObjectType.GameObject, m_spawnId, m_respawnTime);
+                    RespawnInfo ri = new();
+                    ri.type = SpawnObjectType.GameObject;
+                    ri.spawnId = m_spawnId;
+                    ri.respawnTime = m_respawnTime;
+                    GetMap().SaveRespawnInfoDB(ri);
                     return;
                 }
 
@@ -1337,7 +1341,7 @@ namespace Game.Entities
             if (m_spawnedByDefault && m_respawnTime > 0)
             {
                 m_respawnTime = GameTime.GetGameTime();
-                GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId, true);
+                GetMap().Respawn(SpawnObjectType.GameObject, m_spawnId);
             }
         }
 

@@ -253,7 +253,7 @@ namespace Game.AI
                             if (!isEscort)
                                 me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(1));
                             else
-                                me.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, me.GetSpawnId(), true);
+                                me.GetMap().Respawn(SpawnObjectType.Creature, me.GetSpawnId());
                         }
                         else
                             me.DespawnOrUnsummon();

@@ -1625,7 +1625,7 @@ namespace Game.Entities
                 foreach (Creature creature in toUnload)
                     map.AddObjectToRemoveList(creature);
 
-                map.RemoveRespawnTime(SpawnObjectType.Creature, spawnId, false, trans);
+                map.RemoveRespawnTime(SpawnObjectType.Creature, spawnId, trans);
             });
 
             // delete data from memory ...
@@ -1897,9 +1897,6 @@ namespace Game.Entities
 
                 if (GetDeathState() == DeathState.Dead)
                 {
-                    if (m_spawnId != 0)
-                        GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId);
-
                     Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
                     m_respawnTime = 0;
                     ResetPickPocketRefillTimer();
@@ -1939,7 +1936,7 @@ namespace Game.Entities
             else
             {
                 if (m_spawnId != 0)
-                    GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId, true);
+                    GetMap().Respawn(SpawnObjectType.Creature, m_spawnId);
             }
 
             Log.outDebug(LogFilter.Unit, $"Respawning creature {GetName()} ({GetGUID()})");
@@ -2268,7 +2265,11 @@ namespace Game.Entities
 
             if (m_respawnCompatibilityMode)
             {
-                GetMap().SaveRespawnTimeDB(SpawnObjectType.Creature, m_spawnId, m_respawnTime);
+                RespawnInfo ri = new();
+                ri.type = SpawnObjectType.Creature;
+                ri.spawnId = m_spawnId;
+                ri.respawnTime = m_respawnTime;
+                GetMap().SaveRespawnInfoDB(ri);
                 return;
             }
 
