@@ -307,7 +307,9 @@ namespace Game.Entities
                 if (!CanTakeQuest(quest, false))
                     continue;
 
-                if (quest.IsAutoComplete())
+                if (quest.IsAutoComplete() && (!quest.IsRepeatable() || quest.IsDaily() || quest.IsWeekly() || quest.IsMonthly()))
+                    qm.AddMenuItem(quest_id, 0);
+                else if (quest.IsAutoComplete())
                     qm.AddMenuItem(quest_id, 4);
                 else if (GetQuestStatus(quest_id) == QuestStatus.None)
                     qm.AddMenuItem(quest_id, 2);
@@ -1955,7 +1957,7 @@ namespace Game.Entities
                         break;
                 }
 
-                if (quest.IsAutoComplete() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
+                if (quest.IsAutoComplete() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                 {
                     if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                         result |= QuestGiverStatus.RepeatableTurnin;

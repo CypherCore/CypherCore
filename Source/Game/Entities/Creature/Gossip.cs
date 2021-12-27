@@ -280,7 +280,7 @@ namespace Game.Misc
                     text.QuestType = item.QuestIcon;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
-                    text.Repeatable = quest.IsRepeatable();
+                    text.Repeatable = quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
 
                     text.QuestTitle = quest.LogTitle;
                     Locale locale = _session.GetSessionDbLocaleIndex();
@@ -372,7 +372,7 @@ namespace Game.Misc
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
-                    text.Repeatable = quest.IsRepeatable();
+                    text.Repeatable = quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
                     text.QuestTitle = quest.LogTitle;
 
                     if (localeConstant != Locale.enUS)
