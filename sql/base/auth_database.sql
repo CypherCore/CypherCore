@@ -621,7 +621,8 @@ INSERT INTO `build_info` VALUES
 (41079,9,1,5,NULL,NULL,'F8853CF823BC0BBE8A9677A762DFAEE1',NULL,NULL,NULL),
 (41288,9,1,5,NULL,NULL,'871C0C9691DBC536EB24B68EC73FAD5B',NULL,NULL,NULL),
 (41323,9,1,5,NULL,NULL,'E53D0DF1FAC1A59A1C8071B295A04A1D',NULL,NULL,NULL),
-(41359,9,1,5,NULL,NULL,'5F8D7F2A690A4375A1B52A28D6D681FA',NULL,NULL,NULL);
+(41359,9,1,5,NULL,NULL,'5F8D7F2A690A4375A1B52A28D6D681FA',NULL,NULL,NULL),
+(41488,9,1,5,NULL,NULL,'1BC91EC368705815F3F532B553DAD981',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `build_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -829,6 +830,7 @@ INSERT INTO `rbac_linked_permissions` VALUES
 (193,197),
 (194,1),
 (194,2),
+(194,9),
 (194,11),
 (194,12),
 (194,13),
@@ -1245,6 +1247,9 @@ INSERT INTO `rbac_linked_permissions` VALUES
 (196,871),
 (196,872),
 (196,873),
+(196,875),
+(196,876),
+(196,877),
 (196,881),
 (196,882),
 (197,232),
@@ -1483,6 +1488,8 @@ INSERT INTO `rbac_permissions` VALUES
 (5,'Join Arenas'),
 (6,'Join Dungeon Finder'),
 (7,'Skip idle connection check'),
+(8,"Cannot earn achievements"),
+(9,"Cannot earn realm first achievements"),
 (10,'Use character templates'),
 (11,'Log GM trades'),
 (12,'Skip character creation demon hunter min level check'),
@@ -2155,6 +2162,9 @@ INSERT INTO `rbac_permissions` VALUES
 (872,'Command: server debug'),
 (873,'Command: reload creature_movement_override'),
 (874,'Command: debug asan'),
+(875,'Command: lookup map id'),
+(876,'Command: lookup item id'),
+(877,'Command: lookup quest id'),
 (881,'Command: reload vehicle_template'),
 (882,'Command: reload spell_script_names');
 /*!40000 ALTER TABLE `rbac_permissions` ENABLE KEYS */;
@@ -2204,7 +2214,7 @@ CREATE TABLE `realmlist` (
   `timezone` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `allowedSecurityLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `population` float unsigned NOT NULL DEFAULT '0',
-  `gamebuild` int(10) unsigned NOT NULL DEFAULT '41359',
+  `gamebuild` int(10) unsigned NOT NULL DEFAULT '41488',
   `Region` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `Battlegroup` tinyint(3) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
@@ -2219,7 +2229,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'Trinity','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,41359,1,1);
+(1,'Trinity','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,41488,1,1);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2388,10 +2398,13 @@ INSERT INTO `updates` VALUES
 ('2018_12_09_00_auth_2017_01_06_00_auth.sql','6CCFE6A9774EC733C9863D36A0F15F3534189BBD','ARCHIVED','2017-01-06 00:00:00',0),
 ('2018_12_09_01_auth.sql','576C2A11BE671D8420FA3EB705E594E381ECCC56','ARCHIVED','2018-12-09 14:49:17',0),
 ('2019_04_27_00_auth.sql','84B1EB9CC9B09BAF55E6295D202EC57D99B1B60E','ARCHIVED','2019-04-27 18:07:18',0),
+('2019_06_06_00_auth.sql','6DE8159E04BEE7BA0A4A81D72D160EB74934B6A5','ARCHIVED','2019-06-06 18:09:54',0),
 ('2019_06_08_00_auth.sql','EA5A78F5A26C17BC790481EA9B3772D3A6912459','ARCHIVED','2019-05-20 17:21:20',0),
 ('2019_06_08_01_auth.sql','8165B1B787E3ECF0C8C0AD2D641513270977ABB4','ARCHIVED','2019-06-04 16:51:31',0),
 ('2019_06_08_02_auth.sql','B39DCBD902290700A81C9D028F54B58601C19A99','ARCHIVED','2019-06-05 16:26:31',0),
 ('2019_06_08_03_auth.sql','F483B657015D39D4F63E3905C27C3AA48241AB03','ARCHIVED','2019-06-08 17:14:21',0),
+('2019_06_16_00_auth.sql','B14AED4D3387B56FF8C8161D3671750AEEAE0F2E','ARCHIVED','2019-06-15 23:32:12',0),
+('2019_06_21_00_auth.sql','C519239830204B68E710F698BC0C9E89B6D5FD24','ARCHIVED','2019-06-20 19:43:50',0),
 ('2019_07_14_00_auth.sql','94C2B877BD906538E1E008350BEA8D8B58E0A158','ARCHIVED','2019-07-14 19:22:08',0),
 ('2019_07_15_00_auth.sql','3649248104CFEC70553016273069A9AE744798E3','ARCHIVED','2019-07-15 19:22:08',0),
 ('2019_07_26_00_auth.sql','DC9D0651602AE78B1243B40555A1A7B8447D01B2','ARCHIVED','2019-07-26 18:21:34',0),
@@ -2468,7 +2481,8 @@ INSERT INTO `updates` VALUES
 ('2021_11_25_00_auth.sql','7A01CEB201CB825BFD565BBF5EED0162BEA733E7','RELEASED','2021-11-25 19:32:21',0),
 ('2021_12_02_00_auth.sql','ED40A45A8F5E5B1BB68216A3053D721B3BA3A556','RELEASED','2021-12-02 11:48:11',0),
 ('2021_12_04_00_auth.sql','00C4A37A60F53A5E893CAADAC882E5A28375A4D2','RELEASED','2021-12-04 12:49:04',0),
-('2021_12_08_00_auth.sql','9B1A7C86F56159CA50A45B9CB4BC6422A3378231','RELEASED','2021-12-08 00:28:19',0);
+('2021_12_08_00_auth.sql','9B1A7C86F56159CA50A45B9CB4BC6422A3378231','RELEASED','2021-12-08 00:28:19',0),
+('2021_12_16_00_auth.sql','EF5050D779CC6CEAAFB4C7E0CFA26824D92B675E','RELEASED','2021-12-16 12:21:11',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2527,6 +2541,42 @@ LOCK TABLES `uptime` WRITE;
 /*!40000 ALTER TABLE `uptime` DISABLE KEYS */;
 /*!40000 ALTER TABLE `uptime` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Temporary table structure for view `vw_log_history`
+--
+
+DROP TABLE IF EXISTS `vw_log_history`;
+/*!50001 DROP VIEW IF EXISTS `vw_log_history`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vw_log_history` AS SELECT 
+ 1 AS `First Logged`,
+ 1 AS `Last Logged`,
+ 1 AS `Occurrences`,
+ 1 AS `Realm`,
+ 1 AS `type`,
+ 1 AS `level`,
+ 1 AS `string`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Final view structure for view `vw_log_history`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_log_history`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 */
+/*!50001 VIEW `vw_log_history` AS (select from_unixtime(min(`logs`.`time`)) AS `First Logged`,from_unixtime(max(`logs`.`time`)) AS `Last Logged`,count(0) AS `Occurrences`,`realmlist`.`name` AS `Realm`,`logs`.`type` AS `type`,`logs`.`level` AS `level`,`logs`.`string` AS `string` from (`logs` left join `realmlist` on((`logs`.`realm` = `realmlist`.`id`))) group by `logs`.`string`,`logs`.`type`,`logs`.`realm`) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
 -- Dumping routines for database 'auth'
