@@ -486,7 +486,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
             Global.ObjectMgr.LoadInstanceTemplate();
 
-            // Must be called before `creature_respawn`/`gameobject_respawn` tables
+            // Must be called before `respawn` data
             Log.outInfo(LogFilter.ServerLoading, "Loading instances...");
             Global.InstanceSaveMgr.LoadInstances();
 

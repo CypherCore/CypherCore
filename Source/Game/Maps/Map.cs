@@ -812,6 +812,7 @@ namespace Game.Maps
                 i_scriptLock = false;
             }
 
+            _weatherUpdateTimer.Update(diff);
             if (_weatherUpdateTimer.Passed())
             {
                 foreach (var zoneInfo in _zoneDynamicInfo)
@@ -2547,23 +2548,11 @@ namespace Game.Maps
 
         public void RemoveRespawnTime(RespawnInfo info, bool doRespawn = false, SQLTransaction dbTrans = null)
         {
-            PreparedStatement stmt;
-            switch (info.type)
-            {
-                case SpawnObjectType.Creature:
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN);
-                    break;
-                case SpawnObjectType.GameObject:
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GO_RESPAWN);
-                    break;
-                default:
-                    Cypher.Assert(false, $"Invalid respawninfo type {info.type} for spawnid {info.spawnId} map {GetId()}");
-                    return;
-            }
-
-            stmt.AddValue(0, info.spawnId);
-            stmt.AddValue(1, GetId());
-            stmt.AddValue(2, GetInstanceId());
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESPAWN);
+            stmt.AddValue(0, (ushort)info.type);
+            stmt.AddValue(1, info.spawnId);
+            stmt.AddValue(2, GetId());
+            stmt.AddValue(3, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
 
             if (doRespawn)
@@ -3097,7 +3086,8 @@ namespace Game.Maps
         public void SaveRespawnTimeDB(SpawnObjectType type, ulong spawnId, long respawnTime, SQLTransaction dbTrans = null)
         {
             // Just here for support of compatibility mode
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement((type == SpawnObjectType.GameObject) ? CharStatements.REP_GO_RESPAWN : CharStatements.REP_CREATURE_RESPAWN);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
+            stmt.AddValue(0, (ushort)type);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, respawnTime);
             stmt.AddValue(2, GetId());
@@ -3107,7 +3097,7 @@ namespace Game.Maps
 
         public void LoadRespawnTimes()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CREATURE_RESPAWNS);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetInstanceId());
             SQLResult result = DB.Characters.Query(stmt);
@@ -3115,30 +3105,15 @@ namespace Game.Maps
             {
                 do
                 {
-                    var loguid = result.Read<ulong>(0);
-                    var respawnTime = result.Read<long>(1);
+                    SpawnObjectType type = (SpawnObjectType)result.Read<ushort>(0);
+                    var spawnId = result.Read<ulong>(1);
+                    var respawnTime = result.Read<long>(2);
 
-                    CreatureData cdata = Global.ObjectMgr.GetCreatureData(loguid);
-                    if (cdata != null)
-                        SaveRespawnTime(SpawnObjectType.Creature, loguid, cdata.Id, respawnTime, GetZoneId(PhasingHandler.EmptyPhaseShift, cdata.spawnPoint), GridDefines.ComputeGridCoord(cdata.spawnPoint.GetPositionX(), cdata.spawnPoint.GetPositionY()).GetId(), false);
-
-                } while (result.NextRow());
-            }
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GO_RESPAWNS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-            result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    var loguid = result.Read<uint>(0);
-                    var respawnTime = result.Read<long>(1);
-
-                    GameObjectData godata = Global.ObjectMgr.GetGameObjectData(loguid);
-                    if (godata != null)
-                        SaveRespawnTime(SpawnObjectType.GameObject, loguid, godata.Id, respawnTime, GetZoneId(PhasingHandler.EmptyPhaseShift, godata.spawnPoint), GridDefines.ComputeGridCoord(godata.spawnPoint.GetPositionX(), godata.spawnPoint.GetPositionY()).GetId(), false);
+                    SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
+                    if (data != null)
+                        SaveRespawnTime(type, spawnId, data.Id, respawnTime, GetZoneId(PhasingHandler.EmptyPhaseShift, data.spawnPoint), GridDefines.ComputeGridCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY()).GetId(), false);
+                    else
+                        Log.outError(LogFilter.Maps, $"Loading saved respawn time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
 
                 } while (result.NextRow());
             }
@@ -3154,12 +3129,7 @@ namespace Game.Maps
 
         public static void DeleteRespawnTimesInDB(uint mapId, uint instanceId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN_BY_INSTANCE);
-            stmt.AddValue(0, mapId);
-            stmt.AddValue(1, instanceId);
-            DB.Characters.Execute(stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GO_RESPAWN_BY_INSTANCE);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_RESPAWNS);
             stmt.AddValue(0, mapId);
             stmt.AddValue(1, instanceId);
             DB.Characters.Execute(stmt);

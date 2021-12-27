@@ -427,17 +427,11 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CORPSE_CUSTOMIZATIONS, "DELETE FROM corpse_customizations WHERE ownerGuid = ?");
             PrepareStatement(CharStatements.SEL_CORPSE_LOCATION, "SELECT mapId, posX, posY, posZ, orientation FROM corpse WHERE guid = ?");
 
-            // Creature respawn
-            PrepareStatement(CharStatements.SEL_CREATURE_RESPAWNS, "SELECT guid, respawnTime FROM creature_respawn WHERE mapId = ? AND instanceId = ?");
-            PrepareStatement(CharStatements.REP_CREATURE_RESPAWN, "REPLACE INTO creature_respawn (guid, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_CREATURE_RESPAWN, "DELETE FROM creature_respawn WHERE guid = ? AND mapId = ? AND instanceId = ?");
-            PrepareStatement(CharStatements.DEL_CREATURE_RESPAWN_BY_INSTANCE, "DELETE FROM creature_respawn WHERE mapId = ? AND instanceId = ?");
-
-            // Gameobject respawn
-            PrepareStatement(CharStatements.SEL_GO_RESPAWNS, "SELECT guid, respawnTime FROM gameobject_respawn WHERE mapId = ? AND instanceId = ?");
-            PrepareStatement(CharStatements.REP_GO_RESPAWN, "REPLACE INTO gameobject_respawn (guid, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_GO_RESPAWN, "DELETE FROM gameobject_respawn WHERE guid = ? AND mapId = ? AND instanceId = ?");
-            PrepareStatement(CharStatements.DEL_GO_RESPAWN_BY_INSTANCE, "DELETE FROM gameobject_respawn WHERE mapId = ? AND instanceId = ?");
+            // Respawns
+            PrepareStatement(CharStatements.SEL_RESPAWNS, "SELECT type, spawnId, respawnTime FROM respawn WHERE mapId = ? AND instanceId = ?");
+            PrepareStatement(CharStatements.REP_RESPAWN, "REPLACE INTO respawn (type, spawnId, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_RESPAWN, "DELETE FROM respawn WHERE type = ? AND spawnId = ? AND mapId = ? AND instanceId = ?");
+            PrepareStatement(CharStatements.DEL_ALL_RESPAWNS, "DELETE FROM respawn WHERE mapId = ? AND instanceId = ?");
 
             // GM Bug
             PrepareStatement(CharStatements.SEL_GM_BUGS, "SELECT id, playerGuid, note, createTime, mapId, posX, posY, posZ, facing, closedBy, assignedTo, comment FROM gm_bug");
@@ -1111,15 +1105,10 @@ namespace Framework.Database
         DEL_CORPSE_CUSTOMIZATIONS,
         SEL_CORPSE_LOCATION,
 
-        SEL_CREATURE_RESPAWNS,
-        REP_CREATURE_RESPAWN,
-        DEL_CREATURE_RESPAWN,
-        DEL_CREATURE_RESPAWN_BY_INSTANCE,
-
-        SEL_GO_RESPAWNS,
-        REP_GO_RESPAWN,
-        DEL_GO_RESPAWN,
-        DEL_GO_RESPAWN_BY_INSTANCE,
+        SEL_RESPAWNS,
+        REP_RESPAWN,
+        DEL_RESPAWN,
+        DEL_ALL_RESPAWNS,
 
         SEL_GM_BUGS,
         REP_GM_BUG,
