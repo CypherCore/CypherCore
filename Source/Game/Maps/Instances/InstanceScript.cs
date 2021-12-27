@@ -635,29 +635,73 @@ namespace Game.Maps
         }
 
         // Remove Auras due to Spell on all players in instance
-        public void DoRemoveAurasDueToSpellOnPlayers(uint spell)
+        public void DoRemoveAurasDueToSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {
-            var PlayerList = instance.GetPlayers();
-            if (!PlayerList.Empty())
+            var playerList = instance.GetPlayers();
+            foreach (var player in playerList)
             {
-                foreach (var player in PlayerList)
+                player.RemoveAurasDueToSpell(spell);
+
+                if (!includePets)
+                    continue;
+
+                for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
                 {
-                    player.RemoveAurasDueToSpell(spell);
-                    Pet pet = player.GetPet();
-                    if (pet != null)
-                        pet.RemoveAurasDueToSpell(spell);
+                    ObjectGuid summonGUID = player.m_SummonSlot[i];
+                    if (!summonGUID.IsEmpty())
+                    {
+                        Creature summon = instance.GetCreature(summonGUID);
+                        if (summon != null)
+                            summon.RemoveAurasDueToSpell(spell);
+                    }
+                }
+
+                if (!includeControlled)
+                    continue;
+
+                for (var i = 0; i < player.m_Controlled.Count; ++i)
+                {
+                    Unit controlled = player.m_Controlled[i];
+                    if (controlled != null)
+                        if (controlled.IsInWorld && controlled.IsCreature())
+                            controlled.RemoveAurasDueToSpell(spell);
                 }
             }
         }
 
         // Cast spell on all players in instance
-        public void DoCastSpellOnPlayers(uint spell)
+        public void DoCastSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {
-            var PlayerList = instance.GetPlayers();
+            var playerList = instance.GetPlayers();
+            foreach (var player in playerList)
+            {
+                player.CastSpell(player, spell, true);
 
-            if (!PlayerList.Empty())
-                foreach (var player in PlayerList)
-                    player.CastSpell(player, spell, true);
+                if (!includePets)
+                    continue;
+
+                for (var i = 0; i < SharedConst.MaxSummonSlot; ++i)
+                {
+                    ObjectGuid summonGUID = player.m_SummonSlot[i];
+                    if (!summonGUID.IsEmpty())
+                    {
+                        Creature summon = instance.GetCreature(summonGUID);
+                        if (summon != null)
+                            summon.CastSpell(player, spell, true);
+                    }
+                }
+
+                if (!includeControlled)
+                    continue;
+
+                for (var i = 0; i < player.m_Controlled.Count; ++i)
+                {
+                    Unit controlled = player.m_Controlled[i];
+                    if (controlled != null)
+                        if (controlled.IsInWorld && controlled.IsCreature())
+                            controlled.CastSpell(player, spell, true);
+                }
+            }
         }
 
         public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
