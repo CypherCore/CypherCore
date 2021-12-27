@@ -279,6 +279,11 @@ namespace Game
             return true;
         }
 
+        public bool IsSpellUsedInSpellClickConditions(uint spellId)
+        {
+            return spellsUsedInSpellClickConditions.Contains(spellId);
+        }
+        
         public List<Condition> GetConditionsForAreaTrigger(uint areaTriggerId, bool isServerSide)
         {
             return areaTriggerConditionContainerStorage.LookupByKey(Tuple.Create(areaTriggerId, isServerSide));
@@ -486,6 +491,8 @@ namespace Game
                                 spellClickEventConditionStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
                             spellClickEventConditionStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            if (cond.ConditionType == ConditionTypes.Aura)
+                                spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
                             ++count;
                             continue;   // do not add to m_AllocatedMemory to avoid double deleting
                         }
@@ -550,6 +557,9 @@ namespace Game
                 }
 
                 //add new Condition to storage based on Type/Entry
+                if (cond.SourceType == ConditionSourceType.SpellClickEvent && cond.ConditionType == ConditionTypes.Aura)
+                    spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
+
                 conditionStorage[cond.SourceType].Add((uint)cond.SourceEntry, cond);
                 ++count;
             }
@@ -1703,6 +1713,7 @@ namespace Game
             smartEventConditionStorage.Clear();
 
             spellClickEventConditionStorage.Clear();
+            spellsUsedInSpellClickConditions.Clear();
 
             npcVendorConditionContainerStorage.Clear();
 
@@ -2488,6 +2499,7 @@ namespace Game
         MultiMap<uint, Condition> conditionReferenceStorage = new();
         Dictionary<uint, MultiMap<uint, Condition>> vehicleSpellConditionStorage = new();
         Dictionary<uint, MultiMap<uint, Condition>> spellClickEventConditionStorage = new();
+        List<uint> spellsUsedInSpellClickConditions = new();
         Dictionary<uint, MultiMap<uint, Condition>> npcVendorConditionContainerStorage = new();
         Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> smartEventConditionStorage = new();
         MultiMap<Tuple<uint, bool>, Condition> areaTriggerConditionContainerStorage = new();

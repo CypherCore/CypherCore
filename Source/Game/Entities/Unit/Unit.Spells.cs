@@ -3601,6 +3601,11 @@ namespace Game.Entities
             }
 
             aura.HandleAuraSpecificMods(aurApp, caster, false, false);
+
+            Player player = ToPlayer();
+            if (player != null)
+                if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
+                    player.UpdateVisibleGameobjectsOrSpellClicks();
         }
 
         public void _UnapplyAura(AuraApplication aurApp, AuraRemoveMode removeMode)
@@ -3810,6 +3815,11 @@ namespace Game.Entities
                 if (Convert.ToBoolean(effMask & 1 << i) && !(aurApp.HasRemoveMode()))
                     aurApp._HandleEffect(i, true);
             }
+
+            Player player = ToPlayer();
+            if (player != null)
+                if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
+                    player.UpdateVisibleGameobjectsOrSpellClicks();
         }
 
         public void _AddAura(UnitAura aura, Unit caster)

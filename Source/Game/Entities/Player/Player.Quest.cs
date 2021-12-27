@@ -1884,7 +1884,7 @@ namespace Game.Entities
                 }
             }
 
-            UpdateForQuestWorldObjects();
+            UpdateVisibleGameobjectsOrSpellClicks();
             PhasingHandler.OnConditionChange(this);
         }
 
@@ -2254,7 +2254,7 @@ namespace Game.Entities
                 }
             }
 
-            UpdateForQuestWorldObjects();
+            UpdateVisibleGameobjectsOrSpellClicks();
         }
 
         public void KilledMonster(CreatureTemplate cInfo, ObjectGuid guid)
@@ -2433,7 +2433,7 @@ namespace Game.Entities
             }
 
             if (anyObjectiveChangedCompletionState)
-                UpdateForQuestWorldObjects();
+                UpdateVisibleGameobjectsOrSpellClicks();
         }
 
         public bool HasQuestForItem(uint itemid)
@@ -2900,7 +2900,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void UpdateForQuestWorldObjects()
+        public void UpdateVisibleGameobjectsOrSpellClicks()
         {
             if (m_clientGUIDs.Empty())
                 return;
@@ -2950,24 +2950,14 @@ namespace Game.Entities
                     var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(obj.GetEntry());
                     foreach (var spellClickInfo in clickBounds)
                     {
-                        //! This code doesn't look right, but it was logically converted to condition system to do the exact
-                        //! same thing it did before. It definitely needs to be overlooked for intended functionality.
                         List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId);
                         if (conds != null)
                         {
-                            bool buildUpdateBlock = false;
-                            for (var i = 0; i < conds.Count && !buildUpdateBlock; ++i)
-                                if (conds[i].ConditionType == ConditionTypes.QuestRewarded || conds[i].ConditionType == ConditionTypes.QuestTaken || conds[i].ConditionType == ConditionTypes.QuestComplete)
-                                    buildUpdateBlock = true;
-
-                            if (buildUpdateBlock)
-                            {
-                                ObjectFieldData objMask = new();
-                                UnitData unitMask = new();
-                                unitMask.MarkChanged(obj.m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
-                                obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, unitMask._changesMask, this);
-                                break;
-                            }
+                            ObjectFieldData objMask = new();
+                            UnitData unitMask = new();
+                            unitMask.MarkChanged(m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
+                            obj.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
+                            break;
                         }
                     }
                 }

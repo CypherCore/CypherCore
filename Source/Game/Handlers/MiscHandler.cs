@@ -242,7 +242,7 @@ namespace Game
                     }
 
                     if (anyObjectiveChangedCompletionState)
-                        player.UpdateForQuestWorldObjects();
+                        player.UpdateVisibleGameobjectsOrSpellClicks();
                 }
             }
 
