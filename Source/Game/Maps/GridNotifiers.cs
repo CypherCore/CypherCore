@@ -2481,7 +2481,7 @@ namespace Game.Maps
 
     public class AllCreaturesOfEntryInRange : ICheck<Creature>
     {
-        public AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange)
+        public AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange = 0f)
         {
             m_pObject = obj;
             m_uiEntry = entry;
@@ -2490,10 +2490,20 @@ namespace Game.Maps
 
         public bool Invoke(Creature creature)
         {
-            if (m_uiEntry == 0 || creature.GetEntry() == m_uiEntry && m_pObject.IsWithinDist(creature, m_fRange, false))
-                return true;
+            if (m_uiEntry != 0)
+            {
+                if (creature.GetEntry() != m_uiEntry)
+                    return false;
+            }
 
-            return false;
+            if (m_fRange != 0f)
+            {
+                if (m_fRange > 0.0f && !m_pObject.IsWithinDist(creature, m_fRange, false))
+                    return false;
+                if (m_fRange < 0.0f && m_pObject.IsWithinDist(creature, m_fRange, false))
+                    return false;
+            }
+            return true;
         }
 
         WorldObject m_pObject;
@@ -2740,7 +2750,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(go, i_range))
+            if (go.IsSpawned() && go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(go, i_range))
             {
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
