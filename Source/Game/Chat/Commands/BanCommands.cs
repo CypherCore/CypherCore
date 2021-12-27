@@ -331,7 +331,7 @@ namespace Game.Chat.Commands
             }
             else
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_USERNAME);
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
                 stmt.AddValue(0, filter);
                 result = DB.Login.Query(stmt);
             }
