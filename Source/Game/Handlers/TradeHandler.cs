@@ -595,6 +595,8 @@ namespace Game
             if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                info.Status = TradeStatus.Failed;
+                SendTradeStatus(info);
                 return;
             }
 
@@ -670,6 +672,8 @@ namespace Game
             if (pOther.GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeOtherReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
+                info.Status = TradeStatus.Failed;
+                SendTradeStatus(info);
                 return;
             }
 
