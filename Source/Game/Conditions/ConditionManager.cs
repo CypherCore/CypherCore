@@ -1846,7 +1846,7 @@ namespace Game
             if (condition.Gender >= 0 && (int)player.GetGender() != condition.Gender)
                 return false;
 
-            if (condition.NativeGender >= 0 && player.GetNativeSex() != (Gender)condition.NativeGender)
+            if (condition.NativeGender >= 0 && player.GetNativeGender() != (Gender)condition.NativeGender)
                 return false;
 
             if (condition.PowerType != -1 && condition.PowerTypeComp != 0)

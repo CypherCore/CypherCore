@@ -99,7 +99,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)
-                        condMeets = player.GetGender() == (Gender)ConditionValue1;
+                        condMeets = player.GetNativeGender() == (Gender)ConditionValue1;
                     break;
                 case ConditionTypes.Skill:
                     if (player != null)

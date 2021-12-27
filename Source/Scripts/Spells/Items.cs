@@ -1739,9 +1739,9 @@ namespace Scripts.Spells.Items
             switch (RandomHelper.URand(1, 2))
             {
                 // Flip Out - ninja
-                case 1: spellId = (caster.GetGender() == Gender.Male ? SpellIds.FlipOutMale : SpellIds.FlipOutFemale); break;
+                case 1: spellId = (caster.GetNativeGender() == Gender.Male ? SpellIds.FlipOutMale : SpellIds.FlipOutFemale); break;
                 // Yaaarrrr - pirate
-                case 2: spellId = (caster.GetGender() == Gender.Male ? SpellIds.YaaarrrrMale : SpellIds.YaaarrrrFemale); break;
+                case 2: spellId = (caster.GetNativeGender() == Gender.Male ? SpellIds.YaaarrrrMale : SpellIds.YaaarrrrFemale); break;
             }
             caster.CastSpell(caster, spellId, true);
         }
@@ -3186,7 +3186,7 @@ namespace Scripts.Spells.Items
             if (target)
             {
                 target.HandleEmoteCommand(Emote.OneshotTrain);
-                EmotesTextSoundRecord soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((uint)TextEmotes.Train, target.GetRace(), target.GetGender(), target.GetClass());
+                EmotesTextSoundRecord soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((uint)TextEmotes.Train, target.GetRace(), target.GetNativeGender(), target.GetClass());
                 if (soundEntry != null)
                     target.PlayDistanceSound(soundEntry.SoundId);
             }

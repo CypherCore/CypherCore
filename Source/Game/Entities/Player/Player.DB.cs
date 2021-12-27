@@ -2725,7 +2725,7 @@ namespace Game.Entities
             SetCustomizations(customizations, false);
             SetInventorySlotCount(inventorySlots);
             SetBankBagSlotCount(bankSlots);
-            SetNativeSex(gender);
+            SetNativeGender(gender);
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), drunk);
             SetPlayerFlags(playerFlags);
             SetPlayerFlagsEx(playerFlagsEx);
@@ -3393,7 +3393,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, (byte)GetNativeSex());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
+                stmt.AddValue(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
                 stmt.AddValue(index++, m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
@@ -3517,7 +3517,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, (byte)GetNativeSex());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
+                stmt.AddValue(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
                 stmt.AddValue(index++, m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());

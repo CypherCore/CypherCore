@@ -914,7 +914,7 @@ namespace Scripts.World.GameObjects
                 Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, CreatureIds.OuthouseBunny, 3.0f);
                 if (target)
                 {
-                    target.GetAI().SetData(1, (uint)player.GetGender());
+                    target.GetAI().SetData(1, (uint)player.GetNativeGender());
                     me.CastSpell(target, SpellIds.IndisposedIii);
                 }
                 me.CastSpell(player, SpellIds.Indisposed);

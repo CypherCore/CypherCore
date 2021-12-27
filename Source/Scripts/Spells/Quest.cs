@@ -820,7 +820,7 @@ namespace Scripts.Spells.Quest
             Player target = GetHitPlayer();
             if (target)
             {
-                target.CastSpell(target, target.GetGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
+                target.CastSpell(target, target.GetNativeGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
                 target.CastSpell(target, SpellIds.GenericDisguise, true);
             }
         }

@@ -2510,7 +2510,7 @@ namespace Game.Guilds
                 m_name = player.GetName();
                 m_level = (byte)player.GetLevel();
                 m_class = player.GetClass();
-                _gender = player.GetNativeSex();
+                _gender = player.GetNativeGender();
                 m_zoneId = player.GetZoneId();
                 m_accountId = player.GetSession().GetAccountId();
                 m_achievementPoints = player.GetAchievementPoints();

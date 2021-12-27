@@ -249,7 +249,7 @@ namespace Game.Entities
             SetCustomizations(createInfo.Customizations);
             SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
             SetRestState(RestTypes.Honor, PlayerRestState.NotRAFLinked);
-            SetNativeSex(createInfo.Sex);
+            SetNativeGender(createInfo.Sex);
             SetInventorySlotCount(InventorySlots.DefaultSize);
 
             // set starting level
@@ -4453,7 +4453,7 @@ namespace Game.Entities
                 flags |= CorpseFlags.FFAPvP;
 
             corpse.SetRace((byte)GetRace());
-            corpse.SetSex((byte)GetNativeSex());
+            corpse.SetSex((byte)GetNativeGender());
             corpse.SetClass((byte)GetClass());
             corpse.SetCustomizations(m_playerData.Customizations);
             corpse.SetFlags(flags);
@@ -5329,7 +5329,7 @@ namespace Game.Entities
 
         public void InitDisplayIds()
         {
-            ChrModelRecord model = Global.DB2Mgr.GetChrModel(GetRace(), GetNativeSex());
+            ChrModelRecord model = Global.DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
             if (model == null)
             {
                 Log.outError(LogFilter.Player, $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
@@ -7380,8 +7380,8 @@ namespace Game.Entities
             }
         }
 
-        public Gender GetNativeSex() { return (Gender)(byte)m_playerData.NativeSex; }
-        public void SetNativeSex(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
+        public Gender GetNativeGender() { return (Gender)(byte)m_playerData.NativeSex; }
+        public void SetNativeGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
         public void SetPvpTitle(byte pvpTitle) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PvpTitle), pvpTitle); }
         public void SetArenaFaction(byte arenaFaction) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ArenaFaction), arenaFaction); }
         public void ApplyModFakeInebriation(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FakeInebriation), mod, apply); }

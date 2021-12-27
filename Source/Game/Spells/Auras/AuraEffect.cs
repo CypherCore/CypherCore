@@ -1380,6 +1380,7 @@ namespace Game.Spells
                     // special case (spell specific functionality)
                     if (GetMiscValue() == 0)
                     {
+                        bool isFemale = target.GetNativeGender() == Gender.Female;
                         switch (GetId())
                         {
                             // Orb of Deception
@@ -1392,43 +1393,43 @@ namespace Game.Spells
                                 {
                                     // Blood Elf
                                     case Race.BloodElf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 17830 : 17829u);
+                                        target.SetDisplayId(isFemale ? 17830 : 17829u);
                                         break;
                                     // Orc
                                     case Race.Orc:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10140 : 10139u);
+                                        target.SetDisplayId(isFemale ? 10140 : 10139u);
                                         break;
                                     // Troll
                                     case Race.Troll:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10134 : 10135u);
+                                        target.SetDisplayId(isFemale ? 10134 : 10135u);
                                         break;
                                     // Tauren
                                     case Race.Tauren:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10147 : 10136u);
+                                        target.SetDisplayId(isFemale ? 10147 : 10136u);
                                         break;
                                     // Undead
                                     case Race.Undead:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10145 : 10146u);
+                                        target.SetDisplayId(isFemale ? 10145 : 10146u);
                                         break;
                                     // Draenei
                                     case Race.Draenei:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 17828 : 17827u);
+                                        target.SetDisplayId(isFemale ? 17828 : 17827u);
                                         break;
                                     // Dwarf
                                     case Race.Dwarf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10142 : 10141u);
+                                        target.SetDisplayId(isFemale ? 10142 : 10141u);
                                         break;
                                     // Gnome
                                     case Race.Gnome:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10149 : 10148u);
+                                        target.SetDisplayId(isFemale ? 10149 : 10148u);
                                         break;
                                     // Human
                                     case Race.Human:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10138 : 10137u);
+                                        target.SetDisplayId(isFemale ? 10138 : 10137u);
                                         break;
                                     // Night Elf
                                     case Race.NightElf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10144 : 10143u);
+                                        target.SetDisplayId(isFemale ? 10144 : 10143u);
                                         break;
                                     default:
                                         break;
@@ -1451,43 +1452,43 @@ namespace Game.Spells
                                 {
                                     // Blood Elf
                                     case Race.BloodElf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25043 : 25032u);
+                                        target.SetDisplayId(isFemale ? 25043 : 25032u);
                                         break;
                                     // Orc
                                     case Race.Orc:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25050 : 25039u);
+                                        target.SetDisplayId(isFemale ? 25050 : 25039u);
                                         break;
                                     // Troll
                                     case Race.Troll:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25052 : 25041u);
+                                        target.SetDisplayId(isFemale ? 25052 : 25041u);
                                         break;
                                     // Tauren
                                     case Race.Tauren:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25051 : 25040u);
+                                        target.SetDisplayId(isFemale ? 25051 : 25040u);
                                         break;
                                     // Undead
                                     case Race.Undead:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25053 : 25042u);
+                                        target.SetDisplayId(isFemale ? 25053 : 25042u);
                                         break;
                                     // Draenei
                                     case Race.Draenei:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25044 : 25033u);
+                                        target.SetDisplayId(isFemale ? 25044 : 25033u);
                                         break;
                                     // Dwarf
                                     case Race.Dwarf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25045 : 25034u);
+                                        target.SetDisplayId(isFemale ? 25045 : 25034u);
                                         break;
                                     // Gnome
                                     case Race.Gnome:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25035 : 25046u);
+                                        target.SetDisplayId(isFemale ? 25035 : 25046u);
                                         break;
                                     // Human
                                     case Race.Human:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25037 : 25048u);
+                                        target.SetDisplayId(isFemale ? 25037 : 25048u);
                                         break;
                                     // Night Elf
                                     case Race.NightElf:
-                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25038 : 25049u);
+                                        target.SetDisplayId(isFemale ? 25038 : 25049u);
                                         break;
                                     default:
                                         break;
@@ -1501,15 +1502,15 @@ namespace Game.Spells
                             // Honor the Dead
                             case 65386:
                             case 65495:
-                                target.SetDisplayId(target.GetGender() == Gender.Male ? 29203 : 29204u);
+                                target.SetDisplayId(isFemale ? 29204 : 29203u);
                                 break;
                             // Darkspear Pride
                             case 75532:
-                                target.SetDisplayId(target.GetGender() == Gender.Male ? 31737 : 31738u);
+                                target.SetDisplayId(isFemale ? 31738 : 31737u);
                                 break;
                             // Gnomeregan Pride
                             case 75531:
-                                target.SetDisplayId(target.GetGender() == Gender.Male ? 31654 : 31655u);
+                                target.SetDisplayId(isFemale ? 31655 : 31654u);
                                 break;
                             default:
                                 break;

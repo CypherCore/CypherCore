@@ -233,7 +233,7 @@ namespace Scripts.Spells.Holiday
             Player target = GetHitPlayer();
             if (target)
             {
-                Gender gender = target.GetGender();
+                Gender gender = target.GetNativeGender();
                 uint spellId = SpellIds.TrickBuff;
                 switch (RandomHelper.URand(0, 5))
                 {
@@ -327,7 +327,7 @@ namespace Scripts.Spells.Holiday
             Unit target = GetHitUnit();
 
             uint spellId;
-            bool female = target.GetGender() == Gender.Female;
+            bool female = target.GetNativeGender() == Gender.Female;
 
             switch (GetSpellInfo().Id)
             {

@@ -1589,7 +1589,7 @@ namespace Game.Chat
                 mapId = target.GetMapId();
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
-                gender = target.GetNativeSex();
+                gender = target.GetNativeGender();
             }
             // get additional information from DB
             else

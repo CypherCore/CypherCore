@@ -3270,7 +3270,8 @@ namespace Game.Entities
                 58121, // Torch
                 43109, // Throw Torch
                 58552, // Return to Orgrimmar
-                58533  // Return to Stormwind
+                58533, // Return to Stormwind
+                21855  // Challenge Flag
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;
@@ -4860,7 +4861,7 @@ namespace Game.Entities
         public bool IsFitToRequirements(Player player, uint newZone, uint newArea)
         {
             if (gender != Gender.None)                   // not in expected gender
-                if (player == null || gender != player.GetGender())
+                if (player == null || gender != player.GetNativeGender())
                     return false;
 
             if (raceMask != 0)                                // not in expected race

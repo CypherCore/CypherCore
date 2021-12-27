@@ -616,7 +616,7 @@ namespace Game.Networking.Packets
                 BnetAccountID = player.GetSession().GetBattlenetAccountGUID();
                 Name = player.GetName();
                 RaceID = player.GetRace();
-                Sex = player.GetNativeSex();
+                Sex = player.GetNativeGender();
                 ClassID = player.GetClass();
                 Level = (byte)player.GetLevel();
 

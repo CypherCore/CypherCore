@@ -49,7 +49,7 @@ namespace Game.Chat
             {
                 if (target.HasTitle(titleInfo))
                 {
-                    string name = (target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
+                    string name = (target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
                     if (string.IsNullOrEmpty(name))
                         continue;
 

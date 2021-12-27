@@ -559,7 +559,7 @@ namespace Game
                         {
                             Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                             Global.ScriptMgr.OnPlayerCreate(newChar);
-                            Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeSex(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
+                            Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeGender(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
                             SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
                         }
@@ -1379,9 +1379,9 @@ namespace Game
             _player.ModifyMoney(-cost);
             _player.UpdateCriteria(CriteriaType.MoneySpentAtBarberShop, (ulong)cost);
 
-            if (_player.GetNativeSex() != (Gender)packet.NewSex)
+            if (_player.GetNativeGender() != (Gender)packet.NewSex)
             {
-                _player.SetNativeSex((Gender)packet.NewSex);
+                _player.SetNativeGender((Gender)packet.NewSex);
                 _player.InitDisplayIds();
                 _player.RestoreDisplayId(false);
             }

@@ -553,7 +553,7 @@ namespace Game.Achievements
             //! Since no common attributes were found, (not even in titleRewardFlags field)
             //! we explicitly check by ID. Maybe in the future we could move the achievement_reward
             //! condition fields to the condition system.
-            uint titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeSex() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
+            uint titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeGender() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
             if (titleId != 0)
             {
                 CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);
@@ -668,7 +668,7 @@ namespace Game.Achievements
                 Guild guild = Global.GuildMgr.GetGuildById(_owner.GetGuildId());
                 if (guild)
                 {
-                    BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
+                    BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var say_do = new LocalizedDo(say_builder);
                     guild.BroadcastWorker(say_do, _owner);
                 }
@@ -685,7 +685,7 @@ namespace Game.Achievements
                 // if player is in world he can tell his friends about new achievement
                 else if (_owner.IsInWorld)
                 {
-                    BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
+                    BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var _localizer = new LocalizedDo(_builder);
                     var _worker = new PlayerDistWorker(_owner, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), _localizer);
                     Cell.VisitWorldObjects(_owner, _worker, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));

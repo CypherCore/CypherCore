@@ -1758,7 +1758,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.PlayerNativeGender: // 98
-                    if (referencePlayer.GetNativeSex() != (Gender)reqValue)
+                    if (referencePlayer.GetNativeGender() != (Gender)reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerSkillEqualOrGreaterThan: // 99
@@ -3395,7 +3395,7 @@ namespace Game.Achievements
                     return false;
                 case ModifierTreeType.PlayerSpellShapeshiftFormCreatureDisplayInfoSelection: // 308
                 {
-                    ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(referencePlayer.GetRace(), referencePlayer.GetNativeSex(), (ShapeShiftForm)secondaryAsset);
+                    ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(referencePlayer.GetRace(), referencePlayer.GetNativeGender(), (ShapeShiftForm)secondaryAsset);
                     if (formModelData == null)
                         return false;
 

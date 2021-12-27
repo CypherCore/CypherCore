@@ -1203,7 +1203,7 @@ namespace Game.Entities
                     }
                 }
 
-                ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeSex(), form);
+                ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeGender(), form);
                 if (formModelData != null)
                 {
                     bool useRandom = false;
@@ -1698,6 +1698,9 @@ namespace Game.Entities
         public Gender GetGender() { return (Gender)(byte)m_unitData.Sex; }
         public void SetGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Sex), (byte)sex); }
 
+        public virtual Gender GetNativeGender() { return GetGender();    }
+        public virtual void SetNativeGender(Gender gender) { SetGender(gender); }
+        
         public uint GetDisplayId() { return m_unitData.DisplayID; }
         public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
         {

@@ -758,7 +758,7 @@ namespace Scripts.Spells.Generic
             Unit target = GetTarget();
             if (target.IsTypeId(TypeId.Player))
             {
-                if (target.GetGender() == Gender.Male)
+                if (target.GetNativeGender() == Gender.Male)
                     target.SetDisplayId(ModelIds.GoblinMale);
                 else
                     target.SetDisplayId(ModelIds.GoblinFemale);
@@ -1348,7 +1348,7 @@ namespace Scripts.Spells.Generic
             Player player = GetHitPlayer();
             if (player)
             {
-                Gender gender = player.GetGender();
+                Gender gender = player.GetNativeGender();
 
                 uint spellId = GetSpellInfo().Id;
                 switch (spellId)
@@ -2240,7 +2240,7 @@ namespace Scripts.Spells.Generic
             Player target = GetHitPlayer();
             if (target)
             {
-                Gender gender = target.GetGender();
+                Gender gender = target.GetNativeGender();
                 if (gender == Gender.Male)
                     caster.CastSpell(target, SpellIds.OrcDisguiseMale, true);
                 else
