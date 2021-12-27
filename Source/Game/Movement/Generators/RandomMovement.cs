@@ -37,7 +37,7 @@ namespace Game.Movement
 
         public override void DoInitialize(Creature owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.Paused);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (owner == null || !owner.IsAlive())
@@ -64,6 +64,9 @@ namespace Game.Movement
             if (!owner || !owner.IsAlive())
                 return true;
 
+            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
+                return true;
+
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
@@ -76,10 +79,7 @@ namespace Game.Movement
 
             _timer.Update(diff);
             if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
-            {
-                RemoveFlag(MovementGeneratorFlags.Transitory);
                 SetRandomLocation(owner);
-            }
 
             return true;
         }
@@ -101,6 +101,29 @@ namespace Game.Movement
                 // TODO: Research if this modification is needed, which most likely isnt
                 owner.SetWalk(false);
             }
+        }
+
+        public override void Pause(uint timer = 0)
+        {
+            if (timer != 0)
+            {
+                AddFlag(MovementGeneratorFlags.TimedPaused);
+                _timer.Reset(timer);
+                RemoveFlag(MovementGeneratorFlags.Paused);
+            }
+            else
+            {
+                AddFlag(MovementGeneratorFlags.Paused);
+                RemoveFlag(MovementGeneratorFlags.TimedPaused);
+            }
+        }
+
+        public override void Resume(uint overrideTimer = 0)
+        {
+            if (overrideTimer != 0)
+                _timer.Reset(overrideTimer);
+
+            RemoveFlag(MovementGeneratorFlags.Paused);
         }
 
         void SetRandomLocation(Creature owner)
@@ -135,6 +158,8 @@ namespace Game.Movement
                 _timer.Reset(100);
                 return;
             }
+
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.TimedPaused);
 
             owner.AddUnitState(UnitState.RoamingMove);
 
