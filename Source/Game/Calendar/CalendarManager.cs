@@ -675,6 +675,12 @@ namespace Game
             Note = note;
         }
 
+        ~CalendarInvite()
+        {
+            if (InviteId != 0 && EventId != 0)
+                Global.CalendarMgr.FreeInviteId(InviteId);
+        }
+
         public ulong InviteId { get; set; }
         public ulong EventId { get; set; }
         public ObjectGuid InviteeGuid { get; set; }
