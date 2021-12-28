@@ -3382,7 +3382,7 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             characterTransaction.Append(stmt);
 
-            static float finiteAlways(float f) { return !float.IsFinite(f) ? f : 0.0f; };
+            static float finiteAlways(float f) { return float.IsFinite(f) ? f : 0.0f; };
 
             if (create)
             {

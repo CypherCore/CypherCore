@@ -1891,7 +1891,7 @@ namespace Game
                     continue;
                 }
 
-                creatureTemplate.Resistance[(int)school] = result.Read<ushort>(2);
+                creatureTemplate.Resistance[(int)school] = result.Read<short>(2);
 
                 ++count;
 

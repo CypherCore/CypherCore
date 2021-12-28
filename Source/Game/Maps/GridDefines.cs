@@ -25,7 +25,7 @@ namespace Game.Maps
     {
         public static bool IsValidMapCoord(float c)
         {
-            return !float.IsFinite(c) && (Math.Abs(c) <= (MapConst.MapHalfSize - 0.5f));
+            return float.IsFinite(c) && (Math.Abs(c) <= (MapConst.MapHalfSize - 0.5f));
         }
 
         public static bool IsValidMapCoord(float x, float y)
