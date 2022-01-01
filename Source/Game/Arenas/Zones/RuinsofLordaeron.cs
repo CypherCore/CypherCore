@@ -16,15 +16,24 @@
  */
 
 using Framework.Constants;
+using Game.BattleGrounds;
 using Game.Entities;
 using Game.Networking.Packets;
-using Game.BattleGrounds;
+using System;
 
 namespace Game.Arenas
 {
     class RuinsofLordaeronArena : Arena
     {
         public RuinsofLordaeronArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+
+        public override void PostUpdateImpl(uint diff)
+        {
+            if (GetStatus() != BattlegroundStatus.InProgress)
+                return;
+
+            taskScheduler.Update(diff);
+        }
 
         public override bool SetupBattleground()
         {
@@ -58,6 +67,12 @@ namespace Game.Arenas
         {
             for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
                 DoorOpen(i);
+
+            taskScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            {
+                for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
+                    DelObject(i);
+            });
 
             for (int i = RuinsofLordaeronObjectTypes.Buff1; i <= RuinsofLordaeronObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);

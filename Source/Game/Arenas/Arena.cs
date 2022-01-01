@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.BattleGrounds;
 using Game.Entities;
 using Game.Guilds;
@@ -26,7 +27,9 @@ using System.Collections.Generic;
 namespace Game.Arenas
 {
     public class Arena : Battleground
-    {        
+    {
+        protected TaskScheduler taskScheduler = new();
+
         public Arena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             StartDelayTimes[BattlegroundConst.EventIdFirst] = BattlegroundStartTimeIntervals.Delay1m;

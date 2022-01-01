@@ -16,15 +16,24 @@
  */
 
 using Framework.Constants;
+using Game.BattleGrounds;
 using Game.Entities;
 using Game.Networking.Packets;
-using Game.BattleGrounds;
+using System;
 
 namespace Game.Arenas
 {
     public class NagrandArena : Arena
     {
         public NagrandArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+
+        public override void PostUpdateImpl(uint diff)
+        {
+            if (GetStatus() != BattlegroundStatus.InProgress)
+                return;
+
+            taskScheduler.Update(diff);
+        }
 
         public override void StartingEventCloseDoors()
         {
@@ -36,6 +45,12 @@ namespace Game.Arenas
         {
             for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
                 DoorOpen(i);
+
+            taskScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            {
+                for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door2; ++i)
+                    DelObject(i);
+            });
 
             for (int i = NagrandArenaObjectTypes.Buff1; i <= NagrandArenaObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
