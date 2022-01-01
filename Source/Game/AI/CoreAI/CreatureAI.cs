@@ -29,6 +29,7 @@ namespace Game.AI
 {
     public class CreatureAI : UnitAI
     {
+        bool _isEngaged;
         bool _moveInLOSLocked;
         List<AreaBoundary> _boundary = new();
         bool _negateBoundary;
@@ -201,6 +202,12 @@ namespace Game.AI
             }
         }
 
+        public override void JustEnteredCombat(Unit who)
+        {
+            if (!IsEngaged() && !me.CanHaveThreatList())
+                EngagementStart(who);
+        }
+
         // Called for reaction at stopping attack at no attackers or targets
         public virtual void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
@@ -231,7 +238,7 @@ namespace Game.AI
 
         public bool UpdateVictim()
         {
-            if (!me.IsEngaged())
+            if (!IsEngaged())
                 return false;
 
             if (!me.HasReactState(ReactStates.Passive))
@@ -254,23 +261,53 @@ namespace Game.AI
             return true;
         }
 
+        public void EngagementStart(Unit who)
+        {
+            if (_isEngaged)
+            {
+                //Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementStart called even though creature is already engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                return;
+            }
+            _isEngaged = true;
+
+            me.AtEngage(who);
+        }
+
+        public void EngagementOver()
+        {
+            if (!_isEngaged)
+            {
+                //Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                return;
+            }
+            _isEngaged = false;
+
+            me.AtDisengage();
+        }
+
         public bool _EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
-            if (!me.IsAlive())
+            if (me.IsInEvadeMode())
                 return false;
+
+            if (!me.IsAlive())
+            {
+                EngagementOver();
+                return false;
+            }
 
             me.RemoveAurasOnEvade();
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
-            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireTarget();
+            EngagementOver();
 
-            return !me.IsInEvadeMode();
+            return true;
         }
 
         public CypherStrings VisualizeBoundary(int duration, Unit owner = null, bool fill = false)
@@ -404,11 +441,22 @@ namespace Game.AI
             me.DoImmediateBoundaryCheck();
         }
 
+        // Called for reaction whenever a new non-offline unit is added to the threat list
+        public virtual void JustStartedThreateningMe(Unit who)
+        {
+            if (!IsEngaged())
+                EngagementStart(who);
+        }
+
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
         public virtual void JustEngagedWith(Unit who) { }
 
         // Called when the creature is killed
-        public virtual void JustDied(Unit killer) { }
+        public virtual void JustDied(Unit killer) 
+        {
+            if (IsEngaged())
+                EngagementOver();
+        }
 
         // Called when the creature kills a unit
         public virtual void KilledUnit(Unit victim) { }
@@ -521,6 +569,8 @@ namespace Game.AI
         public virtual bool IsEscortNPC(bool onlyIfActive) { return false; }
 
         public List<AreaBoundary> GetBoundary() { return _boundary; }
+
+        public bool IsEngaged() { return _isEngaged; }
     }
 
     public class AISpellInfoType

@@ -21,22 +21,13 @@ using Game.Maps;
 
 namespace Game.AI
 {
-    public class TotemAI : CreatureAI
+    public class TotemAI : NullCreatureAI
     {
         ObjectGuid _victimGuid;
 
         public TotemAI(Creature creature) : base(creature)
         {
             _victimGuid = ObjectGuid.Empty;
-        }
-
-        public override void MoveInLineOfSight(Unit who) { }
-
-        public override void JustAppeared() { }
-
-        public override void EnterEvadeMode(EvadeReason why)
-        {
-            me.CombatStop(true);
         }
 
         public override void UpdateAI(uint diff)

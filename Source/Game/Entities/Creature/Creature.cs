@@ -1047,6 +1047,14 @@ namespace Game.Entities
                 && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
         }
 
+        public override bool IsEngaged()
+        {
+            CreatureAI ai = GetAI();
+            if (ai != null)
+                return ai.IsEngaged();
+            return false;
+        }
+        
         public override void AtEngage(Unit target)
         {
             base.AtEngage(target);
@@ -1353,7 +1361,7 @@ namespace Game.Entities
             CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
 
             // health
-            float healthmod = _GetHealthMod(rank);
+            float healthmod = GetHealthMod(rank);
 
             uint basehp = (uint)GetMaxHealthByLevel(level);
             uint health = (uint)(basehp * healthmod);
@@ -1416,7 +1424,7 @@ namespace Game.Entities
             }
         }
 
-        float _GetHealthMod(CreatureEliteType Rank)
+        public float GetHealthMod(CreatureEliteType Rank)
         {
             switch (Rank)                                           // define rates for each elite rank
             {
@@ -1567,7 +1575,7 @@ namespace Game.Entities
                 curhealth = m_creatureData.curhealth;
                 if (curhealth != 0)
                 {
-                    curhealth = (uint)(curhealth * _GetHealthMod(GetCreatureTemplate().Rank));
+                    curhealth = (uint)(curhealth * GetHealthMod(GetCreatureTemplate().Rank));
                     if (curhealth < 1)
                         curhealth = 1;
                 }

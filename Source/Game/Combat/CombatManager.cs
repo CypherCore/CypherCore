@@ -234,15 +234,9 @@ namespace Game.Combat
 
         public static void NotifyAICombat(Unit me, Unit other)
         {
-            if (!me.IsAIEnabled())
-                return;
-
-            me.GetAI().JustEnteredCombat(other);
-
-            Creature cMe = me.ToCreature();
-            if (cMe != null)
-                if (!cMe.CanHaveThreatList())
-                    cMe.GetAI().JustEngagedWith(other);
+            UnitAI ai = me.GetAI();
+            if (ai != null)
+                ai.JustEnteredCombat(other);
         }
 
         void PutReference(ObjectGuid guid, CombatReference refe)
@@ -277,14 +271,14 @@ namespace Game.Combat
             {
                 _owner.AddUnitFlag(UnitFlags.InCombat);
                 _owner.AtEnterCombat();
-                if (!_owner.CanHaveThreatList() && !_owner.IsEngaged())
+                if (_owner.IsCreature())
                     _owner.AtEngage(GetAnyTarget());
             }
             else
             {
                 _owner.RemoveUnitFlag(UnitFlags.InCombat);
                 _owner.AtExitCombat();
-                if (_owner.IsEngaged() && !(_owner.IsCreature() && _owner.CanHaveThreatList() && _owner.ToCreature().IsAIEnabled()))
+                if (!_owner.IsCreature())
                     _owner.AtDisengage();
             }
 

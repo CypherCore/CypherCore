@@ -48,7 +48,7 @@ namespace Game.AI
             {
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop(true);
-                me.GetThreatManager().NotifyDisengaged();
+                EngagementOver();
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace Game.AI
 
             me.RemoveAllAuras();
             me.CombatStop(true);
-            me.GetThreatManager().NotifyDisengaged();
+            EngagementOver();
 
             me.GetMotionMaster().MoveTargetedHome();
         }

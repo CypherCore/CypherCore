@@ -123,14 +123,18 @@ namespace Game.AI
         public override void EnterEvadeMode(EvadeReason why)
         {
             if (!me.IsAlive())
+            {
+                EngagementOver();
                 return;
+            }
 
             me.RemoveAllAuras();
             me.CombatStop(true);
-            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireTarget();
+
+            EngagementOver();
 
             if (HasFollowState(FollowState.Inprogress))
             {

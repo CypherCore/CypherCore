@@ -135,8 +135,9 @@ namespace Game.AI
         {
             me.RemoveAllAuras();
             me.CombatStop(true);
-            me.GetThreatManager().NotifyDisengaged();
             me.SetLootRecipient(null);
+
+            EngagementOver();
 
             if (HasEscortState(EscortState.Escorting))
             {

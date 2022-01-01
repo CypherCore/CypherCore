@@ -57,8 +57,9 @@ namespace Game.Entities
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
         }
 
-        public virtual void AtEngage(Unit target) { m_isEngaged = true; }
-        public virtual void AtDisengage() { m_isEngaged = false; }
+        public virtual void AtEngage(Unit target) { }
+
+        public virtual void AtDisengage() { }
 
         public void CombatStop(bool includingCast = false, bool mutualPvP = true)
         {
@@ -147,10 +148,10 @@ namespace Game.Entities
 
         public bool CanHaveThreatList() { return m_threatManager.CanHaveThreatList(); }
 
-        // This value can be different from IsInCombat:
+        // This value can be different from IsInCombat, for example:
         // - when a projectile spell is midair against a creature (combat on launch - threat+aggro on impact)
         // - when the creature has no targets left, but the AI has not yet ceased engaged logic
-        public bool IsEngaged() { return m_isEngaged; }
+        public virtual bool IsEngaged() { return IsInCombat(); }
 
         public bool IsEngagedBy(Unit who) { return CanHaveThreatList() ? IsThreatenedBy(who) : IsInCombatWith(who); }
 
@@ -229,7 +230,6 @@ namespace Game.Entities
             foreach (var minion in m_Controlled)
                 minion.StopAttackFaction(factionId);
         }
-
 
         public void HandleProcExtraAttackFor(Unit victim)
         {

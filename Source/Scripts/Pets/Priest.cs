@@ -45,7 +45,7 @@ namespace Scripts.Pets
                     return;
 
                 me.CombatStop(true);
-                me.GetThreatManager().NotifyDisengaged();
+                EngagementOver();
                 me.ResetPlayerDamageReq();
             }
         }

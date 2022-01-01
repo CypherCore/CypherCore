@@ -37,6 +37,7 @@ namespace Game.Combat
         uint _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
+        List<ThreatReference> _needsAIUpdate = new();
         ThreatReference _currentVictimRef;
         ThreatReference _fixateRef;
 
@@ -98,6 +99,12 @@ namespace Game.Combat
             if (_currentVictimRef == null || _currentVictimRef.ShouldBeOffline())
                 UpdateVictim();
 
+            Cypher.Assert(_currentVictimRef == null || _currentVictimRef.IsAvailable());
+            return _currentVictimRef?.GetVictim();
+        }
+
+        public Unit GetLastVictim()
+        {
             if (_currentVictimRef != null && !_currentVictimRef.ShouldBeOffline())
                 return _currentVictimRef.GetVictim();
 
@@ -294,7 +301,7 @@ namespace Game.Combat
                     }
                 }
 
-            if (targetRefe.IsOnline())
+                if (targetRefe.IsOnline())
                     targetRefe.AddThreat(amount);
                 return;
             }
@@ -306,14 +313,13 @@ namespace Game.Combat
 
             // afterwards, we evaluate whether this is an online reference (it might not be an acceptable target, but we need to add it to our threat list before we check!)
             newRefe.UpdateOffline();
-            if (newRefe.IsOnline()) // ...and if the ref is online it also gets the threat it should have
+            if (newRefe.IsOnline()) // we only add the threat if the ref is currently available
                 newRefe.AddThreat(amount);
 
-            if (!_owner.IsEngaged())
-            {
-                _owner.AtEngage(target);
+            if (_currentVictimRef == null)
                 UpdateVictim();
-            }
+            else
+                ProcessAIUpdates();
         }
 
         void ScaleThreat(Unit target, float factor)
@@ -398,18 +404,6 @@ namespace Game.Combat
             }
         }
 
-        /// <summary>
-        /// THIS SHOULD ONLY BE CALLED FROM A CREATURE'S AI (typically in EnterEvadeMode)
-        /// notify the unit that the AI has disengaged
-        /// </summary>
-        public void NotifyDisengaged()
-        {
-            // note: i don't really like having this here
-            // (maybe engage flag should be in creature ai? it's inherently an AI property...)
-            if (_owner.IsEngaged())
-                _owner.AtDisengage();
-        }
-
         public void FixateTarget(Unit target)
         {
             if (target)
@@ -446,6 +440,7 @@ namespace Game.Combat
                 NeedClientUpdate = false;
             }
 
+            ProcessAIUpdates();
         }
 
         ThreatReference ReselectVictim()
@@ -454,7 +449,7 @@ namespace Game.Combat
                 return null;
 
             foreach (var pair in _myThreatListEntries)
-                pair.Value.UpdateOffline();
+                pair.Value.UpdateOffline(); // AI notifies are processed in ::UpdateVictim caller
 
             // fixated target is always preferred
             if (_fixateRef != null && _fixateRef.IsAvailable())
@@ -507,6 +502,16 @@ namespace Game.Combat
             // we should have found the old victim at some point in the loop above, so execution should never get to this point
             Cypher.Assert(false, "Current victim not found in sorted threat list even though it has a reference - manager desync!");
             return null;
+        }
+
+        void ProcessAIUpdates()
+        {
+            CreatureAI ai = _owner.ToCreature().GetAI();
+            List<ThreatReference> v = new(_needsAIUpdate); // _needClientUpdate is now empty in case this triggers a recursive call
+            if (ai == null)
+                return;
+            foreach (ThreatReference refe in v)
+                ai.JustStartedThreateningMe(refe.GetVictim());
         }
 
         // returns true if a is LOWER on the threat list than b
@@ -563,17 +568,17 @@ namespace Game.Combat
                     threat *= victimMgr._singleSchoolModifiers[(int)SpellSchools.Arcane];
                     break;
                 default:
+                {
+                    if (victimMgr._multiSchoolModifiers.TryGetValue(mask, out float value))
                     {
-                        if (victimMgr._multiSchoolModifiers.TryGetValue(mask, out float value))
-                        {
-                            threat *= value;
-                            break;
-                        }
-                        float mod = victim.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, (uint)mask);
-                        victimMgr._multiSchoolModifiers[mask] = mod;
-                        threat *= mod;
+                        threat *= value;
                         break;
                     }
+                    float mod = victim.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, (uint)mask);
+                    victimMgr._multiSchoolModifiers[mask] = mod;
+                    threat *= mod;
+                    break;
+                }
             }
             return threat;
         }
@@ -671,7 +676,7 @@ namespace Game.Combat
             threatClear.UnitGUID = _owner.GetGUID();
             _owner.SendMessageToSet(threatClear, false);
         }
-        
+
         public void SendRemoveToClients(Unit victim)
         {
             ThreatRemove threatRemove = new();
@@ -797,6 +802,8 @@ namespace Game.Combat
 
         // Resets the specified unit's threat to zero
         public void ResetThreat(Unit target) { ScaleThreat(target, 0.0f); }
+
+        public void RegisterForAIUpdate(ThreatReference refe) { _needsAIUpdate.Add(refe); }
     }
 
     public enum TauntState
@@ -827,7 +834,7 @@ namespace Game.Combat
             _owner = mgr._owner as Creature;
             _mgr = mgr;
             _victim = victim;
-            Online = ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
+            Online = OnlineState.Offline;
         }
 
         public void AddThreat(float amount)
@@ -866,6 +873,7 @@ namespace Game.Combat
             {
                 Online = ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
                 ListNotifyChanged();
+                _mgr.RegisterForAIUpdate(this);
             }
         }
 

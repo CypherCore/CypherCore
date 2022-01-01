@@ -536,7 +536,7 @@ namespace Game.AI
             _me = unit;
             _dist = dist;
             _playerOnly = playerOnly;
-            _exception = !withTank ? _me.GetThreatManager().GetCurrentVictim() : null;
+            _exception = !withTank ? unit.GetThreatManager().GetLastVictim() : null;
             _aura = aura;
         }
 

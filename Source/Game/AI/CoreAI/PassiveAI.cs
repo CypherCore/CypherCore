@@ -77,6 +77,21 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who) { }
 
+        public override void JustEnteredCombat(Unit who)
+        {
+            EngagementStart(who);
+        }
+
+        public override void JustExitedCombat()
+        {
+            EngagementOver();
+        }
+
+        public override void JustStartedThreateningMe(Unit who)
+        {
+
+        }
+
         public override void EnterEvadeMode(EvadeReason why) { }
     }
 
@@ -89,6 +104,8 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit unit) { }
         public override void AttackStart(Unit unit) { }
+        public override  void JustStartedThreateningMe(Unit unit)  { }
+        public override void JustEnteredCombat(Unit who) { }
         public override void UpdateAI(uint diff) { }
         public override void JustAppeared() { }
         public override void EnterEvadeMode(EvadeReason why) { }
