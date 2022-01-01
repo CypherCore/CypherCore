@@ -59,9 +59,14 @@ namespace Game.Combat
             if (cWho.IsPet() || cWho.IsTotem() || cWho.IsTrigger())
                 return false;
 
-            // summons cannot have a threat list, unless they are controlled by a creature
-            if (cWho.HasUnitTypeMask(UnitTypeMask.Minion | UnitTypeMask.Guardian) && !cWho.GetOwnerGUID().IsCreature())
-                return false;
+            // summons cannot have a threat list if they were summoned by a player
+            if (cWho.HasUnitTypeMask(UnitTypeMask.Minion | UnitTypeMask.Guardian))
+            {
+                TempSummon tWho = cWho.ToTempSummon();
+                if (tWho != null)
+                    if (tWho.GetSummonerGUID().IsPlayer())
+                        return false;
+            }
 
             return true;
         }

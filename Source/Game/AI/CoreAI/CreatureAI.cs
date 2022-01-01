@@ -186,17 +186,20 @@ namespace Game.AI
         // Called when creature appears in the world (spawn, respawn, grid load etc...)
         public virtual void JustAppeared()
         {
-            TempSummon summon = me.ToTempSummon();
-            if (summon != null)
+            if (!IsEngaged())
             {
-                // Only apply this to specific types of summons
-                if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties))
+                TempSummon summon = me.ToTempSummon();
+                if (summon != null)
                 {
-                    Unit owner = summon.GetCharmerOrOwner();
-                    if (owner != null)
+                    // Only apply this to specific types of summons
+                    if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties))
                     {
-                        summon.GetMotionMaster().Clear();
-                        summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                        Unit owner = summon.GetCharmerOrOwner();
+                        if (owner != null)
+                        {
+                            summon.GetMotionMaster().Clear();
+                            summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                        }
                     }
                 }
             }
