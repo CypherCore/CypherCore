@@ -45,7 +45,7 @@ namespace Scripts.Pets
 
             public override void JustEngagedWith(Unit who) { }
 
-            public override void Reset()
+            public override void JustAppeared()
             {
                 _isViper = me.GetEntry() == CreatureIds.Viper ? true : false;
 
