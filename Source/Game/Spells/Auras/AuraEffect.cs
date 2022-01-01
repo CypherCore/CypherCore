@@ -3705,6 +3705,13 @@ namespace Game.Spells
                 return;
             }
 
+            int spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, GetAuraType());
+            if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
+                return;
+
+            if (spellGroupVal != 0)
+                target.ApplyCastTimePercentMod(spellGroupVal, !apply);
+
             target.ApplyCastTimePercentMod(GetAmount(), apply);
         }
 
