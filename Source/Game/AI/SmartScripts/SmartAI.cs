@@ -597,12 +597,10 @@ namespace Game.AI
             if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Waypoint)
-                {
                     if (me.GetWaypointPath() != 0)
                         me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
-                }
-                else
-                    me.ResumeMovement();
+                
+                me.ResumeMovement();
             }
             else if (formation.IsFormed())
                 me.GetMotionMaster().MoveIdle(); // wait the order of leader
