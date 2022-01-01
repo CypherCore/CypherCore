@@ -87,7 +87,7 @@ namespace Game.Combat
 
         public void Update(uint tdiff)
         {
-            if (!CanHaveThreatList() || IsThreatListEmpty())
+            if (!CanHaveThreatList() || IsThreatListEmpty(true))
                 return;
 
             if (_updateTimer <= tdiff)
