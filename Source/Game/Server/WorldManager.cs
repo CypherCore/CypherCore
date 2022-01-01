@@ -80,6 +80,25 @@ namespace Game
             Global.ScriptMgr.OnOpenStateChange(!val);
         }
 
+        void LoadDBAllowedSecurityLevel()
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
+            stmt.AddValue(0, (int)_realm.Id.Index);
+            SQLResult result = DB.Login.Query(stmt);
+
+            if (!result.IsEmpty())
+                SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
+        }
+
+        void SetPlayerSecurityLimit(AccountTypes _sec)
+        {
+            AccountTypes sec = _sec < AccountTypes.Console ? _sec : AccountTypes.Player;
+            bool update = sec > m_allowedSecurityLevel;
+            m_allowedSecurityLevel = sec;
+            if (update)
+                KickAllLess(m_allowedSecurityLevel);
+        }
+
         public void SetMotd(string motd)
         {
             Global.ScriptMgr.OnMotdChange(motd);
@@ -1979,6 +1998,8 @@ namespace Game
                 m_NextDailyQuestReset = mostRecentQuestTime;
             else // plan next reset time
                 m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + Time.Day : curDayResetTime;
+
+            SetWorldState(WorldStates.DailyQuestResetTime, (ulong)m_NextDailyQuestReset);
         }
 
         void InitMonthlyQuestResetTime()
@@ -2081,25 +2102,6 @@ namespace Game
 
             m_NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
             SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
-        }
-
-        public void LoadDBAllowedSecurityLevel()
-        {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
-            stmt.AddValue(0, _realm.Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
-
-            if (!result.IsEmpty())
-                SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
-        }
-
-        public void SetPlayerSecurityLimit(AccountTypes accountType)
-        {
-            AccountTypes security = accountType < AccountTypes.Console ? accountType : AccountTypes.Player;
-            bool update = security > m_allowedSecurityLevel;
-            m_allowedSecurityLevel = security;
-            if (update)
-                KickAllLess(m_allowedSecurityLevel);
         }
 
         void ResetWeeklyQuests()
