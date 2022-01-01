@@ -318,7 +318,13 @@ namespace Game.Movement
                    + vertice[2] * weights.Z + vertice[3] * weights.W;
         }
 
-        public int Length() { return lengths[index_hi];}
+        public int Length()
+        {
+            if (lengths.Length == 0)
+                return 0;
+
+            return lengths[index_hi];
+        }
 
         public int Length(int first, int last) { return lengths[last] - lengths[first]; }
 
