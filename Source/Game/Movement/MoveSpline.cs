@@ -386,22 +386,25 @@ namespace Game.Movement
 
     public class SplineChainLink
     {
-        public SplineChainLink(Vector3[] points, uint expectedDuration, uint msToNext)
+        public List<Vector3> Points = new();
+        public uint ExpectedDuration;
+        public uint TimeToNext;
+        public float Velocity;
+
+        public SplineChainLink(Vector3[] points, uint expectedDuration, uint msToNext, float velocity)
         {
             Points.AddRange(points);
             ExpectedDuration = expectedDuration;
             TimeToNext = msToNext;
+            Velocity = velocity;
         }
 
-        public SplineChainLink(uint expectedDuration, uint msToNext)
+        public SplineChainLink(uint expectedDuration, uint msToNext, float velocity)
         {
             ExpectedDuration = expectedDuration;
             TimeToNext = msToNext;
+            Velocity = velocity;
         }
-
-        public List<Vector3> Points = new();
-        public uint ExpectedDuration;
-        public uint TimeToNext;
     }
 
     public class SplineChainResumeInfo

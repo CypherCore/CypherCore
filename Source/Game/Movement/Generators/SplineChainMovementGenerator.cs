@@ -91,7 +91,7 @@ namespace Game.Movement
 
                 owner.AddUnitState(UnitState.RoamingMove);
                 Span<Vector3> partial = thisLink.Points.ToArray();
-                SendPathSpline(owner, partial[(_nextFirstWP - 1)..]);
+                SendPathSpline(owner, thisLink.Velocity, partial[(_nextFirstWP - 1)..]);
 
                 Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: resumed spline chain generator from resume state. ({owner.GetGUID()})");
 
@@ -178,7 +178,7 @@ namespace Game.Movement
             }
         }
 
-        uint SendPathSpline(Unit owner, Span<Vector3> path)
+        uint SendPathSpline(Unit owner, float velocity, Span<Vector3> path)
         {
             int nodeCount = path.Length;
             Cypher.Assert(nodeCount > 1, $"SplineChainMovementGenerator::SendPathSpline: Every path must have source & destination (size > 1)! ({owner.GetGUID()})");
@@ -188,6 +188,10 @@ namespace Game.Movement
                 init.MovebyPath(path.ToArray());
             else
                 init.MoveTo(path[1], false, true);
+
+            if (velocity > 0.0f)
+                init.SetVelocity(velocity);
+
             init.SetWalk(_walk);
             return (uint)init.Launch();
         }
@@ -198,7 +202,7 @@ namespace Game.Movement
             Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sending spline on index: {index}. ({owner.GetGUID()})");
 
             SplineChainLink thisLink = _chain[index];
-            uint actualDuration = SendPathSpline(owner, new Span<Vector3>(thisLink.Points.ToArray()));
+            uint actualDuration = SendPathSpline(owner, thisLink.Velocity, new Span<Vector3>(thisLink.Points.ToArray()));
             if (actualDuration != thisLink.ExpectedDuration)
             {
                 Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sent spline on index: {index}, duration: {actualDuration} ms. Expected duration: {thisLink.ExpectedDuration} ms (delta {actualDuration - thisLink.ExpectedDuration} ms). Adjusting. ({owner.GetGUID()})");

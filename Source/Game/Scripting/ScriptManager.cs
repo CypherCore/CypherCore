@@ -259,9 +259,9 @@ namespace Game.Scripting
 
             m_mSplineChainsMap.Clear();
 
-            //                                                     0       1        2             3               4
-            SQLResult resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
-            //                                                  0       1         2       3   4  5  6
+            //                                             0      1        2         3                 4            5
+            SQLResult resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext, velocity FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
+            //                                           0      1        2         3    4  5  6
             SQLResult resultWP = DB.World.Query("SELECT entry, chainId, splineId, wpId, x, y, z FROM script_spline_chain_waypoints ORDER BY entry asc, chainId asc, splineId asc, wpId asc");
             if (resultMeta.IsEmpty() || resultWP.IsEmpty())
             {
@@ -287,8 +287,10 @@ namespace Game.Scripting
                         continue;
                     }
 
-                    uint expectedDuration = resultMeta.Read<uint>(3), msUntilNext = resultMeta.Read<uint>(4);
-                    chain.Add(new SplineChainLink(expectedDuration, msUntilNext));
+                    uint expectedDuration = resultMeta.Read<uint>(3);
+                    uint msUntilNext = resultMeta.Read<uint>(4);
+                    float velocity = resultMeta.Read<float>(5);
+                    chain.Add(new SplineChainLink(expectedDuration, msUntilNext, velocity));
 
                     if (splineId == 0)
                         ++chainCount;
