@@ -5413,6 +5413,10 @@ namespace Game.Entities
             if (go == null)
                 return null;
 
+            // Players cannot interact with gameobjects that use the "Point" icon
+            if (go.GetGoInfo().IconName == "Point")
+                return null;
+
             if (!go.IsWithinDistInMap(this))
                 return null;
 
