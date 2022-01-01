@@ -849,7 +849,10 @@ namespace Game.AI
             {
                 if (on)
                 {
-                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() && !me.GetMotionMaster().HasMovementGenerator(movement => movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal))
+                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() && !me.GetMotionMaster().HasMovementGenerator(movement =>
+                    {
+                        return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase && movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal;
+                    }))
                     {
                         SetRun(_run);
                         me.GetMotionMaster().MoveChase(me.GetVictim());

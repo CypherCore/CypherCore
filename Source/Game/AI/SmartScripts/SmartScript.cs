@@ -452,9 +452,7 @@ namespace Game.AI
 
                                 if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.CombatMove))
                                 {
-                                    // If cast flag SMARTCAST_COMBAT_MOVE is set combat movement will not be allowed
-                                    // unless target is outside spell range, out of mana, or LOS.
-
+                                    // If cast flag SMARTCAST_COMBAT_MOVE is set combat movement will not be allowed unless target is outside spell range, out of mana, or LOS.
                                     bool allowMove = false;
                                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, _me.GetMap().GetDifficultyID());
                                     var costs = spellInfo.CalcPowerCost(_me, spellInfo.GetSchoolMask());
@@ -479,8 +477,7 @@ namespace Game.AI
                                         }
                                     }
 
-                                    if (_me.GetDistance(target) > spellInfo.GetMaxRange(true) ||
-                                        _me.GetDistance(target) < spellInfo.GetMinRange(true) ||
+                                    if (_me.GetDistance(target) > spellInfo.GetMaxRange(true) || _me.GetDistance(target) < spellInfo.GetMinRange(true) ||
                                         !_me.IsWithinLOSInMap(target) || !hasPower || _me.HasUnitFlag(UnitFlags.Silenced))
                                         allowMove = true;
 
