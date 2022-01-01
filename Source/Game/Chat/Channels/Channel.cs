@@ -51,58 +51,28 @@ namespace Game.Chat
                 _channelFlags |= ChannelFlags.NotLfg;
         }
 
-        public Channel(ObjectGuid guid, string name, Team team = 0)
+        public Channel(ObjectGuid guid, string name, Team team = 0, string banList = "")
         {
             _announceEnabled = true;
             _ownershipEnabled = true;
+            _persistentChannel = WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels);
             _channelFlags = ChannelFlags.Custom;
             _channelTeam = team;
             _channelGuid = guid;
             _channelName = name;
 
-            // If storing custom channels in the db is enabled either load or save the channel
-            if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+            StringArray tokens = new(banList, ' ');
+            foreach (string token in tokens)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHANNEL);
-                stmt.AddValue(0, _channelName);
-                stmt.AddValue(1, (uint)_channelTeam);
-                SQLResult result = DB.Characters.Query(stmt);
+                // legacy db content might not have 0x prefix, account for that
+                string bannedGuidStr = token.Contains("0x") ? token.Substring(2) : token;
+                ObjectGuid banned = new();
+                banned.SetRawValue(ulong.Parse(bannedGuidStr.Substring(0, 16)), ulong.Parse(bannedGuidStr.Substring(16)));
+                if (banned.IsEmpty())
+                    continue;
 
-                if (!result.IsEmpty()) //load
-                {
-                    _channelName = result.Read<string>(0); // re-get channel name. MySQL table collation is case insensitive
-                    _announceEnabled = result.Read<bool>(1);
-                    _ownershipEnabled = result.Read<bool>(2);
-                    _channelPassword = result.Read<string>(3);
-                    string bannedList = result.Read<string>(4);
-
-                    if (string.IsNullOrEmpty(bannedList))
-                    {
-                        var tokens = new StringArray(bannedList, ' ');
-                        for (var i = 0; i < tokens.Length; ++i)
-                        {
-                            ObjectGuid bannedGuid = new();
-                            if (ulong.TryParse(tokens[i].Substring(0, 16), out ulong highguid) && ulong.TryParse(tokens[i][16..], out ulong lowguid))
-                                bannedGuid.SetRawValue(highguid, lowguid);
-
-                            if (!bannedGuid.IsEmpty())
-                            {
-                                Log.outDebug(LogFilter.ChatSystem, "Channel({0}) loaded bannedStore guid:{1}", _channelName, bannedGuid);
-                                _bannedStore.Add(bannedGuid);
-                            }
-                        }
-                    }
-                }
-                else // save
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHANNEL);
-                    stmt.AddValue(0, _channelName);
-                    stmt.AddValue(1, (uint)_channelTeam);
-                    DB.Characters.Execute(stmt);
-                    Log.outDebug(LogFilter.ChatSystem, "Channel({0}) saved in database", _channelName);
-                }
-
-                _persistentChannel = true;
+                Log.outDebug(LogFilter.ChatSystem, $"Channel({name}) loaded player {banned} into bannedStore");
+                _bannedStore.Add(banned);
             }
         }
 
@@ -892,7 +862,7 @@ namespace Game.Chat
         
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
         bool IsAnnounce() { return _announceEnabled; }
-        void SetAnnounce(bool announce) { _announceEnabled = announce; }
+        public void SetAnnounce(bool announce) { _announceEnabled = announce; }
 
         public void SetPassword(string npassword) { _channelPassword = npassword; }
         public bool CheckPassword(string password) { return _channelPassword.IsEmpty() || (_channelPassword == password); }

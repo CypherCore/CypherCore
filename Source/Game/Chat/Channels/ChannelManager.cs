@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -85,13 +86,49 @@ namespace Game.Chat
                 return null;
 
             Channel newChannel = new(CreateCustomChannelGuid(), name, _team);
+
+            if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHANNEL);
+                stmt.AddValue(0, name);
+                stmt.AddValue(1, (uint)_team);
+                DB.Characters.Execute(stmt);
+                Log.outDebug(LogFilter.ChatSystem, $"Channel({name}) saved in database");
+            }
+
             _customChannels[name.ToLower()] = newChannel;
             return newChannel;
         }
 
         public Channel GetCustomChannel(string name)
         {
-            return _customChannels.LookupByKey(name.ToLower());
+            string channelName = name.ToLower();
+            if (_customChannels.TryGetValue(channelName, out Channel channel))
+                return channel;
+            else if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHANNEL);
+                stmt.AddValue(0, channelName);
+                stmt.AddValue(1, (uint)_team);
+                SQLResult result = DB.Characters.Query(stmt);
+                if (!result.IsEmpty())
+                {
+                    string dbName = result.Read<string>(0); // may be different - channel names are case insensitive
+                    bool dbAnnounce = result.Read<bool>(1);
+                    bool dbOwnership = result.Read<bool>(2);
+                    string dbPass = result.Read<string>(3);
+                    string dbBanned = result.Read<string>(4);
+
+                    channel = new Channel(CreateCustomChannelGuid(), dbName, _team, dbBanned);
+                    channel.SetAnnounce(dbAnnounce);
+                    channel.SetOwnership(dbOwnership);
+                    channel.SetPassword(dbPass);
+                    _customChannels.Add(channelName, channel);
+                    return channel;
+                }
+            }
+
+            return null;
         }
         
         public Channel GetChannel(uint channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)
