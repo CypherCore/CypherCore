@@ -2039,7 +2039,7 @@ namespace Game.Groups
                     // do not reset the instance, just unbind if others are permanently bound to it
                     if (instanceSave.CanReset())
                     {
-                        if (map != null && IsRaidGroup() && map.IsDungeon() && SendMsgTo)
+                        if (map != null && map.IsDungeon() && SendMsgTo)
                         {
                             AreaTriggerStruct instanceEntrance = Global.ObjectMgr.GetGoBackTrigger(map.GetId());
 
