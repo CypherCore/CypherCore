@@ -290,7 +290,7 @@ namespace Game.AI
 
         public bool _EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
-            if (me.IsInEvadeMode())
+            if (!IsEngaged())
                 return false;
 
             if (!me.IsAlive())
@@ -455,11 +455,7 @@ namespace Game.AI
         public virtual void JustEngagedWith(Unit who) { }
 
         // Called when the creature is killed
-        public virtual void JustDied(Unit killer) 
-        {
-            if (IsEngaged())
-                EngagementOver();
-        }
+        public virtual void JustDied(Unit killer) { }
 
         // Called when the creature kills a unit
         public virtual void KilledUnit(Unit victim) { }

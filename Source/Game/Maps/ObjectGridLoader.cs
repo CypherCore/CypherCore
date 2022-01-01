@@ -214,11 +214,7 @@ namespace Game.Maps
                 creature.RemoveAllAreaTriggers();
 
                 if (creature.IsInCombat())
-                {
                     creature.CombatStop();
-                    if (creature.IsAIEnabled())
-                        creature.GetAI().EnterEvadeMode();
-                }
             }
         }
     }
