@@ -34,9 +34,10 @@ namespace Scripts.World
 
         bool IsXPBoostActive()
         {
-            var now = Time.UnixTimeToDateTime(GameTime.GetGameTime());
+            long time = GameTime.GetGameTime();
+            var localTm = Time.UnixTimeToDateTime(time);
             uint weekdayMaskBoosted = WorldConfig.GetUIntValue(WorldCfg.XpBoostDaymask);
-            uint weekdayMask = (1u << now.Day);
+            uint weekdayMask = 1u << localTm.Day;
             bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;
             return currentDayBoosted;
         }

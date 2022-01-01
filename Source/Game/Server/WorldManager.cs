@@ -80,7 +80,7 @@ namespace Game
             Global.ScriptMgr.OnOpenStateChange(!val);
         }
 
-        void LoadDBAllowedSecurityLevel()
+        public void LoadDBAllowedSecurityLevel()
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
             stmt.AddValue(0, (int)_realm.Id.Index);
@@ -90,7 +90,7 @@ namespace Game
                 SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
         }
 
-        void SetPlayerSecurityLimit(AccountTypes _sec)
+        public void SetPlayerSecurityLimit(AccountTypes _sec)
         {
             AccountTypes sec = _sec < AccountTypes.Console ? _sec : AccountTypes.Player;
             bool update = sec > m_allowedSecurityLevel;
@@ -121,11 +121,11 @@ namespace Game
                 long today = (gameTime / Time.Day) * Time.Day;
 
                 // Check if our window to restart today has passed. 5 mins until quiet time
-                while (gameTime >= (today + (WorldConfig.GetIntValue(WorldCfg.RespawnRestartQuietTime) * Time.Hour) - 1810))
+                while (gameTime >= Time.GetLocalHourTimestamp(today, WorldConfig.GetUIntValue(WorldCfg.RespawnRestartQuietTime)) - 1810)
                     today += Time.Day;
 
                 // Schedule restart for 30 minutes before quiet time, or as long as we have
-                _warnShutdownTime = today + (WorldConfig.GetIntValue(WorldCfg.RespawnRestartQuietTime) * Time.Hour) - 1800;
+                _warnShutdownTime = Time.GetLocalHourTimestamp(today, WorldConfig.GetUIntValue(WorldCfg.RespawnRestartQuietTime)) - 1800;
 
                 _guidWarn = true;
                 SendGuidWarning();

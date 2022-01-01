@@ -120,6 +120,19 @@ public static class Time
         return DateTimeToUnixTime((DateTime.Now.Date + new TimeSpan(months + days, hours, 0)));
     }
 
+    public static long GetLocalHourTimestamp(long time, uint hour, bool onlyAfterTime = true)
+    {
+        DateTime timeLocal = UnixTimeToDateTime(time);
+        timeLocal = new DateTime(timeLocal.Year, timeLocal.Month, timeLocal.Day, 0, 0, 0, timeLocal.Kind);
+        long midnightLocal = DateTimeToUnixTime(timeLocal);
+        long hourLocal = midnightLocal + hour * Hour;
+
+        if (onlyAfterTime && hourLocal < time)
+            hourLocal += Day;
+
+        return hourLocal;
+    }
+
     public static string secsToTimeString(ulong timeInSecs, bool shortText = false, bool hoursOnly = false)
     {
         ulong secs = timeInSecs % Minute;

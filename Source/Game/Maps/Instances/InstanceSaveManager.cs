@@ -219,7 +219,7 @@ namespace Game.Maps
             }
 
             // load the global respawn times for raid/heroic instances
-            uint diff = (uint)(WorldConfig.GetIntValue(WorldCfg.InstanceResetTimeHour) * Time.Hour);
+            uint resetHour = WorldConfig.GetUIntValue(WorldCfg.InstanceResetTimeHour);
             result = DB.Characters.Query("SELECT mapid, difficulty, resettime FROM instance_reset");
             if (!result.IsEmpty())
             {
@@ -241,7 +241,7 @@ namespace Game.Maps
                     }
 
                     // update the reset time if the hour in the configs changes
-                    long newresettime = (oldresettime / Time.Day) * Time.Day + diff;
+                    long newresettime = Time.GetLocalHourTimestamp(oldresettime, resetHour, false);
                     if (oldresettime != newresettime)
                     {
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
@@ -277,7 +277,7 @@ namespace Game.Maps
                     if (t == 0)
                     {
                         // initialize the reset time
-                        t = today + period + diff;
+                        t = Time.GetLocalHourTimestamp(today + period, resetHour);
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, mapid);
@@ -290,8 +290,8 @@ namespace Game.Maps
                     {
                         // assume that expired instances have already been cleaned
                         // calculate the next reset time
-                        t = (t / Time.Day) * Time.Day;
-                        t += ((today - t) / period + 1) * period + diff;
+                        long day = (t / Time.Day) * Time.Day;
+                        t = Time.GetLocalHourTimestamp(day + ((today - day) / period + 1) * period, resetHour);
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, t);
@@ -327,12 +327,12 @@ namespace Game.Maps
                 return 0;
             }
 
-            long diff = WorldConfig.GetIntValue(WorldCfg.InstanceResetTimeHour) * Time.Hour;
+            long resetHour = WorldConfig.GetIntValue(WorldCfg.InstanceResetTimeHour);
             long period = (uint)(((mapDiff.GetRaidDuration() * WorldConfig.GetFloatValue(WorldCfg.RateInstanceResetTime)) / Time.Day) * Time.Day);
             if (period < Time.Day)
                 period = Time.Day;
 
-            return ((resetTime + Time.Minute) / Time.Day * Time.Day) + period + diff;
+            return Time.GetLocalHourTimestamp(((resetTime + Time.Minute) / Time.Day * Time.Day) + period, (uint)resetHour);
         }
 
         public void ScheduleReset(bool add, long time, InstResetEvent Event)
