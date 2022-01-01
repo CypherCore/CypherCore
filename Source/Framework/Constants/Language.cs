@@ -1088,8 +1088,8 @@ namespace Framework.Constants
         ListRespawnsZone = 5078,
         ListRespawnsListheader = 5079,
         ListRespawnsOverdue = 5080,
-        ListRespawnsCreatures = 5081,
-        ListRespawnsGameobjects = 5082,
+        // unused 5081
+        // unused 5082
         ObjectInfoAIType = 5083,
 
         NpcinfoUnitFieldFlags2 = 5084,
