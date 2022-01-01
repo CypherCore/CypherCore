@@ -50,6 +50,7 @@ namespace Scripts.Spells.Priest
         public const uint ItemEfficiency = 37595;
         public const uint LeapOfFaithEffect = 92832;
         public const uint LevitateEffect = 111759;
+        public const uint MindBombStun = 226943;
         public const uint OracularHeal = 26170;
         public const uint PenanceR1 = 47540;
         public const uint PenanceR1Damage = 47758;
@@ -402,8 +403,27 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 47540 - Penance
-    [Script]
+    [Script] // 205369 - Mind Bomb
+    class spell_pri_mind_bomb : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MindBombStun);
+        }
+
+        void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+                GetCaster()?.CastSpell(GetTarget().GetPosition(), SpellIds.MindBombStun, new CastSpellExtraArgs(true));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
+    [Script] // 47540 - Penance
     class spell_pri_penance : SpellScript
     {
         public override bool Load()
