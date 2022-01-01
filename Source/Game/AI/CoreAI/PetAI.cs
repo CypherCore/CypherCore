@@ -633,6 +633,16 @@ namespace Game.AI
             AttackStart(attacker);
         }
 
+        public override void JustEnteredCombat(Unit who)
+        {
+            EngagementStart(who);
+        }
+
+        public override void JustExitedCombat()
+        {
+            EngagementOver();
+        }
+
         // The following aren't used by the PetAI but need to be defined to override
         //  default CreatureAI functions which interfere with the PetAI
         public override void MoveInLineOfSight(Unit who) { }
