@@ -369,7 +369,7 @@ namespace Game.Entities
 
             if (updateLevel)
                 SelectLevel();
-            else
+            else if (!IsGuardian())
             {
                 ulong previousHealth = GetHealth();
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
@@ -377,16 +377,20 @@ namespace Game.Entities
                     SetHealth(previousHealth);
             }
 
-            SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
-            SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
-            SetStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Fire]);
-            SetStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Nature]);
-            SetStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Frost]);
-            SetStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Shadow]);
-            SetStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Arcane]);
+            // Do not update guardian stats here - they are handled in Guardian::InitStatsForLevel()
+            if (!IsGuardian())
+            {
+                SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
+                SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
+                SetStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Fire]);
+                SetStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Nature]);
+                SetStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Frost]);
+                SetStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Shadow]);
+                SetStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Arcane]);
 
-            SetCanModifyStats(true);
-            UpdateAllStats();
+                SetCanModifyStats(true);
+                UpdateAllStats();
+            }
 
             // checked and error show at loading templates
             var factionTemplate = CliDB.FactionTemplateStorage.LookupByKey(cInfo.Faction);
