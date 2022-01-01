@@ -3174,7 +3174,10 @@ namespace Game.Spells
                 if (spellInfo != null && spellInfo.IconFileDataId == 134230)
                 {
                     Log.outDebug(LogFilter.Spells, "Statue {0} is unsummoned in spell {1} finish", unitCaster.GetGUID().ToString(), m_spellInfo.Id);
-                    unitCaster.SetDeathState(DeathState.JustDied);
+                    // Avoid infinite loops with setDeathState(JUST_DIED) being called over and over
+                    // It might make sense to do this check in Unit::setDeathState() and all overloaded functions
+                    if (unitCaster.GetDeathState() != DeathState.JustDied)
+                        unitCaster.SetDeathState(DeathState.JustDied);
                     return;
                 }
             }

@@ -847,10 +847,14 @@ namespace Game.Entities
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
                     RemoveAurasDueToSpell(_lastLiquid.SpellID);
+
                 Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
+
+                // Set _lastLiquid before casting liquid spell to avoid infinite loops
+                _lastLiquid = curLiquid;
+
                 if (curLiquid != null && curLiquid.SpellID != 0 && (!player || !player.IsGameMaster()))
                     CastSpell(this, curLiquid.SpellID, true);
-                _lastLiquid = curLiquid;
 
                 // mount capability depends on liquid state change
                 UpdateMountCapability();
