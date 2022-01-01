@@ -79,6 +79,9 @@ namespace Game.Entities
             else
                 GetTalentMap(spec)[talent.Id] = learning ? PlayerSpellState.New : PlayerSpellState.Unchanged;
 
+            if (learning)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeTalent);
+
             return true;
         }
 
@@ -272,6 +275,8 @@ namespace Game.Entities
             UnsummonAllTotems();
             ExitVehicle();
             RemoveAllControlled();
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeSpec);
 
             // remove single target auras at other targets
             var scAuras = GetSingleCastAuras();

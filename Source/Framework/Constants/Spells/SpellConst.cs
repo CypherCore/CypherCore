@@ -168,7 +168,7 @@ namespace Framework.Constants
         Ground = 0x08,
         Transform = 0x10, // NYI
         Jump = 0x20,
-        ChangeSpec = 0x40, // NYI
+        ChangeSpec = 0x40,
         AbandonVehicle = 0x80, // NYI
         StartOfEncounter = 0x100, // NYI
         EndOfEncounter = 0x200, // NYI
@@ -176,8 +176,8 @@ namespace Framework.Constants
         EnteringInstance = 0x800, // NYI
         DuelEnd = 0x1000, // NYI
         LeaveArenaOrBattleground = 0x2000, // NYI
-        ChangeTalent = 0x4000, // NYI
-        ChangeGlyph = 0x8000, // NYI
+        ChangeTalent = 0x4000,
+        ChangeGlyph = 0x8000,
         SeamlessTransfer = 0x10000, // NYI
         WarModeLeave = 0x20000, // NYI
         TouchingGround = 0x40000, // NYI

@@ -3076,6 +3076,8 @@ namespace Game.Spells
             else if (glyphId != 0)
                 glyphs.Add(glyphId);
 
+            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeGlyph);
+
             GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
             if (glyphProperties != null)
                 player.CastSpell(player, glyphProperties.SpellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
