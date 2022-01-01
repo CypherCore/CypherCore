@@ -34,15 +34,20 @@ namespace Game
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.CritterGUID);
             if (!pet)
             {
-                Log.outDebug(LogFilter.Network, "Vanitypet {0} does not exist - player '{1}' ({2} / account: {3}) attempted to dismiss it (possibly lagged out)",
+                Log.outDebug(LogFilter.Network, "Critter {0} does not exist - player '{1}' ({2} / account: {3}) attempted to dismiss it (possibly lagged out)",
                     packet.CritterGUID.ToString(), GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetAccountId());
                 return;
             }
 
             if (GetPlayer().GetCritterGUID() == pet.GetGUID())
             {
-                if (pet.IsTypeId(TypeId.Unit) && pet.ToCreature().IsSummon())
+                if (pet.IsCreature() && pet.IsSummon())
+                {
+                    if (!_player.GetSummonedBattlePetGUID().IsEmpty() && _player.GetSummonedBattlePetGUID() == pet.GetBattlePetCompanionGUID())
+                        _player.SetBattlePetData(null);
+
                     pet.ToTempSummon().UnSummon();
+                }
             }
         }
 

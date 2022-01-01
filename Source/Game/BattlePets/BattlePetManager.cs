@@ -459,12 +459,10 @@ namespace Game.BattlePets
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
 
             // Update the timestamp if the battle pet is summoned
-            Player player = _owner.GetPlayer();
-            Creature summonedBattlePet = ObjectAccessor.GetCreatureOrPetOrVehicle(player, player.GetCritterGUID());
+            Creature summonedBattlePet = _owner.GetPlayer().GetSummonedBattlePet();
             if (summonedBattlePet != null)
-                if (player.GetSummonedBattlePetGUID() == summonedBattlePet.GetBattlePetCompanionGUID())
-                    if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                        summonedBattlePet.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
+                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                    summonedBattlePet.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
         }
         
         bool IsPetInSlot(ObjectGuid guid)
@@ -579,6 +577,18 @@ namespace Game.BattlePets
             BattlePetDeleted deletePet = new();
             deletePet.PetGuid = guid;
             _owner.SendPacket(deletePet);
+
+            // Battle pet despawns if it's summoned
+            Player player = _owner.GetPlayer();
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet != null)
+            {
+                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                {
+                    summonedBattlePet.DespawnOrUnsummon();
+                    player.SetBattlePetData(null);
+                }
+            }
         }
 
         public void HealBattlePetsPct(byte pct)
@@ -615,20 +625,18 @@ namespace Game.BattlePets
 
             // TODO: set proper CreatureID for spell SPELL_SUMMON_BATTLE_PET (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
             Player player = _owner.GetPlayer();
-            player.SetSummonedBattlePetGUID(guid);
-            player.SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
+            player.SetBattlePetData(pet);
             player.CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.SpellSummonBattlePet);
         }
 
         public void DismissPet()
         {
             Player player = _owner.GetPlayer();
-            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(player, player.GetCritterGUID());
-            if (pet && player.GetSummonedBattlePetGUID() == pet.GetBattlePetCompanionGUID())
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet)
             {
-                pet.DespawnOrUnsummon();
-                player.SetSummonedBattlePetGUID(ObjectGuid.Empty);
-                player.SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
+                summonedBattlePet.DespawnOrUnsummon();
+                player.SetBattlePetData(null);
             }
         }
 

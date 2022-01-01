@@ -1869,7 +1869,8 @@ namespace Game.Entities
 
         public uint GetBattlePetCompanionNameTimestamp() { return m_unitData.BattlePetCompanionNameTimestamp; }
         public void SetBattlePetCompanionNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), timestamp); }
-        
+        public uint GetBattlePetCompanionExperience() { return m_unitData.BattlePetCompanionExperience; }
+        public void SetBattlePetCompanionExperience(uint experience) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionExperience), experience); }
         public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
         public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
 

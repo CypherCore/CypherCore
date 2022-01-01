@@ -942,6 +942,34 @@ namespace Game.Entities
             SendPacket(new PetSpells());
         }
 
+        public Creature GetSummonedBattlePet()
+        {
+            Creature summonedBattlePet = ObjectAccessor.GetCreatureOrPetOrVehicle(this, GetCritterGUID());
+            if (summonedBattlePet != null)
+                if (!GetSummonedBattlePetGUID().IsEmpty() && GetSummonedBattlePetGUID() == summonedBattlePet.GetBattlePetCompanionGUID())
+                    return summonedBattlePet;
+
+            return null;
+        }
+
+        public void SetBattlePetData(BattlePets.BattlePetMgr.BattlePet pet = null)
+        {
+            if (pet != null)
+            {
+                SetSummonedBattlePetGUID(pet.PacketInfo.Guid);
+                SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
+                SetBattlePetCompanionExperience(pet.PacketInfo.Exp);
+                SetWildBattlePetLevel(pet.PacketInfo.Level);
+            }
+            else
+            {
+                SetSummonedBattlePetGUID(ObjectGuid.Empty);
+                SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
+                SetBattlePetCompanionExperience(0);
+                SetWildBattlePetLevel(0);
+            }
+        }
+
         public void StopCastingCharm()
         {
             Unit charm = GetCharmed();
