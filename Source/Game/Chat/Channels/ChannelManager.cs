@@ -33,6 +33,70 @@ namespace Game.Chat
             _guidGenerator = new ObjectGuidGenerator(HighGuid.ChatChannel);
         }
 
+        /*static*/
+        public static void LoadFromDB()
+        {
+            if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. Custom channel saving is disabled.");
+                return;
+            }
+
+            uint oldMSTime = Time.GetMSTime();
+            uint days = WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelDuration);
+            if (days != 0)
+    {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
+                stmt.AddValue(0, days * Time.Day);
+                DB.Characters.Execute(stmt);
+            }
+
+            SQLResult result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. DB table `channels` is empty.");
+                return;
+            }
+
+            List<(string name, Team team)> toDelete = new();
+            uint count = 0;
+            do
+            {
+                string dbName = result.Read<string>(0); // may be different - channel names are case insensitive
+                Team team = (Team)result.Read<int>(1);
+                bool dbAnnounce = result.Read<bool>(2);
+                bool dbOwnership = result.Read<bool>(3);
+                string dbPass = result.Read<string>(4);
+                string dbBanned = result.Read<string>(5);
+
+                ChannelManager mgr = ForTeam(team);
+                if (mgr == null)
+                {
+                    Log.outError(LogFilter.ServerLoading, $"Failed to load custom chat channel '{dbName}' from database - invalid team {team}. Deleted.");
+                    toDelete.Add((dbName, team));
+                    continue;
+                }
+
+                Channel channel = new Channel(mgr.CreateCustomChannelGuid(), dbName, team, dbBanned);
+                channel.SetAnnounce(dbAnnounce);
+                channel.SetOwnership(dbOwnership);
+                channel.SetPassword(dbPass);
+                mgr._customChannels.Add(dbName, channel);
+
+                ++count;
+            } while (result.NextRow());
+
+            foreach (var (name, team) in toDelete)
+    {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHANNEL);
+                stmt.AddValue(0, name);
+                stmt.AddValue(1, (uint)team);
+                DB.Characters.Execute(stmt);
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom chat channels in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public static ChannelManager ForTeam(Team team)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionChannel))
@@ -57,6 +121,12 @@ namespace Game.Chat
             }
 
             return null;
+        }
+
+        public void SaveToDB()
+        {
+            foreach (var pair in _customChannels)
+                pair.Value.UpdateChannelInDB();
         }
 
         public static Channel GetChannelForPlayerByGuid(ObjectGuid channelGuid, Player playerSearcher)
@@ -86,15 +156,7 @@ namespace Game.Chat
                 return null;
 
             Channel newChannel = new(CreateCustomChannelGuid(), name, _team);
-
-            if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHANNEL);
-                stmt.AddValue(0, name);
-                stmt.AddValue(1, (uint)_team);
-                DB.Characters.Execute(stmt);
-                Log.outDebug(LogFilter.ChatSystem, $"Channel({name}) saved in database");
-            }
+            newChannel.SetDirty();
 
             _customChannels[name.ToLower()] = newChannel;
             return newChannel;
@@ -102,33 +164,7 @@ namespace Game.Chat
 
         public Channel GetCustomChannel(string name)
         {
-            string channelName = name.ToLower();
-            if (_customChannels.TryGetValue(channelName, out Channel channel))
-                return channel;
-            else if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHANNEL);
-                stmt.AddValue(0, channelName);
-                stmt.AddValue(1, (uint)_team);
-                SQLResult result = DB.Characters.Query(stmt);
-                if (!result.IsEmpty())
-                {
-                    string dbName = result.Read<string>(0); // may be different - channel names are case insensitive
-                    bool dbAnnounce = result.Read<bool>(1);
-                    bool dbOwnership = result.Read<bool>(2);
-                    string dbPass = result.Read<string>(3);
-                    string dbBanned = result.Read<string>(4);
-
-                    channel = new Channel(CreateCustomChannelGuid(), dbName, _team, dbBanned);
-                    channel.SetAnnounce(dbAnnounce);
-                    channel.SetOwnership(dbOwnership);
-                    channel.SetPassword(dbPass);
-                    _customChannels.Add(channelName, channel);
-                    return channel;
-                }
-            }
-
-            return null;
+            return _customChannels.LookupByKey(name.ToLower());
         }
         
         public Channel GetChannel(uint channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)

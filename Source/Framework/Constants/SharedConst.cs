@@ -887,11 +887,12 @@ namespace Framework.Constants
     public enum WorldStates
     {
         CurrencyResetTime = 20001,          // Next currency reset time
-        WeeklyQuestResetTime = 20002,       // Next weekly reset time
+        WeeklyQuestResetTime = 20002,       // Next weekly quest reset time
         BGDailyResetTime = 20003,           // Next daily BG reset time
         CleaningFlags = 20004,              // Cleaning Flags
         GuildDailyResetTime = 20006,        // Next guild cap reset time
-        MonthlyQuestResetTime = 20007,      // Next monthly reset time
+        MonthlyQuestResetTime = 20007,      // Next monthly quest reset time
+        DailyQuestResetTime = 2008,         // Next daily quest reset time
         // Cata specific custom worldstates
         GuildWeeklyResetTime = 20050,       // Next guild week reset time
     }
@@ -1575,6 +1576,7 @@ namespace Framework.Constants
         PortInstance,
         PortWorld,
         PreserveCustomChannelDuration,
+        PreserveCustomChannelInterval,
         PreserveCustomChannels,
         PreventRenameCustomization,
         PvpTokenCount,

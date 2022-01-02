@@ -318,11 +318,11 @@ namespace Framework.Database
                 " ON DUPLICATE KEY UPDATE LogGuid = VALUES (LogGuid), EventType = VALUES (EventType), PlayerGuid = VALUES (PlayerGuid), Flags = VALUES (Flags), Value = VALUES (Value), Timestamp = VALUES (Timestamp)");
 
             // Chat channel handling
-            PrepareStatement(CharStatements.SEL_CHANNEL, "SELECT name, announce, ownership, password, bannedList FROM channels WHERE name = ? AND team = ?");
-            PrepareStatement(CharStatements.INS_CHANNEL, "INSERT INTO channels(name, team, lastUsed) VALUES (?, ?, UNIX_TIMESTAMP())");
-            PrepareStatement(CharStatements.UPD_CHANNEL, "UPDATE channels SET announce = ?, ownership = ?, password = ?, bannedList = ?, lastUsed = UNIX_TIMESTAMP() WHERE name = ? AND team = ?");
+            PrepareStatement(CharStatements.UPD_CHANNEL, "INSERT INTO channels (name, team, announce, ownership, password, bannedList, lastUsed) VALUES (?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP()) " +
+                "ON DUPLICATE KEY UPDATE announce=VALUES(announce), ownership=VALUES(ownership), password=VALUES(password), bannedList=VALUES(bannedList), lastUsed=VALUES(lastUsed)");
             PrepareStatement(CharStatements.UPD_CHANNEL_USAGE, "UPDATE channels SET lastUsed = UNIX_TIMESTAMP() WHERE name = ? AND team = ?");
             PrepareStatement(CharStatements.UPD_CHANNEL_OWNERSHIP, "UPDATE channels SET ownership = ? WHERE name LIKE ?");
+            PrepareStatement(CharStatements.DEL_CHANNEL, "DELETE FROM channels WHERE name = ? AND team = ?");
             PrepareStatement(CharStatements.DEL_OLD_CHANNELS, "DELETE FROM channels WHERE ownership = 1 AND lastUsed + ? < UNIX_TIMESTAMP()");
 
             // Equipmentsets
@@ -1020,11 +1020,10 @@ namespace Framework.Database
         SEL_GUILD_ACHIEVEMENT_CRITERIA,
         INS_GUILD_NEWS,
 
-        SEL_CHANNEL,
-        INS_CHANNEL,
         UPD_CHANNEL,
         UPD_CHANNEL_USAGE,
         UPD_CHANNEL_OWNERSHIP,
+        DEL_CHANNEL,
         DEL_OLD_CHANNELS,
 
         UPD_EQUIP_SET,

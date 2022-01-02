@@ -55,7 +55,6 @@ namespace Game.Chat
         {
             _announceEnabled = true;
             _ownershipEnabled = true;
-            _persistentChannel = WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels);
             _channelFlags = ChannelFlags.Custom;
             _channelTeam = team;
             _channelGuid = guid;
@@ -101,45 +100,39 @@ namespace Game.Chat
             return result;
         }
 
-        void UpdateChannelInDB()
+        public void UpdateChannelInDB()
         {
-            if (_persistentChannel)
+            long now = GameTime.GetGameTime();
+            if (_isDirty)
             {
                 string banlist = "";
                 foreach (var iter in _bannedStore)
                     banlist += iter.GetRawValue().ToHexString() + ' ';
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL);
-                stmt.AddValue(0, _announceEnabled);
-                stmt.AddValue(1, _ownershipEnabled);
-                stmt.AddValue(2, _channelPassword);
-                stmt.AddValue(3, banlist);
-                stmt.AddValue(4, _channelName);
-                stmt.AddValue(5, (uint)_channelTeam);
+                stmt.AddValue(0, _channelName);
+                stmt.AddValue(1, (uint)_channelTeam);
+                stmt.AddValue(2, _announceEnabled);
+                stmt.AddValue(3, _ownershipEnabled);
+                stmt.AddValue(4, _channelPassword);
+                stmt.AddValue(5, banlist);
                 DB.Characters.Execute(stmt);
-
-                Log.outDebug(LogFilter.ChatSystem, "Channel({0}) updated in database", _channelName);
             }
-        }
-
-        void UpdateChannelUseageInDB()
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
-            stmt.AddValue(0, _channelName);
-            stmt.AddValue(1, (uint)_channelTeam);
-            DB.Characters.Execute(stmt);
-        }
-
-        public static void CleanOldChannelsInDB()
-        {
-            if (WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelDuration) > 0)
+            else if (_nextActivityUpdateTime <= now)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
-                stmt.AddValue(0, (long)(WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelDuration) * Time.Day));
-                DB.Characters.Execute(stmt);
-
-                Log.outDebug(LogFilter.ChatSystem, "Cleaned out unused custom chat channels.");
+                if (!_playersStore.Empty())
+                {
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
+                    stmt.AddValue(0, _channelName);
+                    stmt.AddValue(1, (uint)_channelTeam);
+                    DB.Characters.Execute(stmt);
+                }
             }
+            else
+                return;
+
+            _isDirty = false;
+            _nextActivityUpdateTime = now + RandomHelper.URand(1 * Time.Minute, 6 * Time.Minute) * Math.Max(1u, WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelInterval));
         }
 
         public void JoinChannel(Player player, string pass = "")
@@ -188,6 +181,8 @@ namespace Game.Chat
             }
 
             bool newChannel = _playersStore.Empty();
+            if (newChannel)
+                _nextActivityUpdateTime = 0; // force activity update on next channel tick
 
             PlayerInfo playerInfo = new();
             playerInfo.SetInvisible(!player.IsGMVisible());
@@ -205,10 +200,6 @@ namespace Game.Chat
             // Custom channel handling
             if (!IsConstant())
             {
-                // Update last_used timestamp in db
-                if (!_playersStore.Empty())
-                    UpdateChannelUseageInDB();
-
                 // If the channel has no owner yet and ownership is allowed, set the new owner.
                 // or if the owner was a GM with .gm visible off
                 // don't do this if the new player is, too, an invis GM, unless the channel was empty
@@ -261,9 +252,6 @@ namespace Game.Chat
 
             if (!IsConstant())
             {
-                // Update last_used timestamp in db
-                UpdateChannelUseageInDB();
-
                 // If the channel owner left and there are still playersStore inside, pick a new owner
                 // do not pick invisible gm owner unless there are only invisible gms in that channel (rare)
                 if (changeowner && _ownershipEnabled && !_playersStore.Empty())
@@ -332,7 +320,7 @@ namespace Game.Chat
             if (ban && !IsBanned(victim))
             {
                 _bannedStore.Add(victim);
-                UpdateChannelInDB();
+                _isDirty = true;
 
                 if (!player.GetSession().HasPermission(RBACPermissions.SilentlyJoinChannel))
                 {
@@ -391,7 +379,7 @@ namespace Game.Chat
             ChannelNameBuilder builder1 = new(this, new PlayerUnbannedAppend(good, victim));
             SendToAll(builder1);
 
-            UpdateChannelInDB();
+            _isDirty = true;
         }
 
         public void Password(Player player, string pass)
@@ -418,7 +406,7 @@ namespace Game.Chat
             ChannelNameBuilder builder1 = new(this, new PasswordChangedAppend(guid));
             SendToAll(builder1);
 
-            UpdateChannelInDB();
+            _isDirty = true;
         }
 
         void SetMode(Player player, string p2n, bool mod, bool set)
@@ -601,7 +589,7 @@ namespace Game.Chat
                 SendToAll(builder);
             }
 
-            UpdateChannelInDB();
+            _isDirty = true;
         }
 
         public void Say(ObjectGuid guid, string what, Language lang)
@@ -741,7 +729,7 @@ namespace Game.Chat
                     SendToAll(ownerBuilder);
                 }
 
-                UpdateChannelInDB();
+                _isDirty = true;
             }
         }
 
@@ -864,6 +852,9 @@ namespace Game.Chat
         bool IsAnnounce() { return _announceEnabled; }
         public void SetAnnounce(bool announce) { _announceEnabled = announce; }
 
+        // will be saved to DB on next channel save interval
+        public void SetDirty() { _isDirty = true; }
+
         public void SetPassword(string npassword) { _channelPassword = npassword; }
         public bool CheckPassword(string password) { return _channelPassword.IsEmpty() || (_channelPassword == password); }
         
@@ -893,9 +884,11 @@ namespace Game.Chat
             return info != null ? info.GetFlags() : 0;
         }
 
+        bool _isDirty; // whether the channel needs to be saved to DB
+        long _nextActivityUpdateTime;
+
         bool _announceEnabled;
         bool _ownershipEnabled;
-        bool _persistentChannel;
         bool _isOwnerInvisible;
 
         ChannelFlags _channelFlags;

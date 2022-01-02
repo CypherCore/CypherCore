@@ -224,6 +224,7 @@ namespace Game
             Values[WorldCfg.MailLevelReq] = GetDefaultValue("LevelReq.Mail", 1);
             Values[WorldCfg.PreserveCustomChannels] = GetDefaultValue("PreserveCustomChannels", false);
             Values[WorldCfg.PreserveCustomChannelDuration] = GetDefaultValue("PreserveCustomChannelDuration", 14);
+            Values[WorldCfg.PreserveCustomChannelInterval] = GetDefaultValue("PreserveCustomChannelInterval", 5);
             Values[WorldCfg.GridUnload] = GetDefaultValue("GridUnload", true);
             Values[WorldCfg.BasemapLoadGrids] = GetDefaultValue("BaseMapLoadAllGrids", false);
             if ((bool)Values[WorldCfg.BasemapLoadGrids] && (bool)Values[WorldCfg.GridUnload])

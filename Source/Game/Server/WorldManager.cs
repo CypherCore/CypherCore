@@ -1005,6 +1005,8 @@ namespace Game
 
             m_timers[WorldTimers.WhoList].SetInterval(5 * Time.InMilliseconds); // update who list cache every 5 seconds
 
+            m_timers[WorldTimers.ChannelSave].SetInterval(WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelInterval) * Time.Minute * Time.InMilliseconds);
+
             //to set mailtimer to return mails every day between 4 and 5 am
             //mailtimer is increased when updating auctions
             //one second is 1000 -(tested on win system)
@@ -1027,8 +1029,8 @@ namespace Game
             // Delete all characters which have been deleted X days before
             Player.DeleteOldCharacters();
 
-            // Delete all custom channels which haven't been used for PreserveCustomChannelDuration days.
-            Channel.CleanOldChannelsInDB();
+            Log.outInfo(LogFilter.ServerLoading, "Initializing chat channels...");
+            ChannelManager.LoadFromDB();
 
             Log.outInfo(LogFilter.ServerLoading, "Initializing Opcodes...");
             PacketManager.Initialize();
@@ -1289,6 +1291,20 @@ namespace Game
             {
                 m_timers[WorldTimers.WhoList].Reset();
                 Global.WhoListStorageMgr.Update();
+            }
+
+            if (m_timers[WorldTimers.ChannelSave].Passed())
+            {
+                m_timers[WorldTimers.ChannelSave].Reset();
+
+                if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
+                {
+                    ChannelManager mgr1 = ChannelManager.ForTeam(Team.Alliance);
+                    mgr1.SaveToDB();
+                    ChannelManager mgr2 = ChannelManager.ForTeam(Team.Horde);
+                    if (mgr1 != mgr2)
+                        mgr2.SaveToDB();
+                }
             }
 
             // Handle daily quests reset time
@@ -2514,6 +2530,7 @@ namespace Game
         GuildSave,
         Blackmarket,
         WhoList,
+        ChannelSave,
         Max
     }
 
