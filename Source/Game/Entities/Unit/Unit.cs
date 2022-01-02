@@ -3553,7 +3553,7 @@ namespace Game.Entities
                 return damage;
 
             float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);
-            return Math.Max((uint)(damage * (1.0f - mitigation)), 0);
+            return (uint)Math.Max(damage * (1.0f - mitigation), 0.0f);
         }
 
         public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
