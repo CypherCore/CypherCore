@@ -3676,6 +3676,9 @@ namespace Game.Entities
             else
                 TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModRangedDamageTaken);
 
+            if ((TakenFlatBenefit < 0) && (pdamage < -TakenFlatBenefit))
+                return 0;
+
             // Taken total percent damage auras
             float TakenTotalMod = 1.0f;
 
