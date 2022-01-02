@@ -493,6 +493,7 @@ namespace Game.AI
         public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
         public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
 
+        // Should return true if the NPC is currently being escorted
         public virtual bool IsEscorted() { return false; }
 
         public virtual void MovementInform(MovementGeneratorType type, uint id) { }
@@ -564,14 +565,6 @@ namespace Game.AI
         // If a PlayerAI* is returned, that AI is placed on the player instead of the default charm AI
         // Object destruction is handled by Unit::RemoveCharmedBy
         public virtual PlayerAI GetAIForCharmedPlayer(Player who) { return null; }
-
-        /// <summary>
-        /// Should return true if the NPC is target of an escort quest
-        /// If onlyIfActive is set, should return true only if the escort quest is currently active
-        /// </summary>
-        /// <param name="onlyIfActive"></param>
-        /// <returns></returns>
-        public virtual bool IsEscortNPC(bool onlyIfActive) { return false; }
 
         public List<AreaBoundary> GetBoundary() { return _boundary; }
 

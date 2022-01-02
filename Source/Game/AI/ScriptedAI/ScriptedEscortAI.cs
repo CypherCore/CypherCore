@@ -382,15 +382,8 @@ namespace Game.AI
                 CreatureData cdata = me.GetCreatureData();
                 if (cdata != null)
                 {
-                    SpawnGroupTemplateData groupdata = cdata.spawnGroupData;
-                    if (groupdata != null)
-                    {
-                        if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && groupdata.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc) && map.GetCreatureRespawnTime(me.GetSpawnId()) == 0)
-                        {
-                            me.SetRespawnTime(me.GetRespawnDelay());
-                            me.SaveRespawnTime();
-                        }
-                    }
+                    if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+                        me.SaveRespawnTime(me.GetRespawnDelay());
                 }
             }
 
@@ -467,21 +460,10 @@ namespace Game.AI
             }
         }
 
-        public override bool IsEscortNPC(bool onlyIfActive)
-        {
-            if (!onlyIfActive)
-                return true;
-
-            if (!GetEventStarterGUID().IsEmpty())
-                return true;
-
-            return false;
-        }
-
         void SetPauseTimer(uint Timer) { _pauseTimer = Timer; }
 
         public bool HasEscortState(EscortState escortState) { return (_escortState & escortState) != 0; }
-        public override bool IsEscorted() { return _escortState.HasAnyFlag(EscortState.Escorting); }
+        public override bool IsEscorted() { return !_playerGUID.IsEmpty(); }
 
         void SetMaxPlayerDistance(float newMax) { _maxPlayerDistance = newMax; }
         float GetMaxPlayerDistance() { return _maxPlayerDistance; }

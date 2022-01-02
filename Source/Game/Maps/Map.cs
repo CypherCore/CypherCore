@@ -2348,7 +2348,7 @@ namespace Game.Maps
                                 continue;
 
                             // escort NPCs are allowed to respawn as long as all other instances are already escorting
-                            if (isEscort && creature.IsEscortNPC(true))
+                            if (isEscort && creature.IsEscorted())
                                 continue;
 
                             doDelete = true;

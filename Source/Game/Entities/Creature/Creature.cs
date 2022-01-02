@@ -1100,11 +1100,11 @@ namespace Game.Entities
             }
         }
 
-        public bool IsEscortNPC(bool onlyIfActive = true)
+        public bool IsEscorted()
         {
             CreatureAI ai = GetAI();
             if (ai != null)
-                return ai.IsEscortNPC(onlyIfActive);
+                return ai.IsEscorted();
 
             return false;
         }
@@ -2302,8 +2302,10 @@ namespace Game.Entities
             if (!victim.IsInAccessiblePlaceFor(this))
                 return false;
 
-            if (IsAIEnabled() && !GetAI().CanAIAttack(victim))
-                return false;
+            CreatureAI ai = GetAI();
+            if (ai != null)
+                if (!ai.CanAIAttack(victim))
+                    return false;
 
             // we cannot attack in evade mode
             if (IsInEvadeMode())
