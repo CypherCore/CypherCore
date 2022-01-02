@@ -244,6 +244,12 @@ namespace Game.AI
             if (!IsEngaged())
                 return false;
 
+            if (!me.IsAlive())
+            {
+                EngagementOver();
+                return false;
+            }
+
             if (!me.HasReactState(ReactStates.Passive))
             {
                 Unit victim = me.SelectVictim();

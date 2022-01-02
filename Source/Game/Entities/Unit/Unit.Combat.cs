@@ -858,8 +858,6 @@ namespace Game.Entities
 
                 if (!creature.IsPet())
                 {
-                    creature.GetThreatManager().ClearAllThreat();
-
                     // must be after setDeathState which resets dynamic flags
                     if (!creature.loot.IsLooted())
                         creature.AddDynamicFlag(UnitDynFlags.Lootable);

@@ -502,6 +502,9 @@ namespace Game.Entities
                     if (m_deathState != DeathState.Corpse)
                         break;
 
+                    if (IsEngaged())
+                        AIUpdateTick(diff);
+
                     if (m_groupLootTimer != 0 && !lootingGroupLowGUID.IsEmpty())
                     {
                         if (m_groupLootTimer <= diff)
@@ -583,7 +586,6 @@ namespace Game.Entities
                         }
                     }
 
-                    // do not allow the AI to be changed during update
                     AIUpdateTick(diff);
 
                     if (!IsAlive())
@@ -1087,7 +1089,7 @@ namespace Game.Entities
             base.AtDisengage();
 
             ClearUnitState(UnitState.AttackPlayer);
-            if (HasDynamicFlag(UnitDynFlags.Tapped))
+            if (IsAlive() && HasDynamicFlag(UnitDynFlags.Tapped))
                 SetDynamicFlags((UnitDynFlags)GetCreatureTemplate().DynamicFlags);
 
             if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
