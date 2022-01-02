@@ -1088,9 +1088,6 @@ namespace Game
 
             Log.outInfo(LogFilter.Gameevent, "GameEvent {0} \"{1}\" started.", event_id, mGameEvent[event_id].description);
 
-            //! Run SAI scripts with SMART_EVENT_GAME_EVENT_END
-            RunSmartAIScripts(event_id, true);
-
             // spawn positive event tagget objects
             GameEventSpawn((short)event_id);
             // un-spawn negative event tagged objects
@@ -1107,6 +1104,10 @@ namespace Game
             UpdateEventNPCVendor(event_id, true);
             // update bg holiday
             UpdateBattlegroundSettings();
+
+            //! Run SAI scripts with SMART_EVENT_GAME_EVENT_START
+            RunSmartAIScripts(event_id, true);
+
             // If event's worldstate is 0, it means the event hasn't been started yet. In that case, reset seasonal quests.
             // When event ends (if it expires or if it's stopped via commands) worldstate will be set to 0 again, ready for another seasonal quest reset.
             if (Global.WorldMgr.GetWorldState(event_id) == 0)
