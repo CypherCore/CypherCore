@@ -1121,7 +1121,7 @@ namespace Game.Entities
                             return true;
             }
 
-            if (HandleSpellFocus(null, true))
+            if (HasSpellFocusTarget())
                 return true;
 
             if (HasUnitState(UnitState.Casting))
@@ -3059,6 +3059,8 @@ namespace Game.Entities
             _spellFocusDelay = (!IsPet() && withDelay) ? GameTime.GetGameTimeMS() : 0; // don't allow re-target right away to prevent visual bugs
         }
 
+        public override bool HasSpellFocusTarget() { return IsAlive() && (_focusSpell != null || _spellFocusDelay != 0); }
+        
         public void MustReacquireTarget() { _shouldReacquireSpellFocusTarget = true; } // flags the Creature for forced (client displayed) target reacquisition in the next Update call
 
         public void DoNotReacquireTarget()

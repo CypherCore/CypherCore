@@ -604,16 +604,16 @@ namespace Game.Entities
             switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Magic:
-                    {
-                        if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
-                            crit_chance = 0.0f;
-                        // For other schools
-                        else if (IsTypeId(TypeId.Player))
-                            crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
-                        else
-                            crit_chance = BaseSpellCritChance;
-                        break;
-                    }
+                {
+                    if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
+                        crit_chance = 0.0f;
+                    // For other schools
+                    else if (IsTypeId(TypeId.Player))
+                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
+                    else
+                        crit_chance = BaseSpellCritChance;
+                    break;
+                }
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
                     crit_chance += GetUnitCriticalChanceDone(attackType);
@@ -643,74 +643,74 @@ namespace Game.Entities
             switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Magic:
+                {
+                    // taken
+                    if (!spellInfo.IsPositive())
                     {
-                        // taken
-                        if (!spellInfo.IsPositive())
-                        {
-                            // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
-                            crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
-                        }
+                        // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+                        crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
+                    }
 
-                        if (caster)
+                    if (caster)
+                    {
+                        // scripted (increase crit chance ... against ... target by x%
+                        var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
+                        foreach (var eff in mOverrideClassScript)
                         {
-                            // scripted (increase crit chance ... against ... target by x%
-                            var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-                            foreach (var eff in mOverrideClassScript)
-                            {
-                                if (!eff.IsAffectingSpell(spellInfo))
-                                    continue;
+                            if (!eff.IsAffectingSpell(spellInfo))
+                                continue;
 
-                                switch (eff.GetMiscValue())
-                                {
-                                    case 911: // Shatter
-                                        if (HasAuraState(AuraStateType.Frozen, spellInfo, this))
-                                        {
-                                            crit_chance *= 1.5f;
-                                            AuraEffect _eff = eff.GetBase().GetEffect(1);
-                                            if (_eff != null)
-                                                crit_chance += _eff.GetAmount();
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            // Custom crit by class
-                            switch (spellInfo.SpellFamilyName)
+                            switch (eff.GetMiscValue())
                             {
-                                case SpellFamilyNames.Rogue:
-                                    // Shiv-applied poisons can't crit
-                                    if (caster.FindCurrentSpellBySpellId(5938) != null)
-                                        crit_chance = 0.0f;
-                                    break;
-                                case SpellFamilyNames.Shaman:
-                                    // Lava Burst
-                                    if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00001000u))
+                                case 911: // Shatter
+                                    if (HasAuraState(AuraStateType.Frozen, spellInfo, this))
                                     {
-                                        if (GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000, 0, 0), caster.GetGUID()) != null)
-                                            if (GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
-                                                return 100.0f;
-                                        break;
+                                        crit_chance *= 1.5f;
+                                        AuraEffect _eff = eff.GetBase().GetEffect(1);
+                                        if (_eff != null)
+                                            crit_chance += _eff.GetAmount();
                                     }
                                     break;
-                            }
-
-                            // Spell crit suppression
-                            if (IsCreature())
-                            {
-                                int levelDiff = (int)(GetLevelForTarget(this) - caster.GetLevel());
-                                crit_chance -= levelDiff * 1.0f;
+                                default:
+                                    break;
                             }
                         }
-                        break;
+                        // Custom crit by class
+                        switch (spellInfo.SpellFamilyName)
+                        {
+                            case SpellFamilyNames.Rogue:
+                                // Shiv-applied poisons can't crit
+                                if (caster.FindCurrentSpellBySpellId(5938) != null)
+                                    crit_chance = 0.0f;
+                                break;
+                            case SpellFamilyNames.Shaman:
+                                // Lava Burst
+                                if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00001000u))
+                                {
+                                    if (GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000, 0, 0), caster.GetGUID()) != null)
+                                        if (GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
+                                            return 100.0f;
+                                    break;
+                                }
+                                break;
+                        }
+
+                        // Spell crit suppression
+                        if (IsCreature())
+                        {
+                            int levelDiff = (int)(GetLevelForTarget(this) - caster.GetLevel());
+                            crit_chance -= levelDiff * 1.0f;
+                        }
                     }
+                    break;
+                }
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
-                    {
-                        if (caster != null)
-                            crit_chance += GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
-                        break;
-                    }
+                {
+                    if (caster != null)
+                        crit_chance += GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
+                    break;
+                }
                 case SpellDmgClass.None:
                 default:
                     return 0f;
@@ -1043,6 +1043,8 @@ namespace Game.Entities
 
         public virtual bool HandleSpellFocus(Spell focusSpell = null, bool withDelay = false) { return false; }
 
+        public virtual bool HasSpellFocusTarget() { return false; }        
+        
         /// <summary>
         /// Check if our current channel spell has attribute SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
         /// </summary>
