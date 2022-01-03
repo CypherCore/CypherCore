@@ -1041,9 +1041,7 @@ namespace Game.Entities
             return 0;
         }
 
-        public virtual bool HandleSpellFocus(Spell focusSpell = null, bool withDelay = false) { return false; }
-
-        public virtual bool HasSpellFocusTarget() { return false; }        
+        public virtual bool HasSpellFocus(Spell focusSpell = null) { return false; }        
         
         /// <summary>
         /// Check if our current channel spell has attribute SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING

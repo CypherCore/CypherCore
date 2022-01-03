@@ -254,7 +254,7 @@ namespace Game.AI
             {
                 Unit victim = me.SelectVictim();
                 if (victim != null)
-                    if (!me.HandleSpellFocus(null, true) && victim != me.GetVictim())
+                    if (!me.HasSpellFocus() && victim != me.GetVictim())
                         AttackStart(victim);
 
                 return me.GetVictim() != null;
@@ -313,7 +313,7 @@ namespace Game.AI
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
-            me.DoNotReacquireTarget();
+            me.DoNotReacquireSpellFocusTarget();
             EngagementOver();
 
             return true;

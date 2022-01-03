@@ -27,11 +27,7 @@ namespace Game.Entities
         CreatureTemplate m_creatureInfo;
         CreatureData m_creatureData;
 
-        Spell _focusSpell;   // Locks the target during spell cast for proper facing
-        uint _spellFocusDelay;
-        bool _shouldReacquireSpellFocusTarget;
-        ObjectGuid _suppressedSpellFocusTarget; // Stores the creature's "real" target while casting
-        float _suppressedSpellFocusOrientation; // Stores the creature's "real" orientation while casting
+        SpellFocusInfo _spellFocusInfo;
 
         long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new();
@@ -103,5 +99,13 @@ namespace Game.Entities
         None,    // not in move list
         Active,  // in move list
         Inactive // in move list but should not move
+    }
+
+    struct SpellFocusInfo
+    {
+        public Spell spell;
+        public uint delay;         // ms until the creature's target should snap back (0 = no snapback scheduled)
+        public ObjectGuid target;        // the creature's "real" target while casting
+        public float orientation; // the creature's "real" orientation while casting
     }
 }

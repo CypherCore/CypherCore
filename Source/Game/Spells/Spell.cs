@@ -2343,9 +2343,9 @@ namespace Game.Spells
                 if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat()))
                 {
                     if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
-                        m_caster.ToCreature().SetSpellFocusTarget(this, m_targets.GetObjectTarget());
+                        m_caster.ToCreature().SetSpellFocus(this, m_targets.GetObjectTarget());
                     else if (m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
-                        m_caster.ToCreature().SetSpellFocusTarget(this, null);
+                        m_caster.ToCreature().SetSpellFocus(this, null);
                 }
             }
 
@@ -3998,8 +3998,8 @@ namespace Game.Spells
                     {
                         Creature creatureCaster = unitCaster.ToCreature();
                         if (creatureCaster != null)
-                            if (!creatureCaster.HandleSpellFocus(this))
-                                creatureCaster.SetSpellFocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
+                            if (!creatureCaster.HasSpellFocus())
+                                creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
                     }
                 }
             }

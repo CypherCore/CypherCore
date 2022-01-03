@@ -327,7 +327,7 @@ namespace Game
                         Unit unit_target2 = spell.m_targets.GetUnitTarget();
                         if (unit_target)
                         {
-                            if (!pet.HandleSpellFocus())
+                            if (!pet.HasSpellFocus())
                                 pet.SetInFront(unit_target);
                             Player player = unit_target.ToPlayer();
                             if (player)
@@ -335,7 +335,7 @@ namespace Game
                         }
                         else if (unit_target2)
                         {
-                            if (!pet.HandleSpellFocus())
+                            if (!pet.HasSpellFocus())
                                 pet.SetInFront(unit_target2);
                             Player player = unit_target2.ToPlayer();
                             if (player)
