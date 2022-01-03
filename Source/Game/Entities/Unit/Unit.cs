@@ -521,6 +521,23 @@ namespace Game.Entities
         {
             return m_vehicle != null ? m_vehicle.GetBase() : null;
         }
+
+        Unit GetVehicleRoot()
+        {
+            Unit vehicleRoot = GetVehicleBase();
+
+            if (!vehicleRoot)
+                return null;
+
+            for (; ; )
+            {
+                if (!vehicleRoot.GetVehicleBase())
+                    return vehicleRoot;
+
+                vehicleRoot = vehicleRoot.GetVehicleBase();
+            }
+        }
+        
         public Creature GetVehicleCreatureBase()
         {
             Unit veh = GetVehicleBase();

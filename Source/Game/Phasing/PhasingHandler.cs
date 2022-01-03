@@ -37,7 +37,8 @@ namespace Game
             for (var i = 0; i < unit.m_Controlled.Count; ++i)
             {
                 Unit controlled = unit.m_Controlled[i];
-                if (controlled.GetTypeId() != TypeId.Player)
+                if (controlled.GetTypeId() != TypeId.Player
+                    && controlled.GetVehicle() == null)                   // Player inside nested vehicle should not phase the root vehicle and its accessories (only direct root vehicle control does)
                     func(controlled);
             }
 
@@ -48,6 +49,17 @@ namespace Game
                     Creature summon = unit.GetMap().GetCreature(unit.m_SummonSlot[i]);
                     if (summon)
                         func(summon);
+                }
+            }
+
+            Vehicle vehicle = unit.GetVehicleKit();
+            if (vehicle != null)
+            {
+                foreach (var seat in vehicle.Seats)
+                {
+                    Unit passenger = Global.ObjAccessor.GetUnit(unit, seat.Value.Passenger.Guid);
+                    if (passenger != null)
+                        func(passenger);
                 }
             }
         }
