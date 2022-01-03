@@ -3878,7 +3878,7 @@ namespace Game.Entities
                 ObjectGuid castItemGUID = createInfo.CastItemGUID;
 
                 // find current aura from spell and change it's stackamount, or refresh it's duration
-                Aura foundAura = GetOwnedAura(createInfo.GetSpellInfo().Id, createInfo.CasterGUID, createInfo.GetSpellInfo().HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGUID : ObjectGuid.Empty, 0);
+                Aura foundAura = GetOwnedAura(createInfo.GetSpellInfo().Id, createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters() ? ObjectGuid.Empty : createInfo.CasterGUID, createInfo.GetSpellInfo().HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGUID : ObjectGuid.Empty, 0);
                 if (foundAura != null)
                 {
                     // effect masks do not match
