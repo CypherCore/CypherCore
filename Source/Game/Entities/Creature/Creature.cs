@@ -1819,7 +1819,7 @@ namespace Game.Entities
                 
                 SaveRespawnTime();
 
-                ReleaseFocus(null, false);               // remove spellcast focus
+                ReleaseSpellFocus(null, false);               // remove spellcast focus
                 DoNotReacquireTarget(); // cancel delayed re-target
                 SetTarget(ObjectGuid.Empty); // drop target - dead mobs shouldn't ever target things
 
@@ -2925,7 +2925,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), guid);
         }
 
-        public void FocusTarget(Spell focusSpell, WorldObject target)
+        public void SetSpellFocusTarget(Spell focusSpell, WorldObject target)
         {
             // already focused
             if (_focusSpell != null)
@@ -3005,7 +3005,7 @@ namespace Game.Entities
         {
             if (!IsAlive()) // dead creatures cannot focus
             {
-                ReleaseFocus(null, false);
+                ReleaseSpellFocus(null, false);
                 return false;
             }
 
@@ -3026,7 +3026,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void ReleaseFocus(Spell focusSpell = null, bool withDelay = true)
+        public void ReleaseSpellFocus(Spell focusSpell = null, bool withDelay = true)
         {
             if (_focusSpell == null)
                 return;

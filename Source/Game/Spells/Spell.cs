@@ -2343,9 +2343,9 @@ namespace Game.Spells
                 if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat()))
                 {
                     if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
-                        m_caster.ToCreature().FocusTarget(this, m_targets.GetObjectTarget());
+                        m_caster.ToCreature().SetSpellFocusTarget(this, m_targets.GetObjectTarget());
                     else if (m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
-                        m_caster.ToCreature().FocusTarget(this, null);
+                        m_caster.ToCreature().SetSpellFocusTarget(this, null);
                 }
             }
 
@@ -2693,7 +2693,7 @@ namespace Game.Spells
             {
                 Creature creatureCaster = m_caster.ToCreature();
                 if (creatureCaster != null)
-                    creatureCaster.ReleaseFocus(this);
+                    creatureCaster.ReleaseSpellFocus(this);
             }
 
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
@@ -3161,7 +3161,7 @@ namespace Game.Spells
 
             Creature creatureCaster = unitCaster.ToCreature();
             if (creatureCaster != null)
-                creatureCaster.ReleaseFocus(this);
+                creatureCaster.ReleaseSpellFocus(this);
 
             if (!ok)
                 return;
@@ -3999,7 +3999,7 @@ namespace Game.Spells
                         Creature creatureCaster = unitCaster.ToCreature();
                         if (creatureCaster != null)
                             if (!creatureCaster.HandleSpellFocus(this))
-                                creatureCaster.FocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
+                                creatureCaster.SetSpellFocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
                     }
                 }
             }
