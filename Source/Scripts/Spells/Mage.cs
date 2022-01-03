@@ -52,6 +52,7 @@ namespace Scripts.Spells.Mage
         public const uint IceBarrier = 11426;
         public const uint IceBlock = 45438;
         public const uint Ignite = 12654;
+        public const uint IncantersFlow = 116267;
         public const uint LivingBombExplosion = 44461;
         public const uint LivingBombPeriodic = 217694;
         public const uint ManaSurge = 37445;
@@ -649,6 +650,46 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 1463 - Incanter's Flow
+    class spell_mage_incanters_flow : AuraScript
+    {
+        sbyte modifier = 1;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IncantersFlow);
+        }
+
+        void HandlePeriodicTick(AuraEffect aurEff)
+        {
+            // Incanter's flow should not cycle out of combat
+            if (!GetTarget().IsInCombat())
+                return;
+
+            Aura aura = GetTarget().GetAura(SpellIds.IncantersFlow);
+            if (aura != null)
+            {
+                uint stacks = aura.GetStackAmount();
+
+                // Force always to values between 1 and 5
+                if ((modifier == -1 && stacks == 1) || (modifier == 1 && stacks == 5))
+                {
+                    modifier *= -1;
+                    return;
+                }
+
+                aura.ModStackAmount(modifier);
+            }
+            else
+                GetTarget().CastSpell(GetTarget(), SpellIds.IncantersFlow, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 44457 - Living Bomb
     class spell_mage_living_bomb : SpellScript
     {
