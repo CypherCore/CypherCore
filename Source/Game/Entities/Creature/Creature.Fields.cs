@@ -28,10 +28,10 @@ namespace Game.Entities
         CreatureData m_creatureData;
 
         Spell _focusSpell;   // Locks the target during spell cast for proper facing
-        uint _focusDelay;
-        bool m_shouldReacquireTarget;
-        ObjectGuid m_suppressedTarget; // Stores the creature's "real" target while casting
-        float m_suppressedOrientation; // Stores the creature's "real" orientation while casting
+        uint _spellFocusDelay;
+        bool _shouldReacquireSpellFocusTarget;
+        ObjectGuid _suppressedSpellFocusTarget; // Stores the creature's "real" target while casting
+        float _suppressedSpellFocusOrientation; // Stores the creature's "real" orientation while casting
 
         long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new();

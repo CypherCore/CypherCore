@@ -532,23 +532,23 @@ namespace Game.Entities
 
                     GetThreatManager().Update(diff);
 
-                    if (m_shouldReacquireTarget && !HandleSpellFocus(null, true))
+                    if (_shouldReacquireSpellFocusTarget && !HandleSpellFocus(null, true))
                     {
-                        SetTarget(m_suppressedTarget);
+                        SetTarget(_suppressedSpellFocusTarget);
 
                         if (!HasUnitFlag2(UnitFlags2.DisableTurn))
                         {
-                            if (!m_suppressedTarget.IsEmpty())
+                            if (!_suppressedSpellFocusTarget.IsEmpty())
                             {
-                                WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);
+                                WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _suppressedSpellFocusTarget);
                                 if (objTarget)
                                     SetFacingToObject(objTarget);
                             }
                             else
-                                SetFacingTo(m_suppressedOrientation);
+                                SetFacingTo(_suppressedSpellFocusOrientation);
                         }
 
-                        m_shouldReacquireTarget = false;
+                        _shouldReacquireSpellFocusTarget = false;
                     }
 
                     // periodic check to see if the creature has passed an evade boundary
@@ -2920,7 +2920,7 @@ namespace Game.Entities
         public override void SetTarget(ObjectGuid guid)
         {
             if (HandleSpellFocus(null, true))
-                m_suppressedTarget = guid;
+                _suppressedSpellFocusTarget = guid;
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), guid);
         }
@@ -2955,8 +2955,8 @@ namespace Game.Entities
             // store pre-cast values for target and orientation (used to later restore)
             if (!HandleSpellFocus(null, true))
             { // only overwrite these fields if we aren't transitioning from one spell focus to another
-                m_suppressedTarget = GetTarget();
-                m_suppressedOrientation = GetOrientation();
+                _suppressedSpellFocusTarget = GetTarget();
+                _suppressedSpellFocusOrientation = GetOrientation();
             }
 
             _focusSpell = focusSpell;
@@ -3014,11 +3014,11 @@ namespace Game.Entities
 
             if (!_focusSpell)
             {
-                if (!withDelay || _focusDelay == 0)
+                if (!withDelay || _spellFocusDelay == 0)
                     return false;
-                if (Time.GetMSTimeDiffToNow(_focusDelay) > 1000) // @todo figure out if we can get rid of this magic number somehow
+                if (Time.GetMSTimeDiffToNow(_spellFocusDelay) > 1000) // @todo figure out if we can get rid of this magic number somehow
                 {
-                    _focusDelay = 0; // save checks in the future
+                    _spellFocusDelay = 0; // save checks in the future
                     return false;
                 }
             }
@@ -3037,15 +3037,15 @@ namespace Game.Entities
 
             if (IsPet() && !HasUnitFlag2(UnitFlags2.DisableTurn))// player pets do not use delay system
             {
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), m_suppressedTarget);
-                if (!m_suppressedTarget.IsEmpty())
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _suppressedSpellFocusTarget);
+                if (!_suppressedSpellFocusTarget.IsEmpty())
                 {
-                    WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);
+                    WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _suppressedSpellFocusTarget);
                     if (objTarget)
                         SetFacingToObject(objTarget, false);
                 }
                 else
-                    SetFacingTo(m_suppressedOrientation, false);
+                    SetFacingTo(_suppressedSpellFocusOrientation, false);
             }
             else
                 // tell the creature that it should reacquire its actual target after the delay expires (this is handled in ::Update)
@@ -3056,17 +3056,17 @@ namespace Game.Entities
                 ClearUnitState(UnitState.Focusing);
 
             _focusSpell = null;
-            _focusDelay = (!IsPet() && withDelay) ? GameTime.GetGameTimeMS() : 0; // don't allow re-target right away to prevent visual bugs
+            _spellFocusDelay = (!IsPet() && withDelay) ? GameTime.GetGameTimeMS() : 0; // don't allow re-target right away to prevent visual bugs
         }
 
-        public void MustReacquireTarget() { m_shouldReacquireTarget = true; } // flags the Creature for forced (client displayed) target reacquisition in the next Update call
+        public void MustReacquireTarget() { _shouldReacquireSpellFocusTarget = true; } // flags the Creature for forced (client displayed) target reacquisition in the next Update call
 
         public void DoNotReacquireTarget()
         {
-            m_shouldReacquireTarget = false;
-            m_suppressedTarget = ObjectGuid.Empty;
+            _shouldReacquireSpellFocusTarget = false;
+            _suppressedSpellFocusTarget = ObjectGuid.Empty;
             SetTarget(ObjectGuid.Empty);
-            m_suppressedOrientation = 0.0f;
+            _suppressedSpellFocusOrientation = 0.0f;
         }
 
         public ulong GetSpawnId() { return m_spawnId; }
