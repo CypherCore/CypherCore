@@ -1293,7 +1293,7 @@ namespace Game
                 Global.WhoListStorageMgr.Update();
             }
 
-            if (m_timers[WorldTimers.ChannelSave].Passed())
+            if (IsStopped || m_timers[WorldTimers.ChannelSave].Passed())
             {
                 m_timers[WorldTimers.ChannelSave].Reset();
 
@@ -1866,7 +1866,7 @@ namespace Game
 
         public uint ShutdownCancel()
         {
-            // nothing cancel or too later
+            // nothing cancel or too late
             if (m_ShutdownTimer == 0 || IsStopped)
                 return 0;
 
