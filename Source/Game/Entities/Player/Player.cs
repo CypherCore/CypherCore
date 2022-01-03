@@ -17,11 +17,13 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.Dynamic;
 using Game.Achievements;
 using Game.AI;
 using Game.Arenas;
 using Game.BattleFields;
 using Game.BattleGrounds;
+using Game.BattlePets;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Garrisons;
@@ -38,7 +40,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -952,7 +953,7 @@ namespace Game.Entities
             return null;
         }
 
-        public void SetBattlePetData(BattlePets.BattlePetMgr.BattlePet pet = null)
+        public void SetBattlePetData(BattlePet pet = null)
         {
             if (pet != null)
             {
@@ -4683,11 +4684,18 @@ namespace Game.Entities
             return null;
         }
 
-        public Pet SummonPet(uint entry, float x, float y, float z, float ang, PetType petType, uint duration)
+        public Pet SummonPet(uint entry, float x, float y, float z, float ang, PetType petType, uint duration, bool aliveOnly = false)
         {
             Pet pet = new(this, petType);
             if (petType == PetType.Summon && pet.LoadPetFromDB(this, entry))
             {
+                if (aliveOnly && !pet.IsAlive())
+                {
+                    pet.DespawnOrUnsummon();
+                    SendTameFailure(PetTameResult.Dead);
+                    return null;
+                }
+
                 if (duration > 0)
                     pet.SetDuration(duration);
 
@@ -4834,6 +4842,13 @@ namespace Game.Entities
                 if (GetGroup())
                     SetGroupUpdateFlag(GroupUpdateFlags.Pet);
             }
+        }
+
+        void SendTameFailure(PetTameResult result)
+        {
+            PetTameFailure petTameFailure = new();
+            petTameFailure.Result = result;
+            SendPacket(petTameFailure);
         }
 
         public void AddPetAura(PetAura petSpell)

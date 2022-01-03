@@ -354,6 +354,18 @@ namespace Game.Networking.Packets
         public PetTalk Action;
     }
 
+    class PetTameFailure : ServerPacket
+    {
+        public PetTameFailure() : base(ServerOpcodes.PetTameFailure) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Result);
+        }
+
+        public byte Result;
+    }
+    
     //Structs
     public class PetSpellCooldown
     {

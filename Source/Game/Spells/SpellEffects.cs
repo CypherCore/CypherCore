@@ -2309,7 +2309,7 @@ namespace Game.Spells
 
             float x, y, z;
             owner.GetClosePoint(out x, out y, out z, owner.GetCombatReach());
-            Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0);
+            Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0, true);
             if (!pet)
                 return;
 
