@@ -2176,7 +2176,7 @@ namespace Game.Entities
 
         public void CallForHelp(float radius)
         {
-            if (radius <= 0.0f || !IsEngaged() || IsPet() || IsCharmed())
+            if (radius <= 0.0f || !IsEngaged() || !IsAlive() || IsPet() || IsCharmed())
                 return;
 
             Unit target = GetThreatManager().GetCurrentVictim();
@@ -2187,7 +2187,7 @@ namespace Game.Entities
 
             if (target == null)
             {
-                Log.outError(LogFilter.Unit, $"Creature {GetEntry()} ({GetName()}) is engaged without threat list");
+                Log.outError(LogFilter.Unit, $"Creature {GetEntry()} ({GetName()}) trying to call for help without being in combat.");
                 return;
             }
 
