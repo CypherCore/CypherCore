@@ -532,7 +532,7 @@ namespace Game.Entities
 
                     GetThreatManager().Update(diff);
 
-                    if (m_shouldReacquireTarget && !IsFocusing(null, true))
+                    if (m_shouldReacquireTarget && !HandleSpellFocus(null, true))
                     {
                         SetTarget(m_suppressedTarget);
 
@@ -932,7 +932,7 @@ namespace Game.Entities
 
             if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
             {
-                if (!IsFocusing(null, true))
+                if (!HandleSpellFocus(null, true))
                     SetInFront(target);
                 return target;
             }
@@ -1121,7 +1121,7 @@ namespace Game.Entities
                             return true;
             }
 
-            if (IsFocusing(null, true))
+            if (HandleSpellFocus(null, true))
                 return true;
 
             if (HasUnitState(UnitState.Casting))
@@ -2919,7 +2919,7 @@ namespace Game.Entities
 
         public override void SetTarget(ObjectGuid guid)
         {
-            if (IsFocusing(null, true))
+            if (HandleSpellFocus(null, true))
                 m_suppressedTarget = guid;
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), guid);
@@ -2953,7 +2953,7 @@ namespace Game.Entities
                 return;
 
             // store pre-cast values for target and orientation (used to later restore)
-            if (!IsFocusing(null, true))
+            if (!HandleSpellFocus(null, true))
             { // only overwrite these fields if we aren't transitioning from one spell focus to another
                 m_suppressedTarget = GetTarget();
                 m_suppressedOrientation = GetOrientation();
@@ -3001,7 +3001,7 @@ namespace Game.Entities
                 AddUnitState(UnitState.Focusing);
         }
 
-        public override bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
+        public override bool HandleSpellFocus(Spell focusSpell = null, bool withDelay = false)
         {
             if (!IsAlive()) // dead creatures cannot focus
             {

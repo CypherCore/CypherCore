@@ -3998,7 +3998,7 @@ namespace Game.Spells
                     {
                         Creature creatureCaster = unitCaster.ToCreature();
                         if (creatureCaster != null)
-                            if (!creatureCaster.IsFocusing(this))
+                            if (!creatureCaster.HandleSpellFocus(this))
                                 creatureCaster.FocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
                     }
                 }

@@ -254,7 +254,7 @@ namespace Game.AI
             {
                 Unit victim = me.SelectVictim();
                 if (victim != null)
-                    if (!me.IsFocusing(null, true) && victim != me.GetVictim())
+                    if (!me.HandleSpellFocus(null, true) && victim != me.GetVictim())
                         AttackStart(victim);
 
                 return me.GetVictim() != null;
