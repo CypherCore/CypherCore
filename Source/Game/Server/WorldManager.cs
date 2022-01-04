@@ -1806,14 +1806,9 @@ namespace Game
             m_ShutdownMask = options;
             m_ExitCode = exitcode;
 
-            // If the shutdown time is 0, set m_stopEvent (except if shutdown is 'idle' with remaining sessions)
+            // If the shutdown time is 0, evaluate shutdown on next tick (no message)
             if (time == 0)
-            {
-                if (!options.HasAnyFlag(ShutdownMask.Idle) || GetActiveAndQueuedSessionCount() == 0)
-                    IsStopped = true;                             // exist code already set
-                else
-                    m_ShutdownTimer = 1;                            //So that the session count is re-evaluated at next world tick
-            }
+                m_ShutdownTimer = 1;
             // Else set the shutdown timer and warn users
             else
             {

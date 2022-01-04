@@ -2617,12 +2617,8 @@ namespace Game.Entities
                 // delete channel if empty
                 ChannelManager cMgr = ChannelManager.ForTeam(GetTeam());
                 if (cMgr != null)
-                {
                     if (ch.IsConstant())
                         cMgr.LeftChannel(ch.GetChannelId(), ch.GetZoneEntry());
-                    else
-                        cMgr.LeftChannel(ch.GetName());
-                }
             }
             Log.outDebug(LogFilter.ChatSystem, "Player {0}: channels cleaned up!", GetName());
         }

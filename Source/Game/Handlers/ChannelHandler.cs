@@ -102,8 +102,6 @@ namespace Game
 
                 if (packet.ZoneChannelID != 0)
                     cMgr.LeftChannel((uint)packet.ZoneChannelID, zone);
-                else
-                    cMgr.LeftChannel(packet.ChannelName);
             }
         }
 

@@ -193,18 +193,6 @@ namespace Game.Chat
             return result;
         }
 
-        public void LeftChannel(string name)
-        {
-            string channelName = name.ToLower();
-
-            var channel = _customChannels.LookupByKey(channelName);
-            if (channel == null)
-                return;
-
-            if (channel.GetNumPlayers() == 0)
-                _customChannels.Remove(channelName);
-        }
-
         public void LeftChannel(uint channelId, AreaTableRecord zoneEntry)
         {
             var guid = CreateBuiltinChannelGuid(channelId, zoneEntry);
