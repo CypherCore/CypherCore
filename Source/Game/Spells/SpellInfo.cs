@@ -3147,7 +3147,7 @@ namespace Game.Spells
                 return this;
 
             // Client ignores spell with these attributes (sub_53D9D0)
-            if (HasAttribute(SpellAttr0.Negative1) || HasAttribute(SpellAttr2.Unk3))
+            if (HasAttribute(SpellAttr0.Negative1) || HasAttribute(SpellAttr2.Unk3) || HasAttribute(SpellAttr3.DrainSoul))
                 return this;
 
             bool needRankSelection = false;
@@ -3383,7 +3383,6 @@ namespace Game.Spells
                         case AuraType.ModUnattackable:
                             return true;
                         case AuraType.SchoolHealAbsorb:
-                        case AuraType.ChannelDeathItem:
                         case AuraType.Empathy:
                         case AuraType.ModSpellDamageFromCaster:
                         case AuraType.PreventsFleeing:
@@ -3586,6 +3585,7 @@ namespace Game.Spells
                             return false;
                         break;
                     case AuraType.ModConfuse:
+                    case AuraType.ChannelDeathItem:
                     case AuraType.ModRoot:
                     case AuraType.ModRoot2:
                     case AuraType.ModSilence:
