@@ -945,8 +945,8 @@ namespace Framework.Constants
         CommandInstanceNoExit = 1194,
         CommandWentToInstanceGate = 1195,
         CommandWentToInstanceStart = 1196,
-        CommandGoInstanceFailed = 1197,
-        CommandGoInstanceStartFailed = 1198, // 3.3.5 RESERVED
+        CommandGoInstanceGateFailed = 1197,
+        CommandGoInstanceStartFailed = 1198,
                                              // Room for more level 3                1199 not used
 
         // Debug Commands

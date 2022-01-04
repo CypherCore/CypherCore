@@ -172,27 +172,34 @@ namespace Game.Chat.Commands
 
             // try going to entrance
             AreaTriggerStruct exit = Global.ObjectMgr.GetGoBackTrigger(mapId);
-            if (exit == null)
-                handler.SendSysMessage(CypherStrings.CommandInstanceNoExit, mapId, scriptname);
-
-            if (exit != null && player.TeleportTo(exit.target_mapId, exit.target_X, exit.target_Y, exit.target_Z, exit.target_Orientation + MathF.PI))
+            if (exit != null)
             {
-                handler.SendSysMessage(CypherStrings.CommandWentToInstanceGate, mapId, scriptname);
-                return true;
+                if (player.TeleportTo(exit.target_mapId, exit.target_X, exit.target_Y, exit.target_Z, exit.target_Orientation + MathF.PI))
+                {
+                    handler.SendSysMessage(CypherStrings.CommandWentToInstanceGate, mapId, scriptname);
+                    return true;
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.CommandGoInstanceGateFailed, mapId, scriptname, exit.target_mapId);
             }
+            else
+                handler.SendSysMessage(CypherStrings.CommandInstanceNoExit, mapId, scriptname);
 
             // try going to start
             AreaTriggerStruct entrance = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
-            if (entrance == null)
+            if (entrance != null)
+            {
+                if (player.TeleportTo(entrance.target_mapId, entrance.target_X, entrance.target_Y, entrance.target_Z, entrance.target_Orientation))
+                {
+                    handler.SendSysMessage(CypherStrings.CommandWentToInstanceStart, mapId, scriptname);
+                    return true;
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.CommandGoInstanceStartFailed, mapId, scriptname);
+            }
+            else
                 handler.SendSysMessage(CypherStrings.CommandInstanceNoEntrance, mapId, scriptname);
 
-            if (entrance != null && player.TeleportTo(entrance.target_mapId, entrance.target_X, entrance.target_Y, entrance.target_Z, entrance.target_Orientation))
-            {
-                handler.SendSysMessage(CypherStrings.CommandWentToInstanceStart, mapId, scriptname);
-                return true;
-            }
-
-            handler.SendSysMessage(CypherStrings.CommandGoInstanceFailed, mapId, scriptname, exit != null ? exit.target_mapId : -1);
             return false;
         }
 
