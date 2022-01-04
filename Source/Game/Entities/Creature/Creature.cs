@@ -2981,7 +2981,7 @@ namespace Game.Entities
 
         public override bool HasSpellFocus(Spell focusSpell = null)
         {
-            if (!IsAlive()) // dead creatures cannot focus
+            if (IsDead()) // dead creatures cannot focus
             {
                 if (_spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0)
                     Log.outWarn(LogFilter.Unit, $"Creature '{GetName()}' (entry {GetEntry()}) has spell focus (spell id {(_spellFocusInfo.Spell != null ? _spellFocusInfo.Spell.GetSpellInfo().Id : 0)}, delay {_spellFocusInfo.Delay}ms) despite being dead.");
