@@ -4261,6 +4261,12 @@ namespace Game.Entities
                 spellInfo.ProcChance = 10;
             });
 
+            // Survey Sinkholes
+            ApplySpellFix(new[] { 45853 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40 yards
+            });
+
             // Baron Rivendare (Stratholme) - Unholy Aura
             ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
             {
