@@ -709,7 +709,7 @@ namespace Game.Movement
                 npolys = FixupCorridor(polys, npolys, 74, visited, nvisited);
 
                 if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(polys[0], result, ref result[1])))
-                    return Detour.DT_FAILURE;
+                    Log.outDebug(LogFilter.Maps, $"Cannot find height at position X: {result[2]} Y: {result[0]} Z: {result[1]} for ");// {_sourceUnit.GetDebugInfo()}");
 
                 result[1] += 0.5f;
                 Detour.dtVcopy(iterPos, result);
