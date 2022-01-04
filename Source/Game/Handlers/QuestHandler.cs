@@ -605,7 +605,7 @@ namespace Game
             }
 
             // in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
-            if (Global.PoolMgr.IsPartOfAPool<Quest>(packet.QuestID) != 0 && !Global.PoolMgr.IsSpawnedObject<Quest>(packet.QuestID))
+            if (Global.QuestPoolMgr.IsQuestActive(packet.QuestID))
             {
                 sender.SendPushToPartyResponse(sender, QuestPushReason.NotDaily);
                 return;

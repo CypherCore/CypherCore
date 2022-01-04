@@ -312,6 +312,14 @@ namespace Game
             return 0;
         }
 
+        public static bool IsTakingQuestEnabled(uint questId)
+        {
+            if (!Global.QuestPoolMgr.IsQuestActive(questId))
+                return false;
+
+            return true;
+        }
+
         public uint MoneyValue(Player player)
         {
             QuestMoneyRewardRecord money = CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));

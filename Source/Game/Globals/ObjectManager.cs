@@ -7751,7 +7751,7 @@ namespace Game
         }
         public void LoadGameobjectQuestStarters()
         {
-            LoadQuestRelationsHelper(_goQuestRelations, null, "gameobject_queststarter", true, true);
+            LoadQuestRelationsHelper(_goQuestRelations, null, "gameobject_queststarter");
 
             foreach (var pair in _goQuestRelations)
             {
@@ -7764,7 +7764,7 @@ namespace Game
         }
         public void LoadGameobjectQuestEnders()
         {
-            LoadQuestRelationsHelper(_goQuestInvolvedRelations, _goQuestInvolvedRelationsReverse, "gameobject_questender", false, true);
+            LoadQuestRelationsHelper(_goQuestInvolvedRelations, _goQuestInvolvedRelationsReverse, "gameobject_questender");
 
             foreach (var pair in _goQuestInvolvedRelations)
             {
@@ -7777,7 +7777,7 @@ namespace Game
         }
         public void LoadCreatureQuestStarters()
         {
-            LoadQuestRelationsHelper(_creatureQuestRelations, null, "creature_queststarter", true, false);
+            LoadQuestRelationsHelper(_creatureQuestRelations, null, "creature_queststarter");
 
             foreach (var pair in _creatureQuestRelations)
             {
@@ -7790,7 +7790,7 @@ namespace Game
         }
         public void LoadCreatureQuestEnders()
         {
-            LoadQuestRelationsHelper(_creatureQuestInvolvedRelations, _creatureQuestInvolvedRelationsReverse, "creature_questender", false, false);
+            LoadQuestRelationsHelper(_creatureQuestInvolvedRelations, _creatureQuestInvolvedRelationsReverse, "creature_questender");
 
             foreach (var pair in _creatureQuestInvolvedRelations)
             {
@@ -7801,7 +7801,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `creature_questender` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
             }
         }
-        void LoadQuestRelationsHelper(MultiMap<uint, uint> map, MultiMap<uint, uint> reverseMap, string table, bool starter, bool go)
+        void LoadQuestRelationsHelper(MultiMap<uint, uint> map, MultiMap<uint, uint> reverseMap, string table)
         {
             uint oldMSTime = Time.GetMSTime();
 
@@ -7809,7 +7809,7 @@ namespace Game
 
             uint count = 0;
 
-            SQLResult result = DB.World.Query("SELECT id, quest, pool_entry FROM {0} qr LEFT JOIN pool_quest pq ON qr.quest = pq.entry", table);
+            SQLResult result = DB.World.Query($"SELECT id, quest FROM {table} qr LEFT JOIN pool_quest pq ON qr.quest = pq.entry");
 
             if (result.IsEmpty())
             {
@@ -7817,15 +7817,10 @@ namespace Game
                 return;
             }
 
-            var poolRelationMap = go ? Global.PoolMgr.mQuestGORelation : Global.PoolMgr.mQuestCreatureRelation;
-            if (starter)
-                poolRelationMap.Clear();
-
             do
             {
                 uint id = result.Read<uint>(0);
                 uint quest = result.Read<uint>(1);
-                uint poolId = result.Read<uint>(2);
 
                 if (!_questTemplates.ContainsKey(quest))
                 {
@@ -7833,14 +7828,9 @@ namespace Game
                     continue;
                 }
 
-                if (poolId == 0 || !starter)
-                {
-                    map.Add(id, quest);
-                    if (reverseMap != null)
-                        reverseMap.Add(quest, id);
-                }
-                else
-                    poolRelationMap.Add(quest, id);
+                map.Add(id, quest);
+                if (reverseMap != null)
+                    reverseMap.Add(quest, id);
 
                 ++count;
             } while (result.NextRow());
@@ -8050,38 +8040,14 @@ namespace Game
         {
             return _questTemplatesAutoPush;
         }
-        public MultiMap<uint, uint> GetGOQuestRelationMap()
-        {
-            return _goQuestRelations;
-        }
-        public List<uint> GetGOQuestRelationBounds(uint go_entry)
-        {
-            return _goQuestRelations.LookupByKey(go_entry);
-        }
-        public List<uint> GetGOQuestInvolvedRelationBounds(uint go_entry)
-        {
-            return _goQuestInvolvedRelations.LookupByKey(go_entry);
-        }
-        public List<uint> GetGOQuestInvolvedRelationReverseBounds(uint questId)
-        {
-            return _goQuestInvolvedRelationsReverse.LookupByKey(questId);
-        }
-        public MultiMap<uint, uint> GetCreatureQuestRelationMap()
-        {
-            return _creatureQuestRelations;
-        }
-        public List<uint> GetCreatureQuestRelationBounds(uint creature_entry)
-        {
-            return _creatureQuestRelations.LookupByKey(creature_entry);
-        }
-        public List<uint> GetCreatureQuestInvolvedRelationBounds(uint creature_entry)
-        {
-            return _creatureQuestInvolvedRelations.LookupByKey(creature_entry);
-        }
-        public List<uint> GetCreatureQuestInvolvedRelationReverseBounds(uint questId)
-        {
-            return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId);
-        }
+        public MultiMap<uint, uint> GetGOQuestRelationMapHACK() { return _goQuestRelations; }
+        public QuestRelationResult GetGOQuestRelations(uint entry) { return GetQuestRelationsFrom(_goQuestRelations, entry, true);    }
+        public QuestRelationResult GetGOQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_goQuestInvolvedRelations, entry, false);}
+        public List<uint> GetGOQuestInvolvedRelationReverseBounds(uint questId) { return _goQuestInvolvedRelationsReverse.LookupByKey(questId); }
+        public MultiMap<uint, uint> GetCreatureQuestRelationMapHACK() { return _creatureQuestRelations; }
+        public QuestRelationResult GetCreatureQuestRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestRelations, entry, true); }
+        public QuestRelationResult GetCreatureQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestInvolvedRelations, entry, false); }
+        public List<uint> GetCreatureQuestInvolvedRelationReverseBounds(uint questId) { return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId); }
         public QuestPOIData GetQuestPOIData(uint questId)
         {
             return _questPOIStorage.LookupByKey(questId);
@@ -8122,7 +8088,8 @@ namespace Game
         {
             return _exclusiveQuestGroups.LookupByKey(exclusiveGroupId);
         }
-
+        QuestRelationResult GetQuestRelationsFrom(MultiMap<uint, uint> map, uint key, bool onlyActive) { return new QuestRelationResult(map.LookupByKey(key), onlyActive);}
+        
         //Spells /Skills / Phases
         public void LoadPhases()
         {
@@ -10423,7 +10390,7 @@ namespace Game
         {
             return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
         }
-        
+
         //Vehicles
         public void LoadVehicleTemplate()
         {
@@ -11705,5 +11672,22 @@ namespace Game
     {
         public byte Expansion;
         public uint AchievementId;
+    }
+
+    public class QuestRelationResult : List<uint>
+    {
+        bool _onlyActive;
+
+        public QuestRelationResult() { }
+
+        public QuestRelationResult(List<uint> range, bool onlyActive) : base(range)
+        {
+            _onlyActive = onlyActive;
+        }
+
+        public bool HasQuest(uint questId)
+        { 
+            return Contains(questId) && (!_onlyActive || Quest.IsTakingQuestEnabled(questId));
+        }
     }
 }

@@ -29,8 +29,8 @@ namespace Framework.Database
                 "ig.gemItemId1, ig.gemBonuses1, ig.gemContext1, ig.gemScalingLevel1, ig.gemItemId2, ig.gemBonuses2, ig.gemContext2, ig.gemScalingLevel2, ig.gemItemId3, ig.gemBonuses3, ig.gemContext3, ig.gemScalingLevel3, " +
                 "im.fixedScalingLevel, im.artifactKnowledgeLevel";
 
-            PrepareStatement(CharStatements.DEL_QUEST_POOL_SAVE, "DELETE FROM pool_quest_save WHERE pool_id = ?");
-            PrepareStatement(CharStatements.INS_QUEST_POOL_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)");
+            PrepareStatement(CharStatements.DEL_POOL_QUEST_SAVE, "DELETE FROM pool_quest_save WHERE pool_id = ?");
+            PrepareStatement(CharStatements.INS_POOL_QUEST_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM, "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?");
             PrepareStatement(CharStatements.DEL_EXPIRED_BANS, "UPDATE character_banned SET active = 0 WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate");
             PrepareStatement(CharStatements.SEL_CHECK_NAME, "SELECT 1 FROM characters WHERE name = ?");
@@ -537,7 +537,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_PINFO_XP, "SELECT a.xp, b.guid FROM characters a LEFT JOIN guild_member b ON a.guid = b.guid WHERE a.guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_HOMEBIND, "SELECT mapId, zoneId, posX, posY, posZ, orientation FROM character_homebind WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC, "SELECT guid, name, online FROM characters WHERE account = ?");
-            PrepareStatement(CharStatements.SEL_POOL_QUEST_SAVE, "SELECT quest_id FROM pool_quest_save WHERE pool_id = ?");
             PrepareStatement(CharStatements.SEL_CHAR_CUSTOMIZE_INFO, "SELECT name, race, class, gender, at_login FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT at_login, knownTitles FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_INSTANCE, "SELECT data, completedEncounters, entranceId FROM instance WHERE map = ? AND id = ?");
@@ -791,8 +790,8 @@ namespace Framework.Database
 
     public enum CharStatements
     {
-        DEL_QUEST_POOL_SAVE,
-        INS_QUEST_POOL_SAVE,
+        DEL_POOL_QUEST_SAVE,
+        INS_POOL_QUEST_SAVE,
         DEL_NONEXISTENT_GUILD_BANK_ITEM,
         DEL_EXPIRED_BANS,
         SEL_CHECK_NAME,
@@ -1199,7 +1198,6 @@ namespace Framework.Database
         SEL_PINFO_BANS,
         SEL_CHAR_HOMEBIND,
         SEL_CHAR_GUID_NAME_BY_ACC,
-        SEL_POOL_QUEST_SAVE,
         SEL_CHAR_CUSTOMIZE_INFO,
         SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS,
         SEL_INSTANCE,

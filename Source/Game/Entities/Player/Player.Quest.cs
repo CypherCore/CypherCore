@@ -260,15 +260,15 @@ namespace Game.Entities
 
         public void PrepareQuestMenu(ObjectGuid guid)
         {
-            List<uint> objectQR;
-            List<uint> objectQIR;
+            QuestRelationResult questRelations;
+            QuestRelationResult questInvolvedRelations;
 
             // pets also can have quests
             Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
             if (creature != null)
             {
-                objectQR = Global.ObjectMgr.GetCreatureQuestRelationBounds(creature.GetEntry());
-                objectQIR = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(creature.GetEntry());
+                questRelations = Global.ObjectMgr.GetCreatureQuestRelations(creature.GetEntry());
+                questInvolvedRelations = Global.ObjectMgr.GetCreatureQuestInvolvedRelations(creature.GetEntry());
             }
             else
             {
@@ -279,8 +279,8 @@ namespace Game.Entities
                 GameObject gameObject = _map.GetGameObject(guid);
                 if (gameObject != null)
                 {
-                    objectQR = Global.ObjectMgr.GetGOQuestRelationBounds(gameObject.GetEntry());
-                    objectQIR = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(gameObject.GetEntry());
+                    questRelations = Global.ObjectMgr.GetGOQuestRelations(gameObject.GetEntry());
+                    questInvolvedRelations = Global.ObjectMgr.GetGOQuestInvolvedRelations(gameObject.GetEntry());
                 }
                 else
                     return;
@@ -289,18 +289,18 @@ namespace Game.Entities
             QuestMenu qm = PlayerTalkClass.GetQuestMenu();
             qm.ClearMenu();
 
-            foreach (var quest_id in objectQIR)
+            foreach (var questId in questInvolvedRelations)
             {
-                QuestStatus status = GetQuestStatus(quest_id);
+                QuestStatus status = GetQuestStatus(questId);
                 if (status == QuestStatus.Complete)
-                    qm.AddMenuItem(quest_id, 4);
+                    qm.AddMenuItem(questId, 4);
                 else if (status == QuestStatus.Incomplete)
-                    qm.AddMenuItem(quest_id, 4);
+                    qm.AddMenuItem(questId, 4);
             }
 
-            foreach (var quest_id in objectQR)
+            foreach (var questId in questRelations)
             {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest == null)
                     continue;
 
@@ -308,11 +308,11 @@ namespace Game.Entities
                     continue;
 
                 if (quest.IsAutoComplete() && (!quest.IsRepeatable() || quest.IsDaily() || quest.IsWeekly() || quest.IsMonthly()))
-                    qm.AddMenuItem(quest_id, 0);
+                    qm.AddMenuItem(questId, 0);
                 else if (quest.IsAutoComplete())
-                    qm.AddMenuItem(quest_id, 4);
-                else if (GetQuestStatus(quest_id) == QuestStatus.None)
-                    qm.AddMenuItem(quest_id, 2);
+                    qm.AddMenuItem(questId, 4);
+                else if (GetQuestStatus(questId) == QuestStatus.None)
+                    qm.AddMenuItem(questId, 2);
             }
         }
 
@@ -365,7 +365,7 @@ namespace Game.Entities
 
         public Quest GetNextQuest(ObjectGuid guid, Quest quest)
         {
-            List<uint> objectQR;
+            QuestRelationResult quests;
             uint nextQuestID = quest.NextQuestInChain;
 
             switch (guid.GetHigh())
@@ -379,7 +379,7 @@ namespace Game.Entities
                 {
                     Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
                     if (creature != null)
-                        objectQR = Global.ObjectMgr.GetCreatureQuestRelationBounds(creature.GetEntry());
+                        quests = Global.ObjectMgr.GetCreatureQuestRelations(creature.GetEntry());
                     else
                         return null;
                     break;
@@ -392,7 +392,7 @@ namespace Game.Entities
                     Cypher.Assert(_map != null);
                     GameObject gameObject = _map.GetGameObject(guid);
                     if (gameObject != null)
-                        objectQR = Global.ObjectMgr.GetGOQuestRelationBounds(gameObject.GetEntry());
+                        quests = Global.ObjectMgr.GetGOQuestRelations(gameObject.GetEntry());
                     else
                         return null;
                     break;
@@ -401,12 +401,9 @@ namespace Game.Entities
                     return null;
             }
 
-            // for unit and go state
-            foreach (var id in objectQR)
-            {
-                if (id == nextQuestID)
+            if (nextQuestID != 0)
+                if (quests.HasQuest(nextQuestID))
                     return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
-            }
 
             return null;
         }
@@ -1898,8 +1895,8 @@ namespace Game.Entities
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)
         {
-            List<uint> qr;
-            List<uint> qir;
+            QuestRelationResult questRelations;
+            QuestRelationResult questInvolvedRelations;
 
             switch (questgiver.GetTypeId())
             {
@@ -1913,8 +1910,8 @@ namespace Game.Entities
                             return questStatus.Value;
                     }
 
-                    qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
-                    qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(questgiver.GetEntry());
+                    questRelations = Global.ObjectMgr.GetGOQuestRelations(questgiver.GetEntry());
+                    questInvolvedRelations = Global.ObjectMgr.GetGOQuestInvolvedRelations(questgiver.GetEntry());
                     break;
                 }
                 case TypeId.Unit:
@@ -1927,8 +1924,8 @@ namespace Game.Entities
                             return questStatus.Value;
                     }
 
-                    qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());
-                    qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(questgiver.GetEntry());
+                    questRelations = Global.ObjectMgr.GetCreatureQuestRelations(questgiver.GetEntry());
+                    questInvolvedRelations = Global.ObjectMgr.GetCreatureQuestInvolvedRelations(questgiver.GetEntry());
                     break;
                 }
                 default:
@@ -1939,7 +1936,7 @@ namespace Game.Entities
 
             QuestGiverStatus result = QuestGiverStatus.None;
 
-            foreach (var questId in qir)
+            foreach (var questId in questInvolvedRelations)
             {
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest == null)
@@ -1974,7 +1971,7 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var questId in qr)
+            foreach (var questId in questRelations)
             {
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest == null)

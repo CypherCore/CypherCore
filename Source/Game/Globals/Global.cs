@@ -104,6 +104,7 @@ public static class Global
     public static DB2Manager DB2Mgr { get { return DB2Manager.Instance; } }
     public static DisableManager DisableMgr { get { return DisableManager.Instance; } }
     public static PoolManager PoolMgr { get { return PoolManager.Instance; } }
+    public static QuestPoolManager QuestPoolMgr { get { return QuestPoolManager.Instance; } }
     public static WeatherManager WeatherMgr { get { return WeatherManager.Instance; } }
 
     public static GameEventManager GameEventMgr { get { return GameEventManager.Instance; } }

@@ -1428,7 +1428,7 @@ namespace Game
         {
             foreach (var pair in mGameEventCreatureQuests[eventId])
             {
-                var CreatureQuestMap = Global.ObjectMgr.GetCreatureQuestRelationMap();
+                var CreatureQuestMap = Global.ObjectMgr.GetCreatureQuestRelationMapHACK();
                 if (activate)                                           // Add the pair(id, quest) to the multimap
                     CreatureQuestMap.Add(pair.Item1, pair.Item2);
                 else
@@ -1442,7 +1442,7 @@ namespace Game
             }
             foreach (var pair in mGameEventGameObjectQuests[eventId])
             {
-                var GameObjectQuestMap = Global.ObjectMgr.GetGOQuestRelationMap();
+                var GameObjectQuestMap = Global.ObjectMgr.GetGOQuestRelationMapHACK();
                 if (activate)                                           // Add the pair(id, quest) to the multimap
                     GameObjectQuestMap.Add(pair.Item1, pair.Item2);
                 else

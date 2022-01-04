@@ -31,7 +31,6 @@ namespace Game
 
         public void Initialize()
         {
-            mQuestSearchMap.Clear();
             mGameobjectSearchMap.Clear();
             mCreatureSearchMap.Clear();
         }
@@ -253,91 +252,6 @@ namespace Game
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Quest Pooling Data...");
-            {
-                uint oldMSTime = Time.GetMSTime();
-
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_QUEST_POOLS);
-                SQLResult result = DB.World.Query(stmt);
-
-                if (result.IsEmpty())
-                {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quests in pools");
-                }
-                else
-                {
-                    List<uint> creBounds;
-                    List<uint> goBounds;
-
-                    Dictionary<uint, QuestTypes> poolTypeMap = new();
-                    uint count = 0;
-                    do
-                    {
-                        uint entry = result.Read<uint>(0);
-                        uint pool_id = result.Read<uint>(1);
-
-                        if (!poolTypeMap.ContainsKey(pool_id))
-                            poolTypeMap[pool_id] = 0;
-
-                        Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
-                        if (quest == null)
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_quest` has a non existing quest template (Entry: {0}) defined for pool id ({1}), skipped.", entry, pool_id);
-                            continue;
-                        }
-
-                        if (!mPoolTemplate.ContainsKey(pool_id))
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_quest` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
-                            continue;
-                        }
-
-                        if (!quest.IsDailyOrWeekly())
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_quest` has an quest ({0}) which is not daily or weekly in pool id ({1}), use ExclusiveGroup instead, skipped.", entry, pool_id);
-                            continue;
-                        }
-
-                        if (poolTypeMap[pool_id] == QuestTypes.None)
-                            poolTypeMap[pool_id] = quest.IsDaily() ? QuestTypes.Daily : QuestTypes.Weekly;
-
-                        QuestTypes currType = quest.IsDaily() ? QuestTypes.Daily : QuestTypes.Weekly;
-
-                        if (poolTypeMap[pool_id] != currType)
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_quest` quest {0} is {1} but pool ({2}) is specified for {3}, mixing not allowed, skipped.",
-                                             entry, currType, pool_id, poolTypeMap[pool_id]);
-                            continue;
-                        }
-
-                        creBounds = mQuestCreatureRelation.LookupByKey(entry);
-                        goBounds = mQuestGORelation.LookupByKey(entry);
-
-                        if (creBounds.Empty() && goBounds.Empty())
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_quest` lists entry ({0}) as member of pool ({1}) but is not started anywhere, skipped.", entry, pool_id);
-                            continue;
-                        }
-
-                        PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new(entry, 0.0f);
-
-                        if (!mPoolQuestGroups.ContainsKey(pool_id))
-                            mPoolQuestGroups[pool_id] = new PoolGroup<Quest>();
-
-                        PoolGroup<Quest> questgroup = mPoolQuestGroups[pool_id];
-                        questgroup.SetPoolId(pool_id);
-                        questgroup.AddEntry(plObject, pPoolTemplate.MaxLimit);
-
-                        mQuestSearchMap.Add(entry, pool_id);
-                        ++count;
-                    }
-                    while (result.NextRow());
-
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests in pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-                }
-            }
-
             // The initialize method will spawn all pools not in an event and not in another pool, this is why there is 2 left joins with 2 null checks
             Log.outInfo(LogFilter.ServerLoading, "Starting objects pooling system...");
             {
@@ -385,67 +299,6 @@ namespace Game
             }
         }
 
-        public void SaveQuestsToDB()
-        {
-            SQLTransaction trans = new();
-
-            foreach (var questPoolGroup in mPoolQuestGroups.Values)
-            {
-                if (questPoolGroup.IsEmpty())
-                    continue;
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_QUEST_POOL_SAVE);
-                stmt.AddValue(0, questPoolGroup.GetPoolId());
-                trans.Append(stmt);
-            }
-
-            foreach (var pair in mQuestSearchMap)
-            {
-                if (IsSpawnedObject<Quest>(pair.Key))
-                {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_QUEST_POOL_SAVE);
-                    stmt.AddValue(0, pair.Value);
-                    stmt.AddValue(1, pair.Key);
-                    trans.Append(stmt);
-                }
-            }
-
-            DB.Characters.CommitTransaction(trans);
-        }
-
-        public void ChangeDailyQuests()
-        {
-            foreach (var questPoolGroup in mPoolQuestGroups.Values)
-            {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)questPoolGroup.GetFirstEqualChancedObjectId());
-                if (quest != null)
-                {
-                    if (quest.IsWeekly())
-                        continue;
-
-                    UpdatePool<Quest>(questPoolGroup.GetPoolId(), 1);    // anything non-zero means don't load from db
-                }
-            }
-
-            SaveQuestsToDB();
-        }
-
-        public void ChangeWeeklyQuests()
-        {
-            foreach (var questPoolGroup in mPoolQuestGroups.Values)
-            {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)questPoolGroup.GetFirstEqualChancedObjectId());
-                if (quest != null)
-                {
-                    if (quest.IsDaily())
-                        continue;
-
-                    UpdatePool<Quest>(questPoolGroup.GetPoolId(), 1);
-                }
-            }
-
-            SaveQuestsToDB();
-        }
-
         void SpawnPool<T>(uint pool_id, ulong db_guid)
         {
             switch (typeof(T).Name)
@@ -462,10 +315,6 @@ namespace Game
                     if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
                         mPoolPoolGroups[pool_id].SpawnObject(mSpawnedData, mPoolTemplate[pool_id].MaxLimit, db_guid);
                     break;
-                case "Quest":
-                    if (mPoolQuestGroups.ContainsKey(pool_id) && !mPoolQuestGroups[pool_id].IsEmpty())
-                        mPoolQuestGroups[pool_id].SpawnObject(mSpawnedData, mPoolTemplate[pool_id].MaxLimit, db_guid);
-                    break;
             }
         }
 
@@ -474,7 +323,6 @@ namespace Game
             SpawnPool<Pool>(pool_id, 0);
             SpawnPool<GameObject>(pool_id, 0);
             SpawnPool<Creature>(pool_id, 0);
-            SpawnPool<Quest>(pool_id, 0);
         }
 
         public void DespawnPool(uint pool_id)
@@ -487,9 +335,6 @@ namespace Game
 
             if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
                 mPoolPoolGroups[pool_id].DespawnObject(mSpawnedData);
-
-            if (mPoolQuestGroups.ContainsKey(pool_id) && !mPoolQuestGroups[pool_id].IsEmpty())
-                mPoolQuestGroups[pool_id].DespawnObject(mSpawnedData);
         }
 
         public bool CheckPool(uint pool_id)
@@ -501,9 +346,6 @@ namespace Game
                 return false;
 
             if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].CheckPool())
-                return false;
-
-            if (mPoolQuestGroups.ContainsKey(pool_id) && !mPoolQuestGroups[pool_id].CheckPool())
                 return false;
 
             return true;
@@ -528,8 +370,6 @@ namespace Game
                     return mGameobjectSearchMap.LookupByKey(db_guid);
                 case "Pool":
                     return mPoolSearchMap.LookupByKey(db_guid);
-                case "Quest":
-                    return mQuestSearchMap.LookupByKey(db_guid);
             }
             return 0;
         }
@@ -566,11 +406,9 @@ namespace Game
         Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new();
         Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
         Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new();
-        Dictionary<uint, PoolGroup<Quest>> mPoolQuestGroups = new();
         Dictionary<ulong, uint> mCreatureSearchMap = new();
         Dictionary<ulong, uint> mGameobjectSearchMap = new();
         Dictionary<ulong, uint> mPoolSearchMap = new();
-        Dictionary<ulong, uint> mQuestSearchMap = new();
 
         // dynamic data
         ActivePoolData mSpawnedData = new();
@@ -684,37 +522,6 @@ namespace Game
                 case "Pool":
                     Global.PoolMgr.DespawnPool((uint)guid);
                     break;
-                case "Quest":
-                    // Creatures
-                    var questMap = Global.ObjectMgr.GetCreatureQuestRelationMap();
-                    var qr = Global.PoolMgr.mQuestCreatureRelation.LookupByKey(guid);
-                    foreach (var creature in qr)
-                    {
-                        if (!questMap.ContainsKey(creature))
-                            continue;
-
-                        foreach (var quest in questMap[creature].ToList())
-                        {
-                            if (quest == guid)
-                                questMap.Remove(creature, quest);
-                        }
-                    }
-
-                    // Gameobjects
-                    questMap = Global.ObjectMgr.GetGOQuestRelationMap();
-                    qr = Global.PoolMgr.mQuestGORelation.LookupByKey(guid);
-                    foreach (var go in qr)
-                    {
-                        if (!questMap.ContainsKey(go))
-                            continue;
-
-                        foreach (var quest in questMap[go])
-                        {
-                            if (quest == guid)
-                                questMap.Remove(go, quest);
-                        }
-                    }
-                    break;
             }
         }
 
@@ -743,12 +550,6 @@ namespace Game
 
         public void SpawnObject(ActivePoolData spawns, uint limit, ulong triggerFrom)
         {
-            if (typeof(T).Name == "Quest")
-            {
-                SpawnQuestObject(spawns, limit, triggerFrom);
-                return;
-            }
-
             int count = (int)(limit - spawns.GetActiveObjectCount(poolId));
 
             // If triggered from some object respawn this object is still marked as spawned
@@ -807,71 +608,6 @@ namespace Game
                 DespawnObject(spawns, triggerFrom);
         }
 
-        void SpawnQuestObject(ActivePoolData spawns, uint limit, ulong triggerFrom)
-        {
-            Log.outDebug(LogFilter.Pool, "PoolGroup<Quest>: Spawning pool {0}", poolId);
-            // load state from db
-            if (triggerFrom == 0)
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_POOL_QUEST_SAVE);
-                stmt.AddValue(0, poolId);
-                SQLResult result = DB.Characters.Query(stmt);
-
-                if (!result.IsEmpty())
-                {
-                    do
-                    {
-                        uint questId = result.Read<uint>(0);
-                        spawns.ActivateObject<Quest>(questId, poolId);
-                        PoolObject tempObj = new(questId, 0.0f);
-                        Spawn1Object(tempObj);
-                        --limit;
-                    } while (result.NextRow() && limit != 0);
-                    return;
-                }
-            }
-
-            List<ulong> currentQuests = spawns.GetActiveQuests();
-            List<ulong> newQuests = new();
-
-            // always try to select different quests
-            foreach (var poolObject in EqualChanced)
-            {
-                if (spawns.IsActiveObject<Quest>(poolObject.guid))
-                    continue;
-                newQuests.Add(poolObject.guid);
-            }
-
-            // clear the pool
-            DespawnObject(spawns);
-
-            // recycle minimal amount of quests if possible count is lower than limit
-            while (limit > newQuests.Count && !currentQuests.Empty())
-            {
-                ulong questId = currentQuests.SelectRandom();
-                newQuests.Add(questId);
-                currentQuests.Remove(questId);
-            }
-
-            if (newQuests.Empty())
-                return;
-
-            // activate <limit> random quests
-            do
-            {
-                ulong questId = newQuests.SelectRandom();
-                spawns.ActivateObject<Quest>(questId, poolId);
-                PoolObject tempObj = new(questId, 0.0f);
-                Spawn1Object(tempObj);
-                newQuests.Remove(questId);
-                --limit;
-            } while (limit != 0 && !newQuests.Empty());
-
-            // if we are here it means the pool is initialized at startup and did not have previous saved state
-            if (triggerFrom == 0)
-                Global.PoolMgr.SaveQuestsToDB();
-        }
-
         void Spawn1Object(PoolObject obj)
         {
             switch (typeof(T).Name)
@@ -916,25 +652,6 @@ namespace Game
                 case "Pool":
                     Global.PoolMgr.SpawnPool((uint)obj.guid);
                     break;
-                case "Quest":
-                    // Creatures
-                    var questMap = Global.ObjectMgr.GetCreatureQuestRelationMap();
-                    var qr = Global.PoolMgr.mQuestCreatureRelation.LookupByKey(obj.guid);
-                    foreach (var creature in qr)
-                    {
-                        Log.outDebug(LogFilter.Pool, "PoolGroup<Quest>: Adding quest {0} to creature {1}", obj.guid, creature);
-                        questMap.Add(creature, (uint)obj.guid);
-                    }
-
-                    // Gameobjects
-                    questMap = Global.ObjectMgr.GetGOQuestRelationMap();
-                    qr = Global.PoolMgr.mQuestGORelation.LookupByKey(obj.guid);
-                    foreach (var go in qr)
-                    {
-                        Log.outDebug(LogFilter.Pool, "PoolGroup<Quest>: Adding quest {0} to GO {1}", obj.guid, go);
-                        questMap.Add(go, (uint)obj.guid);
-                    }
-                    break;
             }
         }
 
@@ -977,8 +694,6 @@ namespace Game
                     return mSpawnedGameobjects.Contains(db_guid);
                 case "Pool":
                     return mSpawnedPools.ContainsKey(db_guid);
-                case "Quest":
-                    return mActiveQuests.Contains(db_guid);
                 default:
                     return false;
             }            
@@ -996,9 +711,6 @@ namespace Game
                     break;
                 case "Pool":
                     mSpawnedPools[db_guid] = 0;
-                    break;
-                case "Quest":
-                    mActiveQuests.Add(db_guid);
                     break;
                 default:
                     return;
@@ -1022,9 +734,6 @@ namespace Game
                 case "Pool":
                     mSpawnedPools.Remove(db_guid);
                     break;
-                case "Quest":
-                    mActiveQuests.Remove(db_guid);
-                    break;
                 default:
                     return;
             }
@@ -1033,11 +742,8 @@ namespace Game
                 --mSpawnedPools[pool_id];
         }
 
-        public List<ulong> GetActiveQuests() { return mActiveQuests; } // a copy of the set
-
         List<ulong> mSpawnedCreatures = new();
         List<ulong> mSpawnedGameobjects = new();
-        List<ulong> mActiveQuests = new();
         Dictionary<ulong, uint> mSpawnedPools = new();
     }
 

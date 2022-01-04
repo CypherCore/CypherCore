@@ -21,7 +21,6 @@ namespace Framework.Database
     {
         public override void PreparedStatements()
         {
-            PrepareStatement(WorldStatements.SEL_QUEST_POOLS, "SELECT entry, pool_entry FROM pool_quest");
             PrepareStatement(WorldStatements.DEL_LINKED_RESPAWN, "DELETE FROM linked_respawn WHERE guid = ? AND linkType  = ?");
             PrepareStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER, "DELETE FROM linked_respawn WHERE linkedGuid = ? AND linkType = ?");
             PrepareStatement(WorldStatements.REP_LINKED_RESPAWN, "REPLACE INTO linked_respawn (guid, linkedGuid, linkType) VALUES (?, ?, ?)");
@@ -98,7 +97,6 @@ namespace Framework.Database
 
     public enum WorldStatements
     {
-        SEL_QUEST_POOLS,
         DEL_LINKED_RESPAWN,
         DEL_LINKED_RESPAWN_MASTER,
         REP_LINKED_RESPAWN,

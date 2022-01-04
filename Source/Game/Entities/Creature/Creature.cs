@@ -537,7 +537,7 @@ namespace Game.Entities
                         if (_spellFocusInfo.delay <= diff)
                             ReacquireSpellFocusTarget();
                         else
-                            _spellFocusInfo.delay -= 0;
+                            _spellFocusInfo.delay -= diff;
                     }
 
                     // periodic check to see if the creature has passed an evade boundary
@@ -1588,26 +1588,14 @@ namespace Game.Entities
                 SetControlled(true, UnitState.Root);
         }
 
-        public override bool HasQuest(uint quest_id)
+        public override bool HasQuest(uint questId)
         {
-            var qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(GetEntry());
-            foreach (var id in qr)
-            {
-                if (id == quest_id)
-                    return true;
-            }
-            return false;
+            return Global.ObjectMgr.GetCreatureQuestRelations(GetEntry()).HasQuest(questId);
         }
 
-        public override bool HasInvolvedQuest(uint quest_id)
+        public override bool HasInvolvedQuest(uint questId)
         {
-            var qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(GetEntry());
-            foreach (var id in qir)
-            {
-                if (id == quest_id)
-                    return true;
-            }
-            return false;
+            return Global.ObjectMgr.GetCreatureQuestInvolvedRelations(GetEntry()).HasQuest(questId);
         }
 
         public static bool DeleteFromDB(ulong spawnId)

@@ -1734,6 +1734,7 @@ namespace Framework.Constants
         WardenNumMemChecks,
         WardenNumOtherChecks,
         Weather,
+        WeeklyQuestResetTimeWDay,
         WintergraspBattletime,
         WintergraspEnable,
         WintergraspNobattletime,

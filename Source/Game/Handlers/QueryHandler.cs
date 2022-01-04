@@ -292,12 +292,10 @@ namespace Game
 
                 questCompletionNPC.QuestID = questID;
 
-                var creatures = Global.ObjectMgr.GetCreatureQuestInvolvedRelationReverseBounds(questID);
-                foreach (var id in creatures)
+                foreach (var id in Global.ObjectMgr.GetCreatureQuestInvolvedRelationReverseBounds(questID))
                     questCompletionNPC.NPCs.Add(id);
 
-                var gos = Global.ObjectMgr.GetGOQuestInvolvedRelationReverseBounds(questID);
-                foreach (var id in gos)
+                foreach (var id in Global.ObjectMgr.GetGOQuestInvolvedRelationReverseBounds(questID))
                     questCompletionNPC.NPCs.Add(id | 0x80000000); // GO mask
 
                 response.QuestCompletionNPCs.Add(questCompletionNPC);

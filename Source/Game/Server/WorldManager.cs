@@ -688,6 +688,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Objects Pooling Data...");
             Global.PoolMgr.LoadFromDB();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Quest Pooling Data...");
+            Global.QuestPoolMgr.LoadFromDB();                                // must be after quest templates
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Data...");               // must be after loading pools fully
             Global.GameEventMgr.LoadFromDB();
 
@@ -1065,14 +1068,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Deleting expired bans...");
             DB.Login.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");      // One-time query
 
-            Log.outInfo(LogFilter.ServerLoading, "Calculate next daily quest reset time...");
-            InitDailyQuestResetTime();
-
-            Log.outInfo(LogFilter.ServerLoading, "Calculate next weekly quest reset time...");
-            InitWeeklyQuestResetTime();
-
-            Log.outInfo(LogFilter.ServerLoading, "Calculate next monthly quest reset time...");
-            InitMonthlyQuestResetTime();
+            Log.outInfo(LogFilter.ServerLoading, "Initializing quest reset times...");
+            InitQuestResetTimes();
+            CheckScheduledResetTimes();
 
             Log.outInfo(LogFilter.ServerLoading, "Calculate random Battlegroundreset time...");
             InitRandomBGResetTime();
@@ -1307,20 +1305,7 @@ namespace Game
                 }
             }
 
-            // Handle daily quests reset time
-            if (currentGameTime > m_NextDailyQuestReset)
-            {
-                DailyReset();
-                InitDailyQuestResetTime(false);
-            }
-
-            // Handle weekly quests reset time
-            if (currentGameTime > m_NextWeeklyQuestReset)
-                ResetWeeklyQuests();
-
-            // Handle monthly quests reset time
-            if (currentGameTime > m_NextMonthlyQuestReset)
-                ResetMonthlyQuests();
+            CheckScheduledResetTimes();
 
             if (currentGameTime > m_NextRandomBGReset)
                 ResetRandomBG();
@@ -1979,50 +1964,136 @@ namespace Game
             }
         }
 
-        void InitWeeklyQuestResetTime()
+        void InitQuestResetTimes()
         {
-            long wstime = GetWorldState(WorldStates.WeeklyQuestResetTime);
-            long curtime = GameTime.GetGameTime();
-            m_NextWeeklyQuestReset = wstime < curtime ? curtime : wstime;
+            m_NextDailyQuestReset = GetWorldState(WorldStates.DailyQuestResetTime);
+            m_NextWeeklyQuestReset = GetWorldState(WorldStates.WeeklyQuestResetTime);
+            m_NextMonthlyQuestReset = GetWorldState(WorldStates.MonthlyQuestResetTime);
         }
 
-        void InitDailyQuestResetTime(bool loading = true)
+        static long GetNextDailyResetTime(long t)
         {
-            long mostRecentQuestTime = 0;
+            return Time.GetLocalHourTimestamp(t, WorldConfig.GetUIntValue(WorldCfg.DailyQuestResetTimeHour), true);
+        }
 
-            if (loading)
+        void DailyReset()
+        {
+            // reset all saved quest status
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
+            DB.Characters.Execute(stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
+            stmt.AddValue(0, 1);
+            DB.Characters.Execute(stmt);
+
+            // reset all quest status in memory
+            foreach (var itr in m_sessions)
             {
-                SQLResult result = DB.Characters.Query("SELECT MAX(time) FROM character_queststatus_daily");
-                if (!result.IsEmpty())
-                {
-                    mostRecentQuestTime = result.Read<uint>(0);
-                }
+                Player player = itr.Value.GetPlayer();
+                if (player != null)
+                    player.DailyReset();
             }
 
+            // reselect pools
+            Global.QuestPoolMgr.ChangeDailyQuests();
 
-            // FIX ME: client not show day start time
-            long curTime = GameTime.GetGameTime();
+            // store next reset time
+            long now = GameTime.GetGameTime();
+            long next = GetNextDailyResetTime(now);
+            Cypher.Assert(now < next);
 
-            // current day reset time
-            long curDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.DailyQuestResetTimeHour));
+            m_NextDailyQuestReset = next;
+            SetWorldState(WorldStates.DailyQuestResetTime, (ulong)next);
 
-            // last reset time before current moment
-            long resetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
-
-            // need reset (if we have quest time before last reset time (not processed by some reason)
-            if (mostRecentQuestTime != 0 && mostRecentQuestTime <= resetTime)
-                m_NextDailyQuestReset = mostRecentQuestTime;
-            else // plan next reset time
-                m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + Time.Day : curDayResetTime;
-
-            SetWorldState(WorldStates.DailyQuestResetTime, (ulong)m_NextDailyQuestReset);
+            Log.outInfo(LogFilter.Misc, "Daily quests for all characters have been reset.");
         }
 
-        void InitMonthlyQuestResetTime()
+        static long GetNextWeeklyResetTime(long t)
         {
-            long wstime = GetWorldState(WorldStates.MonthlyQuestResetTime);
-            long curtime = GameTime.GetGameTime();
-            m_NextMonthlyQuestReset = wstime < curtime ? curtime : wstime;
+            t = GetNextDailyResetTime(t);
+            DateTime time = Time.UnixTimeToDateTime(t);
+            int wday = (int)time.DayOfWeek;
+            int target = WorldConfig.GetIntValue(WorldCfg.WeeklyQuestResetTimeWDay);
+            if (target < wday)
+                wday -= 7;
+            t += (Time.Day * (target - wday));
+            return t;
+        }
+
+        void ResetWeeklyQuests()
+        {
+            // reset all saved quest status
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
+            DB.Characters.Execute(stmt);
+            // reset all quest status in memory
+            foreach (var itr in m_sessions)
+            {
+                Player player = itr.Value.GetPlayer();
+                if (player != null)
+                    player.ResetWeeklyQuestStatus();
+            }
+
+            // reselect pools
+            Global.QuestPoolMgr.ChangeWeeklyQuests();
+
+            // store next reset time
+            long now = GameTime.GetGameTime();
+            long next = GetNextWeeklyResetTime(now);
+            Cypher.Assert(now < next);
+
+            m_NextWeeklyQuestReset = next;
+            SetWorldState(WorldStates.WeeklyQuestResetTime, (ulong)next);
+
+            Log.outInfo(LogFilter.Misc, "Weekly quests for all characters have been reset.");
+        }
+
+        static long GetNextMonthlyResetTime(long t)
+        {
+            t = GetNextDailyResetTime(t);
+            DateTime time = Time.UnixTimeToDateTime(t);
+            if (time.Day == 1)
+                return t;
+
+            var newDate = new DateTime(time.Year, time.Month + 1, 1, 0, 0, 0, time.Kind);
+            return Time.DateTimeToUnixTime(newDate);
+        }
+
+        void ResetMonthlyQuests()
+        {
+            // reset all saved quest status
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
+            DB.Characters.Execute(stmt);
+            // reset all quest status in memory
+            foreach (var itr in m_sessions)
+            {
+                Player player = itr.Value.GetPlayer();
+                if (player != null)
+                    player.ResetMonthlyQuestStatus();
+            }
+
+            // reselect pools
+            Global.QuestPoolMgr.ChangeMonthlyQuests();
+
+            // store next reset time
+            long now = GameTime.GetGameTime();
+            long next = GetNextMonthlyResetTime(now);
+            Cypher.Assert(now < next);
+
+            m_NextMonthlyQuestReset = next;
+            SetWorldState(WorldStates.MonthlyQuestResetTime, (ulong)next);
+
+            Log.outInfo(LogFilter.Misc, "Monthly quests for all characters have been reset.");
+        }
+
+        void CheckScheduledResetTimes()
+        {
+            long now = GameTime.GetGameTime();
+            if (m_NextDailyQuestReset <= now)
+                DailyReset();
+            if (m_NextWeeklyQuestReset <= now)
+                ResetWeeklyQuests();
+            if (m_NextMonthlyQuestReset <= now)
+                ResetMonthlyQuests();
         }
 
         void InitRandomBGResetTime()
@@ -2089,25 +2160,6 @@ namespace Game
                 SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
-        void DailyReset()
-        {
-            Log.outInfo(LogFilter.Server, "Daily quests reset for all characters.");
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
-            DB.Characters.Execute(stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
-            stmt.AddValue(0, 1);
-            DB.Characters.Execute(stmt);
-
-            foreach (var session in m_sessions.Values)
-                if (session.GetPlayer() != null)
-                    session.GetPlayer().DailyReset();
-
-            // change available dailies
-            Global.PoolMgr.ChangeDailyQuests();
-        }
-
         void ResetCurrencyWeekCap()
         {
             DB.Characters.Execute("UPDATE `character_currency` SET `WeeklyQuantity` = 0");
@@ -2118,49 +2170,6 @@ namespace Game
 
             m_NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
             SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
-        }
-
-        void ResetWeeklyQuests()
-        {
-            Log.outInfo(LogFilter.Server, "Weekly quests reset for all characters.");
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
-            DB.Characters.Execute(stmt);
-
-            foreach (var session in m_sessions.Values)
-                if (session.GetPlayer() != null)
-                    session.GetPlayer().ResetWeeklyQuestStatus();
-
-            m_NextWeeklyQuestReset += Time.Week;
-            SetWorldState(WorldStates.WeeklyQuestResetTime, (ulong)m_NextWeeklyQuestReset);
-
-            // change available weeklies
-            Global.PoolMgr.ChangeWeeklyQuests();
-        }
-
-        void ResetMonthlyQuests()
-        {
-            Log.outInfo(LogFilter.Server, "Monthly quests reset for all characters.");
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
-            DB.Characters.Execute(stmt);
-
-            foreach (var session in m_sessions.Values)
-                if (session.GetPlayer() != null)
-                    session.GetPlayer().ResetMonthlyQuestStatus();
-
-            long curTime = GameTime.GetGameTime();
-
-            // current day reset time
-            long curDayResetTime = Time.GetNextResetUnixTime(30, 1, 0);
-
-            // last reset time before current moment
-            long nextMonthResetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
-
-            // plan next reset time
-            m_NextMonthlyQuestReset = (curTime >= nextMonthResetTime) ? nextMonthResetTime + Time.Month : nextMonthResetTime;
-
-            SetWorldState(WorldStates.MonthlyQuestResetTime, (ulong)m_NextMonthlyQuestReset);
         }
 
         public void ResetEventSeasonalQuests(ushort event_id)
