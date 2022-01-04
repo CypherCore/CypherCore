@@ -2976,6 +2976,28 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 67489 - Runic Healing Injector
+    class spell_item_runic_healing_injector : SpellScript
+    {
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleHeal(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
+            if (caster != null)
+                if (caster.HasSkill(SkillType.Engineering))
+                    SetHitHeal((int)(GetHitHeal() * 1.25f));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal));
+        }
+    }
+    
     [Script]
     class spell_item_pygmy_oil : SpellScript
     {

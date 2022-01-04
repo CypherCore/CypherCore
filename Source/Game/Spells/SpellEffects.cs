@@ -784,14 +784,6 @@ namespace Game.Spells
 
                 addhealth += damageAmount;
             }
-            // Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
-            else if (m_spellInfo.Id == 67489)
-            {
-                Player player = unitCaster.ToPlayer();
-                if (player != null)
-                    if (player.HasSkill(SkillType.Engineering))
-                        MathFunctions.AddPct(ref addhealth, 25);
-            }
             // Death Pact - return pct of max health to caster
             else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00080000u))
                 addhealth = (int)unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)unitCaster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo);
