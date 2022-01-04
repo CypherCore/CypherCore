@@ -621,11 +621,6 @@ namespace Game.Entities
             return mSpellAreaForAreaMap.LookupByKey(area_id);
         }
 
-        public List<SpellArea> GetSpellAreaForQuestAreaMapBounds(uint area_id, uint quest_id)
-        {
-            return mSpellAreaForQuestAreaMap.LookupByKey(Tuple.Create(area_id, quest_id));
-        }
-
         public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty)
         {
             var list = mSpellInfoMap.LookupByKey(spellId);
@@ -1969,7 +1964,6 @@ namespace Game.Entities
             mSpellAreaForQuestMap.Clear();
             mSpellAreaForQuestEndMap.Clear();
             mSpellAreaForAuraMap.Clear();
-            mSpellAreaForQuestAreaMap.Clear();
 
             //                                            0     1         2              3               4                 5          6          7       8      9
             SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
@@ -2131,9 +2125,19 @@ namespace Game.Entities
                 if (spellArea.areaId != 0)
                     mSpellAreaForAreaMap.AddRange(spellArea.areaId, sa);
 
-                // for search at quest start/reward
-                if (spellArea.questStart != 0)
-                    mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                // for search at quest update checks
+                if (spellArea.questStart != 0 || spellArea.questEnd != 0)
+                {
+                    if (spellArea.questStart == spellArea.questEnd)
+                        mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                    else
+                    {
+                        if (spellArea.questStart != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                        if (spellArea.questEnd != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.questEnd, sa);
+                    }
+                }
 
                 // for search at quest start/reward
                 if (spellArea.questEnd != 0)
@@ -2142,12 +2146,6 @@ namespace Game.Entities
                 // for search at aura apply
                 if (spellArea.auraSpell != 0)
                     mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.auraSpell), sa);
-
-                if (spellArea.areaId != 0 && spellArea.questStart != 0)
-                    mSpellAreaForQuestAreaMap.AddRange(Tuple.Create(spellArea.areaId, spellArea.questStart), sa);
-
-                if (spellArea.areaId != 0 && spellArea.questEnd != 0)
-                    mSpellAreaForQuestAreaMap.AddRange(Tuple.Create(spellArea.areaId, spellArea.questEnd), sa);
 
                 ++count;
             } while (result.NextRow());
@@ -4756,7 +4754,6 @@ namespace Game.Entities
         MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new();
-        MultiMap<Tuple<uint, uint>, SpellArea> mSpellAreaForQuestAreaMap = new();
         MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
         Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry

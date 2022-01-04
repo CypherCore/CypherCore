@@ -1871,22 +1871,51 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        void SendQuestUpdate(uint questid)
+        void SendQuestUpdate(uint questId)
         {
-            uint zone, area;
-            GetZoneAndAreaId(out zone, out area);
-
-            var saBounds = Global.SpellMgr.GetSpellAreaForQuestAreaMapBounds(area, questid);
+            var saBounds = Global.SpellMgr.GetSpellAreaForQuestMapBounds(questId);
             if (!saBounds.Empty())
             {
+                List<uint> aurasToRemove = new();
+                List<uint> aurasToCast = new();
+                GetZoneAndAreaId(out uint zone, out uint area);
+
                 foreach (var spell in saBounds)
                 {
                     if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spell.IsFitToRequirements(this, zone, area))
-                        RemoveAurasDueToSpell(spell.spellId);
+                        aurasToRemove.Add(spell.spellId);
                     else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && !spell.flags.HasAnyFlag(SpellAreaFlag.IgnoreAutocastOnQuestStatusChange))
-                        if (!HasAura(spell.spellId))
-                            CastSpell(this, spell.spellId, true);
+                        aurasToCast.Add(spell.spellId);
                 }
+
+                // Auras matching the requirements will be inside the aurasToCast container.
+                // Auras not matching the requirements may prevent using auras matching the requirements.
+                // aurasToCast will erase conflicting auras in aurasToRemove container to handle spells used by multiple quests.
+
+                for (var c = 0; c < aurasToRemove.Count;)
+                {
+                    bool auraRemoved = false;
+
+                    foreach (var i in aurasToCast)
+                    {
+                        if (aurasToRemove[c] == i)
+                        {
+                            aurasToRemove.Remove(aurasToRemove[c]);
+                            auraRemoved = true;
+                            break;
+                        }
+                    }
+
+                    if (!auraRemoved)
+                        ++c;
+                }
+
+                foreach (var spellId in aurasToCast)
+                    if (!HasAura(spellId))
+                        CastSpell(this, spellId, true);
+
+                foreach (var spellId in aurasToRemove)
+                    RemoveAurasDueToSpell(spellId);
             }
 
             UpdateVisibleGameobjectsOrSpellClicks();
