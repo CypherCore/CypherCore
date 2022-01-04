@@ -2487,19 +2487,18 @@ namespace Game.Maps
             return true;
         }
 
-        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map, uint zoneId)
+        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map)
         {
             foreach (var pair in map)
-                if (zoneId == 0 || pair.Value.zoneId == zoneId)
-                    data.Add(pair.Value);
+                data.Add(pair.Value);
         }
 
-        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types, uint zoneId)
+        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types)
         {
             if (types.HasAnyFlag(SpawnObjectTypeMask.Creature))
-                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId, zoneId);
+                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
             if (types.HasAnyFlag(SpawnObjectTypeMask.GameObject))
-                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId, zoneId);
+                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
         }
 
         RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
@@ -3025,7 +3024,7 @@ namespace Game.Maps
             m_activeNonPlayers.Remove(obj);
         }
 
-        public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint zoneId, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
+        public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
         {
             if (spawnId == 0)
                 return;
@@ -3043,7 +3042,6 @@ namespace Game.Maps
             ri.entry = entry;
             ri.respawnTime = respawnTime;
             ri.gridId = gridId;
-            ri.zoneId = zoneId;
             bool success = AddRespawnInfo(ri);
 
             if (startup)
@@ -3085,7 +3083,7 @@ namespace Game.Maps
                     {
                         SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
                         if (data != null)
-                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GetZoneId(PhasingHandler.EmptyPhaseShift, data.spawnPoint), GridDefines.ComputeGridCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY()).GetId(), null, true);
+                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY()).GetId(), null, true);
                         else
                             Log.outError(LogFilter.Maps, $"Loading saved respawn time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
                     }
@@ -5567,7 +5565,6 @@ namespace Game.Maps
         public uint entry;
         public long respawnTime;
         public uint gridId;
-        public uint zoneId;
 
         public RespawnInfo() { }
         public RespawnInfo(RespawnInfo info)
@@ -5577,7 +5574,6 @@ namespace Game.Maps
             entry = info.entry;
             respawnTime = info.respawnTime;
             gridId = info.gridId;
-            zoneId = info.zoneId;
         }
     }
 

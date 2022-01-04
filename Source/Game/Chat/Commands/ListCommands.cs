@@ -579,28 +579,39 @@ namespace Game.Chat.Commands
             string stringOverdue = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsOverdue, locale);
 
             uint zoneId = player.GetZoneId();
-
+            string zoneName = GetZoneName(zoneId, locale);
             for (SpawnObjectType type = 0; type < SpawnObjectType.Max; type++)
             {
                 if (range != 0)
                     handler.SendSysMessage(CypherStrings.ListRespawnsRange, type, range);
                 else
-                    handler.SendSysMessage(CypherStrings.ListRespawnsZone, type, GetZoneName(zoneId, locale), zoneId);
+                    handler.SendSysMessage(CypherStrings.ListRespawnsZone, type, zoneName, zoneId);
                 handler.SendSysMessage(CypherStrings.ListRespawnsListheader);
                 List<RespawnInfo> respawns = new();
-                map.GetRespawnInfo(respawns, (SpawnObjectTypeMask)(1 << (int)type), range != 0 ? 0 : zoneId);
+                map.GetRespawnInfo(respawns, (SpawnObjectTypeMask)(1 << (int)type));
                 foreach (RespawnInfo ri in respawns)
                 {
                     SpawnData data = Global.ObjectMgr.GetSpawnData(ri.type, ri.spawnId);
                     if (data == null)
                         continue;
-                    if (range != 0 && !player.IsInDist(data.spawnPoint, range))
-                        continue;
+
+                    uint respawnZoneId = map.GetZoneId(PhasingHandler.EmptyPhaseShift, data.spawnPoint);
+                    if (range != 0)
+                    {
+                        if (!player.IsInDist(data.spawnPoint, range))
+                            continue;
+                    }
+                    else
+                    {
+                        if (zoneId != respawnZoneId)
+                            continue;
+                    }
+
                     uint gridY = ri.gridId / MapConst.MaxGrids;
                     uint gridX = ri.gridId % MapConst.MaxGrids;
 
                     string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.respawnTime - GameTime.GetGameTime()), true) : stringOverdue;
-                    handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(ri.zoneId, locale)} ({ri.zoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
+                    handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
                 }
             }
             return true;

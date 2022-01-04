@@ -1953,7 +1953,7 @@ namespace Game.Chat
 
             // Now handle any that had despawned, but had respawn time logged.
             List<RespawnInfo> data = new();
-            player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All, 0);
+            player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All);
             if (!data.Empty())
             {
                 uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
