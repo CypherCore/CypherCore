@@ -103,9 +103,9 @@ namespace Game.Entities
 
     struct SpellFocusInfo
     {
-        public Spell spell;
-        public uint delay;         // ms until the creature's target should snap back (0 = no snapback scheduled)
-        public ObjectGuid target;        // the creature's "real" target while casting
-        public float orientation; // the creature's "real" orientation while casting
+        public Spell Spell;
+        public uint Delay;         // ms until the creature's target should snap back (0 = no snapback scheduled)
+        public ObjectGuid Target;        // the creature's "real" target while casting
+        public float Orientation; // the creature's "real" orientation while casting
     }
 }

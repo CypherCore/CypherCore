@@ -532,12 +532,12 @@ namespace Game.Entities
 
                     GetThreatManager().Update(diff);
 
-                    if (_spellFocusInfo.delay != 0)
+                    if (_spellFocusInfo.Delay != 0)
                     {
-                        if (_spellFocusInfo.delay <= diff)
+                        if (_spellFocusInfo.Delay <= diff)
                             ReacquireSpellFocusTarget();
                         else
-                            _spellFocusInfo.delay -= diff;
+                            _spellFocusInfo.Delay -= diff;
                     }
 
                     // periodic check to see if the creature has passed an evade boundary
@@ -2897,7 +2897,7 @@ namespace Game.Entities
         public override void SetTarget(ObjectGuid guid)
         {
             if (HasSpellFocus())
-                _spellFocusInfo.target = guid;
+                _spellFocusInfo.Target = guid;
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), guid);
         }
@@ -2905,7 +2905,7 @@ namespace Game.Entities
         public void SetSpellFocus(Spell focusSpell, WorldObject target)
         {
             // already focused
-            if (_spellFocusInfo.spell != null)
+            if (_spellFocusInfo.Spell != null)
                 return;
 
             // Prevent dead/feigning death creatures from setting a focus target, so they won't turn
@@ -2930,15 +2930,15 @@ namespace Game.Entities
                 return;
 
             // store pre-cast values for target and orientation (used to later restore)
-            if (_spellFocusInfo.delay == 0)
+            if (_spellFocusInfo.Delay == 0)
             { // only overwrite these fields if we aren't transitioning from one spell focus to another
-                _spellFocusInfo.target = GetTarget();
-                _spellFocusInfo.orientation = GetOrientation();
+                _spellFocusInfo.Target = GetTarget();
+                _spellFocusInfo.Orientation = GetOrientation();
             }
             else // don't automatically reacquire target for the previous spellcast
-                _spellFocusInfo.delay = 0;
+                _spellFocusInfo.Delay = 0;
 
-            _spellFocusInfo.spell = focusSpell;
+            _spellFocusInfo.Spell = focusSpell;
 
             bool noTurnDuringCast = spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast);
             // set target, then force send update packet to players if it changed to provide appropriate facing
@@ -2983,28 +2983,28 @@ namespace Game.Entities
         {
             if (!IsAlive()) // dead creatures cannot focus
             {
-                if (_spellFocusInfo.spell != null || _spellFocusInfo.delay != 0)
-                    Log.outWarn(LogFilter.Unit, $"Creature '{GetName()}' (entry {GetEntry()}) has spell focus (spell id {(_spellFocusInfo.spell != null ? _spellFocusInfo.spell.GetSpellInfo().Id : 0)}, delay {_spellFocusInfo.delay}ms) despite being dead.");
+                if (_spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0)
+                    Log.outWarn(LogFilter.Unit, $"Creature '{GetName()}' (entry {GetEntry()}) has spell focus (spell id {(_spellFocusInfo.Spell != null ? _spellFocusInfo.Spell.GetSpellInfo().Id : 0)}, delay {_spellFocusInfo.Delay}ms) despite being dead.");
 
                 return false;
             }
 
             if (focusSpell)
-                return focusSpell == _spellFocusInfo.spell;
+                return focusSpell == _spellFocusInfo.Spell;
             else
-                return _spellFocusInfo.spell != null || _spellFocusInfo.delay != 0;
+                return _spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0;
         }
 
         public void ReleaseSpellFocus(Spell focusSpell = null, bool withDelay = true)
         {
-            if (!_spellFocusInfo.spell)
+            if (!_spellFocusInfo.Spell)
                 return;
 
             // focused to something else
-            if (focusSpell && focusSpell != _spellFocusInfo.spell)
+            if (focusSpell && focusSpell != _spellFocusInfo.Spell)
                 return;
 
-            if (_spellFocusInfo.spell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast))
+            if (_spellFocusInfo.Spell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast))
                 ClearUnitState(UnitState.Focusing);
 
             if (IsPet()) // player pets do not use delay system
@@ -3013,34 +3013,33 @@ namespace Game.Entities
                     ReacquireSpellFocusTarget();
             }
             else // don't allow re-target right away to prevent visual bugs
-                _spellFocusInfo.delay = withDelay ? 1000 : 1u;
+                _spellFocusInfo.Delay = withDelay ? 1000 : 1u;
 
-            _spellFocusInfo.spell = null;
+            _spellFocusInfo.Spell = null;
         }
 
         void ReacquireSpellFocusTarget()
         {
-            if (!HasSpellFocus())
-                return;
+            Cypher.Assert(HasSpellFocus());
 
-            SetTarget(_spellFocusInfo.target);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _spellFocusInfo.Target);
 
             if (!HasUnitFlag2(UnitFlags2.DisableTurn))
             {
-                if (!_spellFocusInfo.target.IsEmpty())
+                if (!_spellFocusInfo.Target.IsEmpty())
                 {
-                    WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _spellFocusInfo.target);
+                    WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _spellFocusInfo.Target);
                     if (objTarget)
                         SetFacingToObject(objTarget, false);
                 }
                 else
-                    SetFacingTo(_spellFocusInfo.orientation, false);
+                    SetFacingTo(_spellFocusInfo.Orientation, false);
             }
 
-            _spellFocusInfo.delay = 0;
+            _spellFocusInfo.Delay = 0;
         }
 
-        public void DoNotReacquireSpellFocusTarget() { _spellFocusInfo.delay = 0; }
+        public void DoNotReacquireSpellFocusTarget() { _spellFocusInfo.Delay = 0; }
 
         public ulong GetSpawnId() { return m_spawnId; }
 
