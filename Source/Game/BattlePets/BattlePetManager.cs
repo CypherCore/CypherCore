@@ -47,18 +47,18 @@ namespace Game.BattlePets
 
             foreach (var battlePetBreedState in CliDB.BattlePetBreedStateStorage.Values)
             {
-                if (!_battlePetBreedStates.ContainsKey(battlePetBreedState.BattlePetBreedID))
-                    _battlePetBreedStates[battlePetBreedState.BattlePetBreedID] = new Dictionary<BattlePetState, int>();
+                if (!BattlePetBreedStates.ContainsKey(battlePetBreedState.BattlePetBreedID))
+                    BattlePetBreedStates[battlePetBreedState.BattlePetBreedID] = new Dictionary<BattlePetState, int>();
 
-                _battlePetBreedStates[battlePetBreedState.BattlePetBreedID][(BattlePetState)battlePetBreedState.BattlePetStateID] = battlePetBreedState.Value;
+                BattlePetBreedStates[battlePetBreedState.BattlePetBreedID][(BattlePetState)battlePetBreedState.BattlePetStateID] = battlePetBreedState.Value;
             }
 
             foreach (var battlePetSpeciesState in CliDB.BattlePetSpeciesStateStorage.Values)
             {
-                if (!_battlePetSpeciesStates.ContainsKey(battlePetSpeciesState.BattlePetSpeciesID))
-                    _battlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID] = new Dictionary<BattlePetState, int>();
+                if (!BattlePetSpeciesStates.ContainsKey(battlePetSpeciesState.BattlePetSpeciesID))
+                    BattlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID] = new Dictionary<BattlePetState, int>();
 
-                _battlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID][(BattlePetState)battlePetSpeciesState.BattlePetStateID] = battlePetSpeciesState.Value;
+                BattlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID][(BattlePetState)battlePetSpeciesState.BattlePetStateID] = battlePetSpeciesState.Value;
             }
 
             LoadAvailablePetBreeds();
@@ -709,62 +709,62 @@ namespace Game.BattlePets
         Dictionary<ulong, BattlePet> _pets = new();
         List<BattlePetSlot> _slots = new();
 
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new();
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new();
+        public static Dictionary<uint, Dictionary<BattlePetState, int>> BattlePetBreedStates = new();
+        public static Dictionary<uint, Dictionary<BattlePetState, int>> BattlePetSpeciesStates = new();
         static MultiMap<uint, byte> _availableBreedsPerSpecies = new();
         static Dictionary<uint, BattlePetBreedQuality> _defaultQualityPerSpecies = new();
+    }
 
-        public class BattlePet
+    public class BattlePet
+    {
+        public void CalculateStats()
         {
-            public void CalculateStats()
+            // get base breed stats
+            var breedState = BattlePetMgr.BattlePetBreedStates.LookupByKey(PacketInfo.Breed);
+            if (breedState == null) // non existing breed id
+                return;
+
+            float health = breedState[BattlePetState.StatStamina];
+            float power = breedState[BattlePetState.StatPower];
+            float speed = breedState[BattlePetState.StatSpeed];
+
+            // modify stats depending on species - not all pets have this
+            var speciesState = BattlePetMgr.BattlePetSpeciesStates.LookupByKey(PacketInfo.Species);
+            if (speciesState != null)
             {
-                // get base breed stats
-                var breedState = _battlePetBreedStates.LookupByKey(PacketInfo.Breed);
-                if (breedState == null) // non existing breed id
-                    return;
-
-                float health = breedState[BattlePetState.StatStamina];
-                float power = breedState[BattlePetState.StatPower];
-                float speed = breedState[BattlePetState.StatSpeed];
-
-                // modify stats depending on species - not all pets have this
-                var speciesState = _battlePetSpeciesStates.LookupByKey(PacketInfo.Species);
-                if (speciesState != null)
-                {
-                    health += speciesState[BattlePetState.StatStamina];
-                    power += speciesState[BattlePetState.StatPower];
-                    speed += speciesState[BattlePetState.StatSpeed];
-                }
-
-                // modify stats by quality
-                foreach (var battlePetBreedQuality in CliDB.BattlePetBreedQualityStorage.Values)
-                {
-                    if (battlePetBreedQuality.QualityEnum == PacketInfo.Quality)
-                    {
-                        health *= battlePetBreedQuality.StateMultiplier;
-                        power *= battlePetBreedQuality.StateMultiplier;
-                        speed *= battlePetBreedQuality.StateMultiplier;
-                        break;
-                    }
-                    // TOOD: add check if pet has existing quality
-                }
-
-                // scale stats depending on level
-                health *= PacketInfo.Level;
-                power *= PacketInfo.Level;
-                speed *= PacketInfo.Level;
-
-                // set stats
-                // round, ceil or floor? verify this
-                PacketInfo.MaxHealth = (uint)((Math.Round(health / 20) + 100));
-                PacketInfo.Power = (uint)(Math.Round(power / 100));
-                PacketInfo.Speed = (uint)(Math.Round(speed / 100));
+                health += speciesState[BattlePetState.StatStamina];
+                power += speciesState[BattlePetState.StatPower];
+                speed += speciesState[BattlePetState.StatSpeed];
             }
 
-            public BattlePetStruct PacketInfo;
-            public long NameTimestamp;
-            public DeclinedName DeclinedName;
-            public BattlePetSaveInfo SaveInfo;
+            // modify stats by quality
+            foreach (var battlePetBreedQuality in CliDB.BattlePetBreedQualityStorage.Values)
+            {
+                if (battlePetBreedQuality.QualityEnum == PacketInfo.Quality)
+                {
+                    health *= battlePetBreedQuality.StateMultiplier;
+                    power *= battlePetBreedQuality.StateMultiplier;
+                    speed *= battlePetBreedQuality.StateMultiplier;
+                    break;
+                }
+                // TOOD: add check if pet has existing quality
+            }
+
+            // scale stats depending on level
+            health *= PacketInfo.Level;
+            power *= PacketInfo.Level;
+            speed *= PacketInfo.Level;
+
+            // set stats
+            // round, ceil or floor? verify this
+            PacketInfo.MaxHealth = (uint)((Math.Round(health / 20) + 100));
+            PacketInfo.Power = (uint)(Math.Round(power / 100));
+            PacketInfo.Speed = (uint)(Math.Round(speed / 100));
         }
+
+        public BattlePetStruct PacketInfo;
+        public long NameTimestamp;
+        public DeclinedName DeclinedName;
+        public BattlePetSaveInfo SaveInfo;
     }
 }

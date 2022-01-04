@@ -271,7 +271,7 @@ namespace Game.Combat
             {
                 _owner.AddUnitFlag(UnitFlags.InCombat);
                 _owner.AtEnterCombat();
-                if (_owner.IsCreature())
+                if (!_owner.IsCreature())
                     _owner.AtEngage(GetAnyTarget());
             }
             else

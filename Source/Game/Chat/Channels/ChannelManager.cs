@@ -33,7 +33,6 @@ namespace Game.Chat
             _guidGenerator = new ObjectGuidGenerator(HighGuid.ChatChannel);
         }
 
-        /*static*/
         public static void LoadFromDB()
         {
             if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))

@@ -1210,7 +1210,7 @@ namespace Game.Entities
         public UpdateField<uint> MaxItemLevel = new(96, 106);
         public UpdateField<int> AzeriteItemLevel = new(96, 107);
         public UpdateField<uint> WildBattlePetLevel = new(96, 108);
-        public UpdateField<int> BattlePetCompanionExperience = new(96, 109);
+        public UpdateField<uint> BattlePetCompanionExperience = new(96, 109);
         public UpdateField<uint> BattlePetCompanionNameTimestamp = new(96, 110);
         public UpdateField<int> InteractSpellID = new(96, 111);
         public UpdateField<int> ScaleDuration = new(96, 112);
@@ -1403,7 +1403,7 @@ namespace Game.Entities
             data.WriteUInt32(MaxItemLevel);
             data.WriteInt32(AzeriteItemLevel);
             data.WriteUInt32(WildBattlePetLevel);
-            data.WriteInt32(BattlePetCompanionExperience);
+            data.WriteUInt32(BattlePetCompanionExperience);
             data.WriteUInt32(BattlePetCompanionNameTimestamp);
             data.WriteInt32(InteractSpellID);
             data.WriteInt32(ScaleDuration);
@@ -1944,7 +1944,7 @@ namespace Game.Entities
                 }
                 if (changesMask[109])
                 {
-                    data.WriteInt32(BattlePetCompanionExperience);
+                    data.WriteUInt32(BattlePetCompanionExperience);
                 }
                 if (changesMask[110])
                 {

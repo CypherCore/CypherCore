@@ -476,6 +476,12 @@ namespace Game.AI
                 return false;
             }
 
+            if (me.GetCharmInfo() == null)
+            {
+                //Log.outError(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {}", GetDebugInfo());
+                return false;
+            }
+
             // Passive - passive pets can attack if told to
             if (me.HasReactState(ReactStates.Passive))
                 return me.GetCharmInfo().IsCommandAttack();

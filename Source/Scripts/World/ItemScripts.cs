@@ -215,40 +215,6 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_pile_fake_furs : ItemScript
-    {
-        public item_pile_fake_furs() : base("item_pile_fake_furs") { }
-
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
-        {
-            GameObject go = null;
-            foreach (var id in GameObjectIds.CaribouTraps)
-            {
-                go = player.FindNearestGameObject(id, 5.0f);
-                if (go)
-                    break;
-            }
-
-            if (!go)
-                return false;
-
-            if (go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, true) || go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, false) || go.FindNearestGameObject(GameObjectIds.HighQualityFur, 2.0f))
-                return true;
-
-            go.GetClosePoint(out float x, out float y, out float z, go.GetCombatReach() / 3, 7.0f);
-            go.SummonGameObject(GameObjectIds.HighQualityFur, go, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f)), 1);
-            TempSummon summon = player.SummonCreature(CreatureIds.NesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
-            if (summon)
-            {
-                summon.SetVisible(false);
-                summon.SetReactState(ReactStates.Passive);
-                summon.SetImmuneToPC(true);
-            }
-            return false;
-        }
-    }
-
-    [Script]
     class item_petrov_cluster_bombs : ItemScript
     {
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }

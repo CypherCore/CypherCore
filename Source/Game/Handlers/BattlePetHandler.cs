@@ -44,7 +44,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetSetBattleSlot)]
         void HandleBattlePetSetBattleSlot(BattlePetSetBattleSlot battlePetSetBattleSlot)
         {
-            BattlePetMgr.BattlePet pet = GetBattlePetMgr().GetPet(battlePetSetBattleSlot.PetGuid);
+            BattlePet pet = GetBattlePetMgr().GetPet(battlePetSetBattleSlot.PetGuid);
             if (pet != null)
             {
                 BattlePetSlot slot = GetBattlePetMgr().GetSlot((BattlePetSlots)battlePetSetBattleSlot.Slot);
@@ -82,7 +82,7 @@ namespace Game
                 return;
             }
 
-            BattlePetMgr.BattlePet battlePet = petOwner.ToPlayer().GetSession().GetBattlePetMgr().GetPet(queryBattlePetName.BattlePetID);
+            BattlePet battlePet = petOwner.ToPlayer().GetSession().GetBattlePetMgr().GetPet(queryBattlePetName.BattlePetID);
             if (battlePet == null)
             {
                 SendPacket(response);

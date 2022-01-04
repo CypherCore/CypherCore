@@ -4847,7 +4847,7 @@ namespace Game.Entities
         void SendTameFailure(PetTameResult result)
         {
             PetTameFailure petTameFailure = new();
-            petTameFailure.Result = result;
+            petTameFailure.Result = (byte)result;
             SendPacket(petTameFailure);
         }
 

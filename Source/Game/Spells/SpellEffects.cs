@@ -2784,10 +2784,6 @@ namespace Game.Spells
                             if (unitTarget != null && unitCaster != null)
                                 unitCaster.CastSpell(unitTarget, Convert.ToBoolean(RandomHelper.IRand(0, 1)) ? (uint)damage : 52505, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
-                        case 53110: // Devour Humanoid
-                            if (unitTarget != null)
-                                unitTarget.CastSpell(m_caster, (uint)damage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            return;
                         case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
                         {
                             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit) || !m_caster.IsTypeId(TypeId.Player))
