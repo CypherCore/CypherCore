@@ -1777,18 +1777,18 @@ namespace Game.Spells
 
                 if (dispelableAura.RollDispel())
                 {
-                    var successItr = successList.Find(dispelAura =>
+                    var successAura = successList.Find(dispelAura =>
                     {
-                        if (dispelAura.GetAura().GetId() == dispelableAura.GetAura().GetId())
+                        if (dispelAura.GetAura().GetId() == dispelableAura.GetAura().GetId() && dispelAura.GetAura().GetCaster() == dispelableAura.GetAura().GetCaster())
                             return true;
 
                         return false;
                     });
 
-                    if (successItr == null)
+                    if (successAura == null)
                         successList.Add(new DispelableAura(dispelableAura.GetAura(), 0, 1));
                     else
-                        successItr.IncrementCharges();
+                        successAura.IncrementCharges();
 
                     if (!dispelableAura.DecrementCharge())
                     {
