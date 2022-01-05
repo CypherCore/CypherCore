@@ -1437,7 +1437,7 @@ namespace Game.BattleGrounds
         {
             return (uint)_battlegroundTemplate.BattlemasterEntry.MapId[0];
         }
-        
+
         public void SpawnBGObject(int type, uint respawntime)
         {
             Map map = FindBgMap();
@@ -1447,12 +1447,23 @@ namespace Game.BattleGrounds
                 if (obj)
                 {
                     if (respawntime != 0)
-                        obj.SetLootState(LootState.JustDeactivated);
-                    else
                     {
-                        if (obj.GetLootState() == LootState.JustDeactivated)
-                            // Change state from GO_JUST_DEACTIVATED to GO_READY in case Battleground is starting again
-                            obj.SetLootState(LootState.Ready);
+                        obj.SetLootState(LootState.JustDeactivated);
+                        {
+                            GameObjectOverride goOverride = obj.GetGameObjectOverride();
+                            if (goOverride != null)
+                                if (goOverride.Flags.HasFlag(GameObjectFlags.NoDespawn))
+                                {
+                                    // This function should be called in GameObject::Update() but in case of
+                                    // GO_FLAG_NODESPAWN flag the function is never called, so we call it here
+                                    obj.SendGameObjectDespawn();
+                                }
+                        }
+                    }
+                    else if (obj.GetLootState() == LootState.JustDeactivated)
+                    {
+                        // Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
+                        obj.SetLootState(LootState.Ready);
                     }
                     obj.SetRespawnTime((int)respawntime);
                     map.AddToMap(obj);
