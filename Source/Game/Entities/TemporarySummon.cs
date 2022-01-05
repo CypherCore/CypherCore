@@ -31,6 +31,7 @@ namespace Game.Entities
 
             m_summonerGUID = owner != null ? owner.GetGUID() : ObjectGuid.Empty;
             UnitTypeMask |= UnitTypeMask.Summon;
+            m_canFollowOwner = true;
         }
 
         public WorldObject GetSummoner()
@@ -46,7 +47,7 @@ namespace Game.Entities
 
             return null;
         }
-        
+
         public Creature GetSummonerCreatureBase()
         {
             return !m_summonerGUID.IsEmpty() ? ObjectAccessor.GetCreature(this, m_summonerGUID) : null;
@@ -60,7 +61,7 @@ namespace Game.Entities
 
             return null;
         }
-        
+
         public override void Update(uint diff)
         {
             base.Update(diff);
@@ -77,6 +78,19 @@ namespace Game.Entities
                 case TempSummonType.DeadDespawn:
                     break;
                 case TempSummonType.TimedDespawn:
+                {
+                    if (m_timer <= diff)
+                    {
+                        UnSummon();
+                        return;
+                    }
+
+                    m_timer -= diff;
+                    break;
+                }
+                case TempSummonType.TimedDespawnOutOfCombat:
+                {
+                    if (!IsInCombat())
                     {
                         if (m_timer <= diff)
                         {
@@ -85,89 +99,76 @@ namespace Game.Entities
                         }
 
                         m_timer -= diff;
-                        break;
                     }
-                case TempSummonType.TimedDespawnOutOfCombat:
-                    {
-                        if (!IsInCombat())
-                        {
-                            if (m_timer <= diff)
-                            {
-                                UnSummon();
-                                return;
-                            }
+                    else if (m_timer != m_lifetime)
+                        m_timer = m_lifetime;
 
-                            m_timer -= diff;
-                        }
-                        else if (m_timer != m_lifetime)
-                            m_timer = m_lifetime;
-
-                        break;
-                    }
+                    break;
+                }
 
                 case TempSummonType.CorpseTimedDespawn:
+                {
+                    if (m_deathState == DeathState.Corpse)
                     {
-                        if (m_deathState == DeathState.Corpse)
+                        if (m_timer <= diff)
                         {
-                            if (m_timer <= diff)
-                            {
-                                UnSummon();
-                                return;
-                            }
-
-                            m_timer -= diff;
+                            UnSummon();
+                            return;
                         }
-                        break;
+
+                        m_timer -= diff;
                     }
+                    break;
+                }
                 case TempSummonType.CorpseDespawn:
+                {
+                    // if m_deathState is DEAD, CORPSE was skipped
+                    if (m_deathState == DeathState.Corpse)
                     {
-                        // if m_deathState is DEAD, CORPSE was skipped
-                        if (m_deathState == DeathState.Corpse)
-                        {
-                            UnSummon();
-                            return;
-                        }
-
-                        break;
+                        UnSummon();
+                        return;
                     }
+
+                    break;
+                }
                 case TempSummonType.TimedOrCorpseDespawn:
+                {
+                    if (m_deathState == DeathState.Corpse)
                     {
-                        if (m_deathState == DeathState.Corpse)
+                        UnSummon();
+                        return;
+                    }
+
+                    if (!IsInCombat())
+                    {
+                        if (m_timer <= diff)
                         {
                             UnSummon();
                             return;
                         }
-
-                        if (!IsInCombat())
-                        {
-                            if (m_timer <= diff)
-                            {
-                                UnSummon();
-                                return;
-                            }
-                            else
-                                m_timer -= diff;
-                        }
-                        else if (m_timer != m_lifetime)
-                            m_timer = m_lifetime;
-                        break;
+                        else
+                            m_timer -= diff;
                     }
+                    else if (m_timer != m_lifetime)
+                        m_timer = m_lifetime;
+                    break;
+                }
                 case TempSummonType.TimedOrDeadDespawn:
+                {
+                    if (!IsInCombat() && IsAlive())
                     {
-                        if (!IsInCombat() && IsAlive())
+                        if (m_timer <= diff)
                         {
-                            if (m_timer <= diff)
-                            {
-                                UnSummon();
-                                return;
-                            }
-                            else
-                                m_timer -= diff;
+                            UnSummon();
+                            return;
                         }
-                        else if (m_timer != m_lifetime)
-                            m_timer = m_lifetime;
-                        break;
+                        else
+                            m_timer -= diff;
                     }
+                    else if (m_timer != m_lifetime)
+                        m_timer = m_lifetime;
+                    break;
+                }
                 default:
                     UnSummon();
                     Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown type {1} of ", GetEntry(), m_type);
@@ -190,7 +191,7 @@ namespace Game.Entities
             {
                 SetLevel(owner.GetLevel());
                 if (owner.IsTypeId(TypeId.Player))
-                  m_ControlledByPlayer = true;
+                    m_ControlledByPlayer = true;
             }
 
 
@@ -227,9 +228,9 @@ namespace Game.Entities
             if (owner != null)
             {
                 if (owner.IsCreature())
-                        owner.ToCreature().GetAI()?.JustSummoned(this);
+                    owner.ToCreature().GetAI()?.JustSummoned(this);
                 else if (owner.IsGameObject())
-                        owner.ToGameObject().GetAI()?.JustSummoned(this);
+                    owner.ToGameObject().GetAI()?.JustSummoned(this);
 
                 if (IsAIEnabled())
                     GetAI().IsSummonedBy(owner);
@@ -307,11 +308,15 @@ namespace Game.Entities
 
         public uint GetTimer() { return m_timer; }
 
+        public bool CanFollowOwner() { return m_canFollowOwner; }
+        public void SetCanFollowOwner(bool can) { m_canFollowOwner = can; }
+
         public SummonPropertiesRecord m_Properties;
         TempSummonType m_type;
         uint m_timer;
         uint m_lifetime;
         ObjectGuid m_summonerGUID;
+        bool m_canFollowOwner;
     }
 
     public class Minion : TempSummon
