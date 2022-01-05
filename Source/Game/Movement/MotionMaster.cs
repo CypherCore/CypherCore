@@ -106,7 +106,7 @@ namespace Game.Movement
 
         public void Initialize()
         {
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Initialize(), MotionMasterDelayedActionType.Initialize));
                 return;
@@ -118,6 +118,16 @@ namespace Game.Movement
         public void InitializeDefault()
         {
             Add(AI.AISelector.SelectMovementGenerator(_owner), MovementSlot.Default);
+        }
+
+        public void AddToWorld()
+        {
+            if (!HasFlag(MotionMasterFlags.InitializationPending))
+                return;
+
+            ResolveDelayedActions();
+
+            RemoveFlag(MotionMasterFlags.InitializationPending);
         }
 
         public bool Empty()
@@ -287,6 +297,9 @@ namespace Game.Movement
             if (!_owner)
                 return;
 
+            if (HasFlag(MotionMasterFlags.InitializationPending))
+                return;
+
             Cypher.Assert(!Empty(), $"MotionMaster:Update: update called without Initializing! ({_owner.GetGUID()})");
 
             AddFlag(MotionMasterFlags.Update);
@@ -315,11 +328,7 @@ namespace Game.Movement
 
             RemoveFlag(MotionMasterFlags.Update);
 
-            while (_delayedActions.Count != 0)
-            {
-                _delayedActions.Peek().Resolve();
-                _delayedActions.Dequeue();
-            }
+            ResolveDelayedActions();
         }
 
         void Add(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
@@ -330,7 +339,7 @@ namespace Game.Movement
             if (IsInvalidMovementSlot(slot))
                 return;
 
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
                 _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
             else
                 DirectAdd(movement, slot);
@@ -341,7 +350,7 @@ namespace Game.Movement
             if (movement == null || IsInvalidMovementSlot(slot))
                 return;
 
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Remove(movement, slot), MotionMasterDelayedActionType.Remove));
                 return;
@@ -373,7 +382,7 @@ namespace Game.Movement
             if (IsInvalidMovementGeneratorType(type) || IsInvalidMovementSlot(slot))
                 return;
 
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
                 return;
@@ -403,7 +412,7 @@ namespace Game.Movement
 
         public void Clear()
         {
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Clear(), MotionMasterDelayedActionType.Clear));
                 return;
@@ -418,7 +427,7 @@ namespace Game.Movement
             if (IsInvalidMovementSlot(slot))
                 return;
 
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Clear(slot), MotionMasterDelayedActionType.ClearSlot));
                 return;
@@ -442,7 +451,7 @@ namespace Game.Movement
 
         public void Clear(MovementGeneratorMode mode)
         {
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Clear(mode), MotionMasterDelayedActionType.ClearMode));
                 return;
@@ -457,7 +466,7 @@ namespace Game.Movement
         public void Clear(MovementGeneratorPriority priority)
         {
 
-            if (HasFlag(MotionMasterFlags.Update))
+            if (HasFlag(MotionMasterFlags.Delayed))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Clear(priority), MotionMasterDelayedActionType.ClearPriority));
                 return;
@@ -988,6 +997,15 @@ namespace Game.Movement
             GenericMovementGenerator movement = new(init, type, id);
             movement.Priority = priority;
             Add(movement);
+        }
+
+        void ResolveDelayedActions()
+        {
+            while (_delayedActions.Count != 0)
+            {
+                _delayedActions.Peek().Resolve();
+                _delayedActions.Dequeue();
+            }
         }
 
         void Remove(MovementGenerator movement, bool active, bool movementInform)

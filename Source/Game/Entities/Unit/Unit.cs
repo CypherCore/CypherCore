@@ -430,6 +430,7 @@ namespace Game.Entities
         public override void AddToWorld()
         {
             base.AddToWorld();
+            i_motionMaster.AddToWorld();
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterWorld);
         }

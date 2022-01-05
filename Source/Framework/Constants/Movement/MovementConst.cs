@@ -66,7 +66,10 @@ namespace Framework.Constants
     {
         None = 0x0,
         Update = 0x1, // Update in progress
-        StaticInitializationPending = 0x2
+        StaticInitializationPending = 0x2, // Static movement (MOTION_SLOT_DEFAULT) hasn't been initialized
+        InitializationPending = 0x4, // MotionMaster is stalled until signaled
+
+        Delayed = StaticInitializationPending | InitializationPending
     }
 
     public enum MotionMasterDelayedActionType
