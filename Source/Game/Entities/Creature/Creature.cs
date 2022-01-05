@@ -2567,7 +2567,7 @@ namespace Game.Entities
             return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
         }
 
-        float GetBaseDamageForLevel(uint level)
+        public float GetBaseDamageForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());

@@ -551,144 +551,159 @@ namespace Game.Entities
             switch (petType)
             {
                 case PetType.Summon:
-                    {
-                        // the damage bonus used for pets is either fire or shadow damage, whatever is higher
-                        int fire = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
-                        int shadow = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
-                        int val = (fire > shadow) ? fire : shadow;
-                        if (val < 0)
-                            val = 0;
+                {
+                    // the damage bonus used for pets is either fire or shadow damage, whatever is higher
+                    int fire = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
+                    int shadow = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
+                    int val = (fire > shadow) ? fire : shadow;
+                    if (val < 0)
+                        val = 0;
 
-                        SetBonusDamage((int)(val * 0.15f));
+                    SetBonusDamage((int)(val * 0.15f));
 
-                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
-                        break;
-                    }
+                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
+                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                    break;
+                }
                 case PetType.Hunter:
-                    {
-                        ToPet().SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
-                        //these formula may not be correct; however, it is designed to be close to what it should be
-                        //this makes dps 0.5 of pets level
-                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-                        //damage range is then petlevel / 2
-                        SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
-                        //damage is increased afterwards as strength and pet scaling modify attack power
-                        break;
-                    }
+                {
+                    ToPet().SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
+                    //these formula may not be correct; however, it is designed to be close to what it should be
+                    //this makes dps 0.5 of pets level
+                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
+                    //damage range is then petlevel / 2
+                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                    //damage is increased afterwards as strength and pet scaling modify attack power
+                    break;
+                }
                 default:
+                {
+                    switch (GetEntry())
                     {
-                        switch (GetEntry())
+                        case 510: // mage Water Elemental
                         {
-                            case 510: // mage Water Elemental
-                                {
-                                    SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Frost) * 0.33f));
-                                    break;
-                                }
-                            case 1964: //force of nature
-                                {
-                                    if (pInfo == null)
-                                        SetCreateHealth(30 + 30 * petlevel);
-                                    float bonusDmg = GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.15f;
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 2.5f - ((float)petlevel / 2) + bonusDmg);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 2.5f + ((float)petlevel / 2) + bonusDmg);
-                                    break;
-                                }
-                            case 15352: //earth elemental 36213
-                                {
-                                    if (pInfo == null)
-                                        SetCreateHealth(100 + 120 * petlevel);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
-                                    break;
-                                }
-                            case 15438: //fire elemental
-                                {
-                                    if (pInfo == null)
-                                    {
-                                        SetCreateHealth(40 * petlevel);
-                                        SetCreateMana(28 + 10 * petlevel);
-                                    }
-                                    SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Fire) * 0.5f));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 4 - petlevel);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 4 + petlevel);
-                                    break;
-                                }
-                            case 19668: // Shadowfiend
-                                {
-                                    if (pInfo == null)
-                                    {
-                                        SetCreateMana(28 + 10 * petlevel);
-                                        SetCreateHealth(28 + 30 * petlevel);
-                                    }
-                                    int bonus_dmg = (int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Shadow) * 0.3f);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel) + bonus_dmg);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel) + bonus_dmg);
-                                    break;
-                                }
-                            case 19833: //Snake Trap - Venomous Snake
-                                {
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel / 2) - 25);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel / 2) - 18);
-                                    break;
-                                }
-                            case 19921: //Snake Trap - Viper
-                                {
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel / 2 - 10);
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel / 2);
-                                    break;
-                                }
-                            case 29264: // Feral Spirit
-                                {
-                                    if (pInfo == null)
-                                        SetCreateHealth(30 * petlevel);
-
-                                    // wolf attack speed is 1.5s
-                                    SetBaseAttackTime(WeaponAttackType.BaseAttack, cinfo.BaseAttackTime);
-
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel));
-
-                                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetOwner().GetArmor() * 0.35f);  // Bonus Armor (35% of player armor)
-                                    SetStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, GetOwner().GetStat(Stats.Stamina) * 0.3f);  // Bonus Stamina (30% of player stamina)
-                                    if (!HasAura(58877))//prevent apply twice for the 2 wolves
-                                        AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
-                                    break;
-                                }
-                            case 31216: // Mirror Image
-                                {
-                                    SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Frost) * 0.33f));
-                                    SetDisplayId(GetOwner().GetDisplayId());
-                                    if (pInfo == null)
-                                    {
-                                        SetCreateMana(28 + 30 * petlevel);
-                                        SetCreateHealth(28 + 10 * petlevel);
-                                    }
-                                    break;
-                                }
-                            case 27829: // Ebon Gargoyle
-                                {
-                                    if (pInfo == null)
-                                    {
-                                        SetCreateMana(28 + 10 * petlevel);
-                                        SetCreateHealth(28 + 30 * petlevel);
-                                    }
-                                    SetBonusDamage((int)(GetOwner().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.5f));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
-                                    break;
-                                }
-                            case 28017: // Bloodworms
-                                {
-                                    SetCreateHealth(4 * petlevel);
-                                    SetBonusDamage((int)(GetOwner().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.006f));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - 30 - (petlevel / 4));
-                                    SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel - 30 + (petlevel / 4));
-                                }
-                                break;
+                            SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Frost) * 0.33f));
+                            break;
                         }
-                        break;
+                        case 1964: //force of nature
+                        {
+                            if (pInfo == null)
+                                SetCreateHealth(30 + 30 * petlevel);
+                            float bonusDmg = GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.15f;
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 2.5f - ((float)petlevel / 2) + bonusDmg);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 2.5f + ((float)petlevel / 2) + bonusDmg);
+                            break;
+                        }
+                        case 15352: //earth elemental 36213
+                        {
+                            if (pInfo == null)
+                                SetCreateHealth(100 + 120 * petlevel);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                            break;
+                        }
+                        case 15438: //fire elemental
+                        {
+                            if (pInfo == null)
+                            {
+                                SetCreateHealth(40 * petlevel);
+                                SetCreateMana(28 + 10 * petlevel);
+                            }
+                            SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Fire) * 0.5f));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 4 - petlevel);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 4 + petlevel);
+                            break;
+                        }
+                        case 19668: // Shadowfiend
+                        {
+                            if (pInfo == null)
+                            {
+                                SetCreateMana(28 + 10 * petlevel);
+                                SetCreateHealth(28 + 30 * petlevel);
+                            }
+                            int bonus_dmg = (int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Shadow) * 0.3f);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel) + bonus_dmg);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel) + bonus_dmg);
+                            break;
+                        }
+                        case 19833: //Snake Trap - Venomous Snake
+                        {
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel / 2) - 25);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel / 2) - 18);
+                            break;
+                        }
+                        case 19921: //Snake Trap - Viper
+                        {
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel / 2 - 10);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel / 2);
+                            break;
+                        }
+                        case 29264: // Feral Spirit
+                        {
+                            if (pInfo == null)
+                                SetCreateHealth(30 * petlevel);
+
+                            // wolf attack speed is 1.5s
+                            SetBaseAttackTime(WeaponAttackType.BaseAttack, cinfo.BaseAttackTime);
+
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel));
+
+                            SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetOwner().GetArmor() * 0.35f);  // Bonus Armor (35% of player armor)
+                            SetStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, GetOwner().GetStat(Stats.Stamina) * 0.3f);  // Bonus Stamina (30% of player stamina)
+                            if (!HasAura(58877))//prevent apply twice for the 2 wolves
+                                AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
+                            break;
+                        }
+                        case 31216: // Mirror Image
+                        {
+                            SetBonusDamage((int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Frost) * 0.33f));
+                            SetDisplayId(GetOwner().GetDisplayId());
+                            if (pInfo == null)
+                            {
+                                SetCreateMana(28 + 30 * petlevel);
+                                SetCreateHealth(28 + 10 * petlevel);
+                            }
+                            break;
+                        }
+                        case 27829: // Ebon Gargoyle
+                        {
+                            if (pInfo == null)
+                            {
+                                SetCreateMana(28 + 10 * petlevel);
+                                SetCreateHealth(28 + 30 * petlevel);
+                            }
+                            SetBonusDamage((int)(GetOwner().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.5f));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
+                            break;
+                        }
+                        case 28017: // Bloodworms
+                        {
+                            SetCreateHealth(4 * petlevel);
+                            SetBonusDamage((int)(GetOwner().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.006f));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - 30 - (petlevel / 4));
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel - 30 + (petlevel / 4));
+                            break;
+                        }
+                        default:
+                        {
+                            /* ToDo: Check what 5f5d2028 broke/fixed and how much of Creature::UpdateLevelDependantStats()
+                             * should be copied here (or moved to another method or if that function should be called here
+                             * or not just for this default case)
+                             */
+                            float basedamage = GetBaseDamageForLevel(petlevel);
+
+                            float weaponBaseMinDamage = basedamage;
+                            float weaponBaseMaxDamage = basedamage * 1.5f;
+
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, weaponBaseMinDamage);
+                            SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, weaponBaseMaxDamage);
+                            break;
+                        }
                     }
+                    break;
+                }
             }
 
             UpdateAllStats();
