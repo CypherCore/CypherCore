@@ -15,8 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Game.DataStorage;
 using Game.Maps;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Game.Entities
@@ -409,6 +411,12 @@ namespace Game.Entities
             return this;
         }
 
+        public virtual string GetDebugInfo()
+        {
+            var mapEntry = CliDB.MapStorage.LookupByKey(_mapId);
+            return $"MapID: {_mapId} Map name: '{(mapEntry != null ? mapEntry.MapName[Global.WorldMgr.GetDefaultDbcLocale()] : "<not found>")}' {base.ToString()}";
+        }
+        
         public override string ToString()
         {
             return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation} MapId: {_mapId}";

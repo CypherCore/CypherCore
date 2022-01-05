@@ -817,7 +817,7 @@ namespace Game.Entities
                     if (pet.IsAIEnabled())
                         pet.GetAI().KilledUnit(victim);
                     else
-                        Log.outError(LogFilter.Unit, "Pet doesn't have any AI in Unit.Kill()");
+                        Log.outError(LogFilter.Unit, $"Pet doesn't have any AI in Unit.Kill() {pet.GetDebugInfo()}");
                 }
             }
 

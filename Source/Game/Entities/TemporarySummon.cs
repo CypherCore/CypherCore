@@ -300,6 +300,11 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nTempSummonType : {GetSummonType()} Summoner: {GetSummonerGUID()}";
+        }
+        
         public override void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties) { }
 
         public ObjectGuid GetSummonerGUID() { return m_summonerGUID; }
@@ -380,6 +385,11 @@ namespace Game.Entities
             return IsPet() || (m_Properties != null && m_Properties.Control == SummonCategory.Pet);
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nOwner: {(GetOwner() ? GetOwner().GetGUID() : "")}";
+        }
+        
         public override Unit GetOwner() { return m_owner; }
 
         public override float GetFollowAngle() { return m_followAngle; }

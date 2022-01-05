@@ -750,6 +750,11 @@ namespace Game.Entities
             BuildValuesUpdateBlockForPlayer(data_map[player], player);
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: { GetName()}";
+        }
+        
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
         public abstract void BuildValuesUpdate(WorldPacket data, Player target);
 

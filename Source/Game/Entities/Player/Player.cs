@@ -5076,7 +5076,7 @@ namespace Game.Entities
 
             return area.HasFlag2(AreaFlags2.CanEnableWarMode);
         }
-
+        
         // Used in triggers for check "Only to targets that grant experience or honor" req
         public bool IsHonorOrXPTarget(Unit victim)
         {

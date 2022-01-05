@@ -81,6 +81,8 @@ namespace Game.Movement
                 bool departureEvent = true;
                 do
                 {
+                    Cypher.Assert(_currentNode < _path.Count, $"Point Id: {pointId}\n{owner.GetDebugInfo()}");
+
                     DoEventIfAny(owner, _path[_currentNode], departureEvent);
                     while (!_pointsForPathSwitch.Empty() && _pointsForPathSwitch[0].PathIndex <= _currentNode)
                     {
@@ -226,6 +228,8 @@ namespace Game.Movement
 
         void DoEventIfAny(Player owner, TaxiPathNodeRecord node, bool departure)
         {
+            Cypher.Assert(node != null, owner.GetDebugInfo());
+
             uint eventid = departure ? node.DepartureEventID : node.ArrivalEventID;
             if (eventid != 0)
             {
@@ -263,6 +267,20 @@ namespace Game.Movement
                 Log.outDebug(LogFilter.Server, "FlightPathMovementGenerator::PreloadEndGrid: Unable to determine map to preload flightmaster grid");
         }
 
+        uint GetPathId(int index)
+        {
+            if (index >= _path.Count)
+                return 0;
+
+            return _path[index].PathID;
+        }
+        
+        public override string GetDebugInfo()
+        {
+            return $"Current Node: {GetCurrentNode()}\n{base.GetDebugInfo()}\nStart Path Id: {GetPathId(0)} Path Size: {_path.Count} HasArrived: {HasArrived()} End Grid X: {_endGridX} " +
+                $"End Grid Y: {_endGridY} End Map Id: {_endMapId} Preloaded Target Node: {_preloadTargetNode}";
+        }
+        
         public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
             var node = _path[_currentNode];

@@ -542,14 +542,14 @@ namespace Game
             Values[WorldCfg.InstanceResetTimeHour] = GetDefaultValue("Instance.ResetTimeHour", 4);
             Values[WorldCfg.InstanceUnloadDelay] = GetDefaultValue("Instance.UnloadDelay", 30 * Time.Minute * Time.InMilliseconds);
             Values[WorldCfg.DailyQuestResetTimeHour] = GetDefaultValue("Quests.DailyResetTime", 3);
-            if ((int)Values[WorldCfg.DailyQuestResetTimeHour] < 0 || (int)Values[WorldCfg.DailyQuestResetTimeHour] > 23)
+            if ((int)Values[WorldCfg.DailyQuestResetTimeHour] > 23)
             {
                 Log.outError(LogFilter.ServerLoading, $"Quests.DailyResetTime ({Values[WorldCfg.DailyQuestResetTimeHour]}) must be in range 0..23. Set to 3.");
                 Values[WorldCfg.DailyQuestResetTimeHour] = 3;
             }
 
             Values[WorldCfg.WeeklyQuestResetTimeWDay] = GetDefaultValue("Quests.WeeklyResetWDay", 3);
-            if ((int)Values[WorldCfg.WeeklyQuestResetTimeWDay] < 0 || (int)Values[WorldCfg.WeeklyQuestResetTimeWDay] > 6)
+            if ((int)Values[WorldCfg.WeeklyQuestResetTimeWDay] > 6)
             {
                 Log.outError(LogFilter.ServerLoading, $"Quests.WeeklyResetDay ({Values[WorldCfg.WeeklyQuestResetTimeWDay]}) must be in range 0..6. Set to 3 (Wednesday).");
                 Values[WorldCfg.WeeklyQuestResetTimeWDay] = 3;
@@ -680,6 +680,13 @@ namespace Game
             {
                 Log.outError(LogFilter.ServerLoading, "Battleground.Random.ResetHour ({0}) can't be load. Set to 6.", Values[WorldCfg.RandomBgResetHour]);
                 Values[WorldCfg.RandomBgResetHour] = 6;
+            }
+
+            Values[WorldCfg.CalendarDeleteOldEventsHour] = GetDefaultValue("Calendar.DeleteOldEventsHour", 6);
+            if ((int)Values[WorldCfg.CalendarDeleteOldEventsHour] > 23)
+            {
+                Log.outError(LogFilter.Misc, $"Calendar.DeleteOldEventsHour ({Values[WorldCfg.CalendarDeleteOldEventsHour]}) can't be load. Set to 6.");
+                Values[WorldCfg.CalendarDeleteOldEventsHour] = 6;
             }
 
             Values[WorldCfg.GuildResetHour] = GetDefaultValue("Guild.ResetHour", 6);

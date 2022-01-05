@@ -59,7 +59,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UpdateAccountData, Status = SessionStatus.Authed)]
         void HandleUpdateAccountData(UserClientUpdateAccountData packet)
         {
-            if (packet.DataType > AccountDataTypes.Max)
+            if (packet.DataType >= AccountDataTypes.Max)
                 return;
 
             if (packet.Size == 0)

@@ -2285,6 +2285,10 @@ namespace Game.Spells
             }
         }
 
+        public virtual string GetDebugInfo()
+        {
+            return $"Id: {GetId()} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' Caster: {GetCasterGUID()}\nOwner: {(GetOwner() != null ? GetOwner().GetDebugInfo() : "NULL")}";
+        }
         #endregion
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }

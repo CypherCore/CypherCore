@@ -940,7 +940,7 @@ namespace Framework.Constants
         CommandNoInstancesMatch = 1189,
         CommandMultipleInstancesMatch = 1190,
         CommandMultipleInstancesEntry = 1191,
-        CommandMapNotInstance = 1192,
+        // 1192 unused,
         CommandInstanceNoEntrance = 1193,
         CommandInstanceNoExit = 1194,
         CommandWentToInstanceGate = 1195,
@@ -956,13 +956,13 @@ namespace Framework.Constants
         DebugAreatriggerOff = 1203,
         DebugAreatriggerEntered = 1204,
 
-        CommandNoBossesMatch = 1205, // 3.3.5 Reserved
-        CommandMultipleBossesMatch = 1206, // 3.3.5 Reserved
-        CommandMultipleBossesEntry = 1207, // 3.3.5 Reserved
-        CommandBossMultipleSpawns = 1208, // 3.3.5 Reserved
-        CommandBossMultipleSpawnEty = 1209, // 3.3.5 Reserved
-        CommandGoBossFailed = 1210, // 3.3.5 Reserved
-        CommandWentToBoss = 1211, // 3.3.5 Reserved
+        CommandNoBossesMatch = 1205,
+        CommandMultipleBossesMatch = 1206,
+        CommandMultipleBossesEntry = 1207,
+        CommandBossMultipleSpawns = 1208,
+        CommandBossMultipleSpawnEty = 1209,
+        CommandGoBossFailed = 1210,
+        CommandWentToBoss = 1211,
         GuildInfoLevel = 1212,
         AccountBnetLinked = 1213,
         AccountOrBnetDoesNotExist = 1214,

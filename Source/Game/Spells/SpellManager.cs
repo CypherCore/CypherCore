@@ -4266,6 +4266,15 @@ namespace Game.Entities
                 spellInfo.AttributesEx2 |= SpellAttr2.CanTargetDead;
             });
 
+            // Soul Sickness (Forge of Souls)
+            ApplySpellFix(new[] { 69131 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.ApplyAuraName = AuraType.ModDecreaseSpeed;
+                });
+            });
+
             //
             // FIRELANDS SPELLS
             //

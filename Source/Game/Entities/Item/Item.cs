@@ -2340,6 +2340,11 @@ namespace Game.Entities
             return _bonusData.RequiredLevel;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} BagSlot: {GetBagSlot()} Slot: {GetSlot()} Equipped: {IsEquipped()}";
+        }
+        
         public static Item NewItemOrBag(ItemTemplate proto)
         {
             if (proto.GetInventoryType() == InventoryType.Bag)

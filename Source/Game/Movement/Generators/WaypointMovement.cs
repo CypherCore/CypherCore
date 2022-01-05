@@ -397,6 +397,11 @@ namespace Game.Movement
             return true;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
+        }
+        
         bool UpdateTimer(uint diff)
         {
             _nextMoveTime.Update((int)diff);

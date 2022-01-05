@@ -127,7 +127,7 @@ public static class Time
         long midnightLocal = DateTimeToUnixTime(timeLocal);
         long hourLocal = midnightLocal + hour * Hour;
 
-        if (onlyAfterTime && hourLocal < time)
+        if (onlyAfterTime && hourLocal <= time)
             hourLocal += Day;
 
         return hourLocal;

@@ -847,6 +847,12 @@ namespace Game.Entities
             return collisionHeight1 == 0.0f ? MapConst.DefaultCollesionHeight : collisionHeight1;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nIsAIEnabled: {IsAIEnabled()} DeathState: {GetDeathState()} UnitMovementFlags: {GetUnitMovementFlags()} UnitMovementFlags2: {GetUnitMovementFlags2()} Class: {GetClass()}\n" +
+                    $" {(MoveSpline != null ? MoveSpline.ToString() : "Movespline: <none>")}";
+        }
+        
         public Guardian GetGuardianPet()
         {
             ObjectGuid pet_guid = GetPetGUID();
@@ -1424,7 +1430,7 @@ namespace Game.Entities
             // this can happen if OnEffectHitTarget() script hook killed the unit or the aura owner (which can be different)
             if (aura.IsRemoved())
             {
-                Log.outError(LogFilter.Spells, "Unit::_CreateAuraApplication() called with a removed aura. Check if OnEffectHitTarget() is triggering any spell with apply aura effect (that's not allowed!)");//\nUnit: {}\nAura: {}", GetDebugInfo().c_str(), aura->GetDebugInfo().c_str());
+                Log.outError(LogFilter.Spells, $"Unit::_CreateAuraApplication() called with a removed aura. Check if OnEffectHitTarget() is triggering any spell with apply aura effect (that's not allowed!)\nUnit: {GetDebugInfo()}\nAura: {aura.GetDebugInfo()}");
                 return null;
             }
 

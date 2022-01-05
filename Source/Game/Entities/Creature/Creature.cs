@@ -1098,6 +1098,11 @@ namespace Game.Entities
             return false;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPath()} SpawnId: {GetSpawnId()}";
+        }
+        
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
@@ -3022,7 +3027,7 @@ namespace Game.Entities
         {
             if (!HasSpellFocus())
             {
-                //Log.outError(LogFilter.Unit, $"Creature::ReacquireSpellFocusTarget() being called with HasSpellFocus() returning false. {GetDebugInfo()}");
+                Log.outError(LogFilter.Unit, $"Creature::ReacquireSpellFocusTarget() being called with HasSpellFocus() returning false. {GetDebugInfo()}");
                 return;
             }
 
@@ -3170,7 +3175,7 @@ namespace Game.Entities
                     // @todo pools need fixing! this is just a temporary thing, but they violate dynspawn principles
                     if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group '{data.spawnGroupData.name}'");
+                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group '{data.spawnGroupData.name}':\n{GetDebugInfo()}");
                         return false;
                     }
                 }
@@ -3185,7 +3190,7 @@ namespace Game.Entities
                     // @todo same as above
                     if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress");
+                        Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress:\n{GetDebugInfo()}");
                         return false;
                     }
                 }

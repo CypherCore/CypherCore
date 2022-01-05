@@ -159,7 +159,7 @@ namespace Game.Chat.Commands
             InstanceTemplate temp = Global.ObjectMgr.GetInstanceTemplate(mapId);
             if (temp == null)
             {
-                handler.SendSysMessage(CypherStrings.CommandMapNotInstance, mapId);
+                //handler.SendSysMessage(CypherStrings.CommandMapNotInstance, mapId);
                 return false;
             }
             string scriptname = Global.ObjectMgr.GetScriptName(temp.ScriptId);

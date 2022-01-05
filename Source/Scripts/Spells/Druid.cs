@@ -238,7 +238,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 48517 Eclipse (Solar) + 48518 Eclipse (Lunar)
+    [Script] // 48517 Eclipse (Solar) + 48518 Eclipse (Lunar)
     class spell_dru_eclipse_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -262,7 +262,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 79577 - Eclipse - SPELL_DRUID_ECLIPSE_DUMMY
+    [Script] // 79577 - Eclipse - SPELL_DRUID_ECLIPSE_DUMMY
     class spell_dru_eclipse_dummy : AuraScript
     {
         class InitializeEclipseCountersEvent : BasicEvent
@@ -353,7 +353,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 329910 - Eclipse out of combat - SPELL_DRUID_ECLIPSE_OOC
+    [Script] // 329910 - Eclipse out of combat - SPELL_DRUID_ECLIPSE_OOC
     class spell_dru_eclipse_ooc : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

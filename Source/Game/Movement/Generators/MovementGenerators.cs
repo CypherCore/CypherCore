@@ -76,8 +76,13 @@ namespace Game.Movement
         {
             return obj.Mode.GetHashCode() ^ obj.Priority.GetHashCode();
         }
-    }
 
+        public virtual string GetDebugInfo()
+        {
+            return $"Mode: {Mode} Priority: {Priority} Flags: {Flags} BaseUniteState: {BaseUnitState}";
+        }
+    }
+    
     public abstract class MovementGeneratorMedium<T> : MovementGenerator where T : Unit
     {
         public override void Initialize(Unit owner)

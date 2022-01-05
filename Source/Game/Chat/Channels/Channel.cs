@@ -301,7 +301,7 @@ namespace Game.Chat
 
             Player bad = Global.ObjAccessor.FindPlayerByName(badname);
             ObjectGuid victim = bad ? bad.GetGUID() : ObjectGuid.Empty;
-            if (victim.IsEmpty() || !IsOn(victim))
+            if (bad == null || victim.IsEmpty() || !IsOn(victim))
             {
                 ChannelNameBuilder builder = new(this, new PlayerNotFoundAppend(badname));
                 SendToOne(builder, good);
@@ -434,7 +434,7 @@ namespace Game.Chat
             Player newp = Global.ObjAccessor.FindPlayerByName(p2n);
             ObjectGuid victim = newp ? newp.GetGUID() : ObjectGuid.Empty;
 
-            if (victim.IsEmpty() || !IsOn(victim) ||
+            if (newp == null || victim.IsEmpty() || !IsOn(victim) ||
                 (player.GetTeam() != newp.GetTeam() &&
             (!player.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel) ||
             !newp.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))
@@ -490,7 +490,7 @@ namespace Game.Chat
             Player newp = Global.ObjAccessor.FindPlayerByName(newname);
             ObjectGuid victim = newp ? newp.GetGUID() : ObjectGuid.Empty;
 
-            if (victim.IsEmpty() || !IsOn(victim) ||
+            if (newp == null || victim.IsEmpty() || !IsOn(victim) ||
                 (player.GetTeam() != newp.GetTeam() &&
             (!player.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel) ||
             !newp.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))

@@ -260,36 +260,36 @@ namespace Game.AI
                     target = me.GetVictim();
                     break;
                 case AITarget.Enemy:
+                {
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                    if (spellInfo != null)
                     {
-                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-                        if (spellInfo != null)
-                        {
-                            bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
-                            target = SelectTarget(SelectAggroTarget.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
-                        }
-                        break;
+                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                        target = SelectTarget(SelectAggroTarget.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
                     }
+                    break;
+                }
                 case AITarget.Ally:
                 case AITarget.Buff:
                     target = me;
                     break;
                 case AITarget.Debuff:
+                {
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                    if (spellInfo != null)
                     {
-                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-                        if (spellInfo != null)
-                        {
-                            bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
-                            float range = spellInfo.GetMaxRange(false);
+                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                        float range = spellInfo.GetMaxRange(false);
 
-                            DefaultTargetSelector targetSelector = new(me, range, playerOnly, true, -(int)spellId);
-                            if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
-                            && targetSelector.Invoke(me.GetVictim()))
-                                target = me.GetVictim();
-                            else
-                                target = SelectTarget(SelectAggroTarget.Random, 0, targetSelector);
-                        }
-                        break;
+                        DefaultTargetSelector targetSelector = new(me, range, playerOnly, true, -(int)spellId);
+                        if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
+                        && targetSelector.Invoke(me.GetVictim()))
+                            target = me.GetVictim();
+                        else
+                            target = SelectTarget(SelectAggroTarget.Random, 0, targetSelector);
                     }
+                    break;
+                }
             }
 
             if (target != null)
@@ -318,7 +318,7 @@ namespace Game.AI
         }
 
         public SpellCastResult DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { return DoCast(null, spellId, args); }
-        
+
         public static void FillAISpellInfo()
         {
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
@@ -501,6 +501,11 @@ namespace Game.AI
         /// Called when a game event starts or ends
         /// </summary>
         public virtual void OnGameEvent(bool start, ushort eventId) { }
+
+        public virtual string GetDebugInfo()
+        {
+            return $"Me: {(me != null ? me.GetDebugInfo() : "NULL")}";
+        }
 
         public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {

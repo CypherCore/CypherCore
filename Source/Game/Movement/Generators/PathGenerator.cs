@@ -384,7 +384,7 @@ namespace Game.Movement
                     // this is probably an error state, but we'll leave it
                     // and hopefully recover on the next Update
                     // we still need to copy our preffix
-                    Log.outError(LogFilter.Maps, "{0}'s Path Build failed: 0 length path", _sourceUnit.GetGUID().ToString());
+                    Log.outError(LogFilter.Maps, $"Path Build failed\n{_sourceUnit.GetDebugInfo()}");
                 }
 
                 Log.outDebug(LogFilter.Maps, "m_polyLength={0} prefixPolyLength={1} suffixPolyLength={2} \n", _polyLength, prefixPolyLength, suffixPolyLength);
@@ -709,7 +709,7 @@ namespace Game.Movement
                 npolys = FixupCorridor(polys, npolys, 74, visited, nvisited);
 
                 if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(polys[0], result, ref result[1])))
-                    Log.outDebug(LogFilter.Maps, $"Cannot find height at position X: {result[2]} Y: {result[0]} Z: {result[1]} for ");// {_sourceUnit.GetDebugInfo()}");
+                    Log.outDebug(LogFilter.Maps, $"Cannot find height at position X: {result[2]} Y: {result[0]} Z: {result[1]} for {_sourceUnit.GetDebugInfo()}");
 
                 result[1] += 0.5f;
                 Detour.dtVcopy(iterPos, result);

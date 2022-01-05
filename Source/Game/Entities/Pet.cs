@@ -1598,6 +1598,11 @@ namespace Game.Entities
             return ss.ToString();
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()}";
+        }
+        
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
         public new Dictionary<uint, PetSpell> m_spells = new();

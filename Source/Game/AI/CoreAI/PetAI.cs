@@ -478,7 +478,7 @@ namespace Game.AI
 
             if (me.GetCharmInfo() == null)
             {
-                //Log.outError(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {}", GetDebugInfo());
+                Log.outError(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
                 return false;
             }
 

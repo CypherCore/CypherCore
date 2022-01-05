@@ -274,7 +274,7 @@ namespace Game.AI
         {
             if (_isEngaged)
             {
-                //Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementStart called even though creature is already engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementStart called even though creature is already engaged. Creature debug info:\n{me.GetDebugInfo()}");
                 return;
             }
             _isEngaged = true;
@@ -286,7 +286,7 @@ namespace Game.AI
         {
             if (!_isEngaged)
             {
-                //Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
                 return;
             }
             _isEngaged = false;

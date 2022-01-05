@@ -202,7 +202,7 @@ namespace Game.Maps
             if (Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy))
                 Log.outInfo(LogFilter.Maps, "MMAP loaded name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
             else
-                Log.outInfo(LogFilter.Maps, "Could not load MMAP name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
+                Log.outWarn(LogFilter.Maps, "Could not load MMAP name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
         }
 
         void LoadVMap(uint gx, uint gy)
@@ -3488,6 +3488,11 @@ namespace Game.Maps
             }
         }
 
+        public virtual string GetDebugInfo()
+        {
+            return $"Id: {GetId()} InstanceId: {GetInstanceId()} Difficulty: {GetDifficultyID()} HasPlayers: {HavePlayers()}";
+        }
+        
         public MapRecord GetEntry()
         {
             return i_mapRecord;
@@ -5432,6 +5437,11 @@ namespace Game.Maps
             return i_script_id;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nScriptId: {GetScriptId()} ScriptName: {GetScriptName()}";
+        }
+        
         public InstanceScript GetInstanceScript()
         {
             return i_data;

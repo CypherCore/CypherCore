@@ -2292,6 +2292,11 @@ namespace Game.Entities
             return localRotation;
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nSpawnId: {GetSpawnId()} GoState: {GetGoState()} ScriptId: {GetScriptId()} AIName: {GetAIName()}";
+        }
+        
         public bool IsAtInteractDistance(Player player, SpellInfo spell = null)
         {
             if (spell != null || (spell = GetSpellForLock(player)) != null)

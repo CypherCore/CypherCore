@@ -7350,6 +7350,11 @@ namespace Game.Spells
             m_caster.ToUnit().GetSpellHistory().CancelGlobalCooldown(m_spellInfo);
         }
 
+        string GetDebugInfo()
+        {
+            return $"Id: {GetSpellInfo().Id} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' OriginalCaster: {m_originalCasterGUID} State: {GetState()}";
+        }
+        
         List<SpellScript> m_loadedScripts = new();
 
         int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
