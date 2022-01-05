@@ -2467,6 +2467,17 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.StandStateChange)]
         void HandleStandStateChange(StandStateChange packet)
         {
+            switch (packet.StandState)
+            {
+                case UnitStandStateType.Stand:
+                case UnitStandStateType.Sit:
+                case UnitStandStateType.Sleep:
+                case UnitStandStateType.Kneel:
+                    break;
+                default:
+                    return;
+            }
+
             GetPlayer().SetStandState(packet.StandState);
         }
 
