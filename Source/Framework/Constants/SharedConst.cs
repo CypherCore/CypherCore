@@ -143,10 +143,18 @@ namespace Framework.Constants
         public const byte VoidStorageMaxSlot = 160;
 
         /// <summary>
+        /// Calendar Const
+        /// </summary>
+        public const uint CalendarMaxEvents = 30;
+        public const uint CalendarMaxGuildEvents = 100;
+        public const uint CalendarMaxInvites = 100;
+        public const uint CalendarCreateEventCooldown = 5;
+        public const uint CalendarOldEventsDeletionTime = 1 * Time.Month;
+        public const uint CalendarDefaultResponseTime = 946684800; // 01/01/2000 00:00:00
+
+        /// <summary>
         /// Misc Const
         /// </summary>
-        public const uint CalendarMaxInvites = 100;
-        public const uint CalendarDefaultResponseTime = 946684800; // 01/01/2000 00:00:00
         public const Locale DefaultLocale = Locale.enUS;
         public const int MaxAccountTutorialValues = 8;
         public const int MinAuctionTime = (12 * Time.Hour);
@@ -892,7 +900,8 @@ namespace Framework.Constants
         CleaningFlags = 20004,              // Cleaning Flags
         GuildDailyResetTime = 20006,        // Next guild cap reset time
         MonthlyQuestResetTime = 20007,      // Next monthly quest reset time
-        DailyQuestResetTime = 2008,         // Next daily quest reset time
+        DailyQuestResetTime = 20008,         // Next daily quest reset time
+        DailyCalendarDeletionOldEventsTime = 20009,      // Next daily calendar deletions of old events time
         // Cata specific custom worldstates
         GuildWeeklyResetTime = 20050,       // Next guild week reset time
     }
@@ -1427,6 +1436,7 @@ namespace Framework.Constants
         CacheDataQueries,
         CalculateCreatureZoneAreaData,
         CalculateGameobjectZoneAreaData,
+        CalendarDeleteOldEventsHour,
         CastUnstuck,
         CharacterCreatingDisableAlliedRaceAchievementRequirement,
         CharacterCreatingDisabled,

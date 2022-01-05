@@ -890,6 +890,10 @@ namespace Game
         public uint GetRecruiterId() { return recruiterId; }
         public bool IsARecruiter() { return isRecruiter; }
 
+        // Packets cooldown
+        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
+        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
+        
         // Battle Pets
         public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
         public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
@@ -966,6 +970,9 @@ namespace Game
         CollectionMgr _collectionMgr;
 
         ConnectToKey _instanceConnectKey;
+
+        // Packets cooldown
+        long _calendarEventCreationCooldown;
 
         BattlePetMgr _battlePetMgr;
 

@@ -1072,8 +1072,11 @@ namespace Game
             InitQuestResetTimes();
             CheckScheduledResetTimes();
 
-            Log.outInfo(LogFilter.ServerLoading, "Calculate random Battlegroundreset time...");
+            Log.outInfo(LogFilter.ServerLoading, "Calculate random battleground reset time...");
             InitRandomBGResetTime();
+
+            Log.outInfo(LogFilter.ServerLoading, "Calculate deletion of old calendar events time...");
+            InitCalendarOldEventsDeletionTime();
 
             Log.outInfo(LogFilter.ServerLoading, "Calculate Guild cap reset time...");
             InitGuildResetTime();
@@ -1309,6 +1312,9 @@ namespace Game
 
             if (currentGameTime > m_NextRandomBGReset)
                 ResetRandomBG();
+
+            if (currentGameTime > m_NextCalendarOldEventsDeletionTime)
+                CalendarDeleteOldEvents();
 
             if (currentGameTime > m_NextGuildReset)
                 ResetGuildCap();
@@ -2114,6 +2120,23 @@ namespace Game
                 SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
+        void InitCalendarOldEventsDeletionTime()
+        {
+            long now = GameTime.GetGameTime();
+            long nextDeletionTime = Time.GetLocalHourTimestamp(now, WorldConfig.GetUIntValue(WorldCfg.CalendarDeleteOldEventsHour));
+            long currentDeletionTime = GetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime);
+
+            // If the reset time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
+            // In this case we set the reset time in the past and next world update will do the reset and schedule next one in the future.
+            if (currentDeletionTime < now)
+                m_NextCalendarOldEventsDeletionTime = nextDeletionTime - Time.Day;
+            else
+                m_NextCalendarOldEventsDeletionTime = nextDeletionTime;
+
+            if (currentDeletionTime == 0)
+                SetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime, (ulong)m_NextCalendarOldEventsDeletionTime);
+        }
+
         void InitGuildResetTime()
         {
             long gtime = GetWorldState(WorldStates.GuildDailyResetTime);
@@ -2191,6 +2214,15 @@ namespace Game
 
             m_NextRandomBGReset += Time.Day;
             SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
+        }
+
+        void CalendarDeleteOldEvents()
+        {
+            Log.outInfo(LogFilter.Misc, "Calendar deletion of old events.");
+
+            m_NextCalendarOldEventsDeletionTime = m_NextCalendarOldEventsDeletionTime + Time.Day;
+            SetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime, (ulong)m_NextCalendarOldEventsDeletionTime);
+            Global.CalendarMgr.DeleteOldEvents();
         }
 
         void ResetGuildCap()
@@ -2489,6 +2521,7 @@ namespace Game
         long m_NextWeeklyQuestReset;
         long m_NextMonthlyQuestReset;
         long m_NextRandomBGReset;
+        long m_NextCalendarOldEventsDeletionTime;
         long m_NextGuildReset;
         long m_NextCurrencyReset;
 

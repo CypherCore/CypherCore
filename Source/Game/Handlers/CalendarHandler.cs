@@ -124,17 +124,51 @@ namespace Game
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
             if (calendarAddEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
+            {
+                Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventPassed);
                 return;
+            }
+
+            // If the event is a guild event, check if the player is in a guild
+            if (CalendarEvent.IsGuildEvent(calendarAddEvent.EventInfo.Flags) || CalendarEvent.IsGuildAnnouncement(calendarAddEvent.EventInfo.Flags))
+            {
+                if (_player.GetGuildId() == 0)
+                {
+                    Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.GuildPlayerNotInGuild);
+                    return;
+                }
+            }
+
+            // Check if the player reached the max number of events allowed to create
+            if (CalendarEvent.IsGuildEvent(calendarAddEvent.EventInfo.Flags) || CalendarEvent.IsGuildAnnouncement(calendarAddEvent.EventInfo.Flags))
+            {
+                if (Global.CalendarMgr.GetGuildEvents(_player.GetGuildId()).Count >= SharedConst.CalendarMaxGuildEvents)
+                {
+                    Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.GuildEventsExceeded);
+                    return;
+                }
+            }
+            else
+            {
+                if (Global.CalendarMgr.GetEventsCreatedBy(guid).Count >= SharedConst.CalendarMaxEvents)
+                {
+                    Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventsExceeded);
+                    return;
+                }
+            }
+
+            if (GetCalendarEventCreationCooldown() > GameTime.GetGameTime())
+            {
+                Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.Internal);
+                return;
+            }
+            SetCalendarEventCreationCooldown(GameTime.GetGameTime() + SharedConst.CalendarCreateEventCooldown);
 
             CalendarEvent calendarEvent = new(Global.CalendarMgr.GetFreeEventId(), guid, 0, (CalendarEventType)calendarAddEvent.EventInfo.EventType, calendarAddEvent.EventInfo.TextureID,
                 calendarAddEvent.EventInfo.Time, (CalendarFlags)calendarAddEvent.EventInfo.Flags, calendarAddEvent.EventInfo.Title, calendarAddEvent.EventInfo.Description, 0);
 
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
-            {
-                Player creator = Global.ObjAccessor.FindPlayer(guid);
-                if (creator)
-                    calendarEvent.GuildId = creator.GetGuildId();
-            }
+                calendarEvent.GuildId = _player.GetGuildId();
 
             if (calendarEvent.IsGuildAnnouncement())
             {
@@ -209,11 +243,57 @@ namespace Game
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
             if (calendarCopyEvent.Date < (GameTime.GetGameTime() - 86400L))
+            {
+                Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventPassed);
                 return;
-
+            }
+            
             CalendarEvent oldEvent = Global.CalendarMgr.GetEvent(calendarCopyEvent.EventID);
             if (oldEvent != null)
             {
+                // Ensure that the player has access to the event
+                if (oldEvent.IsGuildEvent() || oldEvent.IsGuildAnnouncement())
+                {
+                    if (oldEvent.GuildId != _player.GetGuildId())
+                    {
+                        Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (oldEvent.OwnerGuid != guid)
+                    {
+                        Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
+                        return;
+                    }
+                }
+
+                // Check if the player reached the max number of events allowed to create
+                if (oldEvent.IsGuildEvent() || oldEvent.IsGuildAnnouncement())
+                {
+                    if (Global.CalendarMgr.GetGuildEvents(_player.GetGuildId()).Count >= SharedConst.CalendarMaxGuildEvents)
+                    {
+                        Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.GuildEventsExceeded);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (Global.CalendarMgr.GetEventsCreatedBy(guid).Count >= SharedConst.CalendarMaxEvents)
+                    {
+                        Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventsExceeded);
+                        return;
+                    }
+                }
+
+                if (GetCalendarEventCreationCooldown() > GameTime.GetGameTime())
+                {
+                    Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.Internal);
+                    return;
+                }
+                SetCalendarEventCreationCooldown(GameTime.GetGameTime() + SharedConst.CalendarCreateEventCooldown);
+
                 CalendarEvent newEvent = new(oldEvent, Global.CalendarMgr.GetFreeEventId());
                 newEvent.Date = calendarCopyEvent.Date;
                 Global.CalendarMgr.AddEvent(newEvent, CalendarSendEventType.Copy);

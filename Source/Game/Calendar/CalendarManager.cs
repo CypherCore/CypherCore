@@ -146,13 +146,24 @@ namespace Game
                 return;
             }
 
+            RemoveEvent(calendarEvent, remover);
+        }
+
+        void RemoveEvent(CalendarEvent calendarEvent, ObjectGuid remover)
+        {
+            if (calendarEvent == null)
+            {
+                SendCalendarCommandResult(remover, CalendarError.EventInvalid);
+                return;
+            }
+
             SendCalendarEventRemovedAlert(calendarEvent);
 
             SQLTransaction trans = new();
             PreparedStatement stmt;
             MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
 
-            var eventInvites = _invites[eventId];
+            var eventInvites = _invites[calendarEvent.EventId];
             for (int i = 0; i < eventInvites.Count; ++i)
             {
                 CalendarInvite invite = eventInvites[i];
@@ -166,10 +177,10 @@ namespace Game
                     mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
             }
 
-            _invites.Remove(eventId);
+            _invites.Remove(calendarEvent.EventId);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
-            stmt.AddValue(0, eventId);
+            stmt.AddValue(0, calendarEvent.EventId);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
@@ -329,6 +340,42 @@ namespace Game
             return inviteId;
         }
 
+        public void DeleteOldEvents()
+        {
+            long oldEventsTime = GameTime.GetGameTime() - SharedConst.CalendarOldEventsDeletionTime;
+
+            foreach (var calendarEvent in _events)
+            {
+                if (calendarEvent.Date < oldEventsTime)
+                    RemoveEvent(calendarEvent, ObjectGuid.Empty);
+            }
+        }
+
+        public List<CalendarEvent> GetEventsCreatedBy(ObjectGuid guid, bool includeGuildEvents = false)
+        {
+            List<CalendarEvent> result = new();
+            foreach (var calendarEvent in _events)
+                if (calendarEvent.OwnerGuid == guid && (includeGuildEvents || (!calendarEvent.IsGuildEvent() && !calendarEvent.IsGuildAnnouncement())))
+                    result.Add(calendarEvent);
+
+            return result;
+        }
+
+        public List<CalendarEvent> GetGuildEvents(ulong guildId)
+        {
+            List<CalendarEvent> result = new();
+
+            if (guildId == 0)
+                return result;
+
+            foreach (var calendarEvent in _events)
+                if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
+                    if (calendarEvent.GuildId == guildId)
+                        result.Add(calendarEvent);
+
+            return result;
+        }
+        
         public List<CalendarEvent> GetPlayerEvents(ObjectGuid guid)
         {
             List<CalendarEvent> events = new();
@@ -342,8 +389,9 @@ namespace Game
                         events.Add(Event);
                 }
             }
+
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player?.GetGuildId() != 0)
             {
                 foreach (var calendarEvent in _events)
                     if (calendarEvent.GuildId == player.GetGuildId())
@@ -643,6 +691,15 @@ namespace Game
 
     public class CalendarInvite
     {
+        public ulong InviteId { get; set; }
+        public ulong EventId { get; set; }
+        public ObjectGuid InviteeGuid { get; set; }
+        public ObjectGuid SenderGuid { get; set; }
+        public long ResponseTime { get; set; }
+        public CalendarInviteStatus Status { get; set; }
+        public CalendarModerationRank Rank { get; set; }
+        public string Note { get; set; }
+
         public CalendarInvite()
         {
             InviteId = 1;
@@ -680,19 +737,21 @@ namespace Game
             if (InviteId != 0 && EventId != 0)
                 Global.CalendarMgr.FreeInviteId(InviteId);
         }
-
-        public ulong InviteId { get; set; }
-        public ulong EventId { get; set; }
-        public ObjectGuid InviteeGuid { get; set; }
-        public ObjectGuid SenderGuid { get; set; }
-        public long ResponseTime { get; set; }
-        public CalendarInviteStatus Status { get; set; }
-        public CalendarModerationRank Rank { get; set; }
-        public string Note { get; set; }
     }
 
     public class CalendarEvent
     {
+        public ulong EventId { get; set; }
+        public ObjectGuid OwnerGuid { get; set; }
+        public ulong GuildId { get; set; }
+        public CalendarEventType EventType { get; set; }
+        public int TextureId { get; set; }
+        public long Date { get; set; }
+        public CalendarFlags Flags { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public long LockDate { get; set; }
+
         public CalendarEvent(CalendarEvent calendarEvent, ulong eventId)
         {
             EventId = eventId;
@@ -746,15 +805,7 @@ namespace Game
         public bool IsGuildAnnouncement() { return Flags.HasAnyFlag(CalendarFlags.WithoutInvites); }
         public bool IsLocked() { return Flags.HasAnyFlag(CalendarFlags.InvitesLocked); }
 
-        public ulong EventId { get; set; }
-        public ObjectGuid OwnerGuid { get; set; }
-        public ulong GuildId { get; set; }
-        public CalendarEventType EventType { get; set; }
-        public int TextureId { get; set; }
-        public long Date { get; set; }
-        public CalendarFlags Flags { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public long LockDate { get; set; }
+        public static bool IsGuildEvent(uint flags) { return (flags & (uint)CalendarFlags.GuildEvent) != 0; }
+        public static bool IsGuildAnnouncement(uint flags) { return (flags & (uint)CalendarFlags.WithoutInvites) != 0; }
     }
 }
