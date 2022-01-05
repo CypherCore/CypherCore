@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
+using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -410,7 +411,11 @@ namespace Game.AI
                     if (me.HasUnitState(UnitState.Follow))
                         me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
 
-                    me.GetMotionMaster().MoveChase(target, me.GetPetChaseDistance(), MathF.PI);
+                    // Pets with ranged attacks should not care about the chase angle at all.
+                    float chaseDistance = me.GetPetChaseDistance();
+                    float angle = chaseDistance == 0.0f ? MathF.PI : 0.0f;
+                    float tolerance = chaseDistance == 0.0f ? MathFunctions.PiOver4 : (MathF.PI * 2);
+                    me.GetMotionMaster().MoveChase(target, new ChaseRange(0.0f, chaseDistance), new ChaseAngle(angle, tolerance));
                 }
                 else
                 {
