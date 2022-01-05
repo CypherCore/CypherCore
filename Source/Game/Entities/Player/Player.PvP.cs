@@ -144,6 +144,7 @@ namespace Game.Entities
                     UpdateCriteria(CriteriaType.DeliverKillingBlowToRace, (uint)victim.GetRace());
                     UpdateCriteria(CriteriaType.PVPKillInArea, GetAreaId());
                     UpdateCriteria(CriteriaType.EarnHonorableKill, 1, 0, 0, victim);
+                    UpdateCriteria(CriteriaType.KillPlayer, 1, 0, 0, victim);
                 }
                 else
                 {
