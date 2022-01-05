@@ -2045,6 +2045,12 @@ namespace Game
                         continue;
                     }
 
+                    if (AdditionalSpellInfo.GetDuration() > 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has temporary aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
+                        continue;
+                    }
+
                     creatureAddon.auras[i++] = spellId;
                 }
 
@@ -2156,6 +2162,12 @@ namespace Game
                     if (creatureAddon.auras.Contains(spellId))
                     {
                         Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has duplicate aura (spell {1}) in `auras` field in `creature_addon`.", guid, spellId);
+                        continue;
+                    }
+
+                    if (AdditionalSpellInfo.GetDuration() > 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has temporary aura (spell {spellId}) in `auras` field in `creature_addon`.");
                         continue;
                     }
 
