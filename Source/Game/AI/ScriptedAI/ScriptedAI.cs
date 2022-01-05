@@ -504,6 +504,16 @@ namespace Game.AI
             }
         }
 
+        void ForceStopCombatForCreature(uint entry, float maxSearchRange = 250.0f)
+        {
+            Log.outWarn(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on '{me.GetName()}' with creature entry '{entry}'. This should be fixed in another way than calling this function. Debug info: {me.GetDebugInfo()}");
+            List<Creature> creatures = new();
+            me.GetCreatureListWithEntryInGrid(creatures, entry, maxSearchRange);
+
+            foreach (Creature creature in creatures)
+                creature.CombatStop();
+        }
+
         public override void JustSummoned(Creature summon)
         {
             summons.Summon(summon);
