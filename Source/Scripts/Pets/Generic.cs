@@ -110,6 +110,8 @@ namespace Scripts.Pets
                 Unit owner = me.GetOwner();
                 if (owner != null)
                     DoCast(owner, SpellIds.EtherealOnSummon);
+
+                base.JustAppeared();
             }
         }
     }
