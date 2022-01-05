@@ -2999,6 +2999,21 @@ namespace Game.Entities
             if (owner != null)
                 return owner.GetLevelForTarget(target);
 
+            if (GetGoType() == GameObjectTypes.Trap)
+            {
+                Player player = target.ToPlayer();
+                if (player != null)
+                {
+                    var userLevels = Global.DB2Mgr.GetContentTuningData(GetGoInfo().ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    if (userLevels.HasValue)
+                        return (byte)Math.Clamp(player.GetLevel(), userLevels.Value.MinLevel, userLevels.Value.MaxLevel);
+                }
+
+                Unit targetUnit = target.ToUnit();
+                if (targetUnit != null)
+                    return targetUnit.GetLevel();
+            }
+
             return 1;
         }
 

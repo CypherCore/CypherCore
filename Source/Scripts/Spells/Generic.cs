@@ -2503,20 +2503,20 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            Unit caster = GetCaster();
-            if (caster == null)
+            Unit target = GetTarget();
+            if (target == null)
                 return;
 
-            uint heal = (uint)caster.CountPctFromMaxHealth(10);
-            HealInfo healInfo = new(caster, GetTarget(), heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
-            caster.HealBySpell(healInfo);
+            uint heal = (uint)target.CountPctFromMaxHealth(10);
+            HealInfo healInfo = new(target, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+            target.HealBySpell(healInfo);
 
             /// @todo: should proc other auras?
-            int mana = caster.GetMaxPower(PowerType.Mana);
+            int mana = target.GetMaxPower(PowerType.Mana);
             if (mana != 0)
             {
                 mana /= 10;
-                caster.EnergizeBySpell(caster, GetSpellInfo(), mana, PowerType.Mana);
+                target.EnergizeBySpell(target, GetSpellInfo(), mana, PowerType.Mana);
             }
         }
 
