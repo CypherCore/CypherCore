@@ -259,7 +259,11 @@ namespace Game.Movement
                 return false;
             if (maxDistance.HasValue && distSq > MathF.Sqrt(maxDistance.Value))
                 return false;
-            return !angle.HasValue || angle.Value.IsAngleOkay(target.GetRelativeAngle(owner));
+            if (angle.HasValue && !angle.Value.IsAngleOkay(target.GetRelativeAngle(owner)))
+                return false;
+            if (!owner.IsWithinLOSInMap(target))
+                return false;
+            return true;
         }
 
         static void DoMovementInform(Unit owner, Unit target)

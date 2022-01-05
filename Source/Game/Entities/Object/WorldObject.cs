@@ -3023,7 +3023,7 @@ namespace Game.Entities
             return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z, ox, oy, oz, checks, ignoreFlags);
         }
 
-        Position GetHitSpherePointFor(Position dest)
+        public Position GetHitSpherePointFor(Position dest)
         {
             Vector3 vThis = new(GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight());
             Vector3 vObj = new(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
@@ -3032,7 +3032,7 @@ namespace Game.Entities
             return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAbsoluteAngle(contactPoint.X, contactPoint.Y));
         }
 
-        void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
+        public void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
         {
             Position pos = GetHitSpherePointFor(dest);
             x = pos.GetPositionX();

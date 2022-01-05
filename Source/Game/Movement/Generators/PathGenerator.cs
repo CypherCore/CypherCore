@@ -892,6 +892,10 @@ namespace Game.Movement
                 return;
 
             int i = _pathPoints.Length - 1;
+            float x;
+            float y;
+            float z;
+            float collisionHeight = _sourceUnit.GetCollisionHeight();
             // find the first i s.t.:
             //  - _pathPoints[i] is still too close
             //  - _pathPoints[i-1] is too far away
@@ -901,6 +905,15 @@ namespace Game.Movement
                 // we know that pathPoints[i] is too close already (from the previous iteration)
                 if ((_pathPoints[i - 1] - target).LengthSquared() >= distSq)
                     break; // bingo!
+
+                // check if the shortened path is still in LoS with the target
+                _sourceUnit.GetHitSpherePointFor(new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), out x, out y, out z);
+                if (!_sourceUnit.GetMap().IsInLineOfSight(_sourceUnit.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
+                {
+                    // whenver we find a point that is not in LoS anymore, simply use last valid path
+                    Array.Resize(ref _pathPoints, i + 1);
+                    return;
+                }
 
                 if (--i == 0)
                 {
