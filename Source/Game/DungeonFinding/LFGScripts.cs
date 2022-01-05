@@ -186,6 +186,8 @@ namespace Game.DungeonFinding
                 if (method == RemoveMethod.Leave && state == LfgState.Dungeon &&
                     players >= SharedConst.LFGKickVotesNeeded)
                     player.CastSpell(player, SharedConst.LFGSpellDungeonDeserter, true);
+                else if (method == RemoveMethod.KickLFG)
+                    player.RemoveAurasDueToSpell(SharedConst.LFGSpellDungeonCooldown);
                 //else if (state == LFG_STATE_BOOT)
                 // Update internal kick cooldown of kicked
 
