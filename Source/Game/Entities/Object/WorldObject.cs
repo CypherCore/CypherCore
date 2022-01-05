@@ -1990,9 +1990,27 @@ namespace Game.Entities
 
         public FactionTemplateRecord GetFactionTemplateEntry()
         {
-            var entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
+            uint factionId = GetFaction();
+            var entry = CliDB.FactionTemplateStorage.LookupByKey(factionId);
             if (entry == null)
-                Log.outError(LogFilter.Server, $"{GetGUID()} has invalid faction {GetFaction()}");
+            {
+                switch (GetTypeId())
+                {
+                    case TypeId.Player:
+                        Log.outError(LogFilter.Unit, $"Player {ToPlayer().GetName()} has invalid faction (faction template id) #{factionId}");
+                        break;
+                    case TypeId.Unit:
+                        Log.outError(LogFilter.Unit, $"Creature (template id: {ToCreature().GetCreatureTemplate().Entry}) has invalid faction (faction template Id) #{factionId}");
+                        break;
+                    case TypeId.GameObject:
+                        if (factionId != 0) // Gameobjects may have faction template id = 0
+                            Log.outError(LogFilter.Unit, $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) has invalid faction (faction template Id) #{factionId}");
+                        break;
+                    default:
+                        Log.outError(LogFilter.Unit, $"Object (name={GetName()}, type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
+                        break;
+                }
+            }
 
             return entry;
         }
