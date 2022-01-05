@@ -2671,18 +2671,6 @@ namespace Game.Entities
                         case AuraType.ModStun:
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
                             break;
-                        case AuraType.PeriodicHeal:
-                        case AuraType.PeriodicDamage:
-                        case AuraType.PeriodicDamagePercent:
-                        case AuraType.PeriodicLeech:
-                        case AuraType.PeriodicManaLeech:
-                        case AuraType.PeriodicHealthFunnel:
-                        case AuraType.PeriodicEnergize:
-                        case AuraType.ObsModHealth:
-                        case AuraType.ObsModPower:
-                        case AuraType.PowerBurn:
-                            spellInfo.AttributesCu |= SpellCustomAttributes.NoInitialThreat;
-                            break;
                     }
 
                     switch (spellEffectInfo.ApplyAuraName)
