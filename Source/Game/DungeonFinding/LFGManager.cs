@@ -585,13 +585,23 @@ namespace Game.DungeonFinding
                 case LfgState.Queued:
                     if (!gguid.IsEmpty())
                     {
+                        LfgState newState = LfgState.None;
+                        LfgState oldState = GetOldState(gguid);
+
+                        // Set the new state to LFG_STATE_DUNGEON/LFG_STATE_FINISHED_DUNGEON if the group is already in a dungeon
+                        // This is required in case a LFG group vote-kicks a player in a dungeon, queues, then leaves the queue (maybe to queue later again)
+                        Group group = Global.GroupMgr.GetGroupByGUID(gguid);
+                        if (group != null)
+                            if (group.IsLFGGroup() && GetDungeon(gguid) != 0 && (oldState == LfgState.Dungeon || oldState == LfgState.FinishedDungeon))
+                                newState = oldState;
+
                         LFGQueue queue = GetQueue(gguid);
                         queue.RemoveFromQueue(gguid);
-                        SetState(gguid, LfgState.None);
+                        SetState(gguid, newState);
                         List<ObjectGuid> players = GetPlayers(gguid);
                         foreach (var it in players)
                         {
-                            SetState(it, LfgState.None);
+                            SetState(it, newState);
                             SendLfgUpdateStatus(it, new LfgUpdateData(LfgUpdateType.RemovedFromQueue), true);
                         }
                     }
