@@ -63,7 +63,7 @@ namespace Framework.Constants
         Pvp = 0x1000,
         Silenced = 0x2000,
         CannotSwim = 0x4000,
-        Unk15 = 0x8000,
+        Swimming = 0x8000, // shows swim animation in water
         NonAttackable2 = 0x10000,
         Pacified = 0x20000,
         Stunned = 0x40000,

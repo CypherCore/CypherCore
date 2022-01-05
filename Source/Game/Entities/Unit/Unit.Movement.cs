@@ -61,7 +61,7 @@ namespace Game.Entities
             if (IsPet() && HasUnitFlag(UnitFlags.PetInCombat))
                 return true;
 
-            return HasUnitFlag(UnitFlags.Rename | UnitFlags.Unk15);
+            return HasUnitFlag(UnitFlags.Rename | UnitFlags.Swimming);
         }
         public virtual bool IsInWater()
         {
