@@ -2662,7 +2662,7 @@ namespace Game.Entities
                 return;
 
             if (damageInfo.TargetState == VictimState.Parry &&
-                (!IsTypeId(TypeId.Unit) || !ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
+                (!victim.IsCreature() || victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
             {
                 // Get attack timers
                 float offtime = victim.GetAttackTimer(WeaponAttackType.OffAttack);
