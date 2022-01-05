@@ -2020,9 +2020,6 @@ namespace Game
                 creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
 
                 var tokens = new StringArray(result.Read<string>(10), ' ');
-
-                creatureAddon.auras = new uint[tokens.Length];
-                byte i = 0;
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
@@ -2051,7 +2048,7 @@ namespace Game
                         continue;
                     }
 
-                    creatureAddon.auras[i++] = spellId;
+                    creatureAddon.auras.Add(spellId);
                 }
 
                 if (creatureAddon.mount != 0)
@@ -2141,8 +2138,6 @@ namespace Game
                 creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
 
                 var tokens = new StringArray(result.Read<string>(10), ' ');
-                byte i = 0;
-                creatureAddon.auras = new uint[tokens.Length];
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
@@ -2171,7 +2166,7 @@ namespace Game
                         continue;
                     }
 
-                    creatureAddon.auras[i++] = spellId;
+                    creatureAddon.auras.Add(spellId);
                 }
 
                 if (creatureAddon.mount != 0)
