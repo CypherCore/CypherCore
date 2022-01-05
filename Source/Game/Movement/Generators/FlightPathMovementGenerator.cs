@@ -74,8 +74,9 @@ namespace Game.Movement
             if (owner == null)
                 return false;
 
-            uint pointId = (uint)(owner.MoveSpline.CurrentPathIdx() < 0 ? 0 : owner.MoveSpline.CurrentPathIdx());
-            if (pointId > _currentNode && _currentNode < _path.Count)
+            // skipping the first spline path point because it's our starting point and not a taxi path point
+            uint pointId = (uint)(owner.MoveSpline.CurrentPathIdx() <= 0 ? 0 : owner.MoveSpline.CurrentPathIdx() - 1);
+            if (pointId > _currentNode && _currentNode < _path.Count - 1)
             {
                 bool departureEvent = true;
                 do
@@ -92,7 +93,7 @@ namespace Game.Movement
                         }
                     }
 
-                    if (pointId >= _currentNode)
+                    if (pointId == _currentNode)
                         break;
 
                     if (_currentNode == _preloadTargetNode)
@@ -101,7 +102,7 @@ namespace Game.Movement
                     _currentNode += (departureEvent ? 1 : 0);
                     departureEvent = !departureEvent;
                 }
-                while (true);
+                while (_currentNode < _path.Count - 1);
             }
 
             if (_currentNode >= (_path.Count - 1))
@@ -261,10 +262,6 @@ namespace Game.Movement
             else
                 Log.outDebug(LogFilter.Server, "FlightPathMovementGenerator::PreloadEndGrid: Unable to determine map to preload flightmaster grid");
         }
-
-
-
-
 
         public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
