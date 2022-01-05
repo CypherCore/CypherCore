@@ -51,11 +51,6 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestPetInfo)]
-        void HandleRequestPetInfo(RequestPetInfo packet)
-        {
-        }
-
         [WorldPacketHandler(ClientOpcodes.PetAction)]
         void HandlePetAction(PetAction packet)
         {
@@ -741,6 +736,12 @@ namespace Game
                 petNameInvalid.RenameData.DeclinedNames.name[i] = declinedName.name[i];
 
             SendPacket(petNameInvalid);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.RequestPetInfo)]
+        void HandleRequestPetInfo(RequestPetInfo requestPetInfo)
+        {
+            GetPlayer().PetSpellInitialize();
         }
     }
 }
