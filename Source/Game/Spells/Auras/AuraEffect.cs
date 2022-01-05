@@ -1652,6 +1652,9 @@ namespace Game.Spells
                     }
                 }
 
+                foreach (var pair in target.GetThreatManager().GetThreatenedByMeList())
+                    pair.Value.ScaleThreat(0.0f);
+
                 if (target.GetMap().IsDungeon()) // feign death does not remove combat in dungeons
                 {
                     target.AttackStop();
