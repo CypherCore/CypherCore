@@ -75,7 +75,7 @@ namespace Game.Movement
                 return false;
 
             uint pointId = (uint)(owner.MoveSpline.CurrentPathIdx() < 0 ? 0 : owner.MoveSpline.CurrentPathIdx());
-            if (pointId > _currentNode)
+            if (pointId > _currentNode && _currentNode < _path.Count)
             {
                 bool departureEvent = true;
                 do
@@ -92,7 +92,7 @@ namespace Game.Movement
                         }
                     }
 
-                    if (pointId == _currentNode)
+                    if (pointId >= _currentNode)
                         break;
 
                     if (_currentNode == _preloadTargetNode)
