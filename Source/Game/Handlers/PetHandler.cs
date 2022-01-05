@@ -241,8 +241,7 @@ namespace Game
                                     if (pet.ToPet().GetPetType() == PetType.Hunter)
                                         GetPlayer().RemovePet(pet.ToPet(), PetSaveMode.AsDeleted);
                                     else
-                                        //dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
-                                        pet.SetDeathState(DeathState.Corpse);
+                                        GetPlayer().RemovePet(pet.ToPet(), PetSaveMode.NotInSlot);
                                 }
                                 else if (pet.HasUnitTypeMask(UnitTypeMask.Minion))
                                 {

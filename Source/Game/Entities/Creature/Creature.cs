@@ -3020,7 +3020,11 @@ namespace Game.Entities
 
         void ReacquireSpellFocusTarget()
         {
-            Cypher.Assert(HasSpellFocus());
+            if (!HasSpellFocus())
+            {
+                //Log.outError(LogFilter.Unit, $"Creature::ReacquireSpellFocusTarget() being called with HasSpellFocus() returning false. {GetDebugInfo()}");
+                return;
+            }
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _spellFocusInfo.Target);
 
