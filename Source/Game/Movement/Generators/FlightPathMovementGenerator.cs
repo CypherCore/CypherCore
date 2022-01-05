@@ -126,6 +126,7 @@ namespace Game.Movement
             if (!active)
                 return;
 
+            uint taxiNodeId = owner.m_taxi.GetTaxiDestination();
             owner.m_taxi.ClearTaxiDestinations();
             owner.Dismount();
             owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
@@ -136,10 +137,13 @@ namespace Game.Movement
                 // this prevent cheating with landing  point at lags
                 // when client side flight end early in comparison server side
                 owner.StopMoving();
-                float mapHeight = owner.GetMap().GetHeight(owner.GetPhaseShift(), _path[(int)GetCurrentNode()].Loc.X, _path[(int)GetCurrentNode()].Loc.Y, _path[(int)GetCurrentNode()].Loc.Z);
-                owner.SetFallInformation(0, mapHeight);
-                // When the player reaches the last flight point, teleport to destination at map height
-                owner.TeleportTo(_path[(int)GetCurrentNode()].ContinentID, _path[(int)GetCurrentNode()].Loc.X, _path[(int)GetCurrentNode()].Loc.Y, mapHeight, owner.GetOrientation());
+                // When the player reaches the last flight point, teleport to destination taxi node location
+                var node = CliDB.TaxiNodesStorage.LookupByKey(taxiNodeId);
+                if (node != null)
+                {
+                    owner.SetFallInformation(0, node.Pos.Z);
+                    owner.TeleportTo(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z, owner.GetOrientation());
+                }
             }
 
             owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
