@@ -194,6 +194,68 @@ namespace Game.AI
             return who.GetThreatManager().GetThreat(victim);
         }
 
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the given creature
+        /// </summary>
+        /// <param name="who"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStop(Creature who, bool reset = true)
+        {
+            if (who == null || !who.IsInCombat())
+                return;
+
+            who.CombatStop(true);
+            who.DoNotReacquireSpellFocusTarget();
+            who.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+            if (reset)
+            {
+                who.LoadCreaturesAddon();
+                who.SetLootRecipient(null);
+                who.ResetPlayerDamageReq();
+                who.SetLastDamagedTime(0);
+                who.SetCannotReachTarget(false);
+            }
+        }
+
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="maxSearchRange"></param>
+        /// <param name="samePhase"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+
+            List<Creature> creatures = new();
+            AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
+            CreatureListSearcher searcher = new(me, creatures, check);
+
+            // TODO: FIX THIS
+            //if (!samePhase)
+            //    searcher.i_phaseMask = PHASEMASK_ANYWHERE;
+
+            Cell.VisitGridObjects(me, searcher, maxSearchRange);
+
+            foreach (Creature creature in creatures)
+                ForceCombatStop(creature, reset);
+        }
+
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param name="creatureEntries"></param>
+        /// <param name="maxSearchRange"></param>
+        /// <param name="samePhase"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            foreach (var entry in creatureEntries)
+                ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
+        }
+
         //Spawns a creature relative to me
         public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, uint despawntime)
         {
@@ -504,14 +566,27 @@ namespace Game.AI
             }
         }
 
-        void ForceStopCombatForCreature(uint entry, float maxSearchRange = 250.0f)
+        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
         {
-            Log.outWarn(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on '{me.GetName()}' with creature entry '{entry}'. This should be fixed in another way than calling this function. Debug info: {me.GetDebugInfo()}");
+            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
             List<Creature> creatures = new();
             me.GetCreatureListWithEntryInGrid(creatures, entry, maxSearchRange);
 
             foreach (Creature creature in creatures)
-                creature.CombatStop();
+            {
+                creature.CombatStop(true);
+                creature.DoNotReacquireSpellFocusTarget();
+                creature.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+                if (reset)
+                {
+                    creature.LoadCreaturesAddon();
+                    creature.SetLootRecipient(null);
+                    creature.ResetPlayerDamageReq();
+                    creature.SetLastDamagedTime(0);
+                    creature.SetCannotReachTarget(false);
+                }
+            }
         }
 
         public override void JustSummoned(Creature summon)
