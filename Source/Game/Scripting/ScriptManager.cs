@@ -1105,6 +1105,7 @@ namespace Game.Scripting
         public void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos)
         {
             ForEach<UnitScript>(p => p.ModifyVehiclePassengerExitPos(passenger, vehicle, pos));
+            ForEach<CreatureScript>(p => p.ModifyVehiclePassengerExitPos(passenger, vehicle, pos));
         }
 
         // AreaTriggerEntityScript

@@ -335,6 +335,9 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
+        // Called when an unit exits a vehicle
+        public virtual void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos) { }
+
         // Called when a CreatureAI object is needed for the creature.
         public virtual CreatureAI GetAI(Creature creature) { return null; }
     }
