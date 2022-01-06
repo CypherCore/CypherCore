@@ -330,9 +330,9 @@ namespace Game.Maps
                     return;
                 case TypeId.GameObject:
                 case TypeId.AreaTrigger:
-                case TypeId.DynamicObject:
                     grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).AddGridObject(obj);
                     break;
+                case TypeId.DynamicObject:
                 default:
                     if (obj.IsWorldObject())
                         grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).AddWorldObject(obj);
