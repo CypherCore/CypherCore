@@ -1278,7 +1278,9 @@ namespace Game.Entities
                         continue;
 
                     SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID());
-                    if (!(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && caster && IsFriendlyTo(caster)))
+                    // Consider the school immune if any of these conditions are not satisfied.
+                    // In case of no immuneSpellInfo, ignore that condition and check only the other conditions
+                    if ((immuneSpellInfo != null && !immuneSpellInfo.IsPositive()) || !spellInfo.IsPositive() || caster == null || !IsFriendlyTo(caster))
                         if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                             schoolImmunityMask |= pair.Key;
                 }
