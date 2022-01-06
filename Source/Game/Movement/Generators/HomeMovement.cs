@@ -36,6 +36,8 @@ namespace Game.AI
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
+            owner.SetNoSearchAssistance(false);
+
             SetTargetLocation(owner);
         }
 

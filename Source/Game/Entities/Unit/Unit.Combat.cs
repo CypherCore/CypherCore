@@ -400,15 +400,7 @@ namespace Game.Entities
             // reset only at real combat stop
             Creature creature = ToCreature();
             if (creature != null)
-            {
                 creature.SetNoCallAssistance(false);
-
-                if (creature.HasSearchedAssistance())
-                {
-                    creature.SetNoSearchAssistance(false);
-                    UpdateSpeed(UnitMoveType.Run);
-                }
-            }
 
             SendMeleeAttackStop(victim);
             return true;

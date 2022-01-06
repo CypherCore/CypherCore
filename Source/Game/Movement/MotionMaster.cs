@@ -914,12 +914,15 @@ namespace Game.Movement
 
         public void MoveSeekAssistance(float x, float y, float z)
         {
-            if (_owner.IsCreature())
+            Creature creature = _owner.ToCreature();
+            if (creature != null)
             {
-                _owner.AttackStop();
-                _owner.CastStop();
-                _owner.ToCreature().SetReactState(ReactStates.Passive);
-                Add(new AssistanceMovementGenerator(EventId.AssistMove, x, y, z, _owner.GetSpeed(UnitMoveType.Run) * 0.66f));
+                Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveSeekAssistance: '{creature.GetGUID()}', seeks assistance (X: {x}, Y: {y}, Z: {z})");
+                creature.AttackStop();
+                creature.CastStop();
+                creature.DoNotReacquireSpellFocusTarget();
+                creature.SetReactState(ReactStates.Passive);
+                Add(new AssistanceMovementGenerator(EventId.AssistMove, x, y, z));
             }
             else
                 Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistance: {_owner.GetGUID()}, attempted to seek assistance");

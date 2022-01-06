@@ -713,7 +713,6 @@ namespace Game.Entities
                 var creature = searcher.GetTarget();
 
                 SetNoSearchAssistance(true);
-                UpdateSpeed(UnitMoveType.Run);
 
                 if (!creature)
                     SetControlled(true, UnitState.Fleeing);
@@ -1810,13 +1809,8 @@ namespace Game.Entities
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
-                SetActive(false);
-
-                if (HasSearchedAssistance())
-                {
-                    SetNoSearchAssistance(false);
-                    UpdateSpeed(UnitMoveType.Run);
-                }
+                SetActive(false);                
+                SetNoSearchAssistance(false);
 
                 //Dismiss group if is leader
                 if (m_formation != null && m_formation.GetLeader() == this)

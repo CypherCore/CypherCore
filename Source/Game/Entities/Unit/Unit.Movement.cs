@@ -543,10 +543,6 @@ namespace Game.Entities
             Creature creature = ToCreature();
             if (creature != null)
             {
-                // for creature case, we check explicit if mob searched for assistance
-                if (ToCreature().HasSearchedAssistance())
-                    speed *= 0.66f;                                 // best guessed value, so this will be 33% reduction. Based off initial speed, mob can then "run", "walk fast" or "walk".
-
                 if (creature.HasUnitTypeMask(UnitTypeMask.Minion) && !creature.IsInCombat())
                 {
                     if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Follow)
