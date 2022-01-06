@@ -54,6 +54,10 @@ namespace Game.Movement
         {
             if (timer != 0)
             {
+                // Don't try to paused an already paused generator
+                if (HasFlag(MovementGeneratorFlags.Paused))
+                    return;
+
                 AddFlag(MovementGeneratorFlags.TimedPaused);
                 _nextMoveTime.Reset((int)timer);
                 RemoveFlag(MovementGeneratorFlags.Paused);
