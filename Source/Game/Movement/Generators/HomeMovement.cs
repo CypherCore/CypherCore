@@ -74,7 +74,6 @@ namespace Game.AI
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
-                owner.SetWalk(true);
                 owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
                 if (owner.IsVehicle())
