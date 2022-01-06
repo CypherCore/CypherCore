@@ -4921,22 +4921,14 @@ namespace Game.Spells
 
                             m_preGeneratedPath = new(unitCaster);
                             m_preGeneratedPath.SetPathLengthLimit(range);
-                            //first try with raycast, if it fails fall back to normal path
-                            float targetObjectSize = Math.Min(target.GetCombatReach(), 4.0f);
-                            bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, true);
+
+                            // first try with raycast, if it fails fall back to normal path
+                            bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), false, false);
                             if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                 return SpellCastResult.OutOfRange;
                             else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
-                            {
-                                result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, false);
-                                if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
-                                    return SpellCastResult.OutOfRange;
-                                else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
-                                    return SpellCastResult.NoPath;
-                                else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line
-                                    return SpellCastResult.NoPath;
-                            }
-                            else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if in a straight line
+                                return SpellCastResult.NoPath;
+                            else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line
                                 return SpellCastResult.NoPath;
 
                             m_preGeneratedPath.ShortenPathUntilDist(target, objSize); //move back

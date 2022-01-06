@@ -195,23 +195,21 @@ namespace Game.Movement
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . farFromPoly distToStartPoly={0:F3} distToEndPoly={1:F3}\n", distToStartPoly, distToEndPoly);
 
                 bool buildShotrcut = false;
-                if (_sourceUnit.IsTypeId(TypeId.Unit))
+                var p = (distToStartPoly > 7.0f) ? startPos : endPos;
+                if (_sourceUnit.GetMap().IsUnderWater(_sourceUnit.GetPhaseShift(), p.X, p.Y, p.Z))
                 {
-                    Creature owner = _sourceUnit.ToCreature();
-
-                    Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
-                    if (_sourceUnit.GetMap().IsUnderWater(_sourceUnit.GetPhaseShift(), p.X, p.Y, p.Z))
-                    {
-                        Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . underWater case\n");
-                        if (owner.CanSwim())
-                            buildShotrcut = true;
-                    }
-                    else
-                    {
-                        Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . flying case\n");
-                        if (owner.CanFly())
-                            buildShotrcut = true;
-                    }
+                    Log.outDebug(LogFilter.Maps, "++ BuildPolyPath :: underWater case");
+                    if (_sourceUnit.CanSwim())
+                        buildShotrcut = true;
+                }
+                else
+                {
+                    Log.outDebug(LogFilter.Maps, "++ BuildPolyPath :: flying case");
+                    if (_sourceUnit.CanFly())
+                        buildShotrcut = true;
+                    // Allow to build a shortcut if the unit is falling and it's trying to move downwards towards a target (i.e. charging)
+                    else if (_sourceUnit.IsFalling() && endPos.Z < startPos.Z)
+                        buildShotrcut = true;
                 }
 
                 if (buildShotrcut)
