@@ -233,11 +233,13 @@ namespace Game.AI
             AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
             CreatureListSearcher searcher = new(me, creatures, check);
 
-            // TODO: FIX THIS
-            //if (!samePhase)
-            //    searcher.i_phaseMask = PHASEMASK_ANYWHERE;
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, true, false);
 
             Cell.VisitGridObjects(me, searcher, maxSearchRange);
+
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, false, false);
 
             foreach (Creature creature in creatures)
                 ForceCombatStop(creature, reset);
