@@ -331,6 +331,8 @@ namespace Game.AI
 
             CheckConditions(diff);
 
+            bool hasVictim = UpdateVictim();
+
             GetScript().OnUpdate(diff);
 
             UpdatePath(diff);
@@ -340,7 +342,7 @@ namespace Game.AI
             if (!IsAIControlled())
                 return;
 
-            if (!UpdateVictim())
+            if (!hasVictim)
                 return;
 
             if (_canAutoAttack)
