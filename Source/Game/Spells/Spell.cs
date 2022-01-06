@@ -4922,7 +4922,7 @@ namespace Game.Spells
                             // first try with raycast, if it fails fall back to normal path
                             bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), false, false);
                             if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
-                                return SpellCastResult.OutOfRange;
+                                return SpellCastResult.NoPath;
                             else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
                                 return SpellCastResult.NoPath;
                             else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line

@@ -236,19 +236,14 @@ namespace Game.Movement
             // *** poly path generating logic ***
 
             // start and end are on same polygon
-            // just need to move in straight line
+            // handle this case as if they were 2 different polygons, building a line path split in some few points
             if (startPoly == endPoly)
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (startPoly == endPoly)\n");
 
-                BuildShortcut();
-
                 _pathPolyRefs[0] = startPoly;
-                _polyLength = 1;
-
-                pathType = farFromPoly ? PathType.Incomplete : PathType.Normal;
-                Log.outDebug(LogFilter.Maps, "BuildPolyPath . path type {0}\n", pathType);
-                return;
+                _pathPolyRefs[1] = endPoly;
+                _polyLength = 2;
             }
 
             // look for startPoly/endPoly in current path
