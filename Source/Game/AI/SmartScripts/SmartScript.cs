@@ -2417,7 +2417,7 @@ namespace Game.AI
 
                     foreach (var target in targets)
                         if (IsCreature(target))
-                            _me.SetSpeed((UnitMoveType)e.Action.movementSpeed.movementType, speed);
+                            target.ToCreature().SetSpeed((UnitMoveType)e.Action.movementSpeed.movementType, speed);
 
                     break;
                 }
