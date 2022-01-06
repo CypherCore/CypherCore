@@ -1462,7 +1462,7 @@ namespace Game.Entities
                 RemoveFlag(GameObjectFlags.InUse);
 
             if (GetGoState() == GameObjectState.Ready)                      //if closed . open
-                SetGoState(alternative ? GameObjectState.ActiveAlternative : GameObjectState.Active);
+                SetGoState(alternative ? GameObjectState.Destroyed : GameObjectState.Active);
             else                                                    //if open . close
                 SetGoState(GameObjectState.Ready);
         }

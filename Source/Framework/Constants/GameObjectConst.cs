@@ -87,7 +87,7 @@ namespace Framework.Constants
     {
         Active = 0,
         Ready = 1,
-        ActiveAlternative = 2,
+        Destroyed = 2,
         TransportActive = 24,
         TransportStopped = 25,
         Max = 3
