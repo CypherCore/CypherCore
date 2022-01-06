@@ -522,7 +522,14 @@ namespace Game.Movement
                     _pointPathLimit);    // maximum number of points
             }
 
-            if (pointCount < 2 || Detour.dtStatusFailed(dtResult))
+            // Special case with start and end positions very close to each other
+            if (_polyLength == 1 && pointCount == 1)
+            {
+                // First point is start position, append end position
+                Detour.dtVcopy(pathPoints, 1 * 3, endPoint, 0);
+                pointCount++;
+            }
+            else if (pointCount < 2 || Detour.dtStatusFailed(dtResult))
             {
                 // only happens if pass bad data to findStraightPath or navmesh is broken
                 // single point paths can be generated here
