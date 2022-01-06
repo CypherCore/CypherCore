@@ -536,12 +536,12 @@ namespace Game.AI
                 instance.SetBossState(_bossId, EncounterState.Done);
         }
 
-        public void _JustEngagedWith()
+        public void _JustEngagedWith(Unit who)
         {
             if (instance != null)
             {
                 // bosses do not respawn, check only on enter combat
-                if (!instance.CheckRequiredBosses(_bossId))
+                if (!instance.CheckRequiredBosses(_bossId, who.ToPlayer()))
                 {
                     EnterEvadeMode(EvadeReason.SequenceBreak);
                     return;
@@ -657,7 +657,7 @@ namespace Game.AI
         public virtual void ScheduleTasks() { }
 
         public override void Reset() { _Reset(); }
-        public override void JustEngagedWith(Unit who) { _JustEngagedWith(); }
+        public override void JustEngagedWith(Unit who) { _JustEngagedWith(who); }
         public override void JustDied(Unit killer) { _JustDied(); }
         public override void JustReachedHome() { _JustReachedHome(); }
 
