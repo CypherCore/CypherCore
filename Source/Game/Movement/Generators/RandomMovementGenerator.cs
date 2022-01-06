@@ -161,7 +161,7 @@ namespace Game.Movement
             }
 
             bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
-            if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath) || _path.GetPathType().HasAnyFlag(PathType.Shortcut))
+            if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut) || _path.GetPathType().HasFlag(PathType.FarFromPoly))
             {
                 _timer.Reset(100);
                 return;

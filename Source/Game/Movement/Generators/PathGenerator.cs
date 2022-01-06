@@ -215,7 +215,7 @@ namespace Game.Movement
                 if (buildShotrcut)
                 {
                     BuildShortcut();
-                    pathType = (PathType.Normal | PathType.NotUsingPath);
+                    pathType = PathType.Normal | PathType.NotUsingPath | PathType.FarFromPoly;
                     return;
                 }
                 else
@@ -229,7 +229,7 @@ namespace Game.Movement
                         SetActualEndPosition(new Vector3(endPoint[2], endPoint[0], endPoint[1]));
                     }
 
-                    pathType = PathType.Incomplete;
+                    pathType = PathType.Incomplete | PathType.FarFromPoly;
                 }
             }
 
@@ -242,8 +242,12 @@ namespace Game.Movement
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (startPoly == endPoly)\n");
 
                 _pathPolyRefs[0] = startPoly;
-                _pathPolyRefs[1] = endPoly;
-                _polyLength = 2;
+                _polyLength = 1;
+
+                pathType = farFromPoly ? PathType.Incomplete | PathType.FarFromPoly : PathType.Normal;
+
+                BuildPointPath(startPoint, endPoint);
+                return;
             }
 
             // look for startPoly/endPoly in current path
@@ -453,6 +457,9 @@ namespace Game.Movement
             else
                 pathType = PathType.Incomplete;
 
+            if (farFromPoly)
+                pathType |= PathType.FarFromPoly;
+
             // generate the point-path out of our up-to-date poly-path
             BuildPointPath(startPoint, endPoint);
         }
@@ -657,11 +664,21 @@ namespace Game.Movement
 
             float[] iterPos = new float[3];
             float[] targetPos = new float[3];
-            if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[0], startPos, iterPos)))
-                return Detour.DT_FAILURE;
+            if (polyPathSize > 1)
+            {
+                // Pick the closest poitns on poly border
+                if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[0], startPos, iterPos)))
+                    return Detour.DT_FAILURE;
 
-            if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[npolys - 1], endPos, targetPos)))
-                return Detour.DT_FAILURE;
+                if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[npolys - 1], endPos, targetPos)))
+                    return Detour.DT_FAILURE;
+            }
+            else
+            {
+                // Case where the path is on the same poly
+                Detour.dtVcopy(iterPos, startPos);
+                Detour.dtVcopy(targetPos, endPos);
+            }
 
             Detour.dtVcopy(smoothPath, nsmoothPath * 3, iterPos, 0);
             nsmoothPath++;
@@ -1008,6 +1025,7 @@ namespace Game.Movement
         NoPath = 0x08,   // no valid path at all or error in generating one
         NotUsingPath = 0x10,   // used when we are either flying/swiming or on map w/o mmaps
         Short = 0x20,   // path is longer or equal to its limited path length
+        FarFromPoly = 0x40 // start of end positions are far from the mmap poligon
     }
 
     public enum NavArea
