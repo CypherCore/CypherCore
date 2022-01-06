@@ -79,11 +79,10 @@ namespace Game.AI
                 return;
             }
 
-            var playerList = map.GetPlayers();
-            if (playerList.Empty())
+            if (!map.HavePlayers())
                 return;
 
-            foreach (var player in playerList)
+            foreach (var player in map.GetPlayers())
             {
                 if (player != null)
                 {

@@ -80,6 +80,15 @@ namespace Game.Combat
             }
         }
 
+        public bool HasPvECombatWithPlayers()
+        {
+            foreach (var reference in _pveRefs)
+                if (reference.Value.GetOther(_owner).IsPlayer())
+                    return true;
+
+            return false;
+        }
+        
         public bool HasPvPCombat()
         {
             foreach (var pair in _pvpRefs)
