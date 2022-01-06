@@ -46,8 +46,11 @@ namespace Game.Movement
             _reference = owner.GetPosition();
             owner.StopMoving();
 
-            if (_wanderDistance == 0)
+            if (_wanderDistance == 0f)
                 _wanderDistance = owner.GetRespawnRadius();
+
+            // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
+            _wanderSteps = RandomHelper.URand(2, 10);
 
             _timer.Reset(0);
             _path = null;
@@ -140,8 +143,8 @@ namespace Game.Movement
             }
 
             Position position = new(_reference);
-            float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
-            float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+            float distance = RandomHelper.FRand(0.0f, _wanderDistance);
+            float angle = RandomHelper.FRand(0.0f, MathF.PI * 2.0f);
             owner.MovePositionToFirstCollision(position, distance, angle);
 
             // Check if the destination is in LOS
@@ -151,8 +154,6 @@ namespace Game.Movement
                 _timer.Reset(200);
                 return;
             }
-
-            uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
 
             if (_path == null)
             {
@@ -187,8 +188,17 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(walk);
-            int traveltime = init.Launch();
-            _timer.Reset(traveltime + resetTimer);
+            int splineDuration = init.Launch();
+
+            --_wanderSteps;
+            if (_wanderSteps != 0) // Creature has yet to do steps before pausing
+                _timer.Reset(splineDuration);
+            else
+            {
+                // Creature has made all its steps, time for a little break
+                _timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
+                _wanderSteps = RandomHelper.URand(2, 10);
+            }
 
             // Call for creature group update
             owner.SignalFormationMovement(position);
@@ -205,5 +215,6 @@ namespace Game.Movement
         TimeTracker _timer;
         Position _reference;
         float _wanderDistance;
+        uint _wanderSteps;
     }
 }
