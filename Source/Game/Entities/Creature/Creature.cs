@@ -1101,7 +1101,7 @@ namespace Game.Entities
         {
             return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPath()} SpawnId: {GetSpawnId()}";
         }
-        
+
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
@@ -2903,11 +2903,11 @@ namespace Game.Entities
 
         public void SetSpellFocus(Spell focusSpell, WorldObject target)
         {
-            // already focused
-            if (_spellFocusInfo.Spell != null)
+            // Pointer validation and checking for a already existing focus
+            if (_spellFocusInfo.Spell != null || focusSpell == null)
                 return;
 
-            // Prevent dead/feigning death creatures from setting a focus target, so they won't turn
+            // Prevent dead / feign death creatures from setting a focus target
             if (!IsAlive() || HasUnitFlag2(UnitFlags2.FeignDeath) || HasAuraType(AuraType.FeignDeath))
                 return;
 
@@ -2925,7 +2925,8 @@ namespace Game.Entities
             if (spellInfo.HasAura(AuraType.ControlVehicle))
                 return;
 
-            if ((!target || target == this) && focusSpell.GetCastTime() == 0) // instant cast, untargeted (or self-targeted) spell doesn't need any facing updates
+            // instant non-channeled casts and non-target spells don't need facing updates
+            if (target == null && (focusSpell.GetCastTime() == 0 && !spellInfo.IsChanneled()))
                 return;
 
             // store pre-cast values for target and orientation (used to later restore)
@@ -3042,7 +3043,11 @@ namespace Game.Entities
             _spellFocusInfo.Delay = 0;
         }
 
-        public void DoNotReacquireSpellFocusTarget() { _spellFocusInfo.Delay = 0; }
+        public void DoNotReacquireSpellFocusTarget()
+        {
+            _spellFocusInfo.Delay = 0;
+            _spellFocusInfo.Spell = null;
+        }
 
         public ulong GetSpawnId() { return m_spawnId; }
 
