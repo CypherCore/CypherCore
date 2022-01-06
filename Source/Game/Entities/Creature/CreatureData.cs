@@ -414,7 +414,7 @@ namespace Game.Entities
         public ushort aiAnimKit;
         public ushort movementAnimKit;
         public ushort meleeAnimKit;
-        public uint[] auras;
+        public List<uint> auras = new();
         public VisibilityDistanceType visibilityDistanceType;
     }
 

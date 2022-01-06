@@ -1739,8 +1739,29 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 48682 - Escape from Silverbrook - Periodic Dummy
     [Script]
+    class spell_q11896_weakness_to_lightning_46444 : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                Unit owner = target.GetOwner();
+                if (owner != null)
+                {
+                    target.CastSpell(owner, (uint)GetEffectValue(), true);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
+    [Script] // 48682 - Escape from Silverbrook - Periodic Dummy
     class spell_q12308_escape_from_silverbrook : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1759,8 +1780,8 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 48681 - Summon Silverbrook Worgen
-    [Script]
+    
+    [Script] // 48681 - Summon Silverbrook Worgen
     class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
     {
         void ModDest(ref SpellDestination dest)
@@ -1778,8 +1799,8 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 51858 - Siphon of Acherus
-    [Script]
+    
+    [Script] // 51858 - Siphon of Acherus
     class spell_q12641_death_comes_from_on_high : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)

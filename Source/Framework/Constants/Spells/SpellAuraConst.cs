@@ -69,7 +69,7 @@ namespace Framework.Constants
         TrackResources = 45,
         Unk46 = 46,   // Ignore All Gear Test Spells
         ModParryPercent = 47,
-        Unk48 = 48,   // One Periodic Spell
+        PeriodicTriggerSpellFromClient = 48,   // One Periodic Spell
         ModDodgePercent = 49,
         ModCriticalHealingAmount = 50,
         ModBlockPercent = 51,

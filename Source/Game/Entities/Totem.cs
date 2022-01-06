@@ -71,7 +71,7 @@ namespace Game.Entities
                 if (totemDisplayId != 0)
                     SetDisplayId(totemDisplayId);
                 else
-                    Log.outError(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {m_unitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
+                    Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {m_unitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
             }
 
             base.InitStats(duration);
