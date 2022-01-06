@@ -667,10 +667,11 @@ namespace Framework.Constants
         Gmlist = 597,
         GmlistHeader = 598,
         GmlistEmpty = 599,
+        RemoveitemFailure = 600,
 
         // End Level 3 List, Continued At 1100
 
-        // 600-704 - free
+        // 601-704 - free
 
         WaitBeforeSpeaking = 705,
         NotEquippedItem = 706,

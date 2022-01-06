@@ -5515,7 +5515,7 @@ namespace Game.Entities
             }
         }
 
-        public void DestroyItemCount(uint itemEntry, uint count, bool update, bool unequip_check = true)
+        public uint DestroyItemCount(uint itemEntry, uint count, bool update, bool unequip_check = true)
         {
             Log.outDebug(LogFilter.Player, "STORAGE: DestroyItemCount item = {0}, count = {1}", itemEntry, count);
             uint remcount = 0;
@@ -5536,7 +5536,7 @@ namespace Game.Entities
                             DestroyItem(InventorySlots.Bag0, i, update);
 
                             if (remcount >= count)
-                                return;
+                                return remcount;
                         }
                         else
                         {
@@ -5545,7 +5545,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
@@ -5571,7 +5571,7 @@ namespace Game.Entities
                                     DestroyItem(i, j, update);
 
                                     if (remcount >= count)
-                                        return;
+                                        return remcount;
                                 }
                                 else
                                 {
@@ -5580,7 +5580,7 @@ namespace Game.Entities
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
-                                    return;
+                                    return remcount;
                                 }
                             }
                         }
@@ -5604,7 +5604,7 @@ namespace Game.Entities
                                 DestroyItem(InventorySlots.Bag0, i, update);
 
                                 if (remcount >= count)
-                                    return;
+                                    return remcount;
                             }
                         }
                         else
@@ -5614,7 +5614,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
@@ -5633,7 +5633,7 @@ namespace Game.Entities
                             remcount += item.GetCount();
                             DestroyItem(InventorySlots.Bag0, i, update);
                             if (remcount >= count)
-                                return;
+                                return remcount;
                         }
                         else
                         {
@@ -5642,7 +5642,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
@@ -5668,7 +5668,7 @@ namespace Game.Entities
                                     DestroyItem(i, j, update);
 
                                     if (remcount >= count)
-                                        return;
+                                        return remcount;
                                 }
                                 else
                                 {
@@ -5677,7 +5677,7 @@ namespace Game.Entities
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
-                                    return;
+                                    return remcount;
                                 }
                             }
                         }
@@ -5700,7 +5700,7 @@ namespace Game.Entities
                                 remcount += item.GetCount();
                                 DestroyItem(InventorySlots.Bag0, i, update);
                                 if (remcount >= count)
-                                    return;
+                                    return remcount;
                             }
                         }
                         else
@@ -5710,7 +5710,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
@@ -5730,7 +5730,7 @@ namespace Game.Entities
                             DestroyItem(InventorySlots.Bag0, i, update);
 
                             if (remcount >= count)
-                                return;
+                                return remcount;
                         }
                         else
                         {
@@ -5739,7 +5739,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
@@ -5759,7 +5759,7 @@ namespace Game.Entities
                             DestroyItem(InventorySlots.Bag0, i, update);
 
                             if (remcount >= count)
-                                return;
+                                return remcount;
                         }
                         else
                         {
@@ -5768,11 +5768,13 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return;
+                            return remcount;
                         }
                     }
                 }
             }
+
+            return remcount;
         }
         public void DestroyItemCount(Item pItem, ref uint count, bool update)
         {

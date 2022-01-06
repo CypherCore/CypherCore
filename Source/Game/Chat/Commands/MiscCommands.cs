@@ -123,8 +123,26 @@ namespace Game.Chat
             // Subtract
             if (count < 0)
             {
-                playerTarget.DestroyItemCount(itemId, (uint)-count, true, false);
-                handler.SendSysMessage(CypherStrings.Removeitem, itemId, -count, handler.GetNameLink(playerTarget));
+                uint destroyedItemCount = playerTarget.DestroyItemCount(itemId, (uint)-count, true, false);
+
+                if (destroyedItemCount > 0)
+                {
+                    // output the amount of items successfully destroyed
+                    handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
+
+                    // check to see if we were unable to destroy all of the amount requested.
+                    uint unableToDestroyItemCount = (uint)(-count - destroyedItemCount);
+                    if (unableToDestroyItemCount > 0)
+                    {
+                        // output message for the amount of items we couldn't destroy
+                        handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, handler.GetNameLink(playerTarget));
+                    }
+                }
+                else
+                {
+                    // failed to destroy items of the amount requested
+                    handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
+                }
                 return true;
             }
 
