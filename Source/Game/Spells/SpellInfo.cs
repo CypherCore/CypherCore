@@ -3363,7 +3363,6 @@ namespace Game.Spells
                     case SpellEffectName.LearnSpell:
                     case SpellEffectName.SkillStep:
                     case SpellEffectName.HealPct:
-                    case SpellEffectName.EnergizePct:
                         return true;
                     case SpellEffectName.Instakill:
                         if (otherEffect.EffectIndex != effect.EffectIndex && // for spells like 38044: instakill effect is negative but auras on target must count as buff
