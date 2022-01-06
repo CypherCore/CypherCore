@@ -102,11 +102,15 @@ namespace Game.Movement
         public MotionMaster(Unit unit)
         {
             _owner = unit;
+            _flags = MotionMasterFlags.InitializationPending;
         }
 
         public void Initialize()
         {
-            if (HasFlag(MotionMasterFlags.Delayed))
+            if (HasFlag(MotionMasterFlags.InitializationPending))
+                return;
+
+            if (HasFlag(MotionMasterFlags.Update))
             {
                 _delayedActions.Enqueue(new DelayedAction(() => Initialize(), MotionMasterDelayedActionType.Initialize));
                 return;
@@ -125,9 +129,13 @@ namespace Game.Movement
             if (!HasFlag(MotionMasterFlags.InitializationPending))
                 return;
 
+            AddFlag(MotionMasterFlags.Initializing);
+            RemoveFlag(MotionMasterFlags.InitializationPending);
+
+            DirectInitialize();
             ResolveDelayedActions();
 
-            RemoveFlag(MotionMasterFlags.InitializationPending);
+            RemoveFlag(MotionMasterFlags.Initializing);
         }
 
         public bool Empty()
@@ -297,7 +305,7 @@ namespace Game.Movement
             if (!_owner)
                 return;
 
-            if (HasFlag(MotionMasterFlags.InitializationPending))
+            if (HasFlag(MotionMasterFlags.InitializationPending | MotionMasterFlags.Initializing))
                 return;
 
             Cypher.Assert(!Empty(), $"MotionMaster:Update: update called without Initializing! ({_owner.GetGUID()})");
@@ -559,9 +567,9 @@ namespace Game.Movement
         public void MoveConfused()
         {
             if (_owner.IsTypeId(TypeId.Player))
-                Add(new ConfusedGenerator<Player>());
+                Add(new ConfusedMovementGenerator<Player>());
             else
-                Add(new ConfusedGenerator<Creature>());
+                Add(new ConfusedMovementGenerator<Creature>());
         }
 
         public void MoveFleeing(Unit enemy, uint time)
@@ -574,10 +582,10 @@ namespace Game.Movement
                 if (time != 0)
                     Add(new TimedFleeingGenerator(enemy.GetGUID(), time));
                 else
-                    Add(new FleeingGenerator<Creature>(enemy.GetGUID()));
+                    Add(new FleeingMovementGenerator<Creature>(enemy.GetGUID()));
             }
             else
-                Add(new FleeingGenerator<Player>(enemy.GetGUID()));
+                Add(new FleeingMovementGenerator<Player>(enemy.GetGUID()));
         }
 
         public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null)
@@ -883,7 +891,7 @@ namespace Game.Movement
                 return;
 
             // rooted units don't move (also setting falling+root flag causes client freezes)
-                if (_owner.HasUnitState(UnitState.Root))
+                if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
                     return;
 
             _owner.SetFall(true);
