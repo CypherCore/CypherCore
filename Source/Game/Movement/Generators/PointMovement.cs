@@ -185,7 +185,7 @@ namespace Game.Movement
 
     public class AssistanceMovementGenerator : PointMovementGenerator<Creature>
     {
-        public AssistanceMovementGenerator(uint id, float x, float y, float z) : base(id, x, y, z, true) { }
+        public AssistanceMovementGenerator(uint id, float x, float y, float z, float speed = 0.0f) : base(id, x, y, z, true, speed) { }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
         {

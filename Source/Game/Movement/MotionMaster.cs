@@ -919,7 +919,7 @@ namespace Game.Movement
                 _owner.AttackStop();
                 _owner.CastStop();
                 _owner.ToCreature().SetReactState(ReactStates.Passive);
-                Add(new AssistanceMovementGenerator(EventId.AssistMove, x, y, z));
+                Add(new AssistanceMovementGenerator(EventId.AssistMove, x, y, z, _owner.GetSpeed(UnitMoveType.Run) * 0.66f));
             }
             else
                 Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistance: {_owner.GetGUID()}, attempted to seek assistance");
