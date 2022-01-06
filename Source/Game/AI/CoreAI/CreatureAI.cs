@@ -314,6 +314,7 @@ namespace Game.AI
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
             me.DoNotReacquireSpellFocusTarget();
+            me.GetSpellHistory().ResetAllCooldowns();
             EngagementOver();
 
             return true;
