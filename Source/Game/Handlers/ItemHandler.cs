@@ -329,7 +329,7 @@ namespace Game
                 return;
             }
 
-            if (pItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoUserDestroy))
+            if (pItem.GetTemplate().HasFlag(ItemFlags.NoUserDestroy))
             {
                 _player.SendEquipError(InventoryResult.DropBoundItem);
                 return;
@@ -427,7 +427,7 @@ namespace Game
                 // prevent selling item for sellprice when the item is still refundable
                 // this probably happens when right clicking a refundable item, the client sends both
                 // CMSG_SELL_ITEM and CMSG_REFUND_ITEM (unverified)
-                if (pItem.HasItemFlag(ItemFieldFlags.Refundable))
+                if (pItem.IsRefundable())
                     return; // Therefore, no feedback to client
 
                 // special case at auto sell (sell all)
@@ -667,7 +667,7 @@ namespace Game
                 return;
             }
 
-            if (!gift.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsWrapper)) // cheating: non-wrapper wrapper
+            if (!gift.GetTemplate().HasFlag(ItemFlags.IsWrapper)) // cheating: non-wrapper wrapper
             {
                 GetPlayer().SendEquipError(InventoryResult.ItemNotFound, gift);
                 return;
@@ -857,7 +857,7 @@ namespace Game
                 ItemTemplate iGemProto = gems[i].GetTemplate();
 
                 // unique item (for new and already placed bit removed enchantments
-                if (iGemProto.GetFlags().HasAnyFlag(ItemFlags.UniqueEquippable))
+                if (iGemProto.HasFlag(ItemFlags.UniqueEquippable))
                 {
                     for (int j = 0; j < ItemConst.MaxGemSockets; ++j)
                     {

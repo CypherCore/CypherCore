@@ -1321,7 +1321,7 @@ namespace Game.Entities
                 UpdateDamagePhysical(WeaponAttackType.BaseAttack);
                 Item offhand = GetWeaponForAttack(WeaponAttackType.OffAttack, true);
                 if (offhand)
-                    if (CanDualWield() || offhand.GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.AlwaysAllowDualWield))
+                    if (CanDualWield() || offhand.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
                         UpdateDamagePhysical(WeaponAttackType.OffAttack);
 
                 if (HasAuraType(AuraType.OverrideSpellPowerByApPct))

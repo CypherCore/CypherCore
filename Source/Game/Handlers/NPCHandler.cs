@@ -500,8 +500,8 @@ namespace Game
                         if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
                             continue;
 
-                        if ((itemTemplate.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||
-                            (itemTemplate.GetFlags2().HasAnyFlag(ItemFlags2.FactionAlliance) && GetPlayer().GetTeam() == Team.Horde))
+                        if ((itemTemplate.HasFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||
+                            (itemTemplate.HasFlag(ItemFlags2.FactionAlliance) && GetPlayer().GetTeam() == Team.Horde))
                             continue;
 
                         if (leftInStock == 0)
@@ -528,7 +528,7 @@ namespace Game
                     item.StackCount = (int)itemTemplate.GetBuyCount();
                     item.Price = (ulong)price;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
-                    item.Refundable = (itemTemplate.GetFlags() & ItemFlags.ItemPurchaseRecord) != 0 && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
+                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
 
                     item.Item.ItemID = vendorItem.item;
                     if (!vendorItem.BonusListIDs.Empty())

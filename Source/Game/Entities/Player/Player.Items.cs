@@ -47,7 +47,7 @@ namespace Game.Entities
         }
         public void RefundItem(Item item)
         {
-            if (!item.HasItemFlag(ItemFieldFlags.Refundable))
+            if (!item.IsRefundable())
             {
                 Log.outDebug(LogFilter.Player, "Item refund: item not refundable!");
                 return;
@@ -152,7 +152,7 @@ namespace Game.Entities
             // This function call unsets ITEM_FLAGS_REFUNDABLE if played time is over 2 hours.
             item.UpdatePlayedTime(this);
 
-            if (!item.HasItemFlag(ItemFieldFlags.Refundable))
+            if (!item.IsRefundable())
             {
                 Log.outDebug(LogFilter.Player, "Item refund: item not refundable!");
                 return;
@@ -1453,13 +1453,13 @@ namespace Game.Entities
             if (proto == null)
                 return InventoryResult.ItemNotFound;
 
-            if (proto.GetFlags2().HasAnyFlag(ItemFlags2.InternalItem))
+            if (proto.HasFlag(ItemFlags2.InternalItem))
                 return InventoryResult.CantEquipEver;
 
-            if (Convert.ToBoolean(proto.GetFlags2() & ItemFlags2.FactionHorde) && GetTeam() != Team.Horde)
+            if (proto.HasFlag(ItemFlags2.FactionHorde) && GetTeam() != Team.Horde)
                 return InventoryResult.CantEquipEver;
 
-            if (Convert.ToBoolean(proto.GetFlags2() & ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
+            if (proto.HasFlag(ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
                 return InventoryResult.CantEquipEver;
 
             if ((proto.GetAllowableClass() & GetClassMask()) == 0 || (proto.GetAllowableRace() & (long)SharedConst.GetMaskForRace(GetRace())) == 0)
@@ -2469,7 +2469,7 @@ namespace Game.Entities
                 if (!bStore)
                     AutoUnequipOffhandIfNeed();
 
-                if (pProto.GetFlags().HasAnyFlag(ItemFlags.ItemPurchaseRecord) && crItem.ExtendedCost != 0 && pProto.GetMaxStackSize() == 1)
+                if (pProto.HasFlag(ItemFlags.ItemPurchaseRecord) && crItem.ExtendedCost != 0 && pProto.GetMaxStackSize() == 1)
                 {
                     it.AddItemFlag(ItemFieldFlags.Refundable);
                     it.SetRefundRecipient(GetGUID());
@@ -2542,7 +2542,7 @@ namespace Game.Entities
 
             foreach (var item in m_itemDuration)
             {
-                if (!realtimeonly || item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.RealDuration))
+                if (!realtimeonly || item.GetTemplate().HasFlag(ItemFlags.RealDuration))
                     item.UpdateDuration(this, time);
             }
         }
@@ -3220,7 +3220,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!IsGameMaster() && ((pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetTeam() == Team.Alliance) || (pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionAlliance) && GetTeam() == Team.Horde)))
+            if (!IsGameMaster() && ((pProto.HasFlag(ItemFlags2.FactionHorde) && GetTeam() == Team.Alliance) || (pProto.HasFlag(ItemFlags2.FactionAlliance) && GetTeam() == Team.Horde)))
                 return false;
 
             Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags.Vendor, NPCFlags2.None);
@@ -3478,7 +3478,7 @@ namespace Game.Entities
                     {
                         ItemTemplate itemTemplate = pItem.GetTemplate();
                         if (itemTemplate != null)
-                            if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                            if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                                 Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
 
                         pItem.SetState(ItemUpdateState.Removed, this);
@@ -3812,7 +3812,7 @@ namespace Game.Entities
 
         void ApplyItemEquipSpell(Item item, bool apply, bool formChange = false)
         {
-            if (item == null || item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
+            if (item == null || item.GetTemplate().HasFlag(ItemFlags.Legacy))
                 return;
 
             foreach (ItemEffectRecord effectData in item.GetEffects())
@@ -3880,7 +3880,7 @@ namespace Game.Entities
 
         void ApplyEquipCooldown(Item pItem)
         {
-            if (pItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoEquipCooldown))
+            if (pItem.GetTemplate().HasFlag(ItemFlags.NoEquipCooldown))
                 return;
 
             DateTime now = GameTime.GetGameTimeSteadyPoint();
@@ -4252,7 +4252,7 @@ namespace Game.Entities
                 // in case trade we already have item in other player inventory
                 pLastItem.SetState(in_characterInventoryDB ? ItemUpdateState.Changed : ItemUpdateState.New, this);
 
-                if (pLastItem.HasItemFlag(ItemFieldFlags.BopTradeable))
+                if (pLastItem.IsBOPTradeable())
                     AddTradeableItem(pLastItem);
             }
         }
@@ -4917,7 +4917,7 @@ namespace Game.Entities
                         }
                         else if (type == InventoryType.WeaponOffhand)
                         {
-                            if (!CanDualWield() && !pProto.GetFlags3().HasAnyFlag(ItemFlags3.AlwaysAllowDualWield))
+                            if (!CanDualWield() && !pProto.HasFlag(ItemFlags3.AlwaysAllowDualWield))
                                 return InventoryResult.TwoHandSkillNotFound;
                         }
                         else if (type == InventoryType.Weapon2Hand)
@@ -5025,7 +5025,7 @@ namespace Game.Entities
         public InventoryResult CanEquipUniqueItem(ItemTemplate itemProto, byte except_slot = ItemConst.NullSlot, uint limit_count = 1)
         {
             // check unique-equipped on item
-            if (Convert.ToBoolean(itemProto.GetFlags() & ItemFlags.UniqueEquippable))
+            if (itemProto.HasFlag(ItemFlags.UniqueEquippable))
             {
                 // there is an equip limit on this item
                 if (HasItemOrGemWithIdEquipped(itemProto.GetId(), 1, except_slot))
@@ -5429,7 +5429,7 @@ namespace Game.Entities
                     for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
                         DestroyItem(slot, i, update);
 
-                if (pItem.HasItemFlag(ItemFieldFlags.Wrapped))
+                if (pItem.IsWrapped())
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
                     stmt.AddValue(0, pItem.GetGUID().GetCounter());
@@ -5493,7 +5493,7 @@ namespace Game.Entities
 
                 // Delete rolled money / loot from db.
                 // MUST be done before RemoveFromWorld() or GetTemplate() fails
-                if (pProto.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                if (pProto.HasFlag(ItemFlags.HasLoot))
                     Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
 
                 if (IsInWorld && update)

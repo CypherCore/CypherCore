@@ -1491,7 +1491,7 @@ namespace Game.Entities
 
         public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
         {
-            if (!item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
+            if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
             {
                 // item spells casted at use
                 foreach (ItemEffectRecord effectData in item.GetEffects())
@@ -1779,7 +1779,7 @@ namespace Game.Entities
 
         void ApplyItemObtainSpells(Item item, bool apply)
         {
-            if (item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
+            if (item.GetTemplate().HasFlag(ItemFlags.Legacy))
                 return;
 
             foreach (ItemEffectRecord effect in item.GetEffects())
@@ -3260,7 +3260,7 @@ namespace Game.Entities
             bool canTrigger = damageInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb);
             if (canTrigger)
             {
-                if (!item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
+                if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
                 {
                     foreach (ItemEffectRecord effectData in item.GetEffects())
                     {

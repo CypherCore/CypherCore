@@ -440,7 +440,7 @@ namespace Game.Entities
         public bool IgnoreFiltering;
 
         //helpers
-        public bool IsGoldRequired(ItemTemplate pProto) { return Convert.ToBoolean(pProto.GetFlags2() & ItemFlags2.DontIgnoreBuyPrice) || ExtendedCost == 0; }
+        public bool IsGoldRequired(ItemTemplate pProto) { return pProto.HasFlag(ItemFlags2.DontIgnoreBuyPrice) || ExtendedCost == 0; }
     }
 
     public class VendorItemData

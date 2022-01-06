@@ -404,7 +404,7 @@ namespace Game
                 }
                 else
                 {
-                    if (pItem.loot.IsLooted() || !proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot)) // Only delete item if no loot or money (unlooted loot is saved to db)
+                    if (pItem.loot.IsLooted() || !proto.HasFlag(ItemFlags.HasLoot)) // Only delete item if no loot or money (unlooted loot is saved to db)
                         player.DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
                 }
                 return;                                             // item can be looted only single player

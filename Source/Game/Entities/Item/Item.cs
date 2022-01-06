@@ -191,7 +191,7 @@ namespace Game.Entities
 
                     DB.Characters.Execute(stmt);
 
-                    if ((uState == ItemUpdateState.Changed) && HasItemFlag(ItemFieldFlags.Wrapped))
+                    if ((uState == ItemUpdateState.Changed) && IsWrapped())
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GIFT_OWNER);
                         stmt.AddValue(0, GetOwnerGUID().GetCounter());
@@ -372,7 +372,7 @@ namespace Game.Entities
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    if (HasItemFlag(ItemFieldFlags.Wrapped))
+                    if (IsWrapped())
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
                         stmt.AddValue(0, GetGUID().GetCounter());
@@ -446,7 +446,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), proto.MaxDurability);
 
             // do not overwrite durability for wrapped items
-            if (durability > proto.MaxDurability && !HasItemFlag(ItemFieldFlags.Wrapped))
+            if (durability > proto.MaxDurability && !IsWrapped())
             {
                 SetDurability(proto.MaxDurability);
                 need_save = true;
@@ -805,7 +805,7 @@ namespace Game.Entities
             if (m_lootGenerated)
                 return false;
 
-            if ((!mail || !IsBoundAccountWide()) && (IsSoulBound() && (!HasItemFlag(ItemFieldFlags.BopTradeable) || !trade)))
+            if ((!mail || !IsBoundAccountWide()) && (IsSoulBound() && (!IsBOPTradeable() || !trade)))
                 return false;
 
             if (IsBag() && (Player.IsBagPos(GetPos()) || !ToBag().IsEmpty()))
@@ -924,7 +924,7 @@ namespace Game.Entities
             bool isEnchantSpell = spellInfo.HasEffect(SpellEffectName.EnchantItem) || spellInfo.HasEffect(SpellEffectName.EnchantItemTemporary) || spellInfo.HasEffect(SpellEffectName.EnchantItemPrismatic);
             if ((int)spellInfo.EquippedItemClass != -1)                 // -1 == any item class
             {
-                if (isEnchantSpell && proto.GetFlags3().HasAnyFlag(ItemFlags3.CanStoreEnchants))
+                if (isEnchantSpell && proto.HasFlag(ItemFlags3.CanStoreEnchants))
                     return true;
 
                 if (spellInfo.EquippedItemClass != proto.GetClass())
@@ -1209,7 +1209,7 @@ namespace Game.Entities
             if (GetOwnerGUID() == player.GetGUID())
                 return false;
 
-            if (HasItemFlag(ItemFieldFlags.BopTradeable))
+            if (IsBOPTradeable())
                 if (allowedGUIDs.Contains(player.GetGUID()))
                     return false;
 
@@ -1355,7 +1355,7 @@ namespace Game.Entities
 
         public void SetNotRefundable(Player owner, bool changestate = true, SQLTransaction trans = null, bool addToCollection = true)
         {
-            if (!HasItemFlag(ItemFieldFlags.Refundable))
+            if (!IsRefundable())
                 return;
 
             ItemExpirePurchaseRefund itemExpirePurchaseRefund = new();
@@ -1458,7 +1458,7 @@ namespace Game.Entities
             if (proto.GetClass() == ItemClass.Weapon && proto.GetSubClass() == (uint)ItemSubClassWeapon.FishingPole)
                 return false;
 
-            if (proto.GetFlags2().HasAnyFlag(ItemFlags2.NoAlterItemVisual))
+            if (proto.HasFlag(ItemFlags2.NoAlterItemVisual))
                 return false;
 
             if (!HasStats())
@@ -1614,7 +1614,7 @@ namespace Game.Entities
         {
             standardPrice = true;
 
-            if (proto.GetFlags2().HasAnyFlag(ItemFlags2.OverrideGoldCost))
+            if (proto.HasFlag(ItemFlags2.OverrideGoldCost))
                 return proto.GetBuyPrice();
 
             var qualityPrice = CliDB.ImportPriceQualityStorage.LookupByKey(quality + 1);
@@ -1746,7 +1746,7 @@ namespace Game.Entities
 
         public static uint GetSellPrice(ItemTemplate proto, uint quality, uint itemLevel)
         {
-            if (proto.GetFlags2().HasAnyFlag(ItemFlags2.OverrideGoldCost))
+            if (proto.HasFlag(ItemFlags2.OverrideGoldCost))
                 return proto.GetSellPrice();
 
             bool standardPrice;
@@ -1772,7 +1772,7 @@ namespace Game.Entities
             ItemTemplate itemTemplate = GetTemplate();
             uint minItemLevel = owner.m_unitData.MinItemLevel;
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
-            uint maxItemLevel = itemTemplate.GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
+            uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
 
             uint azeriteLevel = 0;
@@ -1867,7 +1867,7 @@ namespace Game.Entities
 
         public static ItemDisenchantLootRecord GetDisenchantLoot(ItemTemplate itemTemplate, uint quality, uint itemLevel)
         {
-            if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.Conjured | ItemFlags.NoDisenchant) || itemTemplate.GetBonding() == ItemBondingType.Quest)
+            if (itemTemplate.HasFlag(ItemFlags.Conjured) || itemTemplate.HasFlag(ItemFlags.NoDisenchant) || itemTemplate.GetBonding() == ItemBondingType.Quest)
                 return null;
 
             if (itemTemplate.GetArea(0) != 0 || itemTemplate.GetArea(1) != 0 || itemTemplate.GetMap() != 0 || itemTemplate.GetMaxStackSize() > 1)
@@ -2501,8 +2501,8 @@ namespace Game.Entities
         }
 
         public bool IsSoulBound() { return HasItemFlag(ItemFieldFlags.Soulbound); }
-        public bool IsBoundAccountWide() { return GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount); }
-        public bool IsBattlenetAccountBound() { return GetTemplate().GetFlags2().HasAnyFlag(ItemFlags2.BnetAccountTradeOk); }
+        public bool IsBoundAccountWide() { return GetTemplate().HasFlag(ItemFlags.IsBoundToAccount); }
+        public bool IsBattlenetAccountBound() { return GetTemplate().HasFlag(ItemFlags2.BnetAccountTradeOk); }
 
         public bool HasItemFlag(ItemFieldFlags flag) { return (m_itemData.DynamicFlags & (uint)flag) != 0; }
         public void AddItemFlag(ItemFieldFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
@@ -2517,6 +2517,9 @@ namespace Game.Entities
         public AzeriteItem ToAzeriteItem() { return IsAzeriteItem() ? this as AzeriteItem : null; }
         public AzeriteEmpoweredItem ToAzeriteEmpoweredItem() { return IsAzeriteEmpoweredItem() ? this as AzeriteEmpoweredItem : null; }
 
+        public bool IsRefundable() { return HasItemFlag(ItemFieldFlags.Refundable); }
+        public bool IsBOPTradeable() { return HasItemFlag(ItemFieldFlags.BopTradeable); }
+        public bool IsWrapped() { return HasItemFlag(ItemFieldFlags.Wrapped); }
         public bool IsLocked() { return !HasItemFlag(ItemFieldFlags.Unlocked); }
         public bool IsBag() { return GetTemplate().GetInventoryType() == InventoryType.Bag; }
         public bool IsAzeriteItem() { return GetTypeId() == TypeId.AzeriteItem; }
@@ -2784,8 +2787,8 @@ namespace Game.Entities
             for (int i = EffectCount; i < Effects.Length; ++i)
                 Effects[i] = null;
 
-            CanDisenchant = !proto.GetFlags().HasAnyFlag(ItemFlags.NoDisenchant);
-            CanScrap = proto.GetFlags4().HasAnyFlag(ItemFlags4.Scrapable);
+            CanDisenchant = !proto.HasFlag(ItemFlags.NoDisenchant);
+            CanScrap = proto.HasFlag(ItemFlags4.Scrapable);
 
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;

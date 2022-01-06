@@ -1025,7 +1025,7 @@ namespace Game.Groups
                         r.SetLoot(loot);
                         r.itemSlot = itemSlot;
 
-                        if (item.GetFlags2().HasAnyFlag(ItemFlags2.CanOnlyRollGreed))
+                        if (item.HasFlag(ItemFlags2.CanOnlyRollGreed))
                             r.rollTypeMask &= ~RollMask.Need;
 
                         loot.items[itemSlot].is_blocked = true;

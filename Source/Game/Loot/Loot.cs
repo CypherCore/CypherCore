@@ -35,7 +35,7 @@ namespace Game.Loots
             conditions = li.conditions;
 
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
-            freeforall = proto != null && proto.GetFlags().HasAnyFlag(ItemFlags.MultiDrop);
+            freeforall = proto != null && proto.HasFlag(ItemFlags.MultiDrop);
             follow_loot_rules = proto != null && proto.FlagsCu.HasAnyFlag(ItemFlagsCustom.FollowLootRules);
 
             needs_quest = li.needs_quest;
@@ -54,10 +54,10 @@ namespace Game.Loots
                 return false;
 
             // not show loot for not own team
-            if (pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && player.GetTeam() != Team.Horde)
+            if (pProto.HasFlag(ItemFlags2.FactionHorde) && player.GetTeam() != Team.Horde)
                 return false;
 
-            if (pProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionAlliance) && player.GetTeam() != Team.Alliance)
+            if (pProto.HasFlag(ItemFlags2.FactionAlliance) && player.GetTeam() != Team.Alliance)
                 return false;
 
             // Master looter can see certain items even if the character can't loot them
@@ -71,7 +71,7 @@ namespace Game.Loots
             }
 
             // Don't allow loot for players without profession or those who already know the recipe
-            if (pProto.GetFlags().HasFlag(ItemFlags.HideUnusableRecipe))
+            if (pProto.HasFlag(ItemFlags.HideUnusableRecipe))
             {
                 if (!player.HasSkill((SkillType)pProto.GetRequiredSkill()))
                     return false;
@@ -231,7 +231,7 @@ namespace Game.Loots
                 // non-conditional one-player only items are counted here,
                 // free for all items are counted in FillFFALoot(),
                 // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
-                if (!item.needs_quest && item.conditions.Empty() && !proto.GetFlags().HasAnyFlag(ItemFlags.MultiDrop))
+                if (!item.needs_quest && item.conditions.Empty() && !proto.HasFlag(ItemFlags.MultiDrop))
                     ++unlootedCount;
             }
         }

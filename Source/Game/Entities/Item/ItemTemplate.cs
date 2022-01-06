@@ -45,9 +45,15 @@ namespace Game.Entities
             return GetMaxStackSize() == 1 &&
                 GetClass() != ItemClass.Consumable &&
                 GetClass() != ItemClass.Quest &&
-                !GetFlags().HasFlag(ItemFlags.NoCreator) &&
+                !HasFlag(ItemFlags.NoCreator) &&
                 GetId() != 6948; /*Hearthstone*/
         }
+
+        public bool HasFlag(ItemFlags flag) { return (ExtendedData.Flags[0] & (int)flag) != 0; }
+        public bool HasFlag(ItemFlags2 flag) { return (ExtendedData.Flags[1] & (int)flag) != 0; }
+        public bool HasFlag(ItemFlags3 flag) { return (ExtendedData.Flags[2] & (int)flag) != 0; }
+        public bool HasFlag(ItemFlags4 flag) { return (ExtendedData.Flags[3] & (int)flag) != 0; }
+        public bool HasFlag(ItemFlagsCustom customFlag) { return (FlagsCu & customFlag) != 0; }
         
         public bool CanChangeEquipStateInCombat()
         {
@@ -180,7 +186,7 @@ namespace Game.Entities
                     dps = CliDB.ItemDamageAmmoStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     break;
                 case InventoryType.Weapon2Hand:
-                    if (GetFlags2().HasAnyFlag(ItemFlags2.CasterWeapon))
+                    if (HasFlag(ItemFlags2.CasterWeapon))
                         dps = CliDB.ItemDamageTwoHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     else
                         dps = CliDB.ItemDamageTwoHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
@@ -196,7 +202,7 @@ namespace Game.Entities
                         case ItemSubClassWeapon.Bow:
                         case ItemSubClassWeapon.Gun:
                         case ItemSubClassWeapon.Crossbow:
-                            if (GetFlags2().HasAnyFlag(ItemFlags2.CasterWeapon))
+                            if (HasFlag(ItemFlags2.CasterWeapon))
                                 dps = CliDB.ItemDamageTwoHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                             else
                                 dps = CliDB.ItemDamageTwoHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
@@ -208,7 +214,7 @@ namespace Game.Entities
                 case InventoryType.Weapon:
                 case InventoryType.WeaponMainhand:
                 case InventoryType.WeaponOffhand:
-                    if (GetFlags2().HasAnyFlag(ItemFlags2.CasterWeapon))
+                    if (HasFlag(ItemFlags2.CasterWeapon))
                         dps = CliDB.ItemDamageOneHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     else
                         dps = CliDB.ItemDamageOneHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
@@ -234,7 +240,7 @@ namespace Game.Entities
 
         public bool IsUsableByLootSpecialization(Player player, bool alwaysAllowBoundToAccount)
         {
-            if (GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount) && alwaysAllowBoundToAccount)
+            if (HasFlag(ItemFlags.IsBoundToAccount) && alwaysAllowBoundToAccount)
                 return true;
 
             uint spec = player.GetLootSpecId();
@@ -265,10 +271,6 @@ namespace Game.Entities
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
         public uint GetSubClass() { return BasicData.SubclassID; }
         public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
-        public ItemFlags GetFlags() { return (ItemFlags)ExtendedData.Flags[0]; }
-        public ItemFlags2 GetFlags2() { return (ItemFlags2)ExtendedData.Flags[1]; }
-        public ItemFlags3 GetFlags3() { return (ItemFlags3)ExtendedData.Flags[2]; }
-        public ItemFlags4 GetFlags4() { return (ItemFlags4)ExtendedData.Flags[3]; }
         public uint GetOtherFactionItemId() { return ExtendedData.FactionRelated; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
@@ -327,9 +329,9 @@ namespace Game.Entities
         }
 
         public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }
-        public bool IsVellum() { return GetFlags3().HasAnyFlag(ItemFlags3.CanStoreEnchants); }
-        public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && GetFlags().HasAnyFlag(ItemFlags.Conjured); }
-        public bool IsCraftingReagent() { return GetFlags2().HasAnyFlag(ItemFlags2.UsedInATradeskill); }
+        public bool IsVellum() { return HasFlag(ItemFlags3.CanStoreEnchants); }
+        public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && HasFlag(ItemFlags.Conjured); }
+        public bool IsCraftingReagent() { return HasFlag(ItemFlags2.UsedInATradeskill); }
 
         public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
 

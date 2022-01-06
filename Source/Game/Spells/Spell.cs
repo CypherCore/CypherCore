@@ -4219,7 +4219,7 @@ namespace Game.Spells
                 return;
 
             // do not take reagents for these item casts
-            if (m_CastItem != null && m_CastItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoReagentCost))
+            if (m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost))
                 return;
 
             Player p_caster = m_caster.ToPlayer();
@@ -6037,7 +6037,7 @@ namespace Game.Spells
             }
 
             // do not take reagents for these item casts
-            if (!(m_CastItem != null && Convert.ToBoolean(m_CastItem.GetTemplate().GetFlags() & ItemFlags.NoReagentCost)))
+            if (!(m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
             {
                 bool checkReagents = !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost) && !player.CanNoReagentCast(m_spellInfo);
                 // Not own traded item (in trader trade slot) requires reagents even if triggered spell
@@ -6202,7 +6202,7 @@ namespace Game.Spells
                             if (m_targets.GetItemTarget().GetOwner() != player)
                                 return SpellCastResult.NotTradeable;
                             // do not allow to enchant vellum from scroll made by vellum-prevent exploit
-                            if (m_CastItem != null && Convert.ToBoolean(m_CastItem.GetTemplate().GetFlags() & ItemFlags.NoReagentCost))
+                            if (m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost))
                                 return SpellCastResult.TotemCategory;
                             List<ItemPosCount> dest = new();
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, 1);
@@ -6326,7 +6326,7 @@ namespace Game.Spells
                         if (!item)
                             return SpellCastResult.CantBeProspected;
                         //ensure item is a prospectable ore
-                        if (!Convert.ToBoolean(item.GetTemplate().GetFlags() & ItemFlags.IsProspectable))
+                        if (!item.GetTemplate().HasFlag(ItemFlags.IsProspectable))
                             return SpellCastResult.CantBeProspected;
                         //prevent prospecting in trade slot
                         if (item.GetOwnerGUID() != player.GetGUID())
@@ -6354,7 +6354,7 @@ namespace Game.Spells
                         if (!item)
                             return SpellCastResult.CantBeMilled;
                         //ensure item is a millable herb
-                        if (!(item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable)))
+                        if (!item.GetTemplate().HasFlag(ItemFlags.IsMillable))
                             return SpellCastResult.CantBeMilled;
                         //prevent milling in trade slot
                         if (item.GetOwnerGUID() != player.GetGUID())

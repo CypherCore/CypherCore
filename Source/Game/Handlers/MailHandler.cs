@@ -189,7 +189,7 @@ namespace Game
                 if (item)
                 {
                     ItemTemplate itemProto = item.GetTemplate();
-                    if (itemProto == null || !itemProto.GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount))
+                    if (itemProto == null || !itemProto.HasFlag(ItemFlags.IsBoundToAccount))
                     {
                         accountBound = false;
                         break;
@@ -242,13 +242,13 @@ namespace Game
                     }
                 }
 
-                if (item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0)
+                if (item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0)
                 {
                     player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.MailBoundItem);
                     return;
                 }
 
-                if (packet.Info.Cod != 0 && item.HasItemFlag(ItemFieldFlags.Wrapped))
+                if (packet.Info.Cod != 0 && item.IsWrapped())
                 {
                     player.SendMailResult(0, MailResponseType.Send, MailResponseResult.CantSendWrappedCod);
                     return;

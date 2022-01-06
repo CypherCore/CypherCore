@@ -599,7 +599,7 @@ namespace Game.Entities
             if (!CanAddAppearance(itemModifiedAppearance))
                 return;
 
-            if (item.HasItemFlag(ItemFieldFlags.BopTradeable | ItemFieldFlags.Refundable))
+            if (item.IsBOPTradeable() || item.IsRefundable())
             {
                 AddTemporaryAppearance(item.GetGUID(), itemModifiedAppearance);
                 return;
@@ -638,7 +638,7 @@ namespace Game.Entities
             if (_owner.GetPlayer().CanUseItem(itemTemplate) != InventoryResult.Ok)
                 return false;
 
-            if (itemTemplate.GetFlags2().HasAnyFlag(ItemFlags2.NoSourceForItemVisual) || itemTemplate.GetQuality() == ItemQuality.Artifact)
+            if (itemTemplate.HasFlag(ItemFlags2.NoSourceForItemVisual) || itemTemplate.GetQuality() == ItemQuality.Artifact)
                 return false;
 
             switch (itemTemplate.GetClass())
@@ -691,7 +691,7 @@ namespace Game.Entities
             }
 
             if (itemTemplate.GetQuality() < ItemQuality.Uncommon)
-                if (!itemTemplate.GetFlags2().HasAnyFlag(ItemFlags2.IgnoreQualityForItemVisualSource) || !itemTemplate.GetFlags3().HasAnyFlag(ItemFlags3.ActsAsTransmogHiddenVisualOption))
+                if (!itemTemplate.HasFlag(ItemFlags2.IgnoreQualityForItemVisualSource) || !itemTemplate.HasFlag(ItemFlags3.ActsAsTransmogHiddenVisualOption))
                     return false;
 
             if (itemModifiedAppearance.Id < _appearances.Count && _appearances.Get((int)itemModifiedAppearance.Id))

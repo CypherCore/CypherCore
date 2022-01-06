@@ -6660,10 +6660,10 @@ namespace Game
                 if (itemPair.Value.GetOtherFactionItemId() == 0)
                     continue;
 
-                if (itemPair.Value.GetFlags2().HasFlag(ItemFlags2.FactionHorde))
+                if (itemPair.Value.HasFlag(ItemFlags2.FactionHorde))
                     FactionChangeItemsHordeToAlliance[itemPair.Key] = itemPair.Value.GetOtherFactionItemId();
 
-                if (itemPair.Value.GetFlags2().HasFlag(ItemFlags2.FactionAlliance))
+                if (itemPair.Value.HasFlag(ItemFlags2.FactionAlliance))
                     FactionChangeItemsAllianceToHorde[itemPair.Key] = itemPair.Value.GetOtherFactionItemId();
 
                 ++count;

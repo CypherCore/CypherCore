@@ -232,13 +232,13 @@ namespace Game.Entities
                         remove = true;
                     }
                     // "Conjured items disappear if you are logged out for more than 15 minutes"
-                    else if (timeDiff > 15 * Time.Minute && proto.GetFlags().HasAnyFlag(ItemFlags.Conjured))
+                    else if (timeDiff > 15 * Time.Minute && proto.HasFlag(ItemFlags.Conjured))
                     {
                         Log.outDebug(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}, diff: {2}) has conjured item (GUID: {3}, entry: {4}) with expired lifetime (15 minutes). Deleting item.",
                             GetGUID().ToString(), GetName(), timeDiff, item.GetGUID().ToString(), item.GetEntry());
                         remove = true;
                     }
-                    if (item.HasItemFlag(ItemFieldFlags.Refundable))
+                    if (item.IsRefundable())
                     {
                         if (item.GetPlayedTime() > (2 * Time.Hour))
                         {
@@ -272,7 +272,7 @@ namespace Game.Entities
                             }
                         }
                     }
-                    else if (item.HasItemFlag(ItemFieldFlags.BopTradeable))
+                    else if (item.IsBOPTradeable())
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_BOP_TRADE);
                         stmt.AddValue(0, item.GetGUID().ToString());
@@ -1590,7 +1590,7 @@ namespace Game.Entities
                 if (item.GetState() == ItemUpdateState.New)
                 {
                     if (itemTemplate != null)
-                        if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                        if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                             Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
 
                     continue;
@@ -1601,7 +1601,7 @@ namespace Game.Entities
                 m_items[i].FSetState(ItemUpdateState.New);
 
                 if (itemTemplate != null)
-                    if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                    if (itemTemplate.HasFlag(ItemFlags.HasLoot))
                         Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
             }
 

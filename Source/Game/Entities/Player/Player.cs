@@ -7342,7 +7342,7 @@ namespace Game.Entities
             ItemTemplate offtemplate = offItem.GetTemplate();
 
             // unequip offhand weapon if player doesn't have dual wield anymore
-            if (!CanDualWield() && ((offItem.GetTemplate().GetInventoryType() == InventoryType.WeaponOffhand && !offItem.GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.AlwaysAllowDualWield))
+            if (!CanDualWield() && ((offItem.GetTemplate().GetInventoryType() == InventoryType.WeaponOffhand && !offItem.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
                     || offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon))
                 force = true;
 

@@ -882,8 +882,8 @@ namespace Game.Entities
             if (rewardProto == null)
                 return false;
 
-            if ((rewardProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance) ||
-                (rewardProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetTeam() != Team.Horde))
+            if ((rewardProto.HasFlag(ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance) ||
+                (rewardProto.HasFlag(ItemFlags2.FactionHorde) && GetTeam() != Team.Horde))
                 return false;
 
             switch (questPackageItem.DisplayType)

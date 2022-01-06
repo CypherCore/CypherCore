@@ -75,14 +75,14 @@ namespace Game
             }
 
             // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
-            if (proto.GetClass() == ItemClass.Consumable && !proto.GetFlags().HasAnyFlag(ItemFlags.IgnoreDefaultArenaRestrictions) && user.InArena())
+            if (proto.GetClass() == ItemClass.Consumable && !proto.HasFlag(ItemFlags.IgnoreDefaultArenaRestrictions) && user.InArena())
             {
                 user.SendEquipError(InventoryResult.NotDuringArenaMatch, item);
                 return;
             }
 
             // don't allow items banned in arena
-            if (proto.GetFlags().HasAnyFlag(ItemFlags.NotUseableInArena) && user.InArena())
+            if (proto.HasFlag(ItemFlags.NotUseableInArena) && user.InArena())
             {
                 user.SendEquipError(InventoryResult.NotDuringArenaMatch, item);
                 return;
@@ -158,7 +158,7 @@ namespace Game
             }
 
             // Verify that the bag is an actual bag or wrapped item that can be used "normally"
-            if (!proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot) && !item.HasItemFlag(ItemFieldFlags.Wrapped))
+            if (!proto.HasFlag(ItemFlags.HasLoot) && !item.IsWrapped())
             {
                 player.SendEquipError(InventoryResult.ClientLockedOut, item);
                 Log.outError(LogFilter.Network, "Possible hacking attempt: Player {0} [guid: {1}] tried to open item [guid: {2}, entry: {3}] which is not openable!",
@@ -186,7 +186,7 @@ namespace Game
                 }
             }
 
-            if (item.HasItemFlag(ItemFieldFlags.Wrapped))// wrapped?
+            if (item.IsWrapped())// wrapped?
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
@@ -206,7 +206,7 @@ namespace Game
             if (!item)
                 return;
 
-            if (item.GetGUID() != itemGuid || !item.HasItemFlag(ItemFieldFlags.Wrapped)) // during getting result, gift was swapped with another item
+            if (item.GetGUID() != itemGuid || !item.IsWrapped()) // during getting result, gift was swapped with another item
                 return;
 
             if (result.IsEmpty())

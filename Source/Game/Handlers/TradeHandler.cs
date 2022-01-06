@@ -62,7 +62,7 @@ namespace Game
                     tradeItem.Item = new ItemInstance(item);
                     tradeItem.StackCount = (int)item.GetCount();
                     tradeItem.GiftCreator = item.GetGiftCreator();
-                    if (!item.HasItemFlag(ItemFieldFlags.Wrapped))
+                    if (!item.IsWrapped())
                     {
                         tradeItem.Unwrapped.HasValue = true;
                         TradeUpdated.UnwrappedTradeItem unwrappedItem = tradeItem.Unwrapped.Value;
@@ -124,7 +124,7 @@ namespace Game
                         }
 
                         // adjust time (depends on /played)
-                        if (myItems[i].HasItemFlag(ItemFieldFlags.BopTradeable))
+                        if (myItems[i].IsBOPTradeable())
                             myItems[i].SetCreatePlayedTime(trader.GetTotalPlayedTime() - (GetPlayer().GetTotalPlayedTime() - myItems[i].m_itemData.CreatePlayedTime));
                         // store
                         trader.MoveItemToInventory(traderDst, myItems[i], true, true);
@@ -143,7 +143,7 @@ namespace Game
                         
 
                         // adjust time (depends on /played)
-                        if (hisItems[i].HasItemFlag(ItemFieldFlags.BopTradeable))
+                        if (hisItems[i].IsBOPTradeable())
                             hisItems[i].SetCreatePlayedTime(GetPlayer().GetTotalPlayedTime() - (trader.GetTotalPlayedTime() - hisItems[i].m_itemData.CreatePlayedTime));
                         // store
                         GetPlayer().MoveItemToInventory(playerDst, hisItems[i], true, true);

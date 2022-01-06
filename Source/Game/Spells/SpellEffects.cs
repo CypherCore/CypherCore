@@ -2020,7 +2020,7 @@ namespace Game.Spells
             else
             {
                 // do not increase skill if vellum used
-                if (!(m_CastItem && m_CastItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoReagentCost)))
+                if (!(m_CastItem && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
                     player.UpdateCraftSkill(m_spellInfo.Id);
 
                 uint enchant_id = (uint)effectInfo.MiscValue;
@@ -4125,7 +4125,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            if (itemTarget == null || !itemTarget.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsProspectable))
+            if (itemTarget == null || !itemTarget.GetTemplate().HasFlag(ItemFlags.IsProspectable))
                 return;
 
             if (itemTarget.GetCount() < 5)
@@ -4151,7 +4151,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            if (itemTarget == null || !itemTarget.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable))
+            if (itemTarget == null || !itemTarget.GetTemplate().HasFlag(ItemFlags.IsMillable))
                 return;
 
             if (itemTarget.GetCount() < 5)

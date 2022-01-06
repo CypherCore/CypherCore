@@ -203,7 +203,7 @@ namespace Game.Loots
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var pair in its)
-                if (lootIdSet.Contains(pair.Value.GetId()) && pair.Value.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                if (lootIdSet.Contains(pair.Value.GetId()) && pair.Value.HasFlag(ItemFlags.HasLoot))
                     lootIdSet.Remove(pair.Value.GetId());
 
             // output error for any still listed (not referenced from appropriate table) ids
@@ -228,7 +228,7 @@ namespace Game.Loots
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var pair in its)
             {
-                if (!pair.Value.GetFlags().HasAnyFlag(ItemFlags.IsMillable))
+                if (!pair.Value.HasFlag(ItemFlags.IsMillable))
                     continue;
 
                 if (lootIdSet.Contains(pair.Value.GetId()))
@@ -293,7 +293,7 @@ namespace Game.Loots
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var pair in its)
             {
-                if (!pair.Value.GetFlags().HasAnyFlag(ItemFlags.IsProspectable))
+                if (!pair.Value.HasFlag(ItemFlags.IsProspectable))
                     continue;
 
                 if (lootIdSet.Contains(pair.Value.GetId()))
