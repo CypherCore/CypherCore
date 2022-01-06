@@ -5083,6 +5083,36 @@ namespace Game.Spells
             player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot0);
         }
 
+        [SpellEffectHandler(SpellEffectName.ChangeBattlepetQuality)]
+        void EffectChangeBattlePetQuality()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerCaster = m_caster.ToPlayer();
+            if (playerCaster == null)
+                return;
+
+            if (unitTarget == null || !unitTarget.IsCreature())
+                return;
+
+            var quality = BattlePetBreedQuality.Poor;
+            switch (damage)
+            {
+                case 85:
+                    quality = BattlePetBreedQuality.Rare;
+                    break;
+                case 75:
+                    quality = BattlePetBreedQuality.Uncommon;
+                    break;
+                default:
+                    // Ignore Epic Battle-Stones
+                    break;
+            }
+
+            playerCaster.GetSession().GetBattlePetMgr().ChangeBattlePetQuality(unitTarget.GetBattlePetCompanionGUID(), quality);
+        }
+
         [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]
         void EffectLaunchQuestChoice()
         {

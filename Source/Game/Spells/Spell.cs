@@ -5259,6 +5259,67 @@ namespace Game.Spells
                         }
                         break;
                     }
+                    case SpellEffectName.ChangeBattlepetQuality:
+                    case SpellEffectName.GrantBattlepetExperience:
+                    {
+                        Player playerCaster = m_caster.ToPlayer();
+                        if (playerCaster == null || !m_targets.GetUnitTarget() || !m_targets.GetUnitTarget().IsCreature())
+                            return SpellCastResult.BadTargets;
+
+                        var battlePetMgr = playerCaster.GetSession().GetBattlePetMgr();
+                        if (!battlePetMgr.HasJournalLock())
+                            return SpellCastResult.CantDoThatRightNow;
+
+                        Creature creature = m_targets.GetUnitTarget().ToCreature();
+                        if (creature != null)
+                        {
+                            if (playerCaster.GetSummonedBattlePetGUID().IsEmpty() || creature.GetBattlePetCompanionGUID().IsEmpty())
+                                return SpellCastResult.NoPet;
+
+                            if (playerCaster.GetSummonedBattlePetGUID() != creature.GetBattlePetCompanionGUID())
+                                return SpellCastResult.BadTargets;
+
+                            var battlePet = battlePetMgr.GetPet(creature.GetBattlePetCompanionGUID());
+                            if (battlePet != null)
+                            {
+                                var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(battlePet.PacketInfo.Species);
+                                if (battlePetSpecies != null)
+                                {
+                                    uint battlePetType = (uint)spellEffectInfo.MiscValue;
+                                    if (battlePetType != 0)
+                                        if ((battlePetType & (1 << battlePetSpecies.PetTypeEnum)) == 0)
+                                            return SpellCastResult.WrongBattlePetType;
+
+                                    if (spellEffectInfo.Effect == SpellEffectName.ChangeBattlepetQuality)
+                                    {
+                                        BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
+                                        switch (spellEffectInfo.BasePoints)
+                                        {
+                                            case 85:
+                                                quality = BattlePetBreedQuality.Rare;
+                                                break;
+                                            case 75:
+                                                quality = BattlePetBreedQuality.Uncommon;
+                                                break;
+                                            default:
+                                                // Ignore Epic Battle-Stones
+                                                break;
+                                        }
+                                        if (battlePet.PacketInfo.Quality >= (byte)quality)
+                                            return SpellCastResult.CantUpgradeBattlePet;
+                                    }
+
+                                    if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
+                                        if (battlePet.PacketInfo.Level >= SharedConst.MaxBattlePetLevel)
+                                            return SpellCastResult.GrantPetLevelFail;
+
+                                    if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                                        return SpellCastResult.BadTargets;
+                                }
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }

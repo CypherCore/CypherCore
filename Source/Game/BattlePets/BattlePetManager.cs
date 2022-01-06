@@ -591,6 +591,42 @@ namespace Game.BattlePets
             }
         }
 
+        public void ChangeBattlePetQuality(ObjectGuid guid, BattlePetBreedQuality quality)
+        {
+            if (!HasJournalLock())
+                return;
+
+            BattlePet pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            if (quality > BattlePetBreedQuality.Rare)
+                return;
+
+            var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
+            if (battlePetSpecies != null)
+                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                    return;
+
+            byte qualityValue = (byte)quality;
+            if (pet.PacketInfo.Quality >= qualityValue)
+                return;
+
+            pet.PacketInfo.Quality = qualityValue;
+            pet.CalculateStats();
+            pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
+
+            if (pet.SaveInfo != BattlePetSaveInfo.New)
+                pet.SaveInfo = BattlePetSaveInfo.Changed;
+
+            List<BattlePet> updates = new();
+            updates.Add(pet);
+            SendUpdates(updates, false);
+
+            // UF::PlayerData::CurrentBattlePetBreedQuality isn't updated (Intended)
+            // _owner->GetPlayer()->SetCurrentBattlePetBreedQuality(qualityValue);
+        }
+
         public void HealBattlePetsPct(byte pct)
         {
             // TODO: After each Pet Battle, any injured companion will automatically
