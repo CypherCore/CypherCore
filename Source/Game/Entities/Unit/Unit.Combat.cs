@@ -105,9 +105,6 @@ namespace Game.Entities
             if (enemy == null)
                 return;
 
-            if (IsEngagedBy(enemy))
-                return;
-
             if (CanHaveThreatList())
                 m_threatManager.AddThreat(enemy, 0.0f, null, true, true);
             else
