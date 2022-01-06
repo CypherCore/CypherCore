@@ -163,6 +163,10 @@ namespace Game.Entities
             if (!IsInWorld || MoveSpline.Finalized())
                 return;
 
+            // Update position now since Stop does not start a new movement that can be updated later
+            if (MoveSpline.HasStarted())
+                UpdateSplinePosition();
+
             MoveSplineInit init = new(this);
             init.Stop();
         }
@@ -1699,6 +1703,7 @@ namespace Game.Entities
         {
             return MoveSpline.Initialized() && !MoveSpline.Finalized();
         }
+
         void UpdateSplineMovement(uint diff)
         {
             int positionUpdateDelay = 400;
@@ -1714,29 +1719,31 @@ namespace Game.Entities
 
             movesplineTimer.Update((int)diff);
             if (movesplineTimer.Passed() || arrived)
+                UpdateSplinePosition();
+        }
+        void UpdateSplinePosition()
+        {
+            Vector4 loc = MoveSpline.ComputePosition();
+
+            if (MoveSpline.onTransport)
             {
-                movesplineTimer.Reset(positionUpdateDelay);
-                Vector4 loc = MoveSpline.ComputePosition();
-                float x = loc.X;
-                float y = loc.Y;
-                float z = loc.Z;
-                float o = loc.W;
+                Position pos = m_movementInfo.transport.pos;
+                pos.posX = loc.X;
+                pos.posY = loc.Y;
+                pos.posZ = loc.Z;
+                pos.SetOrientation(loc.W);
 
-                if (MoveSpline.onTransport)
-                {
-                    m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
-                    ITransport transport = GetDirectTransport();
-                    if (transport != null)
-                        transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    else
-                        return;
-                }
-                if (HasUnitState(UnitState.CannotTurn))
-                    o = GetOrientation();
-
-                UpdatePosition(x, y, z, o);
+                ITransport transport = GetDirectTransport();
+                if (transport != null)
+                    transport.CalculatePassengerPosition(ref loc.X, ref loc.Y, ref loc.Z, ref loc.W);
+                else
+                    return;
             }
+
+            if (HasUnitState(UnitState.CannotTurn))
+                loc.W = GetOrientation();
+
+            UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
         }
         public void DisableSpline()
         {

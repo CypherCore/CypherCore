@@ -248,6 +248,11 @@ namespace Game.Movement
             return ms / 1000.0f;
         }
 
+        public bool HasStarted()
+        {
+            return time_passed > 0;
+        }
+        
         public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
         public void UpdateState(int difftime)
         {
