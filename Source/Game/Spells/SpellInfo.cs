@@ -2705,7 +2705,7 @@ namespace Game.Spells
                     case AuraType.PeriodicHeal:
                     case AuraType.ObsModHealth:
                     case AuraType.ObsModPower:
-                    case AuraType.Unk48:
+                    case AuraType.PeriodicTriggerSpellFromClient:
                     case AuraType.PowerBurn:
                     case AuraType.PeriodicLeech:
                     case AuraType.PeriodicManaLeech:
@@ -3530,6 +3530,7 @@ namespace Game.Spells
                     case AuraType.AddTargetTrigger:
                         return true;
                     case AuraType.PeriodicTriggerSpellWithValue:
+                    case AuraType.PeriodicTriggerSpellFromClient:
                     case AuraType.PeriodicTriggerSpell:
                         if (!_isPositiveTarget(effect))
                         {

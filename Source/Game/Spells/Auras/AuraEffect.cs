@@ -188,6 +188,7 @@ namespace Game.Spells
                 case AuraType.PeriodicHeal:
                 case AuraType.ObsModHealth:
                 case AuraType.PeriodicTriggerSpell:
+                case AuraType.PeriodicTriggerSpellFromClient:
                 case AuraType.PeriodicEnergize:
                 case AuraType.PeriodicLeech:
                 case AuraType.PeriodicHealthFunnel:
@@ -519,6 +520,9 @@ namespace Game.Spells
                     break;
                 case AuraType.PeriodicTriggerSpell:
                     HandlePeriodicTriggerSpellAuraTick(target, caster);
+                    break;
+                case AuraType.PeriodicTriggerSpellFromClient:
+                    // Don't actually do anything - client will trigger casts of these spells by itself
                     break;
                 case AuraType.PeriodicTriggerSpellWithValue:
                     HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);

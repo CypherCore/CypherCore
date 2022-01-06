@@ -1041,8 +1041,8 @@ namespace Game.Entities
             return 0;
         }
 
-        public virtual bool HasSpellFocus(Spell focusSpell = null) { return false; }        
-        
+        public virtual bool HasSpellFocus(Spell focusSpell = null) { return false; }
+
         /// <summary>
         /// Check if our current channel spell has attribute SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
         /// </summary>
@@ -1075,7 +1075,7 @@ namespace Game.Entities
                     return true;
             return false;
         }
-        
+
         public bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura = 0)
         {
             var auras = GetAuraEffectsByType(type);
@@ -1428,7 +1428,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
@@ -1627,51 +1627,51 @@ namespace Game.Entities
             switch (CSpellType)
             {
                 case CurrentSpellTypes.Generic:
+                {
+                    // generic spells always break channeled not delayed spells
+                    InterruptSpell(CurrentSpellTypes.Channeled, false);
+
+                    // autorepeat breaking
+                    if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                     {
-                        // generic spells always break channeled not delayed spells
-                        InterruptSpell(CurrentSpellTypes.Channeled, false);
-
-                        // autorepeat breaking
-                        if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
-                        {
-                            // break autorepeat if not Auto Shot
-                            if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
-                                InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                            m_AutoRepeatFirstCast = true;
-                        }
-                        if (pSpell.m_spellInfo.CalcCastTime() > 0)
-                            AddUnitState(UnitState.Casting);
-
-                        break;
-                    }
-                case CurrentSpellTypes.Channeled:
-                    {
-                        // channel spells always break generic non-delayed and any channeled spells
-                        InterruptSpell(CurrentSpellTypes.Generic, false);
-                        InterruptSpell(CurrentSpellTypes.Channeled);
-
-                        // it also does break autorepeat if not Auto Shot
-                        if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                        // break autorepeat if not Auto Shot
+                        if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                        m_AutoRepeatFirstCast = true;
+                    }
+                    if (pSpell.m_spellInfo.CalcCastTime() > 0)
                         AddUnitState(UnitState.Casting);
 
-                        break;
-                    }
-                case CurrentSpellTypes.AutoRepeat:
-                    {
-                        // only Auto Shoot does not break anything
-                        if (pSpell.m_spellInfo.Id != 75)
-                        {
-                            // generic autorepeats break generic non-delayed and channeled non-delayed spells
-                            InterruptSpell(CurrentSpellTypes.Generic, false);
-                            InterruptSpell(CurrentSpellTypes.Channeled, false);
-                        }
-                        // special action: set first cast flag
-                        m_AutoRepeatFirstCast = true;
+                    break;
+                }
+                case CurrentSpellTypes.Channeled:
+                {
+                    // channel spells always break generic non-delayed and any channeled spells
+                    InterruptSpell(CurrentSpellTypes.Generic, false);
+                    InterruptSpell(CurrentSpellTypes.Channeled);
 
-                        break;
+                    // it also does break autorepeat if not Auto Shot
+                    if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
+                        m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    AddUnitState(UnitState.Casting);
+
+                    break;
+                }
+                case CurrentSpellTypes.AutoRepeat:
+                {
+                    // only Auto Shoot does not break anything
+                    if (pSpell.m_spellInfo.Id != 75)
+                    {
+                        // generic autorepeats break generic non-delayed and channeled non-delayed spells
+                        InterruptSpell(CurrentSpellTypes.Generic, false);
+                        InterruptSpell(CurrentSpellTypes.Channeled, false);
                     }
+                    // special action: set first cast flag
+                    m_AutoRepeatFirstCast = true;
+
+                    break;
+                }
                 default:
                     break; // other spell types don't break anything now
             }
@@ -1948,74 +1948,74 @@ namespace Game.Entities
                     // Melee and Ranged Spells
                     case SpellDmgClass.Ranged:
                     case SpellDmgClass.Melee:
+                    {
+                        // Physical Damage
+                        if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
                         {
-                            // Physical Damage
-                            if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
+                            // Spells with this attribute were already calculated in MeleeSpellHitResult
+                            if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
                             {
-                                // Spells with this attribute were already calculated in MeleeSpellHitResult
-                                if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
-                                {
-                                    // Get blocked status
-                                    blocked = IsSpellBlocked(victim, spellInfo, attackType);
-                                }
+                                // Get blocked status
+                                blocked = IsSpellBlocked(victim, spellInfo, attackType);
                             }
-
-                            if (crit)
-                            {
-                                damageInfo.HitInfo |= HitInfo.CriticalHit;
-
-                                // Calculate crit bonus
-                                uint crit_bonus = (uint)damage;
-                                // Apply crit_damage bonus for melee spells
-                                Player modOwner = GetSpellModOwner();
-                                if (modOwner != null)
-                                    modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
-                                damage += (int)crit_bonus;
-
-                                // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                                float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
-
-                                if (critPctDamageMod != 0)
-                                    MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
-                            }
-
-                            // Spell weapon based damage CAN BE crit & blocked at same time
-                            if (blocked)
-                            {
-                                // double blocked amount if block is critical
-                                float value = victim.GetBlockPercent(GetLevel());
-                                if (victim.IsBlockCritical())
-                                    value *= 2; // double blocked percent
-                                damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
-                                if (damage <= damageInfo.blocked)
-                                {
-                                    damageInfo.blocked = (uint)damage;
-                                    damageInfo.fullBlock = true;
-                                }
-                                damage -= (int)damageInfo.blocked;
-                            }
-
-                            if (CanApplyResilience())
-                                ApplyResilience(victim, ref damage);
-
-                            break;
                         }
+
+                        if (crit)
+                        {
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
+
+                            // Calculate crit bonus
+                            uint crit_bonus = (uint)damage;
+                            // Apply crit_damage bonus for melee spells
+                            Player modOwner = GetSpellModOwner();
+                            if (modOwner != null)
+                                modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+                            damage += (int)crit_bonus;
+
+                            // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+                            float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
+
+                            if (critPctDamageMod != 0)
+                                MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
+                        }
+
+                        // Spell weapon based damage CAN BE crit & blocked at same time
+                        if (blocked)
+                        {
+                            // double blocked amount if block is critical
+                            float value = victim.GetBlockPercent(GetLevel());
+                            if (victim.IsBlockCritical())
+                                value *= 2; // double blocked percent
+                            damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+                            if (damage <= damageInfo.blocked)
+                            {
+                                damageInfo.blocked = (uint)damage;
+                                damageInfo.fullBlock = true;
+                            }
+                            damage -= (int)damageInfo.blocked;
+                        }
+
+                        if (CanApplyResilience())
+                            ApplyResilience(victim, ref damage);
+
+                        break;
+                    }
                     // Magical Attacks
                     case SpellDmgClass.None:
                     case SpellDmgClass.Magic:
+                    {
+                        // If crit add critical bonus
+                        if (crit)
                         {
-                            // If crit add critical bonus
-                            if (crit)
-                            {
-                                damageInfo.HitInfo |= HitInfo.CriticalHit;
-                                damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
-                            }
-
-                            if (CanApplyResilience())
-                                ApplyResilience(victim, ref damage);
-
-                            break;
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
+                            damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
                         }
+
+                        if (CanApplyResilience())
+                            ApplyResilience(victim, ref damage);
+
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2241,7 +2241,7 @@ namespace Game.Entities
         }
 
         public virtual bool IsAffectedByDiminishingReturns() { return (GetCharmerOrOwnerPlayerOrPlayerItself() != null); }
-        
+
         public DiminishingLevels GetDiminishing(DiminishingGroup group)
         {
             DiminishingReturn diminish = m_Diminishing[(int)group];
@@ -2568,7 +2568,7 @@ namespace Game.Entities
                     {
                         int[] bp = new int[SpellConst.MaxEffects];
                         foreach (var spellEffectInfo in spellEntry.GetEffects())
-                                bp[spellEffectInfo.EffectIndex] = spellEffectInfo.BasePoints;
+                            bp[spellEffectInfo.EffectIndex] = spellEffectInfo.BasePoints;
 
                         bp[i] = seatId;
 
@@ -2611,7 +2611,7 @@ namespace Game.Entities
         {
             return GetAuraApplication(predicate) != null;
         }
-        
+
         public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
@@ -2678,6 +2678,15 @@ namespace Game.Entities
             return false;
         }
 
+        public bool HasAuraTypeWithTriggerSpell(AuraType auratype, uint triggerSpell)
+        {
+            foreach (var aura in GetAuraEffectsByType(auratype))
+                if (aura.GetSpellEffectInfo().TriggerSpell == triggerSpell)
+                    return true;
+
+            return false;
+        }
+        
         public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag, ObjectGuid guid = default)
         {
             if (!HasInterruptFlag(flag))

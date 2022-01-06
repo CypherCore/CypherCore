@@ -314,15 +314,12 @@ namespace Game
                     if (go.GetSpellForLock(caster.ToPlayer()) == spellInfo)
                         allow = true;
 
-                // TODO: Preparation for #23204
                 // allow casting of spells triggered by clientside periodic trigger auras
-                /*
-                 if (caster->HasAuraTypeWithTriggerSpell(SPELL_AURA_PERIODIC_TRIGGER_SPELL_FROM_CLIENT, spellId))
+                if (caster.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
                 {
                     allow = true;
-                    triggerFlag = TRIGGERED_FULL_MASK;
+                    triggerFlag = TriggerCastFlags.FullMask;
                 }
-                */
 
                 if (!allow)
                     return;

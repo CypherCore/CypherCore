@@ -677,13 +677,30 @@ namespace Game
                 return;
             }
 
-            // do not cast not learned spells
-            if (!caster.HasSpell(spellInfo.Id) || spellInfo.IsPassive())
-                return;
-
             SpellCastTargets targets = new(caster, petCastSpell.Cast);
 
-            Spell spell = new(caster, spellInfo, TriggerCastFlags.None);
+            TriggerCastFlags triggerCastFlags = TriggerCastFlags.None;
+
+            if (spellInfo.IsPassive())
+                return;
+
+            // cast only learned spells
+            if (!caster.HasSpell(spellInfo.Id))
+            {
+                bool allow = false;
+
+                // allow casting of spells triggered by clientside periodic trigger auras
+                if (caster.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
+                {
+                    allow = true;
+                    triggerCastFlags = TriggerCastFlags.FullMask;
+                }
+
+                if (!allow)
+                    return;
+            }
+
+            Spell spell = new(caster, spellInfo, triggerCastFlags);
             spell.m_fromClient = true;
             spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];
             spell.m_misc.Data1 = petCastSpell.Cast.Misc[1];

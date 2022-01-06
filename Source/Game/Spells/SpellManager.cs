@@ -2935,6 +2935,7 @@ namespace Game.Entities
                             switch (spellEffectInfo.ApplyAuraName)
                             {
                                 case AuraType.PeriodicTriggerSpell:
+                                case AuraType.PeriodicTriggerSpellFromClient:
                                 case AuraType.PeriodicTriggerSpellWithValue:
                                     SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
                                     if (triggerSpell != null)
@@ -3257,7 +3258,8 @@ namespace Game.Entities
                 43109, // Throw Torch
                 58552, // Return to Orgrimmar
                 58533, // Return to Stormwind
-                21855  // Challenge Flag
+                21855,  // Challenge Flag
+                51122  // Fierce Lightning Stike
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;
@@ -3576,6 +3578,14 @@ namespace Game.Entities
             }, spellInfo =>
             {
                 spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+            });
+
+            ApplySpellFix(new[] {
+                44327, // Trained Rock Falcon/Hawk Hunting
+                44408  // Trained Rock Falcon/Hawk Hunting
+             }, spellInfo =>
+             {
+                spellInfo.Speed = 0.0f;
             });
 
             // Summon Corpse Scarabs
@@ -3915,6 +3925,13 @@ namespace Game.Entities
                 {
                     spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitTargetEnemy);
                 });
+            });
+
+            // Mutated Transformation (Professor Putricide)
+            ApplySpellFix(new[] { 70402 }, spellInfo =>
+            {
+                // Resistance is calculated inside of SpellScript
+                spellInfo.AttributesEx4 |= SpellAttr4.IgnoreResistances;
             });
 
             // Empowered Flare (Blood Prince Council)
