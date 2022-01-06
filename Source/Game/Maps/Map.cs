@@ -1442,6 +1442,10 @@ namespace Game.Maps
                 return true;
             }
 
+            Creature c = obj.ToCreature();
+            if (c != null && c.GetCharmerOrOwnerGUID().IsPlayer())
+                EnsureGridLoaded(new_cell);
+
             // in diff. loaded grid normal creature
             var grid = new GridCoord(new_cell.GetGridX(), new_cell.GetGridY());
             if (IsGridLoaded(grid))
