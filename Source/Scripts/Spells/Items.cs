@@ -410,6 +410,10 @@ namespace Scripts.Spells.Items
         public const uint WorldQuellerFocus = 90900;
         public const uint BrutalKinship1 = 144671;
         public const uint BrutalKinship2 = 145738;
+
+        // Eggnog
+        public const uint EggNogReindeer = 21936;
+        public const uint EggNogSnowman = 21980;
     }
 
     struct TextIds
@@ -793,7 +797,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script] // 64411 - Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
     class spell_item_blessing_of_ancient_kings : AuraScript
     {
@@ -1878,7 +1882,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
         }
     }
-    
+
     [Script] // 36941 - Ultrasafe Transporter: Toshley's Station
     class spell_item_ultrasafe_transporter : SpellScript
     {
@@ -1936,7 +1940,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
         }
     }
-    
+
     [Script] // 36890 - Dimensional Ripper - Area 52
     class spell_item_dimensional_ripper_area52 : SpellScript
     {
@@ -1985,7 +1989,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
         }
     }
-    
+
     [Script] // 71169 - Shadow's Fate (Shadowmourne questline)
     class spell_item_unsated_craving : AuraScript
     {
@@ -2997,7 +3001,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal));
         }
     }
-    
+
     [Script]
     class spell_item_pygmy_oil : SpellScript
     {
@@ -3521,7 +3525,7 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script] // 13180 - Gnomish Mind Control Cap
     class spell_item_mind_control_cap_SpellScript : SpellScript
     {
@@ -3910,6 +3914,26 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             AfterCast.Add(new CastHandler(SecondaryEffect));
+        }
+    }
+
+    [Script] // 21149 - Egg Nog
+    class spell_item_eggnog : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EggNogReindeer, SpellIds.EggNogSnowman);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            if (RandomHelper.randChance(40))
+                GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(50) ? SpellIds.EggNogReindeer : SpellIds.EggNogSnowman, GetCastItem());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate));
         }
     }
 }
