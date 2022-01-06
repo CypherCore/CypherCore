@@ -54,8 +54,7 @@ namespace Scripts.Spells.Paladin
         public const uint DivineStormDamage = 224239;
         public const uint EnduringLight = 40471;
         public const uint EnduringJudgement = 40472;
-        public const uint EyeForAnEyeRank1 = 9799;
-        public const uint EyeForAnEyeDamage = 25997;
+        public const uint EyeForAnEyeTriggered = 205202;
         public const uint FinalStand = 204077;
         public const uint FinalStandEffect = 204079;
         public const uint Forbearance = 25771;
@@ -364,6 +363,25 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 205191 - Eye for an Eye
+    class spell_pal_eye_for_an_eye : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EyeForAnEyeTriggered);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.EyeForAnEyeTriggered, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 234299 - Fist of Justice
     class spell_pal_fist_of_justice : AuraScript
     {
