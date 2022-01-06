@@ -79,10 +79,16 @@ namespace Framework.Constants
 
     public enum SummonSlot
     {
+        Any = -1,
         Pet = 0,
         Totem = 1,
+        Totem2 = 2,
+        Totem3 = 3,
+        Totem4 = 4,
         MiniPet = 5,
         Quest = 6,
+
+        Max
     }
 
     public enum BaseModType

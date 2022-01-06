@@ -43,6 +43,7 @@ namespace Game.Entities
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
         TimeTrackerSmall movesplineTimer;
         MovementForces _movementForces;
+        PositionUpdateInfo _positionUpdateInfo;
         protected Unit m_unitMovedByMe;    // only ever set for players, and only for direct client control
         protected Player m_playerMovingMe; // only set for direct client control (possess effects, vehicles and similar)
 
@@ -554,5 +555,17 @@ namespace Game.Entities
     public class DeclinedName
     {
         public StringArray name = new(SharedConst.MaxDeclinedNameCases);
+    }
+
+    struct PositionUpdateInfo
+    {
+        public bool Relocated;
+        public bool Turned;
+
+        public void Reset()
+        {
+            Relocated = false;
+            Turned = false;
+        }
     }
 }

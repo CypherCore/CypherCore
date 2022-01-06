@@ -172,6 +172,15 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().Update(diff);
 
+            // Wait with the aura interrupts until we have updated our movement generators and position
+            if (IsPlayer())
+                InterruptMovementBasedAuras();
+            else if (!MoveSpline.Finalized())
+                InterruptMovementBasedAuras();
+
+            // All position info based actions have been executed, reset info
+            _positionUpdateInfo.Reset();
+
             if (GetAI() == null && (!IsPlayer() || (IsCharmed() && GetCharmerGUID().IsCreature())))
                 UpdateCharmAI();
 

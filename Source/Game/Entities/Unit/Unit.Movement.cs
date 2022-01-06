@@ -600,13 +600,8 @@ namespace Game.Entities
                 Math.Abs(GetPositionY() - y) > 0.001f ||
                 Math.Abs(GetPositionZ() - z) > 0.001f);
 
-            if (turn)
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
-
             if (relocated)
             {
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving);
-
                 // move and update visible state if need
                 if (IsTypeId(TypeId.Player))
                     GetMap().PlayerRelocation(ToPlayer(), x, y, z, orientation);
@@ -617,6 +612,9 @@ namespace Game.Entities
                 UpdateOrientation(orientation);
 
             UpdatePositionData();
+
+            _positionUpdateInfo.Relocated = relocated;
+            _positionUpdateInfo.Turned = turn;
 
             bool isInWater = IsInWater();
             if (!IsFalling() || isInWater || IsFlying())
@@ -1741,6 +1739,17 @@ namespace Game.Entities
 
             UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
         }
+
+        void InterruptMovementBasedAuras()
+        {
+            // TODO: Check if orientation transport offset changed instead of only global orientation
+            if (_positionUpdateInfo.Turned)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
+
+            if (_positionUpdateInfo.Relocated && !GetVehicle())
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving);
+        }
+
         public void DisableSpline()
         {
             m_movementInfo.RemoveMovementFlag(MovementFlag.Forward);
