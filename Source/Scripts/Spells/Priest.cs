@@ -50,6 +50,8 @@ namespace Scripts.Spells.Priest
         public const uint ItemEfficiency = 37595;
         public const uint LeapOfFaithEffect = 92832;
         public const uint LevitateEffect = 111759;
+        public const uint MasochismTalent = 193063;
+        public const uint MasochismPeriodicHeal = 193065;
         public const uint MindBombStun = 226943;
         public const uint OracularHeal = 26170;
         public const uint PenanceR1 = 47540;
@@ -790,7 +792,7 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity);
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal);
         }
 
         void HandleEffectHit(uint effIndex)
@@ -801,6 +803,11 @@ namespace Scripts.Spells.Priest
                 Unit caster = GetCaster();
                 if (caster.HasAura(SpellIds.Atonement) && !caster.HasAura(SpellIds.Trinity))
                     caster.CastSpell(target, SpellIds.AtonementTriggered, true);
+
+                // Handle Masochism talent
+                int periodicAmount = GetHitHeal() / 20;
+                if (caster.HasAura(SpellIds.MasochismTalent) && caster.GetGUID() == target.GetGUID())
+                    caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
             }
         }
 
