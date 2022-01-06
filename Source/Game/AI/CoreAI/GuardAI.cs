@@ -63,9 +63,12 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            Player player = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (player != null)
-                me.SendZoneUnderAttackMessage(player);
+            if (killer != null)
+            {
+                Player player = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (player != null)
+                    me.SendZoneUnderAttackMessage(player);
+            }
         }
     }
 }
