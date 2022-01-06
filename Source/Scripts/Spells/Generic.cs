@@ -290,6 +290,10 @@ namespace Scripts.Spells.Generic
         // SiegeTankControl
         public const uint SiegeTankControl = 47963;
 
+        // CannonBlast
+        public const uint CannonBlast = 42578;
+        public const uint CannonBlastDamage = 42576;
+
         // FreezingCircleMisc
         public const uint FreezingCirclePitOfSaronNormal = 69574;
         public const uint FreezingCirclePitOfSaronHeroic = 70276;
@@ -3124,12 +3128,17 @@ namespace Scripts.Spells.Generic
 
         void OnPeriodic(AuraEffect aurEff)
         {
-            if (_applyTimes.Empty())
-                return;
+            int removeCount = 0;
 
-            // pop stack if it expired for us
-            if (_applyTimes.First() + GetMaxDuration() < GameTime.GetGameTimeMS())
-                ModStackAmount(-1, AuraRemoveMode.Expire);
+            // pop expired times off of the stack
+            while (!_applyTimes.Empty() && _applyTimes.FirstOrDefault() + GetMaxDuration() < GameTime.GetGameTimeMS())
+            {
+                _applyTimes.RemoveAt(0);
+                removeCount++;
+            }
+
+            if (removeCount != 0)
+                ModStackAmount(-removeCount, AuraRemoveMode.Expire);
         }
 
         public override void Register()
@@ -3924,6 +3933,28 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_cannon_blast : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CannonBlast);
+        }
+        void HandleScript(uint effIndex)
+        {
+            int bp = GetEffectValue();
+            Unit target = GetHitUnit();
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, bp);
+            target.CastSpell(target, SpellIds.CannonBlastDamage, args);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {
