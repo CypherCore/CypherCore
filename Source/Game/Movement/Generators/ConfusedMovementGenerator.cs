@@ -21,9 +21,9 @@ using System;
 
 namespace Game.Movement
 {
-    public class ConfusedGenerator<T> : MovementGeneratorMedium<T> where T : Unit
+    public class ConfusedMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
-        public ConfusedGenerator()
+        public ConfusedMovementGenerator()
         {
             _timer = new TimeTracker();
             _reference = new();
@@ -82,6 +82,14 @@ namespace Game.Movement
                 float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
                 float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
                 owner.MovePositionToFirstCollision(destination, distance, angle);
+
+                // Check if the destination is in LOS
+                if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
+                {
+                    // Retry later on
+                    _timer.Reset(200);
+                    return true;
+                }
 
                 if (_path == null)
                 {

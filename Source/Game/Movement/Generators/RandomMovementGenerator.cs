@@ -144,6 +144,14 @@ namespace Game.Movement
             float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
             owner.MovePositionToFirstCollision(position, distance, angle);
 
+            // Check if the destination is in LOS
+            if (!owner.IsWithinLOS(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ()))
+            {
+                // Retry later on
+                _timer.Reset(200);
+                return;
+            }
+
             uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
 
             if (_path == null)

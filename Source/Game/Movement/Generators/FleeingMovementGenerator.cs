@@ -21,12 +21,12 @@ using System;
 
 namespace Game.Movement
 {
-    public class FleeingGenerator<T> : MovementGeneratorMedium<T> where T : Unit
+    public class FleeingMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
         public const float MIN_QUIET_DISTANCE = 28.0f;
         public const float MAX_QUIET_DISTANCE = 43.0f;
 
-        public FleeingGenerator(ObjectGuid fright)
+        public FleeingMovementGenerator(ObjectGuid fright)
         {
             _fleeTargetGUID = fright;
             _timer = new TimeTracker();
@@ -208,7 +208,7 @@ namespace Game.Movement
         TimeTracker _timer;
     }
 
-    public class TimedFleeingGenerator : FleeingGenerator<Creature>
+    public class TimedFleeingGenerator : FleeingMovementGenerator<Creature>
     {
         public TimedFleeingGenerator(ObjectGuid fright, uint time) : base(fright)
         {
