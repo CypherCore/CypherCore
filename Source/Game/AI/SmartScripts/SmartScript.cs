@@ -2331,18 +2331,11 @@ namespace Game.AI
 
                     break;
                 }
-                case SmartActions.RemoveMovement:
+                case SmartActions.PauseMovement:
                 {
                     foreach (var target in targets)
-                    {
                         if (IsUnit(target))
-                        {
-                            if (e.Action.removeMovement.movementType != 0 && e.Action.removeMovement.movementType < (uint)MovementGeneratorType.Max)
-                                target.ToUnit().GetMotionMaster().Remove((MovementGeneratorType)e.Action.removeMovement.movementType);
-                            if (e.Action.removeMovement.forced != 0)
-                                target.ToUnit().StopMoving();
-                        }
-                    }
+                            target.ToUnit().PauseMovement(e.Action.pauseMovement.pauseTimer, (MovementSlot)e.Action.pauseMovement.movementSlot, e.Action.pauseMovement.force != 0);
 
                     break;
                 }

@@ -1425,6 +1425,15 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.PauseMovement:
+                {
+                    if (e.Action.pauseMovement.pauseTimer == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} does not specify pause duration");
+                        return false;
+                    }
+                    break;
+                }
                 case SmartActions.SetMovementSpeed:
                 {
                     if (e.Action.movementSpeed.movementType >= (int)MovementGeneratorType.Max)
@@ -1529,7 +1538,6 @@ namespace Game.AI
                 case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.DespawnSpawngroup:
-                case SmartActions.RemoveMovement:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
@@ -2534,7 +2542,7 @@ namespace Game.AI
         public RandomTimedEvent randomTimedEvent;
 
         [FieldOffset(4)]
-        public RemoveMovement removeMovement;
+        public PauseMovement pauseMovement;
 
         [FieldOffset(4)]
         public RespawnData respawnData;
@@ -3047,10 +3055,11 @@ namespace Game.AI
             public uint minId;
             public uint maxId;
         }
-        public struct RemoveMovement
+        public struct PauseMovement
         {
-            public uint movementType;
-            public uint forced;
+            public uint movementSlot;
+            public uint pauseTimer;
+            public uint force;
         }
         public struct RespawnData
         {
