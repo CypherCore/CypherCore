@@ -21,6 +21,7 @@ using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
 using Game.Maps;
+using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
@@ -3399,6 +3400,14 @@ namespace Game.Entities
                 Log.outError(LogFilter.Server, "WorldObject.MovePositionToFirstCollision invalid coordinates X: {0} and Y: {1} were passed!", destx, desty);
                 return;
             }
+
+            // Use a detour raycast to get our first collision point
+            PathGenerator path = new(this);
+            path.CalculatePath(destx, desty, destz, false, true);
+            Vector3 result = path.GetPath()[path.GetPath().Length - 1];
+            destx = result.X;
+            desty = result.Y;
+            destz = result.Z;
 
             float halfHeight = GetCollisionHeight() * 0.5f;
             UpdateAllowedPositionZ(destx, desty, ref destz);
