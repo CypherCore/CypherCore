@@ -2278,9 +2278,6 @@ namespace Game.Entities
             bool need_cast = (spellInfo.Stances == 0 || (form != 0 && Convert.ToBoolean(spellInfo.Stances & (1ul << ((int)form - 1)))) ||
             (form == 0 && spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)));
 
-            if (spellInfo.HasAttribute(SpellAttr8.MasterySpecialization))
-                need_cast &= IsCurrentSpecMasterySpell(spellInfo);
-
             // Check EquippedItemClass
             // passive spells which apply aura and have an item requirement are to be added manually, instead of casted
             if (spellInfo.EquippedItemClass >= 0)
@@ -2298,15 +2295,6 @@ namespace Game.Entities
 
             //Check CasterAuraStates
             return need_cast && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState));
-        }
-
-        public bool IsCurrentSpecMasterySpell(SpellInfo spellInfo)
-        {
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
-            if (chrSpec != null)
-                return spellInfo.Id == chrSpec.MasterySpellID[0] || spellInfo.Id == chrSpec.MasterySpellID[1];
-
-            return false;
         }
 
         public void AddStoredAuraTeleportLocation(uint spellId)

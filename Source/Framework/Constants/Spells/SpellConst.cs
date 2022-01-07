@@ -1885,7 +1885,7 @@ namespace Framework.Constants
         RaidMarker = 0x4000000, // 26 Probably Spell No Need Learn To Cast
         Unk27 = 0x8000000, // 27
         NotInBgOrArena = 0x10000000, // 28
-        MasterySpecialization = 0x20000000, // 29
+        MasteryAffectPoints = 0x20000000, // 29
         Unk30 = 0x40000000, // 30
         AttackIgnoreImmuneToPCFlag = 0x80000000  // 31
     }

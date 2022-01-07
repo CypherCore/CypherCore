@@ -74,7 +74,7 @@ namespace Game.Spells
             // default amount calculation
             int amount = 0;
 
-            if (!m_spellInfo.HasAttribute(SpellAttr8.MasterySpecialization) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
+            if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
                 amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
             else if (caster != null && caster.IsTypeId(TypeId.Player))
                 amount = (int)(caster.ToPlayer().m_activePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
@@ -772,10 +772,6 @@ namespace Game.Spells
 
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
                         if (spellInfo == null || !(spellInfo.IsPassive() || spellInfo.HasAttribute(SpellAttr0.HiddenClientside)))
-                            continue;
-
-                        // always valid?
-                        if (spellInfo.HasAttribute(SpellAttr8.MasterySpecialization) && !plrTarget.IsCurrentSpecMasterySpell(spellInfo))
                             continue;
 
                         if (Convert.ToBoolean(spellInfo.Stances & (1ul << (GetMiscValue() - 1))))
