@@ -557,8 +557,7 @@ namespace Scripts.Spells.Generic
         {
             Unit owner = GetUnitOwner();
             if (owner)
-                if (owner.IsInWater())
-                    owner.CastSpell(owner, SpellIds.SpawnBloodPool, true);
+                owner.CastSpell(owner, SpellIds.SpawnBloodPool, true);
         }
 
         public override void Register()
