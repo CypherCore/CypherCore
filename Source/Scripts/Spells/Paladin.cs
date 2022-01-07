@@ -67,6 +67,10 @@ namespace Scripts.Spells.Paladin
         public const uint HolyPowerAttackPower = 28791;
         public const uint HolyPowerSpellPower = 28793;
         public const uint HolyPowerMp5 = 28795;
+        public const uint HolyPrismAreaBeamVisual = 121551;
+        public const uint HolyPrismTargetAlly = 114871;
+        public const uint HolyPrismTargetEnemy = 114852;
+        public const uint HolyPrismTargetBeamVisual = 114862;
         public const uint HolyShockR1 = 20473;
         public const uint HolyShockR1Damage = 25912;
         public const uint HolyShockR1Healing = 25914;
@@ -550,6 +554,91 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 114165 - Holy Prism
+    class spell_pal_holy_prism : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetEnemy, SpellIds.HolyPrismTargetBeamVisual);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            if (GetCaster().IsFriendlyTo(GetHitUnit()))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetAlly, true);
+            else
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetEnemy, true);
+
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetBeamVisual, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 114852 - Holy Prism (Damage)
+    [Script] // 114871 - Holy Prism (Heal)
+    class spell_pal_holy_prism_selector : SpellScript
+    {
+        List<WorldObject> _sharedTargets = new();
+        ObjectGuid _targetGUID;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetBeamVisual);
+        }
+
+        void SaveTargetGuid(uint effIndex)
+        {
+            _targetGUID = GetHitUnit().GetGUID();
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            byte maxTargets = 5;
+
+            if (targets.Count > maxTargets)
+            {
+                if (GetSpellInfo().Id == SpellIds.HolyPrismTargetAlly)
+                {
+                    targets.Sort(new HealthPctOrderPred());
+                    targets.Resize(maxTargets);
+                }
+                else
+                    targets.RandomResize(maxTargets);
+            }
+
+            _sharedTargets = targets;
+        }
+
+        void ShareTargets(List<WorldObject> targets)
+        {
+            targets = _sharedTargets;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Unit initialTarget = Global.ObjAccessor.GetUnit(GetCaster(), _targetGUID);
+            if (initialTarget != null)
+                initialTarget.CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetBeamVisual, true);
+        }
+
+        public override void Register()
+        {
+            if (m_scriptSpellId == SpellIds.HolyPrismTargetEnemy)
+                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaAlly));
+            else if (m_scriptSpellId == SpellIds.HolyPrismTargetAlly)
+                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(ShareTargets, 2, Targets.UnitDestAreaEntry));
+
+            OnEffectHitTarget.Add(new EffectHandler(SaveTargetGuid, 0, SpellEffectName.Any));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 20473 - Holy Shock
     class spell_pal_holy_shock : SpellScript
     {
