@@ -336,7 +336,7 @@ namespace Game.AI
             {
                 if (!me.GetCharmInfo().IsReturning() || me.GetCharmInfo().IsFollowing() || me.GetCharmInfo().IsAtStay())
                 {
-                    Unit nearTarget = me.SelectNearestHostileUnitInAggroRange(true);
+                    Unit nearTarget = me.SelectNearestHostileUnitInAggroRange(true, true);
                     if (nearTarget)
                         return nearTarget;
                 }

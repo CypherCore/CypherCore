@@ -2858,11 +2858,11 @@ namespace Game.Entities
             return 0.0f;
         }
 
-        public Unit SelectNearestHostileUnitInAggroRange(bool useLOS = false)
+        public Unit SelectNearestHostileUnitInAggroRange(bool useLOS = false, bool ignoreCivilians = false)
         {
             // Selects nearest hostile target within creature's aggro range. Used primarily by
             //  pets set to aggressive. Will not return neutral or friendly targets
-            var u_check = new NearestHostileUnitInAggroRangeCheck(this, useLOS);
+            var u_check = new NearestHostileUnitInAggroRangeCheck(this, useLOS, ignoreCivilians);
             var searcher = new UnitSearcher(this, u_check);
             Cell.VisitGridObjects(this, searcher, SharedConst.MaxAggroRadius);
             return searcher.GetTarget();
