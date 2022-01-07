@@ -43,6 +43,7 @@ namespace Scripts.Spells.Warlock
         public const uint RainOfFireDamage = 42223;
         public const uint SeedOfCorruptionDamage = 27285;
         public const uint SeedOfCorruptionGeneric = 32865;
+        public const uint ShadowBoltEnergize = 194192;
         public const uint Soulshatter = 32835;
         public const uint SoulSwapCdMarker = 94229;
         public const uint SoulSwapOverride = 86211;
@@ -443,6 +444,25 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 686 - Shadow Bolt
+    class spell_warl_shadow_bolt : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShadowBoltEnergize);
+        }
+
+        void HandleAfterCast()
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.ShadowBoltEnergize, true);
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(HandleAfterCast));
+        }
+    }
+    
     [Script] // 86121 - Soul Swap
     class spell_warl_soul_swap : SpellScript
     {
