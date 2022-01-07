@@ -59,7 +59,9 @@ namespace Scripts.Spells.Shaman
         public const uint LavaBurst = 51505;
         public const uint LavaBurstBonusDamage = 71824;
         public const uint LavaSurge = 77762;
+        public const uint LightingBoltEnergize = 214815;
         public const uint LiquidMagmaHit = 192231;
+        public const uint MaelstromController = 343725;
         public const uint PathOfFlamesSpread = 210621;
         public const uint PathOfFlamesTalent = 201909;
         public const uint PowerSurge = 40466;
@@ -724,6 +726,29 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 188196 - Lightning Bolt
+    class spell_sha_lightning_bolt : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LightingBoltEnergize, SpellIds.MaelstromController)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 0;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 0);
+            if (energizeAmount != null)
+                GetCaster().CastSpell(GetCaster(), SpellIds.LightingBoltEnergize, new CastSpellExtraArgs(energizeAmount)
+                    .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 192223 - Liquid Magma Totem (erupting hit spell)
     class spell_sha_liquid_magma_totem : SpellScript
     {
