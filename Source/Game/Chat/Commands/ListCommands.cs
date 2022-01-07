@@ -580,31 +580,37 @@ namespace Game.Chat.Commands
 
             uint zoneId = player.GetZoneId();
             string zoneName = GetZoneName(zoneId, locale);
-            for (SpawnObjectType type = 0; type < SpawnObjectType.Max; type++)
+            for (SpawnObjectType type = 0; type < SpawnObjectType.NumSpawnTypes; type++)
             {
                 if (range != 0)
                     handler.SendSysMessage(CypherStrings.ListRespawnsRange, type, range);
                 else
                     handler.SendSysMessage(CypherStrings.ListRespawnsZone, type, zoneName, zoneId);
+
                 handler.SendSysMessage(CypherStrings.ListRespawnsListheader);
                 List<RespawnInfo> respawns = new();
                 map.GetRespawnInfo(respawns, (SpawnObjectTypeMask)(1 << (int)type));
                 foreach (RespawnInfo ri in respawns)
                 {
-                    SpawnData data = Global.ObjectMgr.GetSpawnData(ri.type, ri.spawnId);
+                    SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(ri.type, ri.spawnId);
                     if (data == null)
                         continue;
 
-                    uint respawnZoneId = map.GetZoneId(PhasingHandler.EmptyPhaseShift, data.spawnPoint);
-                    if (range != 0)
+                    uint respawnZoneId = 0;
+                    SpawnData edata = data.ToSpawnData();
+                    if (edata != null)
                     {
-                        if (!player.IsInDist(data.spawnPoint, range))
-                            continue;
-                    }
-                    else
-                    {
-                        if (zoneId != respawnZoneId)
-                            continue;
+                        respawnZoneId = map.GetZoneId(PhasingHandler.EmptyPhaseShift, edata.SpawnPoint);
+                        if (range != 0)
+                        {
+                            if (!player.IsInDist(edata.SpawnPoint, range))
+                                continue;
+                        }
+                        else
+                        {
+                            if (zoneId != respawnZoneId)
+                                continue;
+                        }
                     }
 
                     uint gridY = ri.gridId / MapConst.MaxGrids;
@@ -652,28 +658,28 @@ namespace Game.Chat.Commands
             foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
             {
                 SpawnData data = pair.Value;
-                if (data.spawnPoint.GetMapId() != mapId)
+                if (data.MapId != mapId)
                     continue;
 
                 CreatureTemplate cTemp = Global.ObjectMgr.GetCreatureTemplate(data.Id);
                 if (cTemp == null)
                     continue;
 
-                if (showAll || data.spawnPoint.IsInDist2d(player, 5000.0f))
-                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.spawnId} | Entry: {data.Id} ({cTemp.Name}) | X: {data.spawnPoint.GetPositionX():3} | Y: {data.spawnPoint.GetPositionY():3} | Z: {data.spawnPoint.GetPositionZ():3}");
+                if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
+                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({cTemp.Name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
             }
             foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
             {
                 SpawnData data = pair.Value;
-                if (data.spawnPoint.GetMapId() != mapId)
+                if (data.MapId != mapId)
                     continue;
 
                 GameObjectTemplate goTemp = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
                 if (goTemp == null)
                     continue;
 
-                if (showAll || data.spawnPoint.IsInDist2d(player, 5000.0f))
-                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.spawnId} | Entry: {data.Id} ({goTemp.name}) | X: {data.spawnPoint.GetPositionX():3} | Y: {data.spawnPoint.GetPositionY():3} | Z: {data.spawnPoint.GetPositionZ():3}");
+                if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
+                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({goTemp.name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
             }
             return true;
         }

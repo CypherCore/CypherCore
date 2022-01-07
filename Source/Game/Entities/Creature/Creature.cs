@@ -793,7 +793,7 @@ namespace Game.Entities
 
             if (data != null)
             {
-                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
                 PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
             }
 
@@ -1246,18 +1246,24 @@ namespace Game.Entities
                     dynamicflags = 0;
             }
 
-            if (data.spawnId == 0)
-                data.spawnId = m_spawnId;
-            Cypher.Assert(data.spawnId == m_spawnId);
+            if (data.SpawnId == 0)
+                data.SpawnId = m_spawnId;
+            Cypher.Assert(data.SpawnId == m_spawnId);
 
             data.Id = GetEntry();
             data.displayid = displayId;
             data.equipmentId = (sbyte)GetCurrentEquipmentId();
 
             if (GetTransport() == null)
-                data.spawnPoint.WorldRelocate(this);
+            {
+                data.MapId = GetMapId();
+                data.SpawnPoint.Relocate(this);
+            }
             else
-                data.spawnPoint.WorldRelocate(mapid, GetTransOffsetX(), GetTransOffsetY(), GetTransOffsetZ(), GetTransOffsetO());
+            {
+                data.MapId = mapid;
+                data.SpawnPoint.Relocate(GetTransOffsetX(), GetTransOffsetY(), GetTransOffsetZ(), GetTransOffsetO());
+            }
 
             data.spawntimesecs = (int)m_respawnDelay;
             // prevent add data integrity problems
@@ -1277,8 +1283,8 @@ namespace Game.Entities
             if (data.spawnGroupData == null)
                 data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
-            data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
-            data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
+            data.PhaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.PhaseId;
+            data.PhaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.PhaseGroup;
 
             // update in DB
             SQLTransaction trans = new();
@@ -1294,8 +1300,8 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, data.spawnDifficulties.Empty() ? "" : string.Join(',', data.spawnDifficulties));
-            stmt.AddValue(index++, data.phaseId);
-            stmt.AddValue(index++, data.phaseGroup);
+            stmt.AddValue(index++, data.PhaseId);
+            stmt.AddValue(index++, data.PhaseGroup);
             stmt.AddValue(index++, displayId);
             stmt.AddValue(index++, GetCurrentEquipmentId());
             stmt.AddValue(index++, GetPositionX());
@@ -1610,7 +1616,7 @@ namespace Game.Entities
 
             SQLTransaction trans = new();
 
-            Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+            Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
             {
                 // despawn all active creatures, and remove their respawns
                 List<Creature> toUnload = new();
@@ -2448,7 +2454,7 @@ namespace Game.Entities
         {
             if (m_creatureData != null)
             {
-                m_creatureData.spawnPoint.GetPosition(out x, out y, out z, out ori);
+                m_creatureData.SpawnPoint.GetPosition(out x, out y, out z, out ori);
                 dist = m_creatureData.spawndist;
             }
             else
@@ -2459,7 +2465,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
+        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.MapId != GetMapId(); }
 
         void InitializeMovementFlags()
         {
@@ -3157,7 +3163,7 @@ namespace Game.Entities
             m_respawnradius = data.spawndist;
             m_respawnDelay = (uint)data.spawntimesecs;
 
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.Id, data.spawnPoint, data, 0, !m_respawnCompatibilityMode))
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.Id, data.SpawnPoint, data, 0, !m_respawnCompatibilityMode))
                 return false;
 
             //We should set first home position, because then AI calls home movement
@@ -3198,9 +3204,9 @@ namespace Game.Entities
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
-                    float tz = map.GetHeight(GetPhaseShift(), data.spawnPoint, true, MapConst.MaxFallDistance);
-                    if (data.spawnPoint.GetPositionZ() - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
-                        Relocate(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY(), tz);
+                    float tz = map.GetHeight(GetPhaseShift(), data.SpawnPoint, true, MapConst.MaxFallDistance);
+                    if (data.SpawnPoint.GetPositionZ() - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
+                        Relocate(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY(), tz);
                 }
             }
 

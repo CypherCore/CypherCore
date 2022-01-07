@@ -42,7 +42,7 @@ namespace Game.Maps
         {
             return IsValidMapCoord(x, y, z) && float.IsFinite(o);
         }
-
+        
         public static bool IsValidMapCoord(uint mapid, float x, float y)
         {
             return Global.MapMgr.IsValidMAP(mapid, false) && IsValidMapCoord(x, y);
@@ -58,9 +58,14 @@ namespace Game.Maps
             return Global.MapMgr.IsValidMAP(mapid, false) && IsValidMapCoord(x, y, z, o);
         }
 
+        public static bool IsValidMapCoord(uint mapid, Position pos)
+        {
+            return IsValidMapCoord(mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+        }
+
         public static bool IsValidMapCoord(WorldLocation loc)
         {
-            return IsValidMapCoord(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation());
+            return IsValidMapCoord(loc.GetMapId(), loc);
         }
 
         public static void NormalizeMapCoord(ref float c)

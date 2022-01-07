@@ -172,7 +172,7 @@ namespace Game.Chat
 
             CreatureData data = Global.ObjectMgr.GetCreatureData(target.GetSpawnId());
             if (data != null)
-                handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseId, data.phaseGroup);
+                handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.PhaseId, data.PhaseGroup);
 
             PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
 
@@ -233,14 +233,14 @@ namespace Game.Chat
                 return false;
             }
 
-            if (player.GetMapId() != data.spawnPoint.GetMapId())
+            if (player.GetMapId() != data.MapId)
             {
                 handler.SendSysMessage(CypherStrings.CommandCreatureatsamemap, lowguid);
                 return false;
             }
 
             Global.ObjectMgr.RemoveCreatureFromGrid(lowguid, data);
-            data.spawnPoint.Relocate(player);
+            data.SpawnPoint.Relocate(player);
             Global.ObjectMgr.AddCreatureToGrid(lowguid, data);
 
             // update position in DB
@@ -659,9 +659,9 @@ namespace Game.Chat
                 {
                     ulong guid = map.GenerateLowGuid(HighGuid.Creature);
                     CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(guid);
-                    data.spawnId = guid;
+                    data.SpawnId = guid;
                     data.Id = id;
-                    data.spawnPoint.Relocate(chr.GetTransOffsetX(), chr.GetTransOffsetY(), chr.GetTransOffsetZ(), chr.GetTransOffsetO());
+                    data.SpawnPoint.Relocate(chr.GetTransOffsetX(), chr.GetTransOffsetY(), chr.GetTransOffsetZ(), chr.GetTransOffsetO());
                     data.spawnGroupData = new();
 
                     Creature creaturePassenger = trans.CreateNPCPassenger(guid, data);

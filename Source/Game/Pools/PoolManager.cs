@@ -383,6 +383,8 @@ namespace Game
                     return IsPartOfAPool<Creature>(spawnId);
                 case SpawnObjectType.GameObject:
                     return IsPartOfAPool<GameObject>(spawnId);
+                case SpawnObjectType.AreaTrigger:
+                    return 0;
                 default:
                     Cypher.Assert(false, $"Invalid spawn type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
                     return 0;
@@ -481,7 +483,7 @@ namespace Game
                         if (data != null)
                         {
                             Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
-                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                            Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             if (map != null && !map.Instanceable())
                             {
                                 var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
@@ -503,7 +505,7 @@ namespace Game
                         if (data != null)
                         {
                             Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
-                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                            Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             if (map != null && !map.Instanceable())
                             {
                                 var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
@@ -620,9 +622,9 @@ namespace Game
                             Global.ObjectMgr.AddCreatureToGrid(obj.guid, data);
 
                             // Spawn if necessary (loaded grids only)
-                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                            Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             // We use spawn coords to spawn
-                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
+                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
                                 Creature.CreateCreatureFromDB(obj.guid, map);
                         }
                     }
@@ -635,9 +637,9 @@ namespace Game
                             Global.ObjectMgr.AddGameObjectToGrid(obj.guid, data);
                             // Spawn if necessary (loaded grids only)
                             // this base map checked as non-instanced and then only existed
-                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
+                            Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
+                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
                             {
                                 GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
                                 if (go)

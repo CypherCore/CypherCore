@@ -1124,7 +1124,7 @@ namespace Game
                 // get the creature data from the low guid to get the entry, to be able to find out the whole guid
                 CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                 if (data != null)
-                    creaturesByMap.Add(data.spawnPoint.GetMapId(), guid);
+                    creaturesByMap.Add(data.MapId, guid);
             }
 
             foreach (var key in creaturesByMap.Keys)
@@ -1191,10 +1191,10 @@ namespace Game
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
 
                     // Spawn if necessary (loaded grids only)
-                    Map map = Global.MapMgr.CreateBaseMap(data.spawnPoint.GetMapId());
+                    Map map = Global.MapMgr.CreateBaseMap(data.MapId);
                     map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
                     // We use spawn coords to spawn
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
                         Creature.CreateCreatureFromDB(guid, map);
                 }
             }
@@ -1215,10 +1215,10 @@ namespace Game
                     Global.ObjectMgr.AddGameObjectToGrid(guid, data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
-                    Map map = Global.MapMgr.CreateBaseMap(data.spawnPoint.GetMapId());
+                    Map map = Global.MapMgr.CreateBaseMap(data.MapId);
                     map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
                     // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
                     {
                         GameObject pGameobject = GameObject.CreateGameObjectFromDB(guid, map, false);
                         // @todo find out when it is add to map
@@ -1266,7 +1266,7 @@ namespace Game
                 {
                     Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
 
-                    Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
                         map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
                         var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
@@ -1294,7 +1294,7 @@ namespace Game
                 {
                     Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
 
-                    Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
                         map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
                         var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
@@ -1325,7 +1325,7 @@ namespace Game
                     continue;
 
                 // Update if spawned
-                Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
+                Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                 {
                     var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(tuple.Item1);
                     foreach (var creature in creatureBounds)

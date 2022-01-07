@@ -319,10 +319,11 @@ namespace Game.DataStorage
 
                     AreaTriggerSpawn spawn = new();
                     spawn.SpawnId = spawnId;
-                    spawn.Id = areaTriggerId;
-                    spawn.Location = new WorldLocation(location);
+                    spawn.MapId = location.GetMapId();
+                    spawn.TriggerId = areaTriggerId;
+                    spawn.SpawnPoint = new Position(location);
 
-                    spawn.PhaseUseFlags = templates.Read<byte>(8);
+                    spawn.PhaseUseFlags = (PhaseUseFlagsValues)templates.Read<byte>(8);
                     spawn.PhaseId = templates.Read<uint>(9);
                     spawn.PhaseGroup = templates.Read<uint>(10);
 
@@ -334,13 +335,14 @@ namespace Game.DataStorage
                     }
 
                     spawn.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(18));
+                    spawn.spawnGroupData = Global.ObjectMgr.GetLegacySpawnGroup();
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());
-                    if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.Location.GetMapId(), cellCoord.GetId())))
-                        _areaTriggerSpawnsByLocation[(spawn.Location.GetMapId(), cellCoord.GetId())] = new SortedSet<ulong>();
+                    CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
+                    if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, cellCoord.GetId())))
+                        _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())] = new SortedSet<ulong>();
 
-                    _areaTriggerSpawnsByLocation[(spawn.Location.GetMapId(), cellCoord.GetId())].Add(spawnId);
+                    _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())].Add(spawnId);
 
                     // add the position to the map
                     _areaTriggerSpawnsBySpawnId[spawnId] = spawn;

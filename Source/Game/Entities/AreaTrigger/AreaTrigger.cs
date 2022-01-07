@@ -53,6 +53,9 @@ namespace Game.Entities
             if (!IsInWorld)
             {
                 GetMap().GetObjectsStore().Add(GetGUID(), this);
+                if (_spawnId != 0)
+                    GetMap().GetAreaTriggerBySpawnIdStore().Add(_spawnId, this);
+
                 base.AddToWorld();
             }
         }
@@ -74,6 +77,9 @@ namespace Game.Entities
                 _ai.OnRemove();
 
                 base.RemoveFromWorld();
+                if (_spawnId != 0)
+                    GetMap().GetAreaTriggerBySpawnIdStore().Remove(_spawnId, this);
+
                 GetMap().GetObjectsStore().Remove(GetGUID());
             }
         }
@@ -236,7 +242,7 @@ namespace Game.Entities
             if (position == null)
                 return false;
 
-            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.Id);
+            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.TriggerId);
             if (areaTriggerTemplate == null)
                 return false;
 
@@ -246,7 +252,7 @@ namespace Game.Entities
         bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
         {
             SetMap(map);
-            Relocate(position.Location);
+            Relocate(position.SpawnPoint);
             if (!IsPositionValid())
             {
                 Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");

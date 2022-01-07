@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.Maps;
 using Game.Networking;
 using System;
 using System.Collections.Generic;
@@ -319,18 +320,12 @@ namespace Game.Entities
         public uint ScriptId;
     }
 
-    public class AreaTriggerSpawn
+    public class AreaTriggerSpawn : SpawnData
     {
-        public ulong SpawnId;
-        public AreaTriggerId Id;
-        public WorldLocation Location;
-        public uint PhaseId;
-        public uint PhaseGroup;
-        public byte PhaseUseFlags;
-
+        public AreaTriggerId TriggerId;
         public AreaTriggerShapeInfo Shape = new();
 
-        public uint ScriptId;
+        public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }
     }
 
     public struct AreaTriggerAction

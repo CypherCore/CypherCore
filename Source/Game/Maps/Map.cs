@@ -2411,6 +2411,159 @@ namespace Game.Maps
             return true;
         }
 
+        public void Respawn(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        {
+            RespawnInfo info = GetRespawnInfo(type, spawnId);
+            if (info != null)
+                Respawn(info, dbTrans);
+        }
+
+        public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
+        {
+            info.respawnTime = GameTime.GetGameTime();
+            SaveRespawnInfoDB(info, dbTrans);
+        }
+
+        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        {
+            RespawnInfo info = GetRespawnInfo(type, spawnId);
+            if (info != null)
+                DeleteRespawnInfo(info, dbTrans);
+        }
+
+        int DespawnAll(SpawnObjectType type, ulong spawnId)
+        {
+            List<WorldObject> toUnload = new();
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    foreach (var creature in GetCreatureBySpawnIdStore().LookupByKey(spawnId))
+                        toUnload.Add(creature);
+                    break;
+                case SpawnObjectType.GameObject:
+                    foreach (var obj in GetGameObjectBySpawnIdStore().LookupByKey(spawnId))
+                        toUnload.Add(obj);
+                    break;
+                default:
+                    break;
+            }
+
+            foreach (WorldObject o in toUnload)
+                AddObjectToRemoveList(o);
+
+            return toUnload.Count;
+        }
+
+        bool AddRespawnInfo(RespawnInfo info)
+        {
+            if (info.spawnId == 0)
+            {
+                Log.outError(LogFilter.Maps, $"Attempt to insert respawn info for zero spawn id (type {info.type})");
+                return false;
+            }
+
+            var bySpawnIdMap = GetRespawnMapForType(info.type);
+            if (bySpawnIdMap == null)
+                return false;
+
+            // check if we already have the maximum possible number of respawns scheduled
+            if (SpawnData.TypeHasData(info.type))
+            {
+                var existing = bySpawnIdMap.LookupByKey(info.spawnId);
+                if (existing != null) // spawnid already has a respawn scheduled
+                {
+                    if (info.respawnTime <= existing.respawnTime) // delete existing in this case
+                        DeleteRespawnInfo(existing);
+                    else
+                        return false;
+                }
+                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId), $"Insertion of respawn info with id ({info.type},{info.spawnId}) into spawn id map failed - state desync.");
+            }
+            else
+                Cypher.Assert(false, $"Invalid respawn info for spawn id ({info.type},{info.spawnId}) being inserted");
+
+            RespawnInfo ri = new(info);
+            _respawnTimes.Add(ri);
+            bySpawnIdMap.Add(ri.spawnId, ri);
+            return true;
+        }
+
+        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map)
+        {
+            foreach (var pair in map)
+                data.Add(pair.Value);
+        }
+
+        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types)
+        {
+            if ((types & SpawnObjectTypeMask.Creature) != 0)
+                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
+            if ((types & SpawnObjectTypeMask.GameObject) != 0)
+                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
+        }
+        
+        public RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
+        {
+            var map = GetRespawnMapForType(type);
+            if (map == null)
+                return null;
+
+            var respawnInfo = map.LookupByKey(spawnId);
+            if (respawnInfo == null)
+                return null;
+
+            return respawnInfo;
+        }
+
+        Dictionary<ulong, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
+        {
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    return _creatureRespawnTimesBySpawnId;
+                case SpawnObjectType.GameObject:
+                    return _gameObjectRespawnTimesBySpawnId;
+                case SpawnObjectType.AreaTrigger:
+                    return null;
+                default:
+                    Cypher.Assert(false);
+                    return null;
+            }            
+        }
+
+        void UnloadAllRespawnInfos() // delete everything from memory
+        {
+            _respawnTimes.Clear();
+            _creatureRespawnTimesBySpawnId.Clear();
+            _gameObjectRespawnTimesBySpawnId.Clear();
+        }
+
+        void DeleteRespawnInfo(RespawnInfo info, SQLTransaction dbTrans = null)
+        {
+            // Delete from all relevant containers to ensure consistency
+            Cypher.Assert(info != null);
+
+            // spawnid store
+            var spawnMap = GetRespawnMapForType(info.type);
+            if (spawnMap == null)
+                return;
+
+            var respawnInfo = spawnMap.LookupByKey(info.spawnId);
+            Cypher.Assert(respawnInfo != info, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
+            spawnMap.Remove(info.spawnId);
+
+            // respawn heap
+            _respawnTimes.Remove(info);
+
+            // database
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESPAWN);
+            stmt.AddValue(0, (ushort)info.type);
+            stmt.AddValue(1, info.spawnId);
+            stmt.AddValue(2, GetId());
+            stmt.AddValue(3, GetInstanceId());
+            DB.Characters.ExecuteOrAppend(dbTrans, stmt);
+        }
+
         void DoRespawn(SpawnObjectType type, ulong spawnId, uint gridId)
         {
             if (!IsGridLoaded(gridId)) // if grid isn't loaded, this will be processed in grid load handler
@@ -2436,120 +2589,6 @@ namespace Game.Maps
                     Cypher.Assert(false, $"Invalid spawn type {type} (spawnid {spawnId}) on map {GetId()}");
                     break;
             }
-        }
-
-        public void Respawn(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
-        {
-            RespawnInfo info = GetRespawnInfo(type, spawnId);
-            if (info != null)
-                Respawn(info, dbTrans);
-        }
-
-        public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
-        {
-            if (!CheckRespawn(info))
-            {
-                if (info.respawnTime != 0)
-                {
-                    //_respawnTimes.decrease(info);
-                    SaveRespawnInfoDB(info, dbTrans);
-                }
-                else
-                    DeleteRespawnInfo(info, dbTrans);
-
-                return;
-            }
-
-            // remove the actual respawn record first - since this deletes it, we save what we need
-            SpawnObjectType type = info.type;
-            uint gridId = info.gridId;
-            ulong spawnId = info.spawnId;
-            DeleteRespawnInfo(info, dbTrans);
-            DoRespawn(type, spawnId, gridId);
-        }
-
-        bool AddRespawnInfo(RespawnInfo info)
-        {
-            Cypher.Assert(info.spawnId != 0, $"Attempt to schedule respawn with zero spawnid (type {info.type})");
-
-            var bySpawnIdMap = GetRespawnMapForType(info.type);
-
-            var existing = bySpawnIdMap.LookupByKey(info.spawnId);
-            if (existing != null) // spawnid already has a respawn scheduled
-            {
-                if (info.respawnTime < existing.respawnTime) // delete existing in this case
-                    DeleteRespawnInfo(existing);
-                else
-                    return false;
-            }
-
-            // if we get to this point, we should insert the respawninfo (there either was no prior entry, or it was deleted already)
-            RespawnInfo ri = new(info);
-            _respawnTimes.Add(ri);
-            bool success = bySpawnIdMap.TryAdd(ri.spawnId, ri);
-            Cypher.Assert(success, $"Insertion of respawn info with id ({ri.type},{ri.spawnId}) into spawn id map failed - state desync.");
-            return true;
-        }
-
-        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map)
-        {
-            foreach (var pair in map)
-                data.Add(pair.Value);
-        }
-
-        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types)
-        {
-            if (types.HasAnyFlag(SpawnObjectTypeMask.Creature))
-                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
-            if (types.HasAnyFlag(SpawnObjectTypeMask.GameObject))
-                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
-        }
-
-        RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
-        {
-            var map = GetRespawnMapForType(type);
-            var respawnInfo = map.LookupByKey(spawnId);
-            if (respawnInfo == null)
-                return null;
-
-            return respawnInfo;
-        }
-
-        Dictionary<ulong, RespawnInfo> GetRespawnMapForType(SpawnObjectType type) { return (type == SpawnObjectType.GameObject) ? _gameObjectRespawnTimesBySpawnId : _creatureRespawnTimesBySpawnId; }
-
-        void UnloadAllRespawnInfos() // delete everything from memory
-        {
-            _respawnTimes.Clear();
-            _creatureRespawnTimesBySpawnId.Clear();
-            _gameObjectRespawnTimesBySpawnId.Clear();
-        }
-
-        void DeleteRespawnInfo(RespawnInfo info, SQLTransaction dbTrans = null)
-        {
-            // Delete from all relevant containers to ensure consistency
-            Cypher.Assert(info != null);
-
-            // spawnid store
-            bool removed = GetRespawnMapForType(info.type).Remove(info.spawnId);
-            Cypher.Assert(removed, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
-
-            // respawn heap
-            _respawnTimes.Remove(info);
-
-            // database
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESPAWN);
-            stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(1, info.spawnId);
-            stmt.AddValue(2, GetId());
-            stmt.AddValue(3, GetInstanceId());
-            DB.Characters.ExecuteOrAppend(dbTrans, stmt);
-        }
-
-        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
-        {
-            RespawnInfo info = GetRespawnInfo(type, spawnId);
-            if (info != null)
-                DeleteRespawnInfo(info, dbTrans);
         }
 
         void ProcessRespawns()
@@ -2603,8 +2642,11 @@ namespace Game.Maps
                     return;
             }
 
-            SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
-            if (data == null || data.spawnGroupData == null || !!data.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.DynamicSpawnRate))
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
+            if (data == null)
+                return;
+
+            if (!data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.DynamicSpawnRate))
                 return;
 
             if (!_zonePlayerCountMap.ContainsKey(obj.GetZoneId()))
@@ -2623,6 +2665,25 @@ namespace Game.Maps
                 return;
 
             respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
+        }
+
+        public bool ShouldBeSpawnedOnGridLoad<T>(ulong spawnId) { return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId); }
+        
+        bool ShouldBeSpawnedOnGridLoad(SpawnObjectType type, ulong spawnId)
+        {
+            Cypher.Assert(SpawnData.TypeHasData(type));
+            // check if the object is on its respawn timer
+            if (GetRespawnTime(type, spawnId) != 0)
+                return false;
+
+            SpawnMetadata spawnData = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
+            // check if the object is part of a spawn group
+            SpawnGroupTemplateData spawnGroup = spawnData.spawnGroupData;
+            if (!spawnGroup.flags.HasFlag(SpawnGroupFlags.System))
+                if (!IsSpawnGroupActive(spawnGroup.groupId))
+                    return false;
+
+            return true;
         }
 
         SpawnGroupTemplateData GetSpawnGroupData(uint groupId)
@@ -2644,39 +2705,52 @@ namespace Game.Maps
             }
 
             SetSpawnGroupActive(groupId, true); // start processing respawns for the group
-            foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
+
+            List<SpawnData> toSpawn = new();
+            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
             {
-                Cypher.Assert(groupData.mapId == data.spawnPoint.GetMapId());
-                // Check if there's already an instance spawned
-                if (!force)
-                {
-                    WorldObject obj = GetWorldObjectBySpawnId(data.type, data.spawnId);
-                    if (obj != null)
-                        if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
-                            continue;
-                }
+                Cypher.Assert(groupData.mapId == data.MapId);
 
-                long respawnTime = GetRespawnTime(data.type, data.spawnId);
-                if (respawnTime != 0)
-                {
-                    if (!force && !ignoreRespawn && respawnTime > GameTime.GetGameTime())
-                        continue;
-
-                    // we need to remove the respawn time, otherwise we'd end up double spawning
-                    RemoveRespawnTime(data.type, data.spawnId);
-                }
-
-                // don't spawn if the grid isn't loaded (will be handled in grid loader)
-                if (!IsGridLoaded(data.spawnPoint))
+                var respawnMap = GetRespawnMapForType(data.type);
+                if (respawnMap == null)
                     continue;
 
-                // Everything OK, now do the actual (re)spawn
+                if (force || ignoreRespawn)
+                    RemoveRespawnTime(data.type, data.SpawnId);
+
+                bool hasRespawnTimer = respawnMap.ContainsKey(data.SpawnId);
+                if (SpawnData.TypeHasData(data.type))
+                {
+                    // has a respawn timer
+                    if (hasRespawnTimer)
+                        continue;
+
+                    // has a spawn already active
+                    if (!force)
+                    {
+                        WorldObject obj = GetWorldObjectBySpawnId(data.type, data.SpawnId);
+                        if (obj != null)
+                            if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
+                                continue;
+                    }
+
+                    toSpawn.Add(data.ToSpawnData());
+                }
+            }
+
+            foreach (SpawnData data in toSpawn)
+            {
+                // don't spawn if the grid isn't loaded (will be handled in grid loader)
+                if (!IsGridLoaded(data.SpawnPoint))
+                    continue;
+
+                // now do the actual (re)spawn
                 switch (data.type)
                 {
                     case SpawnObjectType.Creature:
                     {
                         Creature creature = new();
-                        if (!creature.LoadFromDB(data.spawnId, this, true, force))
+                        if (!creature.LoadFromDB(data.SpawnId, this, true, force))
                             creature.Dispose();
                         else if (spawnedObjects != null)
                             spawnedObjects.Add(creature);
@@ -2685,14 +2759,23 @@ namespace Game.Maps
                     case SpawnObjectType.GameObject:
                     {
                         GameObject gameobject = new();
-                        if (!gameobject.LoadFromDB(data.spawnId, this, true))
+                        if (!gameobject.LoadFromDB(data.SpawnId, this, true))
                             gameobject.Dispose();
                         else if (spawnedObjects != null)
                             spawnedObjects.Add(gameobject);
                         break;
                     }
+                    case SpawnObjectType.AreaTrigger:
+                    {
+                        AreaTrigger areaTrigger = new AreaTrigger();
+                        if (!areaTrigger.LoadFromDB(data.SpawnId, this, true, false))
+                            areaTrigger.Dispose();
+                        else if (spawnedObjects != null)
+                            spawnedObjects.Add(areaTrigger);
+                        break;
+                    }
                     default:
-                        Cypher.Assert(false, $"Invalid spawn type {data.type} with spawnId {data.spawnId}");
+                        Cypher.Assert(false, $"Invalid spawn type {data.type} with spawnId {data.SpawnId}");
                         return false;
                 }
             }
@@ -2704,6 +2787,7 @@ namespace Game.Maps
         {
             return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
         }
+
         public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
         {
             count = 0;
@@ -2714,38 +2798,13 @@ namespace Game.Maps
                 return false;
             }
 
-            List<WorldObject> toUnload = new(); // unload after iterating, otherwise iterator invalidation
-            foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
+            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
             {
+                Cypher.Assert(groupData.mapId == data.MapId);
                 if (deleteRespawnTimes)
-                    RemoveRespawnTime(data.type, data.spawnId);
-                switch (data.type)
-                {
-                    case SpawnObjectType.Creature:
-                    {
-                        var bounds = GetCreatureBySpawnIdStore().LookupByKey(data.spawnId);
-                        foreach (var creature in bounds)
-                            toUnload.Add(creature);
-                        break;
-                    }
-                    case SpawnObjectType.GameObject:
-                    {
-                        var bounds = GetGameObjectBySpawnIdStore().LookupByKey(data.spawnId);
-                        foreach (var go in bounds)
-                            toUnload.Add(go);
-                        break;
-                    }
-                    default:
-                        Cypher.Assert(false, $"Invalid spawn type {data.type} in spawn data with spawnId {data.spawnId}.");
-                        return false;
-                }
+                    RemoveRespawnTime(data.type, data.SpawnId);
+                count += DespawnAll(data.type, data.SpawnId);
             }
-
-            count = toUnload.Count;
-
-            // now do the actual despawning
-            foreach (WorldObject obj in toUnload)
-                obj.AddObjectToRemoveList();
 
             SetSpawnGroupActive(groupId, false); // stop processing respawns for the group, too
             return true;
@@ -3030,19 +3089,23 @@ namespace Game.Maps
 
         public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
         {
-            if (spawnId == 0)
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
+            if (data == null)
+            {
+                Log.outError(LogFilter.Maps, $"Map {GetId()} attempt to save respawn time for nonexistant spawnid ({type},{spawnId}).");
                 return;
+            }
 
             if (respawnTime == 0)
             {
                 // Delete only
-                RemoveRespawnTime(type, spawnId, dbTrans);
+                RemoveRespawnTime(data.type, data.SpawnId, dbTrans);
                 return;
             }
 
             RespawnInfo ri = new();
-            ri.type = type;
-            ri.spawnId = spawnId;
+            ri.type = data.type;
+            ri.spawnId = data.SpawnId;
             ri.entry = entry;
             ri.respawnTime = respawnTime;
             ri.gridId = gridId;
@@ -3083,11 +3146,11 @@ namespace Game.Maps
                     var spawnId = result.Read<ulong>(1);
                     var respawnTime = result.Read<long>(2);
 
-                    if (type < SpawnObjectType.Max)
+                    if (SpawnData.TypeHasData(type))
                     {
                         SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
                         if (data != null)
-                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY()).GetId(), null, true);
+                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
                         else
                             Log.outError(LogFilter.Maps, $"Loading saved respawn time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
                     }
@@ -3702,6 +3765,8 @@ namespace Game.Maps
 
         public MultiMap<ulong, GameObject> GetGameObjectBySpawnIdStore() { return _gameobjectBySpawnIdStore; }
 
+        public MultiMap<ulong, AreaTrigger> GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
+
         public List<Corpse> GetCorpsesInCell(uint cellId)
         {
             return _corpsesByCell.LookupByKey(cellId);
@@ -3748,12 +3813,17 @@ namespace Game.Maps
 
         public long GetRespawnTime(SpawnObjectType type, ulong spawnId)
         {
-            var respawnDic = GetRespawnMapForType(type);
-            var respawnInfo = respawnDic.LookupByKey(spawnId);
-            return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
+            var map = GetRespawnMapForType(type);
+            if (map != null)
+            {
+                var respawnInfo = map.LookupByKey(spawnId);
+                return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
+            }
+            return 0;
         }
 
         public long GetCreatureRespawnTime(ulong spawnId) { return GetRespawnTime(SpawnObjectType.Creature, spawnId); }
+
         public long GetGORespawnTime(ulong spawnId) { return GetRespawnTime(SpawnObjectType.GameObject, spawnId); }
         
         void SetTimer(uint t)
@@ -3851,7 +3921,7 @@ namespace Game.Maps
             return go ? go.ToTransport() : null;
         }
 
-        Creature GetCreatureBySpawnId(ulong spawnId)
+        public Creature GetCreatureBySpawnId(ulong spawnId)
         {
             var bounds = GetCreatureBySpawnIdStore().LookupByKey(spawnId);
             if (bounds.Empty())
@@ -3862,7 +3932,7 @@ namespace Game.Maps
             return foundCreature != null ? foundCreature : bounds[0];
         }
 
-        GameObject GetGameObjectBySpawnId(ulong spawnId)
+        public GameObject GetGameObjectBySpawnId(ulong spawnId)
         {
             var bounds = GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
             if (bounds.Empty())
@@ -3873,6 +3943,15 @@ namespace Game.Maps
             return foundGameObject != null ? foundGameObject : bounds[0];
         }
 
+        public AreaTrigger GetAreaTriggerBySpawnId(ulong spawnId)
+        {
+            var bounds = GetAreaTriggerBySpawnIdStore().LookupByKey(spawnId);
+            if (bounds.Empty())
+                return null;
+
+            return bounds.FirstOrDefault();
+        }
+
         public WorldObject GetWorldObjectBySpawnId(SpawnObjectType type, ulong spawnId)
         {
             switch (type)
@@ -3881,6 +3960,8 @@ namespace Game.Maps
                     return GetCreatureBySpawnId(spawnId);
                 case SpawnObjectType.GameObject:
                     return GetGameObjectBySpawnId(spawnId);
+                case SpawnObjectType.AreaTrigger:
+                    return GetAreaTriggerBySpawnId(spawnId);
                 default:
                     return null;
             }
@@ -4986,6 +5067,7 @@ namespace Game.Maps
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
         MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
         MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();
+        MultiMap<ulong, AreaTrigger> _areaTriggerBySpawnIdStore = new();
         MultiMap<uint, Corpse> _corpsesByCell = new();
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();

@@ -866,25 +866,6 @@ namespace Framework.Constants
         DisplayMythic = 0x80  // Controls icon displayed on minimap when inside the instance
     }
 
-    public enum SpawnMask
-    {
-        Continent = (1 << Difficulty.None), // Any Maps Without Spawn Modes
-
-        DungeonNormal = (1 << Difficulty.Normal),
-        DungeonHeroic = (1 << Difficulty.Heroic),
-        DungeonAll = (DungeonNormal | DungeonHeroic),
-
-        Raid10Normal = (1 << Difficulty.Raid10N),
-        Raid25Normal = (1 << Difficulty.Raid25N),
-        RaidNormalAll = (Raid10Normal | Raid25Normal),
-
-        Raid10Heroic = (1 << Difficulty.Raid10HC),
-        Raid25Heroic = (1 << Difficulty.Raid25HC),
-        RaidHeroicAll = (Raid10Heroic | Raid25Heroic),
-
-        RaidAll = (RaidNormalAll | RaidHeroicAll)
-    }
-
     public enum MapFlags
     {
         CanToggleDifficulty = 0x0100,

@@ -2892,8 +2892,8 @@ namespace Game
                             break;
                         }
 
-                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
+                        if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
                             Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
@@ -2908,8 +2908,8 @@ namespace Game
                             break;
                         }
 
-                        guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        guid = ObjectGuid.Create(HighGuid.Creature, slave.MapId, slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.MapId, master.Id, linkedGuidLow);
                         break;
                     }
                     case CreatureLinkedRespawnType.CreatureToGO:
@@ -2930,8 +2930,8 @@ namespace Game
                             break;
                         }
 
-                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
+                        if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
                             Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
@@ -2946,8 +2946,8 @@ namespace Game
                             break;
                         }
 
-                        guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        guid = ObjectGuid.Create(HighGuid.Creature, slave.MapId, slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.MapId, master.Id, linkedGuidLow);
                         break;
                     }
                     case CreatureLinkedRespawnType.GOToGO:
@@ -2968,8 +2968,8 @@ namespace Game
                             break;
                         }
 
-                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
+                        if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
                             Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
@@ -2984,8 +2984,8 @@ namespace Game
                             break;
                         }
 
-                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.MapId, slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.MapId, master.Id, linkedGuidLow);
                         break;
                     }
                     case CreatureLinkedRespawnType.GOToCreature:
@@ -3006,8 +3006,8 @@ namespace Game
                             break;
                         }
 
-                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
+                        if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
                             Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
@@ -3022,8 +3022,8 @@ namespace Game
                             break;
                         }
 
-                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.MapId, slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.MapId, master.Id, linkedGuidLow);
                         break;
                     }
 
@@ -3408,9 +3408,10 @@ namespace Game
                 }
 
                 CreatureData data = new();
-                data.spawnId = guid;
+                data.SpawnId = guid;
                 data.Id = entry;
-                data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
+                data.MapId = result.Read<ushort>(2);
+                data.SpawnPoint = new Position(result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
                 data.displayid = result.Read<uint>(7);
                 data.equipmentId = result.Read<sbyte>(8);
                 data.spawntimesecs = result.Read<int>(9);
@@ -3419,7 +3420,7 @@ namespace Game
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
                 data.movementType = result.Read<byte>(14);
-                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.spawnPoint.GetMapId(), spawnMasks.LookupByKey(data.spawnPoint.GetMapId()));
+                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(16);
                 uint PoolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
@@ -3427,17 +3428,17 @@ namespace Game
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
                 data.dynamicflags = result.Read<uint>(22);
-                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(23);
-                data.phaseId = result.Read<uint>(24);
-                data.phaseGroup = result.Read<uint>(25);
+                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(23);
+                data.PhaseId = result.Read<uint>(24);
+                data.PhaseGroup = result.Read<uint>(25);
                 data.terrainSwapMap = result.Read<int>(26);
                 data.ScriptId = GetScriptId(result.Read<string>(27));
-                data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.spawnPoint.GetMapId()) ? 1 : 0u]; // transport spawns default to compatibility group
+                data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.MapId) ? 1 : 0u]; // transport spawns default to compatibility group
 
-                var mapEntry = CliDB.MapStorage.LookupByKey(data.spawnPoint.GetMapId());
+                var mapEntry = CliDB.MapStorage.LookupByKey(data.MapId);
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0}) that spawned at not existed map (Id: {1}), skipped.", guid, data.spawnPoint.GetMapId());
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0}) that spawned at not existed map (Id: {1}), skipped.", guid, data.MapId);
                     continue;
                 }
 
@@ -3498,40 +3499,40 @@ namespace Game
                     }
                 }
 
-                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                if (Convert.ToBoolean(data.PhaseUseFlags & ~PhaseUseFlagsValues.All))
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.Id);
-                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                    data.PhaseUseFlags &= PhaseUseFlagsValues.All;
                 }
 
-                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                if (data.PhaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.PhaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
                         " removing PHASE_USE_FLAGS_INVERSE.", guid, data.Id);
-                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                    data.PhaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
                 }
 
-                if (data.phaseGroup != 0 && data.phaseId != 0)
+                if (data.PhaseGroup != 0 && data.PhaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.Id);
-                    data.phaseGroup = 0;
+                    data.PhaseGroup = 0;
                 }
 
-                if (data.phaseId != 0)
+                if (data.PhaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.PhaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.Id, data.phaseId);
-                        data.phaseId = 0;
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.Id, data.PhaseId);
+                        data.PhaseId = 0;
                     }
                 }
 
-                if (data.phaseGroup != 0)
+                if (data.PhaseGroup != 0)
                 {
-                    if (Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup).Empty())
+                    if (Global.DB2Mgr.GetPhasesForGroup(data.PhaseGroup).Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phasegroup` {2} does not exist, set to 0", guid, data.Id, data.phaseGroup);
-                        data.phaseGroup = 0;
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phasegroup` {2} does not exist, set to 0", guid, data.Id, data.PhaseGroup);
+                        data.PhaseGroup = 0;
                     }
                 }
 
@@ -3543,7 +3544,7 @@ namespace Game
                         Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.Id, data.terrainSwapMap);
                         data.terrainSwapMap = -1;
                     }
-                    else if (terrainSwapEntry.ParentMapID != data.spawnPoint.GetMapId())
+                    else if (terrainSwapEntry.ParentMapID != data.MapId)
                     {
                         Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.Id, data.terrainSwapMap);
                         data.terrainSwapMap = -1;
@@ -3553,7 +3554,7 @@ namespace Game
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.spawnPoint);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -3578,8 +3579,8 @@ namespace Game
         {
             foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY());
-                var cellguids = CreateCellObjectGuids(data.spawnPoint.GetMapId(), difficulty, cellCoord.GetId());
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
+                var cellguids = CreateCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
                 cellguids.creatures.Add(guid);
             }
         }
@@ -3587,8 +3588,8 @@ namespace Game
         {
             foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY());
-                CellObjectGuids cellguids = GetCellObjectGuids(data.spawnPoint.GetMapId(), difficulty, cellCoord.GetId());
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
+                CellObjectGuids cellguids = GetCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
                 if (cellguids == null)
                     return;
 
@@ -3611,9 +3612,10 @@ namespace Game
 
             ulong spawnId = GenerateCreatureSpawnId();
             CreatureData data = NewOrExistCreatureData(spawnId);
-            data.spawnId = spawnId;
+            data.SpawnId = spawnId;
             data.Id = entry;
-            data.spawnPoint.WorldRelocate(mapId, pos);
+            data.MapId = mapId;
+            data.SpawnPoint.Relocate(pos);
             data.displayid = 0;
             data.equipmentId = 0;
 
@@ -3633,7 +3635,7 @@ namespace Game
             AddCreatureToGrid(spawnId, data);
 
             // We use spawn coords to spawn
-            if (!map.Instanceable() && !map.IsRemovalGrid(data.spawnPoint))
+            if (!map.Instanceable() && !map.IsRemovalGrid(data.SpawnPoint))
             {
                 Creature creature = Creature.CreateCreatureFromDB(spawnId, map, true, true);
                 if (!creature)
@@ -3674,13 +3676,13 @@ namespace Game
             return creatureTemplateStorage;
         }
         public Dictionary<ulong, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
-        public CreatureData GetCreatureData(ulong guid)
+        public CreatureData GetCreatureData(ulong spawnId)
         {
-            return creatureDataStorage.LookupByKey(guid);
+            return creatureDataStorage.LookupByKey(spawnId);
         }
-        public ObjectGuid GetLinkedRespawnGuid(ObjectGuid guid)
+        public ObjectGuid GetLinkedRespawnGuid(ObjectGuid spawnId)
         {
-            var retGuid = linkedRespawnStorage.LookupByKey(guid);
+            var retGuid = linkedRespawnStorage.LookupByKey(spawnId);
             if (retGuid.IsEmpty())
                 return ObjectGuid.Empty;
             return retGuid;
@@ -3691,7 +3693,7 @@ namespace Game
                 return false;
 
             CreatureData master = GetCreatureData(guidLow);
-            ObjectGuid guid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, guidLow);
+            ObjectGuid guid = ObjectGuid.Create(HighGuid.Creature, master.MapId, master.Id, guidLow);
             PreparedStatement stmt;
 
             if (linkedGuidLow == 0) // we're removing the linking
@@ -3711,8 +3713,8 @@ namespace Game
                 return false;
             }
 
-            MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-            if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+            MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
+            if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
             {
                 Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                 return false;
@@ -3725,7 +3727,7 @@ namespace Game
                 return false;
             }
 
-            ObjectGuid linkedGuid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, linkedGuidLow);
+            ObjectGuid linkedGuid = ObjectGuid.Create(HighGuid.Creature, slave.MapId, slave.Id, linkedGuidLow);
 
             linkedRespawnStorage[guid] = linkedGuid;
             stmt = DB.World.GetPreparedStatement(WorldStatements.REP_LINKED_RESPAWN);
@@ -3735,22 +3737,22 @@ namespace Game
             DB.World.Execute(stmt);
             return true;
         }
-        public CreatureData NewOrExistCreatureData(ulong guid)
+        public CreatureData NewOrExistCreatureData(ulong spawnId)
         {
-            if (!creatureDataStorage.ContainsKey(guid))
-                creatureDataStorage[guid] = new CreatureData();
-            return creatureDataStorage[guid];
+            if (!creatureDataStorage.ContainsKey(spawnId))
+                creatureDataStorage[spawnId] = new CreatureData();
+            return creatureDataStorage[spawnId];
         }
-        public void DeleteCreatureData(ulong guid)
+        public void DeleteCreatureData(ulong spawnId)
         {
-            CreatureData data = GetCreatureData(guid);
+            CreatureData data = GetCreatureData(spawnId);
             if (data != null)
             {
-                RemoveCreatureFromGrid(guid, data);
+                RemoveCreatureFromGrid(spawnId, data);
                 OnDeleteSpawnData(data);
             }
 
-            creatureDataStorage.Remove(guid);
+            creatureDataStorage.Remove(spawnId);
         }
         public CreatureBaseStats GetCreatureBaseStats(uint level, uint unitClass)
         {
@@ -4168,20 +4170,21 @@ namespace Game
                 }
 
                 GameObjectData data = new();
-                data.spawnId = guid;
+                data.SpawnId = guid;
                 data.Id = entry;
-                data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
+                data.MapId = result.Read<ushort>(2);
+                data.SpawnPoint = new Position(result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
                 data.rotation.X = result.Read<float>(7);
                 data.rotation.Y = result.Read<float>(8);
                 data.rotation.Z = result.Read<float>(9);
                 data.rotation.W = result.Read<float>(10);
                 data.spawntimesecs = result.Read<int>(11);
-                data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.spawnPoint.GetMapId()) ? 1 : 0u]; // transport spawns default to compatibility group
+                data.spawnGroupData = IsTransportMap(data.MapId) ? GetLegacySpawnGroup() : GetDefaultSpawnGroup(); // transport spawns default to compatibility group
 
-                var mapEntry = CliDB.MapStorage.LookupByKey(data.spawnPoint.GetMapId());
+                var mapEntry = CliDB.MapStorage.LookupByKey(data.MapId);
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) spawned on a non-existed map (Id: {2}), skip", guid, data.Id, data.spawnPoint.GetMapId());
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) spawned on a non-existed map (Id: {2}), skip", guid, data.Id, data.MapId);
                     continue;
                 }
 
@@ -4204,7 +4207,7 @@ namespace Game
                 }
                 data.goState = (GameObjectState)gostate;
 
-                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.spawnPoint.GetMapId(), spawnMasks.LookupByKey(data.spawnPoint.GetMapId()));
+                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 if (data.spawnDifficulties.Empty())
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid}) that is not spawned in any difficulty, skipped.");
@@ -4213,44 +4216,44 @@ namespace Game
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
-                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
-                data.phaseId = result.Read<uint>(18);
-                data.phaseGroup = result.Read<uint>(19);
+                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
+                data.PhaseId = result.Read<uint>(18);
+                data.PhaseGroup = result.Read<uint>(19);
 
-                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                if (Convert.ToBoolean(data.PhaseUseFlags & ~PhaseUseFlagsValues.All))
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.Id);
-                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                    data.PhaseUseFlags &= PhaseUseFlagsValues.All;
                 }
 
-                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                if (data.PhaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.PhaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
                         " removing PHASE_USE_FLAGS_INVERSE.", guid, data.Id);
-                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                    data.PhaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
                 }
 
-                if (data.phaseGroup != 0 && data.phaseId != 0)
+                if (data.PhaseGroup != 0 && data.PhaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.Id);
-                    data.phaseGroup = 0;
+                    data.PhaseGroup = 0;
                 }
 
-                if (data.phaseId != 0)
+                if (data.PhaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.PhaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.Id, data.phaseId);
-                        data.phaseId = 0;
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.Id, data.PhaseId);
+                        data.PhaseId = 0;
                     }
                 }
 
-                if (data.phaseGroup != 0)
+                if (data.PhaseGroup != 0)
                 {
-                    if (Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup).Empty())
+                    if (Global.DB2Mgr.GetPhasesForGroup(data.PhaseGroup).Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseGroup` {2} does not exist, set to 0", guid, data.Id, data.phaseGroup);
-                        data.phaseGroup = 0;
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseGroup` {2} does not exist, set to 0", guid, data.Id, data.PhaseGroup);
+                        data.PhaseGroup = 0;
                     }
                 }
 
@@ -4263,7 +4266,7 @@ namespace Game
                         Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.Id, data.terrainSwapMap);
                         data.terrainSwapMap = -1;
                     }
-                    else if (terrainSwapEntry.ParentMapID != data.spawnPoint.GetMapId())
+                    else if (terrainSwapEntry.ParentMapID != data.MapId)
                     {
                         Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.Id, data.terrainSwapMap);
                         data.terrainSwapMap = -1;
@@ -4296,7 +4299,7 @@ namespace Game
                     continue;
                 }
 
-                if (!GridDefines.IsValidMapCoord(data.spawnPoint))
+                if (!GridDefines.IsValidMapCoord(data.MapId, data.SpawnPoint))
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid coordinates, skip", guid, data.Id);
                     continue;
@@ -4305,13 +4308,13 @@ namespace Game
                 if (!(Math.Abs(Quaternion.Dot(data.rotation, data.rotation) - 1) < 1e-5))
                 {
                     Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only");
-                    data.rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.spawnPoint.GetOrientation(), 0f, 0f));
+                    data.rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.SpawnPoint.GetOrientation(), 0f, 0f));
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.spawnPoint);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -4499,8 +4502,8 @@ namespace Game
         {
             foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY());
-                var cellguids = CreateCellObjectGuids(data.spawnPoint.GetMapId(), difficulty, cellCoord.GetId());
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
+                var cellguids = CreateCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
                 cellguids.gameobjects.Add(guid);
             }
         }
@@ -4508,8 +4511,8 @@ namespace Game
         {
             foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY());
-                CellObjectGuids cellguids = GetCellObjectGuids(data.spawnPoint.GetMapId(), difficulty, cellCoord.GetId());
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
+                CellObjectGuids cellguids = GetCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
                 if (cellguids == null)
                     return;
 
@@ -4528,9 +4531,10 @@ namespace Game
 
             ulong spawnId = GenerateGameObjectSpawnId();
             GameObjectData data = NewOrExistGameObjectData(spawnId);
-            data.spawnId = spawnId;
+            data.SpawnId = spawnId;
             data.Id = entry;
-            data.spawnPoint.WorldRelocate(mapId, pos);
+            data.MapId = mapId;
+            data.SpawnPoint.Relocate(pos);
             data.rotation = rot;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
@@ -4544,7 +4548,7 @@ namespace Game
 
             // Spawn if necessary (loaded grids only)
             // We use spawn coords to spawn
-            if (!map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
+            if (!map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
             {
                 GameObject go = GameObject.CreateGameObjectFromDB(spawnId, map);
                 if (!go)
@@ -4554,7 +4558,7 @@ namespace Game
                 }
             }
 
-            Log.outDebug(LogFilter.Maps, $"AddGameObjectData: dbguid:{spawnId} entry:{entry} map:{mapId} pos:{data.spawnPoint}");
+            Log.outDebug(LogFilter.Maps, $"AddGameObjectData: dbguid:{spawnId} entry:{entry} map:{mapId} pos:{data.SpawnPoint}");
 
             return spawnId;
         }
@@ -4569,27 +4573,27 @@ namespace Game
         }
         MultiMap<uint, uint> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
         public Dictionary<ulong, GameObjectData> GetAllGameObjectData() { return gameObjectDataStorage; }
-        public GameObjectData GetGameObjectData(ulong guid)
+        public GameObjectData GetGameObjectData(ulong spawnId)
         {
-            return gameObjectDataStorage.LookupByKey(guid);
+            return gameObjectDataStorage.LookupByKey(spawnId);
         }
-        public void DeleteGameObjectData(ulong guid)
+        public void DeleteGameObjectData(ulong spawnId)
         {
-            GameObjectData data = GetGameObjectData(guid);
+            GameObjectData data = GetGameObjectData(spawnId);
             if (data != null)
             {
-                RemoveGameObjectFromGrid(guid, data);
+                RemoveGameObjectFromGrid(spawnId, data);
                 OnDeleteSpawnData(data);
             }
 
-            gameObjectDataStorage.Remove(guid);
+            gameObjectDataStorage.Remove(spawnId);
         }
-        public GameObjectData NewOrExistGameObjectData(ulong guid)
+        public GameObjectData NewOrExistGameObjectData(ulong spawnId)
         {
-            if (!gameObjectDataStorage.ContainsKey(guid))
-                gameObjectDataStorage[guid] = new GameObjectData();
+            if (!gameObjectDataStorage.ContainsKey(spawnId))
+                gameObjectDataStorage[spawnId] = new GameObjectData();
 
-            return gameObjectDataStorage[guid];
+            return gameObjectDataStorage[spawnId];
         }
         public GameObjectTemplate GetGameObjectTemplate(uint entry)
         {
@@ -5509,14 +5513,14 @@ namespace Game
             {
                 uint groupId = result.Read<uint>(0);
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
-                if (spawnType >= SpawnObjectType.Max)
+                if (!SpawnData.TypeIsValid(spawnType))
                 {
                     Log.outError(LogFilter.Sql, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
                     continue;
                 }
                 ulong spawnId = result.Read<ulong>(2);
 
-                SpawnData data = GetSpawnData(spawnType, spawnId);
+                SpawnMetadata data = GetSpawnMetadata(spawnType, spawnId);
                 if (data == null)
                 {
                     Log.outError(LogFilter.Sql, $"Spawn data with ID ({spawnType},{spawnId}) not found, but is listed as a member of spawn group {groupId}!");
@@ -5536,10 +5540,10 @@ namespace Game
                 else
                 {
                     if (groupTemplate.mapId == 0xFFFFFFFF)
-                        groupTemplate.mapId = data.spawnPoint.GetMapId();
-                    else if (groupTemplate.mapId != data.spawnPoint.GetMapId() && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
+                        groupTemplate.mapId = data.MapId;
+                    else if (groupTemplate.mapId != data.MapId && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                     {
-                        Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.spawnPoint.GetMapId()} - spawn NOT added to group!");
+                        Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
                         continue;
                     }
                     data.spawnGroupData = groupTemplate;
@@ -5609,7 +5613,7 @@ namespace Game
         void OnDeleteSpawnData(SpawnData data)
         {
             var templateIt = _spawnGroupDataStorage.LookupByKey(data.spawnGroupData.groupId);
-            Cypher.Assert(templateIt != null, $"Creature data for ({data.type},{data.spawnId}) is being deleted and has invalid spawn group index {data.spawnGroupData.groupId}!");
+            Cypher.Assert(templateIt != null, $"Creature data for ({data.type},{data.SpawnId}) is being deleted and has invalid spawn group index {data.spawnGroupData.groupId}!");
 
             if (templateIt.flags.HasAnyFlag(SpawnGroupFlags.System)) // system groups don't store their members in the map
                 return;
@@ -5623,7 +5627,7 @@ namespace Game
                 return;
             }
 
-            Cypher.Assert(false, $"Spawn data ({data.type},{data.spawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
+            Cypher.Assert(false, $"Spawn data ({data.type},{data.SpawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
         }
 
         public Dictionary<uint, InstanceTemplate> GetInstanceTemplates() { return instanceTemplateStorage; }
@@ -5691,19 +5695,38 @@ namespace Game
         }
         public bool IsTransportMap(uint mapId) { return _transportMaps.Contains((ushort)mapId); }
         public SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
+        public SpawnGroupTemplateData GetSpawnGroupData(SpawnObjectType type, ulong spawnId)
+        {
+            SpawnMetadata data = GetSpawnMetadata(type, spawnId);
+            return data != null ? data.spawnGroupData : null;
+        }
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
         public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
-        public List<SpawnData> GetSpawnDataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
-        public SpawnData GetSpawnData(SpawnObjectType type, ulong guid)
+        public List<SpawnMetadata> GetSpawnMetadataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
+        public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, ulong spawnId)
         {
-            if (type == SpawnObjectType.Creature)
-                return GetCreatureData(guid);
-            else if (type == SpawnObjectType.GameObject)
-                return GetGameObjectData(guid);
+            if (SpawnData.TypeHasData(type))
+                return GetSpawnData(type, spawnId);
             else
-                Cypher.Assert(false, $"Invalid spawn object type {type}");
+                return null;
+        }
+        public SpawnData GetSpawnData(SpawnObjectType type, ulong spawnId)
+        {
+            if (!SpawnData.TypeHasData(type))
+                return null;
 
-            return null;
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    return GetCreatureData(spawnId);
+                case SpawnObjectType.GameObject:
+                    return GetGameObjectData(spawnId);
+                case SpawnObjectType.AreaTrigger:
+                    return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
+                default:
+                    Cypher.Assert(false, $"Invalid spawn object type {type}");
+                    return null;
+            }
         }
         public List<InstanceSpawnGroupInfo> GetSpawnGroupsForInstance(uint instanceId) { return _instanceSpawnGroupStorage.LookupByKey(instanceId); }
 
@@ -10593,7 +10616,7 @@ namespace Game
         public MultiMap<uint, GraveYardData> GraveYardStorage = new();
         List<ushort> _transportMaps = new();
         Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
-        MultiMap<uint, SpawnData> _spawnGroupMapStorage = new();
+        MultiMap<uint, SpawnMetadata> _spawnGroupMapStorage = new();
         MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new();
 
         //Spells /Skills / Phases

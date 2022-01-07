@@ -90,52 +90,18 @@ namespace Game.Maps
         {
             foreach (var guid in guid_set)
             {
+                // Don't spawn at all if there's a respawn timer
+                if (!map.ShouldBeSpawnedOnGridLoad<T>(guid))
+                    continue;
+
                 T obj = new();
-                // Don't spawn at all if there's a respawn time
-                if ((obj.IsTypeId(TypeId.Unit) && map.GetCreatureRespawnTime(guid) == 0) || (obj.IsTypeId(TypeId.GameObject) && map.GetGORespawnTime(guid) == 0) || obj.IsTypeId(TypeId.AreaTrigger))
+                if (!obj.LoadFromDB(guid, map, false, false))
                 {
-                    //TC_LOG_INFO("misc", "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
-                    if (obj.IsTypeId(TypeId.Unit))
-                    {
-                        CreatureData cdata = Global.ObjectMgr.GetCreatureData(guid);
-                        Cypher.Assert(cdata != null, $"Tried to load creature with spawnId {guid}, but no such creature exists.");
-
-                        SpawnGroupTemplateData group = cdata.spawnGroupData;
-                        // If creature in manual spawn group, don't spawn here, unless group is already active.
-                        if (!group.flags.HasAnyFlag(SpawnGroupFlags.System))
-                        {
-                            if (!map.IsSpawnGroupActive(group.groupId))
-                            {
-                                obj.Dispose();
-                                continue;
-                            }
-                        }
-                    }
-                    else if (obj.IsTypeId(TypeId.GameObject))
-                    {
-                        // If gameobject in manual spawn group, don't spawn here, unless group is already active.
-                        GameObjectData godata = Global.ObjectMgr.GetGameObjectData(guid);
-                        Cypher.Assert(godata != null, $"Tried to load gameobject with spawnId {guid}, but no such object exists.");
-
-                        if (!godata.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.System))
-                        {
-                            if (!map.IsSpawnGroupActive(godata.spawnGroupData.groupId))
-                            {
-                                obj.Dispose();
-                                continue;
-                            }
-                        }
-                    }
-
-                    if (!obj.LoadFromDB(guid, map, false, false))
-                    {
-                        obj.Dispose();
-                        continue;
-                    }
-                    AddObjectHelper(cell, ref count, map, obj);
-                }
-                else
                     obj.Dispose();
+                    continue;
+                }
+
+                AddObjectHelper(cell, ref count, map, obj);
             }
         }
 

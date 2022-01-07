@@ -205,16 +205,20 @@ namespace Framework.Constants
     {
         Creature = 0,
         GameObject = 1,
+        AreaTrigger = 2,
 
-        Max
+        NumSpawnTypesWithData,
+        NumSpawnTypes
     }
 
     public enum SpawnObjectTypeMask
     {
         Creature = (1 << SpawnObjectType.Creature),
         GameObject = (1 << SpawnObjectType.GameObject),
+        AreaTrigger = (1 << SpawnObjectType.AreaTrigger),
 
-        All = (1 << SpawnObjectType.Max) - 1
+        WithData = (1 << SpawnObjectType.NumSpawnTypesWithData) - 1,
+        All = (1 << SpawnObjectType.NumSpawnTypes) - 1
     }
 
     [Flags]

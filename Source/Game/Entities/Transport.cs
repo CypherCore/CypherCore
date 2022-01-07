@@ -326,7 +326,7 @@ namespace Game.Entities
                 return null;
 
             float x, y, z, o;
-            data.spawnPoint.GetPosition(out x, out y, out z, out o);
+            data.SpawnPoint.GetPosition(out x, out y, out z, out o);
 
             creature.SetTransport(this);
             creature.m_movementInfo.transport.guid = GetGUID();
@@ -347,7 +347,7 @@ namespace Game.Entities
                 return null;
             }
 
-            PhasingHandler.InitDbPhaseShift(creature.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbPhaseShift(creature.GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
             PhasingHandler.InitDbVisibleMapId(creature.GetPhaseShift(), data.terrainSwapMap);
 
             if (!map.AddToMap(creature))
@@ -369,7 +369,7 @@ namespace Game.Entities
                 return null;
 
             float x, y, z, o;
-            data.spawnPoint.GetPosition(out x, out y, out z, out o);
+            data.SpawnPoint.GetPosition(out x, out y, out z, out o);
 
             go.SetTransport(this);
             go.m_movementInfo.transport.guid = GetGUID();
@@ -385,7 +385,7 @@ namespace Game.Entities
                 return null;
             }
 
-            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
             PhasingHandler.InitDbVisibleMapId(go.GetPhaseShift(), data.terrainSwapMap);
 
             if (!map.AddToMap(go))

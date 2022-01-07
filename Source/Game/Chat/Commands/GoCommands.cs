@@ -645,9 +645,9 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                if (!GridDefines.IsValidMapCoord(goData.spawnPoint) || Global.ObjectMgr.IsTransportMap(goData.spawnPoint.GetMapId()))
+                if (!GridDefines.IsValidMapCoord(goData.MapId, goData.SpawnPoint) || Global.ObjectMgr.IsTransportMap(goData.MapId))
                 {
-                    handler.SendSysMessage(CypherStrings.InvalidTargetCoord, goData.spawnPoint.GetPositionX(), goData.spawnPoint.GetPositionY(), goData.spawnPoint.GetMapId());
+                    handler.SendSysMessage(CypherStrings.InvalidTargetCoord, goData.SpawnPoint.GetPositionX(), goData.SpawnPoint.GetPositionY(), goData.MapId);
                     return false;
                 }
 
@@ -657,7 +657,7 @@ namespace Game.Chat.Commands
                 else
                     player.SaveRecallPosition(); // save only in non-flight case
 
-                player.TeleportTo(goData.spawnPoint);
+                player.TeleportTo(new WorldLocation(goData.MapId, goData.SpawnPoint));
                 return true;
             }
 
