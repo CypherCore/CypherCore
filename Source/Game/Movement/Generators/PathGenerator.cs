@@ -450,6 +450,8 @@ namespace Game.Movement
                         pathType = PathType.Incomplete;
                         return;
                     }
+                    else
+                        _navMeshQuery.getPolyHeight(_pathPolyRefs[_polyLength - 1], endPoint, ref endPoint[1]);
                 }
                 else
                 {
