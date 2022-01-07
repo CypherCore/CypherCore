@@ -1822,8 +1822,6 @@ namespace Game.Spells
                 var dispellData = new SpellDispellData();
                 dispellData.SpellID = dispelableAura.GetAura().GetId();
                 dispellData.Harmful = false;      // TODO: use me
-                //dispellData.Rolled = none; // TODO: use me
-                //dispellData.Needed = none; // TODO: use me
 
                 unitTarget.RemoveAurasDueToSpellByDispel(dispelableAura.GetAura().GetId(), m_spellInfo.Id, dispelableAura.GetAura().GetCasterGUID(), m_caster, dispelableAura.GetDispelCharges());
 
@@ -2771,10 +2769,6 @@ namespace Game.Spells
                         case 60243: // Blood Parrot Despawn
                             if (unitTarget.IsTypeId(TypeId.Unit) && unitTarget.ToCreature().IsSummon())
                                 unitTarget.ToTempSummon().UnSummon();
-                            return;
-                        case 52479: // Gift of the Harvester
-                            if (unitTarget != null && unitCaster != null)
-                                unitCaster.CastSpell(unitTarget, Convert.ToBoolean(RandomHelper.IRand(0, 1)) ? (uint)damage : 52505, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
                         case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
                         {
@@ -3754,7 +3748,6 @@ namespace Game.Spells
         }
 
         [SpellEffectHandler(SpellEffectName.PullTowards)]
-        [SpellEffectHandler(SpellEffectName.PullTowardsDest)]
         void EffectPullTowards()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -3763,23 +3756,38 @@ namespace Game.Spells
             if (!unitTarget)
                 return;
 
+            float speedXY = effectInfo.MiscValue / 10.0f;
+            float speedZ = damage / 10.0f;
             Position pos = new();
-            if (effectInfo.Effect == SpellEffectName.PullTowardsDest)
-            {
-                if (m_targets.HasDst())
-                    pos.Relocate(destTarget);
-                else
-                    return;
-            }
-            else
-            {
-                pos.Relocate(m_caster.GetPosition());
-            }
-
-            float speedXY = effectInfo.MiscValue * 0.1f;
-            float speedZ = (float)(unitTarget.GetDistance(pos) / speedXY * 0.5f * MotionMaster.gravity);
+            pos.Relocate(m_caster);
 
             unitTarget.GetMotionMaster().MoveJump(pos, speedXY, speedZ);
+        }
+
+        [SpellEffectHandler(SpellEffectName.PullTowardsDest)]
+        void EffectPullTowardsDest()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget)
+                return;
+
+            if (!m_targets.HasDst())
+            {
+                Log.outError(LogFilter.Spells, $"Spell {m_spellInfo.Id} with SPELL_EFFECT_PULL_TOWARDS_DEST has no dest target");
+                return;
+            }
+
+            Position pos = m_targets.GetDstPos();
+            // This is a blizzlike mistake: this should be 2D distance according to projectile motion formulas, but Blizzard erroneously used 3D distance
+            float distXY = unitTarget.GetExactDist(pos);
+            float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
+
+            float speedXY = effectInfo.MiscValue / 10.0f;
+            float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+
+            unitTarget.JumpTo(speedXY, speedZ, true, pos);
         }
 
         [SpellEffectHandler(SpellEffectName.ChangeRaidMarker)]
@@ -4301,8 +4309,6 @@ namespace Game.Spells
                 var dispellData = new SpellDispellData();
                 dispellData.SpellID = dispell.Item1;
                 dispellData.Harmful = false;      // TODO: use me
-                                                  //dispellData.Rolled = none;        // TODO: use me
-                                                  //dispellData.Needed = none;        // TODO: use me
 
                 unitTarget.RemoveAurasDueToSpellBySteal(dispell.Item1, dispell.Item2, m_caster);
 
