@@ -299,6 +299,19 @@ namespace Scripts.World.GameObjects
         public const uint KharazhanMapid = 532;
     }
 
+    struct ZoneIds
+    {
+        public const uint Tirisfal = 85;
+        public const uint Undercity = 1497;
+        public const uint DunMorogh = 1;
+        public const uint Ironforge = 1537;
+        public const uint Teldrassil = 141;
+        public const uint Darnassus = 1657;
+        public const uint Ashenvale = 331;
+        public const uint HillsbradFoothills = 267;
+        public const uint Duskwood = 42;
+    }
+
     struct Misc
     {
         // These Are In Seconds
@@ -1257,22 +1270,45 @@ namespace Scripts.World.GameObjects
 
         public override void InitializeAI()
         {
+            uint zoneId = me.GetZoneId();
+
             switch (me.GetEntry())
             {
                 case GameObjectIds.HordeBell:
-                    _soundId = me.GetAreaId() == AreaIds.Undercity ? SoundIds.BellTollHorde : SoundIds.BellTollTribal;
-                    break;
-                case GameObjectIds.AllianceBell:
+                {
+                    switch (zoneId)
                     {
-                        if (me.GetAreaId() == AreaIds.Ironforge1 || me.GetAreaId() == AreaIds.Ironforge2)
-                            _soundId = SoundIds.BellTolldwarfgnome;
-                        else if (me.GetAreaId() == AreaIds.Darnassus || me.GetZoneId() == AreaIds.TeldrassilZone)
-                            _soundId = SoundIds.BellTollNightelf;
-                        else
-                            _soundId = SoundIds.BellTollAlliance;
-
-                        break;
+                        case ZoneIds.Tirisfal:
+                        case ZoneIds.Undercity:
+                        case ZoneIds.HillsbradFoothills:
+                        case ZoneIds.Duskwood:
+                            _soundId = SoundIds.BellTollHorde;  // undead bell sound
+                            break;
+                        default:
+                            _soundId = SoundIds.BellTollTribal; // orc drum sound 
+                            break;
                     }
+                    break;
+                }
+                case GameObjectIds.AllianceBell:
+                {
+                    switch (zoneId)
+                    {
+                        case ZoneIds.Ironforge:
+                        case ZoneIds.DunMorogh:
+                            _soundId = SoundIds.BellTolldwarfgnome; // horn sound
+                            break;
+                        case ZoneIds.Darnassus:
+                        case ZoneIds.Teldrassil:
+                        case ZoneIds.Ashenvale:
+                            _soundId = SoundIds.BellTollNightelf;   // nightelf bell sound
+                            break;
+                        default:
+                            _soundId = SoundIds.BellTollAlliance;   // human bell sound
+                            break;
+                    }
+                    break;
+                }
                 case GameObjectIds.KharazhanBell:
                     _soundId = SoundIds.BellTollKharazhan;
                     break;
