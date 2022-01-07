@@ -133,7 +133,7 @@ namespace Game.Entities
             {
                 AddPvpFlag(UnitPVPStateFlags.Sanctuary);
                 pvpInfo.IsInNoPvPArea = true;
-                if (duel == null)
+                if (duel == null && GetCombatManager().HasPvPCombat())
                     CombatStopWithPets();
             }
             else
