@@ -359,7 +359,15 @@ namespace Game.Movement
                     if (hit != float.MaxValue)
                     {
                         // the ray hit something, return no path instead of the incomplete one
-                        pathType = PathType.NoPath;
+                        Clear();
+                        _polyLength = 2;
+                        Array.Resize(ref _pathPoints, 2);
+                        _pathPoints[0] = GetStartPosition();
+                        float[] hitPos = new float[3];
+                        Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
+                        _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
+
+                        pathType = PathType.Incomplete;
                         return;
                     }
                 }
@@ -424,7 +432,15 @@ namespace Game.Movement
                     if (hit != float.MaxValue)
                     {
                         // the ray hit something, return no path instead of the incomplete one
-                        pathType = PathType.NoPath;
+                        Clear();
+                        _polyLength = 2;
+                        Array.Resize(ref _pathPoints, 2);
+                        _pathPoints[0] = GetStartPosition();
+                        float[] hitPos = new float[3];
+                        Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
+                        _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
+
+                        pathType = PathType.Incomplete;
                         return;
                     }
                 }
