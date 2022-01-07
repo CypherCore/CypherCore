@@ -50,7 +50,7 @@ namespace Game.Scripting
             {
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 {
-                    Log.outError(LogFilter.Scripts, "BaseSpellScript.ValidateSpellInfo: Spell {0} does not exist.", spellId);
+                    Log.outError(LogFilter.Scripts, "BaseSpellScript::ValidateSpellInfo: Spell {0} does not exist.", spellId);
                     allValid = false;
                 }
             }

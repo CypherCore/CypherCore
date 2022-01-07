@@ -6165,7 +6165,7 @@ namespace Game.Spells
                             if (spellEffectInfo.ItemType != 0)
                             {
                                 List<ItemPosCount> dest = new();
-                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, spellEffectInfo.CalcValue());
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, (uint)spellEffectInfo.CalcValue());
                                 if (msg != InventoryResult.Ok)
                                 {
                                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
@@ -6591,7 +6591,16 @@ namespace Game.Spells
 
         public bool HasPowerTypeCost(PowerType power)
         {
-            return m_powerCost.Any(cost => cost.Power == power);
+            return GetPowerTypeCostAmount(power).HasValue;
+        }
+
+        public int? GetPowerTypeCostAmount(PowerType power)
+        {
+            var powerCost = m_powerCost.Find(cost => cost.Power == power);
+            if (powerCost == null)
+                return null;
+
+            return powerCost.Amount;
         }
 
         bool UpdatePointers()

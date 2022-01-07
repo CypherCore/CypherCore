@@ -1703,16 +1703,20 @@ namespace Game.Entities
         public int CalcSpellDuration(SpellInfo spellInfo)
         {
             int comboPoints = 0;
+            int maxComboPoints = 5;
             Unit unit = ToUnit();
             if (unit != null)
+            {
                 comboPoints = unit.GetPower(PowerType.ComboPoints);
+                maxComboPoints = unit.GetMaxPower(PowerType.ComboPoints);
+            }
 
             int minduration = spellInfo.GetDuration();
             int maxduration = spellInfo.GetMaxDuration();
 
             int duration;
             if (comboPoints != 0 && minduration != -1 && minduration != maxduration)
-                duration = minduration + ((maxduration - minduration) * comboPoints / 5);
+                duration = minduration + ((maxduration - minduration) * comboPoints / maxComboPoints);
             else
                 duration = minduration;
 
