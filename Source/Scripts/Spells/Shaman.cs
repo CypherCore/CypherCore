@@ -31,6 +31,7 @@ namespace Scripts.Spells.Shaman
     {
         public const uint AncestralGuidance = 108281;
         public const uint AncestralGuidanceHeal = 114911;
+        public const uint ChainLightningEnergize = 195897;
         public const uint ChainedHeal = 70809;
         public const uint CrashLightningCleave = 187878;
         public const uint EarthShieldHeal = 204290;
@@ -168,6 +169,29 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 188443 - Chain lightning
+    class spell_sha_chain_lightning : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ChainLightningEnergize, SpellIds.MaelstromController)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 4;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 4);
+            if (energizeAmount != null)
+                GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningEnergize, new CastSpellExtraArgs(energizeAmount)
+                    .AddSpellMod(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 187874 - Crash Lightning
     class spell_sha_crash_lightning : SpellScript
     {
