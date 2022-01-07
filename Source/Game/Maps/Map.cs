@@ -45,7 +45,6 @@ namespace Game.Maps
             m_VisibleDistance = SharedConst.DefaultVisibilityDistance;
             m_VisibilityNotifyPeriod = SharedConst.DefaultVisibilityNotifyPeriod;
             i_gridExpiry = expiry;
-            _defaultLight = Global.DB2Mgr.GetDefaultMapLight(id);
 
             if (parent)
             {
@@ -3402,13 +3401,12 @@ namespace Game.Maps
 
             SendZoneWeather(zoneInfo, player);
 
-            uint overrideLightId = zoneInfo.OverrideLightId;
-            if (overrideLightId != 0)
+            foreach (var lightOverride in zoneInfo.LightOverrides)
             {
                 OverrideLight overrideLight = new();
-                overrideLight.AreaLightID = _defaultLight;
-                overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = zoneInfo.TransitionMilliseconds;
+                overrideLight.AreaLightID = lightOverride.AreaLightId;
+                overrideLight.OverrideLightID = lightOverride.OverrideLightId;
+                overrideLight.TransitionMilliseconds = lightOverride.TransitionMilliseconds;
                 player.SendPacket(overrideLight);
             }
         }
@@ -3516,20 +3514,31 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneOverrideLight(uint zoneId, uint overrideLightId, uint transitionMilliseconds)
+        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, uint transitionMilliseconds)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
 
             ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
-            info.OverrideLightId = overrideLightId;
-            info.TransitionMilliseconds = transitionMilliseconds;
+            // client can support only one override for each light (zone independent)
+            info.LightOverrides.RemoveAll(lightOverride => lightOverride.AreaLightId == areaLightId);
+
+            // set new override (if any)
+            if (overrideLightId != 0)
+            {
+                ZoneDynamicInfo.LightOverride lightOverride = new();
+                lightOverride.AreaLightId = areaLightId;
+                lightOverride.OverrideLightId = overrideLightId;
+                lightOverride.TransitionMilliseconds = transitionMilliseconds;
+                info.LightOverrides.Add(lightOverride);
+            }
+
             var players = GetPlayers();
 
             if (!players.Empty())
             {
                 OverrideLight overrideLight = new();
-                overrideLight.AreaLightID = _defaultLight;
+                overrideLight.AreaLightID = areaLightId;
                 overrideLight.OverrideLightID = overrideLightId;
                 overrideLight.TransitionMilliseconds = transitionMilliseconds;
 
@@ -5062,7 +5071,6 @@ namespace Game.Maps
 
         Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
-        uint _defaultLight;
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
         MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
@@ -5624,8 +5632,14 @@ namespace Game.Maps
         public Weather DefaultWeather;
         public WeatherState WeatherId;
         public float Intensity;
-        public uint OverrideLightId;
-        public uint TransitionMilliseconds;
+        public List<LightOverride> LightOverrides = new();
+
+        public struct LightOverride
+        {
+            public uint AreaLightId;
+            public uint OverrideLightId;
+            public uint TransitionMilliseconds;
+        }
     }
 
     public class PositionFullTerrainStatus

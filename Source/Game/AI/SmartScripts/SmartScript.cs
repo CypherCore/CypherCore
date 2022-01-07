@@ -2419,9 +2419,9 @@ namespace Game.AI
                     WorldObject obj = GetBaseObject();
                     if (obj != null)
                     {
-                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.overrideLightId, e.Action.overrideLight.transitionMilliseconds);
+                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.areaLightId, e.Action.overrideLight.overrideLightId, e.Action.overrideLight.transitionMilliseconds);
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_LIGHT: {obj.GetGUID()} sets zone override light (zoneId: {e.Action.overrideLight.zoneId}, " +
-                            $"overrideLightId: {e.Action.overrideLight.overrideLightId}, transitionMilliseconds: {e.Action.overrideLight.transitionMilliseconds})");
+                            $"areaLightId: {e.Action.overrideLight.areaLightId}, overrideLightId: {e.Action.overrideLight.overrideLightId}, transitionMilliseconds: {e.Action.overrideLight.transitionMilliseconds})");
                     }
                     break;
                 }

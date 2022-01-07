@@ -1465,6 +1465,12 @@ namespace Game.AI
                         return false;
                     }
 
+                    if (!CliDB.LightStorage.ContainsKey(e.Action.overrideLight.areaLightId))
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent areaLightId {e.Action.overrideLight.areaLightId}, skipped.");
+                        return false;
+                    }
+
                     if (e.Action.overrideLight.overrideLightId != 0 && !CliDB.LightStorage.ContainsKey(e.Action.overrideLight.overrideLightId))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent overrideLightId {e.Action.overrideLight.overrideLightId}, skipped.");
@@ -3140,6 +3146,7 @@ namespace Game.AI
         public struct OverrideLight
         {
             public uint zoneId;
+            public uint areaLightId;
             public uint overrideLightId;
             public uint transitionMilliseconds;
         }
