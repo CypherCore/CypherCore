@@ -1465,9 +1465,9 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (!CliDB.LightStorage.ContainsKey(e.Action.overrideLight.lightId))
+                    if (!CliDB.LightStorage.ContainsKey(e.Action.overrideLight.overrideLightId))
                     {
-                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent lightId {e.Action.overrideLight.lightId}, skipped.");
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent overrideLightId {e.Action.overrideLight.overrideLightId}, skipped.");
                         return false;
                     }
 
@@ -3140,14 +3140,14 @@ namespace Game.AI
         public struct OverrideLight
         {
             public uint zoneId;
-            public uint lightId;
-            public uint fadeInTime;
+            public uint overrideLightId;
+            public uint transitionMilliseconds;
         }
         public struct OverrideWeather
         {
             public uint zoneId;
             public uint weatherId;
-            public uint weatherGrade;
+            public uint intensity;
         }
         public struct Conversation
         {

@@ -3408,7 +3408,7 @@ namespace Game.Maps
                 OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = _defaultLight;
                 overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = zoneInfo.LightFadeInTime;
+                overrideLight.TransitionMilliseconds = zoneInfo.TransitionMilliseconds;
                 player.SendPacket(overrideLight);
             }
         }
@@ -3430,7 +3430,7 @@ namespace Game.Maps
             WeatherState weatherId = zoneDynamicInfo.WeatherId;
             if (weatherId != 0)
             {
-                WeatherPkt weather = new(weatherId, zoneDynamicInfo.WeatherGrade);
+                WeatherPkt weather = new(weatherId, zoneDynamicInfo.Intensity);
                 player.SendPacket(weather);
             }
             else if (zoneDynamicInfo.DefaultWeather != null)
@@ -3494,19 +3494,19 @@ namespace Game.Maps
             return WeatherState.Fine;
         }
 
-        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float weatherGrade)
+        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float intensity)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
 
             ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
             info.WeatherId = weatherId;
-            info.WeatherGrade = weatherGrade;
+            info.Intensity = intensity;
 
             var players = GetPlayers();
             if (!players.Empty())
             {
-                WeatherPkt weather = new(weatherId, weatherGrade);
+                WeatherPkt weather = new(weatherId, intensity);
 
                 foreach (var player in players)
                 {
@@ -3516,22 +3516,22 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneOverrideLight(uint zoneId, uint lightId, uint fadeInTime)
+        public void SetZoneOverrideLight(uint zoneId, uint overrideLightId, uint transitionMilliseconds)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
 
             ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
-            info.OverrideLightId = lightId;
-            info.LightFadeInTime = fadeInTime;
+            info.OverrideLightId = overrideLightId;
+            info.TransitionMilliseconds = transitionMilliseconds;
             var players = GetPlayers();
 
             if (!players.Empty())
             {
                 OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = _defaultLight;
-                overrideLight.OverrideLightID = lightId;
-                overrideLight.TransitionMilliseconds = fadeInTime;
+                overrideLight.OverrideLightID = overrideLightId;
+                overrideLight.TransitionMilliseconds = transitionMilliseconds;
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
@@ -5623,9 +5623,9 @@ namespace Game.Maps
         public uint MusicId;
         public Weather DefaultWeather;
         public WeatherState WeatherId;
-        public float WeatherGrade;
+        public float Intensity;
         public uint OverrideLightId;
-        public uint LightFadeInTime;
+        public uint TransitionMilliseconds;
     }
 
     public class PositionFullTerrainStatus

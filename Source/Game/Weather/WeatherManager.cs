@@ -92,13 +92,13 @@ namespace Game
 
     public class Weather
     {
-        public Weather(uint zone, WeatherData weatherChances)
+        public Weather(uint zoneId, WeatherData weatherChances)
         {
-            m_zone = zone;
+            m_zone = zoneId;
             m_weatherChances = weatherChances;
             m_timer.SetInterval(10 * Time.Minute * Time.InMilliseconds);
             m_type = WeatherType.Fine;
-            m_grade = 0;
+            m_intensity = 0;
 
             //Log.outInfo(LogFilter.General, "WORLD: Starting weather system for zone {0} (change every {1} minutes).", m_zone, (m_timer.GetInterval() / (Time.Minute * Time.InMilliseconds)));
         }
@@ -132,7 +132,7 @@ namespace Game
             if (m_weatherChances == null)
             {
                 m_type = WeatherType.Fine;
-                m_grade = 0.0f;
+                m_intensity = 0.0f;
                 return false;
             }
 
@@ -148,7 +148,7 @@ namespace Game
 
             // remember old values
             WeatherType old_type = m_type;
-            float old_grade = m_grade;
+            float old_intensity = m_intensity;
 
             long gtime = GameTime.GetGameTime();
             var ltime = Time.UnixTimeToDateTime(gtime).ToLocalTime();
@@ -158,21 +158,21 @@ namespace Game
 
             Log.outError(LogFilter.Server, "Generating a change in {0} weather for zone {1}.", seasonName[season], m_zone);
 
-            if ((u < 60) && (m_grade < 0.33333334f))                // Get fair
+            if ((u < 60) && (m_intensity < 0.33333334f))                // Get fair
             {
                 m_type = WeatherType.Fine;
-                m_grade = 0.0f;
+                m_intensity = 0.0f;
             }
 
             if ((u < 60) && (m_type != WeatherType.Fine))          // Get better
             {
-                m_grade -= 0.33333334f;
+                m_intensity -= 0.33333334f;
                 return true;
             }
 
             if ((u < 90) && (m_type != WeatherType.Fine))          // Get worse
             {
-                m_grade += 0.33333334f;
+                m_intensity += 0.33333334f;
                 return true;
             }
 
@@ -183,25 +183,25 @@ namespace Game
                 // if medium . change weather type
                 // if heavy . 50% light, 50% change weather type
 
-                if (m_grade < 0.33333334f)
+                if (m_intensity < 0.33333334f)
                 {
-                    m_grade = 0.9999f;                              // go nuts
+                    m_intensity = 0.9999f;                              // go nuts
                     return true;
                 }
                 else
                 {
-                    if (m_grade > 0.6666667f)
+                    if (m_intensity > 0.6666667f)
                     {
                         // Severe change, but how severe?
                         uint rnd = RandomHelper.URand(0, 99);
                         if (rnd < 50)
                         {
-                            m_grade -= 0.6666667f;
+                            m_intensity -= 0.6666667f;
                             return true;
                         }
                     }
                     m_type = WeatherType.Fine;                     // clear up
-                    m_grade = 0;
+                    m_intensity = 0;
                 }
             }
 
@@ -227,29 +227,29 @@ namespace Game
 
             if (m_type == WeatherType.Fine)
             {
-                m_grade = 0.0f;
+                m_intensity = 0.0f;
             }
             else if (u < 90)
             {
-                m_grade = (float)RandomHelper.NextDouble() * 0.3333f;
+                m_intensity = (float)RandomHelper.NextDouble() * 0.3333f;
             }
             else
             {
                 // Severe change, but how severe?
                 rn = RandomHelper.URand(0, 99);
                 if (rn < 50)
-                    m_grade = (float)RandomHelper.NextDouble() * 0.3333f + 0.3334f;
+                    m_intensity = (float)RandomHelper.NextDouble() * 0.3333f + 0.3334f;
                 else
-                    m_grade = (float)RandomHelper.NextDouble() * 0.3333f + 0.6667f;
+                    m_intensity = (float)RandomHelper.NextDouble() * 0.3333f + 0.6667f;
             }
 
             // return true only in case weather changes
-            return m_type != old_type || m_grade != old_grade;
+            return m_type != old_type || m_intensity != old_intensity;
         }
 
         public void SendWeatherUpdateToPlayer(Player player)
         {
-            WeatherPkt weather = new(GetWeatherState(), m_grade);
+            WeatherPkt weather = new(GetWeatherState(), m_intensity);
             player.SendPacket(weather);
         }
 
@@ -265,14 +265,14 @@ namespace Game
                 return false;
 
             // Send the weather packet to all players in this zone
-            if (m_grade >= 1)
-                m_grade = 0.9999f;
-            else if (m_grade < 0)
-                m_grade = 0.0001f;
+            if (m_intensity >= 1)
+                m_intensity = 0.9999f;
+            else if (m_intensity < 0)
+                m_intensity = 0.0001f;
 
             WeatherState state = GetWeatherState();
 
-            WeatherPkt weather = new(state, m_grade);
+            WeatherPkt weather = new(state, m_intensity);
 
             //- Returns false if there were no players found to update
             if (!Global.WorldMgr.SendZoneMessage(m_zone, weather))
@@ -325,45 +325,45 @@ namespace Game
             }
             Log.outInfo(LogFilter.Server, "Change the weather of zone {0} to {1}.", m_zone, wthstr);
 
-            Global.ScriptMgr.OnWeatherChange(this, state, m_grade);
+            Global.ScriptMgr.OnWeatherChange(this, state, m_intensity);
             return true;
         }
 
         public void SetWeather(WeatherType type, float grade)
         {
-            if (m_type == type && m_grade == grade)
+            if (m_type == type && m_intensity == grade)
                 return;
 
             m_type = type;
-            m_grade = grade;
+            m_intensity = grade;
             UpdateWeather();
         }
 
         public WeatherState GetWeatherState()
         {
-            if (m_grade < 0.27f)
+            if (m_intensity < 0.27f)
                 return WeatherState.Fine;
 
             switch (m_type)
             {
                 case WeatherType.Rain:
-                    if (m_grade < 0.40f)
+                    if (m_intensity < 0.40f)
                         return WeatherState.LightRain;
-                    else if (m_grade < 0.70f)
+                    else if (m_intensity < 0.70f)
                         return WeatherState.MediumRain;
                     else
                         return WeatherState.HeavyRain;
                 case WeatherType.Snow:
-                    if (m_grade < 0.40f)
+                    if (m_intensity < 0.40f)
                         return WeatherState.LightSnow;
-                    else if (m_grade < 0.70f)
+                    else if (m_intensity < 0.70f)
                         return WeatherState.MediumSnow;
                     else
                         return WeatherState.HeavySnow;
                 case WeatherType.Storm:
-                    if (m_grade < 0.40f)
+                    if (m_intensity < 0.40f)
                         return WeatherState.LightSandstorm;
-                    else if (m_grade < 0.70f)
+                    else if (m_intensity < 0.70f)
                         return WeatherState.MediumSandstorm;
                     else
                         return WeatherState.HeavySandstorm;
@@ -382,7 +382,7 @@ namespace Game
 
         uint m_zone;
         WeatherType m_type;
-        float m_grade;
+        float m_intensity;
         IntervalTimer m_timer = new();
         WeatherData m_weatherChances;
     }

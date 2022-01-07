@@ -2419,9 +2419,9 @@ namespace Game.AI
                     WorldObject obj = GetBaseObject();
                     if (obj != null)
                     {
-                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.lightId, e.Action.overrideLight.fadeInTime);
+                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.overrideLightId, e.Action.overrideLight.transitionMilliseconds);
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_LIGHT: {obj.GetGUID()} sets zone override light (zoneId: {e.Action.overrideLight.zoneId}, " +
-                            $"lightId: {e.Action.overrideLight.lightId}, fadeInTime: {e.Action.overrideLight.fadeInTime})");
+                            $"overrideLightId: {e.Action.overrideLight.overrideLightId}, transitionMilliseconds: {e.Action.overrideLight.transitionMilliseconds})");
                     }
                     break;
                 }
@@ -2430,9 +2430,9 @@ namespace Game.AI
                     WorldObject obj = GetBaseObject();
                     if (obj != null)
                     {
-                        obj.GetMap().SetZoneWeather(e.Action.overrideWeather.zoneId, (WeatherState)e.Action.overrideWeather.weatherId, e.Action.overrideWeather.weatherGrade);
+                        obj.GetMap().SetZoneWeather(e.Action.overrideWeather.zoneId, (WeatherState)e.Action.overrideWeather.weatherId, e.Action.overrideWeather.intensity);
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_WEATHER: {obj.GetGUID()} sets zone weather (zoneId: {e.Action.overrideWeather.zoneId}, " +
-                            $"weatherId: {e.Action.overrideWeather.weatherId}, weatherGrade: {e.Action.overrideWeather.weatherGrade})");
+                            $"weatherId: {e.Action.overrideWeather.weatherId}, intensity: {e.Action.overrideWeather.intensity})");
                     }
                     break;
                 }
