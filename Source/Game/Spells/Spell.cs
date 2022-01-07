@@ -1866,7 +1866,7 @@ namespace Game.Spells
 
         public long GetUnitTargetCountForEffect(uint effect)
         {
-            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.Miss && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
         }
 
         public long GetGameObjectTargetCountForEffect(uint effect)
