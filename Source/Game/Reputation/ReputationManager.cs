@@ -549,7 +549,7 @@ namespace Game
         void SetAtWar(FactionState faction, bool atWar)
         {
             // Do not allow to declare war to our own faction. But allow for rival factions (eg Aldor vs Scryer).
-            if (atWar && faction.Flags.HasFlag(ReputationFlags.Peaceful))
+            if (atWar && faction.Flags.HasFlag(ReputationFlags.Peaceful) && GetRank(CliDB.FactionStorage.LookupByKey(faction.Id)) > ReputationRank.Hated)
                 return;
 
             // already set
