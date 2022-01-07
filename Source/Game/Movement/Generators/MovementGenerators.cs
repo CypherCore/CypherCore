@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using System;
 
@@ -58,6 +59,12 @@ namespace Game.Movement
         {
             x = y = z = 0.0f;
             return false;
+        }
+
+        public void NotifyAIOnFinalize(Unit obj)
+        {
+            UnitAI ai = obj.GetAI();
+            ai?.OnMovementGeneratorFinalized(GetMovementGeneratorType());
         }
 
         public void AddFlag(MovementGeneratorFlags flag) { Flags |= flag; }

@@ -119,10 +119,16 @@ namespace Game.AI
             me.SetReactState(ReactStates.Passive);
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage)
+        public override void JustEngagedWith(Unit who)
         {
             if (!me.HasUnitState(UnitState.Fleeing))
                 me.SetControlled(true, UnitState.Fleeing);
+        }
+
+        public override void OnMovementGeneratorFinalized(MovementGeneratorType type)
+        {
+            if (type == MovementGeneratorType.TimedFleeing)
+                EnterEvadeMode(EvadeReason.Other);
         }
 
         public override void EnterEvadeMode(EvadeReason why)
