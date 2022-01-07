@@ -148,76 +148,97 @@ public static class Time
         ulong hours = timeInSecs % Day / Hour;
         ulong days = timeInSecs / Day;
 
+        if (timeFormat == TimeFormat.Numeric)
+        {
+            if (days != 0)
+                return $"{days}:{hours}:{minutes}:{secs:2}";
+            else if (hours != 0)
+                return $"{hours}:{minutes}:{secs:2}";
+            else if (minutes != 0)
+                return $"{minutes}:{secs:2}";
+            else
+                return $"0:{secs:2}";
+        }
+
         StringBuilder ss = new();
         if (days != 0)
         {
             ss.Append(days);
-            if (timeFormat == TimeFormat.Numeric)
-                ss.Append(":");
-            else if (timeFormat == TimeFormat.ShortText)
-                ss.Append("d");
-            else // if (timeFormat == TimeFormat::FullText)
+            switch (timeFormat)
             {
-                if (days == 1)
-                    ss.Append(" Day ");
-                else
-                    ss.Append(" Days ");
+                case TimeFormat.ShortText:
+                    ss.Append("d");
+                    break;
+                case TimeFormat.FullText:
+                    if (days == 1)
+                        ss.Append(" Day ");
+                    else
+                        ss.Append(" Days ");
+                    break;
+                default:
+                    return "<Unknown time format>";
             }
         }
+
         if (hours != 0 || hoursOnly)
         {
             ss.Append(hours);
-            if (timeFormat == TimeFormat.Numeric)
-                ss.Append(":");
-            else if (timeFormat == TimeFormat.ShortText)
-                ss.Append("h");
-            else // if (timeFormat == TimeFormat::FullText)
+            switch (timeFormat)
             {
-                if (hours <= 1)
-                    ss.Append(" Hour ");
-                else
-                    ss.Append(" Hours ");
+
+                case TimeFormat.ShortText:
+                    ss.Append("h");
+                    break;
+                case TimeFormat.FullText:
+
+                    if (hours <= 1)
+                        ss.Append(" Hour ");
+                    else
+                        ss.Append(" Hours ");
+                    break;
+                default:
+                    return "<Unknown time format>";
             }
         }
+
         if (!hoursOnly)
         {
             if (minutes != 0)
             {
                 ss.Append(minutes);
-                if (timeFormat == TimeFormat.Numeric)
-                    ss.Append(":");
-                else if (timeFormat == TimeFormat.ShortText)
-                    ss.Append("m");
-                else // if (timeFormat == TimeFormat::FullText)
+                switch (timeFormat)
                 {
-                    if (minutes == 1)
-                        ss.Append(" Minute ");
-                    else
-                        ss.Append(" Minutes ");
+                    case TimeFormat.ShortText:
+                        ss.Append("m");
+                        break;
+                    case TimeFormat.FullText:
+                        if (minutes == 1)
+                            ss.Append(" Minute ");
+                        else
+                            ss.Append(" Minutes ");
+                        break;
+                    default:
+                        return "<Unknown time format>";
                 }
             }
-            else
-            {
-                if (timeFormat == TimeFormat.Numeric)
-                    ss.Append("0:");
-            }
+
             if (secs != 0 || (days == 0 && hours == 0 && minutes == 0))
             {
-                ss.Append($"{secs:2}");
-                if (timeFormat == TimeFormat.ShortText)
-                    ss.Append("s");
-                else if (timeFormat == TimeFormat.FullText)
+                ss.Append(secs);
+                switch (timeFormat)
                 {
-                    if (secs <= 1)
-                        ss.Append(" Second.");
-                    else
-                        ss.Append(" Seconds.");
+                    case TimeFormat.ShortText:
+                        ss.Append("s");
+                        break;
+                    case TimeFormat.FullText:
+                        if (secs <= 1)
+                            ss.Append(" Second.");
+                        else
+                            ss.Append(" Seconds.");
+                        break;
+                    default:
+                        return "<Unknown time format>";
                 }
-            }
-            else
-            {
-                if (timeFormat == TimeFormat.Numeric)
-                    ss.Append("00");
             }
         }
 
