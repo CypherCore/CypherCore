@@ -706,6 +706,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Vehicle Accessories...");
             Global.ObjectMgr.LoadVehicleAccessories();                       // must be after LoadCreatureTemplates() and LoadNPCSpellClickSpells()
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Vehicle Seat Addon Data...");
+            Global.ObjectMgr.LoadVehicleSeatAddon();                         // must be after loading DBC
+
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellArea Data...");                // must be after quest load
             Global.SpellMgr.LoadSpellAreas();
 

@@ -2350,32 +2350,6 @@ namespace Scripts.World.NpcSpecial
                 creature.SetDisplayFromModel(0);
         }
     }
-
-    [Script]
-    class npc_traveler_tundra_mammoth_exit_pos : UnitScript
-    {
-        public npc_traveler_tundra_mammoth_exit_pos() : base("npc_traveler_tundra_mammoth_exit_pos") { }
-
-        public override void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos)
-        {
-            if (passenger.IsCreature())
-            {
-                switch (passenger.GetEntry())
-                {
-                    // Right side
-                    case CreatureIds.DrixBlackwrench:
-                    case CreatureIds.Gnimo:
-                        pos.RelocateOffset(new Position(-2.0f, -2.0f, 0.0f, 0.0f));
-                        break;
-                    // Left side
-                    case CreatureIds.Mojodishu:
-                    case CreatureIds.HakmudOfArgus:
-                        pos.RelocateOffset(new Position(-2.0f, 2.0f, 0.0f, 0.0f));
-                        break;
-                }
-            }
-        }
-    }
     
     class CastFoodSpell : BasicEvent
     {

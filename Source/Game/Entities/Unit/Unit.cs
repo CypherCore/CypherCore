@@ -1025,6 +1025,7 @@ namespace Game.Entities
                 return;
 
             // This should be done before dismiss, because there may be some aura removal
+            VehicleSeatAddon seatAddon = m_vehicle.GetSeatAddonForSeatOfPassenger(this);
             Vehicle vehicle = m_vehicle.RemovePassenger(this);
 
             Player player = ToPlayer();
@@ -1049,7 +1050,18 @@ namespace Game.Entities
                 // Set exit position to vehicle position and use the current orientation
                 pos = vehicle.GetBase().GetPosition();
                 pos.SetOrientation(GetOrientation());
+
+                // To-do: snap this hook out of existance
                 Global.ScriptMgr.ModifyVehiclePassengerExitPos(this, vehicle, pos);
+
+                // Change exit position based on seat entry addon data
+                if (seatAddon != null)
+                {
+                    if (seatAddon.ExitParameter == VehicleExitParameters.VehicleExitParamOffset)
+                        pos.RelocateOffset(new Position(seatAddon.ExitParameterX, seatAddon.ExitParameterY, seatAddon.ExitParameterZ, seatAddon.ExitParameterO));
+                    else if (seatAddon.ExitParameter == VehicleExitParameters.VehicleExitParamDest)
+                        pos.Relocate(new Position(seatAddon.ExitParameterX, seatAddon.ExitParameterY, seatAddon.ExitParameterZ, seatAddon.ExitParameterO));
+                }
             }
 
             float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();

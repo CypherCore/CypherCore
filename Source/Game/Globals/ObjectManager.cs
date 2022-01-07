@@ -10505,7 +10505,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Vehicle Template Accessories in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
-
         public void LoadVehicleAccessories()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10546,6 +10545,57 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Vehicle Accessories in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+        public void LoadVehicleSeatAddon()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _vehicleSeatAddonStore.Clear();                           // needed for reload case
+
+            //                                          0            1                  2             3             4             5             6
+            SQLResult result = DB.World.Query("SELECT `SeatEntry`, `SeatOrientation`, `ExitParamX`, `ExitParamY`, `ExitParamZ`, `ExitParamO`, `ExitParamValue` FROM `vehicle_seat_addon`");
+            if (result.IsEmpty())
+            {
+                Log.outError(LogFilter.ServerLoading, "Loaded 0 vehicle seat addons. DB table `vehicle_seat_addon` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint seatID = result.Read<uint>(0);
+                float orientation = result.Read<float>(1);
+                float exitX = result.Read<float>(2);
+                float exitY = result.Read<float>(3);
+                float exitZ = result.Read<float>(4);
+                float exitO = result.Read<float>(5);
+                byte exitParam = result.Read<byte>(6);
+
+                if (!CliDB.VehicleSeatStorage.ContainsKey(seatID))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_seat_addon`: SeatID: {seatID} does not exist in VehicleSeat.dbc. Skipping entry.");
+                    continue;
+                }
+
+                // Sanitizing values
+                if (orientation > MathF.PI * 2)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_seat_addon`: SeatID: {seatID} is using invalid angle offset value ({orientation}). Set Value to 0.");
+                    orientation = 0.0f;
+                }
+
+                if (exitParam >= (byte)VehicleExitParameters.VehicleExitParamMax)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_seat_addon`: SeatID: {seatID} is using invalid exit parameter value ({exitParam}). Setting to 0 (none).");
+                    continue;
+                }
+
+                _vehicleSeatAddonStore[seatID] = new VehicleSeatAddon(orientation, exitX, exitY, exitZ, exitO, exitParam);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Seat Addon entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
 
         public VehicleTemplate GetVehicleTemplate(Vehicle veh)
         {
@@ -10565,7 +10615,11 @@ namespace Game
             // Otherwise return entry-based
             return _vehicleTemplateAccessoryStore.LookupByKey(veh.GetCreatureEntry());
         }
-
+        public VehicleSeatAddon GetVehicleSeatAddon(uint seatId)
+        {
+            return _vehicleSeatAddonStore.LookupByKey(seatId);
+        }
+        
         #region Fields
         //General
         Dictionary<uint, StringArray> CypherStringStorage = new();
@@ -10684,6 +10738,7 @@ namespace Game
         Dictionary<uint, VehicleTemplate> _vehicleTemplateStore = new();
         MultiMap<uint, VehicleAccessory> _vehicleTemplateAccessoryStore = new();
         MultiMap<ulong, VehicleAccessory> _vehicleAccessoryStore = new();
+        Dictionary<uint, VehicleSeatAddon> _vehicleSeatAddonStore = new();
 
         //Locales
         Dictionary<uint, CreatureLocale> _creatureLocaleStorage = new();

@@ -61,4 +61,12 @@ namespace Framework.Constants
         AdjustAimPower = 0x800,            // LuaIsvehicleaimpoweradjustable
         FixedPosition = 0x200000            // Used for cannons, when they should be rooted
     }
+
+    public enum VehicleExitParameters
+    {
+        VehicleExitParamNone = 0, // provided parameters will be ignored
+        VehicleExitParamOffset = 1, // provided parameters will be used as offset values
+        VehicleExitParamDest = 2, // provided parameters will be used as absolute destination
+        VehicleExitParamMax
+    }
 }

@@ -45,7 +45,8 @@ namespace Game.Entities
                     VehicleSeatRecord veSeat = CliDB.VehicleSeatStorage.LookupByKey(seatId);
                     if (veSeat != null)
                     {
-                        Seats.Add((sbyte)i, new VehicleSeat(veSeat));
+                        VehicleSeatAddon addon = Global.ObjectMgr.GetVehicleSeatAddon(seatId);
+                        Seats.Add((sbyte)i, new VehicleSeat(veSeat, addon));
                         if (veSeat.CanEnterOrExit())
                             ++UsableSeatNum;
                     }
@@ -253,6 +254,20 @@ namespace Game.Entities
             return seat;
         }
 
+        /// <summary>
+        /// Gets the vehicle seat addon data for the seat of a passenger
+        /// </summary>
+        /// <param name="passenger">Identifier for the current seat user</param>
+        /// <returns>The seat addon data for the currently used seat of a passenger</returns>
+        public VehicleSeatAddon GetSeatAddonForSeatOfPassenger(Unit passenger)
+        {
+            foreach (var pair in Seats)
+                if (!pair.Value.IsEmpty() && pair.Value.Passenger.Guid == passenger.GetGUID())
+                    return pair.Value.SeatAddon;
+
+            return null;
+        }
+        
         void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
         {
             // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
@@ -625,6 +640,7 @@ namespace Game.Entities
             Passenger.RemoveAurasByType(AuraType.Mounted);
 
             VehicleSeatRecord veSeat = Seat.Value.SeatInfo;
+            VehicleSeatAddon veSeatAddon = Seat.Value.SeatAddon;
 
             Player player = Passenger.ToPlayer();
             if (player != null)
@@ -644,10 +660,12 @@ namespace Game.Entities
             if (veSeat.HasFlag(VehicleSeatFlags.DisableGravity))
                 Passenger.SetDisableGravity(true);
 
-            if (Seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable))
-                Passenger.AddUnitFlag(UnitFlags.NotSelectable);
+            float o = veSeatAddon != null ? veSeatAddon.SeatOrientationOffset : 0.0f;
+            float x = veSeat.AttachmentOffset.X;
+            float y = veSeat.AttachmentOffset.Y;
+            float z = veSeat.AttachmentOffset.Z;
 
-            Passenger.m_movementInfo.transport.pos.Relocate(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z);
+            Passenger.m_movementInfo.transport.pos.Relocate(x, y, z, o);
             Passenger.m_movementInfo.transport.time = 0;
             Passenger.m_movementInfo.transport.seat = Seat.Key;
             Passenger.m_movementInfo.transport.guid = Target.GetBase().GetGUID();
@@ -669,8 +687,8 @@ namespace Game.Entities
 
             MoveSplineInit init = new(Passenger);
             init.DisableTransportPathTransformations();
-            init.MoveTo(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z, false, true);
-            init.SetFacing(0.0f);
+            init.MoveTo(x, y, z, false, true);
+            init.SetFacing(o);
             init.SetTransportEnter();
             Passenger.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
 
@@ -736,15 +754,17 @@ namespace Game.Entities
 
     public class VehicleSeat
     {
-        public VehicleSeat(VehicleSeatRecord seatInfo)
+        public VehicleSeat(VehicleSeatRecord seatInfo, VehicleSeatAddon seatAddon)
         {
             SeatInfo = seatInfo;
+            SeatAddon = seatAddon;
             Passenger.Reset();
         }
 
         public bool IsEmpty() { return Passenger.Guid.IsEmpty(); }
 
         public VehicleSeatRecord SeatInfo;
+        public VehicleSeatAddon SeatAddon;
         public PassengerInfo Passenger;
     }
 
@@ -768,5 +788,25 @@ namespace Game.Entities
     public class VehicleTemplate
     {
         public TimeSpan DespawnDelay;
+    }
+
+    public class VehicleSeatAddon
+    {
+        public float SeatOrientationOffset;
+        public float ExitParameterX;
+        public float ExitParameterY;
+        public float ExitParameterZ;
+        public float ExitParameterO;
+        public VehicleExitParameters ExitParameter;
+
+        public VehicleSeatAddon(float orientatonOffset, float exitX, float exitY, float exitZ, float exitO, byte param)
+        {
+            SeatOrientationOffset = orientatonOffset;
+            ExitParameterX = exitX;
+            ExitParameterY = exitY;
+            ExitParameterZ = exitZ;
+            ExitParameterO = exitO;
+            ExitParameter = (VehicleExitParameters)param;
+        }
     }
 }
