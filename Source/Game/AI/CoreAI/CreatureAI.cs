@@ -285,7 +285,7 @@ namespace Game.AI
         {
             if (!_isEngaged)
             {
-                Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
+                Log.outDebug(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
                 return;
             }
             _isEngaged = false;
@@ -295,7 +295,7 @@ namespace Game.AI
 
         public bool _EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
-            if (!IsEngaged())
+            if (me.IsInEvadeMode())
                 return false;
 
             if (!me.IsAlive())
