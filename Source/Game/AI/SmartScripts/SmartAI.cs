@@ -741,7 +741,7 @@ namespace Game.AI
 
             _isCharmed = charmed;
 
-            if (charmed)
+            if (charmed && !me.IsPossessed() && !me.IsVehicle())
                 me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
 
             if (!charmed && !me.IsInEvadeMode())
