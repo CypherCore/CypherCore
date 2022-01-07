@@ -2414,6 +2414,28 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.OverrideLight:
+                {
+                    WorldObject obj = GetBaseObject();
+                    if (obj != null)
+                    {
+                        obj.GetMap().SetZoneOverrideLight(e.Action.overrideLight.zoneId, e.Action.overrideLight.lightId, e.Action.overrideLight.fadeInTime);
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_LIGHT: {obj.GetGUID()} sets zone override light (zoneId: {e.Action.overrideLight.zoneId}, " +
+                            $"lightId: {e.Action.overrideLight.lightId}, fadeInTime: {e.Action.overrideLight.fadeInTime})");
+                    }
+                    break;
+                }
+                case SmartActions.OverrideWeather:
+                {
+                    WorldObject obj = GetBaseObject();
+                    if (obj != null)
+                    {
+                        obj.GetMap().SetZoneWeather(e.Action.overrideWeather.zoneId, (WeatherState)e.Action.overrideWeather.weatherId, e.Action.overrideWeather.weatherGrade);
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_OVERRIDE_WEATHER: {obj.GetGUID()} sets zone weather (zoneId: {e.Action.overrideWeather.zoneId}, " +
+                            $"weatherId: {e.Action.overrideWeather.weatherId}, weatherGrade: {e.Action.overrideWeather.weatherGrade})");
+                    }
+                    break;
+                }
                 case SmartActions.PlaySpellVisualKit:
                 {
                     foreach (var target in targets)

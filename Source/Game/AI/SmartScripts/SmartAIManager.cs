@@ -1450,6 +1450,46 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.OverrideLight:
+                {
+                    var areaEntry = CliDB.AreaTableStorage.LookupByKey(e.Action.overrideLight.zoneId);
+                    if (areaEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent zoneId {e.Action.overrideLight.zoneId}, skipped.");
+                        return false;
+                    }
+
+                    if (areaEntry.ParentAreaID != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideLight.zoneId}) instead of zone, skipped.");
+                        return false;
+                    }
+
+                    if (!CliDB.LightStorage.ContainsKey(e.Action.overrideLight.lightId))
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent lightId {e.Action.overrideLight.lightId}, skipped.");
+                        return false;
+                    }
+
+                    break;
+                }
+                case SmartActions.OverrideWeather:
+                {
+                    var areaEntry = CliDB.AreaTableStorage.LookupByKey(e.Action.overrideWeather.zoneId);
+                    if (areaEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent zoneId {e.Action.overrideWeather.zoneId}, skipped.");
+                        return false;
+                    }
+
+                    if (areaEntry.ParentAreaID != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideWeather.zoneId}) instead of zone, skipped.");
+                        return false;
+                    }
+
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
@@ -2563,6 +2603,12 @@ namespace Game.AI
         public SpellVisualKit spellVisualKit;
 
         [FieldOffset(4)]
+        public OverrideLight overrideLight;
+
+        [FieldOffset(4)]
+        public OverrideWeather overrideWeather;
+
+        [FieldOffset(4)]
         public Conversation conversation;
 
         [FieldOffset(4)]
@@ -3090,6 +3136,18 @@ namespace Game.AI
             public uint spellVisualKitId;
             public uint kitType;
             public uint duration;
+        }
+        public struct OverrideLight
+        {
+            public uint zoneId;
+            public uint lightId;
+            public uint fadeInTime;
+        }
+        public struct OverrideWeather
+        {
+            public uint zoneId;
+            public uint weatherId;
+            public uint weatherGrade;
         }
         public struct Conversation
         {

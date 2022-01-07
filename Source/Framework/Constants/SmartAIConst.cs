@@ -381,7 +381,7 @@ namespace Framework.Constants
         LoadEquipment = 124,    // id
         TriggerRandomTimedEvent = 125,    // id min range, id max range
         RemoveAllGameobjects = 126,
-        RemoveMovement = 127,	  // movementType, forced
+        PauseMovement = 127,	  // MovementSlot (default = 0, active = 1, controlled = 2), PauseTime (ms), Force
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId
@@ -392,6 +392,8 @@ namespace Framework.Constants
         PlayCinematic = 135,    // entry, cinematic
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
+        OverrideLight = 138,    // zoneId, lightId, fadeInTime
+        OverrideWeather = 139,    // zoneId, weatherId, weatherGrade
         CreateConversation = 143, // conversation_template.id
         End = 144
     }
