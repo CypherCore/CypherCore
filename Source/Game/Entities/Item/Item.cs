@@ -1317,11 +1317,16 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        public override void AddToObjectUpdate()
+        public override bool AddToObjectUpdate()
         {
             Player owner = GetOwner();
             if (owner)
+            {
                 owner.GetMap().AddUpdateObject(this);
+                return true;
+            }
+
+            return false;
         }
 
         public override void RemoveFromObjectUpdate()

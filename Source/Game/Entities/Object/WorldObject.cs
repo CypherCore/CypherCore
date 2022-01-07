@@ -724,10 +724,7 @@ namespace Game.Entities
         public void AddToObjectUpdateIfNeeded()
         {
             if (IsInWorld && !m_objectUpdated)
-            {
-                AddToObjectUpdate();
-                m_objectUpdated = true;
-            }
+                m_objectUpdated = AddToObjectUpdate();
         }
 
         public virtual void ClearUpdateMask(bool remove)
@@ -2778,9 +2775,10 @@ namespace Game.Entities
             ClearUpdateMask(false);
         }
 
-        public virtual void AddToObjectUpdate()
+        public virtual bool AddToObjectUpdate()
         {
             GetMap().AddUpdateObject(this);
+            return true;
         }
 
         public virtual void RemoveFromObjectUpdate()
