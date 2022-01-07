@@ -255,12 +255,6 @@ namespace Game.Entities
             if (creature != null && creature.IsInEvadeMode())
                 return false;
 
-            if (HasUnitFlag(UnitFlags.Pacified))
-                return false;
-
-            if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
-                return false;
-
             // nobody can attack GM in GM-mode
             if (victim.IsTypeId(TypeId.Player))
             {
@@ -487,6 +481,9 @@ namespace Game.Entities
         public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
         {
             if (HasUnitState(UnitState.CannotAutoattack) || HasUnitFlag(UnitFlags.Pacified))
+                return;
+
+            if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
                 return;
 
             if (!victim.IsAlive())
