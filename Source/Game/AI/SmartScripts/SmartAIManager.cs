@@ -1465,7 +1465,7 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (!CliDB.LightStorage.ContainsKey(e.Action.overrideLight.overrideLightId))
+                    if (e.Action.overrideLight.overrideLightId != 0 && !CliDB.LightStorage.ContainsKey(e.Action.overrideLight.overrideLightId))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent overrideLightId {e.Action.overrideLight.overrideLightId}, skipped.");
                         return false;
