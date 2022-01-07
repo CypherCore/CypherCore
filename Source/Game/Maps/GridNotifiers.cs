@@ -2696,7 +2696,7 @@ namespace Game.Maps
             if (!go.IsSpawned())
                 return false;
 
-            float dist = go.GetGoInfo().GetSpellFocusRadius() / 2.0f;
+            float dist = go.GetGoInfo().GetSpellFocusRadius();
             return go.IsWithinDistInMap(_caster, dist);
         }
 
