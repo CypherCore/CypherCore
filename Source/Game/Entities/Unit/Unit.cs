@@ -242,13 +242,13 @@ namespace Game.Entities
             _spellHistory.Update();
         }
 
-        public void HandleEmoteCommand(Emote animId, Player target = null, uint[] spellVisualKitIds = null)
+        public void HandleEmoteCommand(Emote emoteId, Player target = null, uint[] spellVisualKitIds = null)
         {
             EmoteMessage packet = new();
             packet.Guid = GetGUID();
-            packet.EmoteID = (uint)animId;
+            packet.EmoteID = (uint)emoteId;
 
-            var emotesEntry = CliDB.EmotesStorage.LookupByKey(animId);
+            var emotesEntry = CliDB.EmotesStorage.LookupByKey(emoteId);
             if (emotesEntry != null && spellVisualKitIds != null)
                 if (emotesEntry.AnimId == (uint)Anim.MountSpecial || emotesEntry.AnimId == (uint)Anim.MountSelfSpecial)
                     packet.SpellVisualKitIDs.AddRange(spellVisualKitIds);
@@ -2878,6 +2878,32 @@ namespace Game.Entities
                 gain = maxHealth - curHealth;
 
             return gain;
+        }
+
+        void TriggerOnHealthChangeAuras(ulong oldVal, ulong newVal)
+        {
+            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.TriggerSpellOnHealthPct))
+            {
+                int triggerHealthPct = effect.GetAmount();
+                uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
+                ulong threshold = CountPctFromMaxHealth(triggerHealthPct);
+
+                switch ((AuraTriggerOnHealthChangeDirection)effect.GetMiscValue())
+                {
+                    case AuraTriggerOnHealthChangeDirection.Above:
+                        if (newVal < threshold || oldVal > threshold)
+                            continue;
+                        break;
+                    case AuraTriggerOnHealthChangeDirection.Below:
+                        if (newVal > threshold || oldVal < threshold)
+                            continue;
+                        break;
+                    default:
+                        break;
+                }
+
+                CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
+            }
         }
 
         public bool IsImmuneToAll() { return IsImmuneToPC() && IsImmuneToNPC(); }

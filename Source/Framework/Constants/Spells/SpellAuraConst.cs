@@ -545,6 +545,18 @@ namespace Framework.Constants
         RealOrReapplyMask = (Reapply | Real)
     }
 
+    public enum AuraTriggerOnPowerChangeDirection
+    {
+        Gain = 0,
+        Loss = 1
+    }
+
+    public enum AuraTriggerOnHealthChangeDirection
+    {
+        Above = 0,
+        Below = 1,
+    }
+
     // Diminishing Returns Types
     public enum DiminishingReturnsType
     {
@@ -577,11 +589,5 @@ namespace Framework.Constants
         Immune = 3,
         Level4 = 3,
         TauntImmune = 4
-    }
-
-    public enum AuraTriggerOnPowerChangeDirection
-    {
-        Gain = 0,
-        Loss = 1
     }
 }

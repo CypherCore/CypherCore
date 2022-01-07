@@ -3538,6 +3538,33 @@ namespace Game.Spells
             target.ModifyPower(powerType, change);
         }
 
+        [AuraEffectHandler(AuraType.TriggerSpellOnHealthPct)]
+        void HandleTriggerSpellOnHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasFlag(AuraEffectHandleModes.Real) || !apply)
+                return;
+
+            Unit target = aurApp.GetTarget();
+            int thresholdPct = GetAmount();
+            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+
+            switch ((AuraTriggerOnHealthChangeDirection)GetMiscValue())
+            {
+                case AuraTriggerOnHealthChangeDirection.Above:
+                    if (!target.HealthAbovePct(thresholdPct))
+                        return;
+                    break;
+                case AuraTriggerOnHealthChangeDirection.Below:
+                    if (!target.HealthBelowPct(thresholdPct))
+                        return;
+                    break;
+                default:
+                    break;
+            }
+
+            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(this));
+        }
+
         /********************************/
         /***          FIGHT           ***/
         /********************************/
