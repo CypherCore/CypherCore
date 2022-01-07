@@ -146,18 +146,29 @@ namespace Game.Entities
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
 
-                if (minion.m_Properties != null && minion.m_Properties.Title == SummonTitle.Companion)
+                var properties = minion.m_Properties;
+                if (properties != null && properties.Title == SummonTitle.Companion)
                 {
                     SetCritterGUID(minion.GetGUID());
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                     {
-                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
-                        if (pet != null)
+                        if (properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
-                            minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
-                            minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
-                            minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
+                            var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
+                            if (pet != null)
+                            {
+                                minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
+                                minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
+                                minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
+
+                                uint display = pet.PacketInfo.DisplayID;
+                                if (display != 0)
+                                {
+                                    minion.SetDisplayId(display);
+                                    minion.SetNativeDisplayId(display);
+                                }
+                            }
                         }
                     }
                 }

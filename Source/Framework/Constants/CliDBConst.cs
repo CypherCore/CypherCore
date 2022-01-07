@@ -1743,7 +1743,7 @@ namespace Framework.Constants
         CannotDismissPet = 0x20, // NYI
         UseDemonTimeout = 0x40, // NYI
         UnlimitedSummons = 0x80, // NYI
-        UseCreatureLevel = 0x100, // NYI
+        UseCreatureLevel = 0x100,
         JoinSummonerSpawnGroup = 0x200, // NYI
         DoNotToggle = 0x400, // NYI
         DespawnWhenExpired = 0x800, // NYI
@@ -1756,7 +1756,7 @@ namespace Framework.Constants
         CastRideVehicleSpellOnSummoner = 0x40000, // NYI
         GuardianActsLikePet = 0x80000, // NYI
         DontSnapSessileToGround = 0x100000, // NYI
-        SummonFromBattlePetJournal = 0x200000, // NYI
+        SummonFromBattlePetJournal = 0x200000,
         UnitClutter = 0x400000, // NYI
         DefaultNameColor = 0x800000, // NYI
         UseOwnInvisibilityDetection = 0x1000000, // NYI. Ignore Owner's Invisibility Detection

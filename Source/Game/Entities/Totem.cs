@@ -83,8 +83,6 @@ namespace Game.Entities
                     m_type = TotemType.Active;
 
             m_duration = duration;
-
-            SetLevel(GetOwner().GetLevel());
         }
 
         public override void InitSummon()

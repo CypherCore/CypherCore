@@ -188,12 +188,8 @@ namespace Game.Entities
 
             Unit owner = GetSummonerUnit();
             if (owner != null && IsTrigger() && m_spells[0] != 0)
-            {
-                SetLevel(owner.GetLevel());
                 if (owner.IsTypeId(TypeId.Player))
                     m_ControlledByPlayer = true;
-            }
-
 
             if (m_Properties == null)
                 return;
@@ -211,15 +207,20 @@ namespace Game.Entities
                     }
                     owner.m_SummonSlot[slot] = GetGUID();
                 }
+
+                if (!m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
+                    SetLevel(owner.GetLevel());
             }
 
             uint faction = m_Properties.Faction;
-            if (m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
-                if (owner)
-                    faction = owner.GetFaction();
+            if (owner && m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+                faction = owner.GetFaction();
 
             if (faction != 0)
                 SetFaction(faction);
+
+            if (m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                RemoveNpcFlag(NPCFlags.WildBattlePet);
         }
 
         public virtual void InitSummon()

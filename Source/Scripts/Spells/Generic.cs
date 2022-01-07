@@ -4149,6 +4149,33 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]// 118301 - Summon Battle Pet
+    class spell_summon_battle_pet : SpellScript
+    {
+        void HandleSummon(uint effIndex)
+        {
+            uint creatureId = (uint)GetSpellValue().EffectBasePoints[effIndex];
+            if (Global.ObjectMgr.GetCreatureTemplate(creatureId) != null)
+            {
+                PreventHitDefaultEffect(effIndex);
+
+                Unit caster = GetCaster();
+                var properties = CliDB.SummonPropertiesStorage.LookupByKey((uint)GetEffectInfo().MiscValueB);
+                uint duration = (uint)GetSpellInfo().CalcDuration(caster);
+                Position pos = GetHitDest().GetPosition();
+
+                Creature summon = caster.GetMap().SummonCreature(creatureId, pos, properties, duration, caster, GetSpellInfo().Id);
+                if (summon != null)
+                    summon.SetImmuneToAll(true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleSummon, 0, SpellEffectName.Summon));
+        }
+    }
+    
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
     {

@@ -20,6 +20,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -659,10 +660,17 @@ namespace Game.BattlePets
             if (speciesEntry == null)
                 return;
 
-            // TODO: set proper CreatureID for spell SPELL_SUMMON_BATTLE_PET (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
             Player player = _owner.GetPlayer();
             player.SetBattlePetData(pet);
-            player.CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.SpellSummonBattlePet);
+
+            CastSpellExtraArgs args = new();
+            uint summonSpellId = speciesEntry.SummonSpellID;
+            if (summonSpellId == 0)
+            {
+                summonSpellId = SharedConst.SpellSummonBattlePet;
+                args.AddSpellMod(SpellValueMod.BasePoint0, (int)speciesEntry.CreatureID);
+            }
+            player.CastSpell(_owner.GetPlayer(), summonSpellId, args);
         }
 
         public void DismissPet()

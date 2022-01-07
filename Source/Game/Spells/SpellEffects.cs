@@ -1598,9 +1598,6 @@ namespace Game.Spells
                             if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
                                 return;
 
-                            summon.SelectLevel();       // some summoned creaters have different from 1 DB data for level/hp
-                            summon.SetNpcFlags((NPCFlags)((int)summon.GetCreatureTemplate().Npcflag & 0xFFFFFFFF));
-                            summon.SetNpcFlags2((NPCFlags2)((int)summon.GetCreatureTemplate().Npcflag >> 32));
                             summon.SetImmuneToAll(true);
 
                             break;
@@ -4504,21 +4501,6 @@ namespace Game.Spells
                 unitCaster = unitCaster.ToTotem().GetOwner();
 
             // in another case summon new
-            uint level = unitCaster.GetLevel();
-
-            // level of pet summoned using engineering item based at engineering skill level
-            if (m_CastItem != null && unitCaster.IsPlayer())
-            {
-                ItemTemplate proto = m_CastItem.GetTemplate();
-                if (proto != null)
-                    if (proto.GetRequiredSkill() == (uint)SkillType.Engineering)
-                    {
-                        ushort skill202 = unitCaster.ToPlayer().GetSkillValue(SkillType.Engineering);
-                        if (skill202 != 0)
-                            level = (uint)(skill202 / 5);
-                    }
-            }
-
             float radius = 5.0f;
             int duration = m_spellInfo.CalcDuration(m_originalCaster);
 
@@ -4537,8 +4519,30 @@ namespace Game.Spells
                 TempSummon summon = map.SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                 if (summon == null)
                     return;
+
                 if (summon.HasUnitTypeMask(UnitTypeMask.Guardian))
+                {
+                    uint level = summon.GetLevel();
+                    if (properties != null && !properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
+                        level = unitCaster.GetLevel();
+
+                    // level of pet summoned using engineering item based at engineering skill level
+                    if (m_CastItem && unitCaster.IsPlayer())
+                    {
+                        ItemTemplate proto = m_CastItem.GetTemplate();
+                        if (proto != null)
+                        {
+                            if (proto.GetRequiredSkill() == (uint)SkillType.Engineering)
+                            {
+                                ushort skill202 = unitCaster.ToPlayer().GetSkillValue(SkillType.Engineering);
+                                if (skill202 != 0)
+                                    level = skill202 / 5u;
+                            }
+                        }
+                    }
+
                     ((Guardian)summon).InitStatsForLevel(level);
+                }
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())
                     ((Minion)summon).SetFollowAngle(unitCaster.GetAbsoluteAngle(summon.GetPosition()));
