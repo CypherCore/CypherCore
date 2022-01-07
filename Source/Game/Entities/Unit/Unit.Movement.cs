@@ -1700,20 +1700,30 @@ namespace Game.Entities
 
         void UpdateSplineMovement(uint diff)
         {
-            int positionUpdateDelay = 400;
-
             if (MoveSpline.Finalized())
                 return;
 
             MoveSpline.UpdateState((int)diff);
             bool arrived = MoveSpline.Finalized();
 
+            if (MoveSpline.IsCyclic())
+            {
+                splineSyncTimer.Update((int)diff);
+                if (splineSyncTimer.Passed())
+                {
+                    splineSyncTimer.Reset(5000); // Retail value, do not change
+
+                    FlightSplineSync flightSplineSync = new();
+                    flightSplineSync.Guid = GetGUID();
+                    flightSplineSync.SplineDist = MoveSpline.TimePassed() / MoveSpline.Duration();
+                    SendMessageToSet(flightSplineSync, true);
+                }
+            }
+
             if (arrived)
                 DisableSpline();
 
-            movesplineTimer.Update((int)diff);
-            if (movesplineTimer.Passed() || arrived)
-                UpdateSplinePosition();
+            UpdateSplinePosition();
         }
         void UpdateSplinePosition()
         {

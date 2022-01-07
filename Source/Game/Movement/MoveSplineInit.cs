@@ -100,7 +100,8 @@ namespace Game.Movement
             // correct first vertex
             args.path[0] = new Vector3(real_position.X, real_position.Y, real_position.Z);
             args.initialOrientation = real_position.W;
-            move_spline.onTransport = !unit.GetTransGUID().IsEmpty();
+            args.flags.SetUnsetFlag(SplineFlag.EnterCycle, args.flags.HasFlag(SplineFlag.Cyclic));
+            move_spline.onTransport = transport;
 
             MovementFlag moveFlags = unit.m_movementInfo.GetMovementFlags();
             if (!args.flags.HasFlag(SplineFlag.Backward))

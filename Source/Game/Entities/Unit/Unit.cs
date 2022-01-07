@@ -87,7 +87,7 @@ namespace Game.Entities
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
-            movesplineTimer = new TimeTrackerSmall();
+            splineSyncTimer = new TimeTrackerSmall();
 
             m_unitData = new UnitData();
         }

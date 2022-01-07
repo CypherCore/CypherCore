@@ -88,7 +88,10 @@ namespace Game.Movement
             Spline.EvaluationMode[] modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
             if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
-                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], 0, args.initialOrientation);
+                int cyclic_point = 0;
+                if (splineflags.HasFlag(SplineFlag.EnterCycle))
+                    cyclic_point = 1;   // shouldn't be modified, came from client
+                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
             }
             else
             {
@@ -288,6 +291,40 @@ namespace Game.Movement
                         point_Idx = spline.First();
                         time_passed %= Duration();
                         result = UpdateResult.NextCycle;
+                        // Remove first point from the path after one full cycle.
+                        // That point was the position of the unit prior to entering the cycle and it shouldn't be repeated with continuous cycles.
+                        if (splineflags.HasFlag(SplineFlag.EnterCycle))
+                        {
+                            splineflags.SetUnsetFlag(SplineFlag.EnterCycle, false);
+
+                            MoveSplineInitArgs args = new(spline.GetPointCount());
+                            args.path = spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray();
+                            args.facing = facing;
+                            args.flags = splineflags;
+                            args.path_Idx_offset = point_Idx_offset;
+                            // MoveSplineFlag::Parabolic | MoveSplineFlag::Animation not supported currently
+                            //args.parabolic_amplitude = ?;
+                            //args.time_perc = ?;
+                            args.splineId = m_Id;
+                            args.initialOrientation = initialOrientation;
+                            args.velocity = 1.0f; // Calculated below
+                            args.HasVelocity = true;
+                            args.TransformForTransport = onTransport;
+                            if (args.Validate(null))
+                            {
+                                // New cycle should preserve previous cycle's duration for some weird reason, even though
+                                // the path is really different now. Blizzard is weird. Or this was just a simple oversight.
+                                // Since our splines precalculate length with velocity in mind, if we want to find the desired
+                                // velocity, we have to make a fake spline, calculate its duration and then compare it to the
+                                // desired duration, thus finding out how much the velocity has to be increased for them to match.
+                                MoveSpline tempSpline = new();
+                                tempSpline.Initialize(args);
+                                args.velocity = (float)tempSpline.Duration() / Duration();
+
+                                if (args.Validate(null))
+                                    InitSpline(args);
+                            }
+                        }
                     }
                     else
                     {

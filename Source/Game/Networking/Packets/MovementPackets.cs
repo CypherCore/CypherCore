@@ -454,6 +454,20 @@ namespace Game.Networking.Packets
         public Vector3 Pos;
     }
 
+    class FlightSplineSync : ServerPacket
+    {
+        public FlightSplineSync() : base(ServerOpcodes.FlightSplineSync, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Guid);
+            _worldPacket.WriteFloat(SplineDist);
+        }
+
+        public ObjectGuid Guid;
+        public float SplineDist;
+    }
+    
     public class MoveSplineSetSpeed : ServerPacket
     {
         public MoveSplineSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
