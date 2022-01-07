@@ -32,6 +32,7 @@ namespace Scripts.Spells.Shaman
         public const uint AncestralGuidance = 108281;
         public const uint AncestralGuidanceHeal = 114911;
         public const uint ChainLightningEnergize = 195897;
+        public const uint ChainLightningOverloadEnergize = 218558;
         public const uint ChainedHeal = 70809;
         public const uint CrashLightningCleave = 187878;
         public const uint EarthShieldHeal = 204290;
@@ -39,7 +40,9 @@ namespace Scripts.Spells.Shaman
         public const uint EarthenRagePeriodic = 170377;
         public const uint EarthenRageDamage = 170379;
         public const uint Electrified = 64930;
+        public const uint ElementalBlast = 117014;
         public const uint ElementalBlastCrit = 118522;
+        public const uint ElementalBlastEnergize = 344645;
         public const uint ElementalBlastHaste = 173183;
         public const uint ElementalBlastMastery = 173184;
         public const uint ElementalMastery = 16166;
@@ -61,6 +64,7 @@ namespace Scripts.Spells.Shaman
         public const uint LavaBurstBonusDamage = 71824;
         public const uint LavaSurge = 77762;
         public const uint LightingBoltEnergize = 214815;
+        public const uint LightingBoltOverloadEnergize = 214816;
         public const uint LiquidMagmaHit = 192231;
         public const uint MaelstromController = 343725;
         public const uint PathOfFlamesSpread = 210621;
@@ -169,7 +173,7 @@ namespace Scripts.Spells.Shaman
         }
     }
 
-    [Script] // 188443 - Chain lightning
+    [Script] // 188443 - Chain Lightning
     class spell_sha_chain_lightning : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -183,6 +187,29 @@ namespace Scripts.Spells.Shaman
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 4);
             if (energizeAmount != null)
                 GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningEnergize, new CastSpellExtraArgs(energizeAmount)
+                    .AddSpellMod(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 45297 - Chain Lightning Overload
+    class spell_sha_chain_lightning_overload : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ChainLightningOverloadEnergize, SpellIds.MaelstromController)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 5;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 5);
+            if (energizeAmount != null)
+                GetCaster().CastSpell(GetCaster(), SpellIds.ChainLightningOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))));
         }
 
@@ -316,29 +343,40 @@ namespace Scripts.Spells.Shaman
         }
     }
 
-    [Script] // 117014 - Elemental Blast
+             // 117014 - Elemental Blast
+    [Script] // 120588 - Elemental Blast Overload
     class spell_sha_elemental_blast : SpellScript
     {
+        uint[] BuffSpells = { SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery };
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
+            return ValidateSpellInfo(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery, SpellIds.MaelstromController)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 10;
         }
 
-        public override bool Load()
+        void HandleEnergize(uint effIndex)
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, GetSpellInfo().Id == SpellIds.ElementalBlast ? 9 : 10u);
+            if (energizeAmount != null)
+            GetCaster().CastSpell(GetCaster(), SpellIds.ElementalBlastEnergize, new CastSpellExtraArgs(energizeAmount)
+                .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
         }
 
         void TriggerBuff()
         {
-            Player caster = GetCaster().ToPlayer();
-            uint spellId = RandomHelper.RAND(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
+            Unit caster = GetCaster();
+            uint spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId =>
+            {
+                return !caster.HasAura(buffSpellId) ? 1.0f : 0.0f;
+            });
 
-            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetCaster().CastSpell(GetCaster(), spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
         {
+            OnEffectLaunch.Add(new EffectHandler(HandleEnergize, 0, SpellEffectName.SchoolDamage));
             AfterCast.Add(new CastHandler(TriggerBuff));
         }
     }
@@ -769,7 +807,30 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 45284 - Lightning Bolt Overload
+    class spell_sha_lightning_bolt_overload : SpellScript
+    {
+        public override  bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LightingBoltOverloadEnergize, SpellIds.MaelstromController)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 1;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 1);
+            if (energizeAmount != null)
+                GetCaster().CastSpell(GetCaster(), SpellIds.LightingBoltOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
+                    .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
         }
     }
     
