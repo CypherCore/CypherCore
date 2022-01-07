@@ -435,6 +435,7 @@ namespace Game.Scripting
         bool IsAfterTargetSelectionPhase()
         {
             return IsInHitPhase()
+                || IsInEffectHook()
                 || m_currentScriptState == (byte)SpellScriptHookType.OnCast
                 || m_currentScriptState == (byte)SpellScriptHookType.AfterCast
                 || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance;
