@@ -41,11 +41,30 @@ namespace Game
                     return;
             }
 
-            if (packet.ChannelName.IsEmpty())
+            if (packet.ChannelName.IsEmpty() || char.IsDigit(packet.ChannelName[0]))
+            {
+                ChannelNotify channelNotify = new();
+                channelNotify.Type = ChatNotify.InvalidNameNotice;
+                channelNotify.Channel = packet.ChannelName;
+                SendPacket(channelNotify);
                 return;
+            }
 
-            if (packet.ChannelName.IsNumber())
+            if (packet.ChannelName.Length > 31)
+            {
+                ChannelNotify channelNotify = new();
+                channelNotify.Type = ChatNotify.InvalidNameNotice;
+                channelNotify.Channel = packet.ChannelName;
+                SendPacket(channelNotify);
+                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a name more than 31 characters long - blocked");
                 return;
+            }
+
+            if (packet.Password.Length > 127)
+            {
+                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more that 127 characters long - blocked");
+                return;
+            }
 
             ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
             if (cMgr != null)
