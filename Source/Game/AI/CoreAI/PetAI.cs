@@ -623,6 +623,14 @@ namespace Game.AI
                 _allySet.Add(owner.GetGUID());
         }
 
+        public override void OnCharmed(bool isNew)
+        {
+            if (me.IsCharmed())
+                me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
+
+            base.OnCharmed(isNew);
+        }
+
         void ClearCharmInfoFlags()
         {
             // Quick access to set all flags to FALSE

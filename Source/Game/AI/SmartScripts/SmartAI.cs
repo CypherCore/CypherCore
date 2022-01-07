@@ -741,6 +741,9 @@ namespace Game.AI
 
             _isCharmed = charmed;
 
+            if (charmed)
+                me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
+
             if (!charmed && !me.IsInEvadeMode())
             {
                 if (_repeatWaypointPath)
