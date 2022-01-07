@@ -57,6 +57,9 @@ namespace Game.AI
                         me.EngageWithTarget(lastCharmer);
                 }
                 me.LastCharmerGUID.Clear();
+
+                if (!me.IsInCombat())
+                    EnterEvadeMode(EvadeReason.NoHostiles);
             }
 
             base.OnCharmed(isNew);
