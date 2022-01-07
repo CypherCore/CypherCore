@@ -189,7 +189,7 @@ namespace Game.SupportSystem
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));
@@ -327,7 +327,7 @@ namespace Game.SupportSystem
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));
@@ -433,7 +433,7 @@ namespace Game.SupportSystem
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
-            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
+            ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, TimeFormat.ShortText, false)));
 
             if (!_assignedTo.IsEmpty())
                 ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistassignedto, GetAssignedToName()));

@@ -100,7 +100,7 @@ namespace Game
                         if (_clientResponseTimer > maxClientResponseDelay * Time.InMilliseconds)
                         {
                             Log.outWarn(LogFilter.Warden, "{0} (latency: {1}, IP: {2}) exceeded Warden module response delay for more than {3} - disconnecting client",
-                                           _session.GetPlayerInfo(), _session.GetLatency(), _session.GetRemoteAddress(), Time.secsToTimeString(maxClientResponseDelay, true));
+                                           _session.GetPlayerInfo(), _session.GetLatency(), _session.GetRemoteAddress(), Time.secsToTimeString(maxClientResponseDelay, TimeFormat.ShortText));
                             _session.KickPlayer();
                         }
                         else

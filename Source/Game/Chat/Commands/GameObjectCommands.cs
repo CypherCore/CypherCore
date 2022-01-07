@@ -495,8 +495,8 @@ namespace Game.Chat
                 if (curRespawnDelay < 0)
                     curRespawnDelay = 0;
 
-                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, true);
-                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
+                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
+                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
                 handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
             }

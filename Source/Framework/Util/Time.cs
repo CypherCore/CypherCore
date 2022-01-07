@@ -16,6 +16,14 @@
  */
 
 using System;
+using System.Text;
+
+public enum TimeFormat
+{
+    FullText,       // 1 Days 2 Hours 3 Minutes 4 Seconds
+    ShortText,      // 1d 2h 3m 4s
+    Numeric         // 1:2:3:4
+}
 
 public static class Time
 {
@@ -133,27 +141,87 @@ public static class Time
         return hourLocal;
     }
 
-    public static string secsToTimeString(ulong timeInSecs, bool shortText = false, bool hoursOnly = false)
+    public static string secsToTimeString(ulong timeInSecs, TimeFormat timeFormat = TimeFormat.FullText, bool hoursOnly = false)
     {
         ulong secs = timeInSecs % Minute;
         ulong minutes = timeInSecs % Hour / Minute;
         ulong hours = timeInSecs % Day / Hour;
         ulong days = timeInSecs / Day;
 
-        string ss = "";
+        StringBuilder ss = new();
         if (days != 0)
-            ss += days + (shortText ? "d" : " Day(s) ");
+        {
+            ss.Append(days);
+            if (timeFormat == TimeFormat.Numeric)
+                ss.Append(":");
+            else if (timeFormat == TimeFormat.ShortText)
+                ss.Append("d");
+            else // if (timeFormat == TimeFormat::FullText)
+            {
+                if (days == 1)
+                    ss.Append(" Day ");
+                else
+                    ss.Append(" Days ");
+            }
+        }
         if (hours != 0 || hoursOnly)
-            ss += hours + (shortText ? "h" : " Hour(s) ");
+        {
+            ss.Append(hours);
+            if (timeFormat == TimeFormat.Numeric)
+                ss.Append(":");
+            else if (timeFormat == TimeFormat.ShortText)
+                ss.Append("h");
+            else // if (timeFormat == TimeFormat::FullText)
+            {
+                if (hours <= 1)
+                    ss.Append(" Hour ");
+                else
+                    ss.Append(" Hours ");
+            }
+        }
         if (!hoursOnly)
         {
             if (minutes != 0)
-                ss += minutes + (shortText ? "m" : " Minute(s) ");
+            {
+                ss.Append(minutes);
+                if (timeFormat == TimeFormat.Numeric)
+                    ss.Append(":");
+                else if (timeFormat == TimeFormat.ShortText)
+                    ss.Append("m");
+                else // if (timeFormat == TimeFormat::FullText)
+                {
+                    if (minutes == 1)
+                        ss.Append(" Minute ");
+                    else
+                        ss.Append(" Minutes ");
+                }
+            }
+            else
+            {
+                if (timeFormat == TimeFormat.Numeric)
+                    ss.Append("0:");
+            }
             if (secs != 0 || (days == 0 && hours == 0 && minutes == 0))
-                ss += secs + (shortText ? "s" : " Second(s).");
+            {
+                ss.Append($"{secs:2}");
+                if (timeFormat == TimeFormat.ShortText)
+                    ss.Append("s");
+                else if (timeFormat == TimeFormat.FullText)
+                {
+                    if (secs <= 1)
+                        ss.Append(" Second.");
+                    else
+                        ss.Append(" Seconds.");
+                }
+            }
+            else
+            {
+                if (timeFormat == TimeFormat.Numeric)
+                    ss.Append("00");
+            }
         }
 
-        return ss;
+        return ss.ToString();
     }
 
     public static uint TimeStringToSecs(string timestring)

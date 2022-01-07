@@ -1842,7 +1842,7 @@ namespace Game
                 (m_ShutdownTimer < 12 * Time.Hour && (m_ShutdownTimer % Time.Hour) == 0) || // < 12 h ; every 1 h
                 (m_ShutdownTimer > 12 * Time.Hour && (m_ShutdownTimer % (12 * Time.Hour)) == 0)) // > 12 h ; every 12 h
             {
-                var str = Time.secsToTimeString(m_ShutdownTimer);
+                var str = Time.secsToTimeString(m_ShutdownTimer, TimeFormat.Numeric);
                 if (!reason.IsEmpty())
                     str += " - " + reason;
 

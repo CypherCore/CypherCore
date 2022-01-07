@@ -135,8 +135,8 @@ namespace Game.Chat
             if (curRespawnDelay < 0)
                 curRespawnDelay = 0;
 
-            string curRespawnDelayStr = Time.secsToTimeString((ulong)curRespawnDelay, true);
-            string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
+            string curRespawnDelayStr = Time.secsToTimeString((ulong)curRespawnDelay, TimeFormat.ShortText);
+            string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
             handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetName(), target.GetSpawnId(), target.GetGUID().ToString(), entry, faction, npcflags, displayid, nativeid);
             if (target.GetCreatureData() != null && target.GetCreatureData().spawnGroupData.groupId != 0)

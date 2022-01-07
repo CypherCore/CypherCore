@@ -1738,11 +1738,11 @@ namespace Game.Chat
 
             // Output III. LANG_PINFO_BANNED if ban exists and is applied
             if (banTime >= 0)
-                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((ulong)(banTime - GameTime.GetGameTime()), true) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
+                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((ulong)(banTime - GameTime.GetGameTime()), TimeFormat.ShortText) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
 
             // Output IV. LANG_PINFO_MUTED if mute is applied
             if (muteTime > 0)
-                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((ulong)(muteTime - GameTime.GetGameTime()), true), muteBy);
+                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((ulong)(muteTime - GameTime.GetGameTime()), TimeFormat.ShortText), muteBy);
 
             // Output V. LANG_PINFO_ACC_ACCOUNT
             handler.SendSysMessage(CypherStrings.PinfoAccAccount, userName, accId, security);
@@ -1817,7 +1817,7 @@ namespace Game.Chat
             }
 
             // Output XX. LANG_PINFO_CHR_PLAYEDTIME
-            handler.SendSysMessage(CypherStrings.PinfoChrPlayedtime, (Time.secsToTimeString(totalPlayerTime, true, true)));
+            handler.SendSysMessage(CypherStrings.PinfoChrPlayedtime, (Time.secsToTimeString(totalPlayerTime, TimeFormat.ShortText, true)));
 
             // Mail Data - an own query, because it may or may not be useful.
             // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
