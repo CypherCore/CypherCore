@@ -6165,7 +6165,7 @@ namespace Game.Spells
                             if (spellEffectInfo.ItemType != 0)
                             {
                                 List<ItemPosCount> dest = new();
-                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, 1);
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, spellEffectInfo.CalcValue());
                                 if (msg != InventoryResult.Ok)
                                 {
                                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
