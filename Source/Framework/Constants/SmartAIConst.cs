@@ -392,10 +392,15 @@ namespace Framework.Constants
         PlayCinematic = 135,    // entry, cinematic
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
-        OverrideLight = 138,    // zoneId, lightId, fadeInTime
-        OverrideWeather = 139,    // zoneId, weatherId, weatherGrade
+        OverrideLight = 138,    // zoneId, overrideLightID, transitionMilliseconds
+        OverrideWeather = 139,    // zoneId, weatherId, intensity
         CreateConversation = 143, // conversation_template.id
-        End = 144
+        SetImmunePC = 144,    // 0/1
+        SetImmuneNPC = 145,    // 0/1
+        SetUninteractible = 146,    // 0/1
+        ActivateGameobject = 147,    // GameObjectActions
+        AddToStoredTargetList = 148, // varID
+        End
     }
 
     public enum SmartTargets

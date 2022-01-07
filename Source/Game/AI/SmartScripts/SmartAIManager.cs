@@ -1584,6 +1584,7 @@ namespace Game.AI
                 case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.DespawnSpawngroup:
+                case SmartActions.AddToStoredTargetList:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
@@ -2618,6 +2619,9 @@ namespace Game.AI
         public Conversation conversation;
 
         [FieldOffset(4)]
+        public AddToStoredTargets addToStoredTargets;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -3157,6 +3161,10 @@ namespace Game.AI
             public uint intensity;
         }
         public struct Conversation
+        {
+            public uint id;
+        }
+        public struct AddToStoredTargets
         {
             public uint id;
         }

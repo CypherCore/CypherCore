@@ -2477,6 +2477,17 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.AddToStoredTargetList:
+                {
+                    if (!targets.Empty())
+                        AddToStoredTargetList(targets, e.Action.addToStoredTargets.id);
+                    else
+                    {
+                        WorldObject baseObject = GetBaseObject();
+                        Log.outWarn(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_ADD_TO_STORED_TARGET_LIST: var {e.Action.addToStoredTargets.id}, baseObject {(baseObject == null ? "" : baseObject.GetName())}, event {e.EventId} - tried to add no targets to stored target list");
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;
@@ -2913,7 +2924,7 @@ namespace Game.AI
                 }
                 case SmartTargets.ClosestCreature:
                 {
-                    WorldObject  refObj = baseObject;
+                    WorldObject refObj = baseObject;
                     if (refObj == null)
                         refObj = scriptTrigger;
 
@@ -4303,6 +4314,14 @@ namespace Game.AI
             _storedTargets.Add(id, new ObjectGuidList(targets));
         }
 
+        void AddToStoredTargetList(List<WorldObject> targets, uint id)
+        {
+            var inserted = _storedTargets.TryAdd(id, new ObjectGuidList(targets));
+            if (!inserted)
+                foreach (WorldObject obj in targets)
+                    _storedTargets[id].AddGuid(obj.GetGUID());
+        }
+
         public List<WorldObject> GetStoredTargetList(uint id, WorldObject obj)
         {
             var list = _storedTargets.LookupByKey(id);
@@ -4451,6 +4470,8 @@ namespace Game.AI
             UpdateObjects(obj);
             return _objectList;
         }
+
+        public void AddGuid(ObjectGuid guid) { _guidList.Add(guid); }
 
         //sanitize vector using _guidVector
         void UpdateObjects(WorldObject obj)
