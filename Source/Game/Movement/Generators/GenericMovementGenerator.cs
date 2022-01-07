@@ -70,7 +70,10 @@ namespace Game.Movement
             if (!owner || HasFlag(MovementGeneratorFlags.Finalized))
                 return false;
 
-            _duration.Update((int)diff);
+            // Cyclic splines never expire, so update the duration only if it's not cyclic
+            if (!owner.MoveSpline.IsCyclic())
+                _duration.Update((int)diff);
+
             if (_duration.Passed() || owner.MoveSpline.Finalized())
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
