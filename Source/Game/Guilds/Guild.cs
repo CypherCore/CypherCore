@@ -824,6 +824,13 @@ namespace Game.Guilds
             // Call script after validation and before money transfer.
             Global.ScriptMgr.OnGuildMemberDepositMoney(this, player, amount);
 
+            if (m_bankMoney > GuildConst.MoneyLimit - amount)
+            {
+                if (!cashFlow)
+                    SendCommandResult(session, GuildCommandType.MoveItem, GuildCommandError.TooMuchMoney);
+                return;
+            }
+
             SQLTransaction trans = new();
             _ModifyBankMoney(trans, amount, true);
             if (!cashFlow)
