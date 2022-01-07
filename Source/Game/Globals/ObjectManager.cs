@@ -3366,7 +3366,7 @@ namespace Game
             var time = Time.GetMSTime();
 
             //                                         0              1   2    3           4           5           6            7        8             9              10
-            SQLResult result = DB.World.Query("SELECT creature.guid, id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, spawndist, " +
+            SQLResult result = DB.World.Query("SELECT creature.guid, id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, wander_distance, " +
                 //11               12         13       14            15                 16          17           18                19                   20                    21
                 "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
                 //22                     23                      24                25                   26                       27
@@ -3415,7 +3415,7 @@ namespace Game
                 data.displayid = result.Read<uint>(7);
                 data.equipmentId = result.Read<sbyte>(8);
                 data.spawntimesecs = result.Read<int>(9);
-                data.spawndist = result.Read<float>(10);
+                data.WanderDistance = result.Read<float>(10);
                 data.currentwaypoint = result.Read<uint>(11);
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
@@ -3477,25 +3477,25 @@ namespace Game
                             "but creature are not in instance.", guid, data.Id);
                 }
 
-                if (data.spawndist < 0.0f)
+                if (data.WanderDistance < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `spawndist`< 0, set to 0.", guid, data.Id);
-                    data.spawndist = 0.0f;
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `wander_distance`< 0, set to 0.", guid, data.Id);
+                    data.WanderDistance = 0.0f;
                 }
                 else if (data.movementType == (byte)MovementGeneratorType.Random)
                 {
-                    if (MathFunctions.fuzzyEq(data.spawndist, 0.0f))
+                    if (MathFunctions.fuzzyEq(data.WanderDistance, 0.0f))
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=1 (random movement) but with `spawndist`=0, replace by idle movement type (0).", guid, data.Id);
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=1 (random movement) but with `wander_distance`=0, replace by idle movement type (0).", guid, data.Id);
                         data.movementType = (byte)MovementGeneratorType.Idle;
                     }
                 }
                 else if (data.movementType == (byte)MovementGeneratorType.Idle)
                 {
-                    if (data.spawndist != 0.0f)
+                    if (data.WanderDistance != 0.0f)
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=0 (idle) have `spawndist`<>0, set to 0.", guid, data.Id);
-                        data.spawndist = 0.0f;
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=0 (idle) have `wander_distance`<>0, set to 0.", guid, data.Id);
+                        data.WanderDistance = 0.0f;
                     }
                 }
 
@@ -3620,7 +3620,7 @@ namespace Game
             data.equipmentId = 0;
 
             data.spawntimesecs = (int)spawntimedelay;
-            data.spawndist = 0;
+            data.WanderDistance = 0;
             data.currentwaypoint = 0;
             data.curhealth = (uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass) * cInfo.ModHealth * cInfo.ModHealthExtra);
             data.curmana = stats.GenerateMana(cInfo);

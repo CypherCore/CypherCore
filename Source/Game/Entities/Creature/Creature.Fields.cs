@@ -79,7 +79,7 @@ namespace Game.Entities
         long m_respawnTime;                               // (secs) time of next respawn
         uint m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint m_corpseDelay;                               // (secs) delay between death and corpse disappearance
-        float m_respawnradius;
+        float m_wanderDistance;
         uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
         uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
         uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)

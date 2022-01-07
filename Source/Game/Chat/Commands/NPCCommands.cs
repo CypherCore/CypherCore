@@ -1403,8 +1403,8 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("spawndist", RBACPermissions.CommandNpcSetSpawndist)]
-            static bool HandleNpcSetSpawnDistCommand(StringArguments args, CommandHandler handler)
+            [Command("wanderdistance", RBACPermissions.CommandNpcSetSpawndist)]
+            static bool HandleNpcSetWanderDistanceCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1428,7 +1428,7 @@ namespace Game.Chat
                 else
                     return false;
 
-                creature.SetRespawnRadius(option);
+                creature.SetWanderDistance(option);
                 creature.SetDefaultMovementType(mtype);
                 creature.GetMotionMaster().Initialize();
                 if (creature.IsAlive())                                // dead creature will reset movement generator at respawn
@@ -1437,14 +1437,14 @@ namespace Game.Chat
                     creature.Respawn();
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_DISTANCE);
+                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_WANDER_DISTANCE);
                 stmt.AddValue(0, option);
                 stmt.AddValue(1, (byte)mtype);
                 stmt.AddValue(2, guidLow);
 
                 DB.World.Execute(stmt);
 
-                handler.SendSysMessage(CypherStrings.CommandSpawndist, option);
+                handler.SendSysMessage(CypherStrings.CommandWanderDistance, option);
                 return true;
             }
 

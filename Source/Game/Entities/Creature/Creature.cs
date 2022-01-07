@@ -314,7 +314,7 @@ namespace Game.Entities
 
             // checked at loading
             DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cInfo.MovementType);
-            if (m_respawnradius == 0 && DefaultMovementType == MovementGeneratorType.Random)
+            if (m_wanderDistance == 0 && DefaultMovementType == MovementGeneratorType.Random)
                 DefaultMovementType = MovementGeneratorType.Idle;
 
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
@@ -1267,12 +1267,12 @@ namespace Game.Entities
 
             data.spawntimesecs = (int)m_respawnDelay;
             // prevent add data integrity problems
-            data.spawndist = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_respawnradius;
+            data.WanderDistance = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_wanderDistance;
             data.currentwaypoint = 0;
             data.curhealth = (uint)GetHealth();
             data.curmana = (uint)GetPower(PowerType.Mana);
             // prevent add data integrity problems
-            data.movementType = (byte)(m_respawnradius == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
+            data.movementType = (byte)(m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
             data.spawnDifficulties = spawnDifficulties;
             data.npcflag = npcflag;
@@ -1309,7 +1309,7 @@ namespace Game.Entities
             stmt.AddValue(index++, GetPositionZ());
             stmt.AddValue(index++, GetOrientation());
             stmt.AddValue(index++, m_respawnDelay);
-            stmt.AddValue(index++, m_respawnradius);
+            stmt.AddValue(index++, m_wanderDistance);
             stmt.AddValue(index++, 0);
             stmt.AddValue(index++, GetHealth());
             stmt.AddValue(index++, GetPower(PowerType.Mana));
@@ -2455,7 +2455,7 @@ namespace Game.Entities
             if (m_creatureData != null)
             {
                 m_creatureData.SpawnPoint.GetPosition(out x, out y, out z, out ori);
-                dist = m_creatureData.spawndist;
+                dist = m_creatureData.WanderDistance;
             }
             else
             {
@@ -3160,7 +3160,7 @@ namespace Game.Entities
             m_spawnId = spawnId;
             m_respawnCompatibilityMode = data.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.CompatibilityMode);
             m_creatureData = data;
-            m_respawnradius = data.spawndist;
+            m_wanderDistance = data.WanderDistance;
             m_respawnDelay = (uint)data.spawntimesecs;
 
             if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.Id, data.SpawnPoint, data, 0, !m_respawnCompatibilityMode))
@@ -3246,8 +3246,8 @@ namespace Game.Entities
         public uint GetRespawnDelay() { return m_respawnDelay; }
         public void SetRespawnDelay(uint delay) { m_respawnDelay = delay; }
 
-        public float GetRespawnRadius() { return m_respawnradius; }
-        public void SetRespawnRadius(float dist) { m_respawnradius = dist; }
+        public float GetWanderDistance() { return m_wanderDistance; }
+        public void SetWanderDistance(float dist) { m_wanderDistance = dist; }
 
         public void DoImmediateBoundaryCheck() { m_boundaryCheckTime = 0; }
         uint GetCombatPulseDelay() { return m_combatPulseDelay; }

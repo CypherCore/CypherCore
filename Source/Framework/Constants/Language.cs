@@ -361,7 +361,7 @@ namespace Framework.Constants
         // 296 free
 
         // End
-        CommandSpawndist = 297,
+        CommandWanderDistance = 297,
         CommandSpawntime = 298,
         CommandModifyHonor = 299,
 

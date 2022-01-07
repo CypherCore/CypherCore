@@ -47,7 +47,7 @@ namespace Game.Movement
             owner.StopMoving();
 
             if (_wanderDistance == 0f)
-                _wanderDistance = owner.GetRespawnRadius();
+                _wanderDistance = owner.GetWanderDistance();
 
             // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
             _wanderSteps = RandomHelper.URand(2, 10);

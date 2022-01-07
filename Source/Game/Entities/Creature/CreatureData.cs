@@ -332,7 +332,7 @@ namespace Game.Entities
     {
         public uint displayid;
         public sbyte equipmentId;
-        public float spawndist;
+        public float WanderDistance;
         public uint currentwaypoint;
         public uint curhealth;
         public uint curmana;
