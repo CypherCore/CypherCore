@@ -2887,6 +2887,12 @@ namespace Game.Entities
                 packet.AddState(2491, 0xF);        // 9
             }
 
+            // Horde War Mode bonus
+            packet.AddState(17042, 10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Alliance ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0));
+
+            // Alliance War Mode bonus
+            packet.AddState(17043, 10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Horde ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0));
+
             // insert <field> <value>
             switch (zoneid)
             {
@@ -5068,15 +5074,101 @@ namespace Game.Entities
             return true;
         }
 
+        public void SetWarModeDesired(bool enabled)
+        {
+            // Only allow to toggle on when in stormwind/orgrimmar, and to toggle off in any rested place.
+            // Also disallow when in combat
+            if ((enabled == IsWarModeDesired()) || IsInCombat() || !HasPlayerFlag(PlayerFlags.Resting))
+                return;
+
+            if (enabled && !CanEnableWarModeInArea())
+                return;
+
+            // Don't allow to chang when aura SPELL_PVP_RULES_ENABLED is on
+            if (HasAura(PlayerConst.SpellPvpRulesEnabled))
+                return;
+
+            if (enabled)
+            {
+                AddPlayerFlag(PlayerFlags.WarModeDesired);
+                TogglePvpTalents(true);
+                SetPvP(true);
+            }
+            else
+            {
+                RemovePlayerFlag(PlayerFlags.WarModeDesired);
+                TogglePvpTalents(false);
+                SetPvP(false);
+            }
+
+            UpdateWarModeAuras();
+        }
+
+        void SetWarModeLocal(bool enabled)
+        {
+            if (enabled)
+                AddPlayerLocalFlag(PlayerLocalFlags.WarMode);
+            else
+                RemovePlayerLocalFlag(PlayerLocalFlags.WarMode);
+        }
+
         public bool CanEnableWarModeInArea()
         {
-            var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
-            if (area == null || !IsFriendlyArea(area))
+            var zone = CliDB.AreaTableStorage.LookupByKey(GetZoneId());
+            if (zone == null || !IsFriendlyArea(zone))
                 return false;
 
-            return area.HasFlag2(AreaFlags2.CanEnableWarMode);
+            var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
+            if (area == null)
+                area = zone;
+
+            do
+            {
+                if ((area.Flags[1] & (uint)AreaFlags2.CanEnableWarMode) != 0)
+                    return true;
+
+                area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+            } while (area != null);
+
+            return false;
         }
-        
+
+        void UpdateWarModeAuras()
+        {
+            uint auraInside = 282559;
+            uint auraOutside = PlayerConst.WarmodeEnlistedSpellOutside;
+
+            if (IsWarModeDesired())
+            {
+                if (CanEnableWarModeInArea())
+                {
+                    RemovePlayerFlag(PlayerFlags.WarModeActive);
+                    RemoveAurasDueToSpell(auraOutside);
+                    CastSpell(this, auraInside, true);
+                }
+                else
+                {
+                    AddPlayerFlag(PlayerFlags.WarModeActive);
+                    RemoveAurasDueToSpell(auraInside);
+                    CastSpell(this, auraOutside, true);
+                }
+                SetWarModeLocal(true);
+                AddPvpFlag(UnitPVPStateFlags.PvP);
+            }
+            else
+            {
+                SetWarModeLocal(false);
+                RemoveAurasDueToSpell(auraOutside);
+                RemoveAurasDueToSpell(auraInside);
+                RemovePlayerFlag(PlayerFlags.WarModeActive);
+                RemovePvpFlag(UnitPVPStateFlags.PvP);
+            }
+        }
+
+        bool IsWarModeDesired() { return HasPlayerFlag(PlayerFlags.WarModeDesired); }
+        bool IsWarModeActive() { return HasPlayerFlag(PlayerFlags.WarModeActive); }
+        public bool IsWarModeLocalActive() { return HasPlayerLocalFlag(PlayerLocalFlags.WarMode); }
+
         // Used in triggers for check "Only to targets that grant experience or honor" req
         public bool IsHonorOrXPTarget(Unit victim)
         {
@@ -5350,6 +5442,12 @@ namespace Game.Entities
         }
         public bool IsAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
         public bool IsDND() { return HasPlayerFlag(PlayerFlags.DND); }
+
+        public bool IsMaxLevel()
+        {
+            return GetLevel() >= m_activePlayerData.MaxLevel;
+        }
+        
         public ChatFlags GetChatFlags()
         {
             ChatFlags tag = ChatFlags.None;
@@ -7504,11 +7602,11 @@ namespace Game.Entities
 
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
-        void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
         void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
+        public void SendAttackSwingCancelAttack() { SendPacket(new CancelCombat()); }
+        void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
         public void SendAttackSwingNotInRange() { SendPacket(new AttackSwingError(AttackSwingErr.NotInRange)); }
         void SendAttackSwingBadFacingAttack() { SendPacket(new AttackSwingError(AttackSwingErr.BadFacing)); }
-        public void SendAttackSwingCancelAttack() { SendPacket(new CancelCombat()); }
         public void SendAutoRepeatCancel(Unit target)
         {
             CancelAutoRepeat cancelAutoRepeat = new();

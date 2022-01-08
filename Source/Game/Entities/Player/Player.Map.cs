@@ -192,6 +192,8 @@ namespace Game.Entities
 
             GetMap().SendZoneDynamicInfo(newZone, this);
 
+            UpdateWarModeAuras();
+
             UpdateHostileAreaState(zone);
 
             if (zone.HasFlag(AreaFlags.Capital))                     // Is in a capital city
@@ -247,15 +249,15 @@ namespace Game.Entities
                 {
                     if (InBattleground() || area.HasFlag(AreaFlags.Combat) || (area.PvpCombatWorldStateID != -1 && Global.WorldMgr.GetWorldState((WorldStates)area.PvpCombatWorldStateID) != 0))
                         pvpInfo.IsInHostileArea = true;
-                    else if (Global.WorldMgr.IsPvPRealm() || area.HasFlag(AreaFlags.Unk3))
+                    else if (IsWarModeLocalActive() || area.HasFlag(AreaFlags.Unk3))
                     {
                         if (area.HasFlag(AreaFlags.ContestedArea))
-                            pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
+                            pvpInfo.IsInHostileArea = IsWarModeLocalActive();
                         else
                         {
                             FactionTemplateRecord factionTemplate = GetFactionTemplateEntry();
                             if (factionTemplate == null || factionTemplate.FriendGroup.HasAnyFlag(area.FactionGroupMask))
-                                pvpInfo.IsInHostileArea = false;
+                                pvpInfo.IsInHostileArea = false; // friend area are considered hostile if war mode is active
                             else if (factionTemplate.EnemyGroup.HasAnyFlag(area.FactionGroupMask))
                                 pvpInfo.IsInHostileArea = true;
                             else
@@ -282,7 +284,7 @@ namespace Game.Entities
             }
 
             // Treat players having a quest flagging for PvP as always in hostile area
-            pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
+            pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest() || IsWarModeLocalActive();
         }
 
         public ZonePVPTypeOverride GetOverrideZonePVPType() { return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType; }

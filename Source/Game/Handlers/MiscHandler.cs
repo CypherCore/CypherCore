@@ -506,39 +506,45 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TogglePvp)]
         void HandleTogglePvP(TogglePvP packet)
         {
-            if (GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
-            {
-                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
-                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
-                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
-            }
-            else
+            if (!GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
             {
                 GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
                     GetPlayer().UpdatePvP(true, true);
+            }
+            else if (!GetPlayer().IsWarModeLocalActive())
+            {
+                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
+                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
             }
         }
 
         [WorldPacketHandler(ClientOpcodes.SetPvp)]
         void HandleSetPvP(SetPvP packet)
         {
-            if (!packet.EnablePVP)
-            {
-                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
-                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
-                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
-                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
-            }
-            else
+            if (packet.EnablePVP)
             {
                 GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
                     GetPlayer().UpdatePvP(true, true);
             }
+            else if (!GetPlayer().IsWarModeLocalActive())
+            {
+                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
+                    GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime() + 300; // start toggle-off
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SetWarMode)]
+        void HandleSetWarMode(SetWarMode packet)
+        {
+            _player.SetWarModeDesired(packet.Enable);
         }
 
         [WorldPacketHandler(ClientOpcodes.FarSight)]

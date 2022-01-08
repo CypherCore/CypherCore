@@ -1243,6 +1243,18 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, @"VMap data directory is: {0}\vmaps", GetDataPath());
         }
 
+        void SetForcedWarModeFactionBalanceState(int team, int reward)
+        {
+            _warModeDominantFaction = team;
+            _warModeOutnumberedFactionReward = reward;
+        }
+
+        void DisableForcedWarModeFactionBalanceState()
+        {
+            UpdateWarModeRewardValues();
+        }
+
+
         public void LoadAutobroadcasts()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -2001,6 +2013,9 @@ namespace Game
             // reselect pools
             Global.QuestPoolMgr.ChangeDailyQuests();
 
+            // Update faction balance
+            UpdateWarModeRewardValues();
+
             // store next reset time
             long now = GameTime.GetGameTime();
             long next = GetNextDailyResetTime(now);
@@ -2450,6 +2465,67 @@ namespace Game
             m_timers[WorldTimers.Corpses].SetCurrent(m_timers[WorldTimers.Corpses].GetInterval());
         }
 
+        void UpdateWarModeRewardValues()
+        {
+            long[] warModeEnabledFaction = new long[2];
+
+            // Search for characters that have war mode enabled and played during the last week
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
+            stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
+            stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
+
+            SQLResult result = DB.Characters.Query(stmt);
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    byte race = result.Read<byte>(0);
+
+                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(race);
+                    if (raceEntry != null)
+                    {
+                        var raceFaction = CliDB.FactionTemplateStorage.LookupByKey(raceEntry.FactionID);
+                        if (raceFaction != null)
+                        {
+                            if ((raceFaction.FactionGroup & (byte)FactionMasks.Alliance) != 0)
+                                warModeEnabledFaction[TeamId.Alliance] += result.Read<long>(1);
+                            else if ((raceFaction.FactionGroup & (byte)FactionMasks.Horde) != 0)
+                                warModeEnabledFaction[TeamId.Horde] += result.Read<long>(1);
+                        }
+                    }
+
+                } while (result.NextRow());
+            }
+
+            _warModeDominantFaction = TeamId.Neutral;
+            _warModeOutnumberedFactionReward = 0;
+
+            if (warModeEnabledFaction.All(val => val == 0))
+                return;
+
+            long dominantFactionCount = warModeEnabledFaction[TeamId.Alliance];
+            int dominantFaction = TeamId.Alliance;
+            if (warModeEnabledFaction[TeamId.Alliance] < warModeEnabledFaction[TeamId.Horde])
+            {
+                dominantFactionCount = warModeEnabledFaction[TeamId.Horde];
+                dominantFaction = TeamId.Horde;
+            }
+
+            double total = warModeEnabledFaction[TeamId.Alliance] + warModeEnabledFaction[TeamId.Horde];
+            double pct = dominantFactionCount / total;
+
+            if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms20Pct))
+                _warModeOutnumberedFactionReward = 20;
+            else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms10Pct))
+                _warModeOutnumberedFactionReward = 10;
+            else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms5Pct))
+                _warModeOutnumberedFactionReward = 5;
+            else
+                return;
+
+            _warModeDominantFaction = dominantFaction;
+        }
+
         public uint GetVirtualRealmAddress()
         {
             return _realm.Id.GetAddress();
@@ -2477,6 +2553,10 @@ namespace Game
         public bool IsGuidWarning() { return _guidWarn; }
         public bool IsGuidAlert() { return _guidAlert; }
 
+        // War mode balancing
+        public int GetWarModeDominantFaction() { return _warModeDominantFaction; }
+        public int GetWarModeOutnumberedFactionReward() { return _warModeOutnumberedFactionReward; }
+        
         public WorldUpdateTime GetWorldUpdateTime() { return _worldUpdateTime; }
 
         #region Fields
@@ -2550,6 +2630,10 @@ namespace Game
         bool _guidAlert;
         uint _warnDiff;
         long _warnShutdownTime;
+
+        // War mode balancing
+        int _warModeDominantFaction; // the team that has higher percentage
+        int _warModeOutnumberedFactionReward;
         #endregion
     }
 

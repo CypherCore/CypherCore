@@ -74,6 +74,9 @@ namespace Framework.Constants
         public const uint MaxAzeriteItemKnowledgeLevel = 30;
         public const uint PlayerConditionIdUnlockedAzeriteEssences = 69048;
         public const uint SpellIdHeartEssenceActionBarOverride = 298554;
+
+        //Warmode
+        public const uint WarmodeEnlistedSpellOutside = 269083;
     }
 
     public struct MoneyConstants

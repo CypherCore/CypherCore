@@ -785,6 +785,9 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID, "DELETE FROM character_aura_stored_location WHERE Guid = ?");
             PrepareStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION, "DELETE FROM character_aura_stored_location WHERE Guid = ? AND Spell = ?");
             PrepareStatement(CharStatements.INS_CHARACTER_AURA_STORED_LOCATION, "INSERT INTO character_aura_stored_location (Guid, Spell, MapId, PositionX, PositionY, PositionZ, Orientation) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+            // War mode
+            PrepareStatement(CharStatements.SEL_WAR_MODE_TUNING, "SELECT race, COUNT(guid) FROM characters WHERE ((playerFlags & 0x00000800) = 0x00000800) AND logout_time >= (UNIX_TIMESTAMP() - 604800) GROUP BY race");
         }
     }
 
@@ -1427,6 +1430,8 @@ namespace Framework.Database
         DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID,
         DEL_CHARACTER_AURA_STORED_LOCATION,
         INS_CHARACTER_AURA_STORED_LOCATION,
+
+        SEL_WAR_MODE_TUNING,
 
         MAX_CHARACTERDATABASE_STATEMENTS
     }

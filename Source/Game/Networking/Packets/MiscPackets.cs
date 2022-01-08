@@ -1135,6 +1135,18 @@ namespace Game.Networking.Packets
         public bool EnablePVP;
     }
 
+    class SetWarMode : ClientPacket
+    {
+        public SetWarMode(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Enable = _worldPacket.HasBit();
+        }
+
+       public bool Enable;
+    }
+    
     class AccountHeirloomUpdate : ServerPacket
     {
         public AccountHeirloomUpdate() : base(ServerOpcodes.AccountHeirloomUpdate, ConnectionType.Instance) { }

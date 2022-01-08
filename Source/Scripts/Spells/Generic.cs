@@ -4082,6 +4082,33 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 269083 - Enlisted
+    [Script] // 282559 - Enlisted
+    class spell_gen_war_mode_enlisted : AuraScript
+    {
+        void CalcWarModeBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            Player target = GetUnitOwner().ToPlayer();
+            if (target == null)
+                return;
+
+            if (target.GetTeamId() == Global.WorldMgr.GetWarModeDominantFaction())
+                return;
+
+            amount += Global.WorldMgr.GetWarModeOutnumberedFactionReward();
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpPct));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpQuestPct));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModCurrencyGainFromSource));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModMoneyGain));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModAnimaGain));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
+        }
+    }
+    
     [Script]
     class spell_defender_of_azeroth_death_gate_selector : SpellScript
     {
