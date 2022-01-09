@@ -787,7 +787,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_CHARACTER_AURA_STORED_LOCATION, "INSERT INTO character_aura_stored_location (Guid, Spell, MapId, PositionX, PositionY, PositionZ, Orientation) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
             // War mode
-            PrepareStatement(CharStatements.SEL_WAR_MODE_TUNING, "SELECT race, COUNT(guid) FROM characters WHERE ((playerFlags & 0x00000800) = 0x00000800) AND logout_time >= (UNIX_TIMESTAMP() - 604800) GROUP BY race");
+            PrepareStatement(CharStatements.SEL_WAR_MODE_TUNING, "SELECT race, COUNT(guid) FROM characters WHERE ((playerFlags & ?) = ?) AND logout_time >= (UNIX_TIMESTAMP() - 604800) GROUP BY race");
         }
     }
 
