@@ -29,6 +29,7 @@ namespace Scripts.Spells.Shaman
 {
     struct SpellIds
     {
+        public const uint AftershockEnergize = 210712;
         public const uint AncestralGuidance = 108281;
         public const uint AncestralGuidanceHeal = 114911;
         public const uint ChainLightningEnergize = 195897;
@@ -90,6 +91,43 @@ namespace Scripts.Spells.Shaman
         public const uint HealingRainInvisibleStalker = 73400;
     }
 
+    [Script] // 273221 - Aftershock
+    class spell_sha_aftershock : AuraScript
+    {
+        public override bool Validate(SpellInfo spellEntry)
+        {
+            return ValidateSpellInfo(SpellIds.AftershockEnergize);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (procSpell != null)
+            {
+                int? cost = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
+                if (cost.HasValue)
+                    return cost > 0 && RandomHelper.randChance(aurEff.GetAmount());
+            }
+
+            return false;
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+            int energize = *procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
+
+            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.AftershockEnergize, new CastSpellExtraArgs(energize != 0)
+                .AddSpellMod(SpellValueMod.BasePoint0, energize));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 108281 - Ancestral Guidance
     class spell_sha_ancestral_guidance : AuraScript
     {
