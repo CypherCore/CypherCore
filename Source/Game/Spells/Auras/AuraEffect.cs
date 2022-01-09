@@ -4711,6 +4711,15 @@ namespace Game.Spells
             target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(this));
         }
 
+        [AuraEffectHandler(AuraType.TriggerSpellOnExpire)]
+        void HandleTriggerSpellOnExpire(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasFlag(AuraEffectHandleModes.Real) || apply || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            aurApp.GetTarget().CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
+        }
+        
         [AuraEffectHandler(AuraType.OpenStable)]
         void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

@@ -516,7 +516,7 @@ namespace Framework.Constants
         Unk492 = 492,
         Unk493 = 493,
         SetPowerPointCharge = 494, // NYI
-        TriggerSpellOnExpire = 495, // NYI
+        TriggerSpellOnExpire = 495,
         AllowChangingEquipmentInTorghast = 496, // NYI
         ModAnimaGain = 497, // NYI
         CurrencyLossPctOnDeath = 498, // NYI
