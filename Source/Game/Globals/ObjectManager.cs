@@ -10212,29 +10212,29 @@ namespace Game
         }
         CellObjectGuids CreateCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
-            uint newid = MathFunctions.MakePair32(mapid, (uint)difficulty);
+            var key = (mapid, difficulty);
 
-            if (!mapObjectGuidsStore.ContainsKey(newid))
-                mapObjectGuidsStore.Add(newid, new Dictionary<uint, CellObjectGuids>());
+            if (!mapObjectGuidsStore.ContainsKey(key))
+                mapObjectGuidsStore.Add(key, new Dictionary<uint, CellObjectGuids>());
 
-            if (!mapObjectGuidsStore[newid].ContainsKey(cellid))
-                mapObjectGuidsStore[newid].Add(cellid, new CellObjectGuids());
+            if (!mapObjectGuidsStore[key].ContainsKey(cellid))
+                mapObjectGuidsStore[key].Add(cellid, new CellObjectGuids());
 
-            return mapObjectGuidsStore[newid][cellid];
+            return mapObjectGuidsStore[key][cellid];
         }
         public CellObjectGuids GetCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
-            uint newid = MathFunctions.MakePair32(mapid, (uint)difficulty);
+            var key = (mapid, difficulty);
 
-            if (mapObjectGuidsStore.ContainsKey(newid) && mapObjectGuidsStore[newid].ContainsKey(cellid))
-                return mapObjectGuidsStore[newid][cellid];
+            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].ContainsKey(cellid))
+                return mapObjectGuidsStore[key][cellid];
 
             return null;
         }
-        public Dictionary<uint, CellObjectGuids> GetMapObjectGuids(uint mapid, byte spawnMode)
+        public Dictionary<uint, CellObjectGuids> GetMapObjectGuids(uint mapid, Difficulty difficulty)
         {
-            var pair = MathFunctions.MakePair32(mapid, spawnMode);
-            return mapObjectGuidsStore.LookupByKey(pair);
+            var key = (mapid, difficulty);
+            return mapObjectGuidsStore.LookupByKey(key);
         }
         public PageText GetPageText(uint pageEntry)
         {
@@ -10665,7 +10665,7 @@ namespace Game
 
         //Maps
         public Dictionary<uint, GameTele> gameTeleStorage = new();
-        Dictionary<uint, Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
+        Dictionary<(uint mapId, Difficulty difficulty), Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
         Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new();
         public MultiMap<uint, GraveYardData> GraveYardStorage = new();
         List<ushort> _transportMaps = new();
