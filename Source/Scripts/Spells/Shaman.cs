@@ -115,10 +115,10 @@ namespace Scripts.Spells.Shaman
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             Spell procSpell = eventInfo.GetProcSpell();
-            int energize = *procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
+            int? energize = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
 
             eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.AftershockEnergize, new CastSpellExtraArgs(energize != 0)
-                .AddSpellMod(SpellValueMod.BasePoint0, energize));
+                .AddSpellMod(SpellValueMod.BasePoint0, energize.Value));
         }
 
         public override void Register()
@@ -293,6 +293,47 @@ namespace Scripts.Spells.Shaman
         int _targetsHit;
     }
 
+    [Script] // 207778 - Downpour
+    class spell_sha_downpour : SpellScript
+    {
+        int _healedTargets = 0;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            uint maxTargets = 6;
+            if (targets.Count > maxTargets)
+            {
+                targets.Sort(new HealthPctOrderPred());
+                targets.Resize(maxTargets);
+            }
+        }
+
+        void CountEffectivelyHealedTarget()
+        {
+            // Cooldown increased for each target effectively healed
+            if (GetHitHeal() != 0)
+                ++_healedTargets;
+        }
+
+        void HandleCooldown()
+        {
+            var cooldown = TimeSpan.FromMilliseconds(GetSpellInfo().RecoveryTime) + TimeSpan.FromSeconds(GetEffectInfo(1).CalcValue() * _healedTargets);
+            GetCaster().GetSpellHistory().StartCooldown(GetSpellInfo(), 0, GetSpell(), false, cooldown);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+            AfterHit.Add(new HitHandler(CountEffectivelyHealedTarget));
+            AfterCast.Add(new CastHandler(HandleCooldown));
+        }
+    }
+    
     [Script] // 204288 - Earth Shield
     class spell_sha_earth_shield : AuraScript
     {
