@@ -991,6 +991,12 @@ namespace Game
             // Whether to use LoS from game objects
             Values[WorldCfg.CheckGobjectLos] = GetDefaultValue("CheckGameObjectLoS", true);
 
+            // FactionBalance
+            Values[WorldCfg.FactionBalanceLevelCheckDiff] = GetDefaultValue("Pvp.FactionBalance.LevelCheckDiff", 0);
+            Values[WorldCfg.CallToArms5Pct] = GetDefaultValue("Pvp.FactionBalance.Pct5", 0.6f);
+            Values[WorldCfg.CallToArms10Pct] = GetDefaultValue("Pvp.FactionBalance.Pct10", 0.7f);
+            Values[WorldCfg.CallToArms20Pct] = GetDefaultValue("Pvp.FactionBalance.Pct20", 0.8f);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);

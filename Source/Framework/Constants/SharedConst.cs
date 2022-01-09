@@ -1319,7 +1319,7 @@ namespace Framework.Constants
         Model = 32,               // Source = Creature, Datalong = Model Id
         CloseGossip = 33,               // Source = Player
         Playmovie = 34,                // Source = Player, Datalong = Movie Id
-        Movement = 35,               // Source = Creature, datalong = MovementType, datalong2 = MovementDistance (spawndist f.ex.), dataint = pathid
+        Movement = 35,               // Source = Creature, datalong = MovementType, datalong2 = MovementDistance (wander_distance f.ex.), dataint = pathid
         PlayAnimkit = 36                // Source = Creature, datalong = AnimKit id
     }
 
@@ -1455,6 +1455,11 @@ namespace Framework.Constants
         CleanCharacterDb,
         CleanOldMailTime,
         ClientCacheVersion,
+        CommunityAllowBnetClubTypeEnabled,
+        CommunityAllowCharacterClubTypeEnabled,
+        CommunityChatKeepDays,
+        CommunityClubFinderEnabled,
+        CommunityClubsEnabled,
         Compression,
         CorpseDecayElite,
         CorpseDecayNormal,

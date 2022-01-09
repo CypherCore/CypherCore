@@ -166,23 +166,6 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_incendiary_explosives : ItemScript
-    {
-        public item_incendiary_explosives() : base("item_incendiary_explosives") { }
-
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
-        {
-            if (player.FindNearestCreature(26248, 15) || player.FindNearestCreature(26249, 15))
-                return false;
-            else
-            {
-                player.SendEquipError(InventoryResult.OutOfRange, item, null);
-                return true;
-            }
-        }
-    }
-
-    [Script]
     class item_mysterious_egg : ItemScript
     {
         public item_mysterious_egg() : base("item_mysterious_egg") { }

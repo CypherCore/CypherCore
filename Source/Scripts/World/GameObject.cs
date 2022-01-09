@@ -309,7 +309,7 @@ namespace Scripts.World.GameObjects
         public const uint Darnassus = 1657;
         public const uint Ashenvale = 331;
         public const uint HillsbradFoothills = 267;
-        public const uint Duskwood = 42;
+        public const uint Duskwood = 10;
     }
 
     struct Misc
@@ -329,32 +329,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_cat_figurine : GameObjectAI
-    {
-        public go_cat_figurine(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            player.CastSpell(player, SpellIds.SummonGhostSaber, true);
-            return false;
-        }
-    }
-
-    [Script]
-    class go_barov_journal : GameObjectAI
-    {
-        public go_barov_journal(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (player.HasSkill(SkillType.Tailoring) && player.GetBaseSkillValue(SkillType.Tailoring) >= 280 && !player.HasSpell(26086))
-                player.CastSpell(player, 26095, false);
-
-            return true;
-        }
-    }
-
-    [Script]
     class go_gilded_brazier : GameObjectAI
     {
         public go_gilded_brazier(GameObject go) : base(go) { }
@@ -370,20 +344,6 @@ namespace Scripts.World.GameObjects
                         Stillblade.GetAI().AttackStart(player);
                 }
             }
-            return true;
-        }
-    }
-
-    [Script]
-    class go_orb_of_command : GameObjectAI
-    {
-        public go_orb_of_command(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (player.GetQuestRewardStatus(7761))
-                player.CastSpell(player, 23460, true);
-
             return true;
         }
     }
@@ -1320,7 +1280,9 @@ namespace Scripts.World.GameObjects
             if (eventId == Misc.GameEventHourlyBells && start)
             {
                 var localTm = Time.UnixTimeToDateTime(GameTime.GetGameTime()).ToLocalTime();
-                int _rings = (localTm.Hour - 1) % 12 + 1;
+                int _rings = localTm.Hour % 12;
+                if (_rings == 0) // 00:00 and 12:00
+                    _rings = 12;
 
                 for (var i = 0; i < _rings; ++i)
                     _scheduler.Schedule(TimeSpan.FromSeconds(i * 4 + 1), task => me.PlayDirectSound(_soundId));

@@ -3121,13 +3121,12 @@ namespace Game.Maps
 
         public void SaveRespawnInfoDB(RespawnInfo info, SQLTransaction dbTrans = null)
         {
-            // Just here for support of compatibility mode
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
             stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(0, info.spawnId);
-            stmt.AddValue(1, info.respawnTime);
-            stmt.AddValue(2, GetId());
-            stmt.AddValue(3, GetInstanceId());
+            stmt.AddValue(1, info.spawnId);
+            stmt.AddValue(2, info.respawnTime);
+            stmt.AddValue(3, GetId());
+            stmt.AddValue(4, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
         }
 

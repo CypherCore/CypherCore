@@ -228,7 +228,7 @@ namespace Game
                     if (activeCount != pool.numActive)
                     {
                         doRegenerate = true;
-                        Log.outError(LogFilter.Sql, "Table `pool_quest_save` has %u active members saved for pool %u, which requests %u active members. Pool spawns re-generated.", activeCount, pool.poolId, pool.numActive);
+                        Log.outError(LogFilter.Sql, $"Table `pool_quest_save` has {activeCount} active members saved for pool {pool.poolId}, which requests {pool.numActive} active members. Pool spawns re-generated.");
                     }
                 }
 
@@ -242,13 +242,12 @@ namespace Game
                 {
                     foreach (uint quest in pool.members[memberKey])
                     {
-                        QuestPool refe = _poolLookup[quest];
-                        if (refe != null)
+                        if (_poolLookup.ContainsKey(quest))
                         {
-                            Log.outError(LogFilter.Sql, "Table `quest_pool_members` lists quest %u as member of pool %u, but it is already a member of pool %u. Skipped.", quest, pool.poolId, refe.poolId);
+                            Log.outError(LogFilter.Sql, $"Table `quest_pool_members` lists quest {quest} as member of pool {pool.poolId}, but it is already a member of pool {_poolLookup[quest].poolId}. Skipped.");
                             continue;
                         }
-                        refe = pool;
+                        _poolLookup[quest] = pool;
                     }
                 }
             }

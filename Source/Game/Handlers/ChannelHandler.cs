@@ -50,19 +50,9 @@ namespace Game
                 return;
             }
 
-            if (packet.ChannelName.Length > 31)
-            {
-                ChannelNotify channelNotify = new();
-                channelNotify.Type = ChatNotify.InvalidNameNotice;
-                channelNotify.Channel = packet.ChannelName;
-                SendPacket(channelNotify);
-                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a name more than 31 characters long - blocked");
-                return;
-            }
-
             if (packet.Password.Length > 127)
             {
-                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more that 127 characters long - blocked");
+                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than 127 characters long - blocked");
                 return;
             }
 
@@ -79,6 +69,12 @@ namespace Game
                 else
                 {
                     // custom channel
+                    if (packet.ChannelName.Length > 31)
+                    {
+                        Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a name more than 31 characters long - blocked");
+                        return;
+                    }
+
                     Channel channel = cMgr.GetCustomChannel(packet.ChannelName);
                     if (channel != null)
                         channel.JoinChannel(GetPlayer(), packet.Password);

@@ -477,7 +477,10 @@ namespace Game.Entities
                     val = maxHealth;
             }
 
+            ulong oldVal = GetHealth();
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Health), val);
+
+            TriggerOnHealthChangeAuras(oldVal, val);
 
             // group update
             Player player = ToPlayer();

@@ -3309,6 +3309,7 @@ namespace Game.Spells
                         case 61716: // Rabbit Costume
                         case 61734: // Noblegarden Bunny
                         case 62344: // Fists of Stone
+                        case 50344: // Dream Funnel
                         case 61819: // Manabonked! (item)
                         case 61834: // Manabonked! (minigob)
                         case 73523: // Rigor Mortis
