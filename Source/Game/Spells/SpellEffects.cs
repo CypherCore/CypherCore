@@ -720,9 +720,9 @@ namespace Game.Spells
             ZoneScript zoneScript = m_caster.GetZoneScript();
             InstanceScript instanceScript = m_caster.GetInstanceScript();
             if (zoneScript != null)
-                zoneScript.ProcessEvent(target, (uint)effectInfo.MiscValue);
+                zoneScript.ProcessEvent(target, (uint)effectInfo.MiscValue, m_caster);
             else if (instanceScript != null)    // needed in case Player is the caster
-                instanceScript.ProcessEvent(target, (uint)effectInfo.MiscValue);
+                instanceScript.ProcessEvent(target, (uint)effectInfo.MiscValue, m_caster);
 
             m_caster.GetMap().ScriptsStart(ScriptsType.Event, (uint)effectInfo.MiscValue, m_caster, target);
         }

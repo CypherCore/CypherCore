@@ -870,7 +870,7 @@ namespace Game.BattleFields
             }
         }
 
-        public override void ProcessEvent(WorldObject obj, uint eventId)
+        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
         {
             if (!obj || !IsWarTime())
                 return;

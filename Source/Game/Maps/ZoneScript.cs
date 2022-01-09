@@ -44,7 +44,7 @@ namespace Game.Maps
         public virtual uint GetData(uint dataId) { return 0; }
         public virtual void SetData(uint dataId, uint value) { }
 
-        public virtual void ProcessEvent(WorldObject obj, uint eventId) { }
+        public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker) { }
 
         protected EventMap _events = new();
     }

@@ -2201,7 +2201,7 @@ namespace Game.Entities
                 GetAI().EventInform(eventId);
 
             if (m_zoneScript != null)
-                m_zoneScript.ProcessEvent(this, eventId);
+                m_zoneScript.ProcessEvent(this, eventId, invoker);
 
             BattlegroundMap bgMap = GetMap().ToBattlegroundMap();
             if (bgMap)
