@@ -29,7 +29,7 @@ namespace Game
 
             if (code == BattlenetRpcErrorCode.Ok)
             {
-                response.SuccessInfo.HasValue = true;
+                response.SuccessInfo.Value = new();
 
                 response.SuccessInfo.Value = new AuthResponse.AuthSuccessInfo();
                 response.SuccessInfo.Value.ActiveExpansionLevel = (byte)GetExpansion();
@@ -51,7 +51,7 @@ namespace Game
 
             if (queued)
             {
-                response.WaitInfo.HasValue = true;
+                response.WaitInfo.Value = new();
                 response.WaitInfo.Value.WaitCount = queuePos;
             }
 

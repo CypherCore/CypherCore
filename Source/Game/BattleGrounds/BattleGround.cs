@@ -702,7 +702,7 @@ namespace Game.BattleGrounds
             PVPMatchComplete pvpMatchComplete = new();
             pvpMatchComplete.Winner = (byte)GetWinner();
             pvpMatchComplete.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
-            pvpMatchComplete.LogData.HasValue = true;
+            pvpMatchComplete.LogData.Value = new();
             BuildPvPLogDataPacket(out pvpMatchComplete.LogData.Value);
             pvpMatchComplete.Write();
 

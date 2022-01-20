@@ -561,7 +561,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         TaskContext ClearGroup()
         {
-            _task._group.HasValue = false;
+            _task._group.Clear();
             return this;
         }
 

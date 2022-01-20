@@ -77,7 +77,7 @@ namespace Game.Garrisons
                     if (!CliDB.GarrBuildingStorage.ContainsKey(buildingId))
                         continue;
 
-                    plot.BuildingInfo.PacketInfo.HasValue = true;
+                    plot.BuildingInfo.PacketInfo.Value = new();
                     plot.BuildingInfo.PacketInfo.Value.GarrPlotInstanceID = plotInstanceId;
                     plot.BuildingInfo.PacketInfo.Value.GarrBuildingID = buildingId;
                     plot.BuildingInfo.PacketInfo.Value.TimeBuilt = timeBuilt;

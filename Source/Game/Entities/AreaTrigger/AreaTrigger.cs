@@ -759,7 +759,7 @@ namespace Game.Entities
 
                 AreaTriggerRePath reshape = new();
                 reshape.TriggerGUID = GetGUID();
-                reshape.AreaTriggerSpline.HasValue = true;
+                reshape.AreaTriggerSpline.Value = new();
                 reshape.AreaTriggerSpline.Value.ElapsedTimeForMovement = GetElapsedTimeForMovement();
                 reshape.AreaTriggerSpline.Value.TimeToTarget = timeToTarget;
                 reshape.AreaTriggerSpline.Value.Points = splinePoints;

@@ -319,7 +319,7 @@ namespace Game.Networking.Packets
             {
                 Pet pet = player.GetPet();
 
-                MemberStats.PetStats.HasValue = true;
+                MemberStats.PetStats.Value = new();
 
                 MemberStats.PetStats.Value.GUID = pet.GetGUID();
                 MemberStats.PetStats.Value.Name = pet.GetName();

@@ -104,8 +104,7 @@ namespace Game.Arenas
 
             if (IsRated())
             {
-                pvpLogData.Ratings.HasValue = true;
-
+                pvpLogData.Ratings.Value = new();
                 for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
                 {
                     pvpLogData.Ratings.Value.Postmatch[i] = _arenaTeamScores[i].PostMatchRating;

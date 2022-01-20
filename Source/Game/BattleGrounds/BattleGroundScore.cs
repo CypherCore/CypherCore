@@ -65,7 +65,7 @@ namespace Game.BattleGrounds
             playerData.Faction = (byte)TeamId;
             if (HonorableKills != 0 || Deaths != 0 || BonusHonor != 0)
             {
-                playerData.Honor.HasValue = true;
+                playerData.Honor.Value = new();
                 playerData.Honor.Value.HonorKills = HonorableKills;
                 playerData.Honor.Value.Deaths = Deaths;
                 playerData.Honor.Value.ContributionPoints = BonusHonor;

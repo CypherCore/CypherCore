@@ -1091,7 +1091,7 @@ namespace Game
             features.VoiceEnabled = false;
             features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 
-            features.EuropaTicketSystemStatus.HasValue = true;
+            features.EuropaTicketSystemStatus.Value = new();
             features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
             features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
             features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
@@ -2533,7 +2533,7 @@ namespace Game
 
             if (result == ResponseCodes.Success)
             {
-                packet.Display.HasValue = true;
+                packet.Display.Value = new();
                 packet.Display.Value.Name = factionChangeInfo.Name;
                 packet.Display.Value.SexID = (byte)factionChangeInfo.SexID;
                 packet.Display.Value.Customizations = factionChangeInfo.Customizations;

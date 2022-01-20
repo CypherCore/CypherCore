@@ -1519,10 +1519,18 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             Flags = (SpellCastTargetFlags)data.ReadBits<uint>(26);
-            SrcLocation.HasValue = data.HasBit();
-            DstLocation.HasValue = data.HasBit();
-            Orientation.HasValue = data.HasBit();
-            MapID.HasValue = data.HasBit();
+            if (data.HasBit())
+                SrcLocation.Value = new();
+
+            if (data.HasBit())
+                DstLocation.Value = new();
+
+            if (data.HasBit())
+                Orientation.Value = new();
+
+            if (data.HasBit())
+                MapID.Value = new();
+
             uint nameLength = data.ReadBits<uint>(7);
 
             Unit = data.ReadPackedGuid();
@@ -1661,7 +1669,9 @@ namespace Game.Networking.Packets
                 OptionalCurrencies[i].Read(data);
 
             SendCastFlags = data.ReadBits<uint>(5);
-            MoveUpdate.HasValue = data.HasBit();
+            if (data.HasBit())
+                MoveUpdate.Value = new();
+
             var weightCount = data.ReadBits<uint>(2);
             Target.Read(data);
 

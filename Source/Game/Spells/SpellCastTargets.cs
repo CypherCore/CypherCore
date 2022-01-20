@@ -88,7 +88,7 @@ namespace Game.Spells
 
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
             {
-                data.SrcLocation.HasValue = true;
+                data.SrcLocation.Value = new();
                 TargetLocation target = new();
                 target.Transport = m_src.TransportGUID; // relative position guid here - transport for example
                 if (!m_src.TransportGUID.IsEmpty())
@@ -101,7 +101,7 @@ namespace Game.Spells
 
             if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation))
             {
-                data.DstLocation.HasValue = true;
+                data.DstLocation.Value = new();
                 TargetLocation target = new();
                 target.Transport = m_dst.TransportGUID; // relative position guid here - transport for example
                 if (!m_dst.TransportGUID.IsEmpty())

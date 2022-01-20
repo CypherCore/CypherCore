@@ -2120,7 +2120,7 @@ namespace Game.Maps
                     }
                 }
 
-                data.LiquidInfo.HasValue = true;
+                data.LiquidInfo.Value = new();
                 data.LiquidInfo.Value.level = wmoData.liquidInfo.Value.Level;
                 data.LiquidInfo.Value.depth_level = wmoData.floorZ;
                 data.LiquidInfo.Value.entry = liquidType;

@@ -3539,7 +3539,7 @@ namespace Game.Spells
 
             if (castFlags.HasAnyFlag(SpellCastFlags.RuneList)) // rune cooldowns list
             {
-                castData.RemainingRunes.HasValue = true;
+                castData.RemainingRunes.Value = new();
 
                 RuneData runeData = castData.RemainingRunes.Value;
                 //TODO: There is a crash caused by a spell with CAST_FLAG_RUNE_LIST casted by a creature
@@ -3654,7 +3654,7 @@ namespace Game.Spells
 
             if (Convert.ToBoolean(castFlags & SpellCastFlags.RuneList))                   // rune cooldowns list
             {
-                castData.RemainingRunes.HasValue = true;
+                castData.RemainingRunes.Value = new();
                 RuneData runeData = castData.RemainingRunes.Value;
 
                 Player player = m_caster.ToPlayer();
@@ -3965,7 +3965,7 @@ namespace Game.Spells
 
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
             {
-                spellChannelStart.InterruptImmunities.HasValue = true;
+                spellChannelStart.InterruptImmunities.Value = new();
                 spellChannelStart.InterruptImmunities.Value.SchoolImmunities = (int)schoolImmunityMask;
                 spellChannelStart.InterruptImmunities.Value.Immunities = (int)mechanicImmunityMask;
             }

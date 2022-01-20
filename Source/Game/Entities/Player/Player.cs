@@ -1836,7 +1836,7 @@ namespace Game.Entities
                     transport = GetTransport();
                     if (transport)
                     {
-                        transferPending.Ship.HasValue = true;
+                        transferPending.Ship.Value = new();
                         transferPending.Ship.Value.Id = transport.GetEntry();
                         transferPending.Ship.Value.OriginMapID = (int)GetMapId();
                     }
@@ -4983,7 +4983,7 @@ namespace Game.Entities
                         rewardEntry.Quantity = item.Quantity;
                         if (!item.BonusListIDs.Empty())
                         {
-                            rewardEntry.Item.ItemBonus.HasValue = true;
+                            rewardEntry.Item.ItemBonus.Value = new();
                             rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
                         }
                         reward.Items.Add(rewardEntry);
@@ -5012,7 +5012,7 @@ namespace Game.Entities
                         rewardEntry.Quantity = item.Quantity;
                         if (!item.BonusListIDs.Empty())
                         {
-                            rewardEntry.Item.ItemBonus.HasValue = true;
+                            rewardEntry.Item.ItemBonus.Value = new();
                             rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
                         }
 

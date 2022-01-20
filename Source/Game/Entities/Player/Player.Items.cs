@@ -200,7 +200,7 @@ namespace Game.Entities
             itemPurchaseRefundResult.Result = error;
             if (error == 0)
             {
-                itemPurchaseRefundResult.Contents.HasValue = true;
+                itemPurchaseRefundResult.Contents.Value = new();
                 itemPurchaseRefundResult.Contents.Value.Money = item.GetPaidMoney();
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // item cost data
                 {

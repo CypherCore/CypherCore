@@ -1658,7 +1658,7 @@ namespace Game
             {
                 if (alwaysSendItem)
                 {
-                    auctionItem.Item.HasValue = true;
+                    auctionItem.Item.Value = new();
                     auctionItem.Item.Value = new ItemInstance(Items[0]);
                 }
 
@@ -1666,7 +1666,7 @@ namespace Game
             }
             else
             {
-                auctionItem.Item.HasValue = true;
+                auctionItem.Item.Value = new();
                 auctionItem.Item.Value = new ItemInstance(Items[0]);
                 auctionItem.Charges = new[] { Items[0].GetSpellCharges(0), Items[0].GetSpellCharges(1), Items[0].GetSpellCharges(2), Items[0].GetSpellCharges(3), Items[0].GetSpellCharges(4) }.Max();
                 for (EnchantmentSlot enchantmentSlot = 0; enchantmentSlot < EnchantmentSlot.MaxInspected; enchantmentSlot++)

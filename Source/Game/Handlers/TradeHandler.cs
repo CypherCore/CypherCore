@@ -64,7 +64,7 @@ namespace Game
                     tradeItem.GiftCreator = item.GetGiftCreator();
                     if (!item.IsWrapped())
                     {
-                        tradeItem.Unwrapped.HasValue = true;
+                        tradeItem.Unwrapped.Value = new();
                         TradeUpdated.UnwrappedTradeItem unwrappedItem = tradeItem.Unwrapped.Value;
                         unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.Perm);
                         unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.Use);

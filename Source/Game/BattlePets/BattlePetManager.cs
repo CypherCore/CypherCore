@@ -230,7 +230,7 @@ namespace Game.BattlePets
 
                         if (!ownerGuid.IsEmpty())
                         {
-                            pet.PacketInfo.OwnerInfo.HasValue = true;
+                            pet.PacketInfo.OwnerInfo.Value = new();
                             pet.PacketInfo.OwnerInfo.Value.Guid = ownerGuid;
                             pet.PacketInfo.OwnerInfo.Value.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
                             pet.PacketInfo.OwnerInfo.Value.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
@@ -398,7 +398,7 @@ namespace Game.BattlePets
             Player player = _owner.GetPlayer();
             if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotAccountWide))
             {
-                pet.PacketInfo.OwnerInfo.HasValue = true;
+                pet.PacketInfo.OwnerInfo.Value = new();
                 pet.PacketInfo.OwnerInfo.Value.Guid = player.GetGUID();
                 pet.PacketInfo.OwnerInfo.Value.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
                 pet.PacketInfo.OwnerInfo.Value.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();

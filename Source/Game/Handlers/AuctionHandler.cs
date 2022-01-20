@@ -57,7 +57,7 @@ namespace Game
             AuctionListBucketsResult listBucketsResult = new();
             if (!browseQuery.ItemClassFilters.Empty())
             {
-                classFilters.HasValue = true;
+                classFilters.Value = new();
 
                 foreach (var classFilter in browseQuery.ItemClassFilters)
                 {

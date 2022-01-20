@@ -68,7 +68,7 @@ namespace Game.Chat
 
             if (!TranslatedPacket.HasValue)
             {
-                TranslatedPacket.HasValue = true;
+                TranslatedPacket.Value = new();
                 TranslatedPacket.Value.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language, player.GetSession().GetSessionDbcLocale()), AchievementId, "", Locale);
                 TranslatedPacket.Value.Write();
             }

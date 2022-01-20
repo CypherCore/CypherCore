@@ -104,7 +104,7 @@ namespace Game
                 GetPlayer().SetTaxiCheater(true); // Grimwing in Ebon Hold, special case. NOTE: Not perfect, Zul'Aman should not be included according to WoWhead, and I think taxicheat includes it.
 
             ShowTaxiNodes data = new();
-            data.WindowInfo.HasValue = true;
+            data.WindowInfo.Value = new();
             data.WindowInfo.Value.UnitGUID = unit.GetGUID();
             data.WindowInfo.Value.CurrentNode = (int)curloc;
 

@@ -1483,14 +1483,14 @@ namespace Game.Groups
             if (GetMembersCount() > 1)
             {
                 // LootSettings
-                partyUpdate.LootSettings.HasValue = true;
+                partyUpdate.LootSettings.Value = new();
 
                 partyUpdate.LootSettings.Value.Method = (byte)m_lootMethod;
                 partyUpdate.LootSettings.Value.Threshold = (byte)m_lootThreshold;
                 partyUpdate.LootSettings.Value.LootMaster = m_lootMethod == LootMethod.MasterLoot ? m_masterLooterGuid : ObjectGuid.Empty;
 
                 // Difficulty Settings
-                partyUpdate.DifficultySettings.HasValue = true;
+                partyUpdate.DifficultySettings.Value = new();
 
                 partyUpdate.DifficultySettings.Value.DungeonDifficultyID = (uint)m_dungeonDifficulty;
                 partyUpdate.DifficultySettings.Value.RaidDifficultyID = (uint)m_raidDifficulty;
@@ -1500,7 +1500,7 @@ namespace Game.Groups
             // LfgInfos
             if (IsLFGGroup())
             {
-                partyUpdate.LfgInfos.HasValue = true;
+                partyUpdate.LfgInfos.Value = new();
 
                 partyUpdate.LfgInfos.Value.Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid));
                 partyUpdate.LfgInfos.Value.BootCount = 0;

@@ -674,7 +674,7 @@ namespace Game.Networking.Packets
 
             if (!isCurrency)
             {
-                RewardItem.HasValue = true;
+                RewardItem.Value = new();
                 RewardItem.Value.ItemID = id;
             }
             else

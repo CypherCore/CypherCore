@@ -855,7 +855,7 @@ namespace Game.Networking.Packets
             List<uint> bonusListIds = item.m_itemData.BonusListIDs;
             if (!bonusListIds.Empty())
             {
-                ItemBonus.HasValue = true;
+                ItemBonus.Value = new();
                 ItemBonus.Value.BonusListIDs.AddRange(bonusListIds);
                 ItemBonus.Value.Context = item.GetContext();
             }
@@ -870,7 +870,7 @@ namespace Game.Networking.Packets
 
             if (!lootItem.BonusListIDs.Empty() || lootItem.randomBonusListId != 0)
             {
-                ItemBonus.HasValue = true;
+                ItemBonus.Value = new();
                 ItemBonus.Value.BonusListIDs = lootItem.BonusListIDs;
                 ItemBonus.Value.Context = lootItem.context;
                 if (lootItem.randomBonusListId != 0)
@@ -890,7 +890,7 @@ namespace Game.Networking.Packets
 
             if (!voidItem.BonusListIDs.Empty())
             {
-                ItemBonus.HasValue = true;
+                ItemBonus.Value = new();
                 ItemBonus.Value.Context = voidItem.Context;
                 ItemBonus.Value.BonusListIDs = voidItem.BonusListIDs;
             }
@@ -927,7 +927,9 @@ namespace Game.Networking.Packets
         {
             ItemID = data.ReadUInt32();
 
-            ItemBonus.HasValue = data.HasBit();
+            if (data.HasBit())
+                ItemBonus.Value = new();
+
             data.ResetBitPos();
 
             Modifications.Read(data);

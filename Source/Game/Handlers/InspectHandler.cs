@@ -58,7 +58,7 @@ namespace Game
             Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
             if (guild)
             {
-                inspectResult.GuildData.HasValue = true;
+                inspectResult.GuildData.Value = new();
 
                 InspectGuildData guildData;
                 guildData.GuildGUID = guild.GetGUID();

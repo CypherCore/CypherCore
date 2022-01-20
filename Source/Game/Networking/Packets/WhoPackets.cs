@@ -117,7 +117,9 @@ namespace Game.Networking.Packets
             ShowEnemies = data.HasBit();
             ShowArenaPlayers = data.HasBit();
             ExactName = data.HasBit();
-            ServerInfo.HasValue = data.HasBit();
+            if (data.HasBit())
+                ServerInfo.Value = new();
+
             data.ResetBitPos();
 
             for (int i = 0; i < wordsCount; ++i)

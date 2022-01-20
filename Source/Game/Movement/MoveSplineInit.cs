@@ -313,7 +313,7 @@ namespace Game.Movement
         public void SetAnimation(AnimType anim)
         {
             args.time_perc = 0.0f;
-            args.animTier.HasValue = true;
+            args.animTier.Value = new();
             args.animTier.Value.AnimTier = (byte)anim;
             args.flags.EnableAnimation();
         }

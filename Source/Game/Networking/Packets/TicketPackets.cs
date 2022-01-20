@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
 
             if (hasClubMessage)
             {
-                CommunityMessage.HasValue = true;
+                CommunityMessage.Value = new();
                 CommunityMessage.Value.IsPlayerUsingVoice = _worldPacket.HasBit();
                 _worldPacket.ResetBitPos();
             }
@@ -158,49 +158,49 @@ namespace Game.Networking.Packets
 
             if (hasMailInfo)
             {
-                MailInfo.HasValue = true;
+                MailInfo.Value = new();
                 MailInfo.Value.Read(_worldPacket);
             }
 
             if (hasCalendarInfo)
             {
-                CalenderInfo.HasValue = true;
+                CalenderInfo.Value = new();
                 CalenderInfo.Value.Read(_worldPacket);
             }
 
             if (hasPetInfo)
             {
-                PetInfo.HasValue = true;
+                PetInfo.Value = new();
                 PetInfo.Value.Read(_worldPacket);
             }
 
             if (hasGuildInfo)
             {
-                GuildInfo.HasValue = true;
+                GuildInfo.Value = new();
                 GuildInfo.Value.Read(_worldPacket);
             }
 
             if (hasLFGListSearchResult)
             {
-                LFGListSearchResult.HasValue = true;
+                LFGListSearchResult.Value = new();
                 LFGListSearchResult.Value.Read(_worldPacket);
             }
 
             if (hasLFGListApplicant)
             {
-                LFGListApplicant.HasValue = true;
+                LFGListApplicant.Value = new();
                 LFGListApplicant.Value.Read(_worldPacket);
             }
 
             if (hasClubFinderResult)
             {
-                ClubFinderResult.HasValue = true;
+                ClubFinderResult.Value = new();
                 ClubFinderResult.Value.Read(_worldPacket);
             }
 
             if (hasUnk910)
             {
-                Unused910.HasValue = true;
+                Unused910.Value = new();
                 Unused910.Value.Read(_worldPacket);
             }
         }
@@ -250,7 +250,9 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 uint linesCount = data.ReadUInt32();
-                ReportLineIndex.HasValue = data.HasBit();
+                if (data.HasBit())
+                    ReportLineIndex.Value = new();
+
                 data.ResetBitPos();
 
                 for (uint i = 0; i < linesCount; i++)
@@ -279,19 +281,19 @@ namespace Game.Networking.Packets
 
                 if (hasClubID)
                 {
-                    ClubID.HasValue = true;
+                    ClubID.Value = new();
                     ClubID.Value = data.ReadUInt64();
                 }
 
                 if (hasChannelGUID)
                 {
-                    ChannelGUID.HasValue = true;
+                    ChannelGUID.Value = new();
                     ChannelGUID.Value = data.ReadPackedGuid();
                 }
 
                 if (hasRealmAddress)
                 {
-                    RealmAddress.HasValue = true;
+                    RealmAddress.Value = new();
                     RealmAddress.Value.VirtualRealmAddress = data.ReadUInt32();
                     RealmAddress.Value.field_4 = data.ReadUInt16();
                     RealmAddress.Value.field_6 = data.ReadUInt8();
@@ -299,7 +301,7 @@ namespace Game.Networking.Packets
 
                 if (hasSlashCmd)
                 {
-                    SlashCmd.HasValue = true;
+                    SlashCmd.Value = new();
                     SlashCmd.Value = data.ReadInt32();
                 }
 

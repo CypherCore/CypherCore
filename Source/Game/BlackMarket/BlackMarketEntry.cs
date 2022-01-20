@@ -50,7 +50,7 @@ namespace Game.BlackMarket
 
             if (!bonusListIDs.Empty())
             {
-                Item.ItemBonus.HasValue = true;
+                Item.ItemBonus.Value = new();
                 Item.ItemBonus.Value.BonusListIDs = bonusListIDs;
             }
 

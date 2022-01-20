@@ -17,25 +17,26 @@
 
 namespace Framework.Dynamic
 {
-    public struct Optional<T> where T : new()
+    public struct Optional<T>
     {
         private bool _hasValue;
         public T Value;
 
+        public Optional(T value)
+        {
+            Value = value;
+            _hasValue = true;
+        }
+
         public bool HasValue
         {
             get { return _hasValue; }
-            set
-            {
-                _hasValue = value;
-                Value = _hasValue ? new T() : default;
-            }
         }
 
-        public void Set(T v)
+        public void Set(T value)
         {
+            Value = value;
             _hasValue = true;
-            Value = v;
         }
 
         public void Clear()
@@ -49,9 +50,14 @@ namespace Framework.Dynamic
             return HasValue ? Value : otherValue;
         }
 
-        public static explicit operator T(Optional<T> value)
+        public static explicit operator T(Optional<T> optional)
         {
-            return (T)value;
+            return optional.Value;
+        }
+
+        public static implicit operator Optional<T>(T value)
+        {
+            return new Optional<T>(value);
         }
     }
 }

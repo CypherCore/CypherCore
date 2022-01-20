@@ -237,7 +237,7 @@ namespace Game.Spells
             if (remove)
                 return;
 
-            auraInfo.AuraData.HasValue = true;
+            auraInfo.AuraData.Value = new();
 
             Aura aura = GetBase();
 

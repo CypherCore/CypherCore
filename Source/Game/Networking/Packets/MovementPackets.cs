@@ -377,7 +377,7 @@ namespace Game.Networking.Packets
 
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {
-                movementSpline.AnimTierTransition.HasValue = true;
+                movementSpline.AnimTierTransition.Value = new();
                 movementSpline.AnimTierTransition.Value.TierTransitionID = (int)moveSpline.anim_tier.Value.TierTransitionId;
                 movementSpline.AnimTierTransition.Value.StartTime = (uint)moveSpline.effect_start_time;
                 movementSpline.AnimTierTransition.Value.AnimTier = moveSpline.anim_tier.Value.AnimTier;
@@ -387,7 +387,7 @@ namespace Game.Networking.Packets
 
             if (splineFlags.HasFlag(SplineFlag.Parabolic) && (!moveSpline.spell_effect_extra.HasValue || moveSpline.effect_start_time != 0))
             {
-                movementSpline.JumpExtraData.HasValue = true;
+                movementSpline.JumpExtraData.Value = new();
                 movementSpline.JumpExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
                 movementSpline.JumpExtraData.Value.StartTime = (uint)moveSpline.effect_start_time;
             }
@@ -397,7 +397,7 @@ namespace Game.Networking.Packets
 
             if (moveSpline.spell_effect_extra.HasValue)
             {
-                movementSpline.SpellEffectExtraData.HasValue = true;
+                movementSpline.SpellEffectExtraData.Value = new();
                 movementSpline.SpellEffectExtraData.Value.TargetGuid = moveSpline.spell_effect_extra.Value.Target;
                 movementSpline.SpellEffectExtraData.Value.SpellVisualID = moveSpline.spell_effect_extra.Value.SpellVisualId;
                 movementSpline.SpellEffectExtraData.Value.ProgressCurveID = moveSpline.spell_effect_extra.Value.ProgressCurveId;
@@ -915,7 +915,7 @@ namespace Game.Networking.Packets
             Ack.Read(_worldPacket);
             if (_worldPacket.HasBit())
             {
-                Speeds.HasValue = true;
+                Speeds.Value = new();
                 Speeds.Value.Read(_worldPacket);
             }
         }

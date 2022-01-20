@@ -5800,7 +5800,7 @@ namespace Game
 
                     if (!result.IsNull(7))
                     {
-                        info.createPositionNPE.HasValue = true;
+                        info.createPositionNPE.Value = new();
 
                         info.createPositionNPE.Value.Loc = new WorldLocation(result.Read<uint>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
                         if (!result.IsNull(12))
@@ -5809,13 +5809,13 @@ namespace Game
                         if (!CliDB.MapStorage.ContainsKey(info.createPositionNPE.Value.Loc.GetMapId()))
                         {
                             Log.outError(LogFilter.Sql, $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
-                            info.createPositionNPE.HasValue = false;
+                            info.createPositionNPE.Clear();
                         }
 
                         if (info.createPositionNPE.HasValue && info.createPositionNPE.Value.TransportGuid.HasValue && Global.TransportMgr.GetTransportSpawn(info.createPositionNPE.Value.TransportGuid.Value) == null)
                         {
                             Log.outError(LogFilter.Sql, $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
-                            info.createPositionNPE.HasValue = false; // remove entire NPE data - assume user put transport offsets into npe_position fields
+                            info.createPositionNPE.Clear(); // remove entire NPE data - assume user put transport offsets into npe_position fields
                         }
                     }
 

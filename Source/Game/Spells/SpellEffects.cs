@@ -5395,14 +5395,14 @@ namespace Game.Spells
             Optional<JumpArrivalCastArgs> arrivalCast = new();
             if (effectInfo.TriggerSpell != 0)
             {
-                arrivalCast.HasValue = true;
+                arrivalCast.Value = new();
                 arrivalCast.Value.SpellId = effectInfo.TriggerSpell;
             }
 
             Optional<SpellEffectExtraData> effectExtra = new();
             if (jumpParams.SpellVisualId.HasValue || jumpParams.ProgressCurveId.HasValue || jumpParams.ParabolicCurveId.HasValue)
             {
-                effectExtra.HasValue = true;
+                effectExtra.Value = new();
                 if (jumpParams.SpellVisualId.HasValue)
                     effectExtra.Value.SpellVisualId = jumpParams.SpellVisualId.Value;
 
