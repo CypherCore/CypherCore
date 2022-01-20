@@ -774,6 +774,41 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("questreset", RBACPermissions.CommandDebugQuestreset)]
+        static bool HandleDebugQuestResetCommand(CommandHandler handler, string arg)
+        {
+            bool daily = false, weekly = false, monthly = false;
+            if (arg == "ALL")
+                daily = weekly = monthly = true;
+            else if (arg == "DAILY")
+                daily = true;
+            else if (arg == "WEEKLY")
+                weekly = true;
+            else if (arg == "MONTHLY")
+                monthly = true;
+            else
+                return false;
+
+            long now = GameTime.GetGameTime();
+            if (daily)
+            {
+                Global.WorldMgr.SetNextDailyQuestsResetTime(now);
+                handler.SendSysMessage("Daily quest reset scheduled for next tick.");
+            }
+            if (weekly)
+            {
+                Global.WorldMgr.SetNextWeeklyQuestsResetTime(now);
+                handler.SendSysMessage("Weekly quest reset scheduled for next tick.");
+            }
+            if (monthly)
+            {
+                Global.WorldMgr.SetNextMonthlyQuestsResetTime(now);
+                handler.SendSysMessage("Monthly quest reset scheduled for next tick.");
+            }
+
+            return true;
+        }
+
         [Command("raidreset", RBACPermissions.CommandInstanceUnbind)]
         static bool HandleDebugRaidResetCommand(CommandHandler handler, StringArguments args)
         {

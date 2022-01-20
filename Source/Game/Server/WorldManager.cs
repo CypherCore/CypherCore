@@ -2405,7 +2405,12 @@ namespace Game
         public void SetDataPath(string path) { _dataPath = path; }
 
         public long GetNextDailyQuestsResetTime() { return m_NextDailyQuestReset; }
+        public void SetNextDailyQuestsResetTime(long time) { m_NextDailyQuestReset = time; }
         public long GetNextWeeklyQuestsResetTime() { return m_NextWeeklyQuestReset; }
+        public void SetNextWeeklyQuestsResetTime(long time) { m_NextWeeklyQuestReset = time; }
+        public long GetNextMonthlyQuestsResetTime() { return m_NextMonthlyQuestReset; }
+        public void SetNextMonthlyQuestsResetTime(long time) { m_NextMonthlyQuestReset = time; }
+
         long GetNextRandomBGResetTime() { return m_NextRandomBGReset; }
 
         public uint GetConfigMaxSkillValue()
