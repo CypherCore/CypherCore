@@ -27,7 +27,7 @@ namespace Game.Chat.Commands
     class RbacComands
     {
         [Command("list", RBACPermissions.CommandRbacList, true)]
-        static bool HandleRBACListPermissionsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleRBACListPermissionsCommand(CommandHandler handler, StringArguments args)
         {
             uint id = args.NextUInt32();
 
@@ -66,7 +66,7 @@ namespace Game.Chat.Commands
         class RbacAccountCommands
         {
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
-            static bool HandleRBACPermGrantCommand(StringArguments args, CommandHandler handler)
+            static bool HandleRBACPermGrantCommand(CommandHandler handler, StringArguments args)
             {
                 RBACCommandData command = ReadParams(args, handler);
                 if (command == null)
@@ -100,7 +100,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
-            static bool HandleRBACPermDenyCommand(StringArguments args, CommandHandler handler)
+            static bool HandleRBACPermDenyCommand(CommandHandler handler, StringArguments args)
             {
                 RBACCommandData command = ReadParams(args, handler);
 
@@ -135,7 +135,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
-            static bool HandleRBACPermRevokeCommand(StringArguments args, CommandHandler handler)
+            static bool HandleRBACPermRevokeCommand(CommandHandler handler, StringArguments args)
             {
                 RBACCommandData command = ReadParams(args, handler);
 
@@ -166,7 +166,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("list", RBACPermissions.CommandRbacAccPermList, true)]
-            static bool HandleRBACPermListCommand(StringArguments args, CommandHandler handler)
+            static bool HandleRBACPermListCommand(CommandHandler handler, StringArguments args)
             {
                 RBACCommandData command = ReadParams(args, handler, false);
 

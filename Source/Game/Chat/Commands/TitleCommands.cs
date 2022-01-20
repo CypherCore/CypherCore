@@ -28,7 +28,7 @@ namespace Game.Chat.Commands
     class TitleCommands
     {
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
-        static bool HandleTitlesCurrentCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTitlesCurrentCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             string id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -69,7 +69,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("add", RBACPermissions.CommandTitlesAdd)]
-        static bool HandleTitlesAddCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTitlesAddCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             string id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -111,7 +111,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("remove", RBACPermissions.CommandTitlesRemove)]
-        static bool HandleTitlesRemoveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTitlesRemoveCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             string id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -164,7 +164,7 @@ namespace Game.Chat.Commands
         {
             //Edit Player KnownTitles
             [Command("mask", RBACPermissions.CommandTitlesSetMask)]
-            static bool HandleTitlesSetMaskCommand(StringArguments args, CommandHandler handler)
+            static bool HandleTitlesSetMaskCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;

@@ -29,6 +29,13 @@ namespace Framework.IO
             activeposition = -1;
         }
 
+        public StringArguments(StringArguments args)
+        {
+            activestring = args.activestring;
+            activeposition = args.activeposition;
+            Current = args.Current;
+        }
+
         public bool Empty()
         {
             return activestring.IsEmpty();
@@ -225,6 +232,21 @@ namespace Framework.IO
         {
             activeposition = -1;
             Current = null;
+        }
+
+        public bool IsAtEnd()
+        {
+            return activeposition == activestring.Length;
+        }
+
+        public int GetCurrentPosition()
+        {
+            return activeposition;
+        }
+
+        public void SetCurrentPosition(int currentPosition)
+        {
+            activeposition = currentPosition;
         }
 
         bool MoveNext(string delimiters)

@@ -28,7 +28,7 @@ namespace Game.Chat.Commands
     class SendCommands
     {
         [Command("mail", RBACPermissions.CommandSendMail, true)]
-        static bool HandleSendMailCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSendMailCommand(CommandHandler handler, StringArguments args)
         {
             // format: name "subject text" "mail text"
             Player target;
@@ -69,7 +69,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("items", RBACPermissions.CommandSendItems, true)]
-        static bool HandleSendItemsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSendItemsCommand(CommandHandler handler, StringArguments args)
         {
             // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
             Player receiver;
@@ -169,7 +169,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("money", RBACPermissions.CommandSendMoney, true)]
-        static bool HandleSendMoneyCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSendMoneyCommand(CommandHandler handler, StringArguments args)
         {
             // format: name "subject text" "mail text" money
 
@@ -218,7 +218,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("message", RBACPermissions.CommandSendMessage, true)]
-        static bool HandleSendMessageCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSendMessageCommand(CommandHandler handler, StringArguments args)
         {
             // - Find the player
             Player player;

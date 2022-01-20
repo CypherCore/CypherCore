@@ -25,7 +25,7 @@ namespace Game.Chat
     class BattleFieldCommands
     {
         [Command("enable", RBACPermissions.CommandBfEnable)]
-        static bool HandleBattlefieldEnable(StringArguments args, CommandHandler handler)
+        static bool HandleBattlefieldEnable(CommandHandler handler, StringArguments args)
         {
             uint battleid = args.NextUInt32();
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -50,7 +50,7 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandBfStart)]
-        static bool HandleBattlefieldStart(StringArguments args, CommandHandler handler)
+        static bool HandleBattlefieldStart(CommandHandler handler, StringArguments args)
         {
             uint battleid = args.NextUInt32();
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -67,7 +67,7 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandBfStop)]
-        static bool HandleBattlefieldEnd(StringArguments args, CommandHandler handler)
+        static bool HandleBattlefieldEnd(CommandHandler handler, StringArguments args)
         {
             uint battleid = args.NextUInt32();
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -84,7 +84,7 @@ namespace Game.Chat
         }
 
         [Command("switch", RBACPermissions.CommandBfSwitch)]
-        static bool HandleBattlefieldSwitch(StringArguments args, CommandHandler handler)
+        static bool HandleBattlefieldSwitch(CommandHandler handler, StringArguments args)
         {
             uint battleid = args.NextUInt32();
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -100,7 +100,7 @@ namespace Game.Chat
         }
 
         [Command("timer", RBACPermissions.CommandBfTimer)]
-        static bool HandleBattlefieldTimer(StringArguments args, CommandHandler handler)
+        static bool HandleBattlefieldTimer(CommandHandler handler, StringArguments args)
         {
             uint battleid = args.NextUInt32();
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);

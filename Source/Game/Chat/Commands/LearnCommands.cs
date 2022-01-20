@@ -29,7 +29,7 @@ namespace Game.Chat.Commands
     class LearnCommands
     {
         [Command("", RBACPermissions.CommandLearn)]
-        static bool HandleLearnCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLearnCommand(CommandHandler handler, StringArguments args)
         {
             Player targetPlayer = handler.GetSelectedPlayerOrSelf();
 
@@ -76,7 +76,7 @@ namespace Game.Chat.Commands
         class LearnAllCommands
         {
             [Command("gm", RBACPermissions.CommandLearnAllGm)]
-            static bool HandleLearnAllGMCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLearnAllGMCommand(CommandHandler handler, StringArguments args)
             {
                 foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
                 {
@@ -92,7 +92,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("lang", RBACPermissions.CommandLearnAllLang)]
-            static bool HandleLearnAllLangCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLearnAllLangCommand(CommandHandler handler, StringArguments args)
             {
                 // skipping UNIVERSAL language (0)
                 Global.LanguageMgr.ForEachLanguage((lang, languageDesc) =>
@@ -108,7 +108,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("default", RBACPermissions.CommandLearnAllDefault)]
-            static bool HandleLearnAllDefaultCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLearnAllDefaultCommand(CommandHandler handler, StringArguments args)
             {
                 Player target;
                 if (!handler.ExtractPlayerTarget(args, out target))
@@ -123,7 +123,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("crafts", RBACPermissions.CommandLearnAllCrafts)]
-            static bool HandleLearnAllCraftsCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLearnAllCraftsCommand(CommandHandler handler, StringArguments args)
             {
                 Player target;
                 if (!handler.ExtractPlayerTarget(args, out target))
@@ -142,7 +142,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("recipes", RBACPermissions.CommandLearnAllRecipes)]
-            static bool HandleLearnAllRecipesCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLearnAllRecipesCommand(CommandHandler handler, StringArguments args)
             {
                 //  Learns all recipes of specified profession and sets skill to max
                 //  Example: .learn all_recipes enchanting
@@ -243,15 +243,15 @@ namespace Game.Chat.Commands
             class LearnAllMyCommands
             {
                 [Command("class", RBACPermissions.CommandLearnAllMyClass)]
-                static bool HandleLearnAllMyClassCommand(StringArguments args, CommandHandler handler)
+                static bool HandleLearnAllMyClassCommand(CommandHandler handler, StringArguments args)
                 {
-                    HandleLearnAllMySpellsCommand(args, handler);
-                    HandleLearnAllMyTalentsCommand(args, handler);
+                    HandleLearnAllMySpellsCommand(handler, args);
+                    HandleLearnAllMyTalentsCommand(handler, args);
                     return true;
                 }
 
                 [Command("spells", RBACPermissions.CommandLearnAllMySpells)]
-                static bool HandleLearnAllMySpellsCommand(StringArguments args, CommandHandler handler)
+                static bool HandleLearnAllMySpellsCommand(CommandHandler handler, StringArguments args)
                 {
                     ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetSession().GetPlayer().GetClass());
                     if (classEntry == null)
@@ -288,7 +288,7 @@ namespace Game.Chat.Commands
                 }
 
                 [Command("talents", RBACPermissions.CommandLearnAllMyTalents)]
-                static bool HandleLearnAllMyTalentsCommand(StringArguments args, CommandHandler handler)
+                static bool HandleLearnAllMyTalentsCommand(CommandHandler handler, StringArguments args)
                 {
                     Player player = handler.GetSession().GetPlayer();
                     uint playerClass = (uint)player.GetClass();
@@ -312,12 +312,12 @@ namespace Game.Chat.Commands
                 }
 
                 [Command("pettalents", RBACPermissions.CommandLearnAllMyPettalents)]
-                static bool HandleLearnAllMyPetTalentsCommand(StringArguments args, CommandHandler handler) { return true; }
+                static bool HandleLearnAllMyPetTalentsCommand(CommandHandler handler, StringArguments args) { return true; }
             }
         }
 
         [CommandNonGroup("unlearn", RBACPermissions.CommandUnlearn)]
-        static bool HandleUnLearnCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnLearnCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;

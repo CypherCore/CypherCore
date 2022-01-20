@@ -26,7 +26,7 @@ namespace Game.Chat
     class GMCommands
     {
         [Command("", RBACPermissions.CommandGm)]
-        static bool HandleGMCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMCommand(CommandHandler handler, StringArguments args)
         {
             Player _player = handler.GetSession().GetPlayer();
 
@@ -57,7 +57,7 @@ namespace Game.Chat
         }
 
         [Command("chat", RBACPermissions.CommandGmChat)]
-        static bool HandleGMChatCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMChatCommand(CommandHandler handler, StringArguments args)
         {
             WorldSession session = handler.GetSession();
             if (session != null)
@@ -93,7 +93,7 @@ namespace Game.Chat
         }
 
         [Command("fly", RBACPermissions.CommandGmFly)]
-        static bool HandleGMFlyCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMFlyCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("ingame", RBACPermissions.CommandGmIngame, true)]
-        static bool HandleGMListIngameCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMListIngameCommand(CommandHandler handler, StringArguments args)
         {
             bool first = true;
             bool footer = false;
@@ -165,7 +165,7 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGmList, true)]
-        static bool HandleGMListFullCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMListFullCommand(CommandHandler handler, StringArguments args)
         {
             // Get the accounts with GM Level >0
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
@@ -200,7 +200,7 @@ namespace Game.Chat
         }
 
         [Command("visible", RBACPermissions.CommandGmVisible)]
-        static bool HandleGMVisibleCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGMVisibleCommand(CommandHandler handler, StringArguments args)
         {
             Player _player = handler.GetSession().GetPlayer();
 

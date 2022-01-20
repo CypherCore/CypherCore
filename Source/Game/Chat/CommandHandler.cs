@@ -78,9 +78,6 @@ namespace Game.Chat
 
             foreach (var command in table)
             {
-                //if (!command.Name.Equals(cmd))
-                    //continue;
-
                 if (!HasStringAbbr(command.Name, cmd))
                     continue;
 
@@ -122,11 +119,11 @@ namespace Game.Chat
                 }
 
                 // must be available and have handler
-                if (command.Handler == null || !IsAvailable(command))
+                if (!command.HasHandler() || !IsAvailable(command))
                     continue;
 
                 _sentErrorMessage = false;
-                if (command.Handler(new StringArguments(!command.Name.IsEmpty() ? args.NextString("") : text), this))
+                if (command.Invoke(this, new StringArguments(!command.Name.IsEmpty() ? args.NextString("") : text)))
                 {
                     if (GetSession() == null) // ignore console
                         return true;

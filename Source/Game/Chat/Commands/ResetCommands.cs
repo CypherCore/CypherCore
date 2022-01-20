@@ -29,7 +29,7 @@ namespace Game.Chat
     class ResetCommands
     {
         [Command("achievements", RBACPermissions.CommandResetAchievements, true)]
-        static bool HandleResetAchievementsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetAchievementsCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -45,7 +45,7 @@ namespace Game.Chat
         }
 
         [Command("honor", RBACPermissions.CommandResetHonor, true)]
-        static bool HandleResetHonorCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetHonorCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -89,7 +89,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandResetLevel, true)]
-        static bool HandleResetLevelCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetLevelCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("spells", RBACPermissions.CommandResetSpells, true)]
-        static bool HandleResetSpellsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetSpellsCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -154,7 +154,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandResetStats, true)]
-        static bool HandleResetStatsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetStatsCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -172,7 +172,7 @@ namespace Game.Chat
         }
 
         [Command("talents", RBACPermissions.CommandResetTalents, true)]
-        static bool HandleResetTalentsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetTalentsCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -237,7 +237,7 @@ namespace Game.Chat
         }
 
         [Command("all", RBACPermissions.CommandResetAll, true)]
-        static bool HandleResetAllCommand(StringArguments args, CommandHandler handler)
+        static bool HandleResetAllCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;

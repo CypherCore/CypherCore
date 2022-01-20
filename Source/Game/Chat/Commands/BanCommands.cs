@@ -28,13 +28,13 @@ namespace Game.Chat.Commands
     class BanCommands
     {
         [Command("account", RBACPermissions.CommandBanAccount, true)]
-        static bool HandleBanAccountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanAccountCommand(CommandHandler handler, StringArguments args)
         {
             return HandleBanHelper(BanMode.Account, args, handler);
         }
 
         [Command("character", RBACPermissions.CommandBanCharacter, true)]
-        static bool HandleBanCharacterCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanCharacterCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -95,13 +95,13 @@ namespace Game.Chat.Commands
         }
 
         [Command("playeraccount", RBACPermissions.CommandBanPlayeraccount, true)]
-        static bool HandleBanAccountByCharCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanAccountByCharCommand(CommandHandler handler, StringArguments args)
         {
             return HandleBanHelper(BanMode.Character, args, handler);
         }
 
         [Command("ip", RBACPermissions.CommandBanIp, true)]
-        static bool HandleBanIPCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanIPCommand(CommandHandler handler, StringArguments args)
         {
             return HandleBanHelper(BanMode.IP, args, handler);
         }
@@ -186,7 +186,7 @@ namespace Game.Chat.Commands
     class BanInfoCommands
     {
         [Command("account", RBACPermissions.CommandBaninfoAccount, true)]
-        static bool HandleBanInfoAccountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanInfoAccountCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -206,7 +206,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("character", RBACPermissions.CommandBaninfoCharacter, true)]
-        static bool HandleBanInfoCharacterCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanInfoCharacterCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -260,7 +260,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("ip", RBACPermissions.CommandBaninfoIp, true)]
-        static bool HandleBanInfoIPCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanInfoIPCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -315,7 +315,7 @@ namespace Game.Chat.Commands
     class BanListCommands
     {
         [Command("account", RBACPermissions.CommandBanlistAccount, true)]
-        static bool HandleBanListAccountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanListAccountCommand(CommandHandler handler, StringArguments args)
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
@@ -346,7 +346,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("character", RBACPermissions.CommandBanlistCharacter, true)]
-        static bool HandleBanListCharacterCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanListCharacterCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -431,7 +431,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("ip", RBACPermissions.CommandBanlistIp, true)]
-        static bool HandleBanListIPCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBanListIPCommand(CommandHandler handler, StringArguments args)
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
@@ -595,13 +595,13 @@ namespace Game.Chat.Commands
     class UnBanCommands
     {
         [Command("account", RBACPermissions.CommandUnbanAccount, true)]
-        static bool HandleUnBanAccountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnBanAccountCommand(CommandHandler handler, StringArguments args)
         {
             return HandleUnBanHelper(BanMode.Account, args, handler);
         }
 
         [Command("character", RBACPermissions.CommandUnbanCharacter, true)]
-        static bool HandleUnBanCharacterCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnBanCharacterCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -623,13 +623,13 @@ namespace Game.Chat.Commands
         }
 
         [Command("playeraccount", RBACPermissions.CommandUnbanPlayeraccount, true)]
-        static bool HandleUnBanAccountByCharCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnBanAccountByCharCommand(CommandHandler handler, StringArguments args)
         {
             return HandleUnBanHelper(BanMode.Character, args, handler);
         }
 
         [Command("ip", RBACPermissions.CommandUnbanIp, true)]
-        static bool HandleUnBanIPCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnBanIPCommand(CommandHandler handler, StringArguments args)
         {
             return HandleUnBanHelper(BanMode.IP, args, handler);
         }

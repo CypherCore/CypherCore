@@ -35,7 +35,7 @@ namespace Game.Chat
     class MiscCommands
     {
         [CommandNonGroup("additem", RBACPermissions.CommandAdditem)]
-        static bool HandleAddItemCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAddItemCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -188,7 +188,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("additemset", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemSetCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAddItemSetCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -276,7 +276,7 @@ namespace Game.Chat
 
         // Teleport to Player
         [CommandNonGroup("appear", RBACPermissions.CommandAppear)]
-        static bool HandleAppearCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAppearCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -413,14 +413,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("bank", RBACPermissions.CommandBank)]
-        static bool HandleBankCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBankCommand(CommandHandler handler, StringArguments args)
         {
             handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID());
             return true;
         }
 
         [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
-        static bool HandleBindSightCommand(StringArguments args, CommandHandler handler)
+        static bool HandleBindSightCommand(CommandHandler handler, StringArguments args)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -431,7 +431,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("combatstop", RBACPermissions.CommandCombatstop, true)]
-        static bool HandleCombatStopCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCombatStopCommand(CommandHandler handler, StringArguments args)
         {
             Player target = null;
 
@@ -460,7 +460,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
-        static bool HandleComeToMeCommand(StringArguments args, CommandHandler handler)
+        static bool HandleComeToMeCommand(CommandHandler handler, StringArguments args)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -476,7 +476,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("commands", RBACPermissions.CommandCommands, true)]
-        static bool HandleCommandsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCommandsCommand(CommandHandler handler, StringArguments args)
         {
             string list = "";
             foreach (var command in CommandManager.GetCommands())
@@ -504,7 +504,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDamageCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -632,7 +632,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dev", RBACPermissions.CommandDev)]
-        static bool HandleDevCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDevCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -664,7 +664,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("die", RBACPermissions.CommandDie)]
-        static bool HandleDieCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDieCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
 
@@ -686,7 +686,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dismount", RBACPermissions.CommandDismount)]
-        static bool HandleDismountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDismountCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayerOrSelf();
 
@@ -709,7 +709,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("distance", RBACPermissions.CommandDistance)]
-        static bool HandleGetDistanceCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGetDistanceCommand(CommandHandler handler, StringArguments args)
         {
             WorldObject obj;
 
@@ -770,7 +770,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("freeze", RBACPermissions.CommandFreeze)]
-        static bool HandleFreezeCommand(StringArguments args, CommandHandler handler)
+        static bool HandleFreezeCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
             int freezeDuration = 0; // Freeze Duration (in seconds)
@@ -862,7 +862,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gps", RBACPermissions.CommandGps)]
-        static bool HandleGPSCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGPSCommand(CommandHandler handler, StringArguments args)
         {
             WorldObject obj;
             if (!args.Empty())
@@ -987,7 +987,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("guid", RBACPermissions.CommandGuid)]
-        static bool HandleGUIDCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGUIDCommand(CommandHandler handler, StringArguments args)
         {
             ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
 
@@ -1002,7 +1002,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
-        static bool HandleHelpCommand(StringArguments args, CommandHandler handler)
+        static bool HandleHelpCommand(CommandHandler handler, StringArguments args)
         {
             string cmd = args.NextString("");
             if (cmd.IsEmpty())
@@ -1020,7 +1020,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("hidearea", RBACPermissions.CommandHidearea)]
-        static bool HandleHideAreaCommand(StringArguments args, CommandHandler handler)
+        static bool HandleHideAreaCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1061,7 +1061,7 @@ namespace Game.Chat
 
         // move item to other slot
         [CommandNonGroup("itemmove", RBACPermissions.CommandItemmove)]
-        static bool HandleItemMoveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleItemMoveCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1088,7 +1088,7 @@ namespace Game.Chat
 
         // kick player
         [CommandNonGroup("kick", RBACPermissions.CommandKick, true)]
-        static bool HandleKickPlayerCommand(StringArguments args, CommandHandler handler)
+        static bool HandleKickPlayerCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             string playerName;
@@ -1121,7 +1121,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool HandleLinkGraveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLinkGraveCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1168,7 +1168,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("listfreeze", RBACPermissions.CommandListfreeze)]
-        static bool HandleListFreezeCommand(StringArguments args, CommandHandler handler)
+        static bool HandleListFreezeCommand(CommandHandler handler, StringArguments args)
         {
             // Get names from DB
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
@@ -1205,7 +1205,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("mailbox", RBACPermissions.CommandMailbox)]
-        static bool HandleMailBoxCommand(StringArguments args, CommandHandler handler)
+        static bool HandleMailBoxCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -1214,7 +1214,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
-        static bool HandleMovegensCommand(StringArguments args, CommandHandler handler)
+        static bool HandleMovegensCommand(CommandHandler handler, StringArguments args)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -1299,7 +1299,7 @@ namespace Game.Chat
 
         // mute player for some times
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool HandleMuteCommand(StringArguments args, CommandHandler handler)
+        static bool HandleMuteCommand(CommandHandler handler, StringArguments args)
         {
             string nameStr;
             string delayStr;
@@ -1382,7 +1382,7 @@ namespace Game.Chat
 
         // mutehistory command
         [CommandNonGroup("mutehistory", RBACPermissions.CommandMutehistory, true)]
-        static bool HandleMuteInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleMuteInfoCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1424,7 +1424,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
-        static bool HandleNearGraveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleNearGraveCommand(CommandHandler handler, StringArguments args)
         {
             string px2 = args.NextString();
             Team team;
@@ -1484,7 +1484,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pinfo", RBACPermissions.CommandPinfo, true)]
-        static bool HandlePInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePInfoCommand(CommandHandler handler, StringArguments args)
         {            
             // Define ALL the player variables!
             Player target;
@@ -1838,7 +1838,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
-        static bool HandlePlayAllCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePlayAllCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1860,7 +1860,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
-        static bool HandlePossessCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePossessCommand(CommandHandler handler, StringArguments args)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -1871,7 +1871,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pvpstats", RBACPermissions.CommandPvpstats, true)]
-        static bool HandlePvPstatsCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePvPstatsCommand(CommandHandler handler, StringArguments args)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
@@ -1900,7 +1900,7 @@ namespace Game.Chat
 
         // Teleport player to last position
         [CommandNonGroup("recall", RBACPermissions.CommandRecall)]
-        static bool HandleRecallCommand(StringArguments args, CommandHandler handler)
+        static bool HandleRecallCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -1925,7 +1925,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("repairitems", RBACPermissions.CommandRepairitems, true)]
-        static bool HandleRepairitemsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleRepairitemsCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -1946,7 +1946,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("respawn", RBACPermissions.CommandRespawn)]
-        static bool HandleRespawnCommand(StringArguments args, CommandHandler handler)
+        static bool HandleRespawnCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -1984,7 +1984,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("revive", RBACPermissions.CommandRevive, true)]
-        static bool HandleReviveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleReviveCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -2005,7 +2005,7 @@ namespace Game.Chat
 
         // Save all players in the world
         [CommandNonGroup("saveall", RBACPermissions.CommandSaveall, true)]
-        static bool HandleSaveAllCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSaveAllCommand(CommandHandler handler, StringArguments args)
         {
             Global.ObjAccessor.SaveAllPlayers();
             handler.SendSysMessage(CypherStrings.PlayersSaved);
@@ -2013,7 +2013,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("save", RBACPermissions.CommandSave)]
-        static bool HandleSaveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSaveCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -2038,7 +2038,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("showarea", RBACPermissions.CommandShowarea)]
-        static bool HandleShowAreaCommand(StringArguments args, CommandHandler handler)
+        static bool HandleShowAreaCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -2079,7 +2079,7 @@ namespace Game.Chat
 
         // Summon Player
         [CommandNonGroup("summon", RBACPermissions.CommandSummon)]
-        static bool HandleSummonCommand(StringArguments args, CommandHandler handler)
+        static bool HandleSummonCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -2191,7 +2191,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unbindsight", RBACPermissions.CommandUnbindsight)]
-        static bool HandleUnbindSightCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnbindSightCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -2203,7 +2203,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
-        static bool HandleUnFreezeCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnFreezeCommand(CommandHandler handler, StringArguments args)
         {
             string name = "";
             Player player;
@@ -2263,7 +2263,7 @@ namespace Game.Chat
 
         // unmute player
         [CommandNonGroup("unmute", RBACPermissions.CommandUnmute, true)]
-        static bool HandleUnmuteCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnmuteCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -2314,7 +2314,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unpossess", RBACPermissions.CommandUnpossess)]
-        static bool HandleUnPossessCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnPossessCommand(CommandHandler handler, StringArguments args)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -2326,7 +2326,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unstuck", RBACPermissions.CommandUnstuck, true)]
-        static bool HandleUnstuckCommand(StringArguments args, CommandHandler handler)
+        static bool HandleUnstuckCommand(CommandHandler handler, StringArguments args)
         {
             uint SPELL_UNSTUCK_ID = 7355;
             uint SPELL_UNSTUCK_VISUAL = 2683;
@@ -2401,7 +2401,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("wchange", RBACPermissions.CommandWchange)]
-        static bool HandleChangeWeather(StringArguments args, CommandHandler handler)
+        static bool HandleChangeWeather(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -2433,36 +2433,6 @@ namespace Game.Chat
             }
 
             weather.SetWeather((WeatherType)type, grade);
-            return true;
-        }
-    }
-
-    [CommandGroup("achievement", RBACPermissions.CommandAchievement)]
-    class AchievementCommand
-    {
-        [Command("add", RBACPermissions.CommandAchievementAdd)]
-        static bool Add(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            string idStr = handler.ExtractKeyFromLink(args, "Hachievement");
-            if (string.IsNullOrEmpty(idStr))
-                return false;
-
-            if (!uint.TryParse(idStr, out uint achievementId) || achievementId == 0)
-                return false;
-
-            Player target = handler.GetSelectedPlayer();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-            AchievementRecord achievementEntry = CliDB.AchievementStorage.LookupByKey(achievementId);
-            if (achievementEntry != null)
-                target.CompletedAchievement(achievementEntry);
-
             return true;
         }
     }

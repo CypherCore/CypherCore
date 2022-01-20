@@ -25,7 +25,7 @@ namespace Game.Chat.Commands
     class AhBotCommands
     {
         [Command("rebuild", RBACPermissions.CommandAhbotRebuild, true)]
-        static bool HandleAHBotRebuildCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAHBotRebuildCommand(CommandHandler handler, StringArguments args)
         {
             /*char* arg = strtok((char*)args, " ");
 
@@ -38,7 +38,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("reload", RBACPermissions.CommandAhbotReload, true)]
-        static bool HandleAHBotReloadCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAHBotReloadCommand(CommandHandler handler, StringArguments args)
         {
             //sAuctionBot->ReloadAllConfig();
             //handler->SendSysMessage(LANG_AHBOT_RELOAD_OK);
@@ -46,7 +46,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("status", RBACPermissions.CommandAhbotStatus, true)]
-        static bool HandleAHBotStatusCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAHBotStatusCommand(CommandHandler handler, StringArguments args)
         {
             /*   char* arg = strtok((char*)args, " ");
             if (!arg)
@@ -117,7 +117,7 @@ namespace Game.Chat.Commands
         class ItemsCommands
         {
             [Command("", RBACPermissions.CommandAhbotItems, true)]
-            static bool HandleAHBotItemsAmountCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAHBotItemsAmountCommand(CommandHandler handler, StringArguments args)
             {
                 /*public uint qVals[MAX_AUCTION_QUALITY];
                 char* arg = strtok((char*)args, " ");
@@ -138,27 +138,27 @@ namespace Game.Chat.Commands
             }
 
             [Command("blue", RBACPermissions.CommandAhbotItemsBlue, true)]
-            static bool HandleAHBotItemsAmountQualityBlue(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityBlue(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("gray", RBACPermissions.CommandAhbotItemsGray, true)]
-            static bool HandleAHBotItemsAmountQualityGray(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityGray(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("green", RBACPermissions.CommandAhbotItemsGreen, true)]
-            static bool HandleAHBotItemsAmountQualityGreen(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityGreen(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("orange", RBACPermissions.CommandAhbotItemsOrange, true)]
-            static bool HandleAHBotItemsAmountQualityOrange(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityOrange(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("purple", RBACPermissions.CommandAhbotItemsPurple, true)]
-            static bool HandleAHBotItemsAmountQualityPurple(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityPurple(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("white", RBACPermissions.CommandAhbotItemsWhite, true)]
-            static bool HandleAHBotItemsAmountQualityWhite(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityWhite(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("yellow", RBACPermissions.CommandAhbotItemsYellow, true)]
-            static bool HandleAHBotItemsAmountQualityYellow(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsAmountQualityYellow(CommandHandler handler, StringArguments args) { return true; }
 
-            static bool HandleAHBotItemsAmountQualityCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAHBotItemsAmountQualityCommand(CommandHandler handler, StringArguments args)
             {
                 /*
                 char* arg = strtok((char*)args, " ");
@@ -178,7 +178,7 @@ namespace Game.Chat.Commands
         class RatioCommands
         {
             [Command("", RBACPermissions.CommandAhbotRatio, true)]
-            static bool HandleAHBotItemsRatioCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAHBotItemsRatioCommand(CommandHandler handler, StringArguments args)
             {
                 /*public uint rVal[MAX_AUCTION_QUALITY];
                 char* arg = strtok((char*)args, " ");
@@ -199,15 +199,15 @@ namespace Game.Chat.Commands
             }
 
             [Command("alliance", RBACPermissions.CommandAhbotRatioAlliance, true)]
-            static bool HandleAHBotItemsRatioHouseAlliance(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsRatioHouseAlliance(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("horde", RBACPermissions.CommandAhbotRatioHorde, true)]
-            static bool HandleAHBotItemsRatioHouseHorde(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsRatioHouseHorde(CommandHandler handler, StringArguments args) { return true; }
 
             [Command("neutral", RBACPermissions.CommandAhbotRatioNeutral, true)]
-            static bool HandleAHBotItemsRatioHouseNeutral(StringArguments args, CommandHandler handler) { return true; }
+            static bool HandleAHBotItemsRatioHouseNeutral(CommandHandler handler, StringArguments args) { return true; }
 
-            static bool HandleAHBotItemsRatioHouseCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAHBotItemsRatioHouseCommand(CommandHandler handler, StringArguments args)
             {
                 /*char* arg = strtok((char*)args, " ");
                 if (!arg)

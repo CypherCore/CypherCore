@@ -30,43 +30,68 @@ namespace Game.Chat
     {
         static CommandManager()
         {
-            try
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+                if (type.Attributes.HasAnyFlag(TypeAttributes.NestedPrivate | TypeAttributes.NestedPublic))
+                    continue;
+
+                var groupAttribute = type.GetCustomAttribute<CommandGroupAttribute>(true);
+                if (groupAttribute != null)
                 {
-                    if (type.Attributes.HasAnyFlag(TypeAttributes.NestedPrivate))
-                        continue;
-
-                    var groupAttribute = type.GetCustomAttribute<CommandGroupAttribute>(true);
-                    if (groupAttribute != null)
-                    {
-                        _commands.Add(groupAttribute.Name, new ChatCommand(type, groupAttribute));
-                    }
-
+                    ChatCommand command = new(groupAttribute);
+                    BuildChildCommandsForCommand(command, type);
+                    _commands.Add(groupAttribute.Name, command);
+                }
+                else
+                {
                     foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
                     {
                         var commandAttribute = method.GetCustomAttribute<CommandNonGroupAttribute>(true);
                         if (commandAttribute != null)
-                            _commands.Add(commandAttribute.Name, new ChatCommand(commandAttribute, (HandleCommandDelegate)method.CreateDelegate(typeof(HandleCommandDelegate))));
+                            _commands.Add(commandAttribute.Name, new ChatCommand(commandAttribute, method));
                     }
                 }
+            }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
-                SQLResult result = DB.World.Query(stmt);
-                if (!result.IsEmpty())
-                {
-                    do
-                    {
-                        string name = result.Read<string>(0);
-                        SetDataForCommandInTable(GetCommands(), name, result.Read<uint>(1), result.Read<string>(2), name);
-                    }
-                    while (result.NextRow());
-                }
-            }
-            catch (Exception ex)
+            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
+            SQLResult result = DB.World.Query(stmt);
+            if (!result.IsEmpty())
             {
-                Log.outException(ex);
+                do
+                {
+                    string name = result.Read<string>(0);
+                    SetDataForCommandInTable(GetCommands(), name, result.Read<uint>(1), result.Read<string>(2), name);
+                }
+                while (result.NextRow());
             }
+        }
+
+        static void BuildChildCommandsForCommand(ChatCommand command, Type type)
+        {
+            foreach (var nestedType in type.GetNestedTypes(BindingFlags.NonPublic))
+            {
+                var groupAttribute = nestedType.GetCustomAttribute<CommandGroupAttribute>(true);
+                if (groupAttribute == null)
+                    continue;
+
+                ChatCommand childCommand = new(groupAttribute);
+                BuildChildCommandsForCommand(childCommand, nestedType);
+                command.AddChildCommand(childCommand);
+            }
+
+            foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
+            {
+                CommandAttribute commandAttribute = method.GetCustomAttribute<CommandAttribute>(false);
+                if (commandAttribute == null)
+                    continue;
+
+                if (commandAttribute.GetType() == typeof(CommandNonGroupAttribute))
+                    continue;
+
+                command.AddChildCommand(new ChatCommand(commandAttribute, method));
+            }
+
+            command.SortChildCommands();
         }
 
         static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, uint permission, string help, string fullcommand)
@@ -143,55 +168,60 @@ namespace Game.Chat
         static SortedDictionary<string, ChatCommand> _commands = new();
     }
 
-    public delegate bool HandleCommandDelegate(StringArguments args, CommandHandler handler);
+    public delegate bool HandleCommandDelegate(CommandHandler handler, StringArguments args);
 
     public class ChatCommand
     {
-        public ChatCommand(CommandAttribute attribute, HandleCommandDelegate handler)
-        {
-            Name = attribute.Name;
-            Permission = attribute.RBAC;
-            AllowConsole = attribute.AllowConsole;
-            Handler = handler;
-            Help = attribute.Help;
-        }
-
-        public ChatCommand(Type type, CommandAttribute attribute)
-        {
-            Name = attribute.Name;
-            Permission = attribute.RBAC;
-            AllowConsole = attribute.AllowConsole;
-            Help = attribute.Help;
-
-            foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
-            {
-                CommandAttribute commandAttribute = method.GetCustomAttribute<CommandAttribute>(false);
-                if (commandAttribute == null)
-                    continue;
-
-                if (commandAttribute.GetType() == typeof(CommandNonGroupAttribute))
-                    continue;
-
-                ChildCommands.Add(new ChatCommand(commandAttribute, (HandleCommandDelegate)method.CreateDelegate(typeof(HandleCommandDelegate))));
-            }
-
-            foreach (var nestedType in type.GetNestedTypes(BindingFlags.NonPublic))
-            {
-                var groupAttribute = nestedType.GetCustomAttribute<CommandGroupAttribute>(true);
-                if (groupAttribute == null)
-                    continue;
-
-                ChildCommands.Add(new ChatCommand(nestedType, groupAttribute));
-            }
-
-            ChildCommands = ChildCommands.OrderBy(p => string.IsNullOrEmpty(p.Name)).ThenBy(p => p.Name).ToList();
-        }
-
         public string Name;
         public RBACPermissions Permission;
         public bool AllowConsole;
-        public HandleCommandDelegate Handler;
         public string Help;
         public List<ChatCommand> ChildCommands = new();
+
+        MethodInfo _methodInfo;
+        Type[] parameterTypes;
+
+        public ChatCommand(CommandAttribute attribute)
+        {
+            Name = attribute.Name;
+            Permission = attribute.RBAC;
+            AllowConsole = attribute.AllowConsole;
+            Help = attribute.Help;
+        }
+
+        public ChatCommand(CommandAttribute attribute, MethodInfo methodInfo) : this(attribute)
+        {
+            _methodInfo = methodInfo;
+            parameterTypes = (from parameter in methodInfo.GetParameters() select parameter.ParameterType).ToArray();
+        }
+
+        public void AddChildCommand(ChatCommand command)
+        {
+            ChildCommands.Add(command);
+        }
+
+        public void SortChildCommands()
+        {
+            ChildCommands = ChildCommands.OrderBy(p => string.IsNullOrEmpty(p.Name)).ThenBy(p => p.Name).ToList();
+        }
+
+        public bool Invoke(CommandHandler handler, StringArguments args)
+        {
+            if (parameterTypes.Contains(typeof(StringArguments)))//Old system, can remove once all commands are changed.
+                return (bool)_methodInfo.Invoke(null, new object[] { handler, args });
+            else
+                return (bool)_methodInfo.Invoke(null, new object[] { handler }.Combine(CommandArgs.Parse(parameterTypes, args)));
+
+        }
+
+        public bool HasHandler()
+        {
+            return _methodInfo != null;
+        }
+
+        public override string ToString()
+        {
+            return $"Name: {Name} Permission: {Permission} AllowConsole: {AllowConsole} ChildCommandCount: {ChildCommands.Count}";
+        }
     }
 }

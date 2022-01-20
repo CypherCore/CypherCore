@@ -28,7 +28,7 @@ namespace Game.Chat
     class MMapsCommands
     {
         [Command("path", RBACPermissions.CommandMmapPath)]
-        static bool PathCommand(StringArguments args, CommandHandler handler)
+        static bool PathCommand(CommandHandler handler, StringArguments args)
         {
             if (Global.MMapMgr.GetNavMesh(handler.GetPlayer().GetMapId()) == null)
             {
@@ -89,7 +89,7 @@ namespace Game.Chat
         }
 
         [Command("loc", RBACPermissions.CommandMmapLoc)]
-        static bool LocCommand(StringArguments args, CommandHandler handler)
+        static bool LocCommand(CommandHandler handler, StringArguments args)
         {
             handler.SendSysMessage("mmap tileloc:");
 
@@ -155,7 +155,7 @@ namespace Game.Chat
         }
 
         [Command("loadedtiles", RBACPermissions.CommandMmapLoadedtiles)]
-        static bool LoadedTilesCommand(StringArguments args, CommandHandler handler)
+        static bool LoadedTilesCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -181,7 +181,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandMmapStats)]
-        static bool HandleMmapStatsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleMmapStatsCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -225,7 +225,7 @@ namespace Game.Chat
         }
 
         [Command("testarea", RBACPermissions.CommandMmapTestarea)]
-        static bool TestArea(StringArguments args, CommandHandler handler)
+        static bool TestArea(CommandHandler handler, StringArguments args)
         {
             float radius = 40.0f;
             WorldObject obj = handler.GetPlayer();

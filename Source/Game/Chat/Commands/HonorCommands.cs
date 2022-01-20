@@ -25,7 +25,7 @@ namespace Game.Chat.Commands
     class HonorCommands
     {
         [Command("update", RBACPermissions.CommandHonorUpdate)]
-        static bool HandleHonorUpdateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleHonorUpdateCommand(CommandHandler handler, StringArguments args)
         {
             Player target = handler.GetSelectedPlayer();
             if (!target)
@@ -46,7 +46,7 @@ namespace Game.Chat.Commands
         class HonorAddCommands
         {
             [Command("", RBACPermissions.CommandHonorAdd)]
-            static bool HandleHonorAddCommand(StringArguments args, CommandHandler handler)
+            static bool HandleHonorAddCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -68,7 +68,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("kill", RBACPermissions.CommandHonorAddKill)]
-            static bool HandleHonorAddKillCommand(StringArguments args, CommandHandler handler)
+            static bool HandleHonorAddKillCommand(CommandHandler handler, StringArguments args)
             {
                 Unit target = handler.GetSelectedUnit();
                 if (!target)

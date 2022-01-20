@@ -33,7 +33,7 @@ namespace Game.Chat
         static int maxResults = 50;
 
         [Command("area", RBACPermissions.CommandLookupArea, true)]
-        static bool Area(StringArguments args, CommandHandler handler)
+        static bool Area(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -97,7 +97,7 @@ namespace Game.Chat
         }
 
         [Command("creature", RBACPermissions.CommandLookupCreature, true)]
-        static bool Creature(StringArguments args, CommandHandler handler)
+        static bool Creature(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -169,7 +169,7 @@ namespace Game.Chat
         }
 
         [Command("event", RBACPermissions.CommandLookupEvent, true)]
-        static bool Event(StringArguments args, CommandHandler handler)
+        static bool Event(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -217,7 +217,7 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandLookupFaction, true)]
-        static bool Faction(StringArguments args, CommandHandler handler)
+        static bool Faction(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -310,7 +310,7 @@ namespace Game.Chat
         }
 
         [Command("item", RBACPermissions.CommandLookupItem, true)]
-        static bool Item(StringArguments args, CommandHandler handler)
+        static bool Item(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -353,7 +353,7 @@ namespace Game.Chat
         }
 
         [Command("itemset", RBACPermissions.CommandLookupItemset, true)]
-        static bool ItemSet(StringArguments args, CommandHandler handler)
+        static bool ItemSet(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -413,7 +413,7 @@ namespace Game.Chat
         }
 
         [Command("object", RBACPermissions.CommandLookupObject, true)]
-        static bool Object(StringArguments args, CommandHandler handler)
+        static bool Object(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -485,7 +485,7 @@ namespace Game.Chat
         }
 
         [Command("quest", RBACPermissions.CommandLookupQuest, true)]
-        static bool Quest(StringArguments args, CommandHandler handler)
+        static bool Quest(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -633,7 +633,7 @@ namespace Game.Chat
         }
 
         [Command("skill", RBACPermissions.CommandLookupSkill, true)]
-        static bool Skill(StringArguments args, CommandHandler handler)
+        static bool Skill(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -710,7 +710,7 @@ namespace Game.Chat
         }
 
         [Command("taxinode", RBACPermissions.CommandLookupTaxinode, true)]
-        static bool TaxiNode(StringArguments args, CommandHandler handler)
+        static bool TaxiNode(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -756,7 +756,7 @@ namespace Game.Chat
         }
 
         [Command("tele", RBACPermissions.CommandLookupTele, true)]
-        static bool Tele(StringArguments args, CommandHandler handler)
+        static bool Tele(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -799,7 +799,7 @@ namespace Game.Chat
         }
 
         [Command("title", RBACPermissions.CommandLookupTitle, true)]
-        static bool Title(StringArguments args, CommandHandler handler)
+        static bool Title(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -876,7 +876,7 @@ namespace Game.Chat
         }
 
         [Command("map", RBACPermissions.CommandLookupMap, true)]
-        static bool Map(StringArguments args, CommandHandler handler)
+        static bool Map(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -956,7 +956,7 @@ namespace Game.Chat
         class PlayerCommandGroup
         {
             [Command("ip", RBACPermissions.CommandLookupPlayerIp)]
-            static bool IP(StringArguments args, CommandHandler handler)
+            static bool IP(CommandHandler handler, StringArguments args)
             {
                 string ip;
                 int limit;
@@ -986,7 +986,7 @@ namespace Game.Chat
             }
 
             [Command("account", RBACPermissions.CommandLookupPlayerAccount)]
-            static bool Account(StringArguments args, CommandHandler handler)
+            static bool Account(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1002,7 +1002,7 @@ namespace Game.Chat
             }
 
             [Command("email", RBACPermissions.CommandLookupPlayerEmail)]
-            static bool Email(StringArguments args, CommandHandler handler)
+            static bool Email(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1072,7 +1072,7 @@ namespace Game.Chat
         class SpellCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupSpell)]
-            static bool Default(StringArguments args, CommandHandler handler)
+            static bool Default(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1173,7 +1173,7 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupSpellId)]
-            static bool SpellId(StringArguments args, CommandHandler handler)
+            static bool SpellId(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;

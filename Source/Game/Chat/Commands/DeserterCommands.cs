@@ -35,13 +35,13 @@ namespace Game.Chat.Commands
         class DeserterInstanceCommands
         {
             [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
-            static bool HandleDeserterInstanceAdd(StringArguments args, CommandHandler handler)
+            static bool HandleDeserterInstanceAdd(CommandHandler handler, StringArguments args)
             {
                 return HandleDeserterAdd(args, handler, true);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterInstanceRemove)]
-            static bool HandleDeserterInstanceRemove(StringArguments args, CommandHandler handler)
+            static bool HandleDeserterInstanceRemove(CommandHandler handler, StringArguments args)
             {
                 return HandleDeserterRemove(args, handler, true);
             }
@@ -51,13 +51,13 @@ namespace Game.Chat.Commands
         class DeserterBGCommands
         {
             [Command("add", RBACPermissions.CommandDeserterBgAdd)]
-            static bool HandleDeserterBGAdd(StringArguments args, CommandHandler handler)
+            static bool HandleDeserterBGAdd(CommandHandler handler, StringArguments args)
             {
                 return HandleDeserterAdd(args, handler, false);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterBgRemove)]
-            static bool HandleDeserterBGRemove(StringArguments args, CommandHandler handler)
+            static bool HandleDeserterBGRemove(CommandHandler handler, StringArguments args)
             {
                 return HandleDeserterRemove(args, handler, false);
             }

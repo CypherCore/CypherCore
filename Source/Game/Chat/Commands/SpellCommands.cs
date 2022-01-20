@@ -27,7 +27,7 @@ namespace Game.Chat
     class SpellCommands
     {
         [CommandNonGroup("cooldown", RBACPermissions.CommandCooldown)]
-        static bool HandleCooldownCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCooldownCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -72,7 +72,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
-        static bool HandleAuraCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAuraCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -99,7 +99,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unaura", RBACPermissions.CommandUnaura)]
-        static bool UnAura(StringArguments args, CommandHandler handler)
+        static bool UnAura(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -128,7 +128,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("setskill", RBACPermissions.CommandSetskill)]
-        static bool SetSkill(StringArguments args, CommandHandler handler)
+        static bool SetSkill(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Hskill:skill_id|h[name]|h|r
             string skillStr = handler.ExtractKeyFromLink(args, "Hskill");

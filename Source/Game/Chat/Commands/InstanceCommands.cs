@@ -28,7 +28,7 @@ namespace Game.Chat
     class InstanceCommands
     {
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
-        static bool HandleInstanceListBinds(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceListBinds(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
@@ -72,7 +72,7 @@ namespace Game.Chat
         }
 
         [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleInstanceUnbind(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceUnbind(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -116,7 +116,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandInstanceStats, true)]
-        static bool HandleInstanceStats(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceStats(CommandHandler handler, StringArguments args)
         {
             handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
             handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
@@ -128,7 +128,7 @@ namespace Game.Chat
         }
 
         [Command("savedata", RBACPermissions.CommandInstanceSavedata)]
-        static bool HandleInstanceSaveData(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceSaveData(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             InstanceMap map = player.GetMap().ToInstanceMap();
@@ -150,7 +150,7 @@ namespace Game.Chat
         }
 
         [Command("setbossstate", RBACPermissions.CommandInstanceSetBossState)]
-        static bool HandleInstanceSetBossState(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceSetBossState(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -214,7 +214,7 @@ namespace Game.Chat
         }
 
         [Command("getbossstate", RBACPermissions.CommandInstanceGetBossState)]
-        static bool HandleInstanceGetBossState(StringArguments args, CommandHandler handler)
+        static bool HandleInstanceGetBossState(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;

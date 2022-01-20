@@ -26,7 +26,7 @@ namespace Game.Chat
     class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        static bool HandleCancelSceneCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCancelSceneCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -48,7 +48,7 @@ namespace Game.Chat
         }
 
         [Command("debug", RBACPermissions.CommandSceneDebug)]
-        static bool HandleDebugSceneCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugSceneCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             if (player)
@@ -61,7 +61,7 @@ namespace Game.Chat
         }
 
         [Command("play", RBACPermissions.CommandScenePlay)]
-        static bool HandlePlaySceneCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePlaySceneCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -82,7 +82,7 @@ namespace Game.Chat
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePlayScenePackageCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;

@@ -32,7 +32,7 @@ namespace Game.Chat
     class GameObjectCommands
     {
         [Command("activate", RBACPermissions.CommandGobjectActivate)]
-        static bool HandleGameObjectActivateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectActivateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -62,7 +62,7 @@ namespace Game.Chat
         }
 
         [Command("delete", RBACPermissions.CommandGobjectDelete)]
-        static bool HandleGameObjectDeleteCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectDeleteCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
             string id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -101,7 +101,7 @@ namespace Game.Chat
         }
 
         [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]
-        static bool HandleGameObjectDespawnGroup(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectDespawnGroup(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -136,7 +136,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGobjectInfo)]
-        static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectInfoCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -233,7 +233,7 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandGobjectMove)]
-        static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectMoveCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
             string id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -302,7 +302,7 @@ namespace Game.Chat
         }
 
         [Command("near", RBACPermissions.CommandGobjectNear)]
-        static bool HandleGameObjectNearCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectNearCommand(CommandHandler handler, StringArguments args)
         {
             float distance = args.Empty() ? 10.0f : args.NextSingle();
             uint count = 0;
@@ -346,7 +346,7 @@ namespace Game.Chat
         }
 
         [Command("spawngroup", RBACPermissions.CommandGobjectSpawngroup)]
-        static bool HandleGameObjectSpawnGroup(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectSpawnGroup(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -389,7 +389,7 @@ namespace Game.Chat
         }
 
         [Command("target", RBACPermissions.CommandGobjectTarget)]
-        static bool HandleGameObjectTargetCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectTargetCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             SQLResult result;
@@ -504,7 +504,7 @@ namespace Game.Chat
         }
 
         [Command("turn", RBACPermissions.CommandGobjectTurn)]
-        static bool HandleGameObjectTurnCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameObjectTurnCommand(CommandHandler handler, StringArguments args)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
             string id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -573,7 +573,7 @@ namespace Game.Chat
         class AddCommands
         {
             [Command("", RBACPermissions.CommandGobjectAdd)]
-            static bool HandleGameObjectAddCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGameObjectAddCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -633,7 +633,7 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandGobjectAddTemp)]
-            static bool HandleGameObjectAddTempCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGameObjectAddTempCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -667,7 +667,7 @@ namespace Game.Chat
         class SetCommands
         {
             [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
-            static bool HandleGameObjectSetPhaseCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGameObjectSetPhaseCommand(CommandHandler handler, StringArguments args)
             {
                 /*// number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
                 string id = handler.extractKeyFromLink(args, "Hgameobject");
@@ -704,7 +704,7 @@ namespace Game.Chat
             }
 
             [Command("state", RBACPermissions.CommandGobjectSetState)]
-            static bool HandleGameObjectSetStateCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGameObjectSetStateCommand(CommandHandler handler, StringArguments args)
             {
                 // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
                 string id = handler.ExtractKeyFromLink(args, "Hgameobject");

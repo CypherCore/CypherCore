@@ -31,7 +31,7 @@ namespace Game.Chat
     class CharacterCommands
     {
         [Command("titles", RBACPermissions.CommandCharacterTitles, true)]
-        static bool HandleCharacterTitlesCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterTitlesCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -71,7 +71,7 @@ namespace Game.Chat
 
         //rename characters
         [Command("rename", RBACPermissions.CommandCharacterRename, true)]
-        static bool HandleCharacterRenameCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterRenameCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -195,7 +195,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandCharacterLevel, true)]
-        static bool HandleCharacterLevelCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterLevelCommand(CommandHandler handler, StringArguments args)
         {
             string nameStr;
             string levelStr;
@@ -239,7 +239,7 @@ namespace Game.Chat
 
         // customize characters
         [Command("customize", RBACPermissions.CommandCharacterCustomize, true)]
-        static bool HandleCharacterCustomizeCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterCustomizeCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -267,7 +267,7 @@ namespace Game.Chat
         }
 
         [Command("changeaccount", RBACPermissions.CommandCharacterChangeaccount, true)]
-        static bool HandleCharacterChangeAccountCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterChangeAccountCommand(CommandHandler handler, StringArguments args)
         {
             string playerNameStr;
             string accountName;
@@ -341,7 +341,7 @@ namespace Game.Chat
         }
 
         [Command("changefaction", RBACPermissions.CommandCharacterChangefaction, true)]
-        static bool HandleCharacterChangeFactionCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterChangeFactionCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -369,7 +369,7 @@ namespace Game.Chat
         }
 
         [Command("changerace", RBACPermissions.CommandCharacterChangerace, true)]
-        static bool HandleCharacterChangeRaceCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterChangeRaceCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -399,7 +399,7 @@ namespace Game.Chat
         }
 
         [Command("reputation", RBACPermissions.CommandCharacterReputation, true)]
-        static bool HandleCharacterReputationCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterReputationCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -443,7 +443,7 @@ namespace Game.Chat
         }
 
         [Command("erase", RBACPermissions.CommandCharacterErase, true)]
-        static bool HandleCharacterEraseCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCharacterEraseCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -489,7 +489,7 @@ namespace Game.Chat
         class DeletedCommands
         {
             [Command("delete", RBACPermissions.CommandCharacterDeletedDelete, true)]
-            static bool HandleCharacterDeletedDeleteCommand(StringArguments args, CommandHandler handler)
+            static bool HandleCharacterDeletedDeleteCommand(CommandHandler handler, StringArguments args)
             {
                 // It is required to submit at least one argument
                 if (args.Empty())
@@ -516,7 +516,7 @@ namespace Game.Chat
             }
 
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
-            static bool HandleCharacterDeletedListCommand(StringArguments args, CommandHandler handler)
+            static bool HandleCharacterDeletedListCommand(CommandHandler handler, StringArguments args)
             {
                 List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
@@ -535,7 +535,7 @@ namespace Game.Chat
             }
 
             [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
-            static bool HandleCharacterDeletedRestoreCommand(StringArguments args, CommandHandler handler)
+            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, StringArguments args)
             {
                 // It is required to submit at least one argument
                 if (args.Empty())
@@ -587,7 +587,7 @@ namespace Game.Chat
             }
 
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
-            static bool HandleCharacterDeletedOldCommand(StringArguments args, CommandHandler handler)
+            static bool HandleCharacterDeletedOldCommand(CommandHandler handler, StringArguments args)
             {
                 int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
 
@@ -730,7 +730,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool LevelUp(StringArguments args, CommandHandler handler)
+        static bool LevelUp(CommandHandler handler, StringArguments args)
         {
             string nameStr;
             string levelStr;
@@ -804,7 +804,7 @@ namespace Game.Chat
     class PdumpCommand
     {
         [Command("load", RBACPermissions.CommandPdumpLoad, true)]
-        static bool HandlePDumpLoadCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePDumpLoadCommand(CommandHandler handler, StringArguments args)
         {
             /*
             if (args.Empty())
@@ -917,7 +917,7 @@ namespace Game.Chat
         }
 
         [Command("write", RBACPermissions.CommandPdumpWrite, true)]
-        static bool HandlePDumpWriteCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePDumpWriteCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;

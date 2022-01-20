@@ -26,7 +26,7 @@ namespace Game.Chat.Commands
     class BNetAccountCommands
     {
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
-        static bool HandleAccountCreateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAccountCreateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -79,7 +79,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("gameaccountcreate", RBACPermissions.CommandBnetAccountCreateGame, true)]
-        static bool HandleGameAccountCreateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGameAccountCreateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -132,7 +132,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("link", RBACPermissions.CommandBnetAccountLink, true)]
-        static bool HandleAccountLinkCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAccountLinkCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -162,7 +162,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("listgameaccounts", RBACPermissions.CommandBnetAccountListGameAccounts, true)]
-        static bool HandleListGameAccountsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleListGameAccountsCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -199,7 +199,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("password", RBACPermissions.CommandBnetAccountPassword, true)]
-        static bool HandleAccountPasswordCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAccountPasswordCommand(CommandHandler handler, StringArguments args)
         {
             // If no args are given at all, we can return false right away.
             if (args.Empty())
@@ -258,7 +258,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("unlink", RBACPermissions.CommandBnetAccountUnlink, true)]
-        static bool HandleAccountUnlinkCommand(StringArguments args, CommandHandler handler)
+        static bool HandleAccountUnlinkCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -289,7 +289,7 @@ namespace Game.Chat.Commands
         class LockCommands
         {
             [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
-            static bool HandleLockCountryCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLockCountryCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                 {
@@ -338,7 +338,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
-            static bool HandleLockIpCommand(StringArguments args, CommandHandler handler)
+            static bool HandleLockIpCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                 {
@@ -376,7 +376,7 @@ namespace Game.Chat.Commands
         class SetCommands
         {
             [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
-            static bool HandleSetPasswordCommand(StringArguments args, CommandHandler handler)
+            static bool HandleSetPasswordCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                 {

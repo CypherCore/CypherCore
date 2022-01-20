@@ -28,7 +28,7 @@ namespace Game.Chat
     class LFGCommands
     {
         [Command("player", RBACPermissions.CommandLfgPlayer, true)]
-        static bool HandleLfgPlayerInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLfgPlayerInfoCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -39,7 +39,7 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandLfgGroup, true)]
-        static bool HandleLfgGroupInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLfgGroupInfoCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -91,7 +91,7 @@ namespace Game.Chat
         }
 
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
-        static bool HandleLfgOptionsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLfgOptionsCommand(CommandHandler handler, StringArguments args)
         {
             string str = args.NextString();
             int options = -1;
@@ -111,14 +111,14 @@ namespace Game.Chat
         }
 
         [Command("queue", RBACPermissions.CommandLfgQueue, true)]
-        static bool HandleLfgQueueInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLfgQueueInfoCommand(CommandHandler handler, StringArguments args)
         {
             handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(args.NextBoolean()));
             return true;
         }
 
         [Command("clean", RBACPermissions.CommandLfgClean, true)]
-        static bool HandleLfgCleanCommand(StringArguments args, CommandHandler handler)
+        static bool HandleLfgCleanCommand(CommandHandler handler, StringArguments args)
         {
             handler.SendSysMessage(CypherStrings.LfgClean);
             Global.LFGMgr.Clean();

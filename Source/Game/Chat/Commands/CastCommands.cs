@@ -27,7 +27,7 @@ namespace Game.Chat
     class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        static bool HandleCastCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCastCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -59,7 +59,7 @@ namespace Game.Chat
         }
 
         [Command("back", RBACPermissions.CommandCastBack)]
-        static bool HandleCastBackCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCastBackCommand(CommandHandler handler, StringArguments args)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -91,7 +91,7 @@ namespace Game.Chat
         }
 
         [Command("dist", RBACPermissions.CommandCastDist)]
-        static bool HandleCastDistCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCastDistCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("self", RBACPermissions.CommandCastSelf)]
-        static bool HandleCastSelfCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCastSelfCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -150,7 +150,7 @@ namespace Game.Chat
         }
 
         [Command("target", RBACPermissions.CommandCastTarget)]
-        static bool HandleCastTargetCommad(StringArguments args, CommandHandler handler)
+        static bool HandleCastTargetCommad(CommandHandler handler, StringArguments args)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -188,7 +188,7 @@ namespace Game.Chat
         }
 
         [Command("dest", RBACPermissions.CommandCastDest)]
-        static bool HandleCastDestCommand(StringArguments args, CommandHandler handler)
+        static bool HandleCastDestCommand(CommandHandler handler, StringArguments args)
         {
             Unit caster = handler.GetSelectedUnit();
             if (!caster)

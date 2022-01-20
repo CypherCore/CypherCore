@@ -33,7 +33,7 @@ namespace Game.Chat
     {
         // Summon group of player
         [Command("summon", RBACPermissions.CommandGroupSummon)]
-        static bool HandleGroupSummonCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupSummonCommand(CommandHandler handler, StringArguments args)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -123,7 +123,7 @@ namespace Game.Chat
         }
 
         [Command("leader", RBACPermissions.CommandGroupLeader)]
-        static bool HandleGroupLeaderCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupLeaderCommand(CommandHandler handler, StringArguments args)
         {
             Player player;
             Group group;
@@ -148,7 +148,7 @@ namespace Game.Chat
         }
 
         [Command("disband", RBACPermissions.CommandGroupDisband)]
-        static bool HandleGroupDisbandCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupDisbandCommand(CommandHandler handler, StringArguments args)
         {
             Player player;
             Group group;
@@ -168,7 +168,7 @@ namespace Game.Chat
         }
 
         [Command("remove", RBACPermissions.CommandGroupRemove)]
-        static bool HandleGroupRemoveCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupRemoveCommand(CommandHandler handler, StringArguments args)
         {
             Player player;
             Group group;
@@ -189,7 +189,7 @@ namespace Game.Chat
         }
 
         [Command("join", RBACPermissions.CommandGroupJoin)]
-        static bool HandleGroupJoinCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupJoinCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -232,7 +232,7 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGroupList)]
-        static bool HandleGroupListCommand(StringArguments args, CommandHandler handler)
+        static bool HandleGroupListCommand(CommandHandler handler, StringArguments args)
         {
             // Get ALL the variables!
             Player playerTarget;
@@ -347,25 +347,25 @@ namespace Game.Chat
         class GroupSetCommands
         {
             [Command("assistant", RBACPermissions.CommandGroupAssistant)]
-            static bool HandleGroupSetAssistantCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGroupSetAssistantCommand(CommandHandler handler, StringArguments args)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.Assistant, "Assistant");
             }
 
             [Command("leader", RBACPermissions.CommandGroupLeader)]
-            static bool HandleGroupSetLeaderCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGroupSetLeaderCommand(CommandHandler handler, StringArguments args)
             {
-                return HandleGroupLeaderCommand(args, handler);
+                return HandleGroupLeaderCommand(handler, args);
             }
 
             [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
-            static bool HandleGroupSetMainAssistCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGroupSetMainAssistCommand(CommandHandler handler, StringArguments args)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.MainAssist, "Main Assist");
             }
 
             [Command("maintank", RBACPermissions.CommandGroupMaintank)]
-            static bool HandleGroupSetMainTankCommand(StringArguments args, CommandHandler handler)
+            static bool HandleGroupSetMainTankCommand(CommandHandler handler, StringArguments args)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.MainTank, "Main Tank");
             }

@@ -30,20 +30,15 @@ namespace Game.Chat
     class TeleCommands
     {
         [Command("", RBACPermissions.CommandTele)]
-        static bool HandleTeleCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTeleCommand(CommandHandler handler, GameTele tele)
         {
-            if (args.Empty())
-                return false;
-
-            Player player = handler.GetPlayer();
-
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
                 return false;
             }
 
+            Player player = handler.GetSession().GetPlayer();
             if (player.IsInCombat() && !handler.GetSession().HasPermission(RBACPermissions.CommandTeleName))
             {
                 handler.SendSysMessage(CypherStrings.YouInCombat);
@@ -68,16 +63,11 @@ namespace Game.Chat
         }
 
         [Command("add", RBACPermissions.CommandTeleAdd)]
-        static bool HandleTeleAddCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTeleAddCommand(CommandHandler handler, string name)
         {
-            if (args.Empty())
-                return false;
-
             Player player = handler.GetSession().GetPlayer();
             if (player == null)
                 return false;
-
-            string name = args.NextString();
 
             if (Global.ObjectMgr.GetGameTele(name) != null)
             {
@@ -108,13 +98,8 @@ namespace Game.Chat
         }
 
         [Command("del", RBACPermissions.CommandTeleDel, true)]
-        static bool HandleTeleDelCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTeleDelCommand(CommandHandler handler, GameTele tele)
         {
-            if (args.Empty())
-                return false;
-
-            // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -127,10 +112,13 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandTeleGroup)]
-        static bool HandleTeleGroupCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTeleGroupCommand(CommandHandler handler, GameTele tele)
         {
-            if (args.Empty())
+            if (tele == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
                 return false;
+            }
 
             Player target = handler.GetSelectedPlayer();
             if (!target)
@@ -142,14 +130,6 @@ namespace Game.Chat
             // check online security
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
-
-            // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
-            if (tele == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
-                return false;
-            }
 
             MapRecord map = CliDB.MapStorage.LookupByKey(tele.mapId);
             if (map == null || map.IsBattlegroundOrArena())
@@ -202,7 +182,7 @@ namespace Game.Chat
         }
 
         [Command("name", RBACPermissions.CommandTeleName, true)]
-        static bool HandleTeleNameCommand(StringArguments args, CommandHandler handler)
+        static bool HandleTeleNameCommand(CommandHandler handler, StringArguments args)
         {
             handler.ExtractOptFirstArg(args, out string nameStr, out string teleStr);
             if (teleStr.IsEmpty())

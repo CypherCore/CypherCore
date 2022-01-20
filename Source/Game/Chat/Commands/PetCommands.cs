@@ -26,7 +26,7 @@ namespace Game.Chat
     class PetCommands
     {
         [Command("create", RBACPermissions.CommandPetCreate)]
-        static bool HandlePetCreateCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePetCreateCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             Creature creatureTarget = handler.GetSelectedCreature();
@@ -94,7 +94,7 @@ namespace Game.Chat
         }
 
         [Command("learn", RBACPermissions.CommandPetLearn)]
-        static bool HandlePetLearnCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePetLearnCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -132,7 +132,7 @@ namespace Game.Chat
         }
 
         [Command("unlearn", RBACPermissions.CommandPetUnlearn)]
-        static bool HandlePetUnlearnCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePetUnlearnCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -155,7 +155,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandPetLevel)]
-        static bool HandlePetLevelCommand(StringArguments args, CommandHandler handler)
+        static bool HandlePetLevelCommand(CommandHandler handler, StringArguments args)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
             Player owner = pet ? pet.GetOwner() : null;

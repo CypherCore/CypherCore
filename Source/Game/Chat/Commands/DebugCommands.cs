@@ -35,7 +35,7 @@ namespace Game.Chat
     class DebugCommands
     {
         [Command("anim", RBACPermissions.CommandDebugAnim)]
-        static bool HandleDebugAnimCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugAnimCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -48,7 +48,7 @@ namespace Game.Chat
         }
 
         [Command("areatriggers", RBACPermissions.CommandDebugAreatriggers)]
-        static bool HandleDebugAreaTriggersCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugAreaTriggersCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             if (!player.IsDebugAreaTriggers)
@@ -65,21 +65,21 @@ namespace Game.Chat
         }
 
         [Command("arena", RBACPermissions.CommandDebugArena, true)]
-        static bool HandleDebugArenaCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugArenaCommand(CommandHandler handler, StringArguments args)
         {
             Global.BattlegroundMgr.ToggleArenaTesting();
             return true;
         }
 
         [Command("bg", RBACPermissions.CommandDebugBg, true)]
-        static bool HandleDebugBattlegroundCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugBattlegroundCommand(CommandHandler handler, StringArguments args)
         {
             Global.BattlegroundMgr.ToggleTesting();
             return true;
         }
 
         [Command("boundary", RBACPermissions.CommandDebugBoundary)]
-        static bool HandleDebugBoundaryCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugBoundaryCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             if (!player)
@@ -107,7 +107,7 @@ namespace Game.Chat
         }
 
         [Command("conversation", RBACPermissions.CommandDebugConversation)]
-        static bool HandleDebugConversationCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugConversationCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -127,14 +127,14 @@ namespace Game.Chat
         }
 
         [Command("dummy", RBACPermissions.CommandDebugDummy)]
-        static bool HandleDebugDummyCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugDummyCommand(CommandHandler handler, StringArguments args)
         {
             handler.SendSysMessage("This command does nothing right now. Edit your local core (DebugCommands.cs) to make it do whatever you need for testing.");
             return true;
         }
 
         [Command("entervehicle", RBACPermissions.CommandDebugEntervehicle)]
-        static bool HandleDebugEnterVehicleCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugEnterVehicleCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target || !target.IsVehicle())
@@ -165,7 +165,7 @@ namespace Game.Chat
         }
 
         [Command("getitemstate", RBACPermissions.CommandDebugGetitemstate)]
-        static bool HandleDebugGetItemStateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugGetItemStateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -444,7 +444,7 @@ namespace Game.Chat
         }
 
         [Command("combat", RBACPermissions.CommandDebugCombat)]
-        static bool HandleDebugCombatListCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugCombatListCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -466,7 +466,7 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebugInstancespawn)]
-        static bool HandleDebugInstanceSpawns(StringArguments args, CommandHandler handler)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             if (player == null)
@@ -575,7 +575,7 @@ namespace Game.Chat
         }
 
         [Command("itemexpire", RBACPermissions.CommandDebugItemexpire)]
-        static bool HandleDebugItemExpireCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugItemExpireCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -594,7 +594,7 @@ namespace Game.Chat
         }
 
         [Command("loadcells", RBACPermissions.CommandDebugLoadcells)]
-        static bool HandleDebugLoadCellsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugLoadCellsCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             if (!player)
@@ -617,7 +617,7 @@ namespace Game.Chat
         }
 
         [Command("lootrecipient", RBACPermissions.CommandDebugLootrecipient)]
-        static bool HandleDebugGetLootRecipientCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugGetLootRecipientCommand(CommandHandler handler, StringArguments args)
         {
             Creature target = handler.GetSelectedCreature();
             if (!target)
@@ -629,7 +629,7 @@ namespace Game.Chat
         }
 
         [Command("los", RBACPermissions.CommandDebugLos)]
-        static bool HandleDebugLoSCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugLoSCommand(CommandHandler handler, StringArguments args)
         {
             Unit unit = handler.GetSelectedUnit();
             if (unit)
@@ -645,7 +645,7 @@ namespace Game.Chat
         }
 
         [Command("moveflags", RBACPermissions.CommandDebugMoveflags)]
-        static bool HandleDebugMoveflagsCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugMoveflagsCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -693,7 +693,7 @@ namespace Game.Chat
         }
 
         [Command("neargraveyard", RBACPermissions.CommandNearGraveyard)]
-        static bool HandleDebugNearGraveyard(StringArguments args, CommandHandler handler)
+        static bool HandleDebugNearGraveyard(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
             WorldSafeLocsEntry nearestLoc = null;
@@ -743,7 +743,7 @@ namespace Game.Chat
         }
 
         [Command("phase", RBACPermissions.CommandDebugPhase)]
-        static bool HandleDebugPhaseCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugPhaseCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -762,7 +762,7 @@ namespace Game.Chat
         }
 
         [Command("raidreset", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleDebugRaidResetCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugRaidResetCommand(CommandHandler handler, StringArguments args)
         {
             if (!int.TryParse(args.NextString(), out int map) || map <= 0)
                 return false;
@@ -822,7 +822,7 @@ namespace Game.Chat
         }
 
         [Command("setaurastate", RBACPermissions.CommandDebugSetaurastate)]
-        static bool HandleDebugSetAuraStateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugSetAuraStateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
             {
@@ -851,7 +851,7 @@ namespace Game.Chat
         }
 
         [Command("setvid", RBACPermissions.CommandDebugSetvid)]
-        static bool HandleDebugSetVehicleIdCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugSetVehicleIdCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target || target.IsVehicle())
@@ -866,7 +866,7 @@ namespace Game.Chat
         }
 
         [Command("spawnvehicle", RBACPermissions.CommandDebugSpawnvehicle)]
-        static bool HandleDebugSpawnVehicleCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugSpawnVehicleCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -902,7 +902,7 @@ namespace Game.Chat
         }
 
         [Command("threat", RBACPermissions.CommandDebugThreat)]
-        static bool HandleDebugThreatListCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugThreatListCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -962,7 +962,7 @@ namespace Game.Chat
         }
 
         [Command("threatinfo", RBACPermissions.CommandDebugThreatinfo)]
-        static bool HandleDebugThreatInfoCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugThreatInfoCommand(CommandHandler handler, StringArguments args)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -1038,7 +1038,7 @@ namespace Game.Chat
         }
 
         [Command("transport", RBACPermissions.CommandDebugTransport)]
-        static bool HandleDebugTransportCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugTransportCommand(CommandHandler handler, StringArguments args)
         {
             Transport transport = handler.GetSession().GetPlayer().GetTransport();
             if (!transport)
@@ -1066,7 +1066,7 @@ namespace Game.Chat
         }
 
         [Command("worldstate", RBACPermissions.CommandDebugWorldState)]
-        static bool HandleDebugUpdateWorldStateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, StringArguments args)
         {
             if (!uint.TryParse(args.NextString(), out uint variable) || variable == 0)
                 return false;
@@ -1077,7 +1077,7 @@ namespace Game.Chat
         }
 
         [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWorldStateCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugWorldStateCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1110,7 +1110,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
-        static bool HandleWPGPSCommand(StringArguments args, CommandHandler handler)
+        static bool HandleWPGPSCommand(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -1121,7 +1121,7 @@ namespace Game.Chat
         }
 
         [Command("wsexpression", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWSExpressionCommand(StringArguments args, CommandHandler handler)
+        static bool HandleDebugWSExpressionCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())
                 return false;
@@ -1156,7 +1156,7 @@ namespace Game.Chat
         class PlayCommands
         {
             [Command("cinematic", RBACPermissions.CommandDebugPlayCinematic)]
-            static bool HandleDebugPlayCinematicCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugPlayCinematicCommand(CommandHandler handler, StringArguments args)
             {
                 // USAGE: .debug play cinematic #cinematicid
                 // #cinematicid - ID decimal number from CinemaicSequences.dbc (1st column)
@@ -1194,7 +1194,7 @@ namespace Game.Chat
             }
 
             [Command("movie", RBACPermissions.CommandDebugPlayMovie)]
-            static bool HandleDebugPlayMovieCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugPlayMovieCommand(CommandHandler handler, StringArguments args)
             {
                 // USAGE: .debug play movie #movieid
                 // #movieid - ID decimal number from Movie.dbc (1st column)
@@ -1217,7 +1217,7 @@ namespace Game.Chat
             }
 
             [Command("music", RBACPermissions.CommandDebugPlayMusic)]
-            static bool HandleDebugPlayMusicCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugPlayMusicCommand(CommandHandler handler, StringArguments args)
             {
                 // USAGE: .debug play music #musicId
                 // #musicId - ID decimal number from SoundEntries.dbc (1st column)
@@ -1243,7 +1243,7 @@ namespace Game.Chat
             }
 
             [Command("sound", RBACPermissions.CommandDebugPlaySound)]
-            static bool HandleDebugPlaySoundCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugPlaySoundCommand(CommandHandler handler, StringArguments args)
             {
                 // USAGE: .debug playsound #soundid
                 // #soundid - ID decimal number from SoundEntries.dbc (1st column)
@@ -1287,7 +1287,7 @@ namespace Game.Chat
         class SendCommands
         {
             [Command("buyerror", RBACPermissions.CommandDebugSendBuyerror)]
-            static bool HandleDebugSendBuyErrorCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1298,7 +1298,7 @@ namespace Game.Chat
             }
 
             [Command("channelnotify", RBACPermissions.CommandDebugSendChannelnotify)]
-            static bool HandleDebugSendChannelNotifyCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendChannelNotifyCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1313,7 +1313,7 @@ namespace Game.Chat
             }
 
             [Command("chatmessage", RBACPermissions.CommandDebugSendChatmessage)]
-            static bool HandleDebugSendChatMsgCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendChatMsgCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1327,7 +1327,7 @@ namespace Game.Chat
             }
 
             [Command("equiperror", RBACPermissions.CommandDebugSendEquiperror)]
-            static bool HandleDebugSendEquipErrorCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendEquipErrorCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1338,7 +1338,7 @@ namespace Game.Chat
             }
 
             [Command("largepacket", RBACPermissions.CommandDebugSendLargepacket)]
-            static bool HandleDebugSendLargePacketCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendLargePacketCommand(CommandHandler handler, StringArguments args)
             {
                 const string stuffingString = "This is a dummy string to push the packet's size beyond 128000 bytes. ";
                 StringBuilder ss = new();
@@ -1349,14 +1349,14 @@ namespace Game.Chat
             }
 
             [Command("opcode", RBACPermissions.CommandDebugSendOpcode)]
-            static bool HandleDebugSendOpcodeCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendOpcodeCommand(CommandHandler handler, StringArguments args)
             {
                 handler.SendSysMessage(CypherStrings.NoCmd);
                 return true;
             }
 
             [Command("playerchoice", RBACPermissions.CommandDebugSendPlayerChoice)]
-            static bool HandleDebugSendPlayerChoiceCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendPlayerChoiceCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1369,7 +1369,7 @@ namespace Game.Chat
             }
 
             [Command("qpartymsg", RBACPermissions.CommandDebugSendQpartymsg)]
-            static bool HandleDebugSendQuestPartyMsgCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendQuestPartyMsgCommand(CommandHandler handler, StringArguments args)
             {
                 uint msg = args.NextUInt32();
                 handler.GetSession().GetPlayer().SendPushToPartyResponse(handler.GetSession().GetPlayer(), (QuestPushReason)msg);
@@ -1377,7 +1377,7 @@ namespace Game.Chat
             }
 
             [Command("qinvalidmsg", RBACPermissions.CommandDebugSendQinvalidmsg)]
-            static bool HandleDebugSendQuestInvalidMsgCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendQuestInvalidMsgCommand(CommandHandler handler, StringArguments args)
             {
                 QuestFailedReasons msg = (QuestFailedReasons)args.NextUInt32();
                 handler.GetSession().GetPlayer().SendCanTakeQuestResponse(msg);
@@ -1385,7 +1385,7 @@ namespace Game.Chat
             }
 
             [Command("sellerror", RBACPermissions.CommandDebugSendSellerror)]
-            static bool HandleDebugSendSellErrorCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendSellErrorCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1396,7 +1396,7 @@ namespace Game.Chat
             }
 
             [Command("setphaseshift", RBACPermissions.CommandDebugSendSetphaseshift)]
-            static bool HandleDebugSendSetPhaseShiftCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendSetPhaseShiftCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
@@ -1417,7 +1417,7 @@ namespace Game.Chat
             }
 
             [Command("spellfail", RBACPermissions.CommandDebugSendSpellfail)]
-            static bool HandleDebugSendSpellFailCommand(StringArguments args, CommandHandler handler)
+            static bool HandleDebugSendSpellFailCommand(CommandHandler handler, StringArguments args)
             {
                 if (args.Empty())
                     return false;
