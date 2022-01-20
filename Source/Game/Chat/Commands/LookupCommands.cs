@@ -33,12 +33,9 @@ namespace Game.Chat
         static int maxResults = 50;
 
         [Command("area", RBACPermissions.CommandLookupArea, true)]
-        static bool Area(CommandHandler handler, StringArguments args)
+        static bool HandleLookupAreaCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             bool found = false;
             uint count = 0;
@@ -97,12 +94,9 @@ namespace Game.Chat
         }
 
         [Command("creature", RBACPermissions.CommandLookupCreature, true)]
-        static bool Creature(CommandHandler handler, StringArguments args)
+        static bool HandleLookupCreatureCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             bool found = false;
             uint count = 0;
@@ -169,12 +163,9 @@ namespace Game.Chat
         }
 
         [Command("event", RBACPermissions.CommandLookupEvent, true)]
-        static bool Event(CommandHandler handler, StringArguments args)
+        static bool HandleLookupEventCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             bool found = false;
             uint count = 0;
@@ -217,15 +208,12 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandLookupFaction, true)]
-        static bool Faction(CommandHandler handler, StringArguments args)
+        static bool HandleLookupFactionCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
             // Can be NULL at console call
             Player target = handler.GetSelectedPlayer();
 
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             bool found = false;
             uint count = 0;
@@ -309,56 +297,10 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("item", RBACPermissions.CommandLookupItem, true)]
-        static bool Item(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString("");
-
-            bool found = false;
-            uint count = 0;
-
-            // Search in ItemSparse
-            var its = Global.ObjectMgr.GetItemTemplates();
-            foreach (var template in its.Values)
-            {
-                string name = template.GetName(handler.GetSessionDbcLocale());
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                if (name.Like(namePart))
-                {
-                    if (maxResults != 0 && count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-                        return true;
-                    }
-
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.ItemListChat, template.GetId(), template.GetId(), name);
-                    else
-                        handler.SendSysMessage(CypherStrings.ItemListConsole, template.GetId(), name);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNoitemfound);
-
-            return true;
-        }
-
         [Command("itemset", RBACPermissions.CommandLookupItemset, true)]
-        static bool ItemSet(CommandHandler handler, StringArguments args)
+        static bool HandleLookupItemSetCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             bool found = false;
             uint count = 0;
@@ -413,13 +355,8 @@ namespace Game.Chat
         }
 
         [Command("object", RBACPermissions.CommandLookupObject, true)]
-        static bool Object(CommandHandler handler, StringArguments args)
+        static bool HandleLookupObjectCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString();
-
             bool found = false;
             uint count = 0;
 
@@ -484,164 +421,11 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("quest", RBACPermissions.CommandLookupQuest, true)]
-        static bool Quest(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
-
-            // can be NULL at console call
-            Player target = handler.GetSelectedPlayer();
-
-            string namePart = args.NextString().ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-            var qTemplates = Global.ObjectMgr.GetQuestTemplates();
-            foreach (var qInfo in qTemplates.Values)
-            {
-                int localeIndex = handler.GetSessionDbLocaleIndex();
-                QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
-                if (questLocale != null)
-                {
-                    if (questLocale.LogTitle.Length > localeIndex && !questLocale.LogTitle[localeIndex].IsEmpty())
-                    {
-                        string title = questLocale.LogTitle[localeIndex];
-
-                        if (title.Like(namePart))
-                        {
-                            if (maxResults != 0 && count++ == maxResults)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-                                return true;
-                            }
-
-                            string statusStr = "";
-
-                            if (target)
-                            {
-                                switch (target.GetQuestStatus(qInfo.Id))
-                                {
-                                    case QuestStatus.Complete:
-                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
-                                        break;
-                                    case QuestStatus.Incomplete:
-                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
-                                        break;
-                                    case QuestStatus.Rewarded:
-                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-
-                            if (handler.GetSession() != null)
-                            {
-                                int maxLevel = 0;
-                                var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                                if (questLevels.HasValue)
-                                    maxLevel = questLevels.Value.MaxLevel;
-
-                                int scalingFactionGroup = 0;
-                                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
-                                if (contentTuning != null)
-                                    scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
-                                handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
-                                    handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
-                                    handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                    maxLevel, scalingFactionGroup,
-                                    title, statusStr);
-                            }
-                            else
-                                handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, title, statusStr);
-
-                            if (!found)
-                                found = true;
-
-                            continue;
-                        }
-                    }
-                }
-
-                string _title = qInfo.LogTitle;
-                if (string.IsNullOrEmpty(_title))
-                    continue;
-
-                if (_title.Like(namePart))
-                {
-                    if (maxResults != 0 && count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-                        return true;
-                    }
-
-                    string statusStr = "";
-
-                    if (target)
-                    {
-                        QuestStatus status = target.GetQuestStatus(qInfo.Id);
-
-                        switch (status)
-                        {
-                            case QuestStatus.Complete:
-                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
-                                break;
-                            case QuestStatus.Incomplete:
-                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
-                                break;
-                            case QuestStatus.Rewarded:
-                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    if (handler.GetSession() != null)
-                    {
-                        int maxLevel = 0;
-                        var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                        if (questLevels.HasValue)
-                            maxLevel = questLevels.Value.MaxLevel;
-
-                        int scalingFactionGroup = 0;
-                        ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
-                        if (contentTuning != null)
-                            scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
-                        handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
-                            handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
-                            handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                            maxLevel, scalingFactionGroup,
-                            _title, statusStr);
-                    }
-                    else
-                        handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, _title, statusStr);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNoquestfound);
-
-            return true;
-        }
-
         [Command("skill", RBACPermissions.CommandLookupSkill, true)]
-        static bool Skill(CommandHandler handler, StringArguments args)
+        static bool HandleLookupSkillCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
             // can be NULL in console call
             Player target = handler.GetSelectedPlayer();
-
-            string namePart = args.NextString();
 
             bool found = false;
             uint count = 0;
@@ -710,13 +494,8 @@ namespace Game.Chat
         }
 
         [Command("taxinode", RBACPermissions.CommandLookupTaxinode, true)]
-        static bool TaxiNode(CommandHandler handler, StringArguments args)
+        static bool HandleLookupTaxiNodeCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString();
-
             bool found = false;
             uint count = 0;
             Locale locale = handler.GetSessionDbcLocale();
@@ -756,15 +535,9 @@ namespace Game.Chat
         }
 
         [Command("tele", RBACPermissions.CommandLookupTele, true)]
-        static bool Tele(CommandHandler handler, StringArguments args)
+        static bool HandleLookupTeleCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.CommandTeleParameter);
-                return false;
-            }
-
-            string namePart = args.NextString().ToLower();
+            namePart = namePart.ToLower();
 
             StringBuilder reply = new();
             uint count = 0;
@@ -799,18 +572,13 @@ namespace Game.Chat
         }
 
         [Command("title", RBACPermissions.CommandLookupTitle, true)]
-        static bool Title(CommandHandler handler, StringArguments args)
+        static bool HandleLookupTitleCommand(CommandHandler handler, string namePart)
         {
-            if (args.Empty())
-                return false;
-
             // can be NULL in console call
             Player target = handler.GetSelectedPlayer();
 
             // title name have single string arg for player name
             string targetName = target ? target.GetName() : "NAME";
-
-            string namePart = args.NextString();
 
             uint counter = 0;                                     // Counter for figure out that we found smth.
             // Search in CharTitles.dbc
@@ -875,56 +643,169 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("map", RBACPermissions.CommandLookupMap, true)]
-        static bool Map(CommandHandler handler, StringArguments args)
+        [CommandGroup("item", RBACPermissions.CommandLookupItem, true)]
+        class ItemCommandGroup
         {
-            if (args.Empty())
-                return false;
-
-            string namePart = args.NextString();
-
-            uint counter = 0;
-
-            // search in Map.dbc
-            foreach (var mapInfo in CliDB.MapStorage.Values)
+            [Command("", RBACPermissions.CommandLookupItem, true)]
+            static bool HandleLookupItemCommand(CommandHandler handler, string namePart)
             {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = mapInfo.MapName[locale];
-                if (string.IsNullOrEmpty(name))
-                    continue;
+                bool found = false;
+                uint count = 0;
 
-                if (!name.Like(namePart) && handler.GetSession())
+                // Search in ItemSparse
+                var its = Global.ObjectMgr.GetItemTemplates();
+                foreach (var template in its.Values)
                 {
-                    locale = 0;
-                    for (; locale < Locale.Total; ++locale)
+                    string name = template.GetName(handler.GetSessionDbcLocale());
+                    if (string.IsNullOrEmpty(name))
+                        continue;
+
+                    if (name.Like(namePart))
                     {
-                        if (locale == handler.GetSessionDbcLocale())
-                            continue;
+                        if (maxResults != 0 && count++ == maxResults)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                            return true;
+                        }
 
-                        name = mapInfo.MapName[locale];
-                        if (name.IsEmpty())
-                            continue;
+                        if (handler.GetSession() != null)
+                            handler.SendSysMessage(CypherStrings.ItemListChat, template.GetId(), template.GetId(), name);
+                        else
+                            handler.SendSysMessage(CypherStrings.ItemListConsole, template.GetId(), name);
 
-                        if (name.Like(namePart))
-                            break;
+                        if (!found)
+                            found = true;
                     }
                 }
 
-                if (locale < Locale.Total)
-                { 
-                    if (maxResults != 0 && counter == maxResults)
+                if (!found)
+                    handler.SendSysMessage(CypherStrings.CommandNoitemfound);
+
+                return true;
+            }
+
+            [Command("id", RBACPermissions.CommandLookupItemId, true)]
+            static bool HandleLookupItemIdCommand(CommandHandler handler, uint id)
+            {
+                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(id);
+                if (itemTemplate != null)
+                {
+                    string name = itemTemplate.GetName(handler.GetSessionDbcLocale());
+
+                    if (name.IsEmpty())
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                        handler.SendSysMessage(CypherStrings.CommandNoitemfound);
+                        return true;
+                    }
+
+                    if (handler.GetSession())
+                        handler.SendSysMessage(CypherStrings.ItemListChat, id, id, name);
+                    else
+                        handler.SendSysMessage(CypherStrings.ItemListConsole, id, name);
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.CommandNoitemfound);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("map", RBACPermissions.CommandLookupMap, true)]
+        class MapCommandGroup
+        {
+            [Command("", RBACPermissions.CommandLookupMap, true)]
+            static bool HandleLookupMapCommand(CommandHandler handler, string namePart)
+            {
+                uint counter = 0;
+
+                // search in Map.dbc
+                foreach (var mapInfo in CliDB.MapStorage.Values)
+                {
+                    Locale locale = handler.GetSessionDbcLocale();
+                    string name = mapInfo.MapName[locale];
+                    if (string.IsNullOrEmpty(name))
+                        continue;
+
+                    if (!name.Like(namePart) && handler.GetSession())
+                    {
+                        locale = 0;
+                        for (; locale < Locale.Total; ++locale)
+                        {
+                            if (locale == handler.GetSessionDbcLocale())
+                                continue;
+
+                            name = mapInfo.MapName[locale];
+                            if (name.IsEmpty())
+                                continue;
+
+                            if (name.Like(namePart))
+                                break;
+                        }
+                    }
+
+                    if (locale < Locale.Total)
+                    {
+                        if (maxResults != 0 && counter == maxResults)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                            return true;
+                        }
+
+                        StringBuilder ss = new();
+                        ss.Append(mapInfo.Id + " - [" + name + ']');
+
+                        if (mapInfo.IsContinent())
+                            ss.Append(handler.GetCypherString(CypherStrings.Continent));
+
+                        switch (mapInfo.InstanceType)
+                        {
+                            case MapTypes.Instance:
+                                ss.Append(handler.GetCypherString(CypherStrings.Instance));
+                                break;
+                            case MapTypes.Raid:
+                                ss.Append(handler.GetCypherString(CypherStrings.Raid));
+                                break;
+                            case MapTypes.Battleground:
+                                ss.Append(handler.GetCypherString(CypherStrings.Battleground));
+                                break;
+                            case MapTypes.Arena:
+                                ss.Append(handler.GetCypherString(CypherStrings.Arena));
+                                break;
+                        }
+
+                        handler.SendSysMessage(ss.ToString());
+
+                        ++counter;
+                    }
+                }
+
+                if (counter == 0)
+                    handler.SendSysMessage(CypherStrings.CommandNomapfound);
+
+                return true;
+            }
+
+            [Command("", RBACPermissions.CommandLookupMap, true)]
+            static bool HandleLookupMapIdCommand(CommandHandler handler, uint id)
+            {
+                var mapInfo = CliDB.MapStorage.LookupByKey(id);
+                if (mapInfo != null)
+                {
+                    Locale locale = handler.GetSession() ? handler.GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale();
+                    string name = mapInfo.MapName[locale];
+                    if (name.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandNomapfound);
                         return true;
                     }
 
                     StringBuilder ss = new();
-                    ss.Append(mapInfo.Id + " - [" + name + ']');
+                    ss.Append($"{id} - [{name}]");
 
                     if (mapInfo.IsContinent())
                         ss.Append(handler.GetCypherString(CypherStrings.Continent));
 
-                    switch (mapInfo.InstanceType)
+                    switch ((MapTypes)mapInfo.MapType)
                     {
                         case MapTypes.Instance:
                             ss.Append(handler.GetCypherString(CypherStrings.Instance));
@@ -938,46 +819,34 @@ namespace Game.Chat
                         case MapTypes.Arena:
                             ss.Append(handler.GetCypherString(CypherStrings.Arena));
                             break;
+                        case MapTypes.Scenario:
+                            ss.Append(handler.GetCypherString(CypherStrings.Scenario));
+                            break;
                     }
 
                     handler.SendSysMessage(ss.ToString());
-
-                    ++counter;
                 }
+                else
+                    handler.SendSysMessage(CypherStrings.CommandNomapfound);
+
+                return true;
             }
-
-            if (counter == 0)
-                handler.SendSysMessage(CypherStrings.CommandNomapfound);
-
-            return true;
         }
 
         [CommandGroup("player", RBACPermissions.CommandLookupPlayer, true)]
         class PlayerCommandGroup
         {
             [Command("ip", RBACPermissions.CommandLookupPlayerIp)]
-            static bool IP(CommandHandler handler, StringArguments args)
+            static bool HandleLookupPlayerIpCommand(CommandHandler handler, string ip, int limit = -1)
             {
-                string ip;
-                int limit;
-                string limitStr;
-
                 Player target = handler.GetSelectedPlayer();
-                if (args.Empty())
+                if (ip.IsEmpty())
                 {
                     // NULL only if used from console
                     if (!target || target == handler.GetSession().GetPlayer())
                         return false;
 
                     ip = target.GetSession().GetRemoteAddress();
-                    limit = -1;
-                }
-                else
-                {
-                    ip = args.NextString();
-                    limitStr = args.NextString();
-                    if (!int.TryParse(limitStr, out limit))
-                        limit = -1;
                 }
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
@@ -986,32 +855,16 @@ namespace Game.Chat
             }
 
             [Command("account", RBACPermissions.CommandLookupPlayerAccount)]
-            static bool Account(CommandHandler handler, StringArguments args)
+            static bool HandleLookupPlayerAccountCommand(CommandHandler handler, string account, int limit = -1)
             {
-                if (args.Empty())
-                    return false;
-
-                string account = args.NextString();
-                string limitStr = args.NextString();
-                if (!int.TryParse(limitStr, out int limit))
-                    limit = -1;
-
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
 
             [Command("email", RBACPermissions.CommandLookupPlayerEmail)]
-            static bool Email(CommandHandler handler, StringArguments args)
+            static bool HandleLookupPlayerEmailCommand(CommandHandler handler, string email, int limit = -1)
             {
-                if (args.Empty())
-                    return false;
-
-                string email = args.NextString();
-                string limitStr = args.NextString();
-                if (!int.TryParse(limitStr, out int limit))
-                    limit = -1;
-
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
@@ -1068,19 +921,226 @@ namespace Game.Chat
             }
         }
 
+        [CommandGroup("quest", RBACPermissions.CommandLookupQuest, true)]
+        class QuestCommandGroup
+        {
+            [Command("", RBACPermissions.CommandLookupQuest, true)]
+            static bool HandleLookupQuestCommand(CommandHandler handler, string namePart)
+            {
+                // can be NULL at console call
+                Player target = handler.GetSelectedPlayer();
+
+                namePart = namePart.ToLower();
+
+                bool found = false;
+                uint count = 0;
+
+                var qTemplates = Global.ObjectMgr.GetQuestTemplates();
+                foreach (var qInfo in qTemplates.Values)
+                {
+                    int localeIndex = handler.GetSessionDbLocaleIndex();
+                    QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
+                    if (questLocale != null)
+                    {
+                        if (questLocale.LogTitle.Length > localeIndex && !questLocale.LogTitle[localeIndex].IsEmpty())
+                        {
+                            string title = questLocale.LogTitle[localeIndex];
+
+                            if (title.Like(namePart))
+                            {
+                                if (maxResults != 0 && count++ == maxResults)
+                                {
+                                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                                    return true;
+                                }
+
+                                string statusStr = "";
+
+                                if (target)
+                                {
+                                    switch (target.GetQuestStatus(qInfo.Id))
+                                    {
+                                        case QuestStatus.Complete:
+                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
+                                            break;
+                                        case QuestStatus.Incomplete:
+                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
+                                            break;
+                                        case QuestStatus.Rewarded:
+                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                                if (handler.GetSession() != null)
+                                {
+                                    int maxLevel = 0;
+                                    var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                                    if (questLevels.HasValue)
+                                        maxLevel = questLevels.Value.MaxLevel;
+
+                                    int scalingFactionGroup = 0;
+                                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
+                                    if (contentTuning != null)
+                                        scalingFactionGroup = contentTuning.GetScalingFactionGroup();
+
+                                    handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
+                                        handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
+                                        handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
+                                        maxLevel, scalingFactionGroup,
+                                        title, statusStr);
+                                }
+                                else
+                                    handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, title, statusStr);
+
+                                if (!found)
+                                    found = true;
+
+                                continue;
+                            }
+                        }
+                    }
+
+                    string _title = qInfo.LogTitle;
+                    if (string.IsNullOrEmpty(_title))
+                        continue;
+
+                    if (_title.Like(namePart))
+                    {
+                        if (maxResults != 0 && count++ == maxResults)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                            return true;
+                        }
+
+                        string statusStr = "";
+
+                        if (target)
+                        {
+                            QuestStatus status = target.GetQuestStatus(qInfo.Id);
+
+                            switch (status)
+                            {
+                                case QuestStatus.Complete:
+                                    statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
+                                    break;
+                                case QuestStatus.Incomplete:
+                                    statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
+                                    break;
+                                case QuestStatus.Rewarded:
+                                    statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        if (handler.GetSession() != null)
+                        {
+                            int maxLevel = 0;
+                            var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                            if (questLevels.HasValue)
+                                maxLevel = questLevels.Value.MaxLevel;
+
+                            int scalingFactionGroup = 0;
+                            ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
+                            if (contentTuning != null)
+                                scalingFactionGroup = contentTuning.GetScalingFactionGroup();
+
+                            handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
+                                handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
+                                handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
+                                maxLevel, scalingFactionGroup,
+                                _title, statusStr);
+                        }
+                        else
+                            handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, _title, statusStr);
+
+                        if (!found)
+                            found = true;
+                    }
+                }
+
+                if (!found)
+                    handler.SendSysMessage(CypherStrings.CommandNoquestfound);
+
+                return true;
+            }
+
+            [Command("id", RBACPermissions.CommandLookupQuestId, true)]
+            static bool HandleLookupQuestIdCommand(CommandHandler handler, uint id)
+            {
+                // can be NULL at console call
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
+                if (quest != null)
+                {
+                    string title = quest.LogTitle;
+                    if (title.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandNoquestfound);
+                        return true;
+                    }
+
+                    string statusStr = "";
+
+                    if (target)
+                    {
+                        switch (target.GetQuestStatus(id))
+                        {
+                            case QuestStatus.Complete:
+                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
+                                break;
+                            case QuestStatus.Incomplete:
+                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
+                                break;
+                            case QuestStatus.Rewarded:
+                                statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if (handler.GetSession())
+                    {
+                        int maxLevel = 0;
+                        var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        if (questLevels.HasValue)
+                            maxLevel = questLevels.Value.MaxLevel;
+
+                        int scalingFactionGroup = 0;
+                        var contentTuning = CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId);
+                        if (contentTuning != null)
+                            scalingFactionGroup = contentTuning.GetScalingFactionGroup();
+
+                        handler.SendSysMessage(CypherStrings.QuestListChat, id, id,
+                            handler.GetSession().GetPlayer().GetQuestLevel(quest),
+                            handler.GetSession().GetPlayer().GetQuestMinLevel(quest),
+                            maxLevel, scalingFactionGroup,
+                            title, statusStr);
+                    }
+                    else
+                        handler.SendSysMessage(CypherStrings.QuestListConsole, id, title, statusStr);
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.CommandNoquestfound);
+
+                return true;
+            }
+        }
+
         [CommandGroup("spell",RBACPermissions.CommandLookupSpell)]
         class SpellCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupSpell)]
-            static bool Default(CommandHandler handler, StringArguments args)
+            static bool HandleLookupSpellCommand(CommandHandler handler, string namePart)
             {
-                if (args.Empty())
-                    return false;
-
                 // can be NULL at console call
                 Player target = handler.GetSelectedPlayer();
-
-                string namePart = args.NextString();
 
                 bool found = false;
                 uint count = 0;
@@ -1173,15 +1233,10 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupSpellId)]
-            static bool SpellId(CommandHandler handler, StringArguments args)
+            static bool HandleLookupSpellIdCommand(CommandHandler handler, uint id)
             {
-                if (args.Empty())
-                    return false;
-
                 // can be NULL at console call
                 Player target = handler.GetSelectedPlayer();
-
-                uint id = args.NextUInt32();
 
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(id, Difficulty.None);
                 if (spellInfo != null)
