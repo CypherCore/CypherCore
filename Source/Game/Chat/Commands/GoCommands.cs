@@ -42,6 +42,108 @@ namespace Game.Chat.Commands
             return DoTeleport(handler, new Position(at.Pos.X, at.Pos.Y, at.Pos.Z), at.ContinentID);
         }
 
+        [Command("areatrigger", RBACPermissions.CommandGo)]
+        static bool HandleGoBossCommand(CommandHandler handler, string[] needles)
+        {
+            if (needles.Empty())
+                return false;
+
+            MultiMap<uint, CreatureTemplate> matches = new();
+            Dictionary<uint, List<CreatureData>> spawnLookup = new();
+
+            // find all boss flagged mobs that match our needles
+            foreach (var pair in Global.ObjectMgr.GetCreatureTemplates())
+            {
+                CreatureTemplate data = pair.Value;
+                if (!data.FlagsExtra.HasFlag(CreatureFlagsExtra.DungeonBoss))
+                    continue;
+
+                uint count = 0;
+                string scriptName = Global.ObjectMgr.GetScriptName(data.ScriptID);
+                foreach (var label in needles)
+                    if (scriptName.Contains(label) || data.Name.Contains(label))
+                        ++count;
+
+                if (count != 0)
+                {
+                    matches.Add(count, data);
+                    spawnLookup[data.Entry] = new List<CreatureData>(); // inserts default-constructed vector
+                }
+            }
+
+            if (!matches.Empty())
+            {
+                // find the spawn points of any matches
+                foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
+                {
+                    CreatureData data = pair.Value;
+                    if (spawnLookup.ContainsKey(data.Id))
+                        spawnLookup[data.Id].Add(data);
+                }
+
+                // remove any matches without spawns
+                foreach (var pair in matches.ToList())
+                    if (spawnLookup[pair.Value.Entry].Empty())
+                        matches.Remove(pair.Key, pair.Value);
+            }
+
+            // check if we even have any matches left
+            if (matches.Empty())
+            {
+                handler.SendSysMessage(CypherStrings.CommandNoBossesMatch);
+                return false;
+            }
+
+            // see if we have multiple equal matches left
+            var keyValueList = matches.KeyValueList;
+            uint maxCount = keyValueList.Last().Key;
+            for (var i = keyValueList.Count; i > 0;)
+            {
+                if ((++i) != 0 && keyValueList[i].Key == maxCount)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandMultipleBossesMatch);
+                    --i;
+                    do
+                        handler.SendSysMessage(CypherStrings.CommandMultipleBossesEntry, keyValueList[i].Value.Entry, keyValueList[i].Value.Name, Global.ObjectMgr.GetScriptName(keyValueList[i].Value.ScriptID));
+                    while (((++i) != 0) && (keyValueList[i].Key == maxCount));
+                    return false;
+                }
+            }
+
+            CreatureTemplate boss = matches.Last().Value;
+            var spawns = spawnLookup[boss.Entry];
+            Cypher.Assert(!spawns.Empty());
+
+            if (spawns.Count > 1)
+            {
+                handler.SendSysMessage(CypherStrings.CommandBossMultipleSpawns, boss.Name, boss.Entry);
+                foreach (CreatureData spawnData in spawns)
+                {
+                    var map = CliDB.MapStorage.LookupByKey(spawnData.MapId);
+                    handler.SendSysMessage(CypherStrings.CommandBossMultipleSpawnEty, spawnData.SpawnId, spawnData.MapId, map.MapName[handler.GetSessionDbcLocale()], spawnData.SpawnPoint.GetPosition().ToString());
+                }
+                return false;
+            }
+
+            Player player = handler.GetSession().GetPlayer();
+            if (player.IsInFlight())
+                player.FinishTaxiFlight();
+            else
+                player.SaveRecallPosition();
+
+            CreatureData spawn = spawns.First();
+            uint mapId = spawn.MapId;
+            if (!player.TeleportTo(new WorldLocation(mapId, spawn.SpawnPoint)))
+            {
+                string mapName = CliDB.MapStorage.LookupByKey(mapId).MapName[handler.GetSessionDbcLocale()];
+                handler.SendSysMessage(CypherStrings.CommandGoBossFailed, spawn.SpawnId, boss.Name, boss.Entry, mapName);
+                return false;
+            }
+
+            handler.SendSysMessage(CypherStrings.CommandWentToBoss, boss.Name, boss.Entry, spawn.SpawnId);
+            return true;
+        }
+
         [Command("bugticket", RBACPermissions.CommandGo)]
         static bool HandleGoBugTicketCommand(CommandHandler handler, uint ticketId)
         {
@@ -133,6 +235,22 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage(CypherStrings.CommandNoInstancesMatch);
                 return false;
+            }
+
+            // see if we have multiple equal matches left
+            var keyValueList = matches.KeyValueList;
+            uint maxCount = keyValueList.Last().Key;
+            for (var i = keyValueList.Count; i > 0;)
+            {
+                if ((++i) != 0 && keyValueList[i].Key == maxCount)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandMultipleInstancesMatch);
+                    --i;
+                    do
+                        handler.SendSysMessage(CypherStrings.CommandMultipleInstancesEntry, keyValueList[i].Value.Item2, keyValueList[i].Value.Item1, keyValueList[i].Value.Item3);
+                    while (((++i) != 0) && (keyValueList[i].Key == maxCount));
+                    return false;
+                }
             }
 
             var it = matches.Last();
