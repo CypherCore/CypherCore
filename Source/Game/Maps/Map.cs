@@ -4087,9 +4087,12 @@ namespace Game.Maps
 
         public ulong GenerateLowGuid(HighGuid high)
         {
-            //Cypher.Assert(!ObjectGuid.IsMapSpecific(high), "Only map specific guid can be generated in Map context");
-
             return GetGuidSequenceGenerator(high).Generate();
+        }
+
+        public ulong GetMaxLowGuid(HighGuid high)
+        {
+            return GetGuidSequenceGenerator(high).GetNextAfterMaxUsed();
         }
 
         ObjectGuidGenerator GetGuidSequenceGenerator(HighGuid high)

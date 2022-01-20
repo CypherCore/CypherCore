@@ -106,6 +106,28 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("combat", RBACPermissions.CommandDebugCombat)]
+        static bool HandleDebugCombatListCommand(CommandHandler handler, StringArguments args)
+        {
+            Unit target = handler.GetSelectedUnit();
+            if (!target)
+                target = handler.GetSession().GetPlayer();
+
+            handler.SendSysMessage($"Combat refs: (Combat state: {target.IsInCombat()} | Manager state: {target.GetCombatManager().HasCombat()})");
+            foreach (var refe in target.GetCombatManager().GetPvPCombatRefs())
+            {
+                Unit unit = refe.Value.GetOther(target);
+                handler.SendSysMessage($"[PvP] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
+            }
+            foreach (var refe in target.GetCombatManager().GetPvECombatRefs())
+            {
+                Unit unit = refe.Value.GetOther(target);
+                handler.SendSysMessage($"[PvE] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
+            }
+
+            return true;
+        }
+
         [Command("conversation", RBACPermissions.CommandDebugConversation)]
         static bool HandleDebugConversationCommand(CommandHandler handler, StringArguments args)
         {
@@ -443,25 +465,16 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("combat", RBACPermissions.CommandDebugCombat)]
-        static bool HandleDebugCombatListCommand(CommandHandler handler, StringArguments args)
+        [Command("guidlimits", RBACPermissions.CommandDebug, true)]
+        static bool HandleDebugGuidLimitsCommand(CommandHandler handler, uint mapId)
         {
-            Unit target = handler.GetSelectedUnit();
-            if (!target)
-                target = handler.GetSession().GetPlayer();
+            if (mapId != 0)
+                Global.MapMgr.DoForAllMapsWithMapId(mapId, map => HandleDebugGuidLimitsMap(handler, map));
+            else
+                Global.MapMgr.DoForAllMaps(map => HandleDebugGuidLimitsMap(handler, map));
 
-            handler.SendSysMessage($"Combat refs: (Combat state: {target.IsInCombat()} | Manager state: {target.GetCombatManager().HasCombat()})");
-            foreach (var refe in target.GetCombatManager().GetPvPCombatRefs())
-            {
-                Unit unit = refe.Value.GetOther(target);
-                handler.SendSysMessage($"[PvP] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
-            }
-            foreach (var refe in target.GetCombatManager().GetPvECombatRefs())
-            {
-                Unit unit = refe.Value.GetOther(target);
-                handler.SendSysMessage($"[PvE] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
-            }
-
+            handler.SendSysMessage($"Guid Warn Level: {WorldConfig.GetIntValue(WorldCfg.RespawnGuidWarnLevel)}");
+            handler.SendSysMessage($"Guid Alert Level: {WorldConfig.GetIntValue(WorldCfg.RespawnGuidAlertLevel)}");
             return true;
         }
 
@@ -1438,6 +1451,11 @@ namespace Game.Chat
 
                 return true;
             }
+        }
+
+        static void HandleDebugGuidLimitsMap(CommandHandler handler, Map map)
+        {
+            handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Highest Guid Creature: {map.GenerateLowGuid(HighGuid.Creature)} GameObject: {map.GetMaxLowGuid(HighGuid.GameObject)}");
         }
     }
 }
