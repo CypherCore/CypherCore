@@ -588,6 +588,19 @@ namespace Game
             return m_muteTime <= GameTime.GetGameTime();
         }
 
+        public bool DisallowHyperlinksAndMaybeKick(string str)
+        {
+            if (!str.Contains('|'))
+                return true;
+
+            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) sent a message which illegally contained a hyperlink:\n{str}");
+
+            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+                KickPlayer();
+
+            return false;
+        }
+        
         public void SendNotification(CypherStrings str, params object[] args)
         {
             SendNotification(Global.ObjectMgr.GetCypherString(str), args);

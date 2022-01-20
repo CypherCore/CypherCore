@@ -136,6 +136,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildUpdateMotdText)]
         void HandleGuildUpdateMotdText(GuildUpdateMotdText packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.MotdText))
+                return;
+
+            if (packet.MotdText.Length > 255)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetMOTD(this, packet.MotdText);
@@ -144,6 +150,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetMemberNote)]
         void HandleGuildSetMemberNote(GuildSetMemberNote packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.Note))
+                return;
+
+            if (packet.Note.Length > 31)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetMemberNote(this, packet.Note, packet.NoteeGUID, packet.IsPublic);
@@ -161,6 +173,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildAddRank)]
         void HandleGuildAddRank(GuildAddRank packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.Name))
+                return;
+
+            if (packet.Name.Length > 15)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleAddNewRank(this, packet.Name);
@@ -177,6 +195,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildUpdateInfoText)]
         void HandleGuildUpdateInfoText(GuildUpdateInfoText packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.InfoText))
+                return;
+
+            if (packet.InfoText.Length > 500)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetInfo(this, packet.InfoText);
@@ -491,6 +515,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankUpdateTab)]
         void HandleGuildBankUpdateTab(GuildBankUpdateTab packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.Name))
+                return;
+
+            if ((packet.Name.Length > 15) || (packet.Icon.Length > 127))
+                return;
+
             if (!string.IsNullOrEmpty(packet.Name) && !string.IsNullOrEmpty(packet.Icon))
             {
                 if (GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
@@ -521,6 +551,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankSetTabText)]
         void HandleGuildBankSetTabText(GuildBankSetTabText packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.TabText))
+                return;
+
+            if (packet.TabText.Length > 500)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SetBankTabText((byte)packet.Tab, packet.TabText);
@@ -529,6 +565,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetRankPermissions)]
         void HandleGuildSetRankPermissions(GuildSetRankPermissions packet)
         {
+            if (!DisallowHyperlinksAndMaybeKick(packet.RankName))
+                return;
+
+            if (packet.RankName.Length > 15)
+                return;
+
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
