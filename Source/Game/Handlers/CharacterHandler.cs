@@ -686,6 +686,7 @@ namespace Game
             if (PlayerLoading() || GetPlayer() != null)
             {
                 Log.outError(LogFilter.Network, "Player tries to login again, AccountId = {0}", GetAccountId());
+                KickPlayer("WorldSession::HandlePlayerLoginOpcode Another client logging in");
                 return;
             }
 
@@ -695,7 +696,7 @@ namespace Game
             if (!_legitCharacters.Contains(playerLogin.Guid))
             {
                 Log.outError(LogFilter.Network, "Account ({0}) can't login with that character ({1}).", GetAccountId(), playerLogin.Guid.ToString());
-                KickPlayer();
+                KickPlayer("WorldSession::HandlePlayerLoginOpcode Trying to login with a character of another account");
                 return;
             }
 
@@ -706,7 +707,7 @@ namespace Game
         {
             if (!PlayerLoading() || GetPlayer())
             {
-                KickPlayer();
+                KickPlayer("WorldSession::HandleContinuePlayerLogin incorrect player state when logging in");
                 return;
             }
 
@@ -726,7 +727,7 @@ namespace Game
             if (!pCurrChar.LoadFromDB(playerGuid, holder))
             {
                 SetPlayer(null);
-                KickPlayer();
+                KickPlayer("WorldSession::HandlePlayerLogin Player::LoadFromDB failed");
                 m_playerLoading.Clear();
                 return;
             }
@@ -1061,7 +1062,7 @@ namespace Game
         {
             if (!PlayerLoading() || GetPlayer())
             {
-                KickPlayer();
+                KickPlayer("WorldSession::AbortLogin incorrect player state when logging in");
                 return;
             }
 
@@ -1220,7 +1221,7 @@ namespace Game
             {
                 Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to rename character {2}, but it does not belong to their account!",
                     GetAccountId(), GetRemoteAddress(), request.RenameInfo.Guid.ToString());
-                KickPlayer();
+                KickPlayer("WorldSession::HandleCharRenameOpcode rename character from a different account");
                 return;
             }
 
@@ -1402,7 +1403,7 @@ namespace Game
             {
                 Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to customise {2}, but it does not belong to their account!",
                     GetAccountId(), GetRemoteAddress(), packet.CustomizeInfo.CharGUID.ToString());
-                KickPlayer();
+                KickPlayer("WorldSession::HandleCharCustomize Trying to customise character of another account");
                 return;
             }
 
@@ -1673,7 +1674,7 @@ namespace Game
             {
                 Log.outError(LogFilter.Network, "Account {0}, IP: {1} tried to factionchange character {2}, but it does not belong to their account!",
                     GetAccountId(), GetRemoteAddress(), packet.RaceOrFactionChangeInfo.Guid.ToString());
-                KickPlayer();
+                KickPlayer("WorldSession::HandleCharFactionOrRaceChange Trying to change faction of character of another account");
                 return;
             }
 

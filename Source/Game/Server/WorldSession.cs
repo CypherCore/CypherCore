@@ -34,6 +34,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Game.Chat;
 
 namespace Game
 {
@@ -419,8 +420,10 @@ namespace Game
 
         public void AddInstanceConnection(WorldSocket sock) { m_Socket[(int)ConnectionType.Instance] = sock; }
 
-        public void KickPlayer()
+        public void KickPlayer(string reason)
         {
+            Log.outInfo(LogFilter.Network, $"Account: {GetAccountId()} Character: '{(_player ? _player.GetName() : "<none>")}' {(_player ? _player.GetGUID() : "")} kicked with reason: {reason}");
+
             for (byte i = 0; i < 2; ++i)
             {
                 if (m_Socket[i] != null)
@@ -588,6 +591,19 @@ namespace Game
             return m_muteTime <= GameTime.GetGameTime();
         }
 
+        bool ValidateHyperlinksAndMaybeKick(string str)
+        {
+            if (Hyperlink.CheckAllLinks(str))
+                return true;
+
+            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
+
+            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+                KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
+
+            return false;
+        }
+        
         public bool DisallowHyperlinksAndMaybeKick(string str)
         {
             if (!str.Contains('|'))
@@ -596,7 +612,7 @@ namespace Game
             Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) sent a message which illegally contained a hyperlink:\n{str}");
 
             if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
-                KickPlayer();
+                KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
 
             return false;
         }

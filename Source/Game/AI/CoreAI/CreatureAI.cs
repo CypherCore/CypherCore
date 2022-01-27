@@ -46,6 +46,11 @@ namespace Game.AI
             _moveInLOSLocked = false;
         }
 
+        public void Talk(uint id, WorldObject whisperTarget = null)
+        {
+            Global.CreatureTextMgr.SendChat(me, (byte)id, whisperTarget);
+        }
+
         public override void OnCharmed(bool isNew)
         {
             if (isNew && !me.IsCharmed() && !me.LastCharmerGUID.IsEmpty())
@@ -56,18 +61,11 @@ namespace Game.AI
                     if (lastCharmer != null)
                         me.EngageWithTarget(lastCharmer);
                 }
-                me.LastCharmerGUID.Clear();
 
-                if (!me.IsInCombat())
-                    EnterEvadeMode(EvadeReason.NoHostiles);
+                me.LastCharmerGUID.Clear();
             }
 
             base.OnCharmed(isNew);
-        }
-
-        public void Talk(uint id, WorldObject whisperTarget = null)
-        {
-            Global.CreatureTextMgr.SendChat(me, (byte)id, whisperTarget);
         }
 
         public void DoZoneInCombat(Creature creature = null)
@@ -76,7 +74,7 @@ namespace Game.AI
                 creature = me;
 
             Map map = creature.GetMap();
-            if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
+            if (!map.IsDungeon()) // use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {
                 Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
                 return;
@@ -219,7 +217,7 @@ namespace Game.AI
             if (!_EnterEvadeMode(why))
                 return;
 
-            Log.outDebug(LogFilter.Unit, "Creature {0} enters evade mode.", me.GetEntry());
+            Log.outDebug(LogFilter.Unit, $"CreatureAI::EnterEvadeMode: entering evade mode (why: {why}) ({me.GetGUID()})");
 
             if (me.GetVehicle() == null) // otherwise me will be in evade mode forever
             {
@@ -374,12 +372,10 @@ namespace Game.AI
                         }
                         alreadyChecked.Add(next);
                     }
-                    else
-                    {
-                        if (outOfBounds.Contains(next))
-                            hasOutOfBoundsNeighbor = true;
-                    }
+                    else if (outOfBounds.Contains(next))
+                        hasOutOfBoundsNeighbor = true;
                 }
+
                 if (fill || hasOutOfBoundsNeighbor)
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);

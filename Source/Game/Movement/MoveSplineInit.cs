@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Networking.Packets;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Game.Movement
@@ -94,7 +95,7 @@ namespace Game.Movement
             }
 
             // should i do the things that user should do? - no.
-            if (args.path.Length == 0)
+            if (args.path.Count == 0)
                 return 0;
 
             // correct first vertex
@@ -246,9 +247,9 @@ namespace Game.Movement
             }
 
             args.path_Idx_offset = 0;
-            args.path = new Vector3[2];
+            args.path.Add(default);
             TransportPathTransform transform = new(unit, args.TransformForTransport);
-            args.path[1] = transform.Calc(dest);
+            args.path.Add(transform.Calc(dest));
         }
 
         public void SetFall()
@@ -282,10 +283,9 @@ namespace Game.Movement
         public void MovebyPath(Vector3[] controls, int path_offset = 0)
         {
             args.path_Idx_offset = path_offset;
-            args.path = new Vector3[controls.Length];
             TransportPathTransform transform = new(unit, args.TransformForTransport);
             for (var i = 0; i < controls.Length; i++)
-                args.path[i] = transform.Calc(controls[i]);
+                args.path.Add(transform.Calc(controls[i]));
 
         }
 
@@ -333,7 +333,7 @@ namespace Game.Movement
             args.spellEffectExtra.Set(spellEffectExtraData);
         }
 
-        public Vector3[] Path() { return args.path; }
+        public List<Vector3> Path() { return args.path; }
 
         public MoveSplineInitArgs args = new();
         Unit unit;

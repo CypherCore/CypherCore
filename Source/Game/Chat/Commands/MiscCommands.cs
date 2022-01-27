@@ -1115,7 +1115,7 @@ namespace Game.Chat
             else
                 handler.SendSysMessage(CypherStrings.CommandKickmessage, playerName);
 
-            target.GetSession().KickPlayer();
+            target.GetSession().KickPlayer("HandleKickPlayerCommand GM Command");
 
             return true;
         }

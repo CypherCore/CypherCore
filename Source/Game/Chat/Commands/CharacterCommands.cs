@@ -144,7 +144,7 @@ namespace Game.Chat
                     target.SetName(newName);
                     session = target.GetSession();
                     if (session != null)
-                        session.KickPlayer();
+                        session.KickPlayer("HandleCharacterRenameCommand GM Command renaming character");
                 }
                 else
                 {
@@ -463,7 +463,7 @@ namespace Game.Chat
             {
                 characterGuid = player.GetGUID();
                 accountId = player.GetSession().GetAccountId();
-                player.GetSession().KickPlayer();
+                player.GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
             }
             else
             {

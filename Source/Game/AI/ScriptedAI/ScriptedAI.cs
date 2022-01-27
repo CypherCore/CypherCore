@@ -108,7 +108,7 @@ namespace Game.AI
 
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
-                Log.outError(LogFilter.Scripts, "Invalid soundId {0} used in DoPlaySoundToSet (Source: TypeId {1}, GUID {2})", soundId, source.GetTypeId(), source.GetGUID().ToString());
+                Log.outError(LogFilter.ScriptsAi, $"ScriptedAI::DoPlaySoundToSet: Invalid soundId {soundId} used in DoPlaySoundToSet (Source: {source.GetGUID()})");
                 return;
             }
 
@@ -307,9 +307,24 @@ namespace Game.AI
                 if (mechanic != 0 && tempSpell.Mechanic != mechanic)
                     continue;
 
+                // Continue if we don't have the mana to actually cast this spell
+                bool hasPower = true;
+                foreach (SpellPowerCost cost in tempSpell.CalcPowerCost(me, tempSpell.GetSchoolMask()))
+                {
+                    if (cost.Amount > me.GetPower(cost.Power))
+                    {
+                        hasPower = false;
+                        break;
+                    }
+                }
+                
+                if (!hasPower)
+                    continue;
+                
                 //Check if the spell meets our range requirements
                 if (rangeMin != 0 && me.GetSpellMinRangeForTarget(target, tempSpell) < rangeMin)
                     continue;
+
                 if (rangeMax != 0 && me.GetSpellMaxRangeForTarget(target, tempSpell) > rangeMax)
                     continue;
 
@@ -350,8 +365,7 @@ namespace Game.AI
             if (player != null)
                 player.TeleportTo(unit.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
             else
-                Log.outError(LogFilter.Scripts, "Creature {0} (Entry: {1}) Tried to teleport non-player unit (Type: {2} GUID: {3}) to X: {4} Y: {5} Z: {6} O: {7}. Aborted.",
-                    me.GetGUID(), me.GetEntry(), unit.GetTypeId(), unit.GetGUID(), x, y, z, o);
+                Log.outError(LogFilter.ScriptsAi, $"ScriptedAI::DoTeleportPlayer: Creature {me.GetGUID()} Tried to teleport non-player unit ({unit.GetGUID()}) to X: {x} Y: {y} Z: {z} O: {o}. Aborted.");
         }
 
         public void DoTeleportAll(float x, float y, float z, float o)
@@ -631,7 +645,7 @@ namespace Game.AI
         {
             if (delayToRespawn < TimeSpan.FromSeconds(2))
             {
-                Log.outError(LogFilter.Scripts, "_DespawnAtEvade called with delay of {0} seconds, defaulting to 2.", delayToRespawn);
+                Log.outError(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called with delay of {delayToRespawn} seconds, defaulting to 2 (me: {me.GetGUID()})");
                 delayToRespawn = TimeSpan.FromSeconds(2);
             }
 
@@ -641,7 +655,7 @@ namespace Game.AI
             TempSummon whoSummon = who.ToTempSummon();
             if (whoSummon)
             {
-                Log.outWarn(LogFilter.ScriptsAi, "_DespawnAtEvade called on a temporary summon.");
+                Log.outWarn(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called on a temporary summon (who: {who.GetGUID()})");
                 whoSummon.UnSummon();
                 return;
             }

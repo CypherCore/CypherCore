@@ -1317,8 +1317,8 @@ namespace Game.AI
                         _castCheckTimer = 0;
                     else
                     {
-                        if (IsRangedAttacker())
-                        { // chase to zero if the target isn't in line of sight
+                        if (IsRangedAttacker()) // chase to zero if the target isn't in line of sight
+                        {
                             bool inLOS = me.IsWithinLOSInMap(target);
                             if (_chaseCloser != !inLOS)
                             {

@@ -17,6 +17,7 @@
 
 using Framework.Dynamic;
 using Game.Entities;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Game.Movement
@@ -33,10 +34,9 @@ namespace Game.Movement
             initialOrientation = 0.0f;
             HasVelocity = false;
             TransformForTransport = true;
-            path = new Vector3[path_capacity];
         }
 
-        public Vector3[] path;
+        public List<Vector3> path = new();
         public FacingInfo facing = new();
         public MoveSplineFlag flags = new();
         public int path_Idx_offset;
@@ -65,7 +65,7 @@ namespace Game.Movement
                 return true;
             }
 
-            if (!CHECK(path.Length > 1))
+            if (!CHECK(path.Count > 1))
                 return false;
             if (!CHECK(velocity >= 0.01f))
                 return false;
@@ -78,8 +78,8 @@ namespace Game.Movement
 
         bool _checkPathLengths()
         {
-            if (path.Length > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
-                for (uint i = 0; i < path.Length - 1; ++i)
+            if (path.Count > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
+                for (int i = 0; i < path.Count - 1; ++i)
                     if ((path[i + 1] - path[i]).Length() < 0.1f)
                         return false;
             return true;

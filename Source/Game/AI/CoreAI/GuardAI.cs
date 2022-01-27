@@ -52,7 +52,7 @@ namespace Game.AI
                 return;
             }
 
-            Log.outDebug(LogFilter.Unit, "Guard entry: {0} enters evade mode.", me.GetEntry());
+            Log.outTrace(LogFilter.ScriptsAi, $"GuardAI::EnterEvadeMode: {me.GetGUID()} enters evade mode.");
 
             me.RemoveAllAuras();
             me.CombatStop(true);

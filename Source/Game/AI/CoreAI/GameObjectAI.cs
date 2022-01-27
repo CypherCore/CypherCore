@@ -29,9 +29,9 @@ namespace Game.AI
 
         public GameObject me;
 
-        public GameObjectAI(GameObject gameObject)
+        public GameObjectAI(GameObject go)
         {
-            me = gameObject;
+            me = go;
             _scheduler = new TaskScheduler();
             _events = new EventMap();
         }

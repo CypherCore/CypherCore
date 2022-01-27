@@ -33,21 +33,21 @@ namespace Scripts.World.NpcSpecial
 {
     enum SpawnType
     {
-        TripwireRooftop,                             // no warning, summon Creature at smaller range
+        Tripwire,                             // no warning, summon Creature at smaller range
         AlarmBot,                                     // cast guards mark and summon npc - if player shows up with that buff duration < 5 seconds attack
     }
 
-    class SpawnAssociation
+    class AirForceSpawn
     {
-        public SpawnAssociation(uint _thisCreatureEntry, uint _spawnedCreatureEntry, SpawnType _spawnType)
+        public AirForceSpawn(uint _myEntry, uint _otherEntry, SpawnType _spawnType)
         {
-            thisCreatureEntry = _thisCreatureEntry;
-            spawnedCreatureEntry = _spawnedCreatureEntry;
+            myEntry = _myEntry;
+            otherEntry = _otherEntry;
             spawnType = _spawnType;
         }
 
-        public uint thisCreatureEntry;
-        public uint spawnedCreatureEntry;
+        public uint myEntry;
+        public uint otherEntry;
         public SpawnType spawnType;
     }
 
@@ -364,39 +364,39 @@ namespace Scripts.World.NpcSpecial
 
     struct Misc
     {
-        public static SpawnAssociation[] spawnAssociations =
+        public static AirForceSpawn[] AirforceSpawns =
         {
-            new SpawnAssociation(2614,  15241, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Alliance)
-            new SpawnAssociation(2615,  15242, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Horde)
-            new SpawnAssociation(21974, 21976, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Area 52)
-            new SpawnAssociation(21993, 15242, SpawnType.AlarmBot),                     //Air Force Guard Post (Horde - Bat Rider)
-            new SpawnAssociation(21996, 15241, SpawnType.AlarmBot),                     //Air Force Guard Post (Alliance - Gryphon)
-            new SpawnAssociation(21997, 21976, SpawnType.AlarmBot),                     //Air Force Guard Post (Goblin - Area 52 - Zeppelin)
-            new SpawnAssociation(21999, 15241, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Alliance)
-            new SpawnAssociation(22001, 15242, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Horde)
-            new SpawnAssociation(22002, 15242, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Ground (Horde)
-            new SpawnAssociation(22003, 15241, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Ground (Alliance)
-            new SpawnAssociation(22063, 21976, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Goblin - Area 52)
-            new SpawnAssociation(22065, 22064, SpawnType.AlarmBot),                     //Air Force Guard Post (Ethereal - Stormspire)
-            new SpawnAssociation(22066, 22067, SpawnType.AlarmBot),                     //Air Force Guard Post (Scryer - Dragonhawk)
-            new SpawnAssociation(22068, 22064, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Ethereal - Stormspire)
-            new SpawnAssociation(22069, 22064, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Stormspire)
-            new SpawnAssociation(22070, 22067, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Scryer)
-            new SpawnAssociation(22071, 22067, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Scryer)
-            new SpawnAssociation(22078, 22077, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Aldor)
-            new SpawnAssociation(22079, 22077, SpawnType.AlarmBot),                     //Air Force Guard Post (Aldor - Gryphon)
-            new SpawnAssociation(22080, 22077, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Aldor)
-            new SpawnAssociation(22086, 22085, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Sporeggar)
-            new SpawnAssociation(22087, 22085, SpawnType.AlarmBot),                     //Air Force Guard Post (Sporeggar - Spore Bat)
-            new SpawnAssociation(22088, 22085, SpawnType.TripwireRooftop),             //Air Force Trip Wire - Rooftop (Sporeggar)
-            new SpawnAssociation(22090, 22089, SpawnType.AlarmBot),                     //Air Force Guard Post (Toshley's Station - Flying Machine)
-            new SpawnAssociation(22124, 22122, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Cenarion)
-            new SpawnAssociation(22125, 22122, SpawnType.AlarmBot),                     //Air Force Guard Post (Cenarion - Stormcrow)
-            new SpawnAssociation(22126, 22122, SpawnType.AlarmBot)                      //Air Force Trip Wire - Rooftop (Cenarion Expedition)
+            new AirForceSpawn(2614,  15241, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Alliance)
+            new AirForceSpawn(2615,  15242, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Horde)
+            new AirForceSpawn(21974, 21976, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Area 52)
+            new AirForceSpawn(21993, 15242, SpawnType.AlarmBot),                     //Air Force Guard Post (Horde - Bat Rider)
+            new AirForceSpawn(21996, 15241, SpawnType.AlarmBot),                     //Air Force Guard Post (Alliance - Gryphon)
+            new AirForceSpawn(21997, 21976, SpawnType.AlarmBot),                     //Air Force Guard Post (Goblin - Area 52 - Zeppelin)
+            new AirForceSpawn(21999, 15241, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Alliance)
+            new AirForceSpawn(22001, 15242, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Horde)
+            new AirForceSpawn(22002, 15242, SpawnType.Tripwire),             //Air Force Trip Wire - Ground (Horde)
+            new AirForceSpawn(22003, 15241, SpawnType.Tripwire),             //Air Force Trip Wire - Ground (Alliance)
+            new AirForceSpawn(22063, 21976, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Goblin - Area 52)
+            new AirForceSpawn(22065, 22064, SpawnType.AlarmBot),                     //Air Force Guard Post (Ethereal - Stormspire)
+            new AirForceSpawn(22066, 22067, SpawnType.AlarmBot),                     //Air Force Guard Post (Scryer - Dragonhawk)
+            new AirForceSpawn(22068, 22064, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Ethereal - Stormspire)
+            new AirForceSpawn(22069, 22064, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Stormspire)
+            new AirForceSpawn(22070, 22067, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Scryer)
+            new AirForceSpawn(22071, 22067, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Scryer)
+            new AirForceSpawn(22078, 22077, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Aldor)
+            new AirForceSpawn(22079, 22077, SpawnType.AlarmBot),                     //Air Force Guard Post (Aldor - Gryphon)
+            new AirForceSpawn(22080, 22077, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Aldor)
+            new AirForceSpawn(22086, 22085, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Sporeggar)
+            new AirForceSpawn(22087, 22085, SpawnType.AlarmBot),                     //Air Force Guard Post (Sporeggar - Spore Bat)
+            new AirForceSpawn(22088, 22085, SpawnType.Tripwire),             //Air Force Trip Wire - Rooftop (Sporeggar)
+            new AirForceSpawn(22090, 22089, SpawnType.AlarmBot),                     //Air Force Guard Post (Toshley's Station - Flying Machine)
+            new AirForceSpawn(22124, 22122, SpawnType.AlarmBot),                     //Air Force Alarm Bot (Cenarion)
+            new AirForceSpawn(22125, 22122, SpawnType.AlarmBot),                     //Air Force Guard Post (Cenarion - Stormcrow)
+            new AirForceSpawn(22126, 22122, SpawnType.AlarmBot)                      //Air Force Trip Wire - Rooftop (Cenarion Expedition)
         };
 
         public const float RangeTripwire = 15.0f;
-        public const float RangeGuardsMark = 100.0f;
+        public const float RangeAlarmbot = 100.0f;
 
         //ChickenCluck
         public const uint FactionFriendly = 35;
@@ -467,153 +467,100 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_air_force_bots : ScriptedAI
+    class npc_air_force_bots : NullCreatureAI
     {
-        SpawnAssociation SpawnAssoc;
-        ObjectGuid SpawnedGUID;
-        List<ObjectGuid> inLineOfSightSinceLastUpdate = new();
+        AirForceSpawn _spawn;
+        ObjectGuid _myGuard;
+        List<ObjectGuid> _toAttack = new();
 
-        public npc_air_force_bots(Creature creature) : base(creature)
+        static AirForceSpawn FindSpawnFor(uint entry)
         {
-            SpawnAssoc = null;
-            SpawnedGUID.Clear();
-
-            // find the correct spawnhandling
-            foreach (var association in Misc.spawnAssociations)
+            foreach (AirForceSpawn spawn in Misc.AirforceSpawns)
             {
-                if (association.thisCreatureEntry == creature.GetEntry())
+                if (spawn.myEntry == entry)
                 {
-                    SpawnAssoc = association;
-                    break;
+                    Cypher.Assert(Global.ObjectMgr.GetCreatureTemplate(spawn.otherEntry) != null, $"Invalid creature entry {spawn.otherEntry} in 'npc_air_force_bots' script");
+                    return spawn;
                 }
             }
-
-            if (SpawnAssoc == null)
-                Log.outError(LogFilter.Sql, "TCSR: Creature template entry {0} has ScriptName npc_air_force_bots, but it's not handled by that script", creature.GetEntry());
-            else
-            {
-                CreatureTemplate spawnedTemplate = Global.ObjectMgr.GetCreatureTemplate(SpawnAssoc.spawnedCreatureEntry);
-                if (spawnedTemplate == null)
-                {
-                    Log.outError(LogFilter.Sql, "TCSR: Creature template entry {0} does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc.spawnedCreatureEntry);
-                    SpawnAssoc = null;
-                    return;
-                }
-            }
-        }
-
-        public override void Reset() { }
-
-        Creature SummonGuard()
-        {
-            Creature summoned = me.SummonCreature(SpawnAssoc.spawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, 300000);
-
-            if (summoned)
-                SpawnedGUID = summoned.GetGUID();
-            else
-            {
-                Log.outError(LogFilter.Sql, "npc_air_force_bots: wasn't able to spawn Creature {0}", SpawnAssoc.spawnedCreatureEntry);
-                SpawnAssoc = null;
-            }
-
-            return summoned;
-        }
-
-        Creature GetSummonedGuard()
-        {
-            Creature creature = ObjectAccessor.GetCreature(me, SpawnedGUID);
-            if (creature && creature.IsAlive())
-                return creature;
+            Cypher.Assert(false, $"Unhandled creature with entry {entry} is assigned 'npc_air_force_bots' script");
 
             return null;
         }
 
+        public npc_air_force_bots(Creature creature) : base(creature)
+        {
+            _spawn = FindSpawnFor(creature.GetEntry());
+        }
+
+        Creature GetOrSummonGuard()
+        {
+            Creature guard = ObjectAccessor.GetCreature(me, _myGuard);
+
+            if (guard == null && (guard = me.SummonCreature(_spawn.otherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, 300000)))
+                _myGuard = guard.GetGUID();
+
+            return guard;
+        }
+
         public override void UpdateAI(uint diff)
         {
-            base.UpdateAI(diff);
+            if (_toAttack.Empty())
+                return;
 
-            inLineOfSightSinceLastUpdate.Clear();
+            Creature guard = GetOrSummonGuard();
+            if (guard == null)
+                return;
+
+            // Keep the list of targets for later on when the guards will be alive
+            if (!guard.IsAlive())
+                return;
+
+            for (var i = 0; i < _toAttack.Count; ++i)
+            {
+                ObjectGuid guid = _toAttack[i];
+
+                Unit target = Global.ObjAccessor.GetUnit(me, guid);
+                if (!target)
+                    continue;
+
+                if (guard.IsEngagedBy(target))
+                    continue;
+
+                guard.EngageWithTarget(target);
+                if (_spawn.spawnType == SpawnType.AlarmBot)
+                    guard.CastSpell(target, SpellIds.GuardsMark, true);
+            }
+
+            _toAttack.Clear();
         }
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (SpawnAssoc == null)
+            // guards are only spawned against players
+            if (!who.IsPlayer())
                 return;
 
-            if (me.IsValidAttackTarget(who))
-            {
-                Player playerTarget = who.ToPlayer();
+            // we're already scheduled to attack this player on our next tick, don't bother checking
+            if (_toAttack.Contains(who.GetGUID()))
+                return;
 
-                // airforce guards only spawn for players
-                if (!playerTarget)
-                    return;
+            // check if they're in range
+            if (!who.IsWithinDistInMap(me, (_spawn.spawnType == SpawnType.AlarmBot) ? Misc.RangeAlarmbot : Misc.RangeTripwire))
+                return;
 
-                Creature lastSpawnedGuard = SpawnedGUID.IsEmpty() ? null : GetSummonedGuard();
+            // check if they're hostile
+            if (!(me.IsHostileTo(who) || who.IsHostileTo(me)))
+                return;
 
-                // prevent calling Unit::GetUnit at next MoveInLineOfSight call - speedup
-                if (!lastSpawnedGuard)
-                    SpawnedGUID.Clear();
+            // check if they're a valid attack target
+            if (!me.IsValidAttackTarget(who))
+                return;
 
-                switch (SpawnAssoc.spawnType)
-                {
-                    case SpawnType.AlarmBot:
-                    {
-                        // handle only 1 change for world update for each target
-                        if (inLineOfSightSinceLastUpdate.Contains(who.GetGUID()))
-                            return;
+            if ((_spawn.spawnType == SpawnType.Tripwire) && who.IsFlying())
+                return;
 
-                        inLineOfSightSinceLastUpdate.Add(who.GetGUID());
-
-                        if (!who.IsWithinDistInMap(me, Misc.RangeGuardsMark))
-                            return;
-
-                        Aura markAura = who.GetAura(SpellIds.GuardsMark);
-                        if (markAura != null)
-                        {
-                            // the target wasn't able to move out of our range within 25 seconds
-                            if (!lastSpawnedGuard)
-                            {
-                                lastSpawnedGuard = SummonGuard();
-
-                                if (!lastSpawnedGuard)
-                                    return;
-                            }
-
-                            if (markAura.GetDuration() < Misc.AuraDurationTimeLeft)
-                                if (!lastSpawnedGuard.GetVictim())
-                                    lastSpawnedGuard.GetAI().AttackStart(who);
-                        }
-                        else
-                        {
-                            if (!lastSpawnedGuard)
-                                lastSpawnedGuard = SummonGuard();
-
-                            if (!lastSpawnedGuard)
-                                return;
-
-                            lastSpawnedGuard.CastSpell(who, SpellIds.GuardsMark, true);
-                        }
-                        break;
-                    }
-                    case SpawnType.TripwireRooftop:
-                    {
-                        if (!who.IsWithinDistInMap(me, Misc.RangeTripwire))
-                            return;
-
-                        if (!lastSpawnedGuard)
-                            lastSpawnedGuard = SummonGuard();
-
-                        if (!lastSpawnedGuard)
-                            return;
-
-                        // ROOFTOP only triggers if the player is on the ground
-                        if (!playerTarget.IsFlying() && !lastSpawnedGuard.GetVictim())
-                            lastSpawnedGuard.GetAI().AttackStart(who);
-
-                        break;
-                    }
-                }
-            }
+            _toAttack.Add(who.GetGUID());
         }
     }
 

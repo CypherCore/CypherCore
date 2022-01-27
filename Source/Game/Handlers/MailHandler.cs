@@ -73,6 +73,9 @@ namespace Game
             if (string.IsNullOrEmpty(packet.Info.Target))
                 return;
 
+            if (!ValidateHyperlinksAndMaybeKick(packet.Info.Subject) || !ValidateHyperlinksAndMaybeKick(packet.Info.Body))
+                return;
+
             Player player = GetPlayer();
             if (player.GetLevel() < WorldConfig.GetIntValue(WorldCfg.MailLevelReq))
             {

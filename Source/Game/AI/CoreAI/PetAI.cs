@@ -30,7 +30,7 @@ namespace Game.AI
         List<ObjectGuid> _allySet = new();
         uint _updateAlliesTimer;
 
-        public PetAI(Creature c) : base(c)
+        public PetAI(Creature creature) : base(creature)
         {
             UpdateAllies();
         }
@@ -60,7 +60,7 @@ namespace Game.AI
 
                 if (NeedToStop())
                 {
-                    Log.outDebug(LogFilter.Server, "Pet AI stopped attacking [{0}]", me.GetGUID().ToString());
+                    Log.outTrace(LogFilter.ScriptsAi, $"PetAI::UpdateAI: AI stopped attacking {me.GetGUID()}");
                     StopAttack();
                     return;
                 }
@@ -528,26 +528,28 @@ namespace Game.AI
 
         public override void ReceiveEmote(Player player, TextEmotes emoteId)
         {
-            if (!me.GetOwnerGUID().IsEmpty() && me.GetOwnerGUID() == player.GetGUID())
-                switch (emoteId)
-                {
-                    case TextEmotes.Cower:
-                        if (me.IsPet() && me.ToPet().IsPetGhoul())
-                            me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
-                        break;
-                    case TextEmotes.Angry:
-                        if (me.IsPet() && me.ToPet().IsPetGhoul())
-                            me.HandleEmoteCommand(Emote.StateStun);
-                        break;
-                    case TextEmotes.Glare:
-                        if (me.IsPet() && me.ToPet().IsPetGhoul())
-                            me.HandleEmoteCommand(Emote.StateStun);
-                        break;
-                    case TextEmotes.Soothe:
-                        if (me.IsPet() && me.ToPet().IsPetGhoul())
-                            me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
-                        break;
-                }
+            if (me.GetOwnerGUID() != player.GetGUID())
+                return;
+
+            switch (emoteId)
+            {
+                case TextEmotes.Cower:
+                    if (me.IsPet() && me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
+                    break;
+                case TextEmotes.Angry:
+                    if (me.IsPet() && me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.StateStun);
+                    break;
+                case TextEmotes.Glare:
+                    if (me.IsPet() && me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.StateStun);
+                    break;
+                case TextEmotes.Soothe:
+                    if (me.IsPet() && me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
+                    break;
+            }
         }
 
         bool NeedToStop()
@@ -595,17 +597,17 @@ namespace Game.AI
             if (player)
                 group = player.GetGroup();
 
-            //only pet and owner/not in group.ok
+            // only pet and owner/not in group.ok
             if (_allySet.Count == 2 && !group)
                 return;
 
-            //owner is in group; group members filled in already (no raid . subgroupcount = whole count)
+            // owner is in group; group members filled in already (no raid . subgroupcount = whole count)
             if (group && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
                 return;
 
             _allySet.Clear();
             _allySet.Add(me.GetGUID());
-            if (group)                                              //add group
+            if (group) // add group
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
@@ -619,7 +621,7 @@ namespace Game.AI
                     _allySet.Add(target.GetGUID());
                 }
             }
-            else                                                    //remove group
+            else // remove group
                 _allySet.Add(owner.GetGUID());
         }
 
@@ -631,12 +633,12 @@ namespace Game.AI
             base.OnCharmed(isNew);
         }
 
+        /// <summary>
+        /// Quick access to set all flags to FALSE
+        /// </summary>
         void ClearCharmInfoFlags()
         {
-            // Quick access to set all flags to FALSE
-
             CharmInfo ci = me.GetCharmInfo();
-
             if (ci != null)
             {
                 ci.SetIsAtStay(false);

@@ -101,7 +101,7 @@ namespace Game
                         {
                             Log.outWarn(LogFilter.Warden, "{0} (latency: {1}, IP: {2}) exceeded Warden module response delay for more than {3} - disconnecting client",
                                            _session.GetPlayerInfo(), _session.GetLatency(), _session.GetRemoteAddress(), Time.secsToTimeString(maxClientResponseDelay, TimeFormat.ShortText));
-                            _session.KickPlayer();
+                            _session.KickPlayer("Warden::Update Warden module response delay exceeded");
                         }
                         else
                             _clientResponseTimer += diff;
@@ -172,7 +172,7 @@ namespace Game
                 case WardenActions.Log:
                     return "None";
                 case WardenActions.Kick:
-                    _session.KickPlayer();
+                    _session.KickPlayer("Warden::Penalty");
                     return "Kick";
                 case WardenActions.Ban:
                     {

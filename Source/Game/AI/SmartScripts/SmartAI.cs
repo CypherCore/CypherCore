@@ -1079,9 +1079,9 @@ namespace Game.AI
             GetScript().OnReset();
         }
 
-        public bool HasEscortState(SmartEscortState uiEscortState) { return (_escortState & uiEscortState) != 0; }
-        public void AddEscortState(SmartEscortState uiEscortState) { _escortState |= uiEscortState; }
-        public void RemoveEscortState(SmartEscortState uiEscortState) { _escortState &= ~uiEscortState; }
+        public bool HasEscortState(SmartEscortState escortState) { return (_escortState & escortState) != 0; }
+        public void AddEscortState(SmartEscortState escortState) { _escortState |= escortState; }
+        public void RemoveEscortState(SmartEscortState escortState) { _escortState &= ~escortState; }
         public void SetAutoAttack(bool on) { _canAutoAttack = on; }
 
         public bool CanCombatMove() { return _canCombatMove; }
@@ -1110,7 +1110,7 @@ namespace Game.AI
         // Gossip
         bool _gossipReturn;
 
-        public SmartGameObjectAI(GameObject g) : base(g) { }
+        public SmartGameObjectAI(GameObject go) : base(go) { }
 
         public override void UpdateAI(uint diff)
         {

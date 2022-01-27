@@ -1331,6 +1331,41 @@ namespace Game.Chat
             }
         }
 
+        [CommandGroup("pvp", RBACPermissions.CommandDebug)]
+        class PvpCommands
+        {
+            [Command("warmode", RBACPermissions.CommandDebug)]
+            static bool HandleDebugWarModeFactionBalanceCommand(CommandHandler handler, string command, int rewardValue = 0)
+            {
+                // USAGE: .debug pvp fb <alliance|horde|neutral|off> [pct]
+                // neutral     Sets faction balance off.
+                // alliance    Set faction balance to alliance.
+                // horde       Set faction balance to horde.
+                // off         Reset the faction balance and use the calculated value of it
+                switch (command.ToLower())
+                {
+                    default: // workaround for Variant of only ExactSequences not being supported
+                        handler.SendSysMessage(CypherStrings.BadValue);
+                        return false;
+                    case "alliance":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue);
+                        break;
+                    case "horde":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue);
+                        break;
+                    case "neutral":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
+                        break;
+                    case "off":
+                        Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
+                        break;
+                }
+
+                return true;
+            }
+        }
+
+
         [CommandGroup("send", RBACPermissions.CommandDebugSend)]
         class SendCommands
         {

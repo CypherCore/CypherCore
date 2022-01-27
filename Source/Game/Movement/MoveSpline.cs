@@ -52,7 +52,7 @@ namespace Game.Movement
             effect_start_time = 0;
             spell_effect_extra = args.spellEffectExtra;
             anim_tier = args.animTier;
-            splineIsFacingOnly = args.path.Length == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
+            splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
 
             // Check if its a stop spline
             if (args.flags.HasFlag(SplineFlag.Done))
@@ -91,11 +91,11 @@ namespace Game.Movement
                 int cyclic_point = 0;
                 if (splineflags.HasFlag(SplineFlag.EnterCycle))
                     cyclic_point = 1;   // shouldn't be modified, came from client
-                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
+                spline.InitCyclicSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
             }
             else
             {
-                spline.InitSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
+                spline.InitSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
             }
 
             // init spline timestamps
@@ -298,7 +298,7 @@ namespace Game.Movement
                             splineflags.SetUnsetFlag(SplineFlag.EnterCycle, false);
 
                             MoveSplineInitArgs args = new(spline.GetPointCount());
-                            args.path = spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray();
+                            args.path.AddRange(spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray());
                             args.facing = facing;
                             args.flags = splineflags;
                             args.path_Idx_offset = point_Idx_offset;

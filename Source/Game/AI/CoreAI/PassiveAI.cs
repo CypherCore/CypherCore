@@ -23,9 +23,9 @@ namespace Game.AI
 {
     public class PassiveAI : CreatureAI
     {
-        public PassiveAI(Creature c) : base(c)
+        public PassiveAI(Creature creature) : base(creature)
         {
-            me.SetReactState(ReactStates.Passive);
+            creature.SetReactState(ReactStates.Passive);
         }
 
         public override void UpdateAI(uint diff)
@@ -41,9 +41,9 @@ namespace Game.AI
 
     public class PossessedAI : CreatureAI
     {
-        public PossessedAI(Creature c) : base(c)
+        public PossessedAI(Creature creature) : base(creature)
         {
-            me.SetReactState(ReactStates.Passive);
+            creature.SetReactState(ReactStates.Passive);
         }
 
         public override void AttackStart(Unit target)
@@ -99,7 +99,7 @@ namespace Game.AI
     {
         public NullCreatureAI(Creature creature) : base(creature)
         {
-            me.SetReactState(ReactStates.Passive);
+            creature.SetReactState(ReactStates.Passive);
         }
 
         public override void MoveInLineOfSight(Unit unit) { }

@@ -52,14 +52,24 @@ namespace Game.Movement
             owner.CombatStopWithPets();
             owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
-            MoveSplineInit init = new(owner);
             uint end = GetPathAtMapEnd();
-            init.args.path = new Vector3[end];
-            for (int i = (int)GetCurrentNode(); i != end; ++i)
+            uint currentNodeId = GetCurrentNode();
+
+            if (currentNodeId == end)
+            {
+                Log.outDebug(LogFilter.Movement, $"FlightPathMovementGenerator::DoReset: trying to start a flypath from the end point. {owner.GetDebugInfo()}");
+                return;
+            }
+
+            MoveSplineInit init = new(owner);
+            // Providing a starting vertex since the taxi paths do not provide such
+            init.Path().Add(new Vector3(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()));
+            for (int i = (int)currentNodeId; i != (uint)end; ++i)
             {
                 Vector3 vertice = new(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
-                init.args.path[i] = vertice;
+                init.Path().Add(vertice);
             }
+            
             init.SetFirstPointId((int)GetCurrentNode());
             init.SetFly();
             init.SetSmooth();

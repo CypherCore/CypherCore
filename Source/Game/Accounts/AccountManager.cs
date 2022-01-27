@@ -98,7 +98,7 @@ namespace Game
                     if (p)
                     {
                         WorldSession s = p.GetSession();
-                        s.KickPlayer();                            // mark session to remove at next session list update
+                        s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
                         s.LogoutPlayer(false);                     // logout player without waiting next session list update
                     }
 

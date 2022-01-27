@@ -61,26 +61,23 @@ namespace Framework.Constants
     //Spell targets used by SelectSpell
     public enum SelectTargetType
     {
-        DontCare = 0,                             //All target types allowed
-
-        Self,                                     //Only Self casting
-
-        SingleEnemy,                             //Only Single Enemy
-        AoeEnemy,                                //Only AoE Enemy
-        AnyEnemy,                                //AoE or Single Enemy
-
-        SingleFriend,                            //Only Single Friend
-        AoeFriend,                               //Only AoE Friend
-        AnyFriend                                //AoE or Single Friend
+        DontCare = 0,   //All target types allowed
+        Self,           //Only Self casting
+        SingleEnemy,    //Only Single Enemy
+        AoeEnemy,       //Only AoE Enemy
+        AnyEnemy,       //AoE or Single Enemy
+        SingleFriend,   //Only Single Friend
+        AoeFriend,      //Only AoE Friend
+        AnyFriend       //AoE or Single Friend
     }
 
     //Spell Effects used by SelectSpell
     public enum SelectEffect
     {
-        DontCare = 0,                             //All spell effects allowed
-        Damage,                                   //Spell does damage
-        Healing,                                  //Spell does healing
-        Aura                                      //Spell applies an aura
+        DontCare = 0,   //All spell effects allowed
+        Damage,         //Spell does damage
+        Healing,        //Spell does healing
+        Aura            //Spell applies an aura
     }
 
     public enum SpellCastSource

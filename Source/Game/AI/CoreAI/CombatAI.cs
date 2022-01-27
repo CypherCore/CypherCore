@@ -109,33 +109,32 @@ namespace Game.AI
 
     public class CasterAI : CombatAI
     {
-        float _attackDist;
+        float _attackDistance;
 
-        public CasterAI(Creature c)
-            : base(c)
+        public CasterAI(Creature creature) : base(creature)
         {
-            _attackDist = SharedConst.MeleeRange;
+            _attackDistance = SharedConst.MeleeRange;
         }
 
         public override void InitializeAI()
         {
             base.InitializeAI();
 
-            _attackDist = 30.0f;
+            _attackDistance = 30.0f;
             foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info != null && info.condition == AICondition.Combat && _attackDist > info.maxRange)
-                    _attackDist = info.maxRange;
+                if (info != null && info.condition == AICondition.Combat && _attackDistance > info.maxRange)
+                    _attackDistance = info.maxRange;
             }
 
-            if (_attackDist == 30.0f)
-                _attackDist = SharedConst.MeleeRange;
+            if (_attackDistance == 30.0f)
+                _attackDistance = SharedConst.MeleeRange;
         }
 
         public override void AttackStart(Unit victim)
         {
-            AttackStartCaster(victim, _attackDist);
+            AttackStartCaster(victim, _attackDistance);
         }
 
         public override void JustEngagedWith(Unit victim)
@@ -198,18 +197,19 @@ namespace Game.AI
     {
         float _minRange;
 
-        public ArcherAI(Creature c) : base(c)
+        public ArcherAI(Creature creature) : base(creature)
         {
-            if (me.m_spells[0] == 0)
-                Log.outError(LogFilter.ScriptsAi, "ArcherAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
+            if (creature.m_spells[0] == 0)
+                Log.outError(LogFilter.ScriptsAi, $"ArcherAI set for creature with spell1=0. AI will do nothing ({me.GetGUID()})");
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(creature.m_spells[0], creature.GetMap().GetDifficultyID());
             _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
 
             if (_minRange == 0)
                 _minRange = SharedConst.MeleeRange;
-            me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
-            me.m_SightDistance = me.m_CombatDistance;
+
+            creature.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
+            creature.m_SightDistance = creature.m_CombatDistance;
         }
 
         public override void AttackStart(Unit who)
@@ -248,23 +248,21 @@ namespace Game.AI
     {
         float _minRange;
 
-        public TurretAI(Creature c)
-            : base(c)
+        public TurretAI(Creature creature) : base(creature)
         {
-            if (me.m_spells[0] == 0)
-                Log.outError(LogFilter.Server, "TurretAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
+            if (creature.m_spells[0] == 0)
+                Log.outError(LogFilter.Server, $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(creature.m_spells[0], creature.GetMap().GetDifficultyID());
             _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
-            me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
-            me.m_SightDistance = me.m_CombatDistance;
+            creature.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
+            creature.m_SightDistance = creature.m_CombatDistance;
         }
 
         public override bool CanAIAttack(Unit victim)
         {
             // todo use one function to replace it
-            if (!me.IsWithinCombatRange(victim, me.m_CombatDistance)
-                || (_minRange != 0 && me.IsWithinCombatRange(victim, _minRange)))
+            if (!me.IsWithinCombatRange(victim, me.m_CombatDistance) || (_minRange != 0 && me.IsWithinCombatRange(victim, _minRange)))
                 return false;
             return true;
         }

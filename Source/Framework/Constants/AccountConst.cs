@@ -789,8 +789,8 @@ namespace Framework.Constants
         CommandLookupMapId = 875,
         CommandLookupItemId = 876,
         CommandLookupQuestId = 877,
-        // 878 previously used, do not reuse
-        CommandDebugPoolstatus = 879,
+        CommandDebugQuestreset = 878,
+        // 879 previously used, do not reuse
         CommandPdumpCopy = 880,
         CommandReloadVehicleTemplate = 881,
         // Custom Permissions 1000+

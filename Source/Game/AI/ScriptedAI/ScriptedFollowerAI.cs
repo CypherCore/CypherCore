@@ -109,7 +109,7 @@ namespace Game.AI
                 {
                     if (HasFollowState(FollowState.Complete) && !HasFollowState(FollowState.PostEvent))
                     {
-                        Log.outDebug(LogFilter.Scripts, "FollowerAI is set completed, despawns.");
+                        Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: is set completed, despawns. ({me.GetGUID()})");
                         me.DespawnOrUnsummon();
                         return;
                     }
@@ -156,7 +156,7 @@ namespace Game.AI
 
                     if (maxRangeExceeded || questAbandoned)
                     {
-                        Log.outDebug(LogFilter.Scripts, $"FollowerAI::UpdateAI: failed because player/group was to far away or not found ({me.GetGUID()})");
+                        Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: failed because player/group was to far away or not found ({me.GetGUID()})");
                         me.DespawnOrUnsummon();
                         return;
                     }

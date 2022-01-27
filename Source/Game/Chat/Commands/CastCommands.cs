@@ -27,11 +27,8 @@ namespace Game.Chat
     class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        static bool HandleCastCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCastCommand(CommandHandler handler, SpellInfo spell, string triggeredStr)
         {
-            if (args.Empty())
-                return false;
-
             Unit target = handler.GetSelectedUnit();
             if (!target)
             {
@@ -39,22 +36,19 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
+            if (!CheckSpellExistsAndIsValid(handler, spell))
                 return false;
 
-            if (!CheckSpellExistsAndIsValid(handler, spellId))
-                return false;         
-
-            string triggeredStr = args.NextString();
-            if (!string.IsNullOrEmpty(triggeredStr))
+            TriggerCastFlags triggerFlags = TriggerCastFlags.None;
+            if (!triggeredStr.IsEmpty())
             {
-                if (triggeredStr != "triggered")
+                if ("triggered".Contains(triggeredStr)) // check if "triggered" starts with *triggeredStr (e.g. "trig", "trigger", etc.)
+                    triggerFlags = TriggerCastFlags.FullDebugMask;
+                else
                     return false;
             }
 
-            handler.GetSession().GetPlayer().CastSpell(target, spellId, !triggeredStr.IsEmpty());
+            handler.GetSession().GetPlayer().CastSpell(target, spell.Id, new CastSpellExtraArgs(triggerFlags));
             return true;
         }
 
@@ -228,7 +222,11 @@ namespace Game.Chat
 
         static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            return CheckSpellExistsAndIsValid(handler, Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None));
+        }
+        
+        static bool CheckSpellExistsAndIsValid(CommandHandler handler, SpellInfo spellInfo)
+        {
             if (spellInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandNospellfound);
@@ -237,7 +235,7 @@ namespace Game.Chat
 
             if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetPlayer()))
             {
-                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
+                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellInfo.Id);
                 return false;
             }
             return true;

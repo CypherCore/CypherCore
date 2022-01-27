@@ -114,6 +114,50 @@ namespace Game.Chat
             return false;
         }
 
+        public static bool CheckAllLinks(string str)
+        {
+            // Step 1: Disallow all control sequences except ||, |H, |h, |c and |r
+            {
+                int pos = 0;
+                while ((pos = str.IndexOf('|', pos)) != -1)
+                {
+                    char next = str[pos + 1];
+                    if (next == 'H' || next == 'h' || next == 'c' || next == 'r' || next == '|')
+                        pos += 2;
+                    else
+                        return false;
+                }
+            }
+
+            // Step 2: Parse all link sequences
+            // They look like this: |c<color>|H<linktag>:<linkdata>|h[<linktext>]|h|r
+            // - <color> is 8 hex characters AARRGGBB
+            // - <linktag> is arbitrary length [a-z_]
+            // - <linkdata> is arbitrary length, no | contained
+            // - <linktext> is printable
+            {
+                int pos = 0;
+                while ((pos = str.IndexOf('|', pos)) != -1)
+                {
+                    if (str[pos + 1] == '|') // this is an escaped pipe character (||)
+                    {
+                        pos += 2;
+                        continue;
+                    }
+
+                    HyperlinkInfo info = ParseHyperlink(str.Substring(pos));
+                    if (info == null)// todo fix me || !ValidateLinkInfo(info))
+                        return false;
+
+                    // tag is fine, find the next one
+                    pos = str.Length - info.next.Length;
+                }
+            }
+
+            // all tags are valid
+            return true;
+        }
+
         static byte toHex(char c) { return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00); }
 
         //|color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r

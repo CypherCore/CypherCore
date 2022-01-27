@@ -27,6 +27,7 @@ namespace Game.AI
 
         public TotemAI(Creature creature) : base(creature)
         {
+            Cypher.Assert(creature.IsTotem(), $"TotemAI: AI assigned to a no-totem creature ({creature.GetGUID()})!");
             _victimGuid = ObjectGuid.Empty;
         }
 
@@ -51,8 +52,7 @@ namespace Game.AI
             Unit victim = !_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _victimGuid) : null;
 
             // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-            if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) ||
-                me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim))
+            if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) || me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim))
             {
                 var u_check = new NearestAttackableUnitInObjectRangeCheck(me, me.GetCharmerOrOwnerOrSelf(), max_range);
                 var checker = new UnitLastSearcher(me, u_check);

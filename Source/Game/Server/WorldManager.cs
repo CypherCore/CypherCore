@@ -182,7 +182,7 @@ namespace Game
                 if (session.PlayerLoading())
                     return false;
 
-                session.KickPlayer();
+                session.KickPlayer("World::RemoveSession");
             }
 
             return true;
@@ -208,7 +208,7 @@ namespace Game
             // if player is in loading and want to load again, return
             if (!RemoveSession(s.GetAccountId()))
             {
-                s.KickPlayer();
+                s.KickPlayer("World::AddSession_ Couldn't remove the other session while on loading screen");
                 return;
             }
 
@@ -1243,17 +1243,16 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, @"VMap data directory is: {0}\vmaps", GetDataPath());
         }
 
-        void SetForcedWarModeFactionBalanceState(int team, int reward)
+        public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
         {
             _warModeDominantFaction = team;
             _warModeOutnumberedFactionReward = reward;
         }
 
-        void DisableForcedWarModeFactionBalanceState()
+        public void DisableForcedWarModeFactionBalanceState()
         {
             UpdateWarModeRewardValues();
         }
-
 
         public void LoadAutobroadcasts()
         {
@@ -1597,7 +1596,7 @@ namespace Game
 
             // session not removed at kick and will removed in next update tick
             foreach (var session in m_sessions.Values)
-                session.KickPlayer();
+                session.KickPlayer("World::KickAll");
         }
 
         void KickAllLess(AccountTypes sec)
@@ -1605,7 +1604,7 @@ namespace Game
             // session not removed at kick and will removed in next update tick
             foreach (var session in m_sessions.Values)
                 if (session.GetSecurity() < sec)
-                    session.KickPlayer();
+                    session.KickPlayer("World::KickAllLess");
         }
 
         /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
@@ -1689,7 +1688,7 @@ namespace Game
                 if (sess)
                 {
                     if (sess.GetPlayerName() != author)
-                        sess.KickPlayer();
+                        sess.KickPlayer("World::BanAccount Banning account");
                 }
             } while (resultAccounts.NextRow());
 
@@ -1762,7 +1761,7 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
 
             if (pBanned)
-                pBanned.GetSession().KickPlayer();
+                pBanned.GetSession().KickPlayer("World::BanCharacter Banning character");
 
             return BanReturn.Success;
         }

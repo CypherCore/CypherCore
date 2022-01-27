@@ -798,11 +798,10 @@ namespace Game.Movement
 
             MoveSplineInit init = new(_owner);
 
-            init.args.path = new Vector3[stepCount + 1];
-
             // add the owner's current position as starting point as it gets removed after entering the cycle
-            init.args.path[0] = new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
-            for (byte i = 1; i < stepCount; angle += step, ++i)
+            init.Path().Add(new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()));
+
+            for (byte i = 0; i < stepCount; angle += step, ++i)
             {
                 Vector3 point = new();
                 point.X = (float)(x + radius * Math.Cos(angle));
@@ -813,7 +812,7 @@ namespace Game.Movement
                 else
                     point.Z = _owner.GetMapHeight(point.X, point.Y, z) + _owner.GetHoverOffset();
 
-                init.args.path[i] = point;
+                init.Path().Add(point);
             }
 
             if (_owner.IsFlying())

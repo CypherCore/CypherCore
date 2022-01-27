@@ -42,7 +42,7 @@ namespace Game.Chat.Commands
             return DoTeleport(handler, new Position(at.Pos.X, at.Pos.Y, at.Pos.Z), at.ContinentID);
         }
 
-        [Command("areatrigger", RBACPermissions.CommandGo)]
+        [Command("boss", RBACPermissions.CommandGo)]
         static bool HandleGoBossCommand(CommandHandler handler, string[] needles)
         {
             if (needles.Empty())
