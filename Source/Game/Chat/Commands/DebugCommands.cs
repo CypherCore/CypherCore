@@ -770,7 +770,7 @@ namespace Game.Chat
             else if (target.GetDBPhase() < 0)
                 handler.SendSysMessage($"Target creature's PhaseGroup in DB: {Math.Abs(target.GetDBPhase())}");
 
-            PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
+            PhasingHandler.PrintToChat(handler, target);
             return true;
         }
 

@@ -1018,7 +1018,7 @@ namespace Game.Entities
                 return;
             }
 
-            SaveToDB(GetMapId(), data.spawnDifficulties);
+            SaveToDB(GetMapId(), data.SpawnDifficulties);
         }
 
         public void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
@@ -1045,7 +1045,7 @@ namespace Game.Entities
             data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();
             data.goState = GetGoState();
-            data.spawnDifficulties = spawnDifficulties;
+            data.SpawnDifficulties = spawnDifficulties;
             data.artKit = (byte)GetGoArtKit();
             if (data.spawnGroupData == null)
                 data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
@@ -1063,7 +1063,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, data.spawnDifficulties.Empty() ? "" : string.Join(",", data.spawnDifficulties));
+            stmt.AddValue(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(",", data.SpawnDifficulties));
             stmt.AddValue(index++, data.PhaseId);
             stmt.AddValue(index++, data.PhaseGroup);
             stmt.AddValue(index++, GetPositionX());

@@ -230,6 +230,15 @@ namespace Game
                 PersonalGuid.Clear();
         }
 
+        public bool HasPersonalPhase()
+        {
+            foreach (PhaseRef phaseRef in GetPhases().Values)
+                if (phaseRef.IsPersonal())
+                    return true;
+
+            return false;
+        }
+        
         public bool HasPhase(uint phaseId) { return Phases.ContainsKey(phaseId); }
         public Dictionary<uint, PhaseRef> GetPhases() { return Phases; }
 
@@ -239,6 +248,8 @@ namespace Game
         public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
         public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
 
+        public ObjectGuid GetPersonalGuid() { return PersonalGuid; }
+        
         public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public ObjectGuid PersonalGuid;
         public Dictionary<uint, PhaseRef> Phases = new();
@@ -260,6 +271,8 @@ namespace Game
             References = 0;
             AreaConditions = conditions;
         }
+
+        public bool IsPersonal() { return Flags.HasFlag(PhaseFlags.Personal); }
 
         public PhaseFlags Flags;
         public int References;

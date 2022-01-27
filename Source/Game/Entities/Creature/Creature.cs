@@ -1204,7 +1204,7 @@ namespace Game.Entities
             }
 
             uint mapId = GetTransport() ? (uint)GetTransport().GetGoInfo().MoTransport.SpawnMap : GetMapId();
-            SaveToDB(mapId, data.spawnDifficulties);
+            SaveToDB(mapId, data.SpawnDifficulties);
         }
 
         public virtual void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
@@ -1274,7 +1274,7 @@ namespace Game.Entities
             // prevent add data integrity problems
             data.movementType = (byte)(m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
-            data.spawnDifficulties = spawnDifficulties;
+            data.SpawnDifficulties = spawnDifficulties;
             data.npcflag = npcflag;
             data.unit_flags = unitFlags;
             data.unit_flags2 = unitFlags2;
@@ -1299,7 +1299,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, data.spawnDifficulties.Empty() ? "" : string.Join(',', data.spawnDifficulties));
+            stmt.AddValue(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(',', data.SpawnDifficulties));
             stmt.AddValue(index++, data.PhaseId);
             stmt.AddValue(index++, data.PhaseGroup);
             stmt.AddValue(index++, displayId);

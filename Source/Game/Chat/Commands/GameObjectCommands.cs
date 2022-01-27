@@ -282,9 +282,9 @@ namespace Game.Chat
             obj.Relocate(x, y, z, obj.GetOrientation());
 
             // update which cell has this gameobject registered for loading
-            Global.ObjectMgr.RemoveGameObjectFromGrid(guidLow, obj.GetGameObjectData());
+            Global.ObjectMgr.RemoveGameObjectFromGrid(obj.GetGameObjectData());
             obj.SaveToDB();
-            Global.ObjectMgr.AddGameObjectToGrid(guidLow, obj.GetGameObjectData());
+            Global.ObjectMgr.AddGameObjectToGrid(obj.GetGameObjectData());
 
             // Generate a completely new spawn with new guid
             // client caches recently deleted objects and brings them back to life
@@ -627,7 +627,7 @@ namespace Game.Chat
                     return false;
 
                 // TODO: is it really necessary to add both the real and DB table guid here ?
-                Global.ObjectMgr.AddGameObjectToGrid(spawnId, Global.ObjectMgr.GetGameObjectData(spawnId));
+                Global.ObjectMgr.AddGameObjectToGrid(Global.ObjectMgr.GetGameObjectData(spawnId));
                 handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
                 return true;
             }

@@ -482,7 +482,7 @@ namespace Game
                         var data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data != null)
                         {
-                            Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
+                            Global.ObjectMgr.RemoveCreatureFromGrid(data);
                             Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             if (map != null && !map.Instanceable())
                             {
@@ -504,7 +504,7 @@ namespace Game
                         var data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data != null)
                         {
-                            Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
+                            Global.ObjectMgr.RemoveGameObjectFromGrid(data);
                             Map map = Global.MapMgr.FindMap(data.MapId, 0);
                             if (map != null && !map.Instanceable())
                             {
@@ -619,7 +619,7 @@ namespace Game
                         CreatureData data = Global.ObjectMgr.GetCreatureData(obj.guid);
                         if (data != null)
                         {
-                            Global.ObjectMgr.AddCreatureToGrid(obj.guid, data);
+                            Global.ObjectMgr.AddCreatureToGrid(data);
 
                             // Spawn if necessary (loaded grids only)
                             Map map = Global.MapMgr.FindMap(data.MapId, 0);
@@ -634,7 +634,7 @@ namespace Game
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(obj.guid);
                         if (data != null)
                         {
-                            Global.ObjectMgr.AddGameObjectToGrid(obj.guid, data);
+                            Global.ObjectMgr.AddGameObjectToGrid(data);
                             // Spawn if necessary (loaded grids only)
                             // this base map checked as non-instanced and then only existed
                             Map map = Global.MapMgr.FindMap(data.MapId, 0);

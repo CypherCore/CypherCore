@@ -1222,10 +1222,7 @@ namespace Game.Entities
 
         public bool IsPossessed() { return HasUnitState(UnitState.Possessed); }
 
-        public void OnPhaseChange()
-        {
-
-        }
+        public virtual void OnPhaseChange() { }
 
         public uint GetModelForForm(ShapeShiftForm form, uint spellId)
         {

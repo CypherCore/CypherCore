@@ -1188,7 +1188,7 @@ namespace Game
                 CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                 if (data != null)
                 {
-                    Global.ObjectMgr.AddCreatureToGrid(guid, data);
+                    Global.ObjectMgr.AddCreatureToGrid(data);
 
                     // Spawn if necessary (loaded grids only)
                     Map map = Global.MapMgr.CreateBaseMap(data.MapId);
@@ -1212,7 +1212,7 @@ namespace Game
                 GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                 if (data != null)
                 {
-                    Global.ObjectMgr.AddGameObjectToGrid(guid, data);
+                    Global.ObjectMgr.AddGameObjectToGrid(data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
                     Map map = Global.MapMgr.CreateBaseMap(data.MapId);
@@ -1264,7 +1264,7 @@ namespace Game
                 CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                 if (data != null)
                 {
-                    Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
+                    Global.ObjectMgr.RemoveCreatureFromGrid(data);
 
                     Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
@@ -1292,7 +1292,7 @@ namespace Game
                 GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                 if (data != null)
                 {
-                    Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
+                    Global.ObjectMgr.RemoveGameObjectFromGrid(data);
 
                     Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {

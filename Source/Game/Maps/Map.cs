@@ -461,6 +461,9 @@ namespace Game.Maps
             EnsureGridLoaded(cell);
             Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
 
+            if (obj.IsPlayer())
+                GetMultiPersonalPhaseTracker().LoadGrid(obj.GetPhaseShift(), grid, this, cell);
+
             // refresh grid state & timer
             if (grid.GetGridState() != GridState.Active)
             {
@@ -526,6 +529,11 @@ namespace Game.Maps
             EnsureGridLoaded(new Cell(x, y));
         }
 
+        public void LoadGridForActiveObject(float x, float y, WorldObject obj)
+        {
+            EnsureGridLoadedForActiveObject(new Cell(x, y), obj);
+        }
+        
         public virtual bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
             CellCoord cellCoord = GridDefines.ComputeCellCoord(player.GetPositionX(), player.GetPositionY());
@@ -563,6 +571,12 @@ namespace Game.Maps
             return true;
         }
 
+        public void UpdatePersonalPhasesForPlayer(Player player)
+        {
+            Cell cell = new(player.GetPositionX(), player.GetPositionY());
+            GetMultiPersonalPhaseTracker().OnOwnerPhaseChanged(player, GetGrid(cell.GetGridX(), cell.GetGridY()), this, cell);
+        }
+        
         void InitializeObject(WorldObject obj)
         {
             if (!obj.IsTypeId(TypeId.Unit) || !obj.IsTypeId(TypeId.GameObject))
@@ -823,6 +837,9 @@ namespace Game.Maps
                 _weatherUpdateTimer.Reset();
             }
 
+            // update phase shift objects
+            GetMultiPersonalPhaseTracker().Update(this, diff);
+
             MoveAllCreaturesInMoveList();
             MoveAllGameObjectsInMoveList();
             MoveAllAreaTriggersInMoveList();
@@ -930,6 +947,8 @@ namespace Game.Maps
             player.UpdateZone(MapConst.InvalidZone, 0);
             Global.ScriptMgr.OnPlayerLeaveMap(this, player);
 
+            GetMultiPersonalPhaseTracker().MarkAllPhasesForDeletion(player.GetGUID());
+
             player.CombatStop();
 
             bool inWorld = player.IsInWorld;
@@ -954,6 +973,8 @@ namespace Game.Maps
             obj.RemoveFromWorld();
             if (obj.IsActiveObject())
                 RemoveFromActive(obj);
+
+            GetMultiPersonalPhaseTracker().UnregisterTrackedObject(obj);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
                 obj.DestroyForNearbyPlayers(); // previous obj.UpdateObjectVisibility(true)
@@ -1574,6 +1595,9 @@ namespace Game.Maps
             }
 
             RemoveAllObjectsInRemoveList();
+
+            // After removing all objects from the map, purge empty tracked phases
+            GetMultiPersonalPhaseTracker().UnloadGrid(grid);
 
             {
                 ObjectGridUnloader worker = new();
@@ -3789,7 +3813,7 @@ namespace Game.Maps
         public InstanceMap ToInstanceMap() { return IsDungeon() ? (this as InstanceMap) : null; }
         public BattlegroundMap ToBattlegroundMap() { return IsBattlegroundOrArena() ? (this as BattlegroundMap) : null; }
 
-        void Balance()
+        public void Balance()
         {
             _dynamicTree.Balance();
         }
@@ -4117,6 +4141,8 @@ namespace Game.Maps
         {
             return map != null;
         }
+
+        public MultiPersonalPhaseTracker GetMultiPersonalPhaseTracker() { return _multiPersonalPhaseTracker; }
 
         #region Scripts
 
@@ -5086,6 +5112,8 @@ namespace Game.Maps
 
         public delegate void FarSpellCallback(Map map);
         Queue<FarSpellCallback> _farSpellCallbacks = new();
+
+        MultiPersonalPhaseTracker _multiPersonalPhaseTracker;
         #endregion
     }
 

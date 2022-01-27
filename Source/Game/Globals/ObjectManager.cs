@@ -2901,7 +2901,7 @@ namespace Game
                         }
 
                         // they must have a possibility to meet (normal/heroic difficulty)
-                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
                             Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
@@ -2939,7 +2939,7 @@ namespace Game
                         }
 
                         // they must have a possibility to meet (normal/heroic difficulty)
-                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
                             Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
@@ -2977,7 +2977,7 @@ namespace Game
                         }
 
                         // they must have a possibility to meet (normal/heroic difficulty)
-                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
                             Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
@@ -3015,7 +3015,7 @@ namespace Game
                         }
 
                         // they must have a possibility to meet (normal/heroic difficulty)
-                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
                             Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
@@ -3420,7 +3420,7 @@ namespace Game
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
                 data.movementType = result.Read<byte>(14);
-                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
+                data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(16);
                 uint PoolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
@@ -3442,7 +3442,7 @@ namespace Game
                     continue;
                 }
 
-                if (data.spawnDifficulties.Empty())
+                if (data.SpawnDifficulties.Empty())
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid}) that is not spawned in any difficulty, skipped.");
                     continue;
@@ -3566,7 +3566,7 @@ namespace Game
 
                 // Add to grid if not managed by the game event or pool system
                 if (gameEvent == 0 && PoolId == 0)
-                    AddCreatureToGrid(guid, data);
+                    AddCreatureToGrid(data);
 
                 creatureDataStorage[guid] = data;
                 count++;
@@ -3575,27 +3575,92 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
 
-        public void AddCreatureToGrid(ulong guid, CreatureData data)
+        public bool HasPersonalSpawns(uint mapid, Difficulty spawnMode, uint phaseId)
         {
-            foreach (Difficulty difficulty in data.spawnDifficulties)
-            {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
-                var cellguids = CreateCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
-                cellguids.creatures.Add(guid);
-            }
+            return mapPersonalObjectGuidsStore.ContainsKey((mapid, spawnMode, phaseId));
         }
-        public void RemoveCreatureFromGrid(ulong guid, CreatureData data)
-        {
-            foreach (Difficulty difficulty in data.spawnDifficulties)
-            {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
-                CellObjectGuids cellguids = GetCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
-                if (cellguids == null)
-                    return;
 
-                cellguids.creatures.Remove(guid);
+        public CellObjectGuids GetCellPersonalObjectGuids(uint mapid, Difficulty spawnMode, uint phaseId, uint cell_id)
+        {
+            var guids = mapPersonalObjectGuidsStore.LookupByKey((mapid, spawnMode, phaseId));
+            if (guids != null)
+                return guids.LookupByKey(cell_id);
+
+            return null;
+        }
+
+        void AddSpawnDataToGrid(SpawnData data)
+        {
+            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
+            if (!isPersonalPhase)
+            {
+                foreach (Difficulty difficulty in data.SpawnDifficulties)
+                {
+                    var key = (data.MapId, difficulty);
+                    if (!mapObjectGuidsStore.ContainsKey(key))
+                        mapObjectGuidsStore[key] = new();
+
+                    if (!mapObjectGuidsStore[key].ContainsKey(cellId))
+                        mapObjectGuidsStore[key][cellId] = new();
+
+                    mapObjectGuidsStore[key][cellId].AddSpawn(data);
+                }
+            }
+            else
+            {
+                foreach (Difficulty difficulty in data.SpawnDifficulties)
+                {
+                    var key = (data.MapId, difficulty, data.PhaseId);
+                    if (!mapPersonalObjectGuidsStore.ContainsKey(key))
+                        mapPersonalObjectGuidsStore[key] = new();
+
+                    if (!mapPersonalObjectGuidsStore[key].ContainsKey(cellId))
+                        mapPersonalObjectGuidsStore[key][cellId] = new();
+
+                    mapPersonalObjectGuidsStore[key][cellId].AddSpawn(data);
+                }
             }
         }
+
+        void RemoveSpawnDataFromGrid(SpawnData data)
+        {
+            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
+            if (!isPersonalPhase)
+            {
+                foreach (Difficulty difficulty in data.SpawnDifficulties)
+                {
+                    var key = (data.MapId, difficulty);
+                    if (!mapObjectGuidsStore.ContainsKey(key) || !mapObjectGuidsStore[key].ContainsKey(cellId))
+                        continue;
+
+                    mapObjectGuidsStore[(data.MapId, difficulty)][cellId].RemoveSpawn(data);
+                }
+            }
+            else
+            {
+                foreach (Difficulty difficulty in data.SpawnDifficulties)
+                {
+                    var key = (data.MapId, difficulty, data.PhaseId);
+                    if (!mapPersonalObjectGuidsStore.ContainsKey(key) || !mapPersonalObjectGuidsStore[key].ContainsKey(cellId))
+                        continue;
+
+                    mapPersonalObjectGuidsStore[key][cellId].RemoveSpawn(data);
+                }
+            }
+        }
+        
+        public void AddCreatureToGrid(CreatureData data)
+        {
+            AddSpawnDataToGrid(data);
+        }
+
+        public void RemoveCreatureFromGrid(CreatureData data)
+        {
+            RemoveSpawnDataFromGrid(data);
+        }
+
         public ulong AddCreatureData(uint entry, uint mapId, Position pos, uint spawntimedelay)
         {
             CreatureTemplate cInfo = GetCreatureTemplate(entry);
@@ -3625,14 +3690,14 @@ namespace Game
             data.curhealth = (uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass) * cInfo.ModHealth * cInfo.ModHealthExtra);
             data.curmana = stats.GenerateMana(cInfo);
             data.movementType = (byte)cInfo.MovementType;
-            data.spawnDifficulties.Add(Difficulty.None);
+            data.SpawnDifficulties.Add(Difficulty.None);
             data.dbData = false;
             data.npcflag = (uint)cInfo.Npcflag;
             data.unit_flags = (uint)cInfo.UnitFlags;
             data.dynamicflags = cInfo.DynamicFlags;
             data.spawnGroupData = GetLegacySpawnGroup();
 
-            AddCreatureToGrid(spawnId, data);
+            AddCreatureToGrid(data);
 
             // We use spawn coords to spawn
             if (!map.Instanceable() && !map.IsRemovalGrid(data.SpawnPoint))
@@ -3721,7 +3786,7 @@ namespace Game
             }
 
             // they must have a possibility to meet (normal/heroic difficulty)
-            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+            if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
             {
                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                 return false;
@@ -3748,7 +3813,7 @@ namespace Game
             CreatureData data = GetCreatureData(spawnId);
             if (data != null)
             {
-                RemoveCreatureFromGrid(spawnId, data);
+                RemoveCreatureFromGrid(data);
                 OnDeleteSpawnData(data);
             }
 
@@ -4207,8 +4272,8 @@ namespace Game
                 }
                 data.goState = (GameObjectState)gostate;
 
-                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
-                if (data.spawnDifficulties.Empty())
+                data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
+                if (data.SpawnDifficulties.Empty())
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid}) that is not spawned in any difficulty, skipped.");
                     continue;
@@ -4324,7 +4389,7 @@ namespace Game
                 }
 
                 if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system
-                    AddGameObjectToGrid(guid, data);
+                    AddGameObjectToGrid(data);
 
                 gameObjectDataStorage[guid] = data;
                 ++count;
@@ -4498,26 +4563,13 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
-        public void AddGameObjectToGrid(ulong guid, GameObjectData data)
+        public void AddGameObjectToGrid(GameObjectData data)
         {
-            foreach (Difficulty difficulty in data.spawnDifficulties)
-            {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
-                var cellguids = CreateCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
-                cellguids.gameobjects.Add(guid);
-            }
+            AddSpawnDataToGrid(data);
         }
-        public void RemoveGameObjectFromGrid(ulong guid, GameObjectData data)
+        public void RemoveGameObjectFromGrid(GameObjectData data)
         {
-            foreach (Difficulty difficulty in data.spawnDifficulties)
-            {
-                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY());
-                CellObjectGuids cellguids = GetCellObjectGuids(data.MapId, difficulty, cellCoord.GetId());
-                if (cellguids == null)
-                    return;
-
-                cellguids.gameobjects.Remove(guid);
-            }
+            RemoveSpawnDataFromGrid(data);
         }
         public ulong AddGameObjectData(uint entry, uint mapId, Position pos, Quaternion rot, uint spawntimedelay)
         {
@@ -4538,13 +4590,13 @@ namespace Game
             data.rotation = rot;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
-            data.spawnDifficulties.Add(Difficulty.None);
+            data.SpawnDifficulties.Add(Difficulty.None);
             data.goState = GameObjectState.Ready;
             data.artKit = (byte)(goinfo.type == GameObjectTypes.ControlZone ? 21 : 0);
             data.dbData = false;
             data.spawnGroupData = GetLegacySpawnGroup();
 
-            AddGameObjectToGrid(spawnId, data);
+            AddGameObjectToGrid(data);
 
             // Spawn if necessary (loaded grids only)
             // We use spawn coords to spawn
@@ -4582,7 +4634,7 @@ namespace Game
             GameObjectData data = GetGameObjectData(spawnId);
             if (data != null)
             {
-                RemoveGameObjectFromGrid(spawnId, data);
+                RemoveGameObjectFromGrid(data);
                 OnDeleteSpawnData(data);
             }
 
@@ -10666,6 +10718,7 @@ namespace Game
         //Maps
         public Dictionary<uint, GameTele> gameTeleStorage = new();
         Dictionary<(uint mapId, Difficulty difficulty), Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
+        Dictionary<(uint mapId, Difficulty diffuculty, uint phaseId), Dictionary<uint, CellObjectGuids>> mapPersonalObjectGuidsStore = new();
         Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new();
         public MultiMap<uint, GraveYardData> GraveYardStorage = new();
         List<ushort> _transportMaps = new();
@@ -11064,6 +11117,32 @@ namespace Game
     {
         public SortedSet<ulong> creatures = new();
         public SortedSet<ulong> gameobjects = new();
+
+        public void AddSpawn(SpawnData data)
+        {
+            switch (data.type)
+            {
+                case SpawnObjectType.Creature:
+                    creatures.Add(data.SpawnId);
+                    break;
+                case SpawnObjectType.GameObject:
+                    gameobjects.Add(data.SpawnId);
+                    break;
+            }
+        }
+
+        public void RemoveSpawn(SpawnData data)
+        {
+            switch (data.type)
+            {
+                case SpawnObjectType.Creature:
+                    creatures.Remove(data.SpawnId);
+                    break;
+                case SpawnObjectType.GameObject:
+                    gameobjects.Remove(data.SpawnId);
+                    break;
+            }
+        }
     }
 
     public class GameTele

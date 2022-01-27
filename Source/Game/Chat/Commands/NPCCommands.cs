@@ -174,7 +174,7 @@ namespace Game.Chat
             if (data != null)
                 handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.PhaseId, data.PhaseGroup);
 
-            PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
+            PhasingHandler.PrintToChat(handler, target);
 
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
             handler.SendSysMessage(CypherStrings.NpcinfoPosition, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
@@ -239,9 +239,9 @@ namespace Game.Chat
                 return false;
             }
 
-            Global.ObjectMgr.RemoveCreatureFromGrid(lowguid, data);
+            Global.ObjectMgr.RemoveCreatureFromGrid(data);
             data.SpawnPoint.Relocate(player);
-            Global.ObjectMgr.AddCreatureToGrid(lowguid, data);
+            Global.ObjectMgr.AddCreatureToGrid(data);
 
             // update position in DB
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_POSITION);
@@ -668,7 +668,7 @@ namespace Game.Chat
                     if (creaturePassenger != null)
                     {
                         creaturePassenger.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, new List<Difficulty>() { map.GetDifficultyID() });
-                        Global.ObjectMgr.AddCreatureToGrid(guid, data);
+                        Global.ObjectMgr.AddCreatureToGrid(data);
                     }
                     return true;
                 }
@@ -689,7 +689,7 @@ namespace Game.Chat
                 if (!creature)
                     return false;
 
-                Global.ObjectMgr.AddCreatureToGrid(db_guid, Global.ObjectMgr.GetCreatureData(db_guid));
+                Global.ObjectMgr.AddCreatureToGrid(Global.ObjectMgr.GetCreatureData(db_guid));
                 return true;
             }
 

@@ -38,14 +38,14 @@ namespace Game.Maps
         public uint PhaseGroup;
         public int terrainSwapMap;
         public int spawntimesecs;
-        public List<Difficulty> spawnDifficulties;
+        public List<Difficulty> SpawnDifficulties;
         public uint ScriptId;
 
         public SpawnData(SpawnObjectType t) : base(t)
         {
             SpawnPoint = new Position();
             terrainSwapMap = -1;
-            spawnDifficulties = new List<Difficulty>();
+            SpawnDifficulties = new List<Difficulty>();
         }
 
         public static SpawnObjectType TypeFor<T>()

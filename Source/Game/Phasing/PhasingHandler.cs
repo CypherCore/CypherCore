@@ -487,6 +487,13 @@ namespace Game
             phaseShift.Flags = flags;
         }
 
+        public static void InitDbPersonalOwnership(PhaseShift phaseShift, ObjectGuid personalGuid)
+        {
+            Cypher.Assert(phaseShift.IsDbPhaseShift);
+            Cypher.Assert(phaseShift.HasPersonalPhase());
+            phaseShift.PersonalGuid = personalGuid;
+        }
+        
         public static void InitDbVisibleMapId(PhaseShift phaseShift, int visibleMapId)
         {
             phaseShift.VisibleMapIds.Clear();
@@ -542,9 +549,20 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, updateVisibility, true);
         }
 
-        public static void PrintToChat(CommandHandler chat, PhaseShift phaseShift)
+        public static void PrintToChat(CommandHandler chat, WorldObject target)
         {
-            chat.SendSysMessage(CypherStrings.PhaseshiftStatus, phaseShift.Flags, phaseShift.PersonalGuid.ToString());
+            PhaseShift phaseShift = target.GetPhaseShift();
+
+            string phaseOwnerName = "N/A";
+            if (phaseShift.HasPersonalPhase())
+            {
+                WorldObject personalGuid = Global.ObjAccessor.GetWorldObject(target, phaseShift.PersonalGuid);
+                if (personalGuid != null)
+                    phaseOwnerName = personalGuid.GetName();
+            }
+
+            chat.SendSysMessage(CypherStrings.PhaseshiftStatus, phaseShift.Flags, phaseShift.PersonalGuid.ToString(), phaseOwnerName);
+
             if (!phaseShift.Phases.Empty())
             {
                 StringBuilder phases = new();
@@ -590,6 +608,15 @@ namespace Game
                 phases.Append(phaseId + ',');
 
             return phases.ToString();
+        }
+
+        public static bool IsPersonalPhase(uint phaseId)
+        {
+            var phase = CliDB.PhaseStorage.LookupByKey(phaseId);
+            if (phase != null)
+                return phase.Flags.HasFlag(PhaseEntryFlags.Personal);
+
+            return false;
         }
 
         static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)

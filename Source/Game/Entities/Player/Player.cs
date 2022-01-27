@@ -2153,6 +2153,13 @@ namespace Game.Entities
             TeleportTo(m_summon_location);
         }
 
+        public override void OnPhaseChange()
+        {
+            base.OnPhaseChange();
+
+            GetMap().UpdatePersonalPhasesForPlayer(this);
+        }
+
         //GM
         public bool IsAcceptWhispers() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers); }
         public void SetAcceptWhispers(bool on)

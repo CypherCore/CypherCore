@@ -80,7 +80,7 @@ namespace Game.Entities
                     if (!pos.IsPositionValid())
                         return;
 
-                    player.GetMap().LoadGrid(firstCamera.locations.X, firstCamera.locations.Y);
+                    player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
                     m_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, 5 * Time.Minute * Time.InMilliseconds);
                     if (m_CinematicObject)
                     {

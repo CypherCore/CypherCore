@@ -981,7 +981,7 @@ namespace Game.Chat
             if (liquidStatus != null)
                 handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
 
-            PhasingHandler.PrintToChat(handler, obj.GetPhaseShift());
+            PhasingHandler.PrintToChat(handler, obj);
 
             return true;
         }
@@ -1774,7 +1774,7 @@ namespace Game.Chat
 
             // Output XIII. phases
             if (target)
-                PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
+                PhasingHandler.PrintToChat(handler, target);
 
             // Output XIV. LANG_PINFO_CHR_MONEY
             ulong gold = money / MoneyConstants.Gold;
