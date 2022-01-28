@@ -1013,7 +1013,7 @@ namespace Game.Spells
                 case Targets.DestDynobjAlly:
                 case Targets.DestDynobjNone:
                 case Targets.DestDest:
-                    return;
+                    break;
                 case Targets.DestDestGround:
                     dest.Position.posZ = m_caster.GetMapHeight(dest.Position.GetPositionX(), dest.Position.GetPositionY(), dest.Position.GetPositionZ());
                     break;
