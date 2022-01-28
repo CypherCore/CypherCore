@@ -1368,7 +1368,6 @@ namespace Framework.Constants
         AhbotUpdateInterval,
         AllTaxiPaths,
         AllowGmGroup,
-        AllowTrackBothResources,
         AllowTwoSideInteractionAuction,
         AllowTwoSideInteractionCalendar,
         AllowTwoSideInteractionChannel,

@@ -878,7 +878,6 @@ namespace Game
             if ((int)Values[WorldCfg.PvpTokenCount] < 1)
                 Values[WorldCfg.PvpTokenCount] = 1;
 
-            Values[WorldCfg.AllowTrackBothResources] = GetDefaultValue("AllowTrackBothResources", false);
             Values[WorldCfg.NoResetTalentCost] = GetDefaultValue("NoResetTalentsCost", false);
             Values[WorldCfg.ShowKickInWorld] = GetDefaultValue("ShowKickInWorld", false);
             Values[WorldCfg.ShowMuteInWorld] = GetDefaultValue("ShowMuteInWorld", false);
