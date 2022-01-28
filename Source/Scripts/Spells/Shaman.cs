@@ -945,6 +945,20 @@ namespace Scripts.Spells.Shaman
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
         }
     }
+
+    [Script] // 30884 - Nature's Guardian
+    class spell_sha_natures_guardian : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount());
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
     
     [Script] // 210621 - Path of Flames Spread
     class spell_sha_path_of_flames_spread : SpellScript
