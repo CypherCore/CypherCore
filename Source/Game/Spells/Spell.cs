@@ -1014,6 +1014,9 @@ namespace Game.Spells
                 case Targets.DestDynobjNone:
                 case Targets.DestDest:
                     return;
+                case Targets.DestDestGround:
+                    dest.Position.posZ = m_caster.GetMapHeight(dest.Position.GetPositionX(), dest.Position.GetPositionY(), dest.Position.GetPositionZ());
+                    break;
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
