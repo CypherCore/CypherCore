@@ -721,10 +721,12 @@ namespace Framework.Constants
     public enum HeirloomPlayerFlags
     {
         None = 0x00,
-        BonusLevel90 = 0x01,
-        BonusLevel100 = 0x02,
-        BonusLevel110 = 0x04,
-        BonusLevel120 = 0x08
+        UpgradeLevel1 = 0x01,
+        UpgradeLevel2 = 0x02,
+        UpgradeLevel3 = 0x04,
+        UpgradeLevel4 = 0x08,
+        UpgradeLevel5 = 0x10,
+        UpgradeLevel6 = 0x20,
     }
 
     public enum HeirloomItemFlags

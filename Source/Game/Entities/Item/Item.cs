@@ -2382,6 +2382,22 @@ namespace Game.Entities
             if (set.SetFlags.HasAnyFlag(ItemSetFlags.LegacyInactive))
                 return;
 
+            // Check player level for heirlooms
+            if (Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
+            {
+                if (item.GetBonus().PlayerLevelToItemLevelCurveId != 0)
+                {
+                    uint maxLevel = (uint)Global.DB2Mgr.GetCurveXAxisRange(item.GetBonus().PlayerLevelToItemLevelCurveId).Item2;
+
+                    var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.m_playerData.CtrOptions._value.ContentTuningConditionMask, true);
+                    if (contentTuning.HasValue)
+                        maxLevel = Math.Min(maxLevel, (uint)contentTuning.Value.MaxLevel);
+
+                    if (player.GetLevel() > maxLevel)
+                        return;
+                }
+            }
+
             ItemSetEffect eff = null;
             for (int x = 0; x < player.ItemSetEff.Count; ++x)
             {
@@ -2408,13 +2424,13 @@ namespace Game.Entities
                     player.ItemSetEff.Add(eff);
             }
 
-            ++eff.EquippedItemCount;
+            eff.EquippedItems.Add(item);
 
             List<ItemSetSpellRecord> itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
             foreach (var itemSetSpell in itemSetSpells)
             {
                 //not enough for  spell
-                if (itemSetSpell.Threshold > eff.EquippedItemCount)
+                if (itemSetSpell.Threshold > eff.EquippedItems.Count)
                     continue;
 
                 if (eff.SetBonuses.Contains(itemSetSpell))
@@ -2434,14 +2450,14 @@ namespace Game.Entities
             }
         }
 
-        public static void RemoveItemsSetItem(Player player, ItemTemplate proto)
+        public static void RemoveItemsSetItem(Player player, Item item)
         {
-            uint setid = proto.GetItemSet();
+            uint setid = item.GetTemplate().GetItemSet();
 
             ItemSetRecord set = CliDB.ItemSetStorage.LookupByKey(setid);
             if (set == null)
             {
-                Log.outError(LogFilter.Sql, "Item set {0} for item {1} not found, mods not removed.", setid, proto.GetId());
+                Log.outError(LogFilter.Sql, $"Item set {setid} for item {item.GetEntry()} not found, mods not removed.");
                 return;
             }
 
@@ -2460,13 +2476,13 @@ namespace Game.Entities
             if (eff == null)
                 return;
 
-            --eff.EquippedItemCount;
+            eff.EquippedItems.Remove(item);
 
             List<ItemSetSpellRecord> itemSetSpells = Global.DB2Mgr.GetItemSetSpells(setid);
             foreach (ItemSetSpellRecord itemSetSpell in itemSetSpells)
             {
                 // enough for spell
-                if (itemSetSpell.Threshold <= eff.EquippedItemCount)
+                if (itemSetSpell.Threshold <= eff.EquippedItems.Count)
                     continue;
 
                 if (!eff.SetBonuses.Contains(itemSetSpell))
@@ -2476,7 +2492,7 @@ namespace Game.Entities
                 eff.SetBonuses.Remove(itemSetSpell);
             }
 
-            if (eff.EquippedItemCount == 0)                                    //all items of a set were removed
+            if (eff.EquippedItems.Empty())                                    //all items of a set were removed
             {
                 Cypher.Assert(eff == player.ItemSetEff[setindex]);
                 player.ItemSetEff[setindex] = null;
@@ -2739,7 +2755,7 @@ namespace Game.Entities
     public class ItemSetEffect
     {
         public uint ItemSetID;
-        public uint EquippedItemCount;
+        public List<Item> EquippedItems = new();
         public List<ItemSetSpellRecord> SetBonuses = new();
     }
 

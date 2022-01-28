@@ -1869,7 +1869,7 @@ namespace Game.Entities
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
                         ItemTemplate pProto = pItem.GetTemplate();
                         if (pProto != null && pProto.GetItemSet() != 0)
-                            Item.RemoveItemsSetItem(this, pProto);
+                            Item.RemoveItemsSetItem(this, pItem);
 
                         _ApplyItemMods(pItem, slot, false, update);
 
@@ -3826,10 +3826,6 @@ namespace Game.Entities
                 if (spellproto == null)
                     continue;
 
-                if (spellproto.HasAura(AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), GetLevel())
-                    && Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
-                    continue;
-
                 if (effectData.ChrSpecializationID != 0 && effectData.ChrSpecializationID != GetPrimarySpecialization())
                     continue;
 
@@ -3939,7 +3935,7 @@ namespace Game.Entities
 
                     // item set bonuses not dependent from item broken state
                     if (proto.GetItemSet() != 0)
-                        Item.RemoveItemsSetItem(this, proto);
+                        Item.RemoveItemsSetItem(this, m_items[i]);
 
                     if (m_items[i].IsBroken() || !CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                         continue;
@@ -4019,6 +4015,15 @@ namespace Game.Entities
                         continue;
 
                     _ApplyItemMods(m_items[i], i, apply);
+
+                    // Update item sets for heirlooms
+                    if (Global.DB2Mgr.GetHeirloomByItemId(m_items[i].GetEntry()) != null && m_items[i].GetTemplate().GetItemSet() != 0)
+                    {
+                        if (apply)
+                            Item.AddItemsSetItem(this, m_items[i]);
+                        else
+                            Item.RemoveItemsSetItem(this, m_items[i]);
+                    }
                 }
             }
         }
@@ -5459,7 +5464,7 @@ namespace Game.Entities
                     {
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
                         if (pProto != null && pProto.GetItemSet() != 0)
-                            Item.RemoveItemsSetItem(this, pProto);
+                            Item.RemoveItemsSetItem(this, pItem);
 
                         _ApplyItemMods(pItem, slot, false);
                     }

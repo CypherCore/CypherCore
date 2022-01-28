@@ -185,14 +185,14 @@ namespace Game.Entities
 
                 uint bonusId = 0;
 
-                if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel120))
-                    bonusId = heirloom.UpgradeItemBonusListID[3];
-                else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
-                    bonusId = heirloom.UpgradeItemBonusListID[2];
-                else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel100))
-                    bonusId = heirloom.UpgradeItemBonusListID[1];
-                else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel90))
-                    bonusId = heirloom.UpgradeItemBonusListID[0];
+                for (int upgradeLevel = heirloom.UpgradeItemID.Length - 1; upgradeLevel >= 0; --upgradeLevel)
+                {
+                    if (((int)flags & (1 << upgradeLevel)) != 0)
+                    {
+                        bonusId = heirloom.UpgradeItemBonusListID[upgradeLevel];
+                        break;
+                    }
+                }
 
                 _heirlooms[itemId] = new HeirloomData(flags, bonusId);
             } while (result.NextRow());
@@ -258,25 +258,13 @@ namespace Game.Entities
             HeirloomPlayerFlags flags = data.flags;
             uint bonusId = 0;
 
-            if (heirloom.UpgradeItemID[0] == castItem)
+            for (int upgradeLevel = 0; upgradeLevel < heirloom.UpgradeItemID.Length; ++upgradeLevel)
             {
-                flags |= HeirloomPlayerFlags.BonusLevel90;
-                bonusId = heirloom.UpgradeItemBonusListID[0];
-            }
-            if (heirloom.UpgradeItemID[1] == castItem)
-            {
-                flags |= HeirloomPlayerFlags.BonusLevel100;
-                bonusId = heirloom.UpgradeItemBonusListID[1];
-            }
-            if (heirloom.UpgradeItemID[2] == castItem)
-            {
-                flags |= HeirloomPlayerFlags.BonusLevel110;
-                bonusId = heirloom.UpgradeItemBonusListID[2];
-            }
-            if (heirloom.UpgradeItemID[3] == castItem)
-            {
-                flags |= HeirloomPlayerFlags.BonusLevel120;
-                bonusId = heirloom.UpgradeItemBonusListID[3];
+                if (heirloom.UpgradeItemID[upgradeLevel] == castItem)
+                {
+                    flags |= (HeirloomPlayerFlags)(1 << upgradeLevel);
+                    bonusId = heirloom.UpgradeItemBonusListID[upgradeLevel];
+                }
             }
 
             foreach (Item item in player.GetItemListByEntry(itemId, true))
@@ -351,27 +339,6 @@ namespace Game.Entities
                 if (!bonusListIDs.Contains(data.bonusId))
                     item.AddBonuses(data.bonusId);
             }
-        }
-
-        public bool CanApplyHeirloomXpBonus(uint itemId, uint level)
-        {
-            if (Global.DB2Mgr.GetHeirloomByItemId(itemId) == null)
-                return false;
-
-            var data = _heirlooms.LookupByKey(itemId);
-            if (data == null)
-                return false;
-
-            if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel120))
-                return level <= 120;
-            if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
-                return level <= 110;
-            if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel100))
-                return level <= 100;
-            if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel90))
-                return level <= 90;
-
-            return level <= 60;
         }
 
         public void LoadMounts()

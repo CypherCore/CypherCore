@@ -1092,6 +1092,15 @@ namespace Game.DataStorage
             return null;
         }
 
+        public Tuple<float, float> GetCurveXAxisRange(uint curveId)
+        {
+            var points = _curvePoints.LookupByKey(curveId);
+            if (!points.Empty())
+                return Tuple.Create(points.First().Pos.X, points.Last().Pos.X);
+
+            return Tuple.Create(0.0f, 0.0f);
+        }
+
         static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<CurvePointRecord> points)
         {
             switch (curve.Type)
