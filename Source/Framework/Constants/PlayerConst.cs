@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
 
 using System;
 
@@ -65,7 +65,7 @@ namespace Framework.Constants
         public const int MaxArtifactTier = 1;
 
         public const int MaxHonorLevel = 500;
-        public const byte LevelMinHonor = 20;
+        public const byte LevelMinHonor = 10;
         public const uint SpellPvpRulesEnabled = 134735;
 
         //Azerite

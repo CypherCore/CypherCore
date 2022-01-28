@@ -3153,8 +3153,6 @@ namespace Game.Entities
             InitTalentForLevel();
             LearnDefaultSkills();
             LearnCustomSpells();
-            if (GetLevel() < PlayerConst.LevelMinHonor)
-                ResetPvpTalents();
 
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));

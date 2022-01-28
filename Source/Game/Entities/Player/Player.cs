@@ -5379,9 +5379,6 @@ namespace Game.Entities
             InitTalentForLevel();
             InitTaxiNodesForLevel();
 
-            if (level < PlayerConst.LevelMinHonor)
-                ResetPvpTalents();
-
             UpdateAllStats();
 
             _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
