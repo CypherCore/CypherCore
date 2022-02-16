@@ -876,6 +876,7 @@ namespace Game.Spells
                     break;
                 }
                 case Targets.DestCasterFrontLeap:
+                case Targets.DestCasterMovementDirection:
                 {
                     Unit unitCaster = m_caster.ToUnit();
                     if (unitCaster == null)
@@ -883,6 +884,47 @@ namespace Game.Spells
 
                     float dist = spellEffectInfo.CalcRadius(unitCaster);
                     float angle = targetType.CalcDirectionAngle();
+                    if (targetType.GetTarget() == Targets.DestCasterMovementDirection)
+                    {
+                        switch (m_caster.m_movementInfo.GetMovementFlags() & (MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight))
+                        {
+                            case MovementFlag.None:
+                            case MovementFlag.Forward:
+                            case MovementFlag.Forward | MovementFlag.Backward:
+                            case MovementFlag.StrafeLeft | MovementFlag.StrafeRight:
+                            case MovementFlag.Forward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight:
+                            case MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight:
+                                angle = 0.0f;
+                                break;
+                            case MovementFlag.Backward:
+                            case MovementFlag.Backward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight:
+                                angle = MathF.PI;
+                                break;
+                            case MovementFlag.StrafeLeft:
+                            case MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeLeft:
+                                angle = (MathF.PI / 2);
+                                break;
+                            case MovementFlag.Forward | MovementFlag.StrafeLeft:
+                                angle = (MathF.PI / 4);
+                                break;
+                            case MovementFlag.Backward | MovementFlag.StrafeLeft:
+                                angle = (3 * MathF.PI / 4);
+                                break;
+                            case MovementFlag.StrafeRight:
+                            case MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeRight:
+                                angle = (-MathF.PI / 2);
+                                break;
+                            case MovementFlag.Forward | MovementFlag.StrafeRight:
+                                angle = (-MathF.PI / 4);
+                                break;
+                            case MovementFlag.Backward | MovementFlag.StrafeRight:
+                                angle = (-3 * MathF.PI / 4);
+                                break;
+                            default:
+                                angle = 0.0f;
+                                break;
+                        }
+                    }
 
                     Position pos = new(dest.Position);
 

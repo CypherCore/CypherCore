@@ -3591,13 +3591,13 @@ namespace Game.Entities
         public void SetMovementFlags(MovementFlag f) { flags = f; }
         public void AddMovementFlag(MovementFlag f) { flags |= f; }
         public void RemoveMovementFlag(MovementFlag f) { flags &= ~f; }
-        public bool HasMovementFlag(MovementFlag f) { return Convert.ToBoolean(flags & f); }
+        public bool HasMovementFlag(MovementFlag f) { return (flags & f) != 0; }
 
         public MovementFlag2 GetMovementFlags2() { return flags2; }
         public void SetMovementFlags2(MovementFlag2 f) { flags2 = f; }
         public void AddMovementFlag2(MovementFlag2 f) { flags2 |= f; }
         public void RemoveMovementFlag2(MovementFlag2 f) { flags2 &= ~f; }
-        public bool HasMovementFlag2(MovementFlag2 f) { return Convert.ToBoolean(flags2 & f); }
+        public bool HasMovementFlag2(MovementFlag2 f) { return (flags2 & f) != 0; }
 
         public void SetFallTime(uint time) { jump.fallTime = time; }
 
