@@ -745,57 +745,44 @@ namespace Game.Spells
                     Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
                     return;
             }
-            List<WorldObject> targets = new();
 
+            float radius = spellEffectInfo.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+            List<WorldObject> targets = new();
             switch (targetType.GetTarget())
             {
+                case Targets.UnitCasterAndPassengers:
+                    targets.Add(m_caster);
+                    Unit unit = m_caster.ToUnit();
+                    if (unit != null)
+                    {
+                        Vehicle vehicleKit = unit.GetVehicleKit();
+                        if (vehicleKit != null)
+                            for (sbyte seat = 0; seat < SharedConst.MaxVehicleSeats; ++seat)
+                            {
+                                Unit passenger = vehicleKit.GetPassenger(seat);
+                                if (passenger != null)
+                                    targets.Add(passenger);
+                            }
+                    }
+                    break;
                 case Targets.UnitTargetAllyOrRaid:
                     Unit targetedUnit = m_targets.GetUnitTarget();
                     if (targetedUnit != null)
                     {
                         if (!m_caster.IsUnit() || !m_caster.ToUnit().IsInRaidWith(targetedUnit))
-                        {
                             targets.Add(m_targets.GetUnitTarget());
-
-                            CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
-
-                            if (!targets.Empty())
-                            {
-                                // Other special target selection goes here
-                                uint maxTargets = m_spellValue.MaxAffectedTargets;
-                                if (maxTargets != 0)
-                                    targets.RandomResize(maxTargets);
-
-                                foreach (WorldObject target in targets)
-                                {
-                                    Unit unit = target.ToUnit();
-                                    if (unit != null)
-                                        AddUnitTarget(unit, effMask, false, true, center);
-                                    else
-                                    {
-                                        GameObject gObjTarget = target.ToGameObject();
-                                        if (gObjTarget != null)
-                                            AddGOTarget(gObjTarget, effMask);
-                                    }
-                                }
-                            }
-
-                            return;
-                        }
-
-                        center = targetedUnit;
+                        else
+                            SearchAreaTargets(targets, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     }
                     break;
                 case Targets.UnitCasterAndSummons:
                     targets.Add(m_caster);
+                    SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     break;
                 default:
+                    SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     break;
             }
-
-            float radius = spellEffectInfo.CalcRadius(m_caster) * m_spellValue.RadiusMod;
-
-            SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
 
             CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
 
