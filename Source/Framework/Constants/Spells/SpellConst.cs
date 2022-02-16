@@ -2710,7 +2710,7 @@ namespace Framework.Constants
         UnitLineCasterToDestAlly = 133,
         UnitLineCasterToDestEnemy = 134,
         UnitLineCasterToDest = 135,
-        Unk136 = 136,
+        UnitConeCasterToDestAlly = 136,
         DestCasterMovementDirection = 137,
         DestDestGround = 138,
         Unk139 = 139,
