@@ -645,11 +645,19 @@ namespace Game.Spells
 
         void SelectImplicitConeTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
-            if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
+            Position coneSrc = new(m_caster);
+            switch (targetType.GetReferenceType())
             {
-                Cypher.Assert(false, "Spell.SelectImplicitConeTargets: received not implemented target reference type");
-                return;
+                case SpellTargetReferenceTypes.Caster:
+                    break;
+                case SpellTargetReferenceTypes.Dest:
+                    if (m_caster.GetExactDist2d(m_targets.GetDstPos()) > 0.1f)
+                        coneSrc.SetOrientation(m_caster.GetAbsoluteAngle(m_targets.GetDstPos()));
+                    break;
+                default:
+                    break;
             }
+
             List<WorldObject> targets = new();
             SpellTargetObjectTypes objectType = targetType.GetObjectType();
             SpellTargetCheckTypes selectionType = targetType.GetCheckType();
@@ -660,7 +668,7 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
-                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
+                var spellCone = new WorldObjectSpellConeTargetCheck(coneSrc, MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
                 SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
 
@@ -8515,12 +8523,14 @@ namespace Game.Spells
 
     public class WorldObjectSpellConeTargetCheck : WorldObjectSpellAreaTargetCheck
     {
+        Position _coneSrc;
         float _coneAngle;
         float _lineWidth;
 
-        public WorldObjectSpellConeTargetCheck(float coneAngle, float lineWidth, float range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+        public WorldObjectSpellConeTargetCheck(Position coneSrc, float coneAngle, float lineWidth, float range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
             : base(range, caster.GetPosition(), caster, caster, spellInfo, selectionType, condList, objectType)
         {
+            _coneSrc = coneSrc;
             _coneAngle = coneAngle;
             _lineWidth = lineWidth;
         }
@@ -8529,12 +8539,12 @@ namespace Game.Spells
         {
             if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeBack))
             {
-                if (!_caster.IsInBack(target, _coneAngle))
+                if (_coneSrc.HasInArc(-Math.Abs(_coneAngle), target))
                     return false;
             }
             else if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeLine))
             {
-                if (!_caster.HasInLine(target, target.GetCombatReach(), _lineWidth))
+                if (!_coneSrc.HasInLine(target, target.GetCombatReach(), _lineWidth))
                     return false;
             }
             else
@@ -8542,7 +8552,7 @@ namespace Game.Spells
                 if (!_caster.IsUnit() || !_caster.ToUnit().IsWithinBoundaryRadius(target.ToUnit()))
                     // ConeAngle > 0 . select targets in front
                     // ConeAngle < 0 . select targets in back
-                    if (_caster.HasInArc(_coneAngle, target) != MathFunctions.fuzzyGe(_coneAngle, 0.0f))
+                    if (_coneSrc.HasInArc(_coneAngle, target) != MathFunctions.fuzzyGe(_coneAngle, 0.0f))
                         return false;
             }
             return base.Invoke(target);

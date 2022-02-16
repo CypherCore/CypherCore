@@ -2678,7 +2678,7 @@ namespace Framework.Constants
         UnitPassenger5 = 101,
         UnitPassenger6 = 102,
         UnitPassenger7 = 103,
-        UnitConeEnemy104 = 104,
+        UnitConeCasterToDestEnemy = 104,
         UnitUnk105 = 105, // 1 Spell
         DestChannelCaster = 106,
         UnkDestAreaUnk107 = 107, // Not Enough Info - Only Generic Spells Avalible

@@ -286,7 +286,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeEnemy104));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
             AfterCast.Add(new CastHandler(TriggerCleaveBuff));
         }
 
