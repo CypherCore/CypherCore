@@ -2684,7 +2684,7 @@ namespace Framework.Constants
         DestNearbyEntry2 = 107,
         GameobjectConeCasterToDestEnemy = 108,
         GameobjectConeCasterToDestAlly = 109,
-        UnitConeEntry110 = 110,
+        UnitConeCasterToDestEntry = 110,
         Unk111 = 111,
         Unk112 = 112,
         Unk113 = 113,
