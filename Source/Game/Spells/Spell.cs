@@ -1152,6 +1152,11 @@ namespace Game.Spells
                     if (vehicleBase != null && vehicleBase.IsVehicle())
                         target = vehicleBase.GetVehicleKit().GetPassenger((sbyte)(targetType.GetTarget() - Targets.UnitPassenger0));
                     break;
+                case Targets.UnitTargetTapList:
+                    Creature creatureCaster = m_caster.ToCreature();
+                    if (creatureCaster != null)
+                        target = creatureCaster.GetLootRecipient();
+                    break;
                 case Targets.UnitOwnCritter:
                 {
                     Unit unitCaster = m_caster.ToUnit();

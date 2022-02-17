@@ -2698,7 +2698,7 @@ namespace Framework.Constants
         CorpseTargetAlly = 121,
         UnitAreaThreatList = 122, // any unit on threat list
         UnitAreaTapList = 123,
-        Unk124 = 124,
+        UnitTargetTapList = 124,
         DestCasterGround2 = 125,
         Unk126 = 126,
         Unk127 = 127,
