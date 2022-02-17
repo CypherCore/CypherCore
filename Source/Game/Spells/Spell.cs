@@ -954,7 +954,8 @@ namespace Game.Spells
                     break;
                 }
                 case Targets.DestCasterGround:
-                    m_caster.UpdateAllowedPositionZ(dest.Position.GetPositionX(), dest.Position.GetPositionY(), ref dest.Position.posZ);
+                case Targets.DestCasterGround2:
+                    dest.Position.posZ = m_caster.GetMapWaterOrGroundLevel(dest.Position.GetPositionX(), dest.Position.GetPositionY(), dest.Position.GetPositionZ());
                     break;
                 case Targets.DestSummoner:
                 {

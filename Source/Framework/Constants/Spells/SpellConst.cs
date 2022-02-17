@@ -2636,7 +2636,7 @@ namespace Framework.Constants
         UnitConeAlly = 59,
         UnitConeEntry = 60,
         UnitAreaRaidClass = 61,
-        Unk62 = 62,
+        DestCasterGround = 62,
         DestAny = 63,
         DestFront = 64,
         DestBack = 65,
@@ -2699,7 +2699,7 @@ namespace Framework.Constants
         UnitAreaThreatList = 122, // any unit on threat list
         UnitAreaTapList = 123,
         Unk124 = 124,
-        DestCasterGround = 125,
+        DestCasterGround2 = 125,
         Unk126 = 126,
         Unk127 = 127,
         Unk128 = 128,

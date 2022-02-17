@@ -3489,7 +3489,13 @@ namespace Game.Entities
             return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()));
         }
 
-        float GetMapWaterOrGroundLevel(float x, float y, float z, ref float ground)
+        public float GetMapWaterOrGroundLevel(float x, float y, float z)
+        {
+            float groundLevel = 0;
+            return GetMapWaterOrGroundLevel(x, y, z, ref groundLevel);
+        }
+
+        public float GetMapWaterOrGroundLevel(float x, float y, float z, ref float ground)
         {
             return GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground, IsTypeMask(TypeMask.Unit) ? !ToUnit().HasAuraType(AuraType.WaterWalk) : false, GetCollisionHeight());
         }
