@@ -2695,7 +2695,7 @@ namespace Framework.Constants
         UnitTargetAllyOrRaid = 118, // If target is in your party or raid, all party and raid members will be affected
         CorpseSrcAreaRaid = 119,
         UnitCasterAndSummons = 120,
-        Unk121 = 121,
+        CorpseTargetAlly = 121,
         UnitAreaThreatList = 122, // any unit on threat list
         UnitAreaTapList = 123,
         Unk124 = 124,
