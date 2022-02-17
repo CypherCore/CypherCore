@@ -1312,7 +1312,7 @@ namespace Game
             }
 
             foreach (var poolId in mGameEventPoolIds[internal_event_id])
-                Global.PoolMgr.DespawnPool(poolId);
+                Global.PoolMgr.DespawnPool(poolId, true);
         }
 
         void ChangeEquipOrModel(short event_id, bool activate)

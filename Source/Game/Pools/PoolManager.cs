@@ -325,16 +325,16 @@ namespace Game
             SpawnPool<Creature>(pool_id, 0);
         }
 
-        public void DespawnPool(uint pool_id)
+        public void DespawnPool(uint pool_id, bool alwaysDeleteRespawnTime = false)
         {
             if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
-                mPoolCreatureGroups[pool_id].DespawnObject(mSpawnedData, 0, true);
+                mPoolCreatureGroups[pool_id].DespawnObject(mSpawnedData, 0, alwaysDeleteRespawnTime);
 
             if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].IsEmpty())
-                mPoolGameobjectGroups[pool_id].DespawnObject(mSpawnedData, 0, true);
+                mPoolGameobjectGroups[pool_id].DespawnObject(mSpawnedData, 0, alwaysDeleteRespawnTime);
 
             if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
-                mPoolPoolGroups[pool_id].DespawnObject(mSpawnedData);
+                mPoolPoolGroups[pool_id].DespawnObject(mSpawnedData, 0, alwaysDeleteRespawnTime);
         }
 
         public bool CheckPool(uint pool_id)
@@ -532,7 +532,7 @@ namespace Game
                         break;
                     }
                 case "Pool":
-                    Global.PoolMgr.DespawnPool((uint)guid);
+                    Global.PoolMgr.DespawnPool((uint)guid, alwaysDeleteRespawnTime);
                     break;
             }
         }
