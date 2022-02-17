@@ -425,6 +425,7 @@ namespace Game.DataStorage
             ArtifactLevelXPGameTable = ReadGameTable<GtArtifactLevelXPRecord>("artifactLevelXP.txt");
             BarberShopCostBaseGameTable = ReadGameTable<GtBarberShopCostBaseRecord>("BarberShopCostBase.txt");
             BaseMPGameTable = ReadGameTable<GtBaseMPRecord>("BaseMp.txt");
+            BattlePetXPGameTable = ReadGameTable<GtBattlePetXPRecord>("BattlePetXP.txt");
             CombatRatingsGameTable = ReadGameTable<GtCombatRatingsRecord>("CombatRatings.txt");
             CombatRatingsMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("CombatRatingsMultByILvl.txt");
             ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
@@ -737,6 +738,7 @@ namespace Game.DataStorage
         public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable;
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
         public static GameTable<GtBaseMPRecord> BaseMPGameTable;
+        public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable;
         public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
         public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
@@ -844,6 +846,11 @@ namespace Game.DataStorage
             return 0.0f;
         }
 
+        public static float GetBattlePetXPPerLevel(GtBattlePetXPRecord row)
+        {
+            return row.Wins * row.Xp;
+        }
+        
         public static float GetIlvlStatMultiplier(GtGenericMultByILvlRecord row, InventoryType invType)
         {
             switch (invType)

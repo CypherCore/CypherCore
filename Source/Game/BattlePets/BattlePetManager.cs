@@ -625,7 +625,79 @@ namespace Game.BattlePets
             SendUpdates(updates, false);
 
             // UF::PlayerData::CurrentBattlePetBreedQuality isn't updated (Intended)
-            // _owner->GetPlayer()->SetCurrentBattlePetBreedQuality(qualityValue);
+            // _owner.GetPlayer().SetCurrentBattlePetBreedQuality(qualityValue);
+        }
+
+        public void GrantBattlePetExperience(ObjectGuid guid, ushort xp, BattlePetXpSource xpSource)
+        {
+            if (!HasJournalLock())
+                return;
+
+            BattlePet pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            if (xp <= 0 || xpSource >= BattlePetXpSource.Count)
+                return;
+
+            var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
+            if (battlePetSpecies != null)
+        if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                return;
+
+            ushort level = pet.PacketInfo.Level;
+            if (level >= SharedConst.MaxBattlePetLevel)
+                return;
+
+            var xpEntry = CliDB.BattlePetXPGameTable.GetRow(level);
+            if (xpEntry == null)
+                return;
+
+            Player player = _owner.GetPlayer();
+            ushort nextLevelXp = (ushort)CliDB.GetBattlePetXPPerLevel(xpEntry);
+
+            if (xpSource == BattlePetXpSource.PetBattle)
+                xp = (ushort)(xp * player.GetTotalAuraMultiplier(AuraType.ModBattlePetXpPct));
+
+            xp += pet.PacketInfo.Exp;
+
+            while (xp >= nextLevelXp && level < SharedConst.MaxBattlePetLevel)
+            {
+                xp -= nextLevelXp;
+
+                xpEntry = CliDB.BattlePetXPGameTable.GetRow(++level);
+                if (xpEntry == null)
+                    return;
+
+                nextLevelXp = (ushort)CliDB.GetBattlePetXPPerLevel(xpEntry);
+
+                player.UpdateCriteria(CriteriaType.BattlePetReachLevel, pet.PacketInfo.Species, level);
+                if (xpSource == BattlePetXpSource.PetBattle)
+                    player.UpdateCriteria(CriteriaType.ActivelyEarnPetLevel, pet.PacketInfo.Species, level);
+            }
+
+            pet.PacketInfo.Level = level;
+            pet.PacketInfo.Exp = (ushort)(level < SharedConst.MaxBattlePetLevel ? xp : 0);
+            pet.CalculateStats();
+            pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
+
+            if (pet.SaveInfo != BattlePetSaveInfo.New)
+                pet.SaveInfo = BattlePetSaveInfo.Changed;
+
+            List<BattlePet> updates = new();
+            updates.Add(pet);
+            SendUpdates(updates, false);
+
+            // Update battle pet related update fields
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet != null)
+            {
+                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                {
+                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
+                    player.SetBattlePetData(pet);
+                }
+            }
         }
 
         public void HealBattlePetsPct(byte pct)

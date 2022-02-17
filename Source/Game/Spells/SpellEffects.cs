@@ -5508,6 +5508,22 @@ namespace Game.Spells
             ChatMsg chatType = (ChatMsg)effectInfo.MiscValueB;
             unitCaster.Talk(broadcastTextId, chatType, Global.CreatureTextMgr.GetRangeForChatType(chatType), unitTarget);
         }
+
+        [SpellEffectHandler(SpellEffectName.GrantBattlepetExperience)]
+        void EffectGrantBattlePetExperience()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerCaster = m_caster.ToPlayer();
+            if (playerCaster == null)
+                return;
+
+            if (!unitTarget || !unitTarget.IsCreature())
+                return;
+
+            playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetExperience(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage, BattlePetXpSource.SpellEffect);
+        }
     }
 
     public class DispelableAura

@@ -77,4 +77,12 @@ namespace Framework.Constants
 
         Max
     }
+
+    public enum BattlePetXpSource
+    {
+        PetBattle = 0,
+        SpellEffect = 1,
+
+        Count
+    }
 }

@@ -49,6 +49,12 @@ namespace Game.DataStorage
         public float DemonHunter;
     }
 
+    public sealed class GtBattlePetXPRecord
+    {
+        public float Wins;
+        public float Xp;
+    }
+
     public sealed class GtCombatRatingsRecord
     {
         public float Amplify;
