@@ -2447,11 +2447,14 @@ namespace Game.Maps
             SaveRespawnInfoDB(info, dbTrans);
         }
 
-        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
         {
             RespawnInfo info = GetRespawnInfo(type, spawnId);
             if (info != null)
                 DeleteRespawnInfo(info, dbTrans);
+            // Some callers might need to make sure the database doesn't contain any respawn time
+            else if (alwaysDeleteFromDB)
+                DeleteRespawnInfoFromDB(type, spawnId, dbTrans);
         }
 
         int DespawnAll(SpawnObjectType type, ulong spawnId)
@@ -2579,9 +2582,14 @@ namespace Game.Maps
             _respawnTimes.Remove(info);
 
             // database
+            DeleteRespawnInfoFromDB(info.type, info.spawnId, dbTrans);
+        }
+
+        void DeleteRespawnInfoFromDB(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESPAWN);
-            stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(1, info.spawnId);
+            stmt.AddValue(0, (ushort)type);
+            stmt.AddValue(1, spawnId);
             stmt.AddValue(2, GetId());
             stmt.AddValue(3, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);

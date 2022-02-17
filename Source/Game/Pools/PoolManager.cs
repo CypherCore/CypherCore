@@ -328,10 +328,10 @@ namespace Game
         public void DespawnPool(uint pool_id)
         {
             if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
-                mPoolCreatureGroups[pool_id].DespawnObject(mSpawnedData);
+                mPoolCreatureGroups[pool_id].DespawnObject(mSpawnedData, 0, true);
 
             if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].IsEmpty())
-                mPoolGameobjectGroups[pool_id].DespawnObject(mSpawnedData);
+                mPoolGameobjectGroups[pool_id].DespawnObject(mSpawnedData, 0, true);
 
             if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
                 mPoolPoolGroups[pool_id].DespawnObject(mSpawnedData);
@@ -444,7 +444,7 @@ namespace Game
             return true;
         }
 
-        public void DespawnObject(ActivePoolData spawns, ulong guid = 0)
+        public void DespawnObject(ActivePoolData spawns, ulong guid = 0, bool alwaysDeleteRespawnTime = false)
         {
             for (int i = 0; i < EqualChanced.Count; ++i)
             {
@@ -453,10 +453,12 @@ namespace Game
                 {
                     if (guid == 0 || EqualChanced[i].guid == guid)
                     {
-                        Despawn1Object(EqualChanced[i].guid);
+                        Despawn1Object(EqualChanced[i].guid, alwaysDeleteRespawnTime);
                         spawns.RemoveObject<T>(EqualChanced[i].guid, poolId);
                     }
                 }
+                else if (alwaysDeleteRespawnTime)
+                    RemoveRespawnTimeFromDB(EqualChanced[i].guid);
             }
 
             for (int i = 0; i < ExplicitlyChanced.Count; ++i)
@@ -466,14 +468,16 @@ namespace Game
                 {
                     if (guid == 0 || ExplicitlyChanced[i].guid == guid)
                     {
-                        Despawn1Object(ExplicitlyChanced[i].guid);
+                        Despawn1Object(ExplicitlyChanced[i].guid, alwaysDeleteRespawnTime);
                         spawns.RemoveObject<T>(ExplicitlyChanced[i].guid, poolId);
                     }
                 }
+                else if (alwaysDeleteRespawnTime)
+                    RemoveRespawnTimeFromDB(ExplicitlyChanced[i].guid);
             }
         }
 
-        void Despawn1Object(ulong guid)
+        void Despawn1Object(ulong guid, bool alwaysDeleteRespawnTime = false)
         {
             switch (typeof(T).Name)
             {
@@ -495,7 +499,10 @@ namespace Game
 
                                     creature.AddObjectToRemoveList();
                                 }
-                            }
+
+                            if (alwaysDeleteRespawnTime)
+                                map.RemoveRespawnTime(SpawnObjectType.Creature, guid, null, true);
+                        }
                         }
                         break;
                     }
@@ -517,7 +524,10 @@ namespace Game
 
                                     go.AddObjectToRemoveList();
                                 }
-                            }
+
+                            if (alwaysDeleteRespawnTime)
+                                map.RemoveRespawnTime(SpawnObjectType.GameObject, guid, null, true);
+                        }
                         }
                         break;
                     }
@@ -660,6 +670,39 @@ namespace Game
         void ReSpawn1Object(PoolObject obj)
         {
             // GameObject/Creature is still on map, nothing to do
+        }
+
+        void RemoveRespawnTimeFromDB(ulong guid)
+        {
+            switch (typeof(T).Name)
+            {
+                case "Creature":
+                {
+                    CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
+                    if (data != null)
+                    {
+                        Map map = Global.MapMgr.CreateBaseMap(data.MapId);
+                        if (!map.Instanceable())
+                        {
+                            map.RemoveRespawnTime(SpawnObjectType.Creature, guid, null, true);
+                        }
+                    }
+                }
+                break;
+                case "GameObject":
+                {
+                    GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
+                    if (data != null)
+                    {
+                        Map map = Global.MapMgr.CreateBaseMap(data.MapId);
+                        if (!map.Instanceable())
+                        {
+                            map.RemoveRespawnTime(SpawnObjectType.GameObject, guid, null, true);
+                        }
+                    }
+                    break;
+                }
+            }
         }
 
         public void SetPoolId(uint pool_id) { poolId = pool_id; }
