@@ -707,7 +707,7 @@ namespace Game.Spells
 
         void SelectImplicitAreaTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
-            WorldObject referer = null;
+            WorldObject referer;
             switch (targetType.GetReferenceType())
             {
                 case SpellTargetReferenceTypes.Src:
@@ -808,12 +808,20 @@ namespace Game.Spells
 
             CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
 
+            if (targetType.GetTarget() == Targets.UnitSrcAreaFurthestEnemy)
+                targets.Sort(new ObjectDistanceOrderPred(referer, false));
+
             if (!targets.Empty())
             {
                 // Other special target selection goes here
                 uint maxTargets = m_spellValue.MaxAffectedTargets;
                 if (maxTargets != 0)
-                    targets.RandomResize(maxTargets);
+                {
+                    if (targetType.GetTarget() != Targets.UnitSrcAreaFurthestEnemy)
+                        targets.RandomResize(maxTargets);
+                    else if (targets.Count > maxTargets)
+                        targets.Resize(maxTargets);
+                }
 
                 foreach (var obj in targets)
                 {
