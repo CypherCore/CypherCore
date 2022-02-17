@@ -130,7 +130,7 @@ namespace Game.AI
             if (tempInvoker != null)
                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: Invoker: {0} (guidlow: {1})", tempInvoker.GetName(), tempInvoker.GetGUID().ToString());
 
-            var targets = GetTargets(e, unit);
+            var targets = GetTargets(e, unit != null ? unit : gob);
 
             switch (e.GetActionType())
             {
@@ -2631,14 +2631,17 @@ namespace Game.AI
             return script;
         }
 
-        List<WorldObject> GetTargets(SmartScriptHolder e, Unit invoker = null)
+        List<WorldObject> GetTargets(SmartScriptHolder e, WorldObject invoker = null)
         {
-            Unit scriptTrigger = null;
-            Unit tempLastInvoker = GetLastInvoker();
+            WorldObject scriptTrigger = null;
             if (invoker != null)
                 scriptTrigger = invoker;
-            else if (tempLastInvoker != null)
-                scriptTrigger = tempLastInvoker;
+            else
+            {
+                Unit tempLastInvoker = GetLastInvoker();
+                if (tempLastInvoker != null)
+                    scriptTrigger = tempLastInvoker;
+            }
 
             WorldObject baseObject = GetBaseObject();
 
@@ -2734,8 +2737,8 @@ namespace Game.AI
                         targets.Add(scriptTrigger);
                     break;
                 case SmartTargets.ActionInvokerVehicle:
-                    if (scriptTrigger != null && scriptTrigger.GetVehicle() != null && scriptTrigger.GetVehicle().GetBase() != null)
-                        targets.Add(scriptTrigger.GetVehicle().GetBase());
+                    if (scriptTrigger != null && scriptTrigger.ToUnit()?.GetVehicle() != null && scriptTrigger.ToUnit().GetVehicle().GetBase() != null)
+                        targets.Add(scriptTrigger.ToUnit().GetVehicle().GetBase());
                     break;
                 case SmartTargets.InvokerParty:
                     if (scriptTrigger != null)
@@ -3375,7 +3378,7 @@ namespace Game.AI
                         (e.Event.spellHit.school == 0 || Convert.ToBoolean((uint)spell.SchoolMask & e.Event.spellHit.school)))
                     {
                         RecalcTimer(e, e.Event.spellHit.cooldownMin, e.Event.spellHit.cooldownMax);
-                        ProcessAction(e, unit, 0, 0, bvar, spell);
+                        ProcessAction(e, unit, 0, 0, bvar, spell, gob);
                     }
                     break;
                 }
