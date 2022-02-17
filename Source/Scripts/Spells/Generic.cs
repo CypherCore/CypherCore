@@ -4100,12 +4100,25 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpPct));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpQuestPct));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModCurrencyGainFromSource));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModMoneyGain));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModAnimaGain));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
+
+            if (spellInfo.HasAura(AuraType.ModXpPct))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpPct));
+
+            if (spellInfo.HasAura(AuraType.ModXpQuestPct))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpQuestPct));
+
+            if (spellInfo.HasAura(AuraType.ModCurrencyGainFromSource))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModCurrencyGainFromSource));
+
+            if (spellInfo.HasAura(AuraType.ModMoneyGain))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModMoneyGain));
+
+            if (spellInfo.HasAura(AuraType.ModAnimaGain))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModAnimaGain));
+
+            if (spellInfo.HasAura(AuraType.Dummy))
+                DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
         }
     }
     
