@@ -287,8 +287,11 @@ namespace Game.Scripting
                     case SpellTargetSelectionCategories.Nearby: // BOTH
                         return true;
                     case SpellTargetSelectionCategories.Cone: // AREA
-                    case SpellTargetSelectionCategories.Area: // AREA
                     case SpellTargetSelectionCategories.Line: // AREA
+                        return _area;
+                    case SpellTargetSelectionCategories.Area: // AREA
+                        if (targetInfo.GetObjectType() == SpellTargetObjectTypes.UnitAndDest)
+                            return _area || _dest;
                         return _area;
                     case SpellTargetSelectionCategories.Default:
                         switch (targetInfo.GetObjectType())

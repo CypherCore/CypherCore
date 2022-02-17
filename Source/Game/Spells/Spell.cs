@@ -720,6 +720,8 @@ namespace Game.Spells
                     break;
                 case SpellTargetReferenceTypes.Last:
                 {
+                    referer = m_caster;
+
                     // find last added target for this effect
                     foreach (var target in m_UniqueTargetInfo)
                     {
@@ -793,6 +795,15 @@ namespace Game.Spells
                 default:
                     SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     break;
+            }
+
+            if (targetType.GetObjectType() == SpellTargetObjectTypes.UnitAndDest)
+            {
+                SpellDestination dest = new(referer);
+
+                CallScriptDestinationTargetSelectHandlers(ref dest, spellEffectInfo.EffectIndex, targetType);
+
+                m_targets.ModDst(dest);
             }
 
             CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);

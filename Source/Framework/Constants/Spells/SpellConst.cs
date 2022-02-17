@@ -2690,7 +2690,7 @@ namespace Framework.Constants
         Unk113 = 113,
         Unk114 = 114,
         Unk115 = 115,
-        Unk116 = 116,
+        UnitAndDestLastEnemy = 116,
         Unk117 = 117,
         UnitTargetAllyOrRaid = 118, // If target is in your party or raid, all party and raid members will be affected
         CorpseSrcAreaRaid = 119,
