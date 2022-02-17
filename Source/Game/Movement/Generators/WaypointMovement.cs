@@ -341,7 +341,6 @@ namespace Game.Movement
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
             WaypointNode waypoint = _path.nodes[_currentNode];
-            Position formationDest = new(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
 
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled | MovementGeneratorFlags.TimedPaused);
 
@@ -351,16 +350,7 @@ namespace Game.Movement
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)
-            {
                 init.DisableTransportPathTransformations();
-                ITransport trans = owner.GetDirectTransport();
-                if (trans != null)
-                {
-                    float orientation = formationDest.GetOrientation();
-                    trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref orientation);
-                    formationDest.SetOrientation(orientation);
-                }
-            }
 
             //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
             //! but formationDest contains global coordinates
@@ -389,7 +379,7 @@ namespace Game.Movement
             init.Launch();
 
             // inform formation
-            owner.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0));
+            owner.SignalFormationMovement();
         }
 
         bool ComputeNextNode()

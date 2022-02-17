@@ -201,7 +201,7 @@ namespace Game.Movement
             }
 
             // Call for creature group update
-            owner.SignalFormationMovement(position);
+            owner.SignalFormationMovement();
         }
 
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }

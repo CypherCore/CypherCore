@@ -130,7 +130,7 @@ namespace Game.Entities
             return m_formation.IsLeader(this);
         }
 
-        public void SignalFormationMovement(Position destination, uint id = 0, WaypointMoveType moveType = 0, bool orientation = false)
+        public void SignalFormationMovement()
         {
             if (m_formation == null)
                 return;
@@ -138,7 +138,7 @@ namespace Game.Entities
             if (!m_formation.IsLeader(this))
                 return;
 
-            m_formation.LeaderMoveTo(destination, id, moveType, orientation);
+            m_formation.LeaderStartedMoving();
         }
 
         public bool IsFormationLeaderMoveAllowed()

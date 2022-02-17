@@ -274,15 +274,10 @@ namespace Game.Entities
             _formed = !dismiss;
         }
 
-        public void LeaderMoveTo(Position destination, uint id = 0, WaypointMoveType moveType = 0, bool orientation = false)
+        public void LeaderStartedMoving()
         {
-            //! To do: This should probably get its own movement generator or use WaypointMovementGenerator.
-            //! If the leader's path is known, member's path can be plotted as well using formation offsets.
             if (_leader == null)
                 return;
-
-            Position pos = new(destination);
-            float pathangle = (float)Math.Atan2(_leader.GetPositionY() - pos.GetPositionY(), _leader.GetPositionX() - pos.GetPositionX());
 
             foreach (var pair in _members)
             {
@@ -290,35 +285,12 @@ namespace Game.Entities
                 if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
                     continue;
 
-                if (pair.Value.LeaderWaypointIDs[0] != 0)
-                {
-                    for (var i = 0; i < 2; ++i)
-                    {
-                        if (_leader.GetCurrentWaypointInfo().nodeId == pair.Value.LeaderWaypointIDs[i])
-                        {
-                            pair.Value.FollowAngle = MathF.PI * 2f - pair.Value.FollowAngle;
-                            break;
-                        }
-                    }
-                }
-
-                float angle = pair.Value.FollowAngle;
+                float angle = pair.Value.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
                 float dist = pair.Value.FollowDist;
 
-                float dx = pos.GetPositionX() + MathF.Cos(angle + pathangle) * dist;
-                float dy = pos.GetPositionY() + MathF.Sin(angle + pathangle) * dist;
-                float dz = pos.GetPositionZ();
-
-                GridDefines.NormalizeMapCoord(ref dx);
-                GridDefines.NormalizeMapCoord(ref dy);
-
-                if (!member.IsFlying())
-                    member.UpdateGroundPositionZ(dx, dy, ref dz);
-
-                member.SetHomePosition(dx, dy, dz, pathangle);
-
-                Position point = new(dx, dy, dz, destination.GetOrientation());
-                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(_leader, dist + 5.0f), orientation);
+                var moveGen = member.GetMotionMaster().GetMovementGenerator(movement => { return movement.GetMovementGeneratorType() == MovementGeneratorType.Formation; }, MovementSlot.Default);
+                if (moveGen == null)
+                    member.GetMotionMaster().MoveFormation(_leader, dist, angle, pair.Value.LeaderWaypointIDs[0], pair.Value.LeaderWaypointIDs[1]);
             }
         }
 

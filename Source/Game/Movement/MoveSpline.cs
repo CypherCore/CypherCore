@@ -54,6 +54,8 @@ namespace Game.Movement
             anim_tier = args.animTier;
             splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
 
+            velocity = args.velocity;
+
             // Check if its a stop spline
             if (args.flags.HasFlag(SplineFlag.Done))
             {
@@ -141,7 +143,7 @@ namespace Game.Movement
             time_passed = Duration();
         }
         public Vector4 ComputePosition(int time_point, int point_index)
-        {            
+        {
             float u = 1.0f;
             int seg_time = spline.Length(point_index, point_index + 1);
             if (seg_time > 0)
@@ -255,7 +257,7 @@ namespace Game.Movement
         {
             return time_passed > 0;
         }
-        
+
         public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
         public void UpdateState(int difftime)
         {
@@ -342,7 +344,8 @@ namespace Game.Movement
         public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
         public bool IsFalling() { return splineflags.HasFlag(SplineFlag.Falling); }
         public bool Initialized() { return !spline.Empty(); }
-        public Vector3 FinalDestination() { return Initialized() ? spline.GetPoint(spline.Last()) : new Vector3(); }
+        public Vector3 FinalDestination() { return Initialized() ? spline.GetPoint(spline.Last()) : Vector3.Zero; }
+        public Vector3 CurrentDestination() { return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero; }
 
         #region Fields
         public MoveSplineInitArgs InitArgs;
@@ -358,6 +361,7 @@ namespace Game.Movement
         public int effect_start_time;
         public int point_Idx;
         public int point_Idx_offset;
+        public float velocity;
         public Optional<SpellEffectExtraData> spell_effect_extra;
         public Optional<AnimTierTransition> anim_tier;
         #endregion

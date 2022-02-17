@@ -17,18 +17,32 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Movement
 {
     public class FormationMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        public FormationMovementGenerator(uint id, Position destination, WaypointMoveType moveType, bool run, bool orientation)
+        AbstractFollower _abstractFollower;
+
+        static int FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
+        float _range;
+        float _angle;
+        uint _point1;
+        uint _point2;
+        uint _lastLeaderSplineID;
+        bool _hasPredictedDestination;
+
+        Position _lastLeaderPosition;
+        TimeTrackerSmall _nextMoveTimer = new();
+
+        public FormationMovementGenerator(Unit leader, float range, float angle, uint point1, uint point2)
         {
-            _movementId = id;
-            _destination = destination;
-            _moveType = moveType;
-            _run = run;
-            _orientation = orientation;
+            _abstractFollower = new(leader);
+            _range = range;
+            _angle = angle;
+            _point1 = point1;
+            _point2 = point2;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -48,33 +62,7 @@ namespace Game.Movement
                 return;
             }
 
-            owner.AddUnitState(UnitState.RoamingMove);
-
-            MoveSplineInit init = new(owner);
-            init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ());
-            if (_orientation)
-                init.SetFacing(_destination.GetOrientation());
-
-            switch (_moveType)
-            {
-                case WaypointMoveType.Land:
-                    init.SetAnimation(AnimType.ToGround);
-                    break;
-                case WaypointMoveType.Takeoff:
-                    init.SetAnimation(AnimType.ToFly);
-                    break;
-                case WaypointMoveType.Run:
-                    init.SetWalk(false);
-                    break;
-                case WaypointMoveType.Walk:
-                    init.SetWalk(true);
-                    break;
-            }
-
-            if (_run)
-                init.SetWalk(false);
-
-            init.Launch();
+            _nextMoveTimer.Reset(0);
         }
 
         public override void DoReset(Creature owner)
@@ -86,55 +74,152 @@ namespace Game.Movement
 
         public override bool DoUpdate(Creature owner, uint diff)
         {
-            if (!owner)
+            Unit target = _abstractFollower.GetTarget();
+
+            if (owner == null || target == null)
                 return false;
 
+            // Owner cannot move. Reset all fields and wait for next action
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
+                owner.ClearUnitState(UnitState.RoamingMove);
                 owner.StopMoving();
                 return true;
             }
 
-            if ((HasFlag(MovementGeneratorFlags.Interrupted) && owner.MoveSpline.Finalized()) || (HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()))
+            // Leader has stopped moving, so do we as well
+            if (target.MoveSpline.Finalized() && target.MoveSpline.GetId() == _lastLeaderSplineID && _hasPredictedDestination)
             {
-                RemoveFlag(MovementGeneratorFlags.Interrupted | MovementGeneratorFlags.SpeedUpdatePending);
+                owner.ClearUnitState(UnitState.RoamingMove);
+                owner.StopMoving();
+                _nextMoveTimer.Reset(0);
+                _hasPredictedDestination = false;
+                return true;
+            }
 
-                owner.AddUnitState(UnitState.RoamingMove);
+            // Update home position
+            owner.SetHomePosition(owner.GetPosition());
+            if (HasFlag(MovementGeneratorFlags.Interrupted))
+                RemoveFlag(MovementGeneratorFlags.Interrupted);
 
-                MoveSplineInit init = new(owner);
-                init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ());
-                if (_orientation)
-                    init.SetFacing(_destination.GetOrientation());
+            // Leader has stopped moving, so do we as well
+            if (owner.HasUnitState(UnitState.RoamingMove) && _hasPredictedDestination && target.MoveSpline.Finalized() && target.MoveSpline.GetId() == _lastLeaderSplineID)
+            {
+                owner.StopMoving();
+                _nextMoveTimer.Reset(0);
+                _hasPredictedDestination = false;
+                return true;
+            }
 
-                switch (_moveType)
+            // Formation leader has launched a new spline, launch a new one for our member as well
+            // This action does not reset the regular movement launch cycle interval
+            if (!target.MoveSpline.Finalized() && target.MoveSpline.GetId() != _lastLeaderSplineID)
+            {
+                // Update formation angle
+                if (_point1 != 0 && target.IsCreature())
                 {
-                    case WaypointMoveType.Land:
-                        init.SetAnimation(AnimType.ToGround);
-                        break;
-                    case WaypointMoveType.Takeoff:
-                        init.SetAnimation(AnimType.ToFly);
-                        break;
-                    case WaypointMoveType.Run:
-                        init.SetWalk(false);
-                        break;
-                    case WaypointMoveType.Walk:
-                        init.SetWalk(true);
-                        break;
+                    CreatureGroup formation = target.ToCreature().GetFormation();
+                    if (formation != null)
+                    {
+                        Creature leader = formation.GetLeader();
+                        if (leader != null)
+                        {
+                            uint currentWaypoint = leader.GetCurrentWaypointInfo().nodeId;
+                            if (currentWaypoint == _point1 || currentWaypoint == _point2)
+                                _angle = MathF.PI * 2 - _angle;
+                        }
+                    }
                 }
 
-                if (_run)
-                    init.SetWalk(false);
-                init.Launch();
+                LaunchMovement(owner, target);
+                _lastLeaderSplineID = target.MoveSpline.GetId();
+                return true;
             }
 
-            if (owner.MoveSpline.Finalized())
+            _nextMoveTimer.Update((int)diff);
+            if (_nextMoveTimer.Passed())
             {
-                RemoveFlag(MovementGeneratorFlags.Transitory);
-                AddFlag(MovementGeneratorFlags.InformEnabled);
-                return false;
+                _nextMoveTimer.Reset(FORMATION_MOVEMENT_INTERVAL);
+
+                // Our leader has a different position than on our last check, launch movement.
+                if (_lastLeaderPosition != target.GetPosition())
+                {
+                    LaunchMovement(owner, target);
+                    return true;
+                }
             }
+
+            // We have reached our destination before launching a new movement. Alling facing with leader
+            if (owner.HasUnitState(UnitState.RoamingMove) && owner.MoveSpline.Finalized())
+            {
+                owner.ClearUnitState(UnitState.RoamingMove);
+                owner.SetFacingTo(target.GetOrientation());
+                MovementInform(owner);
+            }
+
             return true;
+        }
+
+        void LaunchMovement(Creature owner, Unit target)
+        {
+            float relativeAngle = 0.0f;
+
+            // Determine our relative angle to our current spline destination point
+            if (!target.MoveSpline.Finalized())
+                relativeAngle = target.GetRelativeAngle(new Position(target.MoveSpline.CurrentDestination()));
+
+            // Destination calculation
+            /*
+                According to sniff data, formation members have a periodic move interal of 1,2s.
+                Each of these splines has a exact duration of 1650ms +- 1ms when no pathfinding is involved.
+                To get a representative result like that we have to predict our formation leader's path
+                and apply our formation shape based on that destination.
+            */
+            Position dest = target.GetPosition();
+            float velocity = 0.0f;
+
+            // Formation leader is moving. Predict our destination
+            if (!target.MoveSpline.Finalized())
+            {
+                // Pick up leader's spline velocity
+                velocity = target.MoveSpline.velocity;
+
+                // Calculate travel distance to get a 1650ms result
+                float travelDist = velocity * 1.65f;
+
+                // Move destination ahead...
+                target.MovePositionToFirstCollision(dest, travelDist, relativeAngle);
+                // ... and apply formation shape
+                target.MovePositionToFirstCollision(dest, _range, _angle + relativeAngle);
+
+                float distance = owner.GetExactDist(dest);
+
+                // Calculate catchup speed mod (Limit to a maximum of 50% of our original velocity
+                float velocityMod = Math.Min(distance / travelDist, 1.5f);
+
+                // Now we will always stay synch with our leader
+                velocity *= velocityMod;
+                _hasPredictedDestination = true;
+            }
+            else
+            {
+                // Formation leader is not moving. Just apply the base formation shape on his position.
+                target.MovePositionToFirstCollision(dest, _range, _angle + relativeAngle);
+                _hasPredictedDestination = false;
+            }
+
+            // Leader is not moving, so just pick up his default walk speed
+            if (velocity == 0.0f)
+                velocity = target.GetSpeed(UnitMoveType.Walk);
+
+            MoveSplineInit init = new(owner);
+            init.MoveTo(dest);
+            init.SetVelocity(velocity);
+            init.Launch();
+
+            _lastLeaderPosition = target.GetPosition();
+            owner.AddUnitState(UnitState.RoamingMove);
         }
 
         public override void DoDeactivate(Creature owner)
@@ -166,13 +251,7 @@ namespace Game.Movement
         void MovementInform(Creature owner)
         {
             if (owner.GetAI() != null)
-                owner.GetAI().MovementInform(MovementGeneratorType.Formation, _movementId);
+                owner.GetAI().MovementInform(MovementGeneratorType.Formation, 0);
         }
-
-        uint _movementId;
-        Position _destination;
-        WaypointMoveType _moveType;
-        bool _run;
-        bool _orientation;
     }
 }

@@ -994,10 +994,10 @@ namespace Game.Movement
             Add(new RotateMovementGenerator(id, time, direction));
         }
 
-        public void MoveFormation(uint id, Position destination, WaypointMoveType moveType, bool forceRun = false, bool forceOrientation = false)
+        public void MoveFormation(Unit leader, float range, float angle, uint point1, uint point2)
         {
-            if (_owner.GetTypeId() == TypeId.Unit)
-                Add(new FormationMovementGenerator(id, destination, moveType, forceRun, forceOrientation));
+            if (_owner.GetTypeId() == TypeId.Unit && leader != null)
+                Add(new FormationMovementGenerator(leader, range, angle, point1, point2), MovementSlot.Default);
         }
 
         public void LaunchMoveSpline(MoveSplineInit init, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
