@@ -2700,11 +2700,11 @@ namespace Framework.Constants
         UnitAreaTapList = 123,
         UnitTargetTapList = 124,
         DestCasterGround2 = 125,
-        Unk126 = 126,
-        Unk127 = 127,
-        Unk128 = 128,
-        ConeEntry129 = 129,
-        Unk130 = 130,
+        UnitCasterAreaEnemyClump = 126, // NYI
+        DestCasterEnemyClumpCentroid = 127, // NYI
+        UnitRectCasterAlly = 128,
+        UnitRectCasterEnemy = 129,
+        UnitRectCaster = 130,
         DestSummoner = 131,
         DestTargetAlly = 132,
         UnitLineCasterToDestAlly = 133,
@@ -2714,7 +2714,7 @@ namespace Framework.Constants
         DestCasterMovementDirection = 137,
         DestDestGround = 138,
         Unk139 = 139,
-        Unk140 = 140,
+        DestCasterClumpCentroid = 140, // NYI
         Unk141 = 141,
         Unk142 = 142,
         Unk143 = 143,
