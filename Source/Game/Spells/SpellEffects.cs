@@ -2606,16 +2606,19 @@ namespace Game.Spells
             if (target == null)
                 target = m_caster;
 
-            float x, y, z;
+            float x, y, z, o;
             if (m_targets.HasDst())
-                destTarget.GetPosition(out x, out y, out z);
+                destTarget.GetPosition(out x, out y, out z, out o);
             else
+            {
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
+                o = target.GetOrientation();
+            }
 
             Map map = target.GetMap();
 
-            Position pos = new(x, y, z, target.GetOrientation());
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f));
+            Position pos = new(x, y, z, o);
+            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
                 return;
@@ -3239,17 +3242,20 @@ namespace Game.Spells
                 unitCaster.m_ObjectSlot[slot].Clear();
             }
 
-            float x, y, z;
+            float x, y, z, o;
             // If dest location if present
             if (m_targets.HasDst())
-                destTarget.GetPosition(out x, out y, out z);
+                destTarget.GetPosition(out x, out y, out z, out o);
             // Summon in random point all other units if location present
             else
+            {
                 unitCaster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
-
+                o = unitCaster.GetOrientation();
+            }
+            
             Map map = m_caster.GetMap();
-            Position pos = new(x, y, z, m_caster.GetOrientation());
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
+            Position pos = new(x, y, z, o);
+            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
                 return;
@@ -4024,15 +4030,16 @@ namespace Game.Spells
                 return;
             }
 
-            float fx, fy, fz;
+            float fx, fy, fz, fo;
 
             if (m_targets.HasDst())
-                destTarget.GetPosition(out fx, out fy, out fz);
+                destTarget.GetPosition(out fx, out fy, out fz, out fo);
             //FIXME: this can be better check for most objects but still hack
             else if (effectInfo.HasRadius() && m_spellInfo.Speed == 0)
             {
                 float dis = effectInfo.CalcRadius(unitCaster);
                 unitCaster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);
+                fo = unitCaster.GetOrientation();
             }
             else
             {
@@ -4042,15 +4049,16 @@ namespace Game.Spells
                 float dis = (float)RandomHelper.NextDouble() * (max_dis - min_dis) + min_dis;
 
                 unitCaster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);
+                fo = unitCaster.GetOrientation();
             }
 
             Map cMap = unitCaster.GetMap();
             // if gameobject is summoning object, it should be spawned right on caster's position
             if (goinfo.type == GameObjectTypes.Ritual)
-                unitCaster.GetPosition(out fx, out fy, out fz);
+                unitCaster.GetPosition(out fx, out fy, out fz, out fo);
 
-            Position pos = new(fx, fy, fz, unitCaster.GetOrientation());
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(unitCaster.GetOrientation(), 0.0f, 0.0f));
+            Position pos = new(fx, fy, fz, fo);
+            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(fo, 0.0f, 0.0f));
 
             GameObject go = GameObject.CreateGameObject(name_id, cMap, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
@@ -4839,15 +4847,18 @@ namespace Game.Spells
             if (goId == 0)
                 return;
 
-            float x, y, z;
+            float x, y, z, o;
             if (m_targets.HasDst())
-                destTarget.GetPosition(out x, out y, out z);
+                destTarget.GetPosition(out x, out y, out z, out o);
             else
+            {
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
+                o = m_caster.GetOrientation();
+            }
 
             Map map = m_caster.GetMap();
-            Position pos = new(x, y, z, m_caster.GetOrientation());
-            Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
+            Position pos = new(x, y, z, o);
+            Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
             GameObject go = GameObject.CreateGameObject(goId, map, pos, rot, 255, GameObjectState.Ready);
 
             if (!go)
