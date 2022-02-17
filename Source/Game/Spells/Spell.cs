@@ -6240,13 +6240,18 @@ namespace Game.Spells
 
                             if (spellEffectInfo.ItemType != 0)
                             {
+                                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
+                                if (itemTemplate == null)
+                                    return SpellCastResult.ItemNotFound;
+
+                                uint createCount = (uint)Math.Clamp(spellEffectInfo.CalcValue(), 1u, itemTemplate.GetMaxStackSize());
+
                                 List<ItemPosCount> dest = new();
-                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, (uint)spellEffectInfo.CalcValue());
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, createCount);
                                 if (msg != InventoryResult.Ok)
                                 {
-                                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
                                     /// @todo Needs review
-                                    if (itemTemplate != null && itemTemplate.GetItemLimitCategory() == 0)
+                                    if (itemTemplate.GetItemLimitCategory() == 0)
                                     {
                                         player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);
                                         return SpellCastResult.DontReport;
@@ -6256,7 +6261,7 @@ namespace Game.Spells
                                         // Conjure Food/Water/Refreshment spells
                                         if (m_spellInfo.SpellFamilyName != SpellFamilyNames.Mage || (!m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
                                             return SpellCastResult.TooManyOfItem;
-                                        else if (!(target.ToPlayer().HasItemCount(spellEffectInfo.ItemType)))
+                                        else if (!target.ToPlayer().HasItemCount(spellEffectInfo.ItemType))
                                         {
                                             player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);
                                             return SpellCastResult.DontReport;
