@@ -2681,7 +2681,7 @@ namespace Framework.Constants
         UnitConeCasterToDestEnemy = 104,
         UnitCasterAndPassengers = 105,
         DestChannelCaster = 106,
-        UnkDestAreaUnk107 = 107, // Not Enough Info - Only Generic Spells Avalible
+        DestNearbyEntry2 = 107,
         GameobjectCone_108 = 108,
         GameobjectCone_109 = 109,
         UnitConeEntry110 = 110,
