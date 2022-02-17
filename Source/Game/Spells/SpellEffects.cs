@@ -3790,7 +3790,7 @@ namespace Game.Spells
             float distXY = unitTarget.GetExactDist(pos);
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
 
-            float speedXY = effectInfo.MiscValue / 10.0f;
+            float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
             float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
 
             unitTarget.JumpTo(speedXY, speedZ, true, pos);
