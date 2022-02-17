@@ -1914,30 +1914,6 @@ namespace Game.Entities
             return startLevel;
         }
 
-        public override bool IsUnderWater()
-        {
-            return IsInWater() &&
-                GetPositionZ() < (GetMap().GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
-        }
-        public override bool IsInWater()
-        {
-            return m_isInWater;
-        }
-        public override void SetInWater(bool inWater)
-        {
-            if (m_isInWater == inWater)
-                return;
-
-            //define player in water by opcodes
-            //move player's guid into HateOfflineList of those mobs
-            //which can't swim and move guid back into ThreatList when
-            //on surface.
-            // @todo exist also swimming mobs, and function must be symmetric to enter/leave water
-            m_isInWater = inWater;
-
-            // Call base
-            base.SetInWater(inWater);
-        }
         public void ValidateMovementInfo(MovementInfo mi)
         {
             var RemoveViolatingFlags = new Action<bool, MovementFlag>((check, maskToRemove) =>

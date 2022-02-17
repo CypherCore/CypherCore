@@ -104,7 +104,6 @@ namespace Game.Entities
 
         PlayerUnderwaterState m_MirrorTimerFlags;
         PlayerUnderwaterState m_MirrorTimerFlagsLast;
-        bool m_isInWater;
 
         //Stats
         uint m_baseSpellPower;

@@ -63,13 +63,13 @@ namespace Game.Entities
 
             return HasUnitFlag(UnitFlags.Rename | UnitFlags.Swimming);
         }
-        public virtual bool IsInWater()
+        public bool IsInWater()
         {
-            return GetMap().IsInWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
         }
-        public virtual bool IsUnderWater()
+        public bool IsUnderWater()
         {
-            return GetMap().IsUnderWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetLiquidStatus().HasFlag(ZLiquidStatus.UnderWater);
         }
 
         void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
@@ -820,30 +820,26 @@ namespace Game.Entities
         
         public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
+            ZLiquidStatus oldLiquidStatus = GetLiquidStatus();
             base.ProcessPositionDataChanged(data);
-            ProcessTerrainStatusUpdate(data.LiquidStatus, data.LiquidInfo);
+            ProcessTerrainStatusUpdate(oldLiquidStatus, data.LiquidInfo);
         }
 
-        public virtual void SetInWater(bool inWater)
-        {
-            // remove appropriate auras if we are swimming/not swimming respectively
-            if (inWater)
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.UnderWater);
-            else
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.AboveWater);
-        }
-
-        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
+        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, Optional<LiquidData> newLiquidData)
         {
             if (!IsControlledByPlayer())
                 return;
 
-            SetInWater(status.HasAnyFlag(ZLiquidStatus.Swimming));
+            // remove appropriate auras if we are swimming/not swimming respectively
+            if (IsInWater())
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.UnderWater);
+            else
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.AboveWater);
 
             // liquid aura handling
             LiquidTypeRecord curLiquid = null;
-            if (status.HasAnyFlag(ZLiquidStatus.Swimming) && liquidData.HasValue)
-                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(liquidData.Value.entry);
+            if (IsInWater() && newLiquidData.HasValue)
+                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.Value.entry);
             if (curLiquid != _lastLiquid)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
@@ -856,10 +852,11 @@ namespace Game.Entities
 
                 if (curLiquid != null && curLiquid.SpellID != 0 && (!player || !player.IsGameMaster()))
                     CastSpell(this, curLiquid.SpellID, true);
-
-                // mount capability depends on liquid state change
-                UpdateMountCapability();
             }
+
+            // mount capability depends on liquid state change
+            if (oldLiquidStatus != GetLiquidStatus())
+                UpdateMountCapability();
         }
 
         public bool SetWalk(bool enable)

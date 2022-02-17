@@ -131,6 +131,7 @@ namespace Game.Entities
 
             m_outdoors = data.outdoors;
             m_staticFloorZ = data.FloorZ;
+            m_liquidStatus = data.LiquidStatus;
         }
 
         public virtual void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)
@@ -979,6 +980,8 @@ namespace Game.Entities
 
         public bool IsOutdoors() { return m_outdoors; }
 
+        public ZLiquidStatus GetLiquidStatus() { return m_liquidStatus; }
+        
         public bool IsInWorldPvpZone()
         {
             switch (GetZoneId())
@@ -3528,6 +3531,7 @@ namespace Game.Entities
         uint m_areaId;
         float m_staticFloorZ;
         bool m_outdoors;
+        ZLiquidStatus m_liquidStatus;
 
         // Event handler
         public EventSystem m_Events = new();
