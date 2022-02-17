@@ -2931,4 +2931,11 @@ namespace Framework.Constants
         Normal = 0,
         PetBattle = 1
     }
+
+    public enum ComplaintStatus
+    {
+        Disabled = 0,
+        EnabledWithoutAutoIgnore = 1,
+        EnabledWithAutoIgnore = 2
+    }
 }

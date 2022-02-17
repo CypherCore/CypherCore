@@ -1081,7 +1081,7 @@ namespace Game
             FeatureSystemStatus features = new();
 
             // START OF DUMMY VALUES
-            features.ComplaintStatus = 2;
+            features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
             features.ScrollOfResurrectionRequestsRemaining = 1;
             features.ScrollOfResurrectionMaxRequestsPerDay = 1;
             features.TwitterPostThrottleLimit = 60;
@@ -1097,7 +1097,6 @@ namespace Game
             features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
             features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
             features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 111111;
-            features.ComplaintStatus = 0;
             features.TutorialsEnabled = true;
             features.NPETutorialsEnabled = true;
             // END OF DUMMY VALUES
