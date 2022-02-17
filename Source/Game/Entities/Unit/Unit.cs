@@ -3787,6 +3787,13 @@ namespace Game.Entities
                 if (damagetype == DamageEffectType.DOT)
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken, aurEff => (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
             }
+            else // melee attack
+            {
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageFromCaster, aurEff =>
+                {
+                    return aurEff.GetCasterGUID() == attacker.GetGUID();
+                });
+            }
 
             AuraEffect cheatDeath = GetAuraEffect(45182, 0);
             if (cheatDeath != null)
