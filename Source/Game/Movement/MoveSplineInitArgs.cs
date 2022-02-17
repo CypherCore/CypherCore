@@ -16,6 +16,7 @@
  */
 
 using Framework.Dynamic;
+using Game.DataStorage;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Numerics;
@@ -55,24 +56,38 @@ namespace Game.Movement
         // Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed.
         public bool Validate(Unit unit)
         {
-            bool CHECK(bool exp)
+            bool CHECK(bool exp, bool verbose)
             {
                 if (!exp)
                 {
-                    Log.outError(LogFilter.Misc, "MoveSplineInitArgs::Validate: expression '{0}' failed for {1} Entry: {2}", exp.ToString(), unit.GetGUID().ToString(), unit.GetEntry());
+                    if (unit)
+                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for {(verbose ? unit.GetDebugInfo() : unit.GetGUID().ToString())}");
+                    else
+                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for cyclic spline continuation");
                     return false;
                 }
                 return true;
             }
 
-            if (!CHECK(path.Count > 1))
+            if (!CHECK(path.Count > 1, true))
                 return false;
-            if (!CHECK(velocity >= 0.01f))
+            if (!CHECK(velocity >= 0.01f, true))
                 return false;
-            if (!CHECK(time_perc >= 0.0f && time_perc <= 1.0f))
+            if (!CHECK(time_perc >= 0.0f && time_perc <= 1.0f, true))
                 return false;
-            if (!CHECK(_checkPathLengths()))
+            if (!CHECK(_checkPathLengths(), false))
                 return false;
+            if (spellEffectExtra.HasValue)
+            {
+                if (!CHECK(spellEffectExtra.Value.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ProgressCurveId), false))
+                    return false;
+                if (!CHECK(spellEffectExtra.Value.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ParabolicCurveId), false))
+                    return false;
+                if (!CHECK(spellEffectExtra.Value.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ProgressCurveId), true))
+                    return false;
+                if (!CHECK(spellEffectExtra.Value.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ParabolicCurveId), true))
+                    return false;
+            }
             return true;
         }
 
