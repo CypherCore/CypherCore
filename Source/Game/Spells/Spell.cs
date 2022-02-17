@@ -646,6 +646,7 @@ namespace Game.Spells
         void SelectImplicitConeTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
             Position coneSrc = new(m_caster);
+            float coneAngle = m_spellInfo.ConeAngle;
             switch (targetType.GetReferenceType())
             {
                 case SpellTargetReferenceTypes.Caster:
@@ -653,6 +654,16 @@ namespace Game.Spells
                 case SpellTargetReferenceTypes.Dest:
                     if (m_caster.GetExactDist2d(m_targets.GetDstPos()) > 0.1f)
                         coneSrc.SetOrientation(m_caster.GetAbsoluteAngle(m_targets.GetDstPos()));
+                    break;
+                default:
+                    break;
+            }
+
+            switch (targetType.GetTarget())
+            {
+                case Targets.UnitCone180DegEnemy:
+                    if (coneAngle == 0.0f)
+                        coneAngle = 180.0f;
                     break;
                 default:
                     break;
@@ -668,7 +679,7 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
-                var spellCone = new WorldObjectSpellConeTargetCheck(coneSrc, MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
+                var spellCone = new WorldObjectSpellConeTargetCheck(coneSrc, MathFunctions.DegToRad(coneAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
                 SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
 

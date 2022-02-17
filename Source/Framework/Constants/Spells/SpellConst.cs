@@ -2628,7 +2628,7 @@ namespace Framework.Constants
         GameobjectSrcArea = 51,
         GameobjectDestArea = 52,
         DestTargetEnemy = 53,
-        UnitConeEnemy54 = 54,
+        UnitCone180DegEnemy = 54, // Defaults to 180 if ConeDegrees is not set
         DestCasterFrontLeap = 55, // For A Leap Spell
         UnitCasterAreaRaid = 56,
         UnitRaid = 57,
