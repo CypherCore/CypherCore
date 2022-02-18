@@ -3430,58 +3430,29 @@ namespace Game.Entities
             desty = result.Y;
             destz = result.Z;
 
-            float halfHeight = GetCollisionHeight() * 0.5f;
             UpdateAllowedPositionZ(destx, desty, ref destz);
-            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
-
-            destz -= halfHeight;
-
-            // collision occured
-            if (col)
-            {
-                // move back a bit
-                destx -= SharedConst.ContactDistance * (float)Math.Cos(angle);
-                desty -= SharedConst.ContactDistance * (float)Math.Sin(angle);
-                dist = (float)Math.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
-            }
 
             // check dynamic collision
-            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
+            float halfHeight = GetCollisionHeight() * 0.5f;
+            bool col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
             destz -= halfHeight;
 
-            // Collided with a gameobject
+            // Collided with a gameobject, move back to collision point
             if (col)
             {
                 destx -= SharedConst.ContactDistance * (float)Math.Cos(angle);
                 desty -= SharedConst.ContactDistance * (float)Math.Sin(angle);
                 dist = (float)Math.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
-            }
-
-            float step = dist / 10.0f;
-
-            for (byte j = 0; j < 10; ++j)
-            {
-                // do not allow too big z changes
-                if (Math.Abs(pos.posZ - destz) > 6f)
-                {
-                    destx -= step * (float)Math.Cos(angle);
-                    desty -= step * (float)Math.Sin(angle);
-                    UpdateAllowedPositionZ(destx, desty, ref destz);
-                }
-                // we have correct destz now
-                else
-                {
-                    pos.Relocate(destx, desty, destz);
-                    break;
-                }
             }
 
             float groundZ = MapConst.VMAPInvalidHeightValue;
             GridDefines.NormalizeMapCoord(ref pos.posX);
             GridDefines.NormalizeMapCoord(ref pos.posY);
-            UpdateAllowedPositionZ(destx, desty, ref pos.posZ, ref groundZ);
+            UpdateAllowedPositionZ(destx, desty, ref destz, ref groundZ);
+
             pos.SetOrientation(GetOrientation());
+            pos.Relocate(destx, desty, destz);
 
             // position has no ground under it (or is too far away)
             if (groundZ <= MapConst.InvalidHeight)
