@@ -494,19 +494,7 @@ namespace Game.Entities
             SetBaseAttackTime(WeaponAttackType.RangedAttack, SharedConst.BaseAttackTime);
 
             //scale
-            var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
-            if (cFamily != null && cFamily.MinScale > 0.0f && petType == PetType.Hunter)
-            {
-                float scale;
-                if (GetLevel() >= cFamily.MaxScaleLevel)
-                    scale = cFamily.MaxScale;
-                else if (GetLevel() <= cFamily.MinScaleLevel)
-                    scale = cFamily.MinScale;
-                else
-                    scale = cFamily.MinScale + (float)(GetLevel() - cFamily.MinScaleLevel) / cFamily.MaxScaleLevel * (cFamily.MaxScale - cFamily.MinScale);
-
-                SetObjectScale(scale);
-            }
+            SetObjectScale(GetNativeObjectScale());
 
             // Resistance
             // Hunters pet should not inherit resistances from creature_template, they have separate auras for that

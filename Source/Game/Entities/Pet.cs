@@ -1458,6 +1458,25 @@ namespace Game.Entities
             return base.GetOwner().ToPlayer();
         }
 
+        public override float GetNativeObjectScale()
+        {
+            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
+            if (creatureFamily != null && creatureFamily.MinScale > 0.0f && GetPetType() == PetType.Hunter)
+            {
+                float scale;
+                if (GetLevel() >= creatureFamily.MaxScaleLevel)
+                    scale = creatureFamily.MaxScale;
+                else if (GetLevel() <= creatureFamily.MinScaleLevel)
+                    scale = creatureFamily.MinScale;
+                else
+                    scale = creatureFamily.MinScale + (float)(GetLevel() - creatureFamily.MinScaleLevel) / creatureFamily.MaxScaleLevel * (creatureFamily.MaxScale - creatureFamily.MinScale);
+
+                return scale;
+            }
+
+            return base.GetNativeObjectScale();
+        }
+        
         public override void SetDisplayId(uint modelId, float displayScale = 1f)
         {
             base.SetDisplayId(modelId, displayScale);

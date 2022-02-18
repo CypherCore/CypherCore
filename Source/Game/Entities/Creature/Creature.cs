@@ -306,7 +306,7 @@ namespace Game.Entities
             SetSpeedRate(UnitMoveType.Swim, 1.0f);      // using 1.0 rate
             SetSpeedRate(UnitMoveType.Flight, 1.0f);    // using 1.0 rate
 
-            SetObjectScale(cInfo.Scale);
+            SetObjectScale(GetNativeObjectScale());
 
             SetHoverHeight(cInfo.HoverHeight);
 
@@ -2869,6 +2869,11 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
+        public override float GetNativeObjectScale()
+        {
+            return GetCreatureTemplate().Scale;
+        }
+        
         public override void SetObjectScale(float scale)
         {
             base.SetObjectScale(scale);

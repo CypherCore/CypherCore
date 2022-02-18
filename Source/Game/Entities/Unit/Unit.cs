@@ -1753,8 +1753,19 @@ namespace Game.Entities
 
         public virtual Gender GetNativeGender() { return GetGender();    }
         public virtual void SetNativeGender(Gender gender) { SetGender(gender); }
+
+        public void RecalculateObjectScale()
+        {
+            int scaleAuras = GetTotalAuraModifier(AuraType.ModScale) + GetTotalAuraModifier(AuraType.ModScale2);
+            float scale = GetNativeObjectScale() + MathFunctions.CalculatePct(1.0f, scaleAuras);
+            float scaleMin = IsPlayer() ? 0.1f : 0.01f;
+            SetObjectScale(Math.Max(scale, scaleMin));
+        }
+
+        public virtual float GetNativeObjectScale() { return 1.0f; }
         
         public uint GetDisplayId() { return m_unitData.DisplayID; }
+
         public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), modelId);
@@ -1764,6 +1775,7 @@ namespace Game.Entities
             if (minfo != null)
                 SetGender((Gender)minfo.gender);
         }
+
         public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
         {
             AuraEffect handledAura = null;

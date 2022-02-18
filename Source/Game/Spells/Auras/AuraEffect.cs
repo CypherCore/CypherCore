@@ -1586,11 +1586,7 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
 
-            Unit target = aurApp.GetTarget();
-
-            float scale = target.GetObjectScale();
-            scale += MathFunctions.CalculatePct(1.0f, apply ? GetAmount() : -GetAmount());
-            target.SetObjectScale(scale);
+            aurApp.GetTarget().RecalculateObjectScale();
         }
 
         [AuraEffectHandler(AuraType.CloneCaster)]
