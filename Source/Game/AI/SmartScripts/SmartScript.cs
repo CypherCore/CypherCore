@@ -4061,6 +4061,7 @@ namespace Game.AI
             ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
             ProcessEventsFor(SmartEvents.JustCreated);
+            _counterList.Clear();
         }
 
         public void OnInitialize(AreaTriggerRecord at)
@@ -4082,7 +4083,10 @@ namespace Game.AI
             foreach (var holder in _events)
                 InitTimer(holder);//calculate timers for first time use
 
+            ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
+            ProcessEventsFor(SmartEvents.JustCreated);
+            _counterList.Clear();
         }
 
         public void OnInitialize(SceneTemplate scene)
@@ -4104,7 +4108,10 @@ namespace Game.AI
             foreach (var holder in _events)
                 InitTimer(holder);//calculate timers for first time use
 
+            ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
+            ProcessEventsFor(SmartEvents.JustCreated);
+            _counterList.Clear();
         }
 
         public void OnInitialize(Quest qst)
@@ -4126,7 +4133,10 @@ namespace Game.AI
             foreach (var holder in _events)
                 InitTimer(holder);//calculate timers for first time use
 
+            ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
+            ProcessEventsFor(SmartEvents.JustCreated);
+            _counterList.Clear();
         }
 
         public void OnMoveInLineOfSight(Unit who)
