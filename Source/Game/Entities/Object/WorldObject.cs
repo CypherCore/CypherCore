@@ -1540,6 +1540,15 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
+        public GameObject FindNearestUnspawnedGameObject(uint entry, float range)
+        {
+            NearestUnspawnedGameObjectEntryInObjectRangeCheck checker = new(this, entry, range);
+            GameObjectLastSearcher searcher = new(this, checker);
+
+            Cell.VisitGridObjects(this, searcher, range);
+            return searcher.GetTarget();
+        }
+
         public GameObject FindNearestGameObjectOfType(GameObjectTypes type, float range)
         {
             var checker = new NearestGameObjectTypeInObjectRangeCheck(this, type, range);

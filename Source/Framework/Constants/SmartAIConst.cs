@@ -435,7 +435,7 @@ namespace Framework.Constants
         LootRecipients = 27,   // all players that have tagged this creature (for kill credit)
         Farthest = 28,   // maxDist, playerOnly, isInLos
         VehiclePassenger = 29,   // seatMask (0 - all seats)
-        SpellTarget = 30,
+        ClosestUnspawnedGameobject = 30,
 
         End = 31
     }

@@ -2006,7 +2006,8 @@ namespace Game.AI
                                      e.GetTargetType() == SmartTargets.GameobjectGuid || e.GetTargetType() == SmartTargets.GameobjectDistance ||
                                      e.GetTargetType() == SmartTargets.ClosestCreature || e.GetTargetType() == SmartTargets.ClosestGameobject ||
                                      e.GetTargetType() == SmartTargets.OwnerOrSummoner || e.GetTargetType() == SmartTargets.ActionInvoker ||
-                                     e.GetTargetType() == SmartTargets.ClosestEnemy || e.GetTargetType() == SmartTargets.ClosestFriendly)
+                                     e.GetTargetType() == SmartTargets.ClosestEnemy || e.GetTargetType() == SmartTargets.ClosestFriendly ||
+                                     e.GetTargetType() == SmartTargets.ClosestUnspawnedGameobject)
                             {
                                 target.ToCreature().SetHomePosition(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
                             }
@@ -3087,6 +3088,13 @@ namespace Game.AI
                             }
                         }
                     }
+                    break;
+                }
+                case SmartTargets.ClosestUnspawnedGameobject:
+                {
+                    GameObject target = baseObject.FindNearestUnspawnedGameObject(e.Target.closest.entry, (float)(e.Target.closest.dist != 0 ? e.Target.closest.dist : 100));
+                    if (target != null)
+                        targets.Add(target);
                     break;
                 }
                 case SmartTargets.Position:

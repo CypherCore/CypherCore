@@ -513,7 +513,7 @@ namespace Game.AI
                 case SmartTargets.LootRecipients:
                 case SmartTargets.Farthest:
                 case SmartTargets.VehiclePassenger:
-                case SmartTargets.SpellTarget:
+                case SmartTargets.ClosestUnspawnedGameobject:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled target_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetTargetType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());

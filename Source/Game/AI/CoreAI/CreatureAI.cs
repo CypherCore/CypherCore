@@ -493,16 +493,16 @@ namespace Game.AI
         public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
         public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
 
-        // Should return true if the NPC is currently being escorted
-        public virtual bool IsEscorted() { return false; }
-
-        public virtual void MovementInform(MovementGeneratorType type, uint id) { }
-
         // Called when a spell cast gets interrupted
         public virtual void OnSpellCastInterrupt(SpellInfo spell) { }
 
         // Called when a spell cast has been successfully finished
         public virtual void OnSuccessfulSpellCast(SpellInfo spell) { }
+
+        // Should return true if the NPC is currently being escorted
+        public virtual bool IsEscorted() { return false; }
+
+        public virtual void MovementInform(MovementGeneratorType type, uint id) { }
 
         // Called at reaching home after evade
         public virtual void JustReachedHome() { }
