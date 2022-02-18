@@ -190,8 +190,9 @@ namespace Game.Movement
             }
 
             // we may need a better number here
-            bool farFromPoly = (distToStartPoly > 7.0f || distToEndPoly > 7.0f);
-            if (farFromPoly)
+            bool startFarFromPoly = distToStartPoly > 7.0f;
+            bool endFarFromPoly = distToEndPoly > 7.0f;
+            if (startFarFromPoly || endFarFromPoly)
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . farFromPoly distToStartPoly={0:F3} distToEndPoly={1:F3}\n", distToStartPoly, distToEndPoly);
 
@@ -222,7 +223,13 @@ namespace Game.Movement
                 if (buildShotrcut)
                 {
                     BuildShortcut();
-                    pathType = PathType.Normal | PathType.NotUsingPath | PathType.FarFromPoly;
+                    pathType = PathType.Normal | PathType.NotUsingPath;
+
+                    if (startFarFromPoly)
+                        pathType |= PathType.FarFromPolyStart;
+                    if (endFarFromPoly)
+                        pathType |= PathType.FarFromPolyEnd;
+
                     return;
                 }
                 else
@@ -236,7 +243,12 @@ namespace Game.Movement
                         SetActualEndPosition(new Vector3(endPoint[2], endPoint[0], endPoint[1]));
                     }
 
-                    pathType = PathType.Incomplete | PathType.FarFromPoly;
+                    pathType = PathType.Incomplete;
+
+                    if (startFarFromPoly)
+                        pathType |= PathType.FarFromPolyStart;
+                    if (endFarFromPoly)
+                        pathType |= PathType.FarFromPolyEnd;
                 }
             }
 
@@ -251,7 +263,17 @@ namespace Game.Movement
                 _pathPolyRefs[0] = startPoly;
                 _polyLength = 1;
 
-                pathType = farFromPoly ? PathType.Incomplete | PathType.FarFromPoly : PathType.Normal;
+                if (startFarFromPoly || endFarFromPoly)
+                {
+                    pathType = PathType.Incomplete;
+
+                    if (startFarFromPoly)
+                        pathType |= PathType.FarFromPolyStart;
+                    if (endFarFromPoly)
+                        pathType |= PathType.FarFromPolyEnd;
+                }
+                else
+                    pathType = PathType.Normal;
 
                 BuildPointPath(startPoint, endPoint);
                 return;
@@ -374,6 +396,7 @@ namespace Game.Movement
                         Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
                         _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
 
+                        NormalizePath();
                         pathType = PathType.Incomplete;
                         return;
                     }
@@ -447,6 +470,7 @@ namespace Game.Movement
                         Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
                         _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
 
+                        NormalizePath();
                         pathType = PathType.Incomplete;
                         return;
                     }
@@ -482,8 +506,10 @@ namespace Game.Movement
             else
                 pathType = PathType.Incomplete;
 
-            if (farFromPoly)
-                pathType |= PathType.FarFromPoly;
+            if (startFarFromPoly)
+                pathType |= PathType.FarFromPolyStart;
+            if (endFarFromPoly)
+                pathType |= PathType.FarFromPolyEnd;
 
             // generate the point-path out of our up-to-date poly-path
             BuildPointPath(startPoint, endPoint);
@@ -1061,7 +1087,9 @@ namespace Game.Movement
         NoPath = 0x08,   // no valid path at all or error in generating one
         NotUsingPath = 0x10,   // used when we are either flying/swiming or on map w/o mmaps
         Short = 0x20,   // path is longer or equal to its limited path length
-        FarFromPoly = 0x40 // start of end positions are far from the mmap poligon
+        FarFromPolyStart = 0x40, // start position is far from the mmap poligon
+        FarFromPolyEnd = 0x80, // end positions is far from the mmap poligon
+        FarFromPoly = FarFromPolyStart | FarFromPolyEnd // start or end positions are far from the mmap poligon
     }
 
     public enum NavArea
