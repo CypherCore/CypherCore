@@ -3991,41 +3991,47 @@ namespace Game.Entities
                 if (aurEff == null)
                     continue;
 
-                AuraType auraType = aurEff.GetSpellEffectInfo().ApplyAuraName;
-                var auras = GetAuraEffectsByType(auraType);
-                for (var i = 0; i < auras.Count;)
+                if (!IsHighestExclusiveAuraEffect(aura.GetSpellInfo(), aurEff.GetAuraType(), aurEff.GetAmount(), aura.GetEffectMask(), removeOtherAuraApplications))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public bool IsHighestExclusiveAuraEffect(SpellInfo spellInfo, AuraType auraType, int effectAmount, uint auraEffectMask, bool removeOtherAuraApplications = false)
+        {
+            var auras = GetAuraEffectsByType(auraType);
+            foreach (AuraEffect existingAurEff in auras)
+            {
+                if (Global.SpellMgr.CheckSpellGroupStackRules(spellInfo, existingAurEff.GetSpellInfo()) == SpellGroupStackRule.ExclusiveHighest)
                 {
-                    AuraEffect existingAurEff = auras[i];
-                    ++i;
-
-                    if (Global.SpellMgr.CheckSpellGroupStackRules(aura.GetSpellInfo(), existingAurEff.GetSpellInfo()) == SpellGroupStackRule.ExclusiveHighest)
+                    long diff = Math.Abs(effectAmount) - Math.Abs(existingAurEff.GetAmount());
+                    if (diff == 0)
                     {
-                        int diff = Math.Abs(aurEff.GetAmount()) - Math.Abs(existingAurEff.GetAmount());
-                        if (diff == 0)
-                            diff = (int)(aura.GetEffectMask() - existingAurEff.GetBase().GetEffectMask());
+                        for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                            diff += (long)((auraEffectMask & (1 << i)) >> i) - (long)((existingAurEff.GetBase().GetEffectMask() & (1 << i)) >> i);
+                    }
 
-                        if (diff > 0)
+                    if (diff > 0)
+                    {
+                        Aura auraBase = existingAurEff.GetBase();
+                        // no removing of area auras from the original owner, as that completely cancels them
+                        if (removeOtherAuraApplications && (!auraBase.IsArea() || auraBase.GetOwner() != this))
                         {
-                            Aura auraBase = existingAurEff.GetBase();
-                            // no removing of area auras from the original owner, as that completely cancels them
-                            if (removeOtherAuraApplications && (!auraBase.IsArea() || auraBase.GetOwner() != this))
+                            AuraApplication aurApp = existingAurEff.GetBase().GetApplicationOfTarget(GetGUID());
+                            if (aurApp != null)
                             {
-                                AuraApplication aurApp = existingAurEff.GetBase().GetApplicationOfTarget(GetGUID());
-                                if (aurApp != null)
-                                {
-                                    bool hasMoreThanOneEffect = auraBase.HasMoreThanOneEffectForType(auraType);
-                                    uint removedAuras = m_removedAurasCount;
-                                    RemoveAura(aurApp);
-                                    if (hasMoreThanOneEffect || m_removedAurasCount > removedAuras + 1)
-                                        i = 0;
-                                }
+                                //bool hasMoreThanOneEffect = auraBase.HasMoreThanOneEffectForType(auraType);
+                                //uint removedAuras = m_removedAurasCount;
+                                RemoveAura(aurApp);
+                                //if (hasMoreThanOneEffect || m_removedAurasCount > removedAuras + 1)
+                                    //continue;
                             }
                         }
-                        else if (diff < 0)
-                            return false;
                     }
+                    else if (diff < 0)
+                        return false;
                 }
-
             }
 
             return true;
