@@ -4639,7 +4639,9 @@ namespace Game.Spells
             {
                 // Check explicit target for m_originalCaster - todo: get rid of such workarounds
                 WorldObject caster = m_caster;
-                if (m_originalCaster != null)
+                // in case of gameobjects like traps, we need the gameobject itself to check target validity
+                // otherwise, if originalCaster is far away and cannot detect the target, the trap would not hit the target
+                if (m_originalCaster != null && !caster.IsGameObject())
                     caster = m_originalCaster;
 
                 castResult = m_spellInfo.CheckExplicitTarget(caster, m_targets.GetObjectTarget(), m_targets.GetItemTarget());

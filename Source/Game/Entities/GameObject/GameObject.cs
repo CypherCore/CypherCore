@@ -663,7 +663,7 @@ namespace Game.Entities
                             if (owner)
                             {
                                 // Hunter trap: Search units which are unfriendly to the trap's owner
-                                var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, owner, radius);
+                                var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
                                 var searcher = new UnitLastSearcher(this, checker);
                                 Cell.VisitAllObjects(this, searcher, radius);
                                 target = searcher.GetTarget();

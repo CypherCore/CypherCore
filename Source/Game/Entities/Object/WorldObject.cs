@@ -1248,10 +1248,17 @@ namespace Game.Entities
             if (distance < combatReach)
                 return true;
 
-            if (!HasInArc(MathFunctions.PI, obj))
+            // Only check back for units, it does not make sense for gameobjects
+            if (unit && !HasInArc(MathF.PI, obj))
                 return false;
 
-            GameObject go = obj.ToGameObject();
+            // Traps should detect stealth always
+            GameObject go = ToGameObject();
+            if (go != null)
+                if (go.GetGoType() == GameObjectTypes.Trap)
+                    return true;
+
+            go = obj.ToGameObject();
             for (int i = 0; i < (int)StealthType.Max; ++i)
             {
                 if (!Convert.ToBoolean(obj.m_stealth.GetFlags() & (1 << i)))
@@ -2056,8 +2063,8 @@ namespace Game.Entities
                 }
             }
 
-            Unit unit = ToUnit();
-            Unit targetUnit = target.ToUnit();
+            Unit unit = ToUnit() ?? selfPlayerOwner;
+            Unit targetUnit = target.ToUnit() ?? targetPlayerOwner;
             if (unit && unit.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 if (targetUnit && targetUnit.HasUnitFlag(UnitFlags.PlayerControlled))
@@ -2452,7 +2459,7 @@ namespace Game.Entities
             if (IsFriendlyTo(target) || target.IsFriendlyTo(this))
                 return false;
 
-            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : IsGameObject() ? GetAffectingPlayer() : null;
             Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) ? target.GetAffectingPlayer() : null;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
@@ -2500,14 +2507,14 @@ namespace Game.Entities
             // additional checks - only PvP case
             if (playerAffectingAttacker && playerAffectingTarget)
             {
-                if (unitTarget.IsPvP())
+                if (playerAffectingTarget.IsPvP())
                     return true;
 
-                if (unit.IsFFAPvP() && unitTarget.IsFFAPvP())
+                if (playerAffectingAttacker.IsFFAPvP() && playerAffectingTarget.IsFFAPvP())
                     return true;
 
-                return unit.HasPvpFlag(UnitPVPStateFlags.Unk1) ||
-                    unitTarget.HasPvpFlag(UnitPVPStateFlags.Unk1);
+                return playerAffectingAttacker.HasPvpFlag(UnitPVPStateFlags.Unk1) ||
+                    playerAffectingTarget.HasPvpFlag(UnitPVPStateFlags.Unk1);
             }
 
             return true;

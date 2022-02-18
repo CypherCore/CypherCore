@@ -1962,10 +1962,9 @@ namespace Game.Maps
 
     public class NearestAttackableNoTotemUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public NearestAttackableNoTotemUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
+        public NearestAttackableNoTotemUnitInObjectRangeCheck(WorldObject obj, float range)
         {
             i_obj = obj;
-            i_funit = funit;
             i_range = range;
         }
 
@@ -1983,7 +1982,7 @@ namespace Game.Maps
             if (!u.IsTargetableForAttack(false))
                 return false;
 
-            if (!i_obj.IsWithinDistInMap(u, i_range) || i_funit.IsValidAttackTarget(u))
+            if (!i_obj.IsWithinDistInMap(u, i_range) || i_obj.IsValidAttackTarget(u))
                 return false;
 
             i_range = i_obj.GetDistance(u);
@@ -1991,7 +1990,6 @@ namespace Game.Maps
         }
 
         WorldObject i_obj;
-        Unit i_funit;
         float i_range;
     }
 
