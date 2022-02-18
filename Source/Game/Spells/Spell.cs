@@ -5521,7 +5521,7 @@ namespace Game.Spells
                 {
                     Unit target = m_targets.GetUnitTarget();
                     if (target != null)
-                        if (!target.IsHighestExclusiveAuraEffect(m_spellInfo, spellEffectInfo.ApplyAuraName, spellEffectInfo.CalcBaseValue(m_caster, null, m_castItemEntry, m_castItemLevel), approximateAuraEffectMask, false))
+                        if (!target.IsHighestExclusiveAuraEffect(m_spellInfo, spellEffectInfo.ApplyAuraName, spellEffectInfo.CalcValue(m_caster, m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex], null, m_castItemEntry, m_castItemLevel), approximateAuraEffectMask, false))
                             return SpellCastResult.AuraBounced;
                 }
             }
