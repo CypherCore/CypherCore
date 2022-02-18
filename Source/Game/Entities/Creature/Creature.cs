@@ -1532,7 +1532,8 @@ namespace Game.Entities
             }
 
             if (vehId != 0)
-                CreateVehicleKit(vehId, entry, true);
+                if (CreateVehicleKit(vehId, entry, true))
+                    UpdateDisplayPower();
 
             return true;
         }

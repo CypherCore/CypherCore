@@ -72,8 +72,6 @@ namespace Game.Entities
 
         public void Install()
         {
-            _me.UpdateDisplayPower();
-
             _status = Status.Installed;
             if (GetBase().IsTypeId(TypeId.Unit))
                 Global.ScriptMgr.OnInstall(this);
