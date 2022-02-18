@@ -3959,6 +3959,7 @@ namespace Game.Entities
             // check for GM and death state included in isAttackableByAOE
             return (!IsTargetableForAttack(false));
         }
+
         public uint EnvironmentalDamage(EnviromentalDamage type, uint damage)
         {
             if (IsImmuneToEnvironmentalDamage())
@@ -3997,10 +3998,10 @@ namespace Game.Entities
             {
                 if (type == EnviromentalDamage.Fall)                               // DealDamage not apply item durability loss at self damage
                 {
-                    Log.outDebug(LogFilter.Player, "We are fall to death, loosing 10 percents durability");
-                    DurabilityLossAll(0.10f, false);
+                    Log.outDebug(LogFilter.Player, $"Player::EnvironmentalDamage: Player '{GetName()}' ({GetGUID()}) fall to death, losing {WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath)} durability");
+                    DurabilityLossAll(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath), false);
                     // durability lost message
-                    SendDurabilityLoss(this, 10);
+                    SendDurabilityLoss(this, (uint)(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath) * 100.0f));
                 }
 
                 UpdateCriteria(CriteriaType.DieFromEnviromentalDamage, 1, (ulong)type);
