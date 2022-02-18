@@ -153,6 +153,12 @@ namespace Game.Entities
                 if (m_model != null)
                     if (GetMap().ContainsGameObjectModel(m_model))
                         GetMap().RemoveGameObjectModel(m_model);
+
+                // If linked trap exists, despawn it
+                GameObject linkedTrap = GetLinkedTrap();
+                if (linkedTrap != null)
+                    linkedTrap.DespawnOrUnsummon();
+
                 base.RemoveFromWorld();
 
                 if (m_spawnId != 0)
@@ -938,11 +944,6 @@ namespace Game.Entities
 
         public void Delete()
         {
-            // If nearby linked trap exists, despawn it
-            GameObject linkedTrap = GetLinkedTrap();
-            if (linkedTrap != null)
-                linkedTrap.DespawnOrUnsummon();
-
             SetLootState(LootState.NotReady);
             RemoveFromOwner();
 
