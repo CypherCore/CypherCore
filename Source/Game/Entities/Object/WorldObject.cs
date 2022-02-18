@@ -753,7 +753,7 @@ namespace Game.Entities
         {
             return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: { GetName()}";
         }
-        
+
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
         public abstract void BuildValuesUpdate(WorldPacket data, Player target);
 
@@ -981,7 +981,7 @@ namespace Game.Entities
         public bool IsOutdoors() { return m_outdoors; }
 
         public ZLiquidStatus GetLiquidStatus() { return m_liquidStatus; }
-        
+
         public bool IsInWorldPvpZone()
         {
             switch (GetZoneId())
@@ -3435,28 +3435,25 @@ namespace Game.Entities
             desty = result.Y;
             destz = result.Z;
 
-            // Object is using a shortcut. Check static LOS
+            // check static LOS
             float halfHeight = GetCollisionHeight() * 0.5f;
-            if (path.GetPathType().HasFlag(PathType.Shortcut))
+            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
+                pos.posX, pos.posY, pos.posZ + halfHeight,
+                destx, desty, destz + halfHeight,
+                out destx, out desty, out destz, -0.5f);
+
+            destz -= halfHeight;
+
+            // Collided with static LOS object, move back to collision point
+            if (col)
             {
-                bool vmapCol = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
-                    pos.posX, pos.posY, pos.posZ + halfHeight,
-                    destx, desty, destz + halfHeight,
-                    out destx, out desty, out destz, -0.5f);
-
-                destz -= halfHeight;
-
-                // Collided with static LOS object, move back to collision point
-                if (vmapCol)
-                {
-                    destx -= SharedConst.ContactDistance * MathF.Cos(angle);
-                    desty -= SharedConst.ContactDistance * MathF.Sin(angle);
-                    dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
-                }
+                destx -= SharedConst.ContactDistance * MathF.Cos(angle);
+                desty -= SharedConst.ContactDistance * MathF.Sin(angle);
+                dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
             }
 
             // check dynamic collision
-            bool col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
+            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
             destz -= halfHeight;
 
