@@ -2137,6 +2137,14 @@ namespace Game.Entities
         }
 
         //GM
+        public bool IsDeveloper() { return HasPlayerFlag(PlayerFlags.Developer); }
+        public void SetDeveloper(bool on)
+        {
+            if (on)
+                AddPlayerFlag(PlayerFlags.Developer);
+            else
+                RemovePlayerFlag(PlayerFlags.Developer);
+        }
         public bool IsAcceptWhispers() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers); }
         public void SetAcceptWhispers(bool on)
         {
@@ -5440,7 +5448,7 @@ namespace Game.Entities
                 tag |= ChatFlags.DND;
             if (IsAFK())
                 tag |= ChatFlags.AFK;
-            if (HasPlayerFlag(PlayerFlags.Developer))
+            if (IsDeveloper())
                 tag |= ChatFlags.Dev;
 
             return tag;

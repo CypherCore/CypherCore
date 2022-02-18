@@ -632,29 +632,25 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dev", RBACPermissions.CommandDev)]
-        static bool HandleDevCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDevCommand(CommandHandler handler, string enable)
         {
-            if (args.Empty())
+            Player player = handler.GetSession().GetPlayer();
+
+            if (enable.IsEmpty())
             {
-                if (handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer))
-                    handler.GetSession().SendNotification(CypherStrings.DevOn);
-                else
-                    handler.GetSession().SendNotification(CypherStrings.DevOff);
+                handler.GetSession().SendNotification(player.IsDeveloper() ? CypherStrings.DevOn : CypherStrings.DevOff);
                 return true;
             }
 
-            string argstr = args.NextString();
-
-            if (argstr == "on")
+            if (enable == "on")
             {
-                handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer);
+                player.SetDeveloper(true);
                 handler.GetSession().SendNotification(CypherStrings.DevOn);
                 return true;
             }
-
-            if (argstr == "off")
+            else if (enable == "off")
             {
-                handler.GetSession().GetPlayer().RemovePlayerFlag(PlayerFlags.Developer);
+                player.SetDeveloper(false);
                 handler.GetSession().SendNotification(CypherStrings.DevOff);
                 return true;
             }
