@@ -4386,17 +4386,18 @@ namespace Game.Entities
             //for each level they are above 10.
             //Characters level 20 and up suffer from ten minutes of sickness.
             int startLevel = WorldConfig.GetIntValue(WorldCfg.DeathSicknessLevel);
+            var raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
 
             if (GetLevel() >= startLevel)
             {
                 // set resurrection sickness
-                CastSpell(this, 15007, true);
+                CastSpell(this, raceEntry.ResSicknessSpellID, true);
 
                 // not full duration
                 if (GetLevel() < startLevel + 9)
                 {
                     int delta = (int)(GetLevel() - startLevel + 1) * Time.Minute;
-                    Aura aur = GetAura(15007, GetGUID());
+                    Aura aur = GetAura(raceEntry.ResSicknessSpellID, GetGUID());
                     if (aur != null)
                         aur.SetDuration(delta * Time.InMilliseconds);
 
