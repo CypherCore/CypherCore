@@ -2853,7 +2853,7 @@ namespace Game.AI
                         if (_go != null && _go == obj)
                             continue;
 
-                        if ((e.Target.goRange.entry == 0 && obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && refObj.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
+                        if ((e.Target.goRange.entry == 0 || obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && refObj.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
                             targets.Add(obj);
                     }
 
