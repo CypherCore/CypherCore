@@ -687,15 +687,16 @@ namespace Game.Movement
             if (speedXY < 0.01f)
                 return;
 
-            float x, y, z;
+            Position dest = _owner.GetPosition();
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            _owner.GetNearPoint(_owner, out x, out y, out z, dist, _owner.GetAbsoluteAngle(origin) + MathFunctions.PI);
+            // Use a mmap raycast to get a valid destination.
+            _owner.MovePositionToFirstCollision(dest, dist, _owner.GetRelativeAngle(origin) + MathF.PI);
 
             MoveSplineInit init = new(_owner);
-            init.MoveTo(x, y, z);
+            init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
             init.SetParabolic(max_height, 0);
             init.SetOrientationFixed(true);
             init.SetVelocity(speedXY);
@@ -1030,7 +1031,8 @@ namespace Game.Movement
 
         void Pop(bool active, bool movementInform)
         {
-            Remove(_generators.FirstOrDefault(), active, movementInform);
+            if (!_generators.Empty())
+                Remove(_generators.FirstOrDefault(), active, movementInform);
         }
 
         void DirectInitialize()
