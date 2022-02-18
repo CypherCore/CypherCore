@@ -915,16 +915,28 @@ namespace Game.Entities
         {
             Item item2;
 
-            // fill space table
+            // fill space tables, creating a mock-up of the player's inventory
+
+            // counts
             uint[] inventoryCounts = new uint[InventorySlots.ItemEnd - InventorySlots.ItemStart];
             uint[][] bagCounts = new uint[InventorySlots.BagEnd - InventorySlots.BagStart][];
 
+            // Item array
+            Item[] inventoryPointers = new Item[InventorySlots.ItemEnd - InventorySlots.ItemStart];
+            Item[][] bagPointers = new Item[InventorySlots.BagEnd - InventorySlots.BagStart][];
+
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+
+            // filling inventory
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
+                // build items in stock backpack
                 item2 = GetItemByPos(InventorySlots.Bag0, i);
                 if (item2 && !item2.IsInTrade())
+                {
                     inventoryCounts[i - InventorySlots.ItemStart] = item2.GetCount();
+                    inventoryPointers[i - InventorySlots.ItemStart] = item2;
+                }
             }
 
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
@@ -933,25 +945,33 @@ namespace Game.Entities
                 if (pBag)
                 {
                     bagCounts[i - InventorySlots.BagStart] = new uint[ItemConst.MaxBagSize];
+                    bagPointers[i - InventorySlots.BagStart] = new Item[ItemConst.MaxBagSize];
                     for (byte j = 0; j < pBag.GetBagSize(); j++)
                     {
+                        // build item counts in equippable bags
                         item2 = GetItemByPos(i, j);
                         if (item2 && !item2.IsInTrade())
+                        {
                             bagCounts[i - InventorySlots.BagStart][j] = item2.GetCount();
+                            bagPointers[i - InventorySlots.BagStart][j] = item2;
+                        }
                     }
                 }
             }
 
-            // check free space for all items
+            // check free space for all items that we wish to add
             for (int k = 0; k < count; ++k)
             {
+                // Incoming item
                 Item item = items[k];
 
                 // no item
                 if (!item)
                     continue;
 
-                Log.outDebug(LogFilter.Player, "STORAGE: CanStoreItems {0}. item = {1}, count = {2}", k + 1, item.GetEntry(), item.GetCount());
+                uint remaining_count = item.GetCount();
+
+                Log.outDebug(LogFilter.Player, $"STORAGE: CanStoreItems {k + 1}. item = {item.GetEntry()}, count = {remaining_count}");
                 ItemTemplate pProto = item.GetTemplate();
 
                 // strange item
@@ -979,14 +999,19 @@ namespace Game.Entities
                 {
                     for (byte t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                     {
-                        item2 = GetItemByPos(InventorySlots.Bag0, t);
-                        if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] + item.GetCount() <= pProto.GetMaxStackSize())
+                        item2 = inventoryPointers[t - InventorySlots.ItemStart];
+                        if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] < pProto.GetMaxStackSize())
                         {
-                            inventoryCounts[t - InventorySlots.ItemStart] += item.GetCount();
-                            b_found = true;
-                            break;
+                            inventoryCounts[t - InventorySlots.ItemStart] += remaining_count;
+                            remaining_count = inventoryCounts[t - InventorySlots.ItemStart] < pProto.GetMaxStackSize() ? 0 : inventoryCounts[t - InventorySlots.ItemStart] - pProto.GetMaxStackSize();
+
+                            b_found = remaining_count == 0;
+                            // if no pieces of the stack remain, then stop checking stock bag
+                            if (b_found)
+                                break;
                         }
                     }
+
                     if (b_found)
                         continue;
 
@@ -995,21 +1020,28 @@ namespace Game.Entities
                         Bag bag = GetBagByPos(t);
                         if (bag)
                         {
-                            if (Item.ItemCanGoIntoBag(item.GetTemplate(), bag.GetTemplate()))
+                            if (!Item.ItemCanGoIntoBag(item.GetTemplate(), bag.GetTemplate()))
+                                continue;
+
+                            for (byte j = 0; j < bag.GetBagSize(); j++)
                             {
-                                for (byte j = 0; j < bag.GetBagSize(); j++)
+                                item2 = bagPointers[t - InventorySlots.BagStart][j];
+                                if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize())
                                 {
-                                    item2 = GetItemByPos(t, j);
-                                    if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && bagCounts[t - InventorySlots.BagStart][j] + item.GetCount() <= pProto.GetMaxStackSize())
-                                    {
-                                        bagCounts[t - InventorySlots.BagStart][j] += item.GetCount();
-                                        b_found = true;
+                                    // add count to stack so that later items in the list do not double-book
+                                    bagCounts[t - InventorySlots.BagStart][j] += remaining_count;
+                                    remaining_count = bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize() ? 0 : bagCounts[t - InventorySlots.BagStart][j] - pProto.GetMaxStackSize();
+
+                                    b_found = remaining_count == 0;
+
+                                    // if no pieces of the stack remain, then stop checking equippable bags
+                                    if (b_found)
                                         break;
-                                    }
                                 }
                             }
                         }
                     }
+
                     if (b_found)
                         continue;
                 }
@@ -1032,7 +1064,9 @@ namespace Game.Entities
                                 {
                                     if (bagCounts[t - InventorySlots.BagStart][j] == 0)
                                     {
-                                        bagCounts[t - InventorySlots.BagStart][j] = 1;
+                                        bagCounts[t - InventorySlots.BagStart][j] = remaining_count;
+                                        bagPointers[t - InventorySlots.BagStart][j] = item;
+
                                         b_found = true;
                                         break;
                                     }
@@ -1040,6 +1074,7 @@ namespace Game.Entities
                             }
                         }
                     }
+
                     if (b_found)
                         continue;
                 }
@@ -1051,10 +1086,13 @@ namespace Game.Entities
                     if (inventoryCounts[t - InventorySlots.ItemStart] == 0)
                     {
                         inventoryCounts[t - InventorySlots.ItemStart] = 1;
+                        inventoryPointers[t - InventorySlots.ItemStart] = item;
+
                         b_found = true;
                         break;
                     }
                 }
+
                 if (b_found)
                     continue;
 
@@ -1074,7 +1112,9 @@ namespace Game.Entities
                         {
                             if (bagCounts[t - InventorySlots.BagStart][j] == 0)
                             {
-                                bagCounts[t - InventorySlots.BagStart][j] = 1;
+                                bagCounts[t - InventorySlots.BagStart][j] = remaining_count;
+                                bagPointers[t - InventorySlots.BagStart][j] = item;
+
                                 b_found = true;
                                 break;
                             }
@@ -1082,7 +1122,7 @@ namespace Game.Entities
                     }
                 }
 
-                // no free slot found?
+                // if no free slot found for all pieces of the item, then return an error
                 if (!b_found)
                     return InventoryResult.BagFull;
             }
