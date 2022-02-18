@@ -3763,9 +3763,20 @@ namespace Game.Spells
 
             // This is a blizzlike mistake: this should be 2D distance according to projectile motion formulas, but Blizzard erroneously used 3D distance.
             float distXY = unitTarget.GetExactDist(pos);
+
+            // Avoid division by 0
+            if (distXY < 0.001)
+                return;
+
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
             float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
             float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+
+            if (!float.IsFinite(speedZ))
+            {
+                Log.outError(LogFilter.Spells, $"Spell {m_spellInfo.Id} with SPELL_EFFECT_PULL_TOWARDS called with invalid speedZ. {GetDebugInfo()}");
+                return;
+            }
 
             unitTarget.JumpTo(speedXY, speedZ, true, pos);
         }
@@ -3788,10 +3799,21 @@ namespace Game.Spells
             Position pos = m_targets.GetDstPos();
             // This is a blizzlike mistake: this should be 2D distance according to projectile motion formulas, but Blizzard erroneously used 3D distance
             float distXY = unitTarget.GetExactDist(pos);
+
+            // Avoid division by 0
+            if (distXY < 0.001)
+                return;
+
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
 
             float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
             float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+
+            if (!float.IsFinite(speedZ))
+            {
+                Log.outError(LogFilter.Spells, $"Spell {m_spellInfo.Id} with SPELL_EFFECT_PULL_TOWARDS_DEST called with invalid speedZ. {GetDebugInfo()}");
+                return;
+            }
 
             unitTarget.JumpTo(speedXY, speedZ, true, pos);
         }
