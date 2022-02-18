@@ -2605,22 +2605,21 @@ namespace Game.Spells
 
             CallScriptBeforeCastHandlers();
 
+            void cleanupSpell(SpellCastResult result, int? param1 = null, int? param2 = null)
+            {
+                SendCastResult(result, param1, param2);
+                SendInterrupted(0);
+
+                if (modOwner)
+                    modOwner.SetSpellModTakingSpell(this, false);
+
+                Finish(false);
+                SetExecutedCurrently(false);
+            }
+
             // skip check if done already (for instant cast spells for example)
             if (!skipCheck)
             {
-                void cleanupSpell(SpellCastResult result, int? param1 = null, int? param2 = null)
-                {
-                    SendCastResult(result, param1, param2);
-                    SendInterrupted(0);
-
-                    if (modOwner)
-                        modOwner.SetSpellModTakingSpell(this, false);
-
-                    Finish(false);
-                    SetExecutedCurrently(false);
-                }
-
-
                 int param1 = 0, param2 = 0;
                 SpellCastResult castResult = CheckCast(false, ref param1, ref param2);
                 if (castResult != SpellCastResult.SpellCastOk)
@@ -2673,6 +2672,40 @@ namespace Game.Spells
                                         cleanupSpell(SpellCastResult.AuraBounced);
                                         return;
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // check if target already has the same type, but more powerful aura
+            if (modOwner)
+            {
+                foreach (SpellEffectInfo spellEffectInfo in GetSpellInfo().GetEffects())
+                {
+                    if (!spellEffectInfo.IsAura())
+                        continue;
+
+                    var auras = modOwner.GetAuraEffectsByType(AuraType.ModStat);
+                    foreach (var auraIt in auras)
+                    {
+                        // check if both spells are in same SpellGroups
+                        if (Global.SpellMgr.CheckSpellGroupStackRules(GetSpellInfo(), auraIt.GetSpellInfo()) == SpellGroupStackRule.ExclusiveHighest)
+                        {
+                            // compare new aura vs existing aura
+                            if (Math.Abs(spellEffectInfo.CalcBaseValue(m_caster, null, m_castItemEntry, m_castItemLevel)) < Math.Abs(auraIt.GetSpellEffectInfo().CalcBaseValue(m_caster, null, m_castItemEntry, m_castItemLevel)))
+                            {
+                                cleanupSpell(SpellCastResult.AuraBounced);
+                                return;
+                            }
+                            else if (Math.Abs(spellEffectInfo.BasePoints) == Math.Abs(auraIt.GetSpellEffectInfo().BasePoints))
+                            {
+                                // in case when baseboints match and to avoid false positive, example, spell 8097 vs 8116
+                                if (Math.Abs(spellEffectInfo.MiscValue) == Math.Abs(auraIt.GetSpellEffectInfo().MiscValue))
+                                {
+                                    cleanupSpell(SpellCastResult.AuraBounced);
+                                    return;
                                 }
                             }
                         }
