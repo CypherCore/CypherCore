@@ -24,14 +24,14 @@ namespace Game.Movement
 {
     class ChaseMovementGenerator : MovementGenerator
     {
-        static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
+        static int RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
 
         ChaseRange? _range;
         ChaseAngle? _angle;
 
         PathGenerator _path;
         Position _lastTargetPosition;
-        uint _rangeCheckTimer = RANGE_CHECK_INTERVAL;
+        TimeTrackerSmall _rangeCheckTimer;
         bool _movingTowards = true;
         bool _mutualChase = true;
 
@@ -47,12 +47,14 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Chase;
+
+            _rangeCheckTimer = new(RANGE_CHECK_INTERVAL);
         }
 
         public override void Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
-            AddFlag(MovementGeneratorFlags.Initialized);
+            AddFlag(MovementGeneratorFlags.Initialized | MovementGeneratorFlags.InformEnabled);
 
             _path = null;
             _lastTargetPosition = null;
@@ -94,28 +96,31 @@ namespace Game.Movement
             float maxTarget = _range.HasValue ? _range.Value.MaxTolerance + hitboxSum : SharedConst.ContactDistance + hitboxSum;
             ChaseAngle? angle = mutualChase ? null : _angle;
 
-            // if we're already moving, periodically check if we're already in the expected range...
-            if (owner.HasUnitState(UnitState.ChaseMove))
+            // periodically check if we're already in the expected range...
+            _rangeCheckTimer.Update((int)diff);
+            if (_rangeCheckTimer.Passed())
             {
-                if (_rangeCheckTimer > diff)
-                    _rangeCheckTimer -= diff;
-                else
+                _rangeCheckTimer.Reset(RANGE_CHECK_INTERVAL);
+                if (HasFlag(MovementGeneratorFlags.InformEnabled) && PositionOkay(owner, target, _movingTowards ? null : minTarget, _movingTowards ? maxTarget : null, angle))
                 {
-                    _rangeCheckTimer = RANGE_CHECK_INTERVAL;
-                    if (PositionOkay(owner, target, _movingTowards ? null : minTarget, _movingTowards ? maxTarget : null, angle))
-                    {
-                        _path = null;
-                        owner.StopMoving();
-                        owner.SetInFront(target);
-                        DoMovementInform(owner, target);
-                        return true;
-                    }
+                    RemoveFlag(MovementGeneratorFlags.InformEnabled);
+                    _path = null;
+
+                    Creature cOwner = owner.ToCreature();
+                    if (cOwner != null)
+                        cOwner.SetCannotReachTarget(false);
+
+                    owner.StopMoving();
+                    owner.SetInFront(target);
+                    DoMovementInform(owner, target);
+                    return true;
                 }
             }
 
             // if we're done moving, we want to clean up
             if (owner.HasUnitState(UnitState.ChaseMove) && owner.MoveSpline.Finalized())
             {
+                RemoveFlag(MovementGeneratorFlags.InformEnabled);
                 _path = null;
                 Creature cOwner = owner.ToCreature();
                 if (cOwner != null)
@@ -184,8 +189,6 @@ namespace Game.Movement
                     if (cOwner)
                         cOwner.SetCannotReachTarget(false);
 
-                    owner.AddUnitState(UnitState.ChaseMove);
-
                     bool walk = false;
                     if (cOwner && !cOwner.IsPet())
                     {
@@ -202,11 +205,13 @@ namespace Game.Movement
                         }
                     }
 
+                    owner.AddUnitState(UnitState.ChaseMove);
+                    AddFlag(MovementGeneratorFlags.InformEnabled);
+
                     MoveSplineInit init = new(owner);
                     init.MovebyPath(_path.GetPath());
                     init.SetWalk(walk);
                     init.SetFacing(target);
-
                     init.Launch();
                 }
             }
@@ -218,6 +223,7 @@ namespace Game.Movement
         public override void Deactivate(Unit owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled);
             owner.ClearUnitState(UnitState.ChaseMove);
             Creature cOwner = owner.ToCreature();
             if (cOwner != null)

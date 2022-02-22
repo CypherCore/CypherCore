@@ -24,7 +24,7 @@ namespace Game.Movement
 {
     public class FollowMovementGenerator : MovementGenerator
     {
-        static int CHECK_INTERVAL = 250;
+        static int CHECK_INTERVAL = 100;
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         float _range;
