@@ -4812,6 +4812,7 @@ namespace Game.Spells
                 return castResult;
 
             uint approximateAuraEffectMask = 0;
+            uint nonAuraEffectMask = 0;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 // for effects of spells that have only one target
@@ -5393,6 +5394,8 @@ namespace Game.Spells
 
                 if (spellEffectInfo.IsAura())
                     approximateAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                else if (spellEffectInfo.IsEffect())
+                    nonAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
             }
 
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -5517,7 +5520,7 @@ namespace Game.Spells
                 }
 
                 // check if target already has the same type, but more powerful aura
-                if (!m_spellInfo.IsTargetingArea())
+                if (nonAuraEffectMask == 0 && (approximateAuraEffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 && !m_spellInfo.IsTargetingArea())
                 {
                     Unit target = m_targets.GetUnitTarget();
                     if (target != null)

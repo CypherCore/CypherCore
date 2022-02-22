@@ -3941,13 +3941,6 @@ namespace Game.Entities
 
             if (!IsHighestExclusiveAura(aura))
             {
-                if (!aura.GetSpellInfo().IsAffectingArea())
-                {
-                    Unit caster = aura.GetCaster();
-                    if (caster && caster.IsTypeId(TypeId.Player))
-                        Spell.SendCastResult(caster.ToPlayer(), aura.GetSpellInfo(), aura.GetSpellVisual(), aura.GetCastId(), SpellCastResult.AuraBounced);
-                }
-
                 aura.Remove();
                 return;
             }
