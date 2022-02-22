@@ -101,6 +101,14 @@ namespace Game.Movement
                 }
             }
 
+            if (owner.HasUnitState(UnitState.FollowMove) && owner.MoveSpline.Finalized())
+            {
+                RemoveFlag(MovementGeneratorFlags.InformEnabled);
+                _path = null;
+                owner.ClearUnitState(UnitState.FollowMove);
+                DoMovementInform(owner, target);
+            }
+
             if (_lastTargetPosition == null || _lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
             {
                 _lastTargetPosition = new(target.GetPosition());
