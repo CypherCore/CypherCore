@@ -6786,7 +6786,7 @@ namespace Game.Spells
                 case AuraType.ModCharm:
                 case AuraType.ModPossessPet:
                 case AuraType.AoeCharm:
-                    if (target.IsTypeId(TypeId.Unit) && target.IsVehicle())
+                    if (target.GetVehicleKit() && target.GetVehicleKit().IsControllableVehicle())
                         return false;
                     if (target.IsMounted())
                         return false;

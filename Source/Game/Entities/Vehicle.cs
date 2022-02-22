@@ -434,6 +434,15 @@ namespace Game.Entities
             return false;
         }
 
+        public bool IsControllableVehicle()
+        {
+            foreach (var itr in Seats)
+                if (itr.Value.SeatInfo.HasFlag(VehicleSeatFlags.CanControl))
+                    return true;
+
+            return false;
+        }
+        
         void InitMovementInfoForBase()
         {
             VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
