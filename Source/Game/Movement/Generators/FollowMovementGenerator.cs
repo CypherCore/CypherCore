@@ -24,13 +24,13 @@ namespace Game.Movement
 {
     public class FollowMovementGenerator : MovementGenerator
     {
-        static uint CHECK_INTERVAL = 500;
+        static int CHECK_INTERVAL = 250;
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         float _range;
         ChaseAngle _angle;
 
-        uint _checkTimer = CHECK_INTERVAL;
+        TimeTrackerSmall _checkTimer;
         PathGenerator _path;
         Position _lastTargetPosition;
 
@@ -46,12 +46,14 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Follow;
+
+            _checkTimer = new(CHECK_INTERVAL);
         }
 
         public override void Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
-            AddFlag(MovementGeneratorFlags.Initialized);
+            AddFlag(MovementGeneratorFlags.Initialized | MovementGeneratorFlags.InformEnabled);
 
             owner.StopMoving();
             UpdatePetSpeed(owner);
@@ -78,33 +80,25 @@ namespace Game.Movement
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
+                _path = null;
                 owner.StopMoving();
                 _lastTargetPosition = null;
                 return true;
             }
 
-            if (owner.HasUnitState(UnitState.FollowMove))
+            _checkTimer.Update((int)diff);
+            if (_checkTimer.Passed())
             {
-                if (_checkTimer > diff)
-                    _checkTimer -= diff;
-                else
+                _checkTimer.Reset(CHECK_INTERVAL);
+                if (HasFlag(MovementGeneratorFlags.InformEnabled) && PositionOkay(owner, target, _range, _angle))
                 {
-                    _checkTimer = CHECK_INTERVAL;
-                    if (PositionOkay(owner, target, _range, _angle))
-                    {
-                        _path = null;
-                        owner.StopMoving();
-                        DoMovementInform(owner, target);
-                        return true;
-                    }
+                    RemoveFlag(MovementGeneratorFlags.InformEnabled);
+                    _path = null;
+                    owner.StopMoving();
+                    _lastTargetPosition = new();
+                    DoMovementInform(owner, target);
+                    return true;
                 }
-            }
-
-            if (owner.HasUnitState(UnitState.FollowMove) && owner.MoveSpline.Finalized())
-            {
-                _path = null;
-                owner.ClearUnitState(UnitState.FollowMove);
-                DoMovementInform(owner, target);
             }
 
             if (_lastTargetPosition == null || _lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
@@ -152,6 +146,7 @@ namespace Game.Movement
                     }
 
                     owner.AddUnitState(UnitState.FollowMove);
+                    AddFlag(MovementGeneratorFlags.InformEnabled);
 
                     MoveSplineInit init = new(owner);
                     init.MovebyPath(_path.GetPath());
@@ -166,6 +161,7 @@ namespace Game.Movement
         public override void Deactivate(Unit owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled);
             owner.ClearUnitState(UnitState.FollowMove);
         }
 
