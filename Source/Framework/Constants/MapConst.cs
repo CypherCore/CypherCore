@@ -47,7 +47,7 @@ namespace Framework.Constants
         //Liquid
         public const float LiquidTileSize = (533.333f / 128.0f);
 
-        public const int MinMapUpdateDelay = 50;
+        public const int MinMapUpdateDelay = 1;
         public const int MinGridDelay = (Time.Minute * Time.InMilliseconds);
 
         public const int MapResolution = 128;

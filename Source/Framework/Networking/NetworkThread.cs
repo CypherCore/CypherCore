@@ -91,7 +91,7 @@ namespace Framework.Networking
         {
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 
-            int sleepTime = 10;
+            int sleepTime = 1;
             while (!_stopped)
             {
                 Thread.Sleep(sleepTime);
@@ -116,7 +116,7 @@ namespace Framework.Networking
                 }
 
                 uint diff = Time.GetMSTimeDiffToNow(tickStart);
-                sleepTime = (int)(diff > 10 ? 0 : 10 - diff);
+                sleepTime = (int)(diff > 1 ? 0 : 1 - diff);
             }
 
             Log.outDebug(LogFilter.Misc, "Network Thread exits");

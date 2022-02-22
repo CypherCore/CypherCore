@@ -31,7 +31,7 @@ namespace WorldServer
 {
     public class Server
     {
-        const uint WorldSleep = 50;
+        const uint WorldSleep = 1;
 
         static void Main()
         {
@@ -189,14 +189,15 @@ namespace WorldServer
                 var realCurrTime = Time.GetMSTime();
 
                 uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
+                if (diff == 0)
+                {
+                    // sleep until enough time passes that we can update all timers
+                    Thread.Sleep(1);
+                    continue;
+                }
+
                 Global.WorldMgr.Update(diff);
                 realPrevTime = realCurrTime;
-
-                uint executionTimeDiff = Time.GetMSTimeDiffToNow(realCurrTime);
-
-                // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
-                if (executionTimeDiff < WorldSleep)
-                    Thread.Sleep((int)(WorldSleep - executionTimeDiff));
             }
         }
 

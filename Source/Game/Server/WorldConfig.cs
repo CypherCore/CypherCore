@@ -257,7 +257,7 @@ namespace Game
                 Values[WorldCfg.IntervalGridclean] = MapConst.MinGridDelay;
             }
 
-            Values[WorldCfg.IntervalMapupdate] = GetDefaultValue("MapUpdateInterval", 100);
+            Values[WorldCfg.IntervalMapupdate] = GetDefaultValue("MapUpdateInterval", 10);
             if ((int)Values[WorldCfg.IntervalMapupdate] < MapConst.MinMapUpdateDelay)
             {
                 Log.outError(LogFilter.ServerLoading, "MapUpdateInterval ({0}) must be greater {1}. Use this minimal value.", Values[WorldCfg.IntervalMapupdate], MapConst.MinMapUpdateDelay);
