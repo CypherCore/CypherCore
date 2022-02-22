@@ -8143,10 +8143,6 @@ namespace Game.Spells
                     {
                         spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, hitMask);
                         procSpellType |= ProcFlagsSpellType.Damage;
-
-                        if (caster.IsPlayer() && !spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
-                            (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged))
-                            caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
                     }
                 }
 
