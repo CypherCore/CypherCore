@@ -77,8 +77,8 @@ namespace Game.Movement
             if (target == null || !target.IsInWorld)
                 return false;
 
-            // the owner might be unable to move (rooted or casting), pause movement
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
+            // the owner might be unable to move (rooted or casting), or we have lost the target, pause movement
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || HasLostTarget(owner, target))
             {
                 owner.StopMoving();
                 _lastTargetPosition = null;
@@ -245,6 +245,11 @@ namespace Game.Movement
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
         public override void UnitSpeedChanged() { _lastTargetPosition = null; }
+
+        static bool HasLostTarget(Unit owner, Unit target)
+        {
+            return owner.GetVictim() != target;
+        }
 
         static bool IsMutualChase(Unit owner, Unit target)
         {
