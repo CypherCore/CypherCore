@@ -299,6 +299,11 @@ namespace Game.Spells
             _target.SendMessageToSet(update, true);
         }
 
+        public string GetDebugInfo()
+        {
+            return $"Base: {(GetBase() != null ? GetBase().GetDebugInfo() : "NULL")}\nTarget: {(GetTarget() != null ? GetTarget().GetDebugInfo() : "NULL")}";
+        }
+        
         public Unit GetTarget() { return _target; }
         public Aura GetBase() { return _base; }
 

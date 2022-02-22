@@ -924,8 +924,9 @@ namespace Game.Spells
                 target.m_invisibilityDetect.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after chainging state of unit
-            target.UpdateObjectVisibility();
+            // call functions which may have additional effects after changing state of unit
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModInvisibility)]
@@ -978,13 +979,15 @@ namespace Game.Spells
                 target.m_invisibility.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after chainging state of unit
+            // call functions which may have additional effects after changing state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
-            target.UpdateObjectVisibility();
+
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealthDetect)]
@@ -1009,8 +1012,9 @@ namespace Game.Spells
                 target.m_stealthDetect.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after chainging state of unit
-            target.UpdateObjectVisibility();
+            // call functions which may have additional effects after changing state of unit
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealth)]
@@ -1046,13 +1050,15 @@ namespace Game.Spells
                 }
             }
 
-            // call functions which may have additional effects after chainging state of unit
+            // call functions which may have additional effects after changing state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 // drop flag at stealth in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
-            target.UpdateObjectVisibility();
+
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealthLevel)]
@@ -1069,8 +1075,9 @@ namespace Game.Spells
             else
                 target.m_stealth.AddValue(type, -GetAmount());
 
-            // call functions which may have additional effects after chainging state of unit
-            target.UpdateObjectVisibility();
+            // call functions which may have additional effects after changing state of unit
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.DetectAmore)]
@@ -1133,7 +1140,7 @@ namespace Game.Spells
             }
             // die at aura end
             else if (target.IsAlive())
-                // call functions which may have additional effects after chainging state of unit
+                // call functions which may have additional effects after changing state of unit
                 target.SetDeathState(DeathState.JustDied);
         }
 
@@ -1709,7 +1716,7 @@ namespace Game.Spells
             else
                 target.RemoveUnitFlag(UnitFlags.NonAttackable2);
 
-            // call functions which may have additional effects after chainging state of unit
+            // call functions which may have additional effects after changing state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 if (target.GetMap().IsDungeon())
@@ -1810,7 +1817,7 @@ namespace Game.Spells
             {
                 target.AddUnitFlag(UnitFlags.Silenced);
 
-                // call functions which may have additional effects after chainging state of unit
+                // call functions which may have additional effects after changing state of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
@@ -1889,7 +1896,7 @@ namespace Game.Spells
             {
                 target.AddUnitFlag2(UnitFlags2.NoActions);
 
-                // call functions which may have additional effects after chainging state of unit
+                // call functions which may have additional effects after changing state of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
@@ -1969,8 +1976,9 @@ namespace Game.Spells
                     target.RemoveDynamicFlag(UnitDynFlags.TrackUnit);
             }
 
-            // call functions which may have additional effects after chainging state of unit
-            target.UpdateObjectVisibility();
+            // call functions which may have additional effects after changing state of unit
+            if (target.IsInWorld) 
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.Untrackable)]
@@ -4769,8 +4777,9 @@ namespace Game.Spells
                     target.m_invisibilityDetect.DelFlag(InvisibilityType.Drunk);
             }
 
-            // call functions which may have additional effects after chainging state of unit
-            target.UpdateObjectVisibility();
+            // call functions which may have additional effects after changing state of unit
+            if (target.IsInWorld)
+                target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.OverrideSpells)]

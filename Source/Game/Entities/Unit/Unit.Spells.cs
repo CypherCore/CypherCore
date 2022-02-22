@@ -24,6 +24,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Game.Entities
 {
@@ -3345,12 +3346,44 @@ namespace Game.Entities
         {
             // this may be a dead loop if some events on aura remove will continiously apply aura on remove
             // we want to have all auras removed, so use your brain when linking events
-            while (!m_appliedAuras.Empty())
-                _UnapplyAura(m_appliedAuras.FirstOrDefault(), AuraRemoveMode.Default);
+            for (int counter = 0; !m_appliedAuras.Empty() || !m_ownedAuras.Empty(); counter++)
+            {
+                foreach (var aurAppIter in GetAppliedAuras())
+                    _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
-            while (!m_ownedAuras.Empty())
-                RemoveOwnedAura(m_ownedAuras.FirstOrDefault());
+                foreach (var aurIter in GetOwnedAuras())
+                    RemoveOwnedAura(aurIter);
+
+                const int maxIteration = 50;
+                // give this loop a few tries, if there are still auras then log as much information as possible
+                if (counter >= maxIteration)
+                {
+                    StringBuilder sstr = new();
+                    sstr.AppendLine($"Unit::RemoveAllAuras() iterated {maxIteration} times already but there are still {m_appliedAuras.Count} m_appliedAuras and {m_ownedAuras.Count} m_ownedAuras. Details:");
+                    sstr.AppendLine(GetDebugInfo());
+
+                    if (!m_appliedAuras.Empty())
+                    {
+                        sstr.AppendLine("m_appliedAuras:");
+
+                        foreach (var auraAppPair in GetAppliedAuras())
+                            sstr.AppendLine(auraAppPair.Value.GetDebugInfo());
+                    }
+
+                    if (!m_ownedAuras.Empty())
+                    {
+                        sstr.AppendLine("m_ownedAuras:");
+
+                        foreach (var auraPair in GetOwnedAuras())
+                            sstr.AppendLine(auraPair.Value.GetDebugInfo());
+                    }
+
+                    Log.outError(LogFilter.Unit, sstr.ToString());
+                    break;
+                }
+            }
         }
+
         public void RemoveArenaAuras()
         {
             // in join, remove positive buffs, on end, remove negative
@@ -3364,6 +3397,7 @@ namespace Game.Entities
                     aura.GetSpellInfo().HasAttribute(SpellAttr5.RemoveEnteringArena);                             // special marker, always remove
             });
         }
+
         public void RemoveAllAurasExceptType(AuraType type)
         {
             foreach (var pair in GetAppliedAuras())
@@ -3385,6 +3419,7 @@ namespace Game.Entities
                     RemoveOwnedAura(pair, AuraRemoveMode.Default);
             }
         }
+
         public void RemoveAllAurasExceptType(AuraType type1, AuraType type2)
         {
             foreach (var pair in GetAppliedAuras())
