@@ -474,6 +474,7 @@ namespace Framework.Constants
         Possessed = 0x10000, // being possessed by another unit
         Charging = 0x20000,
         Jumping = 0x40000,
+        FollowFormation = 0x80000,
         Move = 0x100000,
         Rotating = 0x200000,
         Evade = 0x400000,
@@ -483,15 +484,17 @@ namespace Framework.Constants
         ChaseMove = 0x4000000,
         FollowMove = 0x8000000,
         IgnorePathfinding = 0x10000000,
+        FollowFormationMove = 0x20000000,
+
         AllStateSupported = Died | MeleeAttacking | Charmed | Stunned | Roaming | Chase
                             | Focusing | Fleeing | InFlight | Follow | Root | Confused
                             | Distracted | Isolated | AttackPlayer | Casting
                             | Possessed | Charging | Jumping | Move | Rotating
                             | Evade | RoamingMove | ConfusedMove | FleeingMove
-                            | ChaseMove | FollowMove | IgnorePathfinding,
+                            | ChaseMove | FollowMove | IgnorePathfinding | FollowFormationMove,
 
         Unattackable = InFlight,
-        Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,
+        Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove | FollowFormationMove,
         Controlled = Confused | Stunned | Fleeing,
         LostControl = Controlled | Possessed | Jumping | Charging,
         CannotAutoattack = Controlled | Charging | Casting,

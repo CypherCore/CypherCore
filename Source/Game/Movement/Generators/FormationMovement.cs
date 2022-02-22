@@ -47,7 +47,7 @@ namespace Game.Movement
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
-            BaseUnitState = UnitState.Roaming;
+            BaseUnitState = UnitState.FollowFormation;
         }
 
         public override void DoInitialize(Creature owner)
@@ -83,15 +83,6 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
-                owner.ClearUnitState(UnitState.RoamingMove);
-                owner.StopMoving();
-                return true;
-            }
-
-            // Leader has stopped moving, so do we as well
-            if (target.MoveSpline.Finalized() && target.MoveSpline.GetId() == _lastLeaderSplineID && _hasPredictedDestination)
-            {
-                owner.ClearUnitState(UnitState.RoamingMove);
                 owner.StopMoving();
                 _nextMoveTimer.Reset(0);
                 _hasPredictedDestination = false;
@@ -99,18 +90,18 @@ namespace Game.Movement
             }
 
             // Update home position
-            owner.SetHomePosition(owner.GetPosition());
-            if (HasFlag(MovementGeneratorFlags.Interrupted))
-                RemoveFlag(MovementGeneratorFlags.Interrupted);
-
-            // Leader has stopped moving, so do we as well
-            if (owner.HasUnitState(UnitState.RoamingMove) && _hasPredictedDestination && target.MoveSpline.Finalized() && target.MoveSpline.GetId() == _lastLeaderSplineID)
+            // If target is not moving and destination has been predicted and if we are on the same spline, we stop as well
+            if (target.MoveSpline.Finalized() && target.MoveSpline.GetId() == _lastLeaderSplineID && _hasPredictedDestination)
             {
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 _nextMoveTimer.Reset(0);
                 _hasPredictedDestination = false;
                 return true;
             }
+
+            if (!owner.MoveSpline.Finalized())
+                owner.SetHomePosition(owner.GetPosition());
 
             // Formation leader has launched a new spline, launch a new one for our member as well
             // This action does not reset the regular movement launch cycle interval
@@ -151,9 +142,9 @@ namespace Game.Movement
             }
 
             // We have reached our destination before launching a new movement. Alling facing with leader
-            if (owner.HasUnitState(UnitState.RoamingMove) && owner.MoveSpline.Finalized())
+            if (owner.HasUnitState(UnitState.FollowFormationMove) && owner.MoveSpline.Finalized())
             {
-                owner.ClearUnitState(UnitState.RoamingMove);
+                owner.ClearUnitState(UnitState.FollowFormationMove);
                 owner.SetFacingTo(target.GetOrientation());
                 MovementInform(owner);
             }
@@ -219,20 +210,21 @@ namespace Game.Movement
             init.Launch();
 
             _lastLeaderPosition = target.GetPosition();
-            owner.AddUnitState(UnitState.RoamingMove);
+            owner.AddUnitState(UnitState.FollowFormationMove);
+            RemoveFlag(MovementGeneratorFlags.Interrupted);
         }
 
         public override void DoDeactivate(Creature owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
-            owner.ClearUnitState(UnitState.RoamingMove);
+            owner.ClearUnitState(UnitState.FollowFormationMove);
         }
 
         public override void DoFinalize(Creature owner, bool active, bool movementInform)
         {
             AddFlag(MovementGeneratorFlags.Finalized);
             if (active)
-                owner.ClearUnitState(UnitState.RoamingMove);
+                owner.ClearUnitState(UnitState.FollowFormationMove);
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
                 MovementInform(owner);
