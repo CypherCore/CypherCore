@@ -657,9 +657,10 @@ namespace Game.Chat
                 Transport trans = chr.GetTransport();
                 if (trans)
                 {
-                    ulong guid = map.GenerateLowGuid(HighGuid.Creature);
+                    ulong guid = Global.ObjectMgr.GenerateCreatureSpawnId();
                     CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(guid);
                     data.SpawnId = guid;
+                    data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
                     data.Id = id;
                     data.SpawnPoint.Relocate(chr.GetTransOffsetX(), chr.GetTransOffsetY(), chr.GetTransOffsetZ(), chr.GetTransOffsetO());
                     data.spawnGroupData = new();
