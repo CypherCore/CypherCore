@@ -246,7 +246,7 @@ namespace Game.DataStorage
         public int Flags;
         public int FactionID;
         public uint CinematicSequenceID;
-        public int ResSicknessSpellID;
+        public uint ResSicknessSpellID;
         public int SplashSoundID;
         public int Alliance;
         public int RaceRelated;
@@ -471,6 +471,8 @@ namespace Game.DataStorage
         public sbyte Unknown820_1;                                              // scale related
         public float Unknown820_2;                                             // scale related
         public float[] Unknown820_3 = new float[2];                            // scale related
+
+        public CreatureModelDataFlags GetFlags() { return (CreatureModelDataFlags)Flags; }
     }
 
     public sealed class CreatureTypeRecord

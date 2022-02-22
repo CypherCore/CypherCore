@@ -301,8 +301,8 @@ namespace Game.Entities
             CreatureModelDataRecord model = CliDB.CreatureModelDataStorage.LookupByKey(display.ModelID);
             ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(displayExtra.DisplayRaceID);
 
-            if (model != null && !Convert.ToBoolean(model.Flags & 0x80))
-                if (race != null && !Convert.ToBoolean(race.Flags & 0x4))
+            if (model != null && !model.GetFlags().HasFlag(CreatureModelDataFlags.CanMountWhileTransformedAsThis))
+                if (race != null && !race.GetFlags().HasFlag(ChrRacesFlag.CanMount))
                     return true;
 
             return false;
