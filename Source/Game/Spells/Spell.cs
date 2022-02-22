@@ -954,22 +954,7 @@ namespace Game.Spells
                     Position pos = new(dest.Position);
 
                     unitCaster.MovePositionToFirstCollision(pos, dist, angle);
-                    // Generate path to that point.
-                    if (m_preGeneratedPath == null)
-                        m_preGeneratedPath = new(unitCaster);
-
-                    m_preGeneratedPath.SetPathLengthLimit(dist);
-
-                    // Should we use straightline here ? What do we do when we don't have a full path ?
-                    bool pathResult = m_preGeneratedPath.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false, true);
-                    if (pathResult && m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Normal | PathType.Shortcut))
-                    {
-                        pos.posX = m_preGeneratedPath.GetActualEndPosition().X;
-                        pos.posY = m_preGeneratedPath.GetActualEndPosition().Y;
-                        pos.posZ = m_preGeneratedPath.GetActualEndPosition().Z;
-                        dest.Relocate(pos);
-                    }
-
+                    dest.Relocate(pos);
                     break;
                 }
                 case Targets.DestCasterGround:
@@ -4999,7 +4984,7 @@ namespace Game.Spells
                             m_preGeneratedPath.SetPathLengthLimit(range);
 
                             // first try with raycast, if it fails fall back to normal path
-                            bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), false, false);
+                            bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), false);
                             if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                 return SpellCastResult.NoPath;
                             else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))

@@ -199,17 +199,11 @@ namespace Scripts.Spells.Warrior
                     PathGenerator generatedPath = new(GetCaster());
                     generatedPath.SetPathLengthLimit(range);
 
-                    bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false, true);
+                    bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
                     if (generatedPath.GetPathType().HasAnyFlag(PathType.Short))
                         return SpellCastResult.OutOfRange;
                     else if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
-                    {
-                        result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false, false);
-                        if (generatedPath.GetPathType().HasAnyFlag(PathType.Short))
-                            return SpellCastResult.OutOfRange;
-                        else if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
-                            return SpellCastResult.NoPath;
-                    }
+                        return SpellCastResult.NoPath;
                 }
                 else if (dest.GetPositionZ() > GetCaster().GetPositionZ() + 4.0f)
                     return SpellCastResult.NoPath;

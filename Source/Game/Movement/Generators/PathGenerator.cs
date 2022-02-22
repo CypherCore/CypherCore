@@ -47,7 +47,7 @@ namespace Game.Movement
             CreateFilter();
         }
 
-        public bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false)
+        public bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false)
         {
             float x, y, z;
             _source.GetPosition(out x, out y, out z);
@@ -62,7 +62,6 @@ namespace Game.Movement
             SetStartPosition(start);
 
             _forceDestination = forceDest;
-            _straightLine = straightLine;
 
             Log.outDebug(LogFilter.Maps, "PathGenerator.CalculatePath() for {0} \n", _source.GetGUID().ToString());
 
@@ -145,6 +144,7 @@ namespace Game.Movement
                 return polyRef;
             }
 
+            distance = float.MaxValue;
             return 0;
         }
 
@@ -159,6 +159,8 @@ namespace Game.Movement
 
             ulong startPoly = GetPolyByLocation(startPoint, ref distToStartPoly);
             ulong endPoly = GetPolyByLocation(endPoint, ref distToEndPoly);
+
+            pathType = PathType.Normal;
 
             // we have a hole in our mesh
             // make shortcut path and mark it as NOPATH ( with flying and swimming exception )
@@ -185,8 +187,18 @@ namespace Game.Movement
                     }
                 }
 
-                pathType = (path || waterPath) ? (PathType.Normal | PathType.NotUsingPath) : PathType.NoPath;
-                return;
+                if (path || waterPath)
+                {
+                    pathType = PathType.Normal | PathType.NotUsingPath;
+                    return;
+                }
+
+                // raycast doesn't need endPoly to be valid
+                if (!_useRaycast)
+                {
+                    pathType = PathType.NoPath;
+                    return;
+                }
             }
 
             // we may need a better number here
@@ -225,10 +237,7 @@ namespace Game.Movement
                     BuildShortcut();
                     pathType = PathType.Normal | PathType.NotUsingPath;
 
-                    if (startFarFromPoly)
-                        pathType |= PathType.FarFromPolyStart;
-                    if (endFarFromPoly)
-                        pathType |= PathType.FarFromPolyEnd;
+                    AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
 
                     return;
                 }
@@ -245,10 +254,7 @@ namespace Game.Movement
 
                     pathType = PathType.Incomplete;
 
-                    if (startFarFromPoly)
-                        pathType |= PathType.FarFromPolyStart;
-                    if (endFarFromPoly)
-                        pathType |= PathType.FarFromPolyEnd;
+                    AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
                 }
             }
 
@@ -256,7 +262,7 @@ namespace Game.Movement
 
             // start and end are on same polygon
             // handle this case as if they were 2 different polygons, building a line path split in some few points
-            if (startPoly == endPoly)
+            if (startPoly == endPoly && !_useRaycast)
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (startPoly == endPoly)\n");
 
@@ -267,10 +273,7 @@ namespace Game.Movement
                 {
                     pathType = PathType.Incomplete;
 
-                    if (startFarFromPoly)
-                        pathType |= PathType.FarFromPolyStart;
-                    if (endFarFromPoly)
-                        pathType |= PathType.FarFromPolyEnd;
+                    AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
                 }
                 else
                     pathType = PathType.Normal;
@@ -368,38 +371,12 @@ namespace Game.Movement
                 ulong[] tempPolyRefs = new ulong[_pathPolyRefs.Length];
 
                 uint dtResult;
-                if (_straightLine)
+                if (_useRaycast)
                 {
-                    float hit = 0;
-                    float[] hitNormal = new float[3];
-
-                    dtResult = _navMeshQuery.raycast(
-                        suffixStartPoly,
-                        suffixEndPoint,
-                        endPoint,
-                        _filter,
-                        ref hit,
-                        hitNormal,
-                        tempPolyRefs,
-                        ref suffixPolyLength,
-                        74 - (int)prefixPolyLength);
-
-                    // raycast() sets hit to FLT_MAX if there is a ray between start and end
-                    if (hit != float.MaxValue)
-                    {
-                        // the ray hit something, return no path instead of the incomplete one
-                        Clear();
-                        _polyLength = 2;
-                        Array.Resize(ref _pathPoints, 2);
-                        _pathPoints[0] = GetStartPosition();
-                        float[] hitPos = new float[3];
-                        Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
-                        _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
-
-                        NormalizePath();
-                        pathType = PathType.Incomplete;
-                        return;
-                    }
+                    Log.outError(LogFilter.Maps, $"PathGenerator::BuildPolyPath() called with _useRaycast with a previous path for unit {_source.GetGUID()}");
+                    BuildShortcut();
+                    pathType = PathType.NoPath;
+                    return;
                 }
                 else
                 {
@@ -442,7 +419,7 @@ namespace Game.Movement
                 Clear();
 
                 uint dtResult;
-                if (_straightLine)
+                if (_useRaycast)
                 {
                     float hit = 0;
                     float[] hitNormal = new float[3];
@@ -458,24 +435,57 @@ namespace Game.Movement
                                     ref _polyLength,
                                     74);
 
+                    if (_polyLength == 0 || Detour.dtStatusFailed(dtResult))
+                    {
+                        BuildShortcut();
+                        pathType = PathType.NoPath;
+                        AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
+                        return;
+                    }
+
                     // raycast() sets hit to FLT_MAX if there is a ray between start and end
                     if (hit != float.MaxValue)
                     {
-                        // the ray hit something, return no path instead of the incomplete one
-                        Clear();
-                        _polyLength = 2;
-                        Array.Resize(ref _pathPoints, 2);
-                        _pathPoints[0] = GetStartPosition();
                         float[] hitPos = new float[3];
+
+                        // Walk back a bit from the hit point to make sure it's in the mesh (sometimes the point is actually outside of the polygons due to float precision issues)
+                        hit *= 0.99f;
                         Detour.dtVlerp(hitPos, startPoint, endPoint, hit);
+
+                        // if it fails again, clamp to poly boundary
+                        if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(_pathPolyRefs[_polyLength - 1], hitPos, ref hitPos[1])))
+                            _navMeshQuery.closestPointOnPolyBoundary(_pathPolyRefs[_polyLength - 1], hitPos, hitPos);
+
+                        _pathPoints = new Vector3[2];
+                        _pathPoints[0] = GetStartPosition();
                         _pathPoints[1] = new Vector3(hitPos[2], hitPos[0], hitPos[1]);
 
                         NormalizePath();
                         pathType = PathType.Incomplete;
+                        AddFarFromPolyFlags(startFarFromPoly, false);
                         return;
                     }
                     else
-                        _navMeshQuery.getPolyHeight(_pathPolyRefs[_polyLength - 1], endPoint, ref endPoint[1]);
+                    {
+                        // clamp to poly boundary if we fail to get the height
+                        if (Detour.dtStatusFailed(_navMeshQuery.getPolyHeight(_pathPolyRefs[_polyLength - 1], endPoint, ref endPoint[1])))
+                            _navMeshQuery.closestPointOnPolyBoundary(_pathPolyRefs[_polyLength - 1], endPoint, endPoint);
+
+                        _pathPoints = new Vector3[2];
+                        _pathPoints[0] = GetStartPosition();
+                        _pathPoints[1] = new Vector3(endPoint[2], endPoint[0], endPoint[1]);
+
+                        NormalizePath();
+                        if (startFarFromPoly || endFarFromPoly)
+                        {
+                            pathType = PathType.Incomplete;
+
+                            AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
+                        }
+                        else
+                            pathType = PathType.Normal;
+                        return;
+                    }
                 }
                 else
                 {
@@ -506,10 +516,7 @@ namespace Game.Movement
             else
                 pathType = PathType.Incomplete;
 
-            if (startFarFromPoly)
-                pathType |= PathType.FarFromPolyStart;
-            if (endFarFromPoly)
-                pathType |= PathType.FarFromPolyEnd;
+            AddFarFromPolyFlags(startFarFromPoly, endFarFromPoly);
 
             // generate the point-path out of our up-to-date poly-path
             BuildPointPath(startPoint, endPoint);
@@ -521,31 +528,13 @@ namespace Game.Movement
             int pointCount = 0;
             uint dtResult;
 
-            if (_straightLine)
+            if (_useRaycast)
             {
-                dtResult = Detour.DT_SUCCESS;
-                pointCount = 1;
-                Array.Copy(startPoint, pathPoints, 3); // first point
-
-                // path has to be split into polygons with dist SMOOTH_PATH_STEP_SIZE between them
-                Vector3 startVec = new(startPoint[0], startPoint[1], startPoint[2]);
-                Vector3 endVec = new(endPoint[0], endPoint[1], endPoint[2]);
-                Vector3 diffVec = (endVec - startVec);
-                Vector3 prevVec = startVec;
-                float len = diffVec.Length();
-                diffVec *= 4.0f / len;
-                while (len > 4.0f)
-                {
-                    len -= 4.0f;
-                    prevVec += diffVec;
-                    pathPoints[3 * pointCount + 0] = prevVec.X;
-                    pathPoints[3 * pointCount + 1] = prevVec.Y;
-                    pathPoints[3 * pointCount + 2] = prevVec.Z;
-                    ++pointCount;
-                }
-
-                Array.Copy(endPoint, 0, pathPoints, 3 * pointCount, 3); // last point
-                ++pointCount;
+                // _straightLine uses raycast and it currently doesn't support building a point path, only a 2-point path with start and hitpoint/end is returned
+                Log.outError(LogFilter.Maps, $"PathGenerator::BuildPointPath() called with _useRaycast for unit {_source.GetGUID()}");
+                BuildShortcut();
+                pathType = PathType.NoPath;
+                return;
             }
             else if (_useStraightPath)
             {
@@ -724,7 +713,7 @@ namespace Game.Movement
             float[] targetPos = new float[3];
             if (polyPathSize > 1)
             {
-                // Pick the closest poitns on poly border
+                // Pick the closest points on poly border
                 if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[0], startPos, iterPos)))
                     return Detour.DT_FAILURE;
 
@@ -1008,6 +997,14 @@ namespace Game.Movement
             return (target.GetPositionZ() - GetActualEndPosition().Z) > 5.0f;
         }
 
+        void AddFarFromPolyFlags(bool startFarFromPoly, bool endFarFromPoly)
+        {
+            if (startFarFromPoly)
+                pathType |= PathType.FarFromPolyStart;
+            if (endFarFromPoly)
+                pathType |= PathType.FarFromPolyEnd;
+        }
+
         void Clear()
         {
             _polyLength = 0;
@@ -1056,12 +1053,13 @@ namespace Game.Movement
         public void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; }
 
         public void SetPathLengthLimit(float distance) { _pointPathLimit = Math.Min((uint)(distance / 4.0f), 74); }
+        public void SetUseRaycast(bool useRaycast) { _useRaycast = useRaycast; }
 
         ulong[] _pathPolyRefs = new ulong[74];
 
         uint _polyLength;
         uint _pointPathLimit;
-        bool _straightLine;     // use raycast if true for a straight line path
+        bool _useRaycast;     // use raycast if true for a straight line path
         WorldObject _source;
         bool _forceDestination;
         bool _useStraightPath;

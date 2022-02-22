@@ -3424,10 +3424,11 @@ namespace Game.Entities
 
             // Use a detour raycast to get our first collision point
             PathGenerator path = new(this);
-            path.CalculatePath(destx, desty, destz, false, true);
+            path.SetUseRaycast(true);
+            path.CalculatePath(destx, desty, destz, false);
 
             // We have a invalid path result. Skip further processing.
-            if ((path.GetPathType() & ~(PathType.Normal | PathType.Shortcut | PathType.Incomplete | PathType.FarFromPoly)) != 0)
+            if ((path.GetPathType() & ~(PathType.Normal | PathType.Shortcut | PathType.Incomplete | PathType.FarFromPoly | PathType.NotUsingPath)) != 0)
                 return;
 
             Vector3 result = path.GetPath()[path.GetPath().Length - 1];
@@ -3437,7 +3438,8 @@ namespace Game.Entities
 
             // check static LOS
             float halfHeight = GetCollisionHeight() * 0.5f;
-            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
+            bool col;
+            /*col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
                 pos.posX, pos.posY, pos.posZ + halfHeight,
                 destx, desty, destz + halfHeight,
                 out destx, out desty, out destz, -0.5f);
@@ -3450,7 +3452,7 @@ namespace Game.Entities
                 destx -= SharedConst.ContactDistance * MathF.Cos(angle);
                 desty -= SharedConst.ContactDistance * MathF.Sin(angle);
                 dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
-            }
+            }*/
 
             // check dynamic collision
             col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);

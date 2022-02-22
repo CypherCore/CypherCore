@@ -53,9 +53,9 @@ namespace Game.Chat
             if (para.Equals("true"))
                 useStraightPath = true;
 
-            bool useStraightLine = false;
-            if (para.Equals("line"))
-                useStraightLine = true;
+            bool useRaycast = false;
+            if (para.Equals("line") || para.Equals("ray") || para.Equals("raycast"))
+                useRaycast = true;
 
             // unit locations
             float x, y, z;
@@ -64,11 +64,12 @@ namespace Game.Chat
             // path
             PathGenerator path = new(target);
             path.SetUseStraightPath(useStraightPath);
-            bool result = path.CalculatePath(x, y, z, false, useStraightLine);
+            path.SetUseRaycast(useRaycast);
+            bool result = path.CalculatePath(x, y, z, false);
 
             var pointPath = path.GetPath();
             handler.SendSysMessage("{0}'s path to {1}:", target.GetName(), player.GetName());
-            handler.SendSysMessage("Building: {0}", useStraightPath ? "StraightPath" : useStraightLine ? "Raycast" : "SmoothPath");
+            handler.SendSysMessage("Building: {0}", useStraightPath ? "StraightPath" : useRaycast ? "Raycast" : "SmoothPath");
             handler.SendSysMessage("Result: {0} - Length: {1} - Type: {2}", (result ? "true" : "false"), pointPath.Length, path.GetPathType());
 
             var start = path.GetStartPosition();
