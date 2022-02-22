@@ -1980,7 +1980,10 @@ namespace Game.Entities
                 if (ssEntry != null && ssEntry.CreatureType > 0)
                     return (CreatureType)ssEntry.CreatureType;
                 else
-                    return CreatureType.Humanoid;
+                {
+                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
+                    return raceEntry.CreatureType;
+                }
             }
             else
                 return ToCreature().GetCreatureTemplate().CreatureType;

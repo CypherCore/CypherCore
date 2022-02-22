@@ -356,6 +356,13 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
+                if (raceEntry.GetFlags().HasFlag(ChrRacesFlag.NPCOnly))
+                {
+                    Log.outError(LogFilter.Network, $"Race ({charCreate.CreateInfo.RaceId}) was not playable but requested while creating new char for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
+                    SendCharCreate(ResponseCodes.CharCreateDisabled);
+                    return;
+                }
+
                 ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
                 if (Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(charCreate.CreateInfo.RaceId) & raceMaskDisabled))
                 {
