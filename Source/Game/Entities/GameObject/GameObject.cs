@@ -1356,7 +1356,7 @@ namespace Game.Entities
                         return false;
 
                     // scan GO chest with loot including quest items
-                    if (LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GetLootId(), target))
+                    if (target.GetQuestStatus(GetGoInfo().Chest.questID) == QuestStatus.Incomplete || LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GetLootId(), target))
                     {
                         Battleground bg = target.GetBattleground();
                         if (bg)
