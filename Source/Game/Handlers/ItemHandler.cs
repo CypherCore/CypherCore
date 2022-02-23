@@ -481,8 +481,8 @@ namespace Game
                         }
                         else
                         {
-                            pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                             pl.RemoveItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
+                            pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                             Item.RemoveItemFromUpdateQueueOf(pItem, pl);
                             pl.AddItemToBuyBackSlot(pItem);
                         }

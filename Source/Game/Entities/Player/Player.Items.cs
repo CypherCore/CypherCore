@@ -1305,15 +1305,15 @@ namespace Game.Entities
             Item item = Item.CreateItem(itemId, count, context, this);
             if (item != null)
             {
-                ItemAddedQuestCheck(itemId, count);
-                UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
-                UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
-
                 item.AddItemFlag(ItemFieldFlags.NewItem);
 
                 item.SetBonuses(bonusListIDs);
 
                 item = StoreItem(pos, item, update);
+
+                ItemAddedQuestCheck(itemId, count);
+                UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
+                UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
                 item.SetFixedLevel(GetLevel());
                 item.SetItemRandomBonusList(randomBonusListId);
@@ -1576,9 +1576,10 @@ namespace Game.Entities
             Item pItem = Item.CreateItem(item, 1, context, this);
             if (pItem != null)
             {
-                ItemAddedQuestCheck(item, 1);
                 UpdateCriteria(CriteriaType.ObtainAnyItem, item, 1);
-                return EquipItem(pos, pItem, update);
+                Item equippedItem = EquipItem(pos, pItem, update);
+                ItemAddedQuestCheck(item, 1);
+                return equippedItem;
             }
 
             return null;
@@ -4265,8 +4266,8 @@ namespace Game.Entities
             Item it = GetItemByPos(bag, slot);
             if (it != null)
             {
-                ItemRemovedQuestCheck(it.GetEntry(), it.GetCount());
                 RemoveItem(bag, slot, update);
+                ItemRemovedQuestCheck(it.GetEntry(), it.GetCount());
                 it.SetNotRefundable(this, false, null, false);
                 Item.RemoveItemFromUpdateQueueOf(it, this);
                 GetSession().GetCollectionMgr().RemoveTemporaryAppearance(it);
@@ -4279,9 +4280,8 @@ namespace Game.Entities
         }
         public void MoveItemToInventory(List<ItemPosCount> dest, Item pItem, bool update, bool in_characterInventoryDB = false)
         {
-            // update quest counters
-            ItemAddedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-            UpdateCriteria(CriteriaType.ObtainAnyItem, pItem.GetEntry(), pItem.GetCount());
+            uint itemId = pItem.GetEntry();
+            uint count = pItem.GetCount();
 
             // store item
             Item pLastItem = StoreItem(dest, pItem, update);
@@ -4300,6 +4300,10 @@ namespace Game.Entities
                 if (pLastItem.IsBOPTradeable())
                     AddTradeableItem(pLastItem);
             }
+
+            // update quest counters
+            ItemAddedQuestCheck(itemId, count);
+            UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
         }
 
         //Bank
@@ -5490,7 +5494,6 @@ namespace Game.Entities
 
                 ApplyItemObtainSpells(pItem, false);
 
-                ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                 Global.ScriptMgr.OnItemRemove(this, pItem);
 
                 Bag pBag;
@@ -5541,6 +5544,8 @@ namespace Game.Entities
                 if (pProto.HasFlag(ItemFlags.HasLoot))
                     Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
 
+                ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
+
                 if (IsInWorld && update)
                 {
                     pItem.RemoveFromWorld();
@@ -5585,8 +5590,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
@@ -5620,8 +5625,8 @@ namespace Game.Entities
                                 }
                                 else
                                 {
-                                    ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                                     item.SetCount(item.GetCount() - count + remcount);
+                                    ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
@@ -5654,8 +5659,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
@@ -5682,8 +5687,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
@@ -5717,8 +5722,8 @@ namespace Game.Entities
                                 }
                                 else
                                 {
-                                    ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                                     item.SetCount(item.GetCount() - count + remcount);
+                                    ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
@@ -5750,8 +5755,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
@@ -5779,8 +5784,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
@@ -5808,8 +5813,8 @@ namespace Game.Entities
                         }
                         else
                         {
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
