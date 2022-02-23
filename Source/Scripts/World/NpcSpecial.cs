@@ -162,17 +162,6 @@ namespace Scripts.World.NpcSpecial
         //Guardianspells
         public const uint Deathtouch = 5;
 
-        //Sayge
-        public const uint Strength = 23735; // +10% Strength
-        public const uint Agility = 23736; // +10% Agility
-        public const uint Stamina = 23737; // +10% Stamina
-        public const uint Spirit = 23738; // +10% Spirit
-        public const uint Intellect = 23766; // +10% Intellect
-        public const uint Armor = 23767; // +10% Armor
-        public const uint Damage = 23768; // +10% Damage
-        public const uint Resistance = 23769; // +25 Magic Resistance (All)
-        public const uint Fortune = 23765;  // Darkmoon Faire Fortune
-
         //Tonkmine
         public const uint TonkMineDetonate = 25099;
 
@@ -296,28 +285,6 @@ namespace Scripts.World.NpcSpecial
 
     struct GossipMenus
     {
-        //Sayge
-        public const int OptionIdAnswer1 = 0;
-        public const int OptionIdAnswer2 = 1;
-        public const int OptionIdAnswer3 = 2;
-        public const int OptionIdAnswer4 = 3;
-        public const int IAmReadyToDiscover = 6186;
-        public const int OptionSayge = 6185;
-        public const int OptionSayge2 = 6187;
-        public const int OptionSayge3 = 6208;
-        public const int OptionSayge4 = 6209;
-        public const int OptionSayge5 = 6210;
-        public const int OptionSayge6 = 6211;
-        public const int IHaveLongKnown = 7339;
-        public const int YouHaveBeenTasked = 7340;
-        public const int SwornExecutioner = 7341;
-        public const int DiplomaticMission = 7361;
-        public const int YourBrotherSeeks = 7362;
-        public const int ATerribleBeast = 7363;
-        public const int YourFortuneIsCast = 7364;
-        public const int HereIsYourFortune = 7365;
-        public const int CantGiveYouYour = 7393;
-
         //Wormhole
         public const int MenuIdWormhole = 10668; // "This tear in the fabric of time and space looks ominous."
         public const int OptionIdWormhole1 = 0;  // "Borean Tundra"
@@ -1077,10 +1044,10 @@ namespace Scripts.World.NpcSpecial
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void SpellHit(Unit caster, SpellInfo spell)
+        public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
             Player player = caster.ToPlayer();
-            if (!player || !me.IsAlive() || spell.Id != 20804)
+            if (!player || !me.IsAlive() || spellInfo.Id != 20804)
                 return;
 
             if (player.GetQuestStatus(6624) == QuestStatus.Incomplete || player.GetQuestStatus(6622) == QuestStatus.Incomplete)
@@ -1199,9 +1166,9 @@ namespace Scripts.World.NpcSpecial
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void SpellHit(Unit caster, SpellInfo spell)
+        public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
-            if (spell.Id == SpellIds.LesserHealR2 || spell.Id == SpellIds.FortitudeR1)
+            if (spellInfo.Id == SpellIds.LesserHealR2 || spellInfo.Id == SpellIds.FortitudeR1)
             {
                 //not while in combat
                 if (me.IsInCombat())
@@ -1216,16 +1183,16 @@ namespace Scripts.World.NpcSpecial
                 {
                     if (quest != 0 && player.GetQuestStatus(quest) == QuestStatus.Incomplete)
                     {
-                        if (IsHealed && !CanRun && spell.Id == SpellIds.FortitudeR1)
+                        if (IsHealed && !CanRun && spellInfo.Id == SpellIds.FortitudeR1)
                         {
-                            Talk(TextIds.SayThanks, caster);
+                            Talk(TextIds.SayThanks, player);
                             CanRun = true;
                         }
-                        else if (!IsHealed && spell.Id == SpellIds.LesserHealR2)
+                        else if (!IsHealed && spellInfo.Id == SpellIds.LesserHealR2)
                         {
-                            CasterGUID = caster.GetGUID();
+                            CasterGUID = player.GetGUID();
                             me.SetStandState(UnitStandStateType.Stand);
-                            Talk(TextIds.SayHealed, caster);
+                            Talk(TextIds.SayHealed, player);
                             IsHealed = true;
                         }
                     }
@@ -1298,127 +1265,6 @@ namespace Scripts.World.NpcSpecial
                 DoCastVictim(SpellIds.Deathtouch, new CastSpellExtraArgs(true));
                 me.ResetAttackTimer();
             }
-        }
-    }
-
-    [Script]
-    class npc_sayge : ScriptedAI
-    {
-        public npc_sayge(Creature creature) : base(creature) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (me.IsQuestGiver())
-                player.PrepareQuestMenu(me.GetGUID());
-
-            if (player.GetSpellHistory().HasCooldown(SpellIds.Strength) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Agility) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Stamina) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Spirit) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Intellect) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Armor) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Damage) ||
-                player.GetSpellHistory().HasCooldown(SpellIds.Resistance))
-                player.SendGossipMenu(GossipMenus.CantGiveYouYour, me.GetGUID());
-            else
-            {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.IAmReadyToDiscover, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                player.SendGossipMenu(GossipMenus.IHaveLongKnown, me.GetGUID());
-            }
-
-            return true;
-        }
-
-        void SendAction(Player player, uint action)
-        {
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-                    player.SendGossipMenu(GossipMenus.YouHaveBeenTasked, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 1, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                    player.SendGossipMenu(GossipMenus.SwornExecutioner, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 3:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                    player.SendGossipMenu(GossipMenus.DiplomaticMission, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 4:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 6, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 7, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 8, eTradeskill.GossipActionInfoDef);
-                    player.SendGossipMenu(GossipMenus.YourBrotherSeeks, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 5:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                    player.SendGossipMenu(GossipMenus.ATerribleBeast, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge6, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
-                    player.SendGossipMenu(GossipMenus.YourFortuneIsCast, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 6:
-                    DoCast(player, SpellIds.Fortune, new CastSpellExtraArgs(false));
-                    player.SendGossipMenu(GossipMenus.HereIsYourFortune, me.GetGUID());
-                    break;
-            }
-        }
-
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-            player.PlayerTalkClass.ClearMenus();
-            uint spellId = 0;
-            switch (sender)
-            {
-                case eTradeskill.GossipSenderMain:
-                    SendAction(player, action);
-                    break;
-                case eTradeskill.GossipSenderMain + 1:
-                    spellId = SpellIds.Damage;
-                    break;
-                case eTradeskill.GossipSenderMain + 2:
-                    spellId = SpellIds.Resistance;
-                    break;
-                case eTradeskill.GossipSenderMain + 3:
-                    spellId = SpellIds.Armor;
-                    break;
-                case eTradeskill.GossipSenderMain + 4:
-                    spellId = SpellIds.Spirit;
-                    break;
-                case eTradeskill.GossipSenderMain + 5:
-                    spellId = SpellIds.Intellect;
-                    break;
-                case eTradeskill.GossipSenderMain + 6:
-                    spellId = SpellIds.Stamina;
-                    break;
-                case eTradeskill.GossipSenderMain + 7:
-                    spellId = SpellIds.Strength;
-                    break;
-                case eTradeskill.GossipSenderMain + 8:
-                    spellId = SpellIds.Agility;
-                    break;
-            }
-
-            if (spellId != 0)
-            {
-                DoCast(player, spellId, new CastSpellExtraArgs(false));
-                player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
-                SendAction(player, action);
-            }
-            return true;
         }
     }
 

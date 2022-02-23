@@ -664,24 +664,14 @@ namespace Game.AI
             }
         }
 
-        public override void SpellHit(Unit caster, SpellInfo spellInfo)
+        public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
-            GetScript().ProcessEventsFor(SmartEvents.SpellHit, caster, 0, 0, false, spellInfo);
-        }
-
-        public override void SpellHitByGameObject(GameObject obj, SpellInfo spellInfo)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.SpellHit, null, 0, 0, false, spellInfo, obj);
+            GetScript().ProcessEventsFor(SmartEvents.SpellHit, caster.ToUnit(), 0, 0, false, spellInfo, caster.ToGameObject());
         }
         
-        public override void SpellHitTarget(Unit target, SpellInfo spellInfo)
+        public override void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
         {
-            GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, target, 0, 0, false, spellInfo);
-        }
-
-        public override void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, null, 0, 0, false, spellInfo, target);
+            GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, target.ToUnit(), 0, 0, false, spellInfo, target.ToGameObject());
         }
         
         public override void DamageTaken(Unit attacker, ref uint damage)
@@ -1199,9 +1189,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.GoEventInform, null, eventId);
         }
 
-        public override void SpellHit(Unit unit, SpellInfo spellInfo)
+        public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
-            GetScript().ProcessEventsFor(SmartEvents.SpellHit, unit, 0, 0, false, spellInfo);
+            GetScript().ProcessEventsFor(SmartEvents.SpellHit, caster.ToUnit(), 0, 0, false, spellInfo);
         }
 
         public override void JustSummoned(Creature creature)

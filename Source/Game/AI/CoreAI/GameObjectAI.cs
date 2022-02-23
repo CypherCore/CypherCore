@@ -95,12 +95,10 @@ namespace Game.AI
         public virtual void EventInform(uint eventId) { }
 
         // Called when hit by a spell
-        public virtual void SpellHit(Unit caster, SpellInfo spellInfo) { }
-        public virtual void SpellHitByGameObject(GameObject caster, SpellInfo spellInfo) { }
+        public virtual void SpellHit(WorldObject caster, SpellInfo spellInfo) { }
 
         // Called when spell hits a target
-        public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
-        public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
+        public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo) { }
 
         // Called when the gameobject summon successfully other creature
         public virtual void JustSummoned(Creature summon) { }

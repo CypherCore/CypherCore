@@ -294,9 +294,9 @@ namespace Scripts.World.EmeraldDragons
             }
         }
 
-        public override void SpellHitTarget(Unit target, SpellInfo spell)
+        public override void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
         {
-            if (spell.Id == SpellIds.DrawSpirit && target.IsTypeId(TypeId.Player))
+            if (spellInfo.Id == SpellIds.DrawSpirit && target.IsPlayer())
             {
                 Position targetPos = target.GetPosition();
                 me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, 50000);

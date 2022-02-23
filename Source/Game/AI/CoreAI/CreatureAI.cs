@@ -486,12 +486,10 @@ namespace Game.AI
         public virtual void JustUnregisteredAreaTrigger(AreaTrigger areaTrigger) { }
 
         // Called when hit by a spell
-        public virtual void SpellHit(Unit caster, SpellInfo spellInfo) { }
-        public virtual void SpellHitByGameObject(GameObject caster, SpellInfo spellInfo) { }
+        public virtual void SpellHit(WorldObject caster, SpellInfo spellInfo) { }
 
         // Called when spell hits a target
-        public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
-        public virtual void SpellHitTargetGameObject(GameObject target, SpellInfo spellInfo) { }
+        public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo) { }
 
         // Called when a spell cast gets interrupted
         public virtual void OnSpellCastInterrupt(SpellInfo spell) { }

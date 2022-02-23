@@ -72,13 +72,13 @@ namespace Scripts.Pets
             }
 
             // Fly away when dismissed
-            public override void SpellHit(Unit source, SpellInfo spell)
+            public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
             {
-                if (spell.Id != SpellIds.DismissGargoyle || !me.IsAlive())
+                if (spellInfo.Id != SpellIds.DismissGargoyle || !me.IsAlive())
                     return;
 
                 Unit owner = me.GetOwner();
-                if (!owner || owner != source)
+                if (!owner || owner != caster)
                     return;
 
                 // Stop Fighting
