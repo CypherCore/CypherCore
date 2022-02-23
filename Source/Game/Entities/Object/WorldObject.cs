@@ -3428,8 +3428,9 @@ namespace Game.Entities
             path.CalculatePath(destx, desty, destz, false);
 
             // We have a invalid path result. Skip further processing.
-            if ((path.GetPathType() & ~(PathType.Normal | PathType.Shortcut | PathType.Incomplete | PathType.FarFromPoly | PathType.NotUsingPath)) != 0)
-                return;
+            if (!path.GetPathType().HasFlag(PathType.NotUsingPath))
+                if ((path.GetPathType() & ~(PathType.Normal | PathType.Shortcut | PathType.Incomplete | PathType.FarFromPoly)) != 0)
+                    return;
 
             Vector3 result = path.GetPath()[path.GetPath().Length - 1];
             destx = result.X;
@@ -3438,22 +3439,27 @@ namespace Game.Entities
 
             // check static LOS
             float halfHeight = GetCollisionHeight() * 0.5f;
-            bool col;
-            /*col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
-                pos.posX, pos.posY, pos.posZ + halfHeight,
-                destx, desty, destz + halfHeight,
-                out destx, out desty, out destz, -0.5f);
+            bool col = false;
 
-            destz -= halfHeight;
-
-            // Collided with static LOS object, move back to collision point
-            if (col)
+            // Unit is flying, check for potential collision via vmaps
+            if (path.GetPathType().HasFlag(PathType.NotUsingPath))
             {
-                destx -= SharedConst.ContactDistance * MathF.Cos(angle);
-                desty -= SharedConst.ContactDistance * MathF.Sin(angle);
-                dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
-            }*/
+                col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
+                    pos.posX, pos.posY, pos.posZ + halfHeight,
+                    destx, desty, destz + halfHeight,
+                    out destx, out desty, out destz, -0.5f);
 
+                destz -= halfHeight;
+
+                // Collided with static LOS object, move back to collision point
+                if (col)
+                {
+                    destx -= SharedConst.ContactDistance * MathF.Cos(angle);
+                    desty -= SharedConst.ContactDistance * MathF.Sin(angle);
+                    dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
+                }
+            }
+            
             // check dynamic collision
             col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
