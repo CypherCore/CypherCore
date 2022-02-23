@@ -1117,6 +1117,16 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.AttackStop:
+                {
+                    foreach (var target in targets)
+                    {
+                        var unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                            unitTarget.AttackStop();
+                    }
+                    break;
+                }
                 case SmartActions.MoveOffset:
                 {
                     foreach (var target in targets)

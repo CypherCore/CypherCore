@@ -300,7 +300,7 @@ namespace Framework.Constants
         MountToEntryOrModel = 43,     // CreatureTemplate Entry(Param1) Or Modelid (Param2) (Or 0 For Both To Dismount)
         SetIngamePhaseId = 44,     // Id
         SetData = 45,     // Field, Data (Only Creature Todo)
-        //46 Unused
+        AttackStop = 46,
         SetVisibility = 47,     // On/Off
         SetActive = 48,     // No Params
         AttackStart = 49,     //

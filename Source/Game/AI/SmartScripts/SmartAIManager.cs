@@ -1529,6 +1529,7 @@ namespace Game.AI
                 case SmartActions.CallForHelp:
                 case SmartActions.SetData:
                 case SmartActions.SetVisibility:
+                case SmartActions.AttackStop:
                 case SmartActions.WpPause:
                 case SmartActions.SetDisableGravity:
                 case SmartActions.SetCanFly:
