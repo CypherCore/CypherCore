@@ -1925,7 +1925,7 @@ namespace Game.Entities
             }
         }
 
-        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, int damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false)
+        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, int damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false, Spell spell = null)
         {
             if (damage < 0)
                 return;
@@ -2032,7 +2032,7 @@ namespace Game.Entities
             damageInfo.damage = (uint)damage;
             damageInfo.originalDamage = (uint)damage;
             DamageInfo dmgInfo = new(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
-            CalcAbsorbResist(dmgInfo);
+            CalcAbsorbResist(dmgInfo, spell);
             damageInfo.absorb = dmgInfo.GetAbsorb();
             damageInfo.resist = dmgInfo.GetResist();
 

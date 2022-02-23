@@ -42,6 +42,7 @@ namespace Framework.Constants
         CheckCast,
         BeforeCast,
         OnCast,
+        OnResistAbsorbCalculation,
         AfterCast,
         CalcCritChance
     }

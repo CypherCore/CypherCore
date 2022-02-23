@@ -148,6 +148,7 @@ namespace Game.Scripting
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate SpellCastResult SpellCheckCastFnType();
+        public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
         public delegate void SpellEffectFnType(uint index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
         public delegate void SpellHitFnType();
@@ -184,6 +185,21 @@ namespace Game.Scripting
             SpellCheckCastFnType _checkCastHandlerScript;
         }
 
+        public class OnCalculateResistAbsorbHandler
+        {
+            public OnCalculateResistAbsorbHandler(SpellOnResistAbsorbCalculateFnType onResistAbsorbCalculateHandlerScript)
+            {
+                _onCalculateResistAbsorbHandlerScript = onResistAbsorbCalculateHandlerScript;
+            }
+
+            public void Call(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+            {
+                _onCalculateResistAbsorbHandlerScript(damageInfo, ref resistAmount, ref absorbAmount);
+            }
+
+            SpellOnResistAbsorbCalculateFnType _onCalculateResistAbsorbHandlerScript;
+        }
+        
         public class EffectHandler : EffectHook
         {
             public EffectHandler(SpellEffectFnType pEffectHandlerScript, uint effIndex, SpellEffectName effName) : base(effIndex)
@@ -497,6 +513,9 @@ namespace Game.Scripting
 
         // where function is SpellCastResult function()
         public List<CheckCastHandler> OnCheckCast = new();
+
+        // where function is void function(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+        public List<OnCalculateResistAbsorbHandler> OnCalculateResistAbsorb = new();
 
         // where function is void function(uint effIndex)
         public List<EffectHandler> OnEffectLaunch = new();

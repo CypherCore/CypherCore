@@ -7344,6 +7344,19 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+        {
+            foreach (var script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.OnResistAbsorbCalculation);
+
+                foreach (var hook in script.OnCalculateResistAbsorb)
+                    hook.Call(damageInfo, ref resistAmount, ref absorbAmount);
+
+                script._FinishScriptCall();
+            }
+        }
+        
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
             // Skip if there are not any script

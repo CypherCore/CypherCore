@@ -3112,6 +3112,15 @@ namespace Game.Entities
                         spellEffectInfo.ApplyAuraName = AuraType.PeriodicTriggerSpell;
                     });
                 });
+
+                // Lich Pet
+                ApplySpellFix(new [] { 70050 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 70049;
+                    });
+                });
             }
 
             // Allows those to crit
@@ -3258,8 +3267,9 @@ namespace Game.Entities
                 43109, // Throw Torch
                 58552, // Return to Orgrimmar
                 58533, // Return to Stormwind
-                21855,  // Challenge Flag
-                51122  // Fierce Lightning Stike
+                21855, // Challenge Flag
+                51122, // Fierce Lightning Stike
+                71848  // Toxic Wasteling Find Target
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;
@@ -3659,6 +3669,12 @@ namespace Game.Entities
                 spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(4); // 2 minutes
             });
 
+            // Dark Conclave Ritualist Channel
+            ApplySpellFix(new [] { 38469 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
+            });
+
             //
             // VIOLET HOLD SPELLS
             //
@@ -3925,13 +3941,6 @@ namespace Game.Entities
                 {
                     spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitTargetEnemy);
                 });
-            });
-
-            // Mutated Transformation (Professor Putricide)
-            ApplySpellFix(new[] { 70402 }, spellInfo =>
-            {
-                // Resistance is calculated inside of SpellScript
-                spellInfo.AttributesEx4 |= SpellAttr4.IgnoreResistances;
             });
 
             // Empowered Flare (Blood Prince Council)

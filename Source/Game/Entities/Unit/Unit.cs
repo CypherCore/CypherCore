@@ -1982,7 +1982,7 @@ namespace Game.Entities
                 else
                 {
                     var raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
-                    return raceEntry.CreatureType;
+                    return  (CreatureType)raceEntry.CreatureType;
                 }
             }
             else
@@ -3282,13 +3282,12 @@ namespace Game.Entities
             return victimResistance / (victimResistance + resistanceConstant);
         }
 
-        public static void CalcAbsorbResist(DamageInfo damageInfo)
+        public static void CalcAbsorbResist(DamageInfo damageInfo, Spell spell = null)
         {
             if (!damageInfo.GetVictim() || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
                 return;
 
             uint resistedDamage = CalcSpellResistedDamage(damageInfo.GetAttacker(), damageInfo.GetVictim(), damageInfo.GetDamage(), damageInfo.GetSchoolMask(), damageInfo.GetSpellInfo());
-            damageInfo.ResistDamage(resistedDamage);
 
             // Ignore Absorption Auras
             float auraAbsorbMod = 0f;
@@ -3300,6 +3299,10 @@ namespace Game.Entities
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
             int absorbIgnoringDamage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), auraAbsorbMod);
+            if (spell != null)
+                spell.CallScriptOnResistAbsorbCalculateHandlers(damageInfo, ref resistedDamage, ref absorbIgnoringDamage);
+
+            damageInfo.ResistDamage(resistedDamage);
             damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
