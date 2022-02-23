@@ -1100,9 +1100,9 @@ namespace Game.Movement
         Empty = 0,
         MagmaSlime = 8, // don't need to differentiate between them
         Water = 9,
-        Ground = 10,
-        GroundSteep = 11,
-        MaxValue = GroundSteep,
+        GroundSteep = 10,
+        Ground = 11,
+        MaxValue = Ground,
         MinValue = MagmaSlime,
         AllMask = 0x3F // max allowed value
         // areas 1-60 will be used for destructible areas (currently skipped in vmaps, WMO with flag 1)
@@ -1112,8 +1112,8 @@ namespace Game.Movement
     public enum NavTerrainFlag
     {
         Empty = 0x00,
-        GroundSteep = 1 << (NavArea.MaxValue - NavArea.GroundSteep),
         Ground = 1 << (NavArea.MaxValue - NavArea.Ground),
+        GroundSteep = 1 << (NavArea.MaxValue - NavArea.GroundSteep),
         Water = 1 << (NavArea.MaxValue - NavArea.Water),
         MagmaSlime = 1 << (NavArea.MaxValue - NavArea.MagmaSlime)
     }
