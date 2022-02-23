@@ -357,6 +357,13 @@ namespace Game.DungeonFinding
             if (!player || player.GetSession() == null || dungeons.Empty())
                 return;
 
+            // At least 1 role must be selected
+            if ((roles & (LfgRoles.Tank | LfgRoles.Healer | LfgRoles.Damage)) == 0)
+                return;
+
+            // Sanitize input roles
+            roles &= LfgRoles.Any;
+
             Group grp = player.GetGroup();
             ObjectGuid guid = player.GetGUID();
             ObjectGuid gguid = grp ? grp.GetGUID() : guid;
@@ -668,6 +675,9 @@ namespace Game.DungeonFinding
             var roleCheck = RoleChecksStore.LookupByKey(gguid);
             if (roleCheck == null)
                 return;
+
+            // Sanitize input roles
+            roles &= LfgRoles.Any;
 
             bool sendRoleChosen = roleCheck.state != LfgRoleCheckState.Default && !guid.IsEmpty();
 

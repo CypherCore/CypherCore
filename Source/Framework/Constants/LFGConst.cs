@@ -26,7 +26,8 @@ namespace Framework.Constants
         Leader = 0x01,
         Tank = 0x02,
         Healer = 0x04,
-        Damage = 0x08
+        Damage = 0x08,
+        Any = Leader | Tank | Healer | Damage
     }
 
     public enum LfgUpdateType
