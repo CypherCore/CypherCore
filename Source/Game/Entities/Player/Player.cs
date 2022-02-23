@@ -3432,7 +3432,7 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     break;
                 // Wintergrasp
-                case 4197:
+                case (uint)AreaId.Wintergrasp:
                     if (bf != null && bf.GetTypeId() == (uint)BattleFieldTypes.WinterGrasp)
                         bf.FillInitialWorldStates(packet);
                     goto default;

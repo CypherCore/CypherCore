@@ -23,7 +23,6 @@ namespace Game.BattleFields
 {
     static class WGConst
     {
-        public const uint ZoneId = 4197;             // Wintergrasp
         public const uint MapId = 571;               // Northrend
 
         public const byte MaxOutsideNpcs = 14;
@@ -546,17 +545,6 @@ namespace Game.BattleFields
         public const uint Horde = 5;
         public const uint Alliance = 6;
         public const uint Max = 7;
-    }
-
-    public struct WintergraspAreaIds
-    {
-        public const uint WintergraspFortress = 4575;
-        public const uint TheSunkenRing = 4538;
-        public const uint TheBrokenTemplate = 4539;
-        public const uint WestparkWorkshop = 4611;
-        public const uint EastparkWorkshop = 4612;
-        public const uint Wintergrasp = 4197;
-        public const uint TheChilledQuagmire = 4589;
     }
 
     struct WintergraspQuests

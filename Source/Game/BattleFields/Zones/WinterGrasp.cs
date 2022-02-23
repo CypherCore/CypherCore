@@ -30,7 +30,7 @@ namespace Game.BattleFields
         {
             m_TypeId = (uint)BattleFieldTypes.WinterGrasp;                              // See enum BattlefieldTypes
             m_BattleId = BattlefieldIds.WG;
-            m_ZoneId = WGConst.ZoneId;
+            m_ZoneId = (uint)AreaId.Wintergrasp;
             m_MapId = WGConst.MapId;
             m_Map = Global.MapMgr.CreateBaseMap(m_MapId);
 
@@ -431,21 +431,21 @@ namespace Game.BattleFields
 
         uint GetSpiritGraveyardId(uint areaId)
         {
-            switch (areaId)
+            switch ((AreaId)areaId)
             {
-                case WintergraspAreaIds.WintergraspFortress:
+                case AreaId.WintergraspFortress:
                     return WGGraveyardId.Keep;
-                case WintergraspAreaIds.TheSunkenRing:
+                case AreaId.TheSunkenRing:
                     return WGGraveyardId.WorkshopNE;
-                case WintergraspAreaIds.TheBrokenTemplate:
+                case AreaId.TheBrokenTemplate:
                     return WGGraveyardId.WorkshopNW;
-                case WintergraspAreaIds.WestparkWorkshop:
+                case AreaId.WestparkWorkshop:
                     return WGGraveyardId.WorkshopSW;
-                case WintergraspAreaIds.EastparkWorkshop:
+                case AreaId.EastparkWorkshop:
                     return WGGraveyardId.WorkshopSE;
-                case WintergraspAreaIds.Wintergrasp:
+                case AreaId.Wintergrasp:
                     return WGGraveyardId.Alliance;
-                case WintergraspAreaIds.TheChilledQuagmire:
+                case AreaId.TheChilledQuagmire:
                     return WGGraveyardId.Horde;
                 default:
                     Log.outError(LogFilter.Battlefield, "BattlefieldWG.GetSpiritGraveyardId: Unexpected Area Id {0}", areaId);
@@ -741,14 +741,14 @@ namespace Game.BattleFields
 
         public override uint GetData(uint data)
         {
-            switch (data)
+            switch ((AreaId)data)
             {
                 // Used to determine when the phasing spells must be cast
                 // See: SpellArea.IsFitToRequirements
-                case WintergraspAreaIds.TheSunkenRing:
-                case WintergraspAreaIds.TheBrokenTemplate:
-                case WintergraspAreaIds.WestparkWorkshop:
-                case WintergraspAreaIds.EastparkWorkshop:
+                case AreaId.TheSunkenRing:
+                case AreaId.TheBrokenTemplate:
+                case AreaId.WestparkWorkshop:
+                case AreaId.EastparkWorkshop:
                     // Graveyards and Workshops are controlled by the same team.
                     BfGraveyard graveyard = GetGraveyardById((int)GetSpiritGraveyardId(data));
                     if (graveyard != null)

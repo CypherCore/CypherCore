@@ -2939,4 +2939,15 @@ namespace Framework.Constants
         EnabledWithoutAutoIgnore = 1,
         EnabledWithAutoIgnore = 2
     }
+
+    public enum AreaId
+    {
+        Wintergrasp = 4197,
+        TheSunkenRing = 4538,
+        TheBrokenTemplate = 4539,
+        WintergraspFortress = 4575,
+        TheChilledQuagmire = 4589,
+        WestparkWorkshop = 4611,
+        EastparkWorkshop = 4612,
+    }
 }

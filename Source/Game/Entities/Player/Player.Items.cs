@@ -6289,7 +6289,7 @@ namespace Game.Entities
                         if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
                             loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
                     }
-                    else if (GetZoneId() == WintergraspAreaIds.Wintergrasp)
+                    else if (GetZoneId() == (uint)AreaId.Wintergrasp)
                         loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
 
                     // It may need a better formula

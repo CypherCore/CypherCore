@@ -941,7 +941,7 @@ namespace Game.Spells
                     if (mapEntry == null)
                         return SpellCastResult.IncorrectArea;
 
-                    return zone_id == 4197 || (mapEntry.IsBattleground() && player != null && player.InBattleground()) ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                    return zone_id == (uint)AreaId.Wintergrasp || (mapEntry.IsBattleground() && player != null && player.InBattleground()) ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 44521:         // Preparation
                 {
                     if (player == null)
