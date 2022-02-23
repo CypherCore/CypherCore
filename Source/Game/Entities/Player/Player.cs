@@ -235,7 +235,6 @@ namespace Game.Entities
             SetGender(createInfo.Sex);
             SetPowerType(powertype, false);
             InitDisplayIds();
-            UpdatePositionData();
             if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
             {
                 AddPvpFlag(UnitPVPStateFlags.PvP);
