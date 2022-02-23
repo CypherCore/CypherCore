@@ -419,7 +419,7 @@ namespace Game.Chat
             }
 
             [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int realmId = -1)
+            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int? realmId)
             {
                 uint accountId;
                 if (!accountName.IsEmpty())
@@ -447,15 +447,19 @@ namespace Game.Chat
                     return false;
                 }
 
+                int realmID = -1;
+                if (realmId.HasValue)
+                    realmID = realmId.Value;
+
                 AccountTypes playerSecurity;
                 if (handler.GetSession() != null)
-                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmId);
+                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
                 else
                     playerSecurity = AccountTypes.Console;
 
                 // can set security level only for target with less security and to less security that we have
                 // This is also reject self apply in fact
-                AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmId);
+                AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
                 if (targetSecurity >= playerSecurity || (AccountTypes)securityLevel >= playerSecurity)
                 {
                     handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
@@ -463,7 +467,7 @@ namespace Game.Chat
                 }
                 PreparedStatement stmt;
                 // Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
-                if (realmId == -1 && !Global.AccountMgr.IsConsoleAccount(playerSecurity))
+                if (realmID == -1 && !Global.AccountMgr.IsConsoleAccount(playerSecurity))
                 {
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_SECLEVEL_TEST);
                     stmt.AddValue(0, accountId);
@@ -479,13 +483,13 @@ namespace Game.Chat
                 }
 
                 // Check if provided realmID has a negative value other than -1
-                if (realmId < -1)
+                if (realmID < -1)
                 {
                     handler.SendSysMessage(CypherStrings.InvalidRealmid);
                     return false;
                 }
 
-                Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmId);
+                Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmID);
 
                 handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
                 return true;
