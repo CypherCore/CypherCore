@@ -896,6 +896,11 @@ namespace Game.Movement
 
                     _filter.setIncludeFlags((ushort)includedFlags);
                 }
+
+                Creature _sourceCreature = _source.ToCreature();
+                if (_sourceCreature != null)
+                    if (_sourceCreature.IsInCombat() || _sourceCreature.IsInEvadeMode())
+                        _filter.setIncludeFlags((ushort)(_filter.getIncludeFlags() | (ushort)NavTerrainFlag.GroundSteep));
             }
         }
 
@@ -1093,19 +1098,24 @@ namespace Game.Movement
     public enum NavArea
     {
         Empty = 0,
+        MagmaSlime = 8, // don't need to differentiate between them
+        Water = 9,
+        Ground = 10,
+        GroundSteep = 11,
+        MaxValue = GroundSteep,
+        MinValue = MagmaSlime,
+        AllMask = 0x3F // max allowed value
         // areas 1-60 will be used for destructible areas (currently skipped in vmaps, WMO with flag 1)
         // ground is the highest value to make recast choose ground over water when merging surfaces very close to each other (shallow water would be walkable) 
-        MagmaSlime = 61, // don't need to differentiate between them
-        Water = 62,
-        Ground = 63,
     }
 
     public enum NavTerrainFlag
     {
         Empty = 0x00,
-        Ground = 1 << (63 - NavArea.Ground),
-        Water = 1 << (63 - NavArea.Water),
-        MagmaSlime = 1 << (63 - NavArea.MagmaSlime)
+        GroundSteep = 1 << (NavArea.MaxValue - NavArea.GroundSteep),
+        Ground = 1 << (NavArea.MaxValue - NavArea.Ground),
+        Water = 1 << (NavArea.MaxValue - NavArea.Water),
+        MagmaSlime = 1 << (NavArea.MaxValue - NavArea.MagmaSlime)
     }
 
     public enum PolyFlag
