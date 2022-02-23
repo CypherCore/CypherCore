@@ -27,6 +27,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Game.Chat
@@ -751,6 +752,22 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.CommandNearGraveyard, nearestLoc.Id, nearestLoc.Loc.GetPositionX(), nearestLoc.Loc.GetPositionY(), nearestLoc.Loc.GetPositionZ());
             else
                 handler.SendSysMessage(CypherStrings.CommandNearGraveyardNotfound);
+
+            return true;
+        }
+        
+        [Command("objectcount", RBACPermissions.CommandDebug, true)]
+        static bool HandleDebugObjectCountCommand(CommandHandler handler, uint? mapId)
+        {
+            void HandleDebugObjectCountMap(Map map)
+            {
+                handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()}");
+            }
+
+            if (mapId.HasValue)
+                Global.MapMgr.DoForAllMapsWithMapId(mapId.Value, map => HandleDebugObjectCountMap(map));
+            else
+                Global.MapMgr.DoForAllMaps(map => HandleDebugObjectCountMap(map));
 
             return true;
         }
