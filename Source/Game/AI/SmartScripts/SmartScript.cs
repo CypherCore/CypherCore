@@ -44,6 +44,7 @@ namespace Game.AI
         ObjectGuid _meOrigGUID;
         GameObject _go;
         ObjectGuid _goOrigGUID;
+        Player _atPlayer;
         AreaTriggerRecord _trigger;
         AreaTrigger _areaTrigger;
         SceneTemplate _sceneTemplate;
@@ -1181,7 +1182,7 @@ namespace Game.AI
                 {
                     SmartActionSummonCreatureFlags flags = (SmartActionSummonCreatureFlags)e.Action.summonCreature.flags;
                     bool preferUnit = flags.HasAnyFlag(SmartActionSummonCreatureFlags.PreferUnit);
-                    WorldObject summoner = preferUnit ? unit : GetBaseObjectOrUnit(unit);
+                    WorldObject summoner = preferUnit ? unit : GetBaseObjectOrPlayerTrigger() ?? unit;
                     if (summoner == null)
                         break;
 
@@ -2654,7 +2655,7 @@ namespace Game.AI
                     scriptTrigger = tempLastInvoker;
             }
 
-            WorldObject baseObject = GetBaseObject();
+            WorldObject baseObject = GetBaseObjectOrPlayerTrigger();
 
             List<WorldObject> targets = new();
             switch (e.GetTargetType())
@@ -2672,13 +2673,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.MaxThreat, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MaxThreat, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.MaxThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MaxThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2689,13 +2690,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.MinThreat, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MinThreat, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.MinThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MinThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2706,13 +2707,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.Random, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.Random, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.Random, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.Random, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2723,13 +2724,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.Random, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.Random, 1, new PowerUsersSelector(_me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.Random, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.Random, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2738,7 +2739,7 @@ namespace Game.AI
                 case SmartTargets.Farthest:
                     if (_me)
                     {
-                        Unit u = _me.GetAI().SelectTarget(SelectAggroTarget.MaxDistance, 0, new FarthestTargetSelector(_me, (float)e.Target.farthest.maxDist, e.Target.farthest.playerOnly != 0, e.Target.farthest.isInLos != 0));
+                        Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MaxDistance, 0, new FarthestTargetSelector(_me, (float)e.Target.farthest.maxDist, e.Target.farthest.playerOnly != 0, e.Target.farthest.isInLos != 0));
                         if (u != null)
                             targets.Add(u);
                     }
@@ -3118,7 +3119,7 @@ namespace Game.AI
         List<WorldObject> GetWorldObjectsInDist(float dist)
         {
             List<WorldObject> targets = new();
-            WorldObject obj = GetBaseObject();
+            WorldObject obj = GetBaseObjectOrPlayerTrigger();
             if (obj == null)
                 return targets;
 
@@ -4039,7 +4040,7 @@ namespace Game.AI
             }
         }
 
-        public void OnInitialize(WorldObject obj)
+        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
         {
             if (obj != null)
             {
@@ -4048,12 +4049,23 @@ namespace Game.AI
                     case TypeId.Unit:
                         _scriptType = SmartScriptType.Creature;
                         _me = obj.ToCreature();
-                        Log.outDebug(LogFilter.Scripts, "SmartScript.OnInitialize: source is Creature {0}", _me.GetEntry());
+                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is Creature {_me.GetEntry()}");
                         break;
                     case TypeId.GameObject:
                         _scriptType = SmartScriptType.GameObject;
                         _go = obj.ToGameObject();
-                        Log.outDebug(LogFilter.Scripts, "SmartScript.OnInitialize: source is GameObject {0}", _go.GetEntry());
+                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is GameObject {_go.GetEntry()}");
+                        break;
+                    case TypeId.Player:
+                        if (at != null)
+                        {
+                            _scriptType = SmartScriptType.AreaTrigger;
+                            _trigger = at;
+                            _atPlayer = obj.ToPlayer();
+                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
+                        }
+                        else
+                            Log.outError(LogFilter.Misc, "SmartScript::OnInitialize: !WARNING! Player TypeID is only allowed for AreaTriggers");
                         break;
                     case TypeId.AreaTrigger:
                         _areaTrigger = obj.ToAreaTrigger();
@@ -4065,76 +4077,13 @@ namespace Game.AI
                         return;
                 }
             }
-            else
-            {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
-                return;
-            }
-
-            GetScript();//load copy of script
-
-            foreach (var holder in _events)
-                InitTimer(holder);//calculate timers for first time use
-
-            ProcessEventsFor(SmartEvents.AiInit);
-            InstallEvents();
-            ProcessEventsFor(SmartEvents.JustCreated);
-            _counterList.Clear();
-        }
-
-        public void OnInitialize(AreaTriggerRecord at)
-        {
-            if (at != null)
-            {
-                _scriptType = SmartScriptType.AreaTrigger;
-                _trigger = at;
-                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: AreaTrigger {0}", _trigger.Id);
-            }
-            else
-            {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized AreaTrigger is Null.");
-                return;
-            }
-
-            GetScript();//load copy of script
-
-            foreach (var holder in _events)
-                InitTimer(holder);//calculate timers for first time use
-
-            ProcessEventsFor(SmartEvents.AiInit);
-            InstallEvents();
-            ProcessEventsFor(SmartEvents.JustCreated);
-            _counterList.Clear();
-        }
-
-        public void OnInitialize(SceneTemplate scene)
-        {
-            if (scene != null)
+            else if (scene != null)
             {
                 _scriptType = SmartScriptType.Scene;
                 _sceneTemplate = scene;
-                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: Scene with id {0}", scene.SceneId);
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with id {scene.SceneId}");
             }
-            else
-            {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized Scene is Null.");
-                return;
-            }
-
-            GetScript();//load copy of script
-
-            foreach (var holder in _events)
-                InitTimer(holder);//calculate timers for first time use
-
-            ProcessEventsFor(SmartEvents.AiInit);
-            InstallEvents();
-            ProcessEventsFor(SmartEvents.JustCreated);
-            _counterList.Clear();
-        }
-
-        public void OnInitialize(Quest qst)
-        {
-            if (qst != null)
+            else if (qst != null)
             {
                 _scriptType = SmartScriptType.Quest;
                 _quest = qst;
@@ -4142,7 +4091,7 @@ namespace Game.AI
             }
             else
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized quest is Null.");
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
                 return;
             }
 
@@ -4280,7 +4229,11 @@ namespace Game.AI
 
             return summoner;
         }
-
+        WorldObject GetBaseObjectOrPlayerTrigger()
+        {
+            return _trigger != null ? _atPlayer : GetBaseObject();
+        }
+        
         public bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
         public bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }

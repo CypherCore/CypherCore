@@ -119,7 +119,7 @@ namespace Game.AI
         /// - Has aura with ID <aura> (if aura > 0)
         /// - Does not have aura with ID -<aura> (if aura < 0)
         /// </summary>
-        public Unit SelectTarget(SelectAggroTarget targetType, uint offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
+        public Unit SelectTarget(SelectTargetMethod targetType, uint offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
             return SelectTarget(targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
@@ -128,7 +128,7 @@ namespace Game.AI
         /// Select the best target (in <targetType> order) satisfying <predicate> from the threat list.
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public Unit SelectTarget(SelectAggroTarget targetType, uint offset, ICheck<Unit> selector)
+        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
         {
             ThreatManager mgr = GetThreatManager();
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
@@ -143,8 +143,8 @@ namespace Game.AI
 
             return targetType switch
             {
-                SelectAggroTarget.MaxThreat or SelectAggroTarget.MinThreat or SelectAggroTarget.MaxDistance or SelectAggroTarget.MinDistance => targetList[0],
-                SelectAggroTarget.Random => targetList.SelectRandom(),
+                SelectTargetMethod.MaxThreat or SelectTargetMethod.MinThreat or SelectTargetMethod.MaxDistance or SelectTargetMethod.MinDistance => targetList[0],
+                SelectTargetMethod.Random => targetList.SelectRandom(),
                 _ => null,
             };
         }
@@ -160,7 +160,7 @@ namespace Game.AI
         /// - Does not have aura with ID -<aura> (if aura < 0)
         /// The resulting targets are stored in <targetList> (which is cleared first).
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
+        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
             return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
@@ -169,7 +169,7 @@ namespace Game.AI
         /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, ICheck<Unit> selector)
+        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
         {
             var targetList = new List<Unit>();
 
@@ -178,7 +178,7 @@ namespace Game.AI
             if (mgr.GetThreatListSize() <= offset)
                 return targetList;
 
-            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
+            if (targetType == SelectTargetMethod.MaxDistance || targetType == SelectTargetMethod.MinDistance)
             {
                 foreach (ThreatReference refe in mgr.GetSortedThreatList())
                 {
@@ -213,11 +213,11 @@ namespace Game.AI
             }
 
             // right now, list is unsorted for DISTANCE types - re-sort by MAXDISTANCE
-            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
-                SortByDistance(targetList, targetType == SelectAggroTarget.MinDistance);
+            if (targetType == SelectTargetMethod.MaxDistance || targetType == SelectTargetMethod.MinDistance)
+                SortByDistance(targetList, targetType == SelectTargetMethod.MinDistance);
 
             // now the list is MAX sorted, reverse for MIN types
-            if (targetType == SelectAggroTarget.MinThreat)
+            if (targetType == SelectTargetMethod.MinThreat)
                 targetList.Reverse();
 
             // ignore the first <offset> elements
@@ -233,7 +233,7 @@ namespace Game.AI
             if (targetList.Count <= num)
                 return targetList;
 
-            if (targetType == SelectAggroTarget.Random)
+            if (targetType == SelectTargetMethod.Random)
                 targetList = targetList.SelectRandom(num).ToList();
             else
                 targetList.Resize(num);
@@ -265,7 +265,7 @@ namespace Game.AI
                     if (spellInfo != null)
                     {
                         bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
-                        target = SelectTarget(SelectAggroTarget.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
+                        target = SelectTarget(SelectTargetMethod.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
                     }
                     break;
                 }
@@ -286,7 +286,7 @@ namespace Game.AI
                         && targetSelector.Invoke(me.GetVictim()))
                             target = me.GetVictim();
                         else
-                            target = SelectTarget(SelectAggroTarget.Random, 0, targetSelector);
+                            target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
                     break;
                 }
@@ -515,7 +515,7 @@ namespace Game.AI
         }
     }
     
-    public enum SelectAggroTarget
+    public enum SelectTargetMethod
     {
         Random = 0,  // just pick a random target
         MaxThreat,   // prefer targets higher in the threat list

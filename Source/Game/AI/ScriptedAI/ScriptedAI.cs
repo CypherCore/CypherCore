@@ -706,7 +706,7 @@ namespace Game.AI
 
         void _JustEngagedWith()
         {
-            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
             if (target)
                 AttackStart(target);
         }
@@ -714,7 +714,7 @@ namespace Game.AI
         public override void JustSummoned(Creature summon)
         {
             summons.Summon(summon);
-            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
             if (target)
                 summon.GetAI().AttackStart(target);
         }

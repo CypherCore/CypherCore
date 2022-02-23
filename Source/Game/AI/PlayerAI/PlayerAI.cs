@@ -711,7 +711,7 @@ namespace Game.AI
             {
                 UnitAI charmerAI = charmer.GetAI();
                 if (charmerAI != null)
-                    return charmerAI.SelectTarget(SelectAggroTarget.Random, 0, new ValidTargetSelectPredicate(this));
+                    return charmerAI.SelectTarget(SelectTargetMethod.Random, 0, new ValidTargetSelectPredicate(this));
 
                 return charmer.GetVictim();
             }
