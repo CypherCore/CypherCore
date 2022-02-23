@@ -613,14 +613,19 @@ namespace Game.Entities
 
         public void UpdatePvPFlag(long currTime)
         {
+            if (!IsPvP())
+                return;
+
+            if (pvpInfo.EndTimer == 0 || (currTime < pvpInfo.EndTimer + 300) || pvpInfo.IsHostile)
+                return;
+
             if (pvpInfo.EndTimer != 0 && pvpInfo.EndTimer <= currTime)
             {
                 pvpInfo.EndTimer = 0;
                 RemovePlayerFlag(PlayerFlags.PVPTimer);
             }
-
-            if (IsPvP() && !pvpInfo.IsHostile && !HasPlayerFlag(PlayerFlags.InPVP | PlayerFlags.PVPTimer))
-                UpdatePvP(false);
+            
+            UpdatePvP(false);
         }
 
         public void UpdatePvP(bool state, bool Override = false)
@@ -632,21 +637,16 @@ namespace Game.Entities
             }
             else
             {
-                pvpInfo.EndTimer = GameTime.GetGameTime() + 300;
+                pvpInfo.EndTimer = GameTime.GetGameTime();
                 SetPvP(state);
             }
         }
 
         void InitPvP()
         {
+            // pvp flag should stay after relog
             if (HasPlayerFlag(PlayerFlags.InPVP))
                 UpdatePvP(true, true);
-            else if (HasPlayerFlag(PlayerFlags.PVPTimer))
-            {
-                UpdatePvP(true, true);
-                if (!pvpInfo.IsHostile)
-                    pvpInfo.EndTimer = GameTime.GetGameTime() + 300;
-            }
         }
 
         public void UpdatePvPState(bool onlyFFA = false)
@@ -681,7 +681,7 @@ namespace Game.Entities
             else                                                    // in friendly area
             {
                 if (IsPvP() && !HasPlayerFlag(PlayerFlags.InPVP) && pvpInfo.EndTimer == 0)
-                    pvpInfo.EndTimer = GameTime.GetGameTime() + 300;                  // start toggle-off
+                    pvpInfo.EndTimer = GameTime.GetGameTime();                  // start toggle-off
             }
         }
 
