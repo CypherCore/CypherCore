@@ -170,7 +170,7 @@ namespace Scripts.Pets
             public override bool CanAIAttack(Unit who)
             {
                 Unit owner = me.GetOwner();
-                return owner && who.IsAlive() &&
+                return owner && who.IsAlive() && me.IsValidAttackTarget(who) &&
                     !who.HasBreakableByDamageCrowdControlAura() &&
                     who.IsInCombatWith(owner) && CanAIAttack(who);
             }
