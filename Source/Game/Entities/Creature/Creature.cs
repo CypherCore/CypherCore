@@ -2818,7 +2818,7 @@ namespace Game.Entities
 
         bool CanNotReachTarget() { return m_cannotReachTarget; }
 
-        void SetCannotReachTarget(bool cannotReach)
+        public void SetCannotReachTarget(bool cannotReach)
         {
             if (cannotReach == m_cannotReachTarget)
                 return;
@@ -3101,9 +3101,9 @@ namespace Game.Entities
 
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
         public override bool CanSwim() { return GetMovementTemplate().IsSwimAllowed() || IsPet();}
-        public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed(); }
-        bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover; }
-        
+        public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
+        bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover || IsHovering(); }
+
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
         public override bool IsAffectedByDiminishingReturns() { return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); }
 

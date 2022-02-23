@@ -31,7 +31,7 @@ namespace Game.Entities
 {
     public partial class Unit
     {
-        public bool IsLevitating()
+        public bool IsGravityDisabled()
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.DisableGravity);
         }
@@ -661,7 +661,7 @@ namespace Game.Entities
 
         public bool SetDisableGravity(bool disable)
         {
-            if (disable == IsLevitating())
+            if (disable == IsGravityDisabled())
                 return false;
 
             if (disable)

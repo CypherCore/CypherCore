@@ -169,7 +169,7 @@ namespace Game.Movement
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (startPoly == 0 || endPoly == 0)\n");
                 BuildShortcut();
-                bool path = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().IsFlying();
+                bool path = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().CanFly();
 
                 bool waterPath = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().CanSwim();
                 if (waterPath)
@@ -224,7 +224,7 @@ namespace Game.Movement
                     Unit _sourceUnit = _source.ToUnit();
                     if (_sourceUnit != null)
                     {
-                        if (_sourceUnit.IsFlying())
+                        if (_sourceUnit.CanFly())
                             buildShotrcut = true;
                         // Allow to build a shortcut if the unit is falling and it's trying to move downwards towards a target (i.e. charging)
                         else if (_sourceUnit.IsFalling() && endPos.Z < startPos.Z)

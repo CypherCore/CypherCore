@@ -2162,7 +2162,7 @@ namespace Game.Spells
             target.SetCanTransitionBetweenSwimAndFly(apply);
 
             if (target.SetCanFly(apply))
-                if (!apply && !target.IsLevitating())
+                if (!apply && !target.IsGravityDisabled())
                     target.GetMotionMaster().MoveFall();
         }
 
@@ -2618,7 +2618,7 @@ namespace Game.Spells
                     target.SetCanTransitionBetweenSwimAndFly(apply);
 
                     if (target.SetCanFly(apply))
-                        if (!apply && !target.IsLevitating())
+                        if (!apply && !target.IsGravityDisabled())
                             target.GetMotionMaster().MoveFall();
                 }
 
