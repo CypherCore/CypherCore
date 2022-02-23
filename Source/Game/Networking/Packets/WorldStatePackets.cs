@@ -38,9 +38,19 @@ namespace Game.Networking.Packets
             }
         }
 
+        public void AddState(WorldStates variableID, int value)
+        {
+            AddState((uint)variableID, value);
+        }
+
         public void AddState(uint variableID, int value)
         {
             Worldstates.Add(new WorldStateInfo(variableID, value));
+        }
+
+        public void AddState(WorldStates variableID, bool value)
+        {
+            AddState((uint)variableID, value);
         }
 
         public void AddState(uint variableID, bool value)

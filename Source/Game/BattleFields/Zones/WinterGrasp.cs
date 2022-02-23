@@ -61,15 +61,15 @@ namespace Game.BattleFields
             m_saveTimer = 60000;
 
             // Load from db
-            if ((Global.WorldMgr.GetWorldState(WGWorldStates.Active) == 0) && (Global.WorldMgr.GetWorldState(WGWorldStates.Defender) == 0) && (Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]) == 0))
+            if ((Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgActive) == 0) && (Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefender) == 0) && (Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]) == 0))
             {
-                Global.WorldMgr.SetWorldState(WGWorldStates.Active, 0);
-                Global.WorldMgr.SetWorldState(WGWorldStates.Defender, RandomHelper.URand(0, 1));
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgActive, 0);
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefender, RandomHelper.URand(0, 1));
                 Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_NoWarBattleTime);
             }
 
-            m_isActive = Global.WorldMgr.GetWorldState(WGWorldStates.Active) != 0;
-            m_DefenderTeam = Global.WorldMgr.GetWorldState(WGWorldStates.Defender);
+            m_isActive = Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgActive) != 0;
+            m_DefenderTeam = Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefender);
 
             m_Timer = Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]);
             if (m_isActive)
@@ -78,10 +78,10 @@ namespace Game.BattleFields
                 m_Timer = m_RestartAfterCrash;
             }
 
-            SetData(WGData.WonA, Global.WorldMgr.GetWorldState(WGWorldStates.AttackedA));
-            SetData(WGData.DefA, Global.WorldMgr.GetWorldState(WGWorldStates.DefendedA));
-            SetData(WGData.WonH, Global.WorldMgr.GetWorldState(WGWorldStates.AttackedH));
-            SetData(WGData.DefH, Global.WorldMgr.GetWorldState(WGWorldStates.DefendedH));
+            SetData(WGData.WonA, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgAttackedA));
+            SetData(WGData.DefA, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefendedA));
+            SetData(WGData.WonH, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgAttackedH));
+            SetData(WGData.DefH, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefendedH));
 
             foreach (var gy in WGConst.WGGraveYard)
             {
@@ -163,13 +163,13 @@ namespace Game.BattleFields
             bool m_return = base.Update(diff);
             if (m_saveTimer <= diff)
             {
-                Global.WorldMgr.SetWorldState(WGWorldStates.Active, m_isActive);
-                Global.WorldMgr.SetWorldState(WGWorldStates.Defender, m_DefenderTeam);
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgActive, m_isActive);
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefender, m_DefenderTeam);
                 Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_Timer);
-                Global.WorldMgr.SetWorldState(WGWorldStates.AttackedA, GetData(WGData.WonA));
-                Global.WorldMgr.SetWorldState(WGWorldStates.DefendedA, GetData(WGData.DefA));
-                Global.WorldMgr.SetWorldState(WGWorldStates.AttackedH, GetData(WGData.WonH));
-                Global.WorldMgr.SetWorldState(WGWorldStates.DefendedH, GetData(WGData.DefH));
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgAttackedA, GetData(WGData.WonA));
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefendedA, GetData(WGData.DefA));
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgAttackedH, GetData(WGData.WonH));
+                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefendedH, GetData(WGData.DefH));
                 m_saveTimer = 60 * Time.InMilliseconds;
             }
             else
@@ -763,19 +763,19 @@ namespace Game.BattleFields
 
         public override void FillInitialWorldStates(InitWorldStates packet)
         {
-            packet.AddState(WGWorldStates.Attacker, (int)GetAttackerTeam());
-            packet.AddState(WGWorldStates.Defender, (int)GetDefenderTeam());
+            packet.AddState(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam());
+            packet.AddState(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam());
             // Note: cleanup these two, their names look awkward
-            packet.AddState(WGWorldStates.Active, IsWarTime());
-            packet.AddState(WGWorldStates.ShowWorldstate, IsWarTime());
+            packet.AddState(WorldStates.BattlefieldWgActive, IsWarTime());
+            packet.AddState(WorldStates.BattlefieldWgShowWorldstate, IsWarTime());
 
             for (uint i = 0; i < 2; ++i)
                 packet.AddState(WGConst.ClockWorldState[i], (int)(GameTime.GetGameTime() + (m_Timer / 1000)));
 
-            packet.AddState(WGWorldStates.VehicleH, (int)GetData(WGData.VehicleH));
-            packet.AddState(WGWorldStates.MaxVehicleH, (int)GetData(WGData.MaxVehicleH));
-            packet.AddState(WGWorldStates.VehicleA, (int)GetData(WGData.VehicleA));
-            packet.AddState(WGWorldStates.MaxVehicleA, (int)GetData(WGData.MaxVehicleA));
+            packet.AddState(WorldStates.BattlefieldWgVehicleH, (int)GetData(WGData.VehicleH));
+            packet.AddState(WorldStates.BattlefieldWgMaxVehicleH, (int)GetData(WGData.MaxVehicleH));
+            packet.AddState(WorldStates.BattlefieldWgVehicleA, (int)GetData(WGData.VehicleA));
+            packet.AddState(WorldStates.BattlefieldWgMaxVehicleA, (int)GetData(WGData.MaxVehicleA));
 
             foreach (BfWGGameObjectBuilding building in BuildingsInZone)
                 building.FillInitialWorldStates(packet);
@@ -922,10 +922,10 @@ namespace Game.BattleFields
         // Update vehicle count WorldState to player
         void UpdateVehicleCountWG()
         {
-            SendUpdateWorldState(WGWorldStates.VehicleH, GetData(WGData.VehicleH));
-            SendUpdateWorldState(WGWorldStates.MaxVehicleH, GetData(WGData.MaxVehicleH));
-            SendUpdateWorldState(WGWorldStates.VehicleA, GetData(WGData.VehicleA));
-            SendUpdateWorldState(WGWorldStates.MaxVehicleA, GetData(WGData.MaxVehicleA));
+            SendUpdateWorldState(WorldStates.BattlefieldWgVehicleH, GetData(WGData.VehicleH));
+            SendUpdateWorldState(WorldStates.BattlefieldWgMaxVehicleH, GetData(WGData.MaxVehicleH));
+            SendUpdateWorldState(WorldStates.BattlefieldWgVehicleA, GetData(WGData.VehicleA));
+            SendUpdateWorldState(WorldStates.BattlefieldWgMaxVehicleA, GetData(WGData.MaxVehicleA));
         }
 
         void UpdateTenacity()

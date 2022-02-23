@@ -2116,7 +2116,7 @@ namespace Game
 
         void InitRandomBGResetTime()
         {
-            long bgtime = GetWorldState(WorldStates.BGDailyResetTime);
+            long bgtime = GetWorldState(WorldStates.BgDailyResetTime);
             if (bgtime == 0)
                 m_NextRandomBGReset = GameTime.GetGameTime();         // game time not yet init
 
@@ -2134,7 +2134,7 @@ namespace Game
             m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
             if (bgtime == 0)
-                SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
+                SetWorldState(WorldStates.BgDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
         void InitCalendarOldEventsDeletionTime()
@@ -2230,7 +2230,7 @@ namespace Game
                     session.GetPlayer().SetRandomWinner(false);
 
             m_NextRandomBGReset += Time.Day;
-            SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
+            SetWorldState(WorldStates.BgDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
         void CalendarDeleteOldEvents()
@@ -2319,7 +2319,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} world states in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void SetWorldState(WorldStates index, ulong value)
+        public void SetWorldState(WorldStates index, object value)
         {
             SetWorldState((uint)index, value);
         }

@@ -729,9 +729,9 @@ namespace Game.Entities
                 BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);//Wintergrasp battle
                 if (wg != null)
                 {
-                    SendUpdateWorldState(3801, (uint)(wg.IsWarTime() ? 0 : 1));
+                    SendUpdateWorldState(WorldStates.BattlefieldWgActive, (uint)(wg.IsWarTime() ? 0 : 1));
                     uint timer = wg.IsWarTime() ? 0 : (wg.GetTimer() / 1000); // 0 - Time to next battle
-                    SendUpdateWorldState(4354, (uint)(GameTime.GetGameTime() + timer));
+                    SendUpdateWorldState(WorldStates.BattlefieldWgTimeNextBattle, (uint)(GameTime.GetGameTime() + timer));
                 }
             }
         }

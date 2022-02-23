@@ -41,7 +41,7 @@ namespace Game.BattleFields
             new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, TeamId.Alliance),
         };
 
-        public static uint[] ClockWorldState = { 3781, 4354 };
+        public static WorldStates[] ClockWorldState = { WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle };
         public static uint[] WintergraspFaction = { 1732, 1735, 35 };
 
         public static Position WintergraspStalkerPos = new(4948.985f, 2937.789f, 550.5172f, 1.815142f);
@@ -308,7 +308,7 @@ namespace Game.BattleFields
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId =  WGWorkshopIds.Ne,
-                WorldStateId = WGWorldStates.NE,
+                WorldStateId = WorldStates.BattlefieldWgWorkshopNe,
                 AllianceCaptureTextId = WintergraspText.SunkenRingCaptureAlliance,
                 AllianceAttackTextId = WintergraspText.SunkenRingAttackAlliance,
                 HordeCaptureTextId = WintergraspText.SunkenRingCaptureHorde,
@@ -317,7 +317,7 @@ namespace Game.BattleFields
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId = WGWorkshopIds.Nw,
-                WorldStateId = WGWorldStates.NW,
+                WorldStateId = WorldStates.BattlefieldWgWorkshopNw,
                 AllianceCaptureTextId = WintergraspText.BrokenTempleCaptureAlliance,
                 AllianceAttackTextId = WintergraspText.BrokenTempleAttackAlliance,
                 HordeCaptureTextId = WintergraspText.BrokenTempleCaptureHorde,
@@ -326,7 +326,7 @@ namespace Game.BattleFields
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId = WGWorkshopIds.Se,
-                WorldStateId = WGWorldStates.SE,
+                WorldStateId = WorldStates.BattlefieldWgWorkshopSe,
                 AllianceCaptureTextId = WintergraspText.EastsparkCaptureAlliance,
                 AllianceAttackTextId = WintergraspText.EastsparkAttackAlliance,
                 HordeCaptureTextId = WintergraspText.EastsparkCaptureHorde,
@@ -336,7 +336,7 @@ namespace Game.BattleFields
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId = WGWorkshopIds.Sw,
-                WorldStateId = WGWorldStates.SW,
+                WorldStateId = WorldStates.BattlefieldWgWorkshopSw,
                 AllianceCaptureTextId = WintergraspText.WestsparkCaptureAlliance,
                 AllianceAttackTextId = WintergraspText.WestsparkAttackAlliance,
                 HordeCaptureTextId = WintergraspText.WestsparkCaptureHorde,
@@ -347,13 +347,13 @@ namespace Game.BattleFields
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId = WGWorkshopIds.KeepWest,
-                WorldStateId = WGWorldStates.KeepW
+                WorldStateId = WorldStates.BattlefieldWgWorkshopKW
             },
 
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId = WGWorkshopIds.KeepEast,
-                WorldStateId = WGWorldStates.KeepE
+                WorldStateId = WorldStates.BattlefieldWgWorkshopKE
             }
         };
         #endregion
@@ -499,29 +499,6 @@ namespace Game.BattleFields
         public const byte Nw = 3;
         public const byte KeepWest = 4;
         public const byte KeepEast = 5;
-    }
-
-    struct WGWorldStates
-    {
-        public const uint NE = 3701;
-        public const uint NW = 3700;
-        public const uint SE = 3703;
-        public const uint SW = 3702;
-        public const uint KeepW = 3698;
-        public const uint KeepE = 3699;
-
-        public const uint VehicleH = 3490;
-        public const uint MaxVehicleH = 3491;
-        public const uint VehicleA = 3680;
-        public const uint MaxVehicleA = 3681;
-        public const uint Active = 3801;
-        public const uint Defender = 3802;
-        public const uint Attacker = 3803;
-        public const uint ShowWorldstate = 3710;
-        public const uint AttackedH = 4022;
-        public const uint AttackedA = 4023;
-        public const uint DefendedH = 4024;
-        public const uint DefendedA = 4025;
     }
 
     struct WGGossipText
@@ -715,7 +692,7 @@ namespace Game.BattleFields
     class StaticWintergraspWorkshopInfo
     {
         public byte WorkshopId;
-        public uint WorldStateId;
+        public WorldStates WorldStateId;
         public byte AllianceCaptureTextId;
         public byte AllianceAttackTextId;
         public byte HordeCaptureTextId;

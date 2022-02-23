@@ -874,20 +874,6 @@ namespace Framework.Constants
         Garrison = 0x4000000
     }
 
-    public enum WorldStates
-    {
-        CurrencyResetTime = 20001,          // Next currency reset time
-        WeeklyQuestResetTime = 20002,       // Next weekly quest reset time
-        BGDailyResetTime = 20003,           // Next daily BG reset time
-        CleaningFlags = 20004,              // Cleaning Flags
-        GuildDailyResetTime = 20006,        // Next guild cap reset time
-        MonthlyQuestResetTime = 20007,      // Next monthly quest reset time
-        DailyQuestResetTime = 20008,         // Next daily quest reset time
-        DailyCalendarDeletionOldEventsTime = 20009,      // Next daily calendar deletions of old events time
-        // Cata specific custom worldstates
-        GuildWeeklyResetTime = 20050,       // Next guild week reset time
-    }
-
     // values based at Holidays.dbc
     public enum HolidayIds
     {
@@ -2949,5 +2935,39 @@ namespace Framework.Constants
         TheChilledQuagmire = 4589,
         WestparkWorkshop = 4611,
         EastparkWorkshop = 4612,
+    }
+
+    public enum WorldStates
+    {
+        BattlefieldWgVehicleH = 3490,
+        BattlefieldWgMaxVehicleH = 3491,
+        BattlefieldWgVehicleA = 3680,
+        BattlefieldWgMaxVehicleA = 3681,
+        BattlefieldWgWorkshopKW = 3698,
+        BattlefieldWgWorkshopKE = 3699,
+        BattlefieldWgWorkshopNw = 3700,
+        BattlefieldWgWorkshopNe = 3701,
+        BattlefieldWgWorkshopSw = 3702,
+        BattlefieldWgWorkshopSe = 3703,
+        BattlefieldWgShowWorldstate = 3710,
+        BattlefieldWgTimeBattleEnd = 3781,
+        BattlefieldWgActive = 3801,
+        BattlefieldWgDefender = 3802,
+        BattlefieldWgAttacker = 3803,
+        BattlefieldWgAttackedH = 4022,
+        BattlefieldWgAttackedA = 4023,
+        BattlefieldWgDefendedH = 4024,
+        BattlefieldWgDefendedA = 4025,
+        BattlefieldWgTimeNextBattle = 4354,
+
+        CurrencyResetTime = 20001,                     // Next Arena Distribution Time
+        WeeklyQuestResetTime = 20002,                     // Next Weekly Quest Reset Time
+        BgDailyResetTime = 20003,                     // Next Daily Bg Reset Time
+        CleaningFlags = 20004,                     // Cleaning Flags
+        GuildDailyResetTime = 20006,                     // Next Guild Cap Reset Time
+        MonthlyQuestResetTime = 20007,                     // Next Monthly Quest Reset Time
+        DailyQuestResetTime = 20008,                     // Next Daily Quest Reset Time
+        DailyCalendarDeletionOldEventsTime = 20009,      // Next Daily Calendar Deletions Of Old Events Time
+        GuildWeeklyResetTime = 20050,                     // Next Guild Week Reset Time
     }
 }
