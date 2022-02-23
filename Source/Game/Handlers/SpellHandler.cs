@@ -473,6 +473,18 @@ namespace Game
             if (mover != _player && mover.IsTypeId(TypeId.Player))
                 return;
 
+            var spellInfo = Global.SpellMgr.GetSpellInfo((uint)cancelChanneling.ChannelSpell, mover.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return;
+
+            // not allow remove spells with attr SPELL_ATTR0_CANT_CANCEL
+            if (spellInfo.HasAttribute(SpellAttr0.CantCancel))
+                return;
+
+            var spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell == null || spell.GetSpellInfo().Id != spellInfo.Id)
+                return;
+
             mover.InterruptSpell(CurrentSpellTypes.Channeled);
         }
 
