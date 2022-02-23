@@ -1666,6 +1666,7 @@ namespace Framework.Constants
         RateXpBoost,
         RateXpQuest,
         RealmZone,
+        RegenHpCannotReachTargetInRaid,
         ResetDuelCooldowns,
         ResetDuelHealthMana,
         RespawnDynamicEscortNpc,

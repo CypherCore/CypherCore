@@ -312,6 +312,8 @@ namespace Game
             /// @todo Add MonsterSight (with meaning) in worldserver.conf or put them as define
             Values[WorldCfg.SightMonster] = GetDefaultValue("MonsterSight", 50.0f);
 
+            Values[WorldCfg.RegenHpCannotReachTargetInRaid] = GetDefaultValue("Creature.RegenHPCannotReachTargetInRaid", true);
+
             if (reload)
             {
                 int val = GetDefaultValue("GameType", 0);

@@ -590,8 +590,24 @@ namespace Game.Entities
 
                     if (RegenTimer == 0)
                     {
-                        if (!IsInEvadeMode() && (!IsEngaged() || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
-                            RegenerateHealth();
+                        if (!IsInEvadeMode())
+                        {
+                            // regenerate health if not in combat or if polymorphed)
+                            if (!IsEngaged() || IsPolymorphed())
+                                RegenerateHealth();
+                            else if (CanNotReachTarget())
+                            {
+                                // regenerate health if cannot reach the target and the setting is set to do so.
+                                // this allows to disable the health regen of raid bosses if pathfinding has issues for whatever reason
+                                if (WorldConfig.GetBoolValue(WorldCfg.RegenHpCannotReachTargetInRaid) || !GetMap().IsRaid())
+                                {
+                                    RegenerateHealth();
+                                    Log.outDebug(LogFilter.Unit, $"RegenerateHealth() enabled because Creature cannot reach the target. Detail: {GetDebugInfo()}");
+                                }
+                                else
+                                    Log.outDebug(LogFilter.Unit, $"RegenerateHealth() disabled even if the Creature cannot reach the target. Detail: {GetDebugInfo()}");
+                            }
+                        }
 
                         if (GetPowerType() == PowerType.Energy)
                             Regenerate(PowerType.Energy);
@@ -2800,15 +2816,19 @@ namespace Game.Entities
             return range;
         }
 
-        public void SetCannotReachTarget(bool cannotReach)
+        bool CanNotReachTarget() { return m_cannotReachTarget; }
+
+        void SetCannotReachTarget(bool cannotReach)
         {
             if (cannotReach == m_cannotReachTarget)
                 return;
 
             m_cannotReachTarget = cannotReach;
             m_cannotReachTimer = 0;
+
+            if (cannotReach)
+                Log.outDebug(LogFilter.Unit, $"Creature::SetCannotReachTarget() called with true. Details: {GetDebugInfo()}");
         }
-        bool CanNotReachTarget() { return m_cannotReachTarget; }
 
         public float GetAggroRange(Unit target)
         {
