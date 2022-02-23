@@ -45,53 +45,6 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_gen_mojo : ScriptedAI
-        {
-            public npc_pet_gen_mojo(Creature creature) : base(creature) { }
-
-            public override void Reset()
-            {
-                _victimGUID.Clear();
-
-                Unit owner = me.GetOwner();
-                if (owner)
-                    me.GetMotionMaster().MoveFollow(owner, 0.0f, 0.0f);
-            }
-
-            public override void JustEngagedWith(Unit who) { }
-
-            public override void UpdateAI(uint diff) { }
-
-            public override void ReceiveEmote(Player player, TextEmotes emote)
-            {
-                me.HandleEmoteCommand((Emote)emote);
-                Unit owner = me.GetOwner();
-                if (emote != TextEmotes.Kiss || !owner || !owner.IsTypeId(TypeId.Player) ||
-                    owner.ToPlayer().GetTeam() != player.GetTeam())
-                {
-                    return;
-                }
-
-                Talk(TextIds.SayMojo, player);
-
-                if (!_victimGUID.IsEmpty())
-                {
-                    Player victim = Global.ObjAccessor.GetPlayer(me, _victimGUID);
-                    if (victim)
-                        victim.RemoveAura(SpellIds.FeelingFroggy);
-                }
-
-                _victimGUID = player.GetGUID();
-
-                DoCast(player, SpellIds.FeelingFroggy, new Game.Spells.CastSpellExtraArgs(true));
-                DoCast(me, SpellIds.SeductionVisual, new Game.Spells.CastSpellExtraArgs(true));
-                me.GetMotionMaster().MoveFollow(player, 0.0f, 0.0f);
-            }
-
-            ObjectGuid _victimGUID;
-        }
-
-        [Script]
         class npc_pet_gen_soul_trader : ScriptedAI
         {
             public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }

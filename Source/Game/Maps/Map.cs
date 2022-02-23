@@ -5121,7 +5121,7 @@ namespace Game.Maps
         public delegate void FarSpellCallback(Map map);
         Queue<FarSpellCallback> _farSpellCallbacks = new();
 
-        MultiPersonalPhaseTracker _multiPersonalPhaseTracker;
+        MultiPersonalPhaseTracker _multiPersonalPhaseTracker = new();
         #endregion
     }
 

@@ -1629,6 +1629,12 @@ namespace Game.BattleGrounds
         // buffs are in their positions when Battleground starts
         public void HandleTriggerBuff(ObjectGuid goGuid)
         {
+            if (!FindBgMap())
+            {
+                Log.outError(LogFilter.Battleground, $"Battleground::HandleTriggerBuff called with null bg map, {goGuid}");
+                return;
+            }
+
             GameObject obj = GetBgMap().GetGameObject(goGuid);
             if (!obj || obj.GetGoType() != GameObjectTypes.Trap || !obj.IsSpawned())
                 return;

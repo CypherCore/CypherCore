@@ -129,27 +129,6 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_nether_wraith_beacon : ItemScript
-    {
-        public item_nether_wraith_beacon() : base("item_nether_wraith_beacon") { }
-
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
-        {
-            if (player.GetQuestStatus(10832) == QuestStatus.Incomplete)
-            {
-                Creature nether = player.SummonCreature(22408, player.GetPositionX(), player.GetPositionY() + 20, player.GetPositionZ(), 0, TempSummonType.TimedDespawn, 180000);
-                if (nether)
-                    nether.GetAI().AttackStart(player);
-
-                nether = player.SummonCreature(22408, player.GetPositionX(), player.GetPositionY() - 20, player.GetPositionZ(), 0, TempSummonType.TimedDespawn, 180000);
-                if (nether)
-                    nether.GetAI().AttackStart(player);
-            }
-            return false;
-        }
-    }
-
-    [Script]
     class item_gor_dreks_ointment : ItemScript
     {
         public item_gor_dreks_ointment() : base("item_gor_dreks_ointment") { }

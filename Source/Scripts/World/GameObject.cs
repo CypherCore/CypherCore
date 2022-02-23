@@ -65,9 +65,6 @@ namespace Scripts.World.GameObjects
         public const uint SummonBladeKnightOrc = 56212;
         public const uint SummonBladeKnightTroll = 56214;
 
-        //Inconspicuouslandmark
-        public const uint SummonPiratesTreasureAndTriggerMob = 11462;
-
         //Amberpineouthouse
         public const uint Indisposed = 53017;
         public const uint IndisposedIii = 48341;
@@ -111,11 +108,6 @@ namespace Scripts.World.GameObjects
         //Sacredfireoflife
         public const uint Arikara = 10882;
 
-        //Shrineofthebirds
-        public const uint HawkGuard = 22992;
-        public const uint EagleGuard = 22993;
-        public const uint FalconGuard = 22994;
-
         //Southfury
         public const uint Rizzle = 23002;
 
@@ -130,13 +122,6 @@ namespace Scripts.World.GameObjects
         public const uint EbonBladePrisonerNe = 30194;
         public const uint EbonBladePrisonerTroll = 30196;
         public const uint EbonBladePrisonerOrc = 30195;
-
-        //Prisonersofwyrmskull
-        public const uint PrisonerPriest = 24086;
-        public const uint PrisonerMage = 24088;
-        public const uint PrisonerWarrior = 24089;
-        public const uint PrisonerPaladin = 24090;
-        public const uint CapturedValgardePrisonerProxy = 24124;
 
         //Tadpoles
         public const uint WinterfinTadpole = 25201;
@@ -156,11 +141,6 @@ namespace Scripts.World.GameObjects
 
     struct GameObjectIds
     {
-        //Shrineofthebirds
-        public const uint ShrineHawk = 185551;
-        public const uint ShrineEagle = 185547;
-        public const uint ShrineFalcon = 185553;
-
         //Bellhourlyobjects
         public const uint HordeBell = 175885;
         public const uint AllianceBell = 176573;
@@ -180,9 +160,6 @@ namespace Scripts.World.GameObjects
         public const uint MatrixPunchograph3005C = 142476;
         public const uint MatrixPunchograph3005D = 142696;
 
-        //Inconspicuouslandmark
-        public const uint CuergosKey = 9275;
-
         //Amberpineouthouse
         public const uint AnderholsSliderCider = 37247;
     }
@@ -201,9 +178,6 @@ namespace Scripts.World.GameObjects
 
         //Tabletheka
         public const uint SpiderGold = 2936;
-
-        //Prisonersofwyrmskull
-        public const uint PrisonersOfWyrmskull = 11255;
 
         //Tadpoles
         public const uint OhNoesTheTadpoles = 11560;
@@ -349,20 +323,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_tablet_of_madness : GameObjectAI
-    {
-        public go_tablet_of_madness(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (player.HasSkill(SkillType.Alchemy) && player.GetSkillValue(SkillType.Alchemy) >= 300 && !player.HasSpell(24266))
-                player.CastSpell(player, 24267, false);
-
-            return true;
-        }
-    }
-
-    [Script]
     class go_tablet_of_the_seven : GameObjectAI
     {
         public go_tablet_of_the_seven(GameObject go) : base(go) { }
@@ -375,20 +335,6 @@ namespace Scripts.World.GameObjects
 
             if (player.GetQuestStatus(4296) == QuestStatus.Incomplete)
                 player.CastSpell(player, 15065, false);
-
-            return true;
-        }
-    }
-
-    [Script]
-    class go_jump_a_tron : GameObjectAI
-    {
-        public go_jump_a_tron(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (player.GetQuestStatus(10111) == QuestStatus.Incomplete)
-                player.CastSpell(player, 33382, true);
 
             return true;
         }
@@ -479,37 +425,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_shrine_of_the_birds : GameObjectAI
-    {
-        public go_shrine_of_the_birds(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            uint birdEntryId = 0;
-
-            me.GetClosePoint(out float fX, out float fY, out float fZ, me.GetCombatReach(), SharedConst.InteractionDistance);
-
-            switch (me.GetEntry())
-            {
-                case GameObjectIds.ShrineHawk:
-                    birdEntryId = CreatureIds.HawkGuard;
-                    break;
-                case GameObjectIds.ShrineEagle:
-                    birdEntryId = CreatureIds.EagleGuard;
-                    break;
-                case GameObjectIds.ShrineFalcon:
-                    birdEntryId = CreatureIds.FalconGuard;
-                    break;
-            }
-
-            if (birdEntryId != 0)
-                player.SummonCreature(birdEntryId, fX, fY, fZ, me.GetOrientation(), TempSummonType.TimedDespawnOutOfCombat, 60000);
-
-            return false;
-        }
-    }
-
-    [Script]
     class go_southfury_moonstone : GameObjectAI
     {
         public go_southfury_moonstone(GameObject go) : base(go) { }
@@ -552,94 +467,6 @@ namespace Scripts.World.GameObjects
             if (player.GetQuestRewardStatus(QuestIds.LearnLeaveReturn) || player.GetQuestStatus(QuestIds.LearnLeaveReturn) == QuestStatus.Incomplete)
                 return false;
 
-            return true;
-        }
-    }
-
-    [Script]
-    class go_fel_crystalforge : GameObjectAI
-    {
-        public go_fel_crystalforge(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
-                player.PrepareQuestMenu(me.GetGUID()); /* return true*/
-
-            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-
-            player.SendGossipMenu(GossipConst.GossipFelCrystalforgeText, me.GetGUID());
-
-            return true;
-        }
-
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-            player.ClearGossipMenu();
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef:
-                    player.CastSpell(player, SpellIds.Create1FlaskOfBeast, false);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SendGossipMenu(GossipConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.CastSpell(player, SpellIds.Create5FlaskOfBeast, false);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SendGossipMenu(GossipConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SendGossipMenu(GossipConst.GossipFelCrystalforgeText, me.GetGUID());
-                    break;
-            }
-            return true;
-        }
-    }
-
-    [Script]
-    class go_bashir_crystalforge : GameObjectAI
-    {
-        public go_bashir_crystalforge(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
-                player.PrepareQuestMenu(me.GetGUID()); /* return true*/
-
-            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-
-            player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeText, me.GetGUID());
-
-            return true;
-        }
-
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-            player.ClearGossipMenu();
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef:
-                    player.CastSpell(player, SpellIds.Create1FlaskOfSorcerer, false);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.CastSpell(player, SpellIds.Create5FlaskOfSorcerer, false);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeText, me.GetGUID());
-                    break;
-            }
             return true;
         }
     }
@@ -797,21 +624,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_inconspicuous_landmark : GameObjectAI
-    {
-        public go_inconspicuous_landmark(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (player.HasItemCount(ItemIds.CuergosKey))
-                return false;
-
-            player.CastSpell(player, SpellIds.SummonPiratesTreasureAndTriggerMob, true);
-            return true;
-        }
-    }
-
-    [Script]
     class go_soulwell : GameObjectAI
     {
         public go_soulwell(GameObject go) : base(go) { }
@@ -822,39 +634,6 @@ namespace Scripts.World.GameObjects
             if (!owner || !owner.IsTypeId(TypeId.Player) || !player.IsInSameRaidWith(owner.ToPlayer()))
                 return true;
             return false;
-        }
-    }
-
-    [Script]
-    class go_dragonflayer_cage : GameObjectAI
-    {
-        public go_dragonflayer_cage(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            me.UseDoorOrButton();
-            if (player.GetQuestStatus(QuestIds.PrisonersOfWyrmskull) != QuestStatus.Incomplete)
-                return true;
-
-            Creature pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerPriest, 2.0f);
-            if (!pPrisoner)
-            {
-                pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerMage, 2.0f);
-                if (!pPrisoner)
-                {
-                    pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerWarrior, 2.0f);
-                    if (!pPrisoner)
-                        pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerPaladin, 2.0f);
-                }
-            }
-
-            if (!pPrisoner || !pPrisoner.IsAlive())
-                return true;
-
-            /// @todo prisoner should help player for a short period of time
-            player.KilledMonsterCredit(CreatureIds.CapturedValgardePrisonerProxy);
-            pPrisoner.DespawnOrUnsummon();
-            return true;
         }
     }
 

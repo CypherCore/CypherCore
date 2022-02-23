@@ -1710,6 +1710,24 @@ namespace Game.Spells
             switch (SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
+                    // Frost Tomb
+                    if (Id == 48400)
+                        return DiminishingGroup.None;
+                    // Gnaw
+                    else if (Id == 47481)
+                        return DiminishingGroup.Stun;
+                    // ToC Icehowl Arctic Breath
+                    else if (Id == 66689)
+                        return DiminishingGroup.None;
+                    // Black Plague
+                    else if (Id == 64155)
+                        return DiminishingGroup.None;
+                    // Screams of the Dead (King Ymiron)
+                    else if (Id == 51750)
+                        return DiminishingGroup.None;
+                    // Crystallize (Keristrasza heroic)
+                    else if (Id == 48179)
+                        return DiminishingGroup.None;
                     break;
                 case SpellFamilyNames.Mage:
                 {

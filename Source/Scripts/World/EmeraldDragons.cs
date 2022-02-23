@@ -146,7 +146,7 @@ namespace Scripts.World.EmeraldDragons
 
             _scheduler.Update(diff);
 
-            Unit target = SelectTarget(SelectAggroTarget.MaxThreat, 0, -50.0f, true);
+            Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0, -50.0f, true);
             if (target)
                 DoCast(target, SpellIds.SummonPlayer);
 
@@ -182,7 +182,7 @@ namespace Scripts.World.EmeraldDragons
             if (_roamTimer == 0)
             {
                 // Chase target, but don't attack - otherwise just roam around
-                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
                 if (target)
                 {
                     _roamTimer = RandomHelper.URand(15000, 30000);
