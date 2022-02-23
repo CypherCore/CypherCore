@@ -59,14 +59,14 @@ namespace Framework.Constants
         public const float DefaultCollesionHeight = 2.03128f; // Most common value in dbc
 
         public const uint MapMagic = 0x5350414D; //"MAPS";
-        public const uint MapVersionMagic = 0x392E3176; //"v1.9";
+        public const uint MapVersionMagic = 10;
         public const uint MapVersionMagic2 = 0x302E3276; //"v2.0"; // Hack for some different extractors using v2.0 header
         public const uint MapAreaMagic = 0x41455241; //"AREA";
         public const uint MapHeightMagic = 0x5447484D; //"MHGT";
         public const uint MapLiquidMagic = 0x51494C4D; //"MLIQ";
 
         public const uint mmapMagic = 0x4D4D4150; // 'MMAP'
-        public const int mmapVersion = 11;
+        public const int mmapVersion = 14;
 
         public const string VMapMagic = "VMAP_4.A";
         public const float VMAPInvalidHeightValue = -200000.0f;
