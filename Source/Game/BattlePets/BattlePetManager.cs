@@ -700,6 +700,59 @@ namespace Game.BattlePets
             }
         }
 
+        public void GrantBattlePetLevel(ObjectGuid guid, ushort grantedLevels)
+        {
+            if (!HasJournalLock())
+                return;
+
+            var pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
+            if (battlePetSpecies != null)
+                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                    return;
+
+            ushort level = pet.PacketInfo.Level;
+            if (level >= SharedConst.MaxBattlePetLevel)
+                return;
+
+            Player player = _owner.GetPlayer();
+
+            while (grantedLevels > 0 && level < SharedConst.MaxBattlePetLevel)
+            {
+                ++level;
+                --grantedLevels;
+
+                player.UpdateCriteria(CriteriaType.BattlePetReachLevel, pet.PacketInfo.Species, level);
+            }
+
+            pet.PacketInfo.Level = level;
+            if (level >= SharedConst.MaxBattlePetLevel)
+                pet.PacketInfo.Exp = 0;
+            pet.CalculateStats();
+            pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
+
+            if (pet.SaveInfo != BattlePetSaveInfo.New)
+                pet.SaveInfo = BattlePetSaveInfo.Changed;
+
+            List<BattlePet> updates = new List<BattlePet>();
+            updates.Add(pet);
+            SendUpdates(updates, false);
+
+            // Update battle pet related update fields
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet != null)
+            {
+                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                {
+                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
+                    player.SetBattlePetData(pet);
+                }
+            }
+        }
+
         public void HealBattlePetsPct(byte pct)
         {
             // TODO: After each Pet Battle, any injured companion will automatically

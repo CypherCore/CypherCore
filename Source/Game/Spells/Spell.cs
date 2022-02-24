@@ -5313,6 +5313,7 @@ namespace Game.Spells
                         break;
                     }
                     case SpellEffectName.ChangeBattlepetQuality:
+                    case SpellEffectName.GrantBattlepetLevel:
                     case SpellEffectName.GrantBattlepetExperience:
                     {
                         Player playerCaster = m_caster.ToPlayer();
@@ -5362,7 +5363,7 @@ namespace Game.Spells
                                             return SpellCastResult.CantUpgradeBattlePet;
                                     }
 
-                                    if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
+                                    if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetLevel || spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
                                         if (battlePet.PacketInfo.Level >= SharedConst.MaxBattlePetLevel)
                                             return SpellCastResult.GrantPetLevelFail;
 

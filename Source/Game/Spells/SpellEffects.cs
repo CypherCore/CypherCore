@@ -5101,6 +5101,22 @@ namespace Game.Spells
                 garrison.ActivateBuilding((uint)effectInfo.MiscValue);
         }
 
+        [SpellEffectHandler(SpellEffectName.GrantBattlepetLevel)]
+        void EffectGrantBattlePetLevel()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerCaster = m_caster.ToPlayer();
+            if (playerCaster == null)
+                return;
+
+            if (unitTarget == null || !unitTarget.IsCreature())
+                return;
+
+            playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetLevel(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage);
+        }
+
         [SpellEffectHandler(SpellEffectName.HealBattlepetPct)]
         void EffectHealBattlePetPct()
         {
