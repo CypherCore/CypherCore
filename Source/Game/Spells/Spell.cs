@@ -8791,6 +8791,12 @@ namespace Game.Spells
             CastItem = item;
         }
 
+        public CastSpellExtraArgs(Spell triggeringSpell)
+        {
+            TriggerFlags = TriggerCastFlags.FullMask;
+            SetTriggeringSpell(triggeringSpell);
+        }
+
         public CastSpellExtraArgs(AuraEffect eff)
         {
             TriggerFlags = TriggerCastFlags.FullMask;
@@ -8819,6 +8825,12 @@ namespace Game.Spells
             return this;
         }
 
+        public CastSpellExtraArgs SetTriggeringSpell(Spell triggeringSpell)
+        {
+            OriginalCastId = triggeringSpell.m_castId;
+            return this;
+        }
+        
         public CastSpellExtraArgs SetTriggeringAura(AuraEffect triggeringAura)
         {
             TriggeringAura = triggeringAura;
