@@ -31,7 +31,7 @@ namespace Game.AI
         {
             _pauseTimer = 2500;
             _playerCheckTimer = 1000;
-            _maxPlayerDistance = 50;
+            _maxPlayerDistance = 100;
             _activeAttacker = true;
             _despawnAtEnd = true;
             _despawnAtFar = true;
