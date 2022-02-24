@@ -545,7 +545,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(InitializeVisualStalker));
+            AfterHit.Add(new HitHandler(InitializeVisualStalker));
         }
     }
     
