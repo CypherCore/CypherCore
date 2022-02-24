@@ -486,7 +486,7 @@ namespace Framework.Constants
         ModHealingAndAbsorbFromCaster = 462, // NYI
         ConvertCritRatingPctToParryRating = 463, // NYI
         ModAttackPowerOfBonusArmor = 464, // NYI
-        ModBonusArmor = 465, // NYI
+        ModBonusArmor = 465,
         ModBonusArmorPct = 466,
         ModStatBonusPct = 467,
         TriggerSpellOnHealthPct = 468,
