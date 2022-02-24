@@ -56,6 +56,7 @@ namespace Scripts.Spells.Shaman
         public const uint FlametongueWeaponAura = 319778;
         public const uint GatheringStorms = 198299;
         public const uint GatheringStormsBuff = 198300;
+        public const uint GhostWolf = 2645;
         public const uint HealingRainVisual = 147490;
         public const uint HealingRainHeal = 73921;
         public const uint ItemLightningShield = 23552;
@@ -72,6 +73,9 @@ namespace Scripts.Spells.Shaman
         public const uint PathOfFlamesTalent = 201909;
         public const uint PowerSurge = 40466;
         public const uint Sated = 57724;
+        public const uint SpiritWolfTalent = 260878;
+        public const uint SpiritWolfPeriodic = 260882;
+        public const uint SpiritWolfAura = 260881;
         public const uint TidalWaves = 53390;
         public const uint TotemicPowerMp5 = 28824;
         public const uint TotemicPowerSpellPower = 28825;
@@ -998,6 +1002,35 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    // 2645 - Ghost Wolf
+    [Script] // 260878 - Spirit Wolf
+    class spell_sha_spirit_wolf : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GhostWolf, SpellIds.SpiritWolfTalent, SpellIds.SpiritWolfPeriodic, SpellIds.SpiritWolfAura);
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(SpellIds.SpiritWolfTalent) && target.HasAura(SpellIds.GhostWolf))
+                target.CastSpell(target, SpellIds.SpiritWolfPeriodic, new CastSpellExtraArgs(aurEff));
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SpiritWolfPeriodic);
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SpiritWolfAura);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Any, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Any, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 51562 - Tidal Waves
     class spell_sha_tidal_waves : AuraScript
     {
