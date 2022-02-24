@@ -32,6 +32,7 @@ namespace Scripts.Spells.Warlock
         public const uint DemonicCircleSummon = 48018;
         public const uint DemonicCircleTeleport = 48020;
         public const uint DevourMagicHeal = 19658;
+        public const uint DrainSoulEnergize = 205292;
         public const uint GlyphOfDemonTraining = 56249;
         public const uint GlyphOfSoulSwap = 56226;
         public const uint GlyphOfSuccubus = 56250;
@@ -224,6 +225,30 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 198590 - Drain Soul
+    class spell_warl_drain_soul : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DrainSoulEnergize);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Death)
+                return;
+
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(caster, SpellIds.DrainSoulEnergize, true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 48181 - Haunt
     class spell_warl_haunt : SpellScript
     {
