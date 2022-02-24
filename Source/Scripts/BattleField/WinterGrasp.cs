@@ -22,6 +22,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
 using Game.Scripting;
+using Game.AI;
 
 namespace Game.BattleFields
 {
@@ -606,7 +607,7 @@ namespace Game.BattleFields
                         UpdateVehicleCountWG();
         }
 
-        void HandlePromotion(Player playerKiller, Unit unitKilled)
+        public void HandlePromotion(Player playerKiller, Unit unitKilled)
         {
             int teamId = playerKiller.GetTeamId();
 
@@ -1644,6 +1645,24 @@ namespace Game.BattleFields
         public override BattleField GetBattlefield()
         {
             return new BattlefieldWG();
+        }
+    }
+
+    [Script]
+    class npc_wg_give_promotion_credit : ScriptedAI
+    {
+        public npc_wg_give_promotion_credit(Creature creature) : base(creature) { }
+
+        public override void JustDied(Unit killer)
+        {
+            if (!killer || !killer.IsPlayer())
+                return;
+
+            BattlefieldWG wintergrasp = (BattlefieldWG)Global.BattleFieldMgr.GetBattlefieldByBattleId(BattlefieldIds.WG);
+            if (wintergrasp == null)
+                return;
+
+            wintergrasp.HandlePromotion(killer.ToPlayer(), me);
         }
     }
 }
