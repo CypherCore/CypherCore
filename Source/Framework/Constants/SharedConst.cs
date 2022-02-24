@@ -1710,6 +1710,14 @@ namespace Framework.Constants
         SupportTicketsEnabled,
         TalentsInspecting,
         ThreatRadius,
+        TolbaradBattleTime,
+        TolbaradBonusTime,
+        TolbaradEnable,
+        TolbaradNoBattleTime,
+        TolbaradPlrMax,
+        TolbaradPlrMin,
+        TolbaradPlrMinLvl,
+        TolbaradRestartAfterCrash,
         TradeLevelReq,
         UptimeUpdate,
         VmapIndoorCheck,
@@ -2959,6 +2967,75 @@ namespace Framework.Constants
         BattlefieldWgDefendedH = 4024,
         BattlefieldWgDefendedA = 4025,
         BattlefieldWgTimeNextBattle = 4354,
+
+        BattlefieldTbAllianceControlsShow = 5385,
+        BattlefieldTbHordeControlsShow = 5384,
+        BattlefieldTbAllianceAttackingShow = 5546,
+        BattlefieldTbHordeAttackingShow = 5547,
+
+        BattlefieldTbBuildingsCaptured = 5348,
+        BattlefieldTbBuildingsCapturedShow = 5349,
+        BattlefieldTbTowersDestroyed = 5347,
+        BattlefieldTbTowersDestroyedShow = 5350,
+
+        BattlefieldTbFactionControlling = 5334, // 1 -> Alliance, 2 -> Horde
+
+        BattlefieldTbTimeNextBattle = 5332,
+        BattlefieldTbTimeNextBattleShow = 5387,
+        BattlefieldTbTimeBattleEnd = 5333,
+        BattlefieldTbTimeBattleEndShow = 5346,
+
+        BattlefieldTbStatePreparations = 5684,
+        BattlefieldTbStateBattle = 5344,
+
+        BattlefieldTbProgressShow = 5376,
+        BattlefieldTbProgress = 5377, // 0 Horde, 100 Alliance
+        BattlefieldTbProgressPercentGrey = 5378,
+
+        BattlefieldTbKeepHorde = 5469,
+        BattlefieldTbKeepAlliance = 5470,
+
+        BattlefieldTbGarrisonHordeControlled = 5418,
+        BattlefieldTbGarrisonHordeCapturing = 5419,
+        BattlefieldTbGarrisonNeutral = 5420, // Unused
+        BattlefieldTbGarrisonAllianceCapturing = 5421,
+        BattlefieldTbGarrisonAllianceControlled = 5422,
+
+        BattlefieldTbVigilHordeControlled = 5423,
+        BattlefieldTbVigilHordeCapturing = 5424,
+        BattlefieldTbVigilNeutral = 5425, // Unused
+        BattlefieldTbVigilAllianceCapturing = 5426,
+        BattlefieldTbVigilAllianceControlled = 5427,
+
+        BattlefieldTbSlagworksHordeControlled = 5428,
+        BattlefieldTbSlagworksHordeCapturing = 5429,
+        BattlefieldTbSlagworksNeutral = 5430, // Unused
+        BattlefieldTbSlagworksAllianceCapturing = 5431,
+        BattlefieldTbSlagworksAllianceControlled = 5432,
+
+        BattlefieldTbWestIntactHorde = 5433,
+        BattlefieldTbWestDamagedHorde = 5434,
+        BattlefieldTbWestDestroyedNeutral = 5435,
+        BattlefieldTbWestIntactAlliance = 5436,
+        BattlefieldTbWestDamagedAlliance = 5437,
+        BattlefieldTbWestIntactNeutral = 5453, // Unused
+        BattlefieldTbWestDamagedNeutral = 5454, // Unused
+
+        BattlefieldTbSouthIntactHorde = 5438,
+        BattlefieldTbSouthDamagedHorde = 5439,
+        BattlefieldTbSouthDestroyedNeutral = 5440,
+        BattlefieldTbSouthIntactAlliance = 5441,
+        BattlefieldTbSouthDamagedAlliance = 5442,
+        BattlefieldTbSouthIntactNeutral = 5455, // Unused
+        BattlefieldTbSouthDamagedNeutral = 5456, // Unused
+
+        BattlefieldTbEastIntactHorde = 5443,
+        BattlefieldTbEastDamagedHorde = 5444,
+        BattlefieldTbEastDestroyedNeutral = 5445,
+        BattlefieldTbEastIntactAlliance = 5446,
+        BattlefieldTbEastDamagedAlliance = 5447,
+        BattlefieldTbEastIntactNeutral = 5451,
+        BattlefieldTbEastDamagedNeutral = 5452,
 
         CurrencyResetTime = 20001,                     // Next Arena Distribution Time
         WeeklyQuestResetTime = 20002,                     // Next Weekly Quest Reset Time

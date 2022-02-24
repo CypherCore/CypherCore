@@ -2858,35 +2858,43 @@ namespace Game.Entities
             uint mapid = GetMapId();
             OutdoorPvP pvp = Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(zoneid);
             InstanceScript instance = GetInstanceScript();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(zoneid);
+            BattleField battlefield = Global.BattleFieldMgr.GetBattlefieldToZoneId(zoneid);
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
             packet.AreaID = zoneid;
             packet.SubareaID = areaid;
-            packet.AddState(2264, 0);              // 1
-            packet.AddState(2263, 0);              // 2
-            packet.AddState(2262, 0);              // 3
-            packet.AddState(2261, 0);              // 4
-            packet.AddState(2260, 0);              // 5
-            packet.AddState(2259, 0);              // 6
 
-            packet.AddState(3191, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) : 0); // 7 Current Season - Arena season in progress
-                                                                                                                                                   // 0 - End of season
-            packet.AddState(3901, WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));     // 8 PreviousSeason
+            packet.AddState(2264, 0); // SCOURGE_EVENT_WORLDSTATE_EASTERN_PLAGUELANDS
+            packet.AddState(2263, 0); // SCOURGE_EVENT_WORLDSTATE_TANARIS
+            packet.AddState(2262, 0); // SCOURGE_EVENT_WORLDSTATE_BURNING_STEPPES
+            packet.AddState(2261, 0); // SCOURGE_EVENT_WORLDSTATE_BLASTED_LANDS
+            packet.AddState(2260, 0); // SCOURGE_EVENT_WORLDSTATE_AZSHARA
+            packet.AddState(2259, 0); // SCOURGE_EVENT_WORLDSTATE_WINTERSPRING
 
-            if (mapid == 530)                                       // Outland
+            // ARENA_SEASON_IN_PROGRESS
+            //   7 - arena season in progress
+            //   0 - end of season
+            packet.AddState(3191, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId) : 0); // 7 Current Season - Arena season in progress
+
+            // Previous arena season id
+            uint previousArenaSeason = 0;
+            if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) && WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) > 0)
+                previousArenaSeason = WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId) - 1;// 0 - End of season
+            packet.AddState(3901, previousArenaSeason);
+
+            if (mapid == 530) // Outland
             {
-                packet.AddState(2495, 0);          // 7
-                packet.AddState(2493, 0xF);        // 8
-                packet.AddState(2491, 0xF);        // 9
+                packet.AddState(2495, 0);  // NA_UI_OUTLAND_01 "Progress: %2494w"
+                packet.AddState(2493, 15); // NA_UI_GUARDS_MAX
+                packet.AddState(2491, 15); // NA_UI_GUARDS_LEFT
             }
 
             // Horde War Mode bonus
-            packet.AddState(17042, 10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Alliance ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0));
+            packet.AddState(17042, (uint)(10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Alliance ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0)));
 
             // Alliance War Mode bonus
-            packet.AddState(17043, 10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Horde ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0));
+            packet.AddState(17043, (uint)(10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Horde ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0)));
 
             // insert <field> <value>
             switch (zoneid)
@@ -2907,97 +2915,96 @@ namespace Game.Entities
                         pvp.FillInitialWorldStates(packet);
                     else
                     {
-                        // states are always shown
-                        packet.AddState(2313, 0x0); // 7 ally silityst gathered
-                        packet.AddState(2314, 0x0); // 8 horde silityst gathered
-                        packet.AddState(2317, 0x0); // 9 max silithyst
+                        packet.AddState(2313, 0); // SI_GATHERED_A
+                        packet.AddState(2314, 0); // SI_GATHERED_H
+                        packet.AddState(2317, 0); // SI_SILITHYST_MAX
                     }
-                    // dunno about these... aq opening event maybe?
-                    packet.AddState(2322, 0x0); // 10 sandworm N
-                    packet.AddState(2323, 0x0); // 11 sandworm S
-                    packet.AddState(2324, 0x0); // 12 sandworm SW
-                    packet.AddState(2325, 0x0); // 13 sandworm E
+                    // unknown, aq opening?
+                    packet.AddState(2322, 0); // AQ_SANDWORM_N
+                    packet.AddState(2323, 0); // AQ_SANDWORM_S
+                    packet.AddState(2324, 0); // AQ_SANDWORM_SW
+                    packet.AddState(2325, 0); // AQ_SANDWORM_E
                     break;
                 case 2597:                                          // Alterac Valley
                     if (bg && bg.GetTypeID(true) == BattlegroundTypeId.AV)
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x7ae, 0x1);           // 7 snowfall n
-                        packet.AddState(0x532, 0x1);           // 8 frostwolfhut hc
-                        packet.AddState(0x531, 0x0);           // 9 frostwolfhut ac
-                        packet.AddState(0x52e, 0x0);           // 10 stormpike firstaid a_a
-                        packet.AddState(0x571, 0x0);           // 11 east frostwolf tower horde assaulted -unused
-                        packet.AddState(0x570, 0x0);           // 12 west frostwolf tower horde assaulted - unused
-                        packet.AddState(0x567, 0x1);           // 13 frostwolfe c
-                        packet.AddState(0x566, 0x1);           // 14 frostwolfw c
-                        packet.AddState(0x550, 0x1);           // 15 irondeep (N) ally
-                        packet.AddState(0x544, 0x0);           // 16 ice grave a_a
-                        packet.AddState(0x536, 0x0);           // 17 stormpike grave h_c
-                        packet.AddState(0x535, 0x1);           // 18 stormpike grave a_c
-                        packet.AddState(0x518, 0x0);           // 19 stoneheart grave a_a
-                        packet.AddState(0x517, 0x0);           // 20 stoneheart grave h_a
-                        packet.AddState(0x574, 0x0);           // 21 1396 unk
-                        packet.AddState(0x573, 0x0);           // 22 iceblood tower horde assaulted -unused
-                        packet.AddState(0x572, 0x0);           // 23 towerpoint horde assaulted - unused
-                        packet.AddState(0x56f, 0x0);           // 24 1391 unk
-                        packet.AddState(0x56e, 0x0);           // 25 iceblood a
-                        packet.AddState(0x56d, 0x0);           // 26 towerp a
-                        packet.AddState(0x56c, 0x0);           // 27 frostwolfe a
-                        packet.AddState(0x56b, 0x0);           // 28 froswolfw a
-                        packet.AddState(0x56a, 0x1);           // 29 1386 unk
-                        packet.AddState(0x569, 0x1);           // 30 iceblood c
-                        packet.AddState(0x568, 0x1);           // 31 towerp c
-                        packet.AddState(0x565, 0x0);           // 32 stoneh tower a
-                        packet.AddState(0x564, 0x0);           // 33 icewing tower a
-                        packet.AddState(0x563, 0x0);           // 34 dunn a
-                        packet.AddState(0x562, 0x0);           // 35 duns a
-                        packet.AddState(0x561, 0x0);           // 36 stoneheart bunker alliance assaulted - unused
-                        packet.AddState(0x560, 0x0);           // 37 icewing bunker alliance assaulted - unused
-                        packet.AddState(0x55f, 0x0);           // 38 dunbaldar south alliance assaulted - unused
-                        packet.AddState(0x55e, 0x0);           // 39 dunbaldar north alliance assaulted - unused
-                        packet.AddState(0x55d, 0x0);           // 40 stone tower d
-                        packet.AddState(0x3c6, 0x0);           // 41 966 unk
-                        packet.AddState(0x3c4, 0x0);           // 42 964 unk
-                        packet.AddState(0x3c2, 0x0);           // 43 962 unk
-                        packet.AddState(0x516, 0x1);           // 44 stoneheart grave a_c
-                        packet.AddState(0x515, 0x0);           // 45 stonheart grave h_c
-                        packet.AddState(0x3b6, 0x0);           // 46 950 unk
-                        packet.AddState(0x55c, 0x0);           // 47 icewing tower d
-                        packet.AddState(0x55b, 0x0);           // 48 dunn d
-                        packet.AddState(0x55a, 0x0);           // 49 duns d
-                        packet.AddState(0x559, 0x0);           // 50 1369 unk
-                        packet.AddState(0x558, 0x0);           // 51 iceblood d
-                        packet.AddState(0x557, 0x0);           // 52 towerp d
-                        packet.AddState(0x556, 0x0);           // 53 frostwolfe d
-                        packet.AddState(0x555, 0x0);           // 54 frostwolfw d
-                        packet.AddState(0x554, 0x1);           // 55 stoneh tower c
-                        packet.AddState(0x553, 0x1);           // 56 icewing tower c
-                        packet.AddState(0x552, 0x1);           // 57 dunn c
-                        packet.AddState(0x551, 0x1);           // 58 duns c
-                        packet.AddState(0x54f, 0x0);           // 59 irondeep (N) horde
-                        packet.AddState(0x54e, 0x0);           // 60 irondeep (N) ally
-                        packet.AddState(0x54d, 0x1);           // 61 mine (S) neutral
-                        packet.AddState(0x54c, 0x0);           // 62 mine (S) horde
-                        packet.AddState(0x54b, 0x0);           // 63 mine (S) ally
-                        packet.AddState(0x545, 0x0);           // 64 iceblood h_a
-                        packet.AddState(0x543, 0x1);           // 65 iceblod h_c
-                        packet.AddState(0x542, 0x0);           // 66 iceblood a_c
-                        packet.AddState(0x540, 0x0);           // 67 snowfall h_a
-                        packet.AddState(0x53f, 0x0);           // 68 snowfall a_a
-                        packet.AddState(0x53e, 0x0);           // 69 snowfall h_c
-                        packet.AddState(0x53d, 0x0);           // 70 snowfall a_c
-                        packet.AddState(0x53c, 0x0);           // 71 frostwolf g h_a
-                        packet.AddState(0x53b, 0x0);           // 72 frostwolf g a_a
-                        packet.AddState(0x53a, 0x1);           // 73 frostwolf g h_c
-                        packet.AddState(0x539, 0x0);           // 74 frostwolf g a_c
-                        packet.AddState(0x538, 0x0);           // 75 stormpike grave h_a
-                        packet.AddState(0x537, 0x0);           // 76 stormpike grave a_a
-                        packet.AddState(0x534, 0x0);           // 77 frostwolf hut h_a
-                        packet.AddState(0x533, 0x0);           // 78 frostwolf hut a_a
-                        packet.AddState(0x530, 0x0);           // 79 stormpike first aid h_a
-                        packet.AddState(0x52f, 0x0);           // 80 stormpike first aid h_c
-                        packet.AddState(0x52d, 0x1);           // 81 stormpike first aid a_c
+                        packet.AddState(1966, 1); // AV_SNOWFALL_N
+                        packet.AddState(1330, 1); // AV_FROSTWOLFHUT_H_C
+                        packet.AddState(1329, 0); // AV_FROSTWOLFHUT_A_C
+                        packet.AddState(1326, 0); // AV_AID_A_A
+                        packet.AddState(1393, 0); // East Frostwolf Tower Horde Assaulted - UNUSED
+                        packet.AddState(1392, 0); // West Frostwolf Tower Horde Assaulted - UNUSED
+                        packet.AddState(1383, 1); // AV_FROSTWOLFE_CONTROLLED
+                        packet.AddState(1382, 1); // AV_FROSTWOLFW_CONTROLLED
+                        packet.AddState(1360, 1); // AV_N_MINE_N
+                        packet.AddState(1348, 0); // AV_ICEBLOOD_A_A
+                        packet.AddState(1334, 0); // AV_PIKEGRAVE_H_C
+                        packet.AddState(1333, 1); // AV_PIKEGRAVE_A_C
+                        packet.AddState(1304, 0); // AV_STONEHEART_A_A
+                        packet.AddState(1303, 0); // AV_STONEHEART_H_A
+                        packet.AddState(1396, 0); // unk
+                        packet.AddState(1395, 0); // Iceblood Tower Horde Assaulted - UNUSED
+                        packet.AddState(1394, 0); // Towerpoint Horde Assaulted - UNUSED
+                        packet.AddState(1391, 0); // unk
+                        packet.AddState(1390, 0); // AV_ICEBLOOD_ASSAULTED
+                        packet.AddState(1389, 0); // AV_TOWERPOINT_ASSAULTED
+                        packet.AddState(1388, 0); // AV_FROSTWOLFE_ASSAULTED
+                        packet.AddState(1387, 0); // AV_FROSTWOLFW_ASSAULTED
+                        packet.AddState(1386, 1); // unk
+                        packet.AddState(1385, 1); // AV_ICEBLOOD_CONTROLLED
+                        packet.AddState(1384, 1); // AV_TOWERPOINT_CONTROLLED
+                        packet.AddState(1381, 0); // AV_STONEH_ASSAULTED
+                        packet.AddState(1380, 0); // AV_ICEWING_ASSAULTED
+                        packet.AddState(1379, 0); // AV_DUNN_ASSAULTED
+                        packet.AddState(1378, 0); // AV_DUNS_ASSAULTED
+                        packet.AddState(1377, 0); // Stoneheart Bunker Alliance Assaulted - UNUSED
+                        packet.AddState(1376, 0); // Icewing Bunker Alliance Assaulted - UNUSED
+                        packet.AddState(1375, 0); // Dunbaldar South Alliance Assaulted - UNUSED
+                        packet.AddState(1374, 0); // Dunbaldar North Alliance Assaulted - UNUSED
+                        packet.AddState(1373, 0); // AV_STONEH_DESTROYED
+                        packet.AddState(966, 0);  // AV_UNK_02
+                        packet.AddState(964, 0);  // AV_UNK_01
+                        packet.AddState(962, 0);  // AV_STORMPIKE_COMMANDERS
+                        packet.AddState(1302, 1); // AV_STONEHEART_A_C
+                        packet.AddState(1301, 0); // AV_STONEHEART_H_C
+                        packet.AddState(950, 0);  // AV_STORMPIKE_LIEUTENANTS
+                        packet.AddState(1372, 0); // AV_ICEWING_DESTROYED
+                        packet.AddState(1371, 0); // AV_DUNN_DESTROYED
+                        packet.AddState(1370, 0); // AV_DUNS_DESTROYED
+                        packet.AddState(1369, 0); // unk
+                        packet.AddState(1368, 0); // AV_ICEBLOOD_DESTROYED
+                        packet.AddState(1367, 0); // AV_TOWERPOINT_DESTROYED
+                        packet.AddState(1366, 0); // AV_FROSTWOLFE_DESTROYED
+                        packet.AddState(1365, 0); // AV_FROSTWOLFW_DESTROYED
+                        packet.AddState(1364, 1); // AV_STONEH_CONTROLLED
+                        packet.AddState(1363, 1); // AV_ICEWING_CONTROLLED
+                        packet.AddState(1362, 1); // AV_DUNN_CONTROLLED
+                        packet.AddState(1361, 1); // AV_DUNS_CONTROLLED
+                        packet.AddState(1359, 0); // AV_N_MINE_H
+                        packet.AddState(1358, 0); // AV_N_MINE_A
+                        packet.AddState(1357, 1); // AV_S_MINE_N
+                        packet.AddState(1356, 0); // AV_S_MINE_H
+                        packet.AddState(1355, 0); // AV_S_MINE_A
+                        packet.AddState(1349, 0); // AV_ICEBLOOD_H_A
+                        packet.AddState(1347, 1); // AV_ICEBLOOD_H_C
+                        packet.AddState(1346, 0); // AV_ICEBLOOD_A_C
+                        packet.AddState(1344, 0); // AV_SNOWFALL_H_A
+                        packet.AddState(1343, 0); // AV_SNOWFALL_A_A
+                        packet.AddState(1342, 0); // AV_SNOWFALL_H_C
+                        packet.AddState(1341, 0); // AV_SNOWFALL_A_C
+                        packet.AddState(1340, 0); // AV_FROSTWOLF_H_A
+                        packet.AddState(1339, 0); // AV_FROSTWOLF_A_A
+                        packet.AddState(1338, 1); // AV_FROSTWOLF_H_C
+                        packet.AddState(1337, 0); // AV_FROSTWOLF_A_C
+                        packet.AddState(1336, 0); // AV_PIKEGRAVE_H_A
+                        packet.AddState(1335, 0); // AV_PIKEGRAVE_A_A
+                        packet.AddState(1332, 0); // AV_FROSTWOLFHUT_H_A
+                        packet.AddState(1331, 0); // AV_FROSTWOLFHUT_A_A
+                        packet.AddState(1328, 0); // AV_AID_H_A
+                        packet.AddState(1327, 0); // AV_AID_H_C
+                        packet.AddState(1325, 1); // AV_AID_A_C
                     }
                     break;
                 case 3277:                                          // Warsong Gulch
@@ -3005,14 +3012,14 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x62d, 0x0);       // 7 1581 alliance flag captures
-                        packet.AddState(0x62e, 0x0);       // 8 1582 horde flag captures
-                        packet.AddState(0x609, 0x0);       // 9 1545 unk, set to 1 on alliance flag pickup...
-                        packet.AddState(0x60a, 0x0);       // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
-                        packet.AddState(0x60b, 0x2);       // 11 1547 unk
-                        packet.AddState(0x641, 0x3);       // 12 1601 unk (max flag captures?)
-                        packet.AddState(0x922, 0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-                        packet.AddState(0x923, 0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                        packet.AddState(1581, 0); // alliance flag captures
+                        packet.AddState(1582, 0); // horde flag captures
+                        packet.AddState(1545, 0); // unk, set to 1 on alliance flag pickup...
+                        packet.AddState(1546, 0); // unk, set to 1 on horde flag pickup, after drop it's -1
+                        packet.AddState(1547, 2); // unk
+                        packet.AddState(1601, 3); // unk (max flag captures?)
+                        packet.AddState(2338, 1); // horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                        packet.AddState(2339, 1); // alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
                     }
                     break;
                 case 3358:                                          // Arathi Basin
@@ -3020,38 +3027,38 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x6e7, 0x0);       // 7 1767 stables alliance
-                        packet.AddState(0x6e8, 0x0);       // 8 1768 stables horde
-                        packet.AddState(0x6e9, 0x0);       // 9 1769 unk, ST?
-                        packet.AddState(0x6ea, 0x0);       // 10 1770 stables (show/hide)
-                        packet.AddState(0x6ec, 0x0);       // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
-                        packet.AddState(0x6ed, 0x0);       // 12 1773 farm (show/hide)
-                        packet.AddState(0x6ee, 0x0);       // 13 1774 farm color
-                        packet.AddState(0x6ef, 0x0);       // 14 1775 gold mine color, may be FM?
-                        packet.AddState(0x6f0, 0x0);       // 15 1776 alliance resources
-                        packet.AddState(0x6f1, 0x0);       // 16 1777 horde resources
-                        packet.AddState(0x6f2, 0x0);       // 17 1778 horde bases
-                        packet.AddState(0x6f3, 0x0);       // 18 1779 alliance bases
-                        packet.AddState(0x6f4, 0x7d0);     // 19 1780 max resources (2000)
-                        packet.AddState(0x6f6, 0x0);       // 20 1782 blacksmith color
-                        packet.AddState(0x6f7, 0x0);       // 21 1783 blacksmith (show/hide)
-                        packet.AddState(0x6f8, 0x0);       // 22 1784 unk, bs?
-                        packet.AddState(0x6f9, 0x0);       // 23 1785 unk, bs?
-                        packet.AddState(0x6fb, 0x0);       // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
-                        packet.AddState(0x6fc, 0x0);       // 25 1788 gold mine (0 - conflict, 1 - horde)
-                        packet.AddState(0x6fd, 0x0);       // 26 1789 gold mine (1 - show/0 - hide)
-                        packet.AddState(0x6fe, 0x0);       // 27 1790 gold mine color
-                        packet.AddState(0x700, 0x0);       // 28 1792 gold mine color, wtf?, may be LM?
-                        packet.AddState(0x701, 0x0);       // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
-                        packet.AddState(0x702, 0x0);       // 30 1794 lumber mill (show/hide)
-                        packet.AddState(0x703, 0x0);       // 31 1795 lumber mill color color
-                        packet.AddState(0x732, 0x1);       // 32 1842 stables (1 - uncontrolled)
-                        packet.AddState(0x733, 0x1);       // 33 1843 gold mine (1 - uncontrolled)
-                        packet.AddState(0x734, 0x1);       // 34 1844 lumber mill (1 - uncontrolled)
-                        packet.AddState(0x735, 0x1);       // 35 1845 farm (1 - uncontrolled)
-                        packet.AddState(0x736, 0x1);       // 36 1846 blacksmith (1 - uncontrolled)
-                        packet.AddState(0x745, 0x2);       // 37 1861 unk
-                        packet.AddState(0x7a3, 0x708);     // 38 1955 warning limit (1800)
+                        packet.AddState(1767, 0);    // stables alliance
+                        packet.AddState(1768, 0);    // stables horde
+                        packet.AddState(1769, 0);    // stables alliance controlled
+                        packet.AddState(1770, 0);    // stables horde controlled
+                        packet.AddState(1772, 0);    // farm alliance
+                        packet.AddState(1773, 0);    // farm horde
+                        packet.AddState(1774, 0);    // farm alliance controlled
+                        packet.AddState(1775, 0);    // farm horde controlled
+                        packet.AddState(1776, 0);    // alliance resources
+                        packet.AddState(1777, 0);    // horde resources
+                        packet.AddState(1778, 0);    // horde bases
+                        packet.AddState(1779, 0);    // alliance bases
+                        packet.AddState(1780, 2000); // max resources (2000)
+                        packet.AddState(1782, 0);    // blacksmith alliance
+                        packet.AddState(1783, 0);    // blacksmith horde
+                        packet.AddState(1784, 0);    // blacksmith alliance controlled
+                        packet.AddState(1785, 0);    // blacksmith horde controlled
+                        packet.AddState(1787, 0);    // gold mine alliance
+                        packet.AddState(1788, 0);    // gold mine horde
+                        packet.AddState(1789, 0);    // gold mine alliance controlled
+                        packet.AddState(1790, 0);    // gold mine horde controlled
+                        packet.AddState(1792, 0);    // lumber mill alliance
+                        packet.AddState(1793, 0);    // lumber mill horde
+                        packet.AddState(1794, 0);    // lumber mill alliance controlled
+                        packet.AddState(1795, 0);    // lumber mill horde controlled
+                        packet.AddState(1842, 1);    // stables (1 - uncontrolled)
+                        packet.AddState(1843, 1);    // gold mine (1 - uncontrolled)
+                        packet.AddState(1844, 1);    // lumber mill (1 - uncontrolled)
+                        packet.AddState(1845, 1);    // farm (1 - uncontrolled)
+                        packet.AddState(1846, 1);    // blacksmith (1 - uncontrolled)
+                        packet.AddState(1861, 2);    // unk
+                        packet.AddState(1955, 1800); // warning limit (1800)
                     }
                     break;
                 case 3820:                                          // Eye of the Storm
@@ -3059,39 +3066,39 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0xac1, 0x0);       // 7  2753 Horde Bases
-                        packet.AddState(0xac0, 0x0);       // 8  2752 Alliance Bases
-                        packet.AddState(0xab6, 0x0);       // 9  2742 Mage Tower - Horde conflict
-                        packet.AddState(0xab5, 0x0);       // 10 2741 Mage Tower - Alliance conflict
-                        packet.AddState(0xab4, 0x0);       // 11 2740 Fel Reaver - Horde conflict
-                        packet.AddState(0xab3, 0x0);       // 12 2739 Fel Reaver - Alliance conflict
-                        packet.AddState(0xab2, 0x0);       // 13 2738 Draenei - Alliance conflict
-                        packet.AddState(0xab1, 0x0);       // 14 2737 Draenei - Horde conflict
-                        packet.AddState(0xab0, 0x0);       // 15 2736 unk // 0 at start
-                        packet.AddState(0xaaf, 0x0);       // 16 2735 unk // 0 at start
-                        packet.AddState(0xaad, 0x0);       // 17 2733 Draenei - Horde control
-                        packet.AddState(0xaac, 0x0);       // 18 2732 Draenei - Alliance control
-                        packet.AddState(0xaab, 0x1);       // 19 2731 Draenei uncontrolled (1 - yes, 0 - no)
-                        packet.AddState(0xaaa, 0x0);       // 20 2730 Mage Tower - Alliance control
-                        packet.AddState(0xaa9, 0x0);       // 21 2729 Mage Tower - Horde control
-                        packet.AddState(0xaa8, 0x1);       // 22 2728 Mage Tower uncontrolled (1 - yes, 0 - no)
-                        packet.AddState(0xaa7, 0x0);       // 23 2727 Fel Reaver - Horde control
-                        packet.AddState(0xaa6, 0x0);       // 24 2726 Fel Reaver - Alliance control
-                        packet.AddState(0xaa5, 0x1);       // 25 2725 Fel Reaver uncontrolled (1 - yes, 0 - no)
-                        packet.AddState(0xaa4, 0x0);       // 26 2724 Boold Elf - Horde control
-                        packet.AddState(0xaa3, 0x0);       // 27 2723 Boold Elf - Alliance control
-                        packet.AddState(0xaa2, 0x1);       // 28 2722 Boold Elf uncontrolled (1 - yes, 0 - no)
-                        packet.AddState(0xac5, 0x1);       // 29 2757 Flag (1 - show, 0 - hide) - doesn't work exactly this way!
-                        packet.AddState(0xad2, 0x1);       // 30 2770 Horde top-stats (1 - show, 0 - hide) // 02 . horde picked up the flag
-                        packet.AddState(0xad1, 0x1);       // 31 2769 Alliance top-stats (1 - show, 0 - hide) // 02 . alliance picked up the flag
-                        packet.AddState(0xabe, 0x0);       // 32 2750 Horde resources
-                        packet.AddState(0xabd, 0x0);       // 33 2749 Alliance resources
-                        packet.AddState(0xa05, 0x8e);      // 34 2565 unk, constant?
-                        packet.AddState(0xaa0, 0x0);       // 35 2720 Capturing progress-bar (100 . empty (only grey), 0 . blue|red (no grey), default 0)
-                        packet.AddState(0xa9f, 0x0);       // 36 2719 Capturing progress-bar (0 - left, 100 - right)
-                        packet.AddState(0xa9e, 0x0);       // 37 2718 Capturing progress-bar (1 - show, 0 - hide)
-                        packet.AddState(0xc0d, 0x17b);     // 38 3085 unk
-                                                           // and some more ... unknown
+                        packet.AddState(2753, 0);   // Horde Bases
+                        packet.AddState(2752, 0);   // Alliance Bases
+                        packet.AddState(2742, 0);   // Mage Tower - Horde conflict
+                        packet.AddState(2741, 0);   // Mage Tower - Alliance conflict
+                        packet.AddState(2740, 0);   // Fel Reaver - Horde conflict
+                        packet.AddState(2739, 0);   // Fel Reaver - Alliance conflict
+                        packet.AddState(2738, 0);   // Draenei - Alliance conflict
+                        packet.AddState(2737, 0);   // Draenei - Horde conflict
+                        packet.AddState(2736, 0);   // unk (0 at start)
+                        packet.AddState(2735, 0);   // unk (0 at start)
+                        packet.AddState(2733, 0);   // Draenei - Horde control
+                        packet.AddState(2732, 0);   // Draenei - Alliance control
+                        packet.AddState(2731, 1);   // Draenei uncontrolled (1 - yes, 0 - no)
+                        packet.AddState(2730, 0);   // Mage Tower - Alliance control
+                        packet.AddState(2729, 0);   // Mage Tower - Horde control
+                        packet.AddState(2728, 1);   // Mage Tower uncontrolled (1 - yes, 0 - no)
+                        packet.AddState(2727, 0);   // Fel Reaver - Horde control
+                        packet.AddState(2726, 0);   // Fel Reaver - Alliance control
+                        packet.AddState(2725, 1);   // Fel Reaver uncontrolled (1 - yes, 0 - no)
+                        packet.AddState(2724, 0);   // Boold Elf - Horde control
+                        packet.AddState(2723, 0);   // Boold Elf - Alliance control
+                        packet.AddState(2722, 1);   // Boold Elf uncontrolled (1 - yes, 0 - no)
+                        packet.AddState(2757, 1);   // Flag (1 - show, 0 - hide) - doesn't work exactly this way!
+                        packet.AddState(2770, 1);   // Horde top-stats (1 - show, 0 - hide) // 02 -> horde picked up the flag
+                        packet.AddState(2769, 1);   // Alliance top-stats (1 - show, 0 - hide) // 02 -> alliance picked up the flag
+                        packet.AddState(2750, 0);   // Horde resources
+                        packet.AddState(2749, 0);   // Alliance resources
+                        packet.AddState(2565, 142); // unk, constant?
+                        packet.AddState(2720, 0);   // Capturing progress-bar (100 -> empty (only grey), 0 -> blue|red (no grey), default 0)
+                        packet.AddState(2719, 0);   // Capturing progress-bar (0 - left, 100 - right)
+                        packet.AddState(2718, 0);   // Capturing progress-bar (1 - show, 0 - hide)
+                        packet.AddState(3085, 379); // unk, constant?
+                                                                    // missing unknowns
                     }
                     break;
                 // any of these needs change! the client remembers the prev setting!
@@ -3101,22 +3108,22 @@ namespace Game.Entities
                         pvp.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x9ba, 0x1);           // 10 // add ally tower main gui icon       // maybe should be sent only on login?
-                        packet.AddState(0x9b9, 0x1);           // 11 // add horde tower main gui icon      // maybe should be sent only on login?
-                        packet.AddState(0x9b5, 0x0);           // 12 // show neutral broken hill icon      // 2485
-                        packet.AddState(0x9b4, 0x1);           // 13 // show icon above broken hill        // 2484
-                        packet.AddState(0x9b3, 0x0);           // 14 // show ally broken hill icon         // 2483
-                        packet.AddState(0x9b2, 0x0);           // 15 // show neutral overlook icon         // 2482
-                        packet.AddState(0x9b1, 0x1);           // 16 // show the overlook arrow            // 2481
-                        packet.AddState(0x9b0, 0x0);           // 17 // show ally overlook icon            // 2480
-                        packet.AddState(0x9ae, 0x0);           // 18 // horde pvp objectives captured      // 2478
-                        packet.AddState(0x9ac, 0x0);           // 19 // ally pvp objectives captured       // 2476
-                        packet.AddState(2475, 100);            //: ally / horde slider grey area                              // show only in direct vicinity!
-                        packet.AddState(2474, 50);             //: ally / horde slider percentage, 100 for ally, 0 for horde  // show only in direct vicinity!
-                        packet.AddState(2473, 0);              //: ally / horde slider display                                // show only in direct vicinity!
-                        packet.AddState(0x9a8, 0x0);           // 20 // show the neutral stadium icon      // 2472
-                        packet.AddState(0x9a7, 0x0);           // 21 // show the ally stadium icon         // 2471
-                        packet.AddState(0x9a6, 0x1);           // 22 // show the horde stadium icon        // 2470
+                        packet.AddState(2490, 1);   // add ally tower main gui icon
+                        packet.AddState(2489, 1);   // add horde tower main gui icon
+                        packet.AddState(2485, 0);   // show neutral broken hill icon
+                        packet.AddState(2484, 1);   // show icon above broken hill
+                        packet.AddState(2483, 0);   // show ally broken hill icon
+                        packet.AddState(2482, 0);   // show neutral overlook icon
+                        packet.AddState(2481, 1);   // show the overlook arrow
+                        packet.AddState(2480, 0);   // show ally overlook icon
+                        packet.AddState(2478, 0);   // horde pvp objectives captured
+                        packet.AddState(2476, 0);   // ally pvp objectives captured
+                        packet.AddState(2475, 100); // horde slider grey area
+                        packet.AddState(2474, 50);  // horde slider percentage, 100 for ally, 0 for horde
+                        packet.AddState(2473, 0);   // horde slider display
+                        packet.AddState(2472, 0);   // show the neutral stadium icon
+                        packet.AddState(2471, 0);   // show the ally stadium icon
+                        packet.AddState(2470, 1);   // show the horde stadium icon
                     }
                     break;
                 case 3518:                                          // Nagrand
@@ -3124,40 +3131,34 @@ namespace Game.Entities
                         pvp.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(2503, 0x0);    // 10
-                        packet.AddState(2502, 0x0);    // 11
-                        packet.AddState(2493, 0x0);    // 12
-                        packet.AddState(2491, 0x0);    // 13
-
-                        packet.AddState(2495, 0x0);    // 14
-                        packet.AddState(2494, 0x0);    // 15
-                        packet.AddState(2497, 0x0);    // 16
-
-                        packet.AddState(2762, 0x0);    // 17
-                        packet.AddState(2662, 0x0);    // 18
-                        packet.AddState(2663, 0x0);    // 19
-                        packet.AddState(2664, 0x0);    // 20
-
-                        packet.AddState(2760, 0x0);    // 21
-                        packet.AddState(2670, 0x0);    // 22
-                        packet.AddState(2668, 0x0);    // 23
-                        packet.AddState(2669, 0x0);    // 24
-
-                        packet.AddState(2761, 0x0);    // 25
-                        packet.AddState(2667, 0x0);    // 26
-                        packet.AddState(2665, 0x0);    // 27
-                        packet.AddState(2666, 0x0);    // 28
-
-                        packet.AddState(2763, 0x0);    // 29
-                        packet.AddState(2659, 0x0);    // 30
-                        packet.AddState(2660, 0x0);    // 31
-                        packet.AddState(2661, 0x0);    // 32
-
-                        packet.AddState(2671, 0x0);    // 33
-                        packet.AddState(2676, 0x0);    // 34
-                        packet.AddState(2677, 0x0);    // 35
-                        packet.AddState(2672, 0x0);    // 36
-                        packet.AddState(2673, 0x0);    // 37
+                        packet.AddState(2503, 0); // NA_UI_HORDE_GUARDS_SHOW
+                        packet.AddState(2502, 0); // NA_UI_ALLIANCE_GUARDS_SHOW
+                        packet.AddState(2493, 0); // NA_UI_GUARDS_MAX
+                        packet.AddState(2491, 0); // NA_UI_GUARDS_LEFT
+                        packet.AddState(2495, 0); // NA_UI_OUTLAND_01
+                        packet.AddState(2494, 0); // NA_UI_UNK_1
+                        packet.AddState(2497, 0); // NA_UI_UNK_2
+                        packet.AddState(2762, 0); // NA_MAP_WYVERN_NORTH_NEU_H
+                        packet.AddState(2662, 0); // NA_MAP_WYVERN_NORTH_NEU_A
+                        packet.AddState(2663, 0); // NA_MAP_WYVERN_NORTH_H
+                        packet.AddState(2664, 0); // NA_MAP_WYVERN_NORTH_A
+                        packet.AddState(2760, 0); // NA_MAP_WYVERN_SOUTH_NEU_H
+                        packet.AddState(2670, 0); // NA_MAP_WYVERN_SOUTH_NEU_A
+                        packet.AddState(2668, 0); // NA_MAP_WYVERN_SOUTH_H
+                        packet.AddState(2669, 0); // NA_MAP_WYVERN_SOUTH_A
+                        packet.AddState(2761, 0); // NA_MAP_WYVERN_WEST_NEU_H
+                        packet.AddState(2667, 0); // NA_MAP_WYVERN_WEST_NEU_A
+                        packet.AddState(2665, 0); // NA_MAP_WYVERN_WEST_H
+                        packet.AddState(2666, 0); // NA_MAP_WYVERN_WEST_A
+                        packet.AddState(2763, 0); // NA_MAP_WYVERN_EAST_NEU_H
+                        packet.AddState(2659, 0); // NA_MAP_WYVERN_EAST_NEU_A
+                        packet.AddState(2660, 0); // NA_MAP_WYVERN_EAST_H
+                        packet.AddState(2661, 0); // NA_MAP_WYVERN_EAST_A
+                        packet.AddState(2671, 0); // NA_MAP_HALAA_NEUTRAL
+                        packet.AddState(2676, 0); // NA_MAP_HALAA_NEU_A
+                        packet.AddState(2677, 0); // NA_MAP_HALAA_NEU_H
+                        packet.AddState(2672, 0); // NA_MAP_HALAA_HORDE
+                        packet.AddState(2673, 0); // NA_MAP_HALAA_ALLIANCE
                     }
                     break;
                 case 3519:                                          // Terokkar Forest
@@ -3165,33 +3166,34 @@ namespace Game.Entities
                         pvp.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0xa41, 0x0);           // 10 // 2625 capture bar pos
-                        packet.AddState(0xa40, 0x14);          // 11 // 2624 capture bar neutral
-                        packet.AddState(0xa3f, 0x0);           // 12 // 2623 show capture bar
-                        packet.AddState(0xa3e, 0x0);           // 13 // 2622 horde towers controlled
-                        packet.AddState(0xa3d, 0x5);           // 14 // 2621 ally towers controlled
-                        packet.AddState(0xa3c, 0x0);           // 15 // 2620 show towers controlled
-                        packet.AddState(0xa88, 0x0);           // 16 // 2696 SE Neu
-                        packet.AddState(0xa87, 0x0);           // 17 // SE Horde
-                        packet.AddState(0xa86, 0x0);           // 18 // SE Ally
-                        packet.AddState(0xa85, 0x0);           // 19 //S Neu
-                        packet.AddState(0xa84, 0x0);           // 20 S Horde
-                        packet.AddState(0xa83, 0x0);           // 21 S Ally
-                        packet.AddState(0xa82, 0x0);           // 22 NE Neu
-                        packet.AddState(0xa81, 0x0);           // 23 NE Horde
-                        packet.AddState(0xa80, 0x0);           // 24 NE Ally
-                        packet.AddState(0xa7e, 0x0);           // 25 // 2686 N Neu
-                        packet.AddState(0xa7d, 0x0);           // 26 N Horde
-                        packet.AddState(0xa7c, 0x0);           // 27 N Ally
-                        packet.AddState(0xa7b, 0x0);           // 28 NW Ally
-                        packet.AddState(0xa7a, 0x0);           // 29 NW Horde
-                        packet.AddState(0xa79, 0x0);           // 30 NW Neutral
-                        packet.AddState(0x9d0, 0x5);           // 31 // 2512 locked time remaining seconds first digit
-                        packet.AddState(0x9ce, 0x0);           // 32 // 2510 locked time remaining seconds second digit
-                        packet.AddState(0x9cd, 0x0);           // 33 // 2509 locked time remaining minutes
-                        packet.AddState(0x9cc, 0x0);           // 34 // 2508 neutral locked time show
-                        packet.AddState(0xad0, 0x0);           // 35 // 2768 horde locked time show
-                        packet.AddState(0xacf, 0x1);           // 36 // 2767 ally locked time show
+                        packet.AddState(2625, 0);  // TF_UI_CAPTURE_BAR_POS
+                        packet.AddState(2624, 20); // TF_UI_CAPTURE_BAR_NEUTRAL
+                        packet.AddState(2623, 0);  // TF_UI_SHOW CAPTURE BAR
+                        packet.AddState(2622, 0);  // TF_UI_TOWER_COUNT_H
+                        packet.AddState(2621, 5);  // TF_UI_TOWER_COUNT_A
+                        packet.AddState(2620, 0);  // TF_UI_TOWERS_CONTROLLED_DISPLAY
+                        packet.AddState(2696, 0);  // TF_TOWER_NUM_15 - SE Neutral
+                        packet.AddState(2695, 0);  // TF_TOWER_NUM_14 - SE Horde
+                        packet.AddState(2694, 0);  // TF_TOWER_NUM_13 - SE Alliance
+                        packet.AddState(2693, 0);  // TF_TOWER_NUM_12 - S Neutral
+                        packet.AddState(2692, 0);  // TF_TOWER_NUM_11 - S Horde
+                        packet.AddState(2691, 0);  // TF_TOWER_NUM_10 - S Alliance
+                        packet.AddState(2690, 0);  // TF_TOWER_NUM_09 - NE Neutral
+                        packet.AddState(2689, 0);  // TF_TOWER_NUM_08 - NE Horde
+                        packet.AddState(2688, 0);  // TF_TOWER_NUM_07 - NE Alliance
+                        packet.AddState(2687, 0);  // TF_TOWER_NUM_16 - unk
+                        packet.AddState(2686, 0);  // TF_TOWER_NUM_06 - N Neutral
+                        packet.AddState(2685, 0);  // TF_TOWER_NUM_05 - N Horde
+                        packet.AddState(2684, 0);  // TF_TOWER_NUM_04 - N Alliance
+                        packet.AddState(2683, 0);  // TF_TOWER_NUM_03 - NW Alliance
+                        packet.AddState(2682, 0);  // TF_TOWER_NUM_02 - NW Horde
+                        packet.AddState(2681, 0);  // TF_TOWER_NUM_01 - NW Neutral
+                        packet.AddState(2512, 5);  // TF_UI_LOCKED_TIME_MINUTES_FIRST_DIGIT
+                        packet.AddState(2510, 0);  // TF_UI_LOCKED_TIME_MINUTES_SECOND_DIGIT
+                        packet.AddState(2509, 0);  // TF_UI_LOCKED_TIME_HOURS
+                        packet.AddState(2508, 0);  // TF_UI_LOCKED_DISPLAY_NEUTRAL
+                        packet.AddState(2768, 0);  // TF_UI_LOCKED_DISPLAY_HORDE
+                        packet.AddState(2767, 1);  // TF_UI_LOCKED_DISPLAY_ALLIANCE
                     }
                     break;
                 case 3521:                                          // Zangarmarsh
@@ -3199,32 +3201,32 @@ namespace Game.Entities
                         pvp.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x9e1, 0x0);           // 10 //2529
-                        packet.AddState(0x9e0, 0x0);           // 11
-                        packet.AddState(0x9df, 0x0);           // 12
-                        packet.AddState(0xa5d, 0x1);           // 13 //2653
-                        packet.AddState(0xa5c, 0x0);           // 14 //2652 east beacon neutral
-                        packet.AddState(0xa5b, 0x1);           // 15 horde
-                        packet.AddState(0xa5a, 0x0);           // 16 ally
-                        packet.AddState(0xa59, 0x1);           // 17 // 2649 Twin spire graveyard horde  12???
-                        packet.AddState(0xa58, 0x0);           // 18 ally     14 ???
-                        packet.AddState(0xa57, 0x0);           // 19 neutral  7???
-                        packet.AddState(0xa56, 0x0);           // 20 // 2646 west beacon neutral
-                        packet.AddState(0xa55, 0x1);           // 21 horde
-                        packet.AddState(0xa54, 0x0);           // 22 ally
-                        packet.AddState(0x9e7, 0x0);           // 23 // 2535
-                        packet.AddState(0x9e6, 0x0);           // 24
-                        packet.AddState(0x9e5, 0x0);           // 25
-                        packet.AddState(0xa00, 0x0);           // 26 // 2560
-                        packet.AddState(0x9ff, 0x1);           // 27
-                        packet.AddState(0x9fe, 0x0);           // 28
-                        packet.AddState(0x9fd, 0x0);           // 29
-                        packet.AddState(0x9fc, 0x1);           // 30
-                        packet.AddState(0x9fb, 0x0);           // 31
-                        packet.AddState(0xa62, 0x0);           // 32 // 2658
-                        packet.AddState(0xa61, 0x1);           // 33
-                        packet.AddState(0xa60, 0x1);           // 34
-                        packet.AddState(0xa5f, 0x0);           // 35
+                        packet.AddState(2529, 0); // ZM_UNK_1
+                        packet.AddState(2528, 0); // ZM_UNK_2
+                        packet.AddState(2527, 0); // ZM_UNK_3
+                        packet.AddState(2653, 1); // ZM_WORLDSTATE_UNK_1
+                        packet.AddState(2652, 0); // ZM_MAP_TOWER_EAST_N
+                        packet.AddState(2651, 1); // ZM_MAP_TOWER_EAST_H
+                        packet.AddState(2650, 0); // ZM_MAP_TOWER_EAST_A
+                        packet.AddState(2649, 1); // ZM_MAP_GRAVEYARD_H - Twin spire graveyard horde
+                        packet.AddState(2648, 0); // ZM_MAP_GRAVEYARD_A
+                        packet.AddState(2647, 0); // ZM_MAP_GRAVEYARD_N
+                        packet.AddState(2646, 0); // ZM_MAP_TOWER_WEST_N
+                        packet.AddState(2645, 1); // ZM_MAP_TOWER_WEST_H
+                        packet.AddState(2644, 0); // ZM_MAP_TOWER_WEST_A
+                        packet.AddState(2535, 0); // ZM_UNK_4
+                        packet.AddState(2534, 0); // ZM_UNK_5
+                        packet.AddState(2533, 0); // ZM_UNK_6
+                        packet.AddState(2560, 0); // ZM_UI_TOWER_EAST_N
+                        packet.AddState(2559, 1); // ZM_UI_TOWER_EAST_H
+                        packet.AddState(2558, 0); // ZM_UI_TOWER_EAST_A
+                        packet.AddState(2557, 0); // ZM_UI_TOWER_WEST_N
+                        packet.AddState(2556, 1); // ZM_UI_TOWER_WEST_H
+                        packet.AddState(2555, 0); // ZM_UI_TOWER_WEST_A
+                        packet.AddState(2658, 0); // ZM_MAP_HORDE_FLAG_READY
+                        packet.AddState(2657, 1); // ZM_MAP_HORDE_FLAG_NOT_READY
+                        packet.AddState(2656, 1); // ZM_MAP_ALLIANCE_FLAG_NOT_READY
+                        packet.AddState(2655, 0); // ZM_MAP_ALLIANCE_FLAG_READY
                     }
                     break;
                 case 3698:                                          // Nagrand Arena
@@ -3232,9 +3234,9 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0xa0f, 0x0);           // 7
-                        packet.AddState(0xa10, 0x0);           // 8
-                        packet.AddState(0xa11, 0x0);           // 9 show
+                        packet.AddState(2575, 0); // BATTLEGROUND_NAGRAND_ARENA_GOLD
+                        packet.AddState(2576, 0); // BATTLEGROUND_NAGRAND_ARENA_GREEN
+                        packet.AddState(2577, 0); // BATTLEGROUND_NAGRAND_ARENA_SHOW
                     }
                     break;
                 case 3702:                                          // Blade's Edge Arena
@@ -3242,9 +3244,9 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x9f0, 0x0);           // 7 gold
-                        packet.AddState(0x9f1, 0x0);           // 8 green
-                        packet.AddState(0x9f3, 0x0);           // 9 show
+                        packet.AddState(2544, 0); // BATTLEGROUND_BLADES_EDGE_ARENA_GOLD
+                        packet.AddState(2545, 0); // BATTLEGROUND_BLADES_EDGE_ARENA_GREEN
+                        packet.AddState(2547, 0); // BATTLEGROUND_BLADES_EDGE_ARENA_SHOW
                     }
                     break;
                 case 3968:                                          // Ruins of Lordaeron
@@ -3252,9 +3254,9 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0xbb8, 0x0);           // 7 gold
-                        packet.AddState(0xbb9, 0x0);           // 8 green
-                        packet.AddState(0xbba, 0x0);           // 9 show
+                        packet.AddState(3000, 0); // BATTELGROUND_RUINS_OF_LORDAERNON_GOLD
+                        packet.AddState(3001, 0); // BATTELGROUND_RUINS_OF_LORDAERNON_GREEN
+                        packet.AddState(3002, 0); // BATTELGROUND_RUINS_OF_LORDAERNON_SHOW
                     }
                     break;
                 case 4378:                                          // Dalaran Sewers
@@ -3262,9 +3264,9 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(3601, 0x0);           // 7 gold
-                        packet.AddState(3600, 0x0);           // 8 green
-                        packet.AddState(3610, 0x0);           // 9 show
+                        packet.AddState(3601, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_GOLD
+                        packet.AddState(3600, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_GREEN
+                        packet.AddState(3610, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_SHOW
                     }
                     break;
                 case 4384:                                          // Strand of the Ancients
@@ -3272,34 +3274,34 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        // 1-3 A defend, 4-6 H defend, 7-9 unk defend, 1 - ok, 2 - half destroyed, 3 - destroyed
-                        packet.AddState(0xf09, 0x0);       // 7  3849 Gate of Temple
-                        packet.AddState(0xe36, 0x0);       // 8  3638 Gate of Yellow Moon
-                        packet.AddState(0xe27, 0x0);       // 9  3623 Gate of Green Emerald
-                        packet.AddState(0xe24, 0x0);       // 10 3620 Gate of Blue Sapphire
-                        packet.AddState(0xe21, 0x0);       // 11 3617 Gate of Red Sun
-                        packet.AddState(0xe1e, 0x0);       // 12 3614 Gate of Purple Ametyst
+                        packet.AddState(3849, 0); // Gate of Temple
+                        packet.AddState(3638, 0); // Gate of Yellow Moon
+                        packet.AddState(3623, 0); // Gate of Green Emerald
+                        packet.AddState(3620, 0); // Gate of Blue Sapphire
+                        packet.AddState(3617, 0); // Gate of Red Sun
+                        packet.AddState(3614, 0); // Gate of Purple Ametyst
+                        packet.AddState(3571, 0); // bonus timer (1 - on, 0 - off)
+                        packet.AddState(3565, 0); // Horde Attacker
+                        packet.AddState(3564, 0); // Alliance Attacker
 
-                        packet.AddState(0xdf3, 0x0);       // 13 3571 bonus timer (1 - on, 0 - off)
-                        packet.AddState(0xded, 0x0);       // 14 3565 Horde Attacker
-                        packet.AddState(0xdec, 0x0);       // 15 3564 Alliance Attacker
-                                                           // End Round (timer), better explain this by example, eg. ends in 19:59 . A:BC
-                        packet.AddState(0xde9, 0x0);       // 16 3561 C
-                        packet.AddState(0xde8, 0x0);       // 17 3560 B
-                        packet.AddState(0xde7, 0x0);       // 18 3559 A
-                        packet.AddState(0xe35, 0x0);       // 19 3637 East g - Horde control
-                        packet.AddState(0xe34, 0x0);       // 20 3636 West g - Horde control
-                        packet.AddState(0xe33, 0x0);       // 21 3635 South g - Horde control
-                        packet.AddState(0xe32, 0x0);       // 22 3634 East g - Alliance control
-                        packet.AddState(0xe31, 0x0);       // 23 3633 West g - Alliance control
-                        packet.AddState(0xe30, 0x0);       // 24 3632 South g - Alliance control
-                        packet.AddState(0xe2f, 0x0);       // 25 3631 Chamber of Ancients - Horde control
-                        packet.AddState(0xe2e, 0x0);       // 26 3630 Chamber of Ancients - Alliance control
-                        packet.AddState(0xe2d, 0x0);       // 27 3629 Beach1 - Horde control
-                        packet.AddState(0xe2c, 0x0);       // 28 3628 Beach2 - Horde control
-                        packet.AddState(0xe2b, 0x0);       // 29 3627 Beach1 - Alliance control
-                        packet.AddState(0xe2a, 0x0);       // 30 3626 Beach2 - Alliance control
-                                                           // and many unks...
+                        // End Round timer, example: 19:59 -> A:BC
+                        packet.AddState(3561, 0); // C
+                        packet.AddState(3560, 0); // B
+                        packet.AddState(3559, 0); // A
+
+                        packet.AddState(3637, 0); // BG_SA_CENTER_GY_ALLIANCE
+                        packet.AddState(3636, 0); // BG_SA_RIGHT_GY_ALLIANCE
+                        packet.AddState(3635, 0); // BG_SA_LEFT_GY_ALLIANCE
+                        packet.AddState(3634, 0); // BG_SA_CENTER_GY_HORDE
+                        packet.AddState(3633, 0); // BG_SA_LEFT_GY_HORDE
+                        packet.AddState(3632, 0); // BG_SA_RIGHT_GY_HORDE
+                        packet.AddState(3631, 0); // BG_SA_HORDE_DEFENCE_TOKEN
+                        packet.AddState(3630, 0); // BG_SA_ALLIANCE_DEFENCE_TOKEN
+                        packet.AddState(3629, 0); // BG_SA_LEFT_ATT_TOKEN_HRD
+                        packet.AddState(3628, 0); // BG_SA_RIGHT_ATT_TOKEN_HRD
+                        packet.AddState(3627, 0); // BG_SA_RIGHT_ATT_TOKEN_ALL
+                        packet.AddState(3626, 0); // BG_SA_LEFT_ATT_TOKEN_ALL
+                                                                  // missing unknowns
                     }
                     break;
                 case 4406:                                          // Ring of Valor
@@ -3307,9 +3309,9 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0xe10, 0x0);           // 7 gold
-                        packet.AddState(0xe11, 0x0);           // 8 green
-                        packet.AddState(0xe1a, 0x0);           // 9 show
+                        packet.AddState(3600, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_GREEN
+                        packet.AddState(3601, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_GOLD
+                        packet.AddState(3610, 0); // ARENA_WORLD_STATE_ALIVE_PLAYERS_SHOW
                     }
                     break;
                 case 4710:
@@ -3317,25 +3319,24 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(4221, 1); // 7 BG_IC_ALLIANCE_RENFORT_SET
-                        packet.AddState(4222, 1); // 8 BG_IC_HORDE_RENFORT_SET
-                        packet.AddState(4226, 300); // 9 BG_IC_ALLIANCE_RENFORT
-                        packet.AddState(4227, 300); // 10 BG_IC_HORDE_RENFORT
-                        packet.AddState(4322, 1); // 11 BG_IC_GATE_FRONT_H_WS_OPEN
-                        packet.AddState(4321, 1); // 12 BG_IC_GATE_WEST_H_WS_OPEN
-                        packet.AddState(4320, 1); // 13 BG_IC_GATE_EAST_H_WS_OPEN
-                        packet.AddState(4323, 1); // 14 BG_IC_GATE_FRONT_A_WS_OPEN
-                        packet.AddState(4324, 1); // 15 BG_IC_GATE_WEST_A_WS_OPEN
-                        packet.AddState(4325, 1); // 16 BG_IC_GATE_EAST_A_WS_OPEN
-                        packet.AddState(4317, 1); // 17 unknown
-
-                        packet.AddState(4301, 1); // 18 BG_IC_DOCKS_UNCONTROLLED
-                        packet.AddState(4296, 1); // 19 BG_IC_HANGAR_UNCONTROLLED
-                        packet.AddState(4306, 1); // 20 BG_IC_QUARRY_UNCONTROLLED
-                        packet.AddState(4311, 1); // 21 BG_IC_REFINERY_UNCONTROLLED
-                        packet.AddState(4294, 1); // 22 BG_IC_WORKSHOP_UNCONTROLLED
-                        packet.AddState(4243, 1); // 23 unknown
-                        packet.AddState(4345, 1); // 24 unknown
+                        packet.AddState(4221, 1);   // BG_IC_ALLIANCE_RENFORT_SET
+                        packet.AddState(4222, 1);   // BG_IC_HORDE_RENFORT_SET
+                        packet.AddState(4226, 300); // BG_IC_ALLIANCE_RENFORT
+                        packet.AddState(4227, 300); // BG_IC_HORDE_RENFORT
+                        packet.AddState(4322, 1);   // BG_IC_GATE_FRONT_H_WS_OPEN
+                        packet.AddState(4321, 1);   // BG_IC_GATE_WEST_H_WS_OPEN
+                        packet.AddState(4320, 1);   // BG_IC_GATE_EAST_H_WS_OPEN
+                        packet.AddState(4323, 1);   // BG_IC_GATE_FRONT_A_WS_OPEN
+                        packet.AddState(4324, 1);   // BG_IC_GATE_WEST_A_WS_OPEN
+                        packet.AddState(4325, 1);   // BG_IC_GATE_EAST_A_WS_OPEN
+                        packet.AddState(4317, 1);   // unk
+                        packet.AddState(4301, 1);   // BG_IC_DOCKS_UNCONTROLLED
+                        packet.AddState(4296, 1);   // BG_IC_HANGAR_UNCONTROLLED
+                        packet.AddState(4306, 1);   // BG_IC_QUARRY_UNCONTROLLED
+                        packet.AddState(4311, 1);   // BG_IC_REFINERY_UNCONTROLLED
+                        packet.AddState(4294, 1);   // BG_IC_WORKSHOP_UNCONTROLLED
+                        packet.AddState(4243, 1);   // unk
+                        packet.AddState(4345, 1);   // unk
                     }
                     break;
                 // The Ruby Sanctum
@@ -3344,9 +3345,9 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(5049, 50);             // 9  WORLDSTATE_CORPOREALITY_MATERIAL
-                        packet.AddState(5050, 50);             // 10 WORLDSTATE_CORPOREALITY_TWILIGHT
-                        packet.AddState(5051, 0);              // 11 WORLDSTATE_CORPOREALITY_TOGGLE
+                        packet.AddState(5049, 50); // WORLDSTATE_CORPOREALITY_MATERIAL
+                        packet.AddState(5050, 50); // WORLDSTATE_CORPOREALITY_TWILIGHT
+                        packet.AddState(5051, 0);  // WORLDSTATE_CORPOREALITY_TOGGLE
                     }
                     break;
                 // Icecrown Citadel
@@ -3355,11 +3356,11 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(4903, 0);              // 9  WORLDSTATE_SHOW_TIMER (Blood Quickening weekly)
-                        packet.AddState(4904, 30);             // 10 WORLDSTATE_EXECUTION_TIME
-                        packet.AddState(4940, 0);              // 11 WORLDSTATE_SHOW_ATTEMPTS
-                        packet.AddState(4941, 50);             // 12 WORLDSTATE_ATTEMPTS_REMAINING
-                        packet.AddState(4942, 50);             // 13 WORLDSTATE_ATTEMPTS_MAX
+                        packet.AddState(4903, 0);  // WORLDSTATE_SHOW_TIMER (Blood Quickening weekly)
+                        packet.AddState(4904, 30); // WORLDSTATE_EXECUTION_TIME
+                        packet.AddState(4940, 0);  // WORLDSTATE_SHOW_ATTEMPTS
+                        packet.AddState(4941, 50); // WORLDSTATE_ATTEMPTS_REMAINING
+                        packet.AddState(4942, 50); // WORLDSTATE_ATTEMPTS_MAX
                     }
                     break;
                 // The Culling of Stratholme
@@ -3368,11 +3369,11 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(3479, 0);              // 9  WORLDSTATE_SHOW_CRATES
-                        packet.AddState(3480, 0);              // 10 WORLDSTATE_CRATES_REVEALED
-                        packet.AddState(3504, 0);              // 11 WORLDSTATE_WAVE_COUNT
-                        packet.AddState(3931, 25);             // 12 WORLDSTATE_TIME_GUARDIAN
-                        packet.AddState(3932, 0);              // 13 WORLDSTATE_TIME_GUARDIAN_SHOW
+                        packet.AddState(3479, 0);  // WORLDSTATE_SHOW_CRATES
+                        packet.AddState(3480, 0);  // WORLDSTATE_CRATES_REVEALED
+                        packet.AddState(3504, 0);  // WORLDSTATE_WAVE_COUNT
+                        packet.AddState(3931, 25); // WORLDSTATE_TIME_GUARDIAN
+                        packet.AddState(3932, 0);  // WORLDSTATE_TIME_GUARDIAN_SHOW
                     }
                     break;
                 // The Oculus
@@ -3381,8 +3382,8 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(3524, 0);              // 9  WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW
-                        packet.AddState(3486, 0);              // 10 WORLD_STATE_CENTRIFUGE_CONSTRUCT_AMOUNT
+                        packet.AddState(3524, 0); // WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW
+                        packet.AddState(3486, 0); // WORLD_STATE_CENTRIFUGE_CONSTRUCT_AMOUNT
                     }
                     break;
                 // Ulduar
@@ -3391,8 +3392,18 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(4132, 0);              // 9  WORLDSTATE_ALGALON_TIMER_ENABLED
-                        packet.AddState(4131, 0);              // 10 WORLDSTATE_ALGALON_DESPAWN_TIMER
+                        packet.AddState(4132, 0); // WORLDSTATE_ALGALON_TIMER_ENABLED
+                        packet.AddState(4131, 0); // WORLDSTATE_ALGALON_DESPAWN_TIMER
+                    }
+                    break;
+                case 4415: // Violet Hold
+                    if (instance != null)
+                        instance.FillInitialWorldStates(packet);
+                    else
+                    {
+                        packet.AddState(3816, 0);   // WORLD_STATE_VH_SHOW
+                        packet.AddState(3815, 100); // WORLD_STATE_VH_PRISON_STATE
+                        packet.AddState(3810, 0);   // WORLD_STATE_VH_WAVE_COUNT
                     }
                     break;
                 // Halls of Refection
@@ -3401,9 +3412,13 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(4884, 0);              // 9  WORLD_STATE_HOR_WAVES_ENABLED
-                        packet.AddState(4882, 0);              // 10 WORLD_STATE_HOR_WAVE_COUNT
+                        packet.AddState(4884, 0); // WORLD_STATE_HOR_WAVES_ENABLED
+                        packet.AddState(4882, 0); // WORLD_STATE_HOR_WAVE_COUNT
                     }
+                    break;
+                case (uint)AreaId.Wintergrasp: // Wintergrasp
+                    if (battlefield != null && battlefield.GetTypeId() == (uint)BattleFieldTypes.WinterGrasp)
+                        battlefield.FillInitialWorldStates(packet);
                     break;
                 // Zul Aman
                 case 3805:
@@ -3411,8 +3426,8 @@ namespace Game.Entities
                         instance.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(3104, 0);              // 9  WORLD_STATE_ZULAMAN_TIMER_ENABLED
-                        packet.AddState(3106, 0);              // 10 WORLD_STATE_ZULAMAN_TIMER
+                        packet.AddState(3104, 0); // WORLD_STATE_ZULAMAN_TIMER_ENABLED
+                        packet.AddState(3106, 0); // WORLD_STATE_ZULAMAN_TIMER
                     }
                     break;
                 // Twin Peaks
@@ -3421,14 +3436,14 @@ namespace Game.Entities
                         bg.FillInitialWorldStates(packet);
                     else
                     {
-                        packet.AddState(0x62d, 0x0);       //  7 1581 alliance flag captures
-                        packet.AddState(0x62e, 0x0);       //  8 1582 horde flag captures
-                        packet.AddState(0x609, 0x0);       //  9 1545 unk
-                        packet.AddState(0x60a, 0x0);       // 10 1546 unk
-                        packet.AddState(0x60b, 0x2);       // 11 1547 unk
-                        packet.AddState(0x641, 0x3);       // 12 1601 unk
-                        packet.AddState(0x922, 0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-                        packet.AddState(0x923, 0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                        packet.AddState(1581, 0x0); // alliance flag captures
+                        packet.AddState(1582, 0x0); // horde flag captures
+                        packet.AddState(1545, 0x0); // unk
+                        packet.AddState(1546, 0x0); // unk
+                        packet.AddState(1547, 0x2); // unk
+                        packet.AddState(1601, 0x3); // unk
+                        packet.AddState(2338, 0x1); // horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                        packet.AddState(2339, 0x1); // alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
                     }
                     break;
                 // Battle for Gilneas
@@ -3436,17 +3451,21 @@ namespace Game.Entities
                     if (bg && bg.GetTypeID(true) == BattlegroundTypeId.BFG)
                         bg.FillInitialWorldStates(packet);
                     break;
-                // Wintergrasp
-                case (uint)AreaId.Wintergrasp:
-                    if (bf != null && bf.GetTypeId() == (uint)BattleFieldTypes.WinterGrasp)
-                        bf.FillInitialWorldStates(packet);
-                    goto default;
-                // No break here, intended.
+                case 5389: // Tol Barad Peninsula
+                    if (WorldConfig.GetBoolValue(WorldCfg.TolbaradEnable))
+                    {
+                        packet.AddState(WorldStates.BattlefieldTbAllianceControlsShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbAllianceControlsShow));
+                        packet.AddState(WorldStates.BattlefieldTbHordeControlsShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbHordeControlsShow));
+                        packet.AddState(WorldStates.BattlefieldTbTimeNextBattleShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbTimeNextBattleShow));
+                        packet.AddState(WorldStates.BattlefieldTbAllianceAttackingShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbAllianceAttackingShow));
+                        packet.AddState(WorldStates.BattlefieldTbHordeAttackingShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbHordeAttackingShow));
+                    }
+                    break;
+                case 5095: // Tol Barad
+                    if (battlefield != null && battlefield.GetTypeId() == (uint)BattleFieldTypes.TolBarad)
+                        battlefield.FillInitialWorldStates(packet);
+                    break;
                 default:
-                    packet.AddState(0x914, 0x0);           // 7
-                    packet.AddState(0x913, 0x0);           // 8
-                    packet.AddState(0x912, 0x0);           // 9
-                    packet.AddState(0x915, 0x0);           // 10
                     break;
             }
 

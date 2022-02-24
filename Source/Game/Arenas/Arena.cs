@@ -77,8 +77,8 @@ namespace Game.Arenas
 
         public override void FillInitialWorldStates(InitWorldStates packet)
         {
-            packet.AddState(ArenaWorldStates.AlivePlayersGreen, (int)GetAlivePlayersCountByTeam(Team.Horde));
-            packet.AddState(ArenaWorldStates.AlivePlayersGold, (int)GetAlivePlayersCountByTeam(Team.Alliance));
+            packet.AddState(ArenaWorldStates.AlivePlayersGreen, GetAlivePlayersCountByTeam(Team.Horde));
+            packet.AddState(ArenaWorldStates.AlivePlayersGold, GetAlivePlayersCountByTeam(Team.Alliance));
         }
 
         void UpdateArenaWorldState()

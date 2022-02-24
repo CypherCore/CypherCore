@@ -947,6 +947,16 @@ namespace Game
             Values[WorldCfg.WintergraspNobattletime] = GetDefaultValue("Wintergrasp.NoBattleTimer", 150);
             Values[WorldCfg.WintergraspRestartAfterCrash] = GetDefaultValue("Wintergrasp.CrashRestartTimer", 10);
 
+            // Tol Barad battlefield
+            Values[WorldCfg.TolbaradEnable] = GetDefaultValue("TolBarad.Enable", true);
+            Values[WorldCfg.TolbaradPlrMax] = GetDefaultValue("TolBarad.PlayerMax", 100);
+            Values[WorldCfg.TolbaradPlrMin] = GetDefaultValue("TolBarad.PlayerMin", 0);
+            Values[WorldCfg.TolbaradPlrMinLvl] = GetDefaultValue("TolBarad.PlayerMinLvl", 85);
+            Values[WorldCfg.TolbaradBattleTime] = GetDefaultValue("TolBarad.BattleTimer", 15);
+            Values[WorldCfg.TolbaradBonusTime] = GetDefaultValue("TolBarad.BonusTime", 5);
+            Values[WorldCfg.TolbaradNoBattleTime] = GetDefaultValue("TolBarad.NoBattleTimer", 150);
+            Values[WorldCfg.TolbaradRestartAfterCrash] = GetDefaultValue("TolBarad.CrashRestartTimer", 10);
+
             // Stats limits
             Values[WorldCfg.StatsLimitsEnable] = GetDefaultValue("Stats.Limits.Enable", false);
             Values[WorldCfg.StatsLimitsDodge] = GetDefaultValue("Stats.Limits.Dodge", 95.0f);

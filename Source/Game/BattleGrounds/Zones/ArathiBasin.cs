@@ -321,8 +321,8 @@ namespace Game.BattleGrounds.Zones
             // Team scores
             packet.AddState(ABWorldStates.ResourcesMax, MaxTeamScore);
             packet.AddState(ABWorldStates.ResourcesWarning, WarningNearVictoryScore);
-            packet.AddState(ABWorldStates.ResourcesAlly, (int)m_TeamScores[TeamId.Alliance]);
-            packet.AddState(ABWorldStates.ResourcesHorde, (int)m_TeamScores[TeamId.Horde]);
+            packet.AddState(ABWorldStates.ResourcesAlly, m_TeamScores[TeamId.Alliance]);
+            packet.AddState(ABWorldStates.ResourcesHorde, m_TeamScores[TeamId.Horde]);
 
             // other unknown
             packet.AddState(0x745, 0x2);

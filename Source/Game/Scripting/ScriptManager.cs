@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.AI;
+using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Chat;
 using Game.Conditions;
@@ -709,6 +710,12 @@ namespace Game.Scripting
             Cypher.Assert(trigger != null);
 
             return RunScriptRet<AreaTriggerScript>(p => entered ? p.OnTrigger(player, trigger) : p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
+        }
+
+        //BattlefieldScript
+        public BattleField CreateBattlefield(uint scriptId)
+        {
+            return RunScriptRet<BattlefieldScript, BattleField>(p => p.GetBattlefield(), scriptId, null);
         }
 
         //BattlegroundScript

@@ -801,18 +801,18 @@ namespace Game.BattleGrounds.Zones
 
         public override void FillInitialWorldStates(InitWorldStates packet)
         {
-            packet.AddState(WSGWorldStates.FlagCapturesAlliance, (int)GetTeamScore(TeamId.Alliance));
-            packet.AddState(WSGWorldStates.FlagCapturesHorde, (int)GetTeamScore(TeamId.Horde));
+            packet.AddState(WSGWorldStates.FlagCapturesAlliance, GetTeamScore(TeamId.Alliance));
+            packet.AddState(WSGWorldStates.FlagCapturesHorde, GetTeamScore(TeamId.Horde));
 
             if (_flagState[TeamId.Alliance] == WSGFlagState.OnGround)
-                packet.AddState(WSGWorldStates.FlagUnkAlliance, -1);
+                packet.AddState(WSGWorldStates.FlagUnkAlliance, 0xFFFFFFFF);
             else if (_flagState[TeamId.Alliance] == WSGFlagState.OnPlayer)
                 packet.AddState(WSGWorldStates.FlagUnkAlliance, 1);
             else
                 packet.AddState(WSGWorldStates.FlagUnkAlliance, 0);
 
             if (_flagState[TeamId.Horde] == WSGFlagState.OnGround)
-                packet.AddState(WSGWorldStates.FlagUnkHorde, -1);
+                packet.AddState(WSGWorldStates.FlagUnkHorde, 0xFFFFFFFF);
             else if (_flagState[TeamId.Horde] == WSGFlagState.OnPlayer)
                 packet.AddState(WSGWorldStates.FlagUnkHorde, 1);
             else
@@ -823,7 +823,7 @@ namespace Game.BattleGrounds.Zones
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
                 packet.AddState(WSGWorldStates.StateTimerActive, 1);
-                packet.AddState(WSGWorldStates.StateTimer, 25 - _minutesElapsed);
+                packet.AddState(WSGWorldStates.StateTimer, 25u - _minutesElapsed);
             }
             else
                 packet.AddState(WSGWorldStates.StateTimerActive, 0);

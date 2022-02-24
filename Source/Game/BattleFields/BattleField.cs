@@ -29,8 +29,9 @@ namespace Game.BattleFields
 {
     public enum BattleFieldTypes
     {
-        WinterGrasp,
-        TolBarad
+        WinterGrasp = 1,
+        TolBarad = 2,
+        Max
     }
 
     public class BattleField : ZoneScript

@@ -444,12 +444,12 @@ namespace Game.BattleGrounds.Zones
             bool allyAttacks = Attackers == TeamId.Alliance;
             bool hordeAttacks = Attackers == TeamId.Horde;
 
-            packet.AddState(SAWorldStateIds.AncientGate, (int)GateStatus[SAObjectTypes.AncientGate]);
-            packet.AddState(SAWorldStateIds.YellowGate, (int)GateStatus[SAObjectTypes.YellowGate]);
-            packet.AddState(SAWorldStateIds.GreenGate, (int)GateStatus[SAObjectTypes.GreenGate]);
-            packet.AddState(SAWorldStateIds.BlueGate, (int)GateStatus[SAObjectTypes.BlueGate]);
-            packet.AddState(SAWorldStateIds.RedGate, (int)GateStatus[SAObjectTypes.RedGate]);
-            packet.AddState(SAWorldStateIds.PurpleGate, (int)GateStatus[SAObjectTypes.PurpleGate]);
+            packet.AddState(SAWorldStateIds.AncientGate, (uint)GateStatus[SAObjectTypes.AncientGate]);
+            packet.AddState(SAWorldStateIds.YellowGate, (uint)GateStatus[SAObjectTypes.YellowGate]);
+            packet.AddState(SAWorldStateIds.GreenGate, (uint)GateStatus[SAObjectTypes.GreenGate]);
+            packet.AddState(SAWorldStateIds.BlueGate, (uint)GateStatus[SAObjectTypes.BlueGate]);
+            packet.AddState(SAWorldStateIds.RedGate, (uint)GateStatus[SAObjectTypes.RedGate]);
+            packet.AddState(SAWorldStateIds.PurpleGate, (uint)GateStatus[SAObjectTypes.PurpleGate]);
 
             packet.AddState(SAWorldStateIds.BonusTimer, 0);
 

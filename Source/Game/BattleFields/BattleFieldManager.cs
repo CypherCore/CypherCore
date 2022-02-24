@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Database;
 using Game.Entities;
 using Game.Maps;
 using System.Collections.Generic;
@@ -27,33 +28,38 @@ namespace Game.BattleFields
 
         public void InitBattlefield()
         {
-            BattleField wg = new BattlefieldWG();
-            // respawn, init variables
-            if (!wg.SetupBattlefield())
+            uint oldMSTime = Time.GetMSTime();
+
+            uint count = 0;
+            var result = DB.World.Query("SELECT TypeId, ScriptName FROM battlefield_template");
+            if (!result.IsEmpty())
             {
-                Log.outError(LogFilter.Battlefield, "Battlefield: Wintergrasp init failed.");
-            }
-            else
-            {
-                _battlefieldSet.Add(wg);
-                Log.outInfo(LogFilter.Battlefield, "Battlefield: Wintergrasp successfully initiated.");
+                do
+                {
+                    BattleFieldTypes typeId = (BattleFieldTypes)result.Read<byte>(0);
+                    if (typeId >= BattleFieldTypes.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"BattlefieldMgr::InitBattlefield: Invalid TypeId value {typeId} in battlefield_template, skipped.");
+                        continue;
+                    }
+
+                    uint scriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
+
+                    var bf = Global.ScriptMgr.CreateBattlefield(scriptId);
+                    if (!bf.SetupBattlefield())
+                    {
+                        Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {typeId} failed.");
+                        continue;
+                    }
+
+                    _battlefieldSet.Add(bf);
+                    Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {typeId} succeeded.");
+                    ++count;
+
+                } while (result.NextRow());
             }
 
-            /*
-            For Cataclysm: Tol Barad
-            Battlefield* tb = new BattlefieldTB;
-            // respawn, init variables
-            if (!tb.SetupBattlefield())
-            {
-                TC_LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad init failed.");
-                delete tb;
-            }
-            else
-            {
-                _battlefieldSet.push_back(tb);
-                TC_LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad successfully initiated.");
-            }
-            */
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battlefields in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void AddZone(uint zoneId, BattleField bf)

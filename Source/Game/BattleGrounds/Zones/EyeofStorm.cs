@@ -848,8 +848,8 @@ namespace Game.BattleGrounds.Zones
 
         public override void FillInitialWorldStates(InitWorldStates packet)
         {
-            packet.AddState(EotSWorldStateIds.HordeBase, (int)m_TeamPointsCount[TeamId.Horde]);
-            packet.AddState(EotSWorldStateIds.AllianceBase, (int)m_TeamPointsCount[TeamId.Alliance]);
+            packet.AddState(EotSWorldStateIds.HordeBase, m_TeamPointsCount[TeamId.Horde]);
+            packet.AddState(EotSWorldStateIds.AllianceBase, m_TeamPointsCount[TeamId.Alliance]);
             packet.AddState(0xAB6, 0x0);
             packet.AddState(0xAB5, 0x0);
             packet.AddState(0xAB4, 0x0);
@@ -876,9 +876,9 @@ namespace Game.BattleGrounds.Zones
             packet.AddState(0xAD2, 0x1);
             packet.AddState(0xAD1, 0x1);
 
-            packet.AddState(EotSWorldStateIds.HordeResources, (int)GetTeamScore(TeamId.Horde));
-            packet.AddState(EotSWorldStateIds.AllianceResources, (int)GetTeamScore(TeamId.Alliance));
-            packet.AddState(EotSWorldStateIds.MaxResources, (int)EotSScoreIds.MaxTeamScore);
+            packet.AddState(EotSWorldStateIds.HordeResources, GetTeamScore(TeamId.Horde));
+            packet.AddState(EotSWorldStateIds.AllianceResources, GetTeamScore(TeamId.Alliance));
+            packet.AddState(EotSWorldStateIds.MaxResources, EotSScoreIds.MaxTeamScore);
 
             packet.AddState(0xA05, 0x8E);
             packet.AddState(0xAA0, 0x0);
@@ -889,8 +889,8 @@ namespace Game.BattleGrounds.Zones
             for (byte point = 0; point < EotSPoints.PointsMax; ++point)
             {
                 BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
-                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0));
-                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0));
+                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0u));
+                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0u));
             }
         }
 

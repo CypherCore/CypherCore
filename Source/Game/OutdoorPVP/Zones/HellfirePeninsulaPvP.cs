@@ -117,8 +117,8 @@ namespace Game.PvP
         {
             packet.AddState(OutdoorPvPHPWorldStates.Display_A, 1);
             packet.AddState(OutdoorPvPHPWorldStates.Display_H, 1);
-            packet.AddState(OutdoorPvPHPWorldStates.Count_A, (int)m_AllianceTowersControlled);
-            packet.AddState(OutdoorPvPHPWorldStates.Count_H, (int)m_HordeTowersControlled);
+            packet.AddState(OutdoorPvPHPWorldStates.Count_A, m_AllianceTowersControlled);
+            packet.AddState(OutdoorPvPHPWorldStates.Count_H, m_HordeTowersControlled);
 
             foreach (var capture in m_capturePoints.Values)
                 capture.FillInitialWorldStates(packet);

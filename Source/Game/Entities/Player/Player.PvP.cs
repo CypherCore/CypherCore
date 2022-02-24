@@ -726,12 +726,24 @@ namespace Game.Entities
             // Send misc stuff that needs to be sent on every login, like the battle timers.
             if (WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable))
             {
-                BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);//Wintergrasp battle
+                BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(BattlefieldIds.WG);
                 if (wg != null)
                 {
                     SendUpdateWorldState(WorldStates.BattlefieldWgActive, (uint)(wg.IsWarTime() ? 0 : 1));
                     uint timer = wg.IsWarTime() ? 0 : (wg.GetTimer() / 1000); // 0 - Time to next battle
                     SendUpdateWorldState(WorldStates.BattlefieldWgTimeNextBattle, (uint)(GameTime.GetGameTime() + timer));
+                }
+            }
+
+            if (WorldConfig.GetBoolValue(WorldCfg.TolbaradEnable))
+            {
+                BattleField tb = Global.BattleFieldMgr.GetBattlefieldByBattleId(BattlefieldIds.TB);
+                if (tb != null)
+                {
+                    SendUpdateWorldState(WorldStates.BattlefieldTbFactionControlling, (uint)(tb.GetDefenderTeam() + 1));
+                    uint timer = tb.GetTimer() / 1000;
+                    SendUpdateWorldState(WorldStates.BattlefieldTbTimeBattleEnd, (uint)(tb.IsWarTime() ? (uint)(GameTime.GetGameTime() + timer) : 0));
+                    SendUpdateWorldState(WorldStates.BattlefieldTbTimeNextBattle, (uint)(!tb.IsWarTime() ? (uint)(GameTime.GetGameTime() + timer) : 0));
                 }
             }
         }

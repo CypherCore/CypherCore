@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.AI;
+using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Chat;
 using Game.Conditions;
@@ -439,6 +440,18 @@ namespace Game.Scripting
 
         public virtual bool _OnTrigger(Player player, AreaTriggerRecord trigger) { return false; }
     }
+
+    public class BattlefieldScript : ScriptObject
+    {
+        public BattlefieldScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        public virtual BattleField GetBattlefield() { return null; }
+    }
     
     public class BattlegroundScript : ScriptObject
     {
@@ -450,7 +463,7 @@ namespace Game.Scripting
         public override bool IsDatabaseBound() { return true; }
 
         // Should return a fully valid Battlegroundobject for the type ID.
-        public virtual Battleground BattlegroundGetBattleground() { return null; }
+        public virtual Battleground GetBattleground() { return null; }
     }
 
     public class OutdoorPvPScript : ScriptObject
