@@ -3670,7 +3670,13 @@ namespace Game.Entities
             });
 
             // Dark Conclave Ritualist Channel
-            ApplySpellFix(new [] { 38469 }, spellInfo =>
+            ApplySpellFix(new[] { 38469 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
+            });
+
+            // Chrono Shift (enemy slow part)
+            ApplySpellFix(new[] { 236299 }, spellInfo =>
             {
                 spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
             });
