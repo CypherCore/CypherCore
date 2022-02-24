@@ -469,6 +469,17 @@ namespace Game.BattleFields
                 Global.CreatureTextMgr.SendChat(stalker, (byte)id, target);
         }
 
+        void SendInitWorldStatesTo(Player player)
+        {
+            InitWorldStates packet = new();
+            packet.MapID = m_MapId;
+            packet.AreaID = m_ZoneId;
+            packet.SubareaID = player.GetAreaId();
+            FillInitialWorldStates(packet);
+
+            player.SendPacket(packet);
+        }
+
         public void SendUpdateWorldState(WorldStates variable, uint value, bool hidden = false)
         {
             SendUpdateWorldState((uint)variable, value, hidden);

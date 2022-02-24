@@ -786,18 +786,6 @@ namespace Game.BattleFields
                 workshop.FillInitialWorldStates(packet);
         }
 
-        void SendInitWorldStatesTo(Player player)
-        {
-            InitWorldStates packet = new();
-            packet.AreaID = m_ZoneId;
-            packet.MapID = m_MapId;
-            packet.SubareaID = 0;
-
-            FillInitialWorldStates(packet);
-
-            player.SendPacket(packet);
-        }
-
         public override void SendInitWorldStatesToAll()
         {
             for (byte team = 0; team < SharedConst.PvpTeamsCount; team++)
