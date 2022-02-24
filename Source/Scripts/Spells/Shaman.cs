@@ -78,6 +78,7 @@ namespace Scripts.Spells.Shaman
         public const uint TotemicPowerAttackPower = 28826;
         public const uint TotemicPowerArmor = 28827;
         public const uint WindfuryAttack = 25504;
+        public const uint WindfuryEnchantment = 334302;
         public const uint WindRush = 192082;
 
         //Misc
@@ -1222,9 +1223,36 @@ namespace Scripts.Spells.Shaman
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
+    [Script] // 33757 - Windfury Weapon
+    class spell_sha_windfury_weapon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WindfuryEnchantment);
+        }
 
-    [Script] // 33757 - Windfury
-    class spell_sha_windfury : AuraScript
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleEffect(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            Item mainHand = GetCaster().ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack, false);
+            if (mainHand != null)
+                GetCaster().CastSpell(mainHand, SpellIds.WindfuryEnchantment, GetSpell());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy));
+        }
+    }
+    
+    [Script] // 319773 - Windfury Weapon (proc)
+    class spell_sha_windfury_weapon_proc : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
