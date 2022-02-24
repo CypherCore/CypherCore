@@ -46,6 +46,9 @@ namespace Game.BattleFields
                     uint scriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
 
                     var bf = Global.ScriptMgr.CreateBattlefield(scriptId);
+                    if (bf == null)
+                        continue;
+
                     if (!bf.SetupBattlefield())
                     {
                         Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {typeId} failed.");
