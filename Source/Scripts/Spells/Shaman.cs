@@ -159,7 +159,7 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -811,16 +811,14 @@ namespace Scripts.Spells.Shaman
             Unit caster = GetCaster();
             if (caster)
             {
-                Unit target = GetExplTargetUnit();
-                if (target)
-                    if (caster.HasAura(SpellIds.PathOfFlamesTalent))
-                        caster.CastSpell(target, SpellIds.PathOfFlamesSpread, true);
+                if (caster.HasAura(SpellIds.PathOfFlamesTalent))
+                    caster.CastSpell(GetHitUnit(), SpellIds.PathOfFlamesSpread, new CastSpellExtraArgs(GetSpell()));
             }
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TriggerMissile));
         }
     }
 
