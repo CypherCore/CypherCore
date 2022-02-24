@@ -959,9 +959,8 @@ namespace Game.Entities
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetEnchantmentId(slot) != 0)
-                        pItem.ClearEnchantment(slot);
+                if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
+                    pItem.ClearEnchantment(slot);
             }
 
             // in inventory bags
@@ -973,9 +972,8 @@ namespace Game.Entities
                     for (byte j = 0; j < pBag.GetBagSize(); j++)
                     {
                         Item pItem = pBag.GetItemByPos(j);
-                        if (pItem)
-                            if (pItem.GetEnchantmentId(slot) != 0)
-                                pItem.ClearEnchantment(slot);
+                        if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
+                            pItem.ClearEnchantment(slot);
                     }
                 }
             }

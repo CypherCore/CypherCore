@@ -1587,7 +1587,7 @@ namespace Game
                     if (illusion == null)
                         return false;
 
-                    if (illusion.ItemVisual == 0 || !illusion.Flags.HasAnyFlag(EnchantmentSlotMask.Collectable))
+                    if (illusion.ItemVisual == 0 || !illusion.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
                         return false;
 
                     PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);

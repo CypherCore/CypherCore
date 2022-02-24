@@ -1919,9 +1919,19 @@ namespace Game.Entities
                         // remove item dependent auras and casts (only weapon and armor slots)
                         if (slot < EquipmentSlot.End)
                         {
-                            // remove held enchantments, update expertise
+                            // update expertise
                             if (slot == EquipmentSlot.MainHand)
+                            {
+                                // clear main hand only enchantments
+                                for (EnchantmentSlot enchantSlot = 0; enchantSlot < EnchantmentSlot.Max; ++enchantSlot)
+                                {
+                                    var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(pItem.GetEnchantmentId(enchantSlot));
+                                    if (enchantment != null && enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.MainhandOnly))
+                                        pItem.ClearEnchantment(enchantSlot);
+                                }
+
                                 UpdateExpertise(WeaponAttackType.BaseAttack);
+                            }
                             else if (slot == EquipmentSlot.OffHand)
                                 UpdateExpertise(WeaponAttackType.OffAttack);
                             // update armor penetration - passive auras may need it

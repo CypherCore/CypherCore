@@ -283,14 +283,19 @@ namespace Framework.Constants
         OK = 3
     }
 
-    public enum EnchantmentSlotMask : ushort
+    [Flags]
+    public enum SpellItemEnchantmentFlags : ushort
     {
-        CanSouldBound = 0x01,
-        Unk1 = 0x02,
-        Unk2 = 0x04,
-        Unk3 = 0x08,
-        Collectable = 0x100,
-        HideIfNotCollected = 0x200,
+        Soulbound = 0x01,
+        DoNotLog = 0x02,
+        MainhandOnly = 0x04,
+        AllowEnteringArena = 0x08,
+        DoNotSaveToDB = 0x10,
+        ScaleAsAGem = 0x20,
+        DisableInChallengeModes = 0x40,
+        DisableInProvingGrounds = 0x80,
+        AllowTransmog = 0x100,
+        HideUntilCollected = 0x200,
     }
 
     public enum ItemModifier

@@ -168,7 +168,13 @@ namespace Game.Entities
 
                     ss.Clear();
                     for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
-                        ss.AppendFormat("{0} {1} {2} ", GetEnchantmentId(slot), GetEnchantmentDuration(slot), GetEnchantmentCharges(slot));
+                    {
+                        var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
+                        if (enchantment != null && !enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotSaveToDB))
+                            ss.Append($"{GetEnchantmentId(slot)} {GetEnchantmentDuration(slot)} {GetEnchantmentCharges(slot)} ");
+                        else
+                            ss.Append("0 0 0 ");
+                    }
 
                     stmt.AddValue(++index, ss.ToString());
                     stmt.AddValue(++index, m_randomBonusListId);
@@ -892,7 +898,7 @@ namespace Game.Entities
                 {
                     var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
-                        if (enchantEntry.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
+                        if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
                             return true;
                 }
             }
@@ -960,12 +966,13 @@ namespace Game.Entities
             Player owner = GetOwner();
             if (slot < EnchantmentSlot.MaxInspected)
             {
-                uint oldEnchant = GetEnchantmentId(slot);
-                if (oldEnchant != 0)
-                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant, (uint)slot);
+                var oldEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
+                if (oldEnchant != null && !oldEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
+                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
 
-                if (id != 0)
-                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
+                var newEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(id);
+                if (newEnchant != null && !newEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
+                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
             }
 
             ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);

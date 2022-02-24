@@ -6351,7 +6351,7 @@ namespace Game.Spells
                         {
                             if (enchantEntry == null)
                                 return SpellCastResult.Error;
-                            if (enchantEntry.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
+                            if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
                                 return SpellCastResult.NotTradeable;
                         }
                         break;
@@ -6365,10 +6365,10 @@ namespace Game.Spells
                         if (item.GetOwner() != player)
                         {
                             int enchant_id = spellEffectInfo.MiscValue;
-                            var pEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-                            if (pEnchant == null)
+                            var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
+                            if (enchantEntry == null)
                                 return SpellCastResult.Error;
-                            if (pEnchant.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
+                            if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
                                 return SpellCastResult.NotTradeable;
                         }
 

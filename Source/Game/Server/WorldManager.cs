@@ -748,9 +748,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell target coordinates...");
             Global.SpellMgr.LoadSpellTargetPositions();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading enchant custom attributes...");
-            Global.SpellMgr.LoadEnchantCustomAttr();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading linked spells...");
             Global.SpellMgr.LoadSpellLinked();
 

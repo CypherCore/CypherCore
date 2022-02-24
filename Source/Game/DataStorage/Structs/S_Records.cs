@@ -347,7 +347,7 @@ namespace Game.DataStorage
         public uint TransmogCost;
         public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
-        public EnchantmentSlotMask Flags;
+        public ushort Flags;
         public ushort RequiredSkillID;
         public ushort RequiredSkillRank;
         public ushort ItemLevel;
@@ -358,6 +358,8 @@ namespace Game.DataStorage
         public byte ConditionID;
         public byte MinLevel;
         public byte MaxLevel;
+
+        public SpellItemEnchantmentFlags GetFlags() { return (SpellItemEnchantmentFlags)Flags; }
     }
 
     public sealed class SpellItemEnchantmentConditionRecord

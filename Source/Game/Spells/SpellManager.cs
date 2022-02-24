@@ -578,7 +578,11 @@ namespace Game.Entities
 
         public bool IsArenaAllowedEnchancment(uint ench_id)
         {
-            return mEnchantCustomAttr.LookupByKey((int)ench_id);
+            var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(ench_id);
+            if (enchantment != null)
+                return enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowEnteringArena);
+
+            return false;
         }
 
         public List<int> GetSpellLinked(int spell_id)
@@ -1683,36 +1687,6 @@ namespace Game.Entities
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
-        // Fill custom data about enchancments
-        public void LoadEnchantCustomAttr()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            uint count = 0;
-            foreach (var spellInfo in mSpellInfoMap.Values)
-            {
-                // @todo find a better check
-                if (!spellInfo.HasAttribute(SpellAttr2.PreserveEnchantInArena) || !spellInfo.HasAttribute(SpellAttr0.NotShapeshift))
-                    continue;
-
-                foreach (var spellEffectInfo in spellInfo.GetEffects())
-                {
-                    if (spellEffectInfo.Effect == SpellEffectName.EnchantItemTemporary)
-                    {
-                        int enchId = spellEffectInfo.MiscValue;
-                        var ench = CliDB.SpellItemEnchantmentStorage.LookupByKey((uint)enchId);
-                        if (ench == null)
-                            continue;
-                        mEnchantCustomAttr[enchId] = true;
-                        ++count;
-                        break;
-                    }
-                }
-            }
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} custom enchant attributes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadSpellEnchantProcData()
@@ -4777,7 +4751,6 @@ namespace Game.Entities
         Dictionary<uint, PetAura> mSpellPetAuraMap = new();
         MultiMap<int, int> mSpellLinkedMap = new();
         Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
-        Dictionary<int, bool> mEnchantCustomAttr = new();
         MultiMap<uint, SpellArea> mSpellAreaMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new();
