@@ -1091,6 +1091,9 @@ namespace Game.Entities
             if (!obj.CheckPrivateObjectOwnerVisibility(this))
                 return false;
 
+            if (!Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
+                return false;
+
             bool corpseVisibility = false;
             if (distanceCheck)
             {

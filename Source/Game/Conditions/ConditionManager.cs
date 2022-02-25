@@ -141,7 +141,7 @@ namespace Game
 
         public bool CanHaveSourceGroupSet(ConditionSourceType sourceType)
         {
-            return (sourceType == ConditionSourceType.CreatureLootTemplate ||
+            return sourceType == ConditionSourceType.CreatureLootTemplate ||
                     sourceType == ConditionSourceType.DisenchantLootTemplate ||
                     sourceType == ConditionSourceType.FishingLootTemplate ||
                     sourceType == ConditionSourceType.GameobjectLootTemplate ||
@@ -162,7 +162,8 @@ namespace Game
                     sourceType == ConditionSourceType.NpcVendor ||
                     sourceType == ConditionSourceType.Phase ||
                     sourceType == ConditionSourceType.AreaTrigger ||
-                    sourceType == ConditionSourceType.TrainerSpell);
+                    sourceType == ConditionSourceType.TrainerSpell ||
+                    sourceType == ConditionSourceType.ObjectIdVisibility;
         }
 
         public bool CanHaveSourceIdSet(ConditionSourceType sourceType)
@@ -300,6 +301,17 @@ namespace Game
                     Log.outDebug(LogFilter.Condition, $"GetConditionsForTrainerSpell: found conditions for trainer id {trainerId} spell {spellId}");
                     return IsObjectMeetToConditions(player, conditionList);
                 }
+            }
+            return true;
+        }
+
+        public bool IsObjectMeetingVisibilityByObjectIdConditions(uint objectType, uint entry, WorldObject seer)
+        {
+            var conditions = objectVisibilityConditionStorage.LookupByKey((objectType, entry));
+            if (conditions != null)
+            {
+                Log.outDebug(LogFilter.Condition, $"IsObjectMeetingVisibilityByObjectIdConditions: found conditions for objectType {objectType} entry {entry}");
+                return IsObjectMeetToConditions(seer, conditions);
             }
             return true;
         }
@@ -541,6 +553,13 @@ namespace Game
                                 trainerSpellConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
                             trainerSpellConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            ++count;
+                            continue;
+                        }
+                        case ConditionSourceType.ObjectIdVisibility:
+                        {
+                            objectVisibilityConditionStorage.Add((cond.SourceGroup, (uint)cond.SourceEntry), cond);
+                            valid = true;
                             ++count;
                             continue;
                         }
@@ -1167,6 +1186,37 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionSourceType.ObjectIdVisibility:
+                {
+                    if (cond.SourceGroup <= 0 || cond.SourceGroup >= (uint)TypeId.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, is no valid object type, ignoring.");
+                        return false;
+                    }
+
+                    if (cond.SourceGroup == (uint)TypeId.Unit)
+                    {
+                        if (Global.ObjectMgr.GetCreatureTemplate((uint)cond.SourceEntry) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in `creature_template`, ignoring.");
+                            return false;
+                        }
+                    }
+                    else if (cond.SourceGroup == (uint)TypeId.GameObject)
+                    {
+                        if (Global.ObjectMgr.GetGameObjectTemplate((uint)cond.SourceEntry) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in `gameobject_template`, ignoring.");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked type id, ignoring.");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     return false;
@@ -1720,6 +1770,8 @@ namespace Game
             areaTriggerConditionContainerStorage.Clear();
 
             trainerSpellConditionContainerStorage.Clear();
+
+            objectVisibilityConditionStorage.Clear();
         }
 
         static bool PlayerConditionCompare(int comparisonType, int value1, int value2)
@@ -2504,6 +2556,7 @@ namespace Game
         Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> smartEventConditionStorage = new();
         MultiMap<Tuple<uint, bool>, Condition> areaTriggerConditionContainerStorage = new();
         Dictionary<uint, MultiMap<uint, Condition>> trainerSpellConditionContainerStorage = new();
+        MultiMap<(uint objectType, uint objectId), Condition> objectVisibilityConditionStorage = new();
 
         public string[] StaticSourceTypeData =
         {
@@ -2538,7 +2591,8 @@ namespace Game
             "AreaTrigger",
             "ConversationLine",
             "AreaTrigger Client Triggered",
-            "Trainer Spell"
+            "Trainer Spell",
+            "Object Visibility (by ID)"
         };
 
         public ConditionTypeInfo[] StaticConditionTypeData =

@@ -109,6 +109,7 @@ namespace Framework.Constants
         ConversationLine = 29,
         AreatriggerClientTriggered = 30,
         TrainerSpell = 31,
+        ObjectIdVisibility = 32,
         Max
     }
 
