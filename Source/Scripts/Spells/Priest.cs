@@ -64,6 +64,8 @@ namespace Scripts.Spells.Priest
         public const uint Renew = 139;
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
+        public const uint ShadowMendDamage = 186439;
+        public const uint ShadowMendPeriodicDummy = 187464;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
         public const uint Smite = 585;
@@ -792,31 +794,80 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal);
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
         }
 
-        void HandleEffectHit(uint effIndex)
+        void HandleEffectHit()
         {
             Unit target = GetHitUnit();
             if (target != null)
             {
                 Unit caster = GetCaster();
+
+                int periodicAmount = GetHitHeal() / 20;
+                int damageForAuraRemoveAmount = periodicAmount * 10;
                 if (caster.HasAura(SpellIds.Atonement) && !caster.HasAura(SpellIds.Trinity))
-                    caster.CastSpell(target, SpellIds.AtonementTriggered, true);
+                    caster.CastSpell(target, SpellIds.AtonementTriggered, new CastSpellExtraArgs(GetSpell()));
 
                 // Handle Masochism talent
-                int periodicAmount = GetHitHeal() / 20;
                 if (caster.HasAura(SpellIds.MasochismTalent) && caster.GetGUID() == target.GetGUID())
-                    caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+                    caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+                else if (target.IsInCombat() && periodicAmount != 0)
+                {
+                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                    args.SetTriggeringSpell(GetSpell());
+                    args.AddSpellMod(SpellValueMod.BasePoint0, periodicAmount);
+                    args.AddSpellMod(SpellValueMod.BasePoint1, damageForAuraRemoveAmount);
+                    caster.CastSpell(target, SpellIds.ShadowMendPeriodicDummy, args);
+                }
             }
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHit, 0, SpellEffectName.Heal));
+            AfterHit.Add(new HitHandler(HandleEffectHit));
         }
     }
 
+    [Script] // 187464 - Shadow Mend (Damage)
+    class spell_pri_shadow_mend_periodic_damage : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShadowMendDamage);
+        }
+
+        void HandleDummyTick(AuraEffect aurEff)
+        {
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SetOriginalCaster(GetCasterGUID());
+            args.SetTriggeringAura(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
+            GetTarget().CastSpell(GetTarget(), SpellIds.ShadowMendDamage, args);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetDamageInfo() != null;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            int newAmount = (int)(aurEff.GetAmount() - eventInfo.GetDamageInfo().GetDamage());
+
+            aurEff.ChangeAmount(newAmount);
+            if (newAmount < 0)
+                Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 28809 - Greater Heal
     class spell_pri_t3_4p_bonus : AuraScript
     {
