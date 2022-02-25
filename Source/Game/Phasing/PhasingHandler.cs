@@ -1,15 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿/*
+ * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+using Framework.Constants;
+using Game.Chat;
+using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
-using Framework.Constants;
-using Game.Conditions;
-using Game.Spells;
-using System.Linq;
-using Game.Networking.Packets;
-using Game.Chat;
 using Game.Maps;
+using Game.Networking.Packets;
+using Game.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Game
 {
@@ -66,10 +83,11 @@ namespace Game
 
         public static void AddPhase(WorldObject obj, uint phaseId, bool updateVisibility)
         {
-            AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility);
+            ControlledUnitVisitor visitor = new(obj);
+            AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility, visitor);
         }
-        
-        static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility)
+
+        static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
 
@@ -80,9 +98,9 @@ namespace Game
             if (unit)
             {
                 unit.OnPhaseChange();
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    AddPhase(controlled, phaseId, personalGuid, updateVisibility);
+                    AddPhase(controlled, phaseId, personalGuid, updateVisibility, visitor);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -92,15 +110,21 @@ namespace Game
 
         public static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility)
         {
+            ControlledUnitVisitor visitor = new(obj);
+            RemovePhase(obj, phaseId, updateVisibility, visitor);
+        }
+
+        static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
             bool changed = obj.GetPhaseShift().RemovePhase(phaseId);
 
             Unit unit = obj.ToUnit();
             if (unit)
             {
                 unit.OnPhaseChange();
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    RemovePhase(controlled, phaseId, updateVisibility);
+                    RemovePhase(controlled, phaseId, updateVisibility, visitor);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -110,15 +134,15 @@ namespace Game
 
         public static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
         {
-            AddPhaseGroup(obj, phaseGroupId, obj.GetGUID(), updateVisibility);
-        }
-        
-        static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, ObjectGuid personalGuid, bool updateVisibility)
-        {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
             if (phasesInGroup.Empty())
                 return;
+            ControlledUnitVisitor visitor = new(obj);
+            AddPhaseGroup(obj, phasesInGroup, obj.GetGUID(), updateVisibility, visitor);
+        }
 
+        static void AddPhaseGroup(WorldObject obj, List<uint> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
             bool changed = false;
             foreach (uint phaseId in phasesInGroup)
                 changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
@@ -130,9 +154,9 @@ namespace Game
             if (unit)
             {
                 unit.OnPhaseChange();
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    AddPhaseGroup(controlled, phaseGroupId, personalGuid, updateVisibility);
+                    AddPhaseGroup(controlled, phasesInGroup, personalGuid, updateVisibility, visitor);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -146,6 +170,12 @@ namespace Game
             if (phasesInGroup.Empty())
                 return;
 
+            ControlledUnitVisitor visitor = new(obj);
+            RemovePhaseGroup(obj, phasesInGroup, updateVisibility, visitor);
+        }
+
+        static void RemovePhaseGroup(WorldObject obj, List<uint> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
             bool changed = false;
             foreach (uint phaseId in phasesInGroup)
                 changed = obj.GetPhaseShift().RemovePhase(phaseId) || changed;
@@ -154,9 +184,9 @@ namespace Game
             if (unit)
             {
                 unit.OnPhaseChange();
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    RemovePhaseGroup(controlled, phaseGroupId, updateVisibility);
+                    RemovePhaseGroup(controlled, phasesInGroup, updateVisibility, visitor);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -166,18 +196,24 @@ namespace Game
 
         public static void AddVisibleMapId(WorldObject obj, uint visibleMapId)
         {
+            ControlledUnitVisitor visitor = new(obj);
+            AddVisibleMapId(obj, visibleMapId, visitor);
+        }
+
+        static void AddVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
+        {
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().AddVisibleMapId(visibleMapId, terrainSwapInfo);
 
-            foreach (uint uiMapPhaseId  in terrainSwapInfo.UiMapPhaseIDs)
-                changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId ) || changed;
+            foreach (uint uiMapPhaseId in terrainSwapInfo.UiMapPhaseIDs)
+                changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId) || changed;
 
             Unit unit = obj.ToUnit();
             if (unit)
             {
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    AddVisibleMapId(controlled, visibleMapId);
+                    AddVisibleMapId(controlled, visibleMapId, visitor);
                 });
             }
 
@@ -185,6 +221,12 @@ namespace Game
         }
 
         public static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId)
+        {
+            ControlledUnitVisitor visitor = new(obj);
+            RemoveVisibleMapId(obj, visibleMapId, visitor);
+        }
+
+        static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
         {
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().RemoveVisibleMapId(visibleMapId);
@@ -195,9 +237,9 @@ namespace Game
             Unit unit = obj.ToUnit();
             if (unit)
             {
-                ForAllControlled(unit, controlled =>
+                visitor.VisitControlledOf(unit, controlled =>
                 {
-                    RemoveVisibleMapId(controlled, visibleMapId);
+                    RemoveVisibleMapId(controlled, visibleMapId, visitor);
                 });
             }
 
@@ -300,7 +342,8 @@ namespace Game
                 if (changed)
                     unit.OnPhaseChange();
 
-                ForAllControlled(unit, controlled =>
+                ControlledUnitVisitor visitor = new(unit);
+                visitor.VisitControlledOf(unit, controlled =>
                 {
                     InheritPhaseShift(controlled, unit);
                 });
@@ -411,7 +454,8 @@ namespace Game
                 if (changed)
                     unit.OnPhaseChange();
 
-                ForAllControlled(unit, controlled =>
+                ControlledUnitVisitor visitor = new(unit);
+                visitor.VisitControlledOf(unit, controlled =>
                 {
                     InheritPhaseShift(controlled, unit);
                 });
@@ -493,7 +537,7 @@ namespace Game
             Cypher.Assert(phaseShift.HasPersonalPhase());
             phaseShift.PersonalGuid = personalGuid;
         }
-        
+
         public static void InitDbVisibleMapId(PhaseShift phaseShift, int visibleMapId)
         {
             phaseShift.VisibleMapIds.Clear();
@@ -633,6 +677,50 @@ namespace Game
                         player.GetMap().SendUpdateTransportVisibility(player);
 
                     obj.UpdateObjectVisibility();
+                }
+            }
+        }
+    }
+
+    class ControlledUnitVisitor
+    {
+        HashSet<WorldObject> _visited = new();
+
+        public ControlledUnitVisitor(WorldObject owner)
+        {
+            _visited.Add(owner);
+        }
+
+        public void VisitControlledOf(Unit unit, Action<Unit> func)
+        {
+            foreach (Unit controlled in unit.m_Controlled)
+            {
+                // Player inside nested vehicle should not phase the root vehicle and its accessories (only direct root vehicle control does)
+                if (!controlled.IsPlayer() && controlled.GetVehicle() == null)
+                    if (_visited.Add(controlled))
+                        func(controlled);
+            }
+
+            foreach (ObjectGuid summonGuid in unit.m_SummonSlot)
+            {
+                if (!summonGuid.IsEmpty())
+                {
+                    Creature summon = unit.GetMap().GetCreature(summonGuid);
+                    if (summon != null)
+                        if (_visited.Add(summon))
+                            func(summon);
+                }
+            }
+
+            Vehicle vehicle = unit.GetVehicleKit();
+            if (vehicle != null)
+            {
+                foreach (var seatPair in vehicle.Seats)
+                {
+                    Unit passenger = Global.ObjAccessor.GetUnit(unit, seatPair.Value.Passenger.Guid);
+                    if (passenger != null && passenger != unit)
+                        if (_visited.Add(passenger))
+                            func(passenger);
                 }
             }
         }
