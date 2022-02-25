@@ -460,6 +460,7 @@ namespace Game
                         }
                     }
 
+                    GetPlayer().SetQuestSlot(packet.Entry, 0);
                     GetPlayer().TakeQuestSourceItem(questId, true); // remove quest src item from player
                     GetPlayer().AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
                     GetPlayer().RemoveActiveQuest(questId);
@@ -472,8 +473,6 @@ namespace Game
                     if (quest != null)
                         Global.ScriptMgr.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None);
                 }
-
-                GetPlayer().SetQuestSlot(packet.Entry, 0);
 
                 GetPlayer().UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);
             }
