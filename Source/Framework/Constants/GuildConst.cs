@@ -83,13 +83,14 @@ namespace Framework.Constants
         All = 0x00DDFFBF
     }
 
-    public struct GuildDefaultRanks
+    public enum GuildRankId
     {
-        public const int Master = 0;
-        public const int Officer = 1;
-        public const int Veteran = 2;
-        public const int Member = 3;
-        public const int Initiate = 4;
+        GuildMaster = 0
+    }
+
+    public enum GuildRankOrder
+    {
+
     }
 
     [Flags]

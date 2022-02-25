@@ -113,7 +113,7 @@ namespace Game
         {
             Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
             if (guild)
-                guild.MassInviteToEvent(this, calendarCommunityInvite.MinLevel, calendarCommunityInvite.MaxLevel, calendarCommunityInvite.MaxRankOrder);
+                guild.MassInviteToEvent(this, calendarCommunityInvite.MinLevel, calendarCommunityInvite.MaxLevel, (GuildRankOrder)calendarCommunityInvite.MaxRankOrder);
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarAddEvent)]

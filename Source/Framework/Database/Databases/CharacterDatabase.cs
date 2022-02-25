@@ -260,7 +260,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_GUILD_MEMBER, "DELETE FROM guild_member WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_GUILD_MEMBERS, "DELETE FROM guild_member WHERE guildid = ?");
 
-            PrepareStatement(CharStatements.INS_GUILD_RANK, "INSERT INTO guild_rank (guildid, rid, rname, rights, BankMoneyPerDay) VALUES (?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_GUILD_RANK, "INSERT INTO guild_rank (guildid, rid, RankOrder, rname, rights, BankMoneyPerDay) VALUES (?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GUILD_RANKS, "DELETE FROM guild_rank WHERE guildid = ?");
             PrepareStatement(CharStatements.DEL_GUILD_RANK, "DELETE FROM guild_rank WHERE guildid = ? AND rid = ?");
             PrepareStatement(CharStatements.INS_GUILD_BANK_TAB, "INSERT INTO guild_bank_tab (guildid, TabId) VALUES (?, ?)");
@@ -290,6 +290,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_GUILD_MOTD, "UPDATE guild SET motd = ? WHERE guildid = ?");
             PrepareStatement(CharStatements.UPD_GUILD_INFO, "UPDATE guild SET info = ? WHERE guildid = ?");
             PrepareStatement(CharStatements.UPD_GUILD_LEADER, "UPDATE guild SET leaderguid = ? WHERE guildid = ?");
+            PrepareStatement(CharStatements.UPD_GUILD_RANK_ORDER, "UPDATE guild_rank SET RankOrder = ? WHERE rid = ? AND guildid = ?");
             PrepareStatement(CharStatements.UPD_GUILD_RANK_NAME, "UPDATE guild_rank SET rname = ? WHERE rid = ? AND guildid = ?");
             PrepareStatement(CharStatements.UPD_GUILD_RANK_RIGHTS, "UPDATE guild_rank SET rights = ? WHERE rid = ? AND guildid = ?");
 
@@ -1001,6 +1002,7 @@ namespace Framework.Database
         UPD_GUILD_MOTD,
         UPD_GUILD_INFO,
         UPD_GUILD_LEADER,
+        UPD_GUILD_RANK_ORDER,
         UPD_GUILD_RANK_NAME,
         UPD_GUILD_RANK_RIGHTS,
         UPD_GUILD_EMBLEM_INFO,

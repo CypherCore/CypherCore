@@ -917,7 +917,7 @@ namespace Game.Scripting
                 // not enough injured units
                 // fill remainder with full health units
                 targets.AddRange(lookupPlayers[true]);
-                targets.AddRange(lookupPlayers[false].Shuffle()));
+                targets.AddRange(lookupPlayers[false].Shuffle());
             }
             else if (lookupPlayers[true].Count() > maxTargets)
             {

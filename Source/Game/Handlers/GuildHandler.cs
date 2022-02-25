@@ -114,7 +114,7 @@ namespace Game
 
             Guild guild = GetPlayer().GetGuild();
             if (guild)
-                guild.HandleSetMemberRank(this, packet.Member, setterGuid, (byte)packet.RankOrder);
+                guild.HandleSetMemberRank(this, packet.Member, setterGuid, (GuildRankOrder)packet.RankOrder);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildLeave)]
@@ -189,7 +189,7 @@ namespace Game
         {
             Guild guild = GetPlayer().GetGuild();
             if (guild)
-                guild.HandleRemoveRank(this, (byte)packet.RankOrder);
+                guild.HandleRemoveRank(this, (GuildRankOrder)packet.RankOrder);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildUpdateInfoText)]
@@ -579,7 +579,7 @@ namespace Game
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
                 rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], (int)packet.TabWithdrawItemLimit[tabId]);
 
-            guild.HandleSetRankInfo(this, (byte)packet.RankOrder, packet.RankName, (GuildRankRights)packet.Flags, packet.WithdrawGoldLimit, rightsAndSlots);
+            guild.HandleSetRankInfo(this, (GuildRankId)packet.RankID, packet.RankName, (GuildRankRights)packet.Flags, packet.WithdrawGoldLimit, rightsAndSlots);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestGuildPartyState)]

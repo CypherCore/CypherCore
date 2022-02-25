@@ -152,7 +152,7 @@ namespace Game.Chat
             if (!byte.TryParse(rankStr, out byte newRank))
                 return false;
 
-            return targetGuild.ChangeMemberRank(null, targetGuid, newRank);
+            return targetGuild.ChangeMemberRank(null, targetGuid, (GuildRankId)newRank);
         }
 
         [Command("rename", RBACPermissions.CommandGuildRename, true)]

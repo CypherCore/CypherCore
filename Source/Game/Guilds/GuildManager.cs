@@ -141,8 +141,8 @@ namespace Game
                 // Delete orphaned guild rank entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gr FROM guild_rank gr LEFT JOIN guild g ON gr.guildId = g.guildId WHERE g.guildId IS NULL");
 
-                //                                                   0    1      2       3                4
-                SQLResult result = DB.Characters.Query("SELECT guildid, rid, rname, rights, BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC");
+                //                                                   0    1      2       3      4       5
+                SQLResult result = DB.Characters.Query("SELECT guildid, rid, RankOrder, rname, rights, BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC");
 
                 if (result.IsEmpty())
                 {
