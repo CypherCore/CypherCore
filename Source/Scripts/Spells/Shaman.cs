@@ -177,7 +177,7 @@ namespace Scripts.Spells.Shaman
 
         void ResizeTargets(List<WorldObject> targets)
         {
-            targets.Resize(3);
+            SelectRandomInjuredTargets(targets, 3, true);
         }
 
         public override void Register()
@@ -310,12 +310,7 @@ namespace Scripts.Spells.Shaman
 
         void FilterTargets(List<WorldObject> targets)
         {
-            uint maxTargets = 6;
-            if (targets.Count > maxTargets)
-            {
-                targets.Sort(new HealthPctOrderPred());
-                targets.Resize(maxTargets);
-            }
+            SelectRandomInjuredTargets(targets, 6, true);
         }
 
         void CountEffectivelyHealedTarget()
@@ -586,18 +581,27 @@ namespace Scripts.Spells.Shaman
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDummy));
         }
     }
+
+    [Script] // 73921 - Healing Rain
+    class spell_sha_healing_rain_target_limit : SpellScript
+    {
+        void SelectTargets(List<WorldObject> targets)
+        {
+            SelectRandomInjuredTargets(targets, 6, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
     
     [Script] // 52042 - Healing Stream Totem
     class spell_sha_healing_stream_totem_heal : SpellScript
     {
         void SelectTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(target => !target.ToUnit() || target.ToUnit().IsFullHealth());
-
-            targets.RandomResize(1);
-
-            if (targets.Empty())
-                targets.Add(GetOriginalCaster());
+            SelectRandomInjuredTargets(targets, 1, true);
         }
 
         public override void Register()

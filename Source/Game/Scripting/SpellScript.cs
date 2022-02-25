@@ -20,6 +20,7 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Scripting
 {
@@ -865,6 +866,66 @@ namespace Game.Scripting
             }
 
             m_spell.m_customError = result;
+        }
+
+        public void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers)
+        {
+            if (targets.Count <= maxTargets)
+                return;
+
+            //List of all player targets.
+            var tempPlayers = targets.Where(p => p.IsPlayer()).ToList();
+
+            //List of all injured non player targets.
+            var tempInjuredUnits = targets.Where(target => target.IsUnit() && !target.ToUnit().IsFullHealth()).ToList();
+
+            //List of all none injured non player targets.
+            var tempNoneInjuredUnits = targets.Where(target => target.IsUnit() && target.ToUnit().IsFullHealth()).ToList();
+
+            targets.Clear();
+            if (prioritizePlayers)
+            {
+                if (tempPlayers.Count < maxTargets)
+                {
+                    // not enough players, add nonplayer targets
+                    // prioritize injured nonplayers over full health nonplayers
+
+                    if (tempPlayers.Count + tempInjuredUnits.Count < maxTargets)
+                    {
+                        // not enough players + injured nonplayers
+                        // fill remainder with random full health nonplayers
+                        targets.AddRange(tempPlayers);
+                        targets.AddRange(tempInjuredUnits);
+                        targets.AddRange(tempNoneInjuredUnits.Shuffle());
+                    }
+                    else if (tempPlayers.Count + tempInjuredUnits.Count > maxTargets)
+                    {
+                        // randomize injured nonplayers order
+                        // final list will contain all players + random injured nonplayers
+                        targets.AddRange(tempPlayers);
+                        targets.AddRange(tempInjuredUnits.Shuffle());
+                    }
+
+                    targets.Resize(maxTargets);
+                    return;
+                }
+            }
+
+            var lookupPlayers = tempPlayers.ToLookup(target => !target.ToUnit().IsFullHealth());
+            if (lookupPlayers[true].Count() < maxTargets)
+            {
+                // not enough injured units
+                // fill remainder with full health units
+                targets.AddRange(lookupPlayers[true]);
+                targets.AddRange(lookupPlayers[false].Shuffle()));
+            }
+            else if (lookupPlayers[true].Count() > maxTargets)
+            {
+                // select random injured units
+                targets.AddRange(lookupPlayers[true].Shuffle());
+            }
+
+            targets.Resize(maxTargets);
         }
     }
 
