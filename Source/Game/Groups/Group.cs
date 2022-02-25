@@ -2605,8 +2605,9 @@ namespace Game.Groups
         Roll GetRoll(ObjectGuid lootObjectGuid, byte lootListId)
         {
             foreach (var roll in RollId)
-                if (roll.GetTarget() != null && roll.GetTarget().GetGUID() == lootObjectGuid && roll.itemSlot == lootListId && roll.IsValid())
+                if (roll.IsValid() && roll.GetTarget().GetGUID() == lootObjectGuid && roll.itemSlot == lootListId)
                     return roll;
+
             return null;
         }
 
