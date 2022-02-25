@@ -2540,7 +2540,9 @@ namespace Framework.Constants
         ReqPowerCost = 0x04, // requires triggering spell to have a power cost for aura proc
         ReqSpellmod = 0x08,  // requires triggering spell to be affected by proccing aura to drop charges
         UseStacksForCharges = 0x10, // consuming proc drops a stack from proccing aura instead of charge
-        ReduceProc60 = 0x80  // aura should have a reduced chance to proc if level of proc Actor > 60
+        ReduceProc60 = 0x80,  // aura should have a reduced chance to proc if level of proc Actor > 60
+
+        AllAllowed = ReqExpOrHonor | TriggeredCanProc | ReqPowerCost | ReqSpellmod | UseStacksForCharges | ReduceProc60
     }
 
     // Spell aura states

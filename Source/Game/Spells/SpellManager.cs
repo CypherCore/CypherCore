@@ -1431,6 +1431,11 @@ namespace Game.Entities
                             if (!found)
                                 Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has Attribute PROC_ATTR_REQ_SPELLMOD, but spell has no spell mods. Proc will not be triggered");
                         }
+                        if ((procEntry.AttributesMask & ~ProcAttributes.AllAllowed) != 0)
+                        {
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `AttributesMask` value specifying invalid attributes 0x{procEntry.AttributesMask & ~ProcAttributes.AllAllowed:X2}.");
+                            procEntry.AttributesMask &= ProcAttributes.AllAllowed;
+                        }
 
                         mSpellProcMap.Add((spellInfo.Id, spellInfo.Difficulty), procEntry);
                         ++count;
