@@ -26,6 +26,10 @@ namespace Scripts.Spells.Hunter
 {
     struct SpellIds
     {
+        public const uint AMurderOfCrowsDamage = 131900;
+        public const uint AMurderOfCrowsVisual1 = 131637;
+        public const uint AMurderOfCrowsVisual2 = 131951;
+        public const uint AMurderOfCrowsVisual3 = 131952;
         public const uint AspectCheetahSlow = 186258;
         public const uint Exhilaration = 109304;
         public const uint ExhilarationPet = 128594;
@@ -43,6 +47,44 @@ namespace Scripts.Spells.Hunter
         public const uint RoarOfSacrificeTriggered = 67481;
     }
 
+    [Script] // 131894 - A Murder of Crows
+    class spell_hun_a_murder_of_crows : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AMurderOfCrowsDamage, SpellIds.AMurderOfCrowsVisual1, SpellIds.AMurderOfCrowsVisual2, SpellIds.AMurderOfCrowsVisual3);
+        }
+
+        void HandleDummyTick(AuraEffect aurEff)
+        {
+            Unit target = GetTarget();
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(target, SpellIds.AMurderOfCrowsDamage, true);
+
+            target.CastSpell(target, SpellIds.AMurderOfCrowsVisual1, true);
+            target.CastSpell(target, SpellIds.AMurderOfCrowsVisual2, true);
+            target.CastSpell(target, SpellIds.AMurderOfCrowsVisual3, true);
+            target.CastSpell(target, SpellIds.AMurderOfCrowsVisual3, true); // not a mistake, it is intended to cast twice
+        }
+
+        void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death)
+            {
+                Unit caster = GetCaster();
+                if (caster != null)
+                    caster.GetSpellHistory().ResetCooldown(GetId(), true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 186257 - Aspect of the Cheetah
     class spell_hun_aspect_cheetah : AuraScript
     {
