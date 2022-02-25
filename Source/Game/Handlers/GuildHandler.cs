@@ -192,6 +192,14 @@ namespace Game
                 guild.HandleRemoveRank(this, (GuildRankOrder)packet.RankOrder);
         }
 
+        [WorldPacketHandler(ClientOpcodes.GuildShiftRank)]
+        void HandleGuildShiftRank(GuildShiftRank shiftRank)
+        {
+            Guild guild = GetPlayer().GetGuild();
+            if (guild)
+                guild.HandleShiftRank(this, (GuildRankOrder)shiftRank.RankOrder, shiftRank.ShiftUp);
+        }
+
         [WorldPacketHandler(ClientOpcodes.GuildUpdateInfoText)]
         void HandleGuildUpdateInfoText(GuildUpdateInfoText packet)
         {

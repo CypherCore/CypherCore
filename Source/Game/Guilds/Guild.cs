@@ -740,7 +740,7 @@ namespace Game.Guilds
                 else
                 {
                     // Allow to promote only to lower rank than member's rank
-                    // memberMe->GetRankId() + 1 is the highest rank that current player can promote to
+                    // memberMe.GetRankId() + 1 is the highest rank that current player can promote to
                     if ((oldRank.GetOrder() - 1) <= myRank.GetOrder())
                     {
                         SendCommandResult(session, type, GuildCommandError.RankTooHigh_S, name);
@@ -847,6 +847,46 @@ namespace Game.Guilds
 
             DB.Characters.CommitTransaction(trans);
 
+            BroadcastPacket(new GuildEventRanksUpdated());
+        }
+
+        public void HandleShiftRank(WorldSession session, GuildRankOrder rankOrder, bool shiftUp)
+        {
+            // Only leader can modify ranks
+            if (!_IsLeader(session.GetPlayer()))
+                return;
+
+            GuildRankOrder otherRankOrder = (GuildRankOrder)(rankOrder + (shiftUp ? -1 : 1));
+
+            RankInfo rankInfo = GetRankInfo(rankOrder);
+            RankInfo otherRankInfo = GetRankInfo(otherRankOrder);
+            if (rankInfo == null || otherRankInfo == null)
+                return;
+
+            // can't shift guild master rank (rank id = 0) - there's already a client-side limitation for it so that's just a safe-guard
+            if (rankInfo.GetId() == GuildRankId.GuildMaster || otherRankInfo.GetId() == GuildRankId.GuildMaster)
+                return;
+
+            rankInfo.SetOrder(otherRankOrder);
+            otherRankInfo.SetOrder(rankOrder);
+
+            SQLTransaction trans = new SQLTransaction();
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_ORDER);
+            stmt.AddValue(0, (byte)rankInfo.GetOrder());
+            stmt.AddValue(1, (byte)rankInfo.GetId());
+            stmt.AddValue(2, m_id);
+            trans.Append(stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_ORDER);
+            stmt.AddValue(0, (byte)otherRankInfo.GetOrder());
+            stmt.AddValue(1, (byte)otherRankInfo.GetId());
+            stmt.AddValue(2, m_id);
+            trans.Append(stmt);
+
+            DB.Characters.CommitTransaction(trans);
+
+            // force client to re-request SMSG_GUILD_RANKS
             BroadcastPacket(new GuildEventRanksUpdated());
         }
 
