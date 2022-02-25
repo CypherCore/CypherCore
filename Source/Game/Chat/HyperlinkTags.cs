@@ -20,27 +20,6 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-    abstract class HyperLinks<T>
-    {
-        public abstract string GetTag();
-        public abstract bool StoreTo(out T val, string arg);
-
-        public bool StoreTo(out uint val, string arg)
-        {
-            if (!uint.TryParse(arg, out val))
-                return false;
-
-            return true;
-        }
-    }
-
-    interface IHyperLink<T>
-    {
-        string GetTag();
-        bool StoreTo(out T val, string arg);
-    }
-
-
     class HyperlinkDataTokenizer
     {
         public HyperlinkDataTokenizer(string arg, bool allowEmptyTokens = false)
