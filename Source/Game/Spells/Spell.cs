@@ -7357,7 +7357,7 @@ namespace Game.Spells
                 script._FinishScriptCall();
             }
         }
-        
+
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
             // Skip if there are not any script
@@ -7512,7 +7512,7 @@ namespace Game.Spells
         {
             return $"Id: {GetSpellInfo().Id} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' OriginalCaster: {m_originalCasterGUID} State: {GetState()}";
         }
-        
+
         List<SpellScript> m_loadedScripts = new();
 
         int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
@@ -8763,6 +8763,53 @@ namespace Game.Spells
         ObjectGuid _casterGuid;
     }
 
+    public class CastSpellTargetArg
+    {
+        public SpellCastTargets Targets;
+
+        public CastSpellTargetArg() { Targets = new(); }
+
+        public CastSpellTargetArg(WorldObject target)
+        {
+            if (target != null)
+            {
+                Unit unitTarget = target.ToUnit();
+                if (unitTarget != null)
+                {
+                    Targets = new();
+                    Targets.SetUnitTarget(unitTarget);
+                }
+                else
+                {
+                    GameObject goTarget = target.ToGameObject();
+                    if (goTarget != null)
+                    {
+                        Targets = new();
+                        Targets.SetGOTarget(goTarget);
+                    }
+                }
+            }
+        }
+
+        public CastSpellTargetArg(Item itemTarget)
+        {
+            Targets = new();
+            Targets.SetItemTarget(itemTarget);
+        }
+
+        public CastSpellTargetArg(Position dest)
+        {
+            Targets = new();
+            Targets.SetDst(dest);
+        }
+
+        public CastSpellTargetArg(SpellCastTargets targets)
+        {
+            Targets = new();
+            Targets = targets;
+        }
+    }
+    
     public class CastSpellExtraArgs
     {
         public TriggerCastFlags TriggerFlags;

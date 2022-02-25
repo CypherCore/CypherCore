@@ -96,7 +96,11 @@ namespace Framework.Dynamic
             m_events.Add(e_time, Event);
         }
 
+        public void AddEvent(Action action, ulong e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
+
         public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime((ulong)offset.TotalMilliseconds)); }
+
+        public void AddEventAtOffset(Action action, TimeSpan offset) { AddEventAtOffset(new LambdaBasicEvent(action), offset); }
 
         public void ModifyEventTime(BasicEvent Event, ulong newTime)
         {
@@ -157,6 +161,22 @@ namespace Framework.Dynamic
         public ulong m_execTime; // planned time of next execution, filled by event handler
     }
 
+    class LambdaBasicEvent : BasicEvent
+    {
+        Action _callback;
+
+        public LambdaBasicEvent(Action callback) : base()
+        {
+            _callback = callback;
+        }
+
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            _callback();
+            return true;
+        }
+    }
+    
     enum AbortState
     {
         Running,

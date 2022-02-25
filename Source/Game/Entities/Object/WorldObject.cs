@@ -2230,6 +2230,21 @@ namespace Game.Entities
 
         public SpellCastResult CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
         {
+            return CastSpell(new CastSpellTargetArg(targets), spellId, args);
+        }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args)
+        {
+            return CastSpell(new CastSpellTargetArg(target), spellId, args);
+        }
+
+        public SpellCastResult CastSpell(Position dest, uint spellId, CastSpellExtraArgs args)
+        {
+            return CastSpell(new CastSpellTargetArg(dest), spellId, args);
+        }
+
+        public SpellCastResult CastSpell(CastSpellTargetArg targets, uint spellId, CastSpellExtraArgs args)
+        {
             SpellInfo info = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
             if (info == null)
             {
@@ -2237,43 +2252,18 @@ namespace Game.Entities
                 return SpellCastResult.SpellUnavailable;
             }
 
+            if (targets.Targets == null)
+            {
+                Log.outError(LogFilter.Unit, $"CastSpell: Invalid target passed to spell cast {spellId} by {GetGUID()}");
+                return SpellCastResult.BadTargets;
+            }
+
             Spell spell = new(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
             foreach (var pair in args.SpellValueOverrides)
                 spell.SetSpellValue(pair.Key, pair.Value);
 
             spell.m_CastItem = args.CastItem;
-            return spell.Prepare(targets, args.TriggeringAura);
-        }
-
-        public SpellCastResult CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args)
-        {
-            SpellCastTargets targets = new();
-            if (target)
-            {
-                Unit unitTarget = target.ToUnit();
-                if (unitTarget != null)
-                    targets.SetUnitTarget(unitTarget);
-                else
-                {
-                    GameObject goTarget = target.ToGameObject();
-                    if (goTarget != null)
-                        targets.SetGOTarget(goTarget);
-                    else
-                    {
-                        Log.outError(LogFilter.Unit, $"CastSpell: Invalid target {target.GetGUID()} passed to spell cast by {GetGUID()}");
-                        return SpellCastResult.BadTargets;
-                    }
-                }
-            }
-
-            return CastSpell(targets, spellId, args);
-        }
-
-        public void CastSpell(Position dest, uint spellId, CastSpellExtraArgs args)
-        {
-            SpellCastTargets targets = new();
-            targets.SetDst(dest);
-            CastSpell(targets, spellId, args);
+            return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 
         public void SendPlaySpellVisual(WorldObject target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)

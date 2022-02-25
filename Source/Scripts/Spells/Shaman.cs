@@ -32,10 +32,15 @@ namespace Scripts.Spells.Shaman
         public const uint AftershockEnergize = 210712;
         public const uint AncestralGuidance = 108281;
         public const uint AncestralGuidanceHeal = 114911;
+        public const uint ChainLightning = 188443;
         public const uint ChainLightningEnergize = 195897;
+        public const uint ChainLightningOverload = 45297;
         public const uint ChainLightningOverloadEnergize = 218558;
         public const uint ChainedHeal = 70809;
         public const uint CrashLightningCleave = 187878;
+        public const uint Earthquake = 61882;
+        public const uint EarthquakeKnockingDown = 77505;
+        public const uint EarthquakeTick = 77478;
         public const uint EarthShieldHeal = 204290;
         public const uint EarthenRagePassive = 170374;
         public const uint EarthenRagePeriodic = 170377;
@@ -46,29 +51,40 @@ namespace Scripts.Spells.Shaman
         public const uint ElementalBlastEnergize = 344645;
         public const uint ElementalBlastHaste = 173183;
         public const uint ElementalBlastMastery = 173184;
+        public const uint ElementalBlastOverload = 120588;
         public const uint ElementalMastery = 16166;
         public const uint EnergySurge = 40465;
         public const uint Exhaustion = 57723;
-        public const uint FlameShock = 8050;
-        public const uint FlameShockMaelstrom = 188389;
+        public const uint FlameShock = 188389;
         public const uint FlametongueAttack = 10444;
         public const uint FlametongueWeaponEnchant = 334294;
         public const uint FlametongueWeaponAura = 319778;
+        public const uint FrostShockEnergize = 289439;
         public const uint GatheringStorms = 198299;
         public const uint GatheringStormsBuff = 198300;
         public const uint GhostWolf = 2645;
         public const uint HealingRainVisual = 147490;
         public const uint HealingRainHeal = 73921;
+        public const uint Icefury = 210714;
+        public const uint IcefuryOverload = 219271;
+        public const uint IgneousPotential = 279830;
         public const uint ItemLightningShield = 23552;
         public const uint ItemLightningShieldDamage = 27635;
         public const uint ItemManaSurge = 23571;
+        public const uint LavaBeam = 114074;
+        public const uint LavaBeamOverload = 114738;
         public const uint LavaBurst = 51505;
         public const uint LavaBurstBonusDamage = 71824;
+        public const uint LavaBurstOverload = 77451;
+        public const uint LavaBurstRank2 = 231721;
         public const uint LavaSurge = 77762;
-        public const uint LightingBoltEnergize = 214815;
-        public const uint LightingBoltOverloadEnergize = 214816;
+        public const uint LightningBolt = 188196;
+        public const uint LightningBoltEnergize = 214815;
+        public const uint LightningBoltOverload = 45284;
+        public const uint LightningBoltOverloadEnergize = 214816;
         public const uint LiquidMagmaHit = 192231;
         public const uint MaelstromController = 343725;
+        public const uint MasteryElementalOverload = 168534;
         public const uint PathOfFlamesSpread = 210621;
         public const uint PathOfFlamesTalent = 201909;
         public const uint PowerSurge = 40466;
@@ -76,11 +92,14 @@ namespace Scripts.Spells.Shaman
         public const uint SpiritWolfTalent = 260878;
         public const uint SpiritWolfPeriodic = 260882;
         public const uint SpiritWolfAura = 260881;
+        public const uint Stormkeeper = 191634;
         public const uint TidalWaves = 53390;
         public const uint TotemicPowerMp5 = 28824;
         public const uint TotemicPowerSpellPower = 28825;
         public const uint TotemicPowerAttackPower = 28826;
         public const uint TotemicPowerArmor = 28827;
+        public const uint UndulationProc = 216251;
+        public const uint UnlimitedPowerBuff = 272737;
         public const uint WindfuryAttack = 25504;
         public const uint WindfuryEnchantment = 334302;
         public const uint WindRush = 192082;
@@ -132,7 +151,7 @@ namespace Scripts.Spells.Shaman
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
-    
+
     [Script] // 108281 - Ancestral Guidance
     class spell_sha_ancestral_guidance : AuraScript
     {
@@ -261,7 +280,7 @@ namespace Scripts.Spells.Shaman
             OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
     [Script] // 187874 - Crash Lightning
     class spell_sha_crash_lightning : SpellScript
     {
@@ -333,7 +352,7 @@ namespace Scripts.Spells.Shaman
             AfterCast.Add(new CastHandler(HandleCooldown));
         }
     }
-    
+
     [Script] // 204288 - Earth Shield
     class spell_sha_earth_shield : AuraScript
     {
@@ -422,7 +441,7 @@ namespace Scripts.Spells.Shaman
         }
     }
 
-             // 117014 - Elemental Blast
+    // 117014 - Elemental Blast
     [Script] // 120588 - Elemental Blast Overload
     class spell_sha_elemental_blast : SpellScript
     {
@@ -438,8 +457,8 @@ namespace Scripts.Spells.Shaman
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, GetSpellInfo().Id == SpellIds.ElementalBlast ? 9 : 10u);
             if (energizeAmount != null)
-            GetCaster().CastSpell(GetCaster(), SpellIds.ElementalBlastEnergize, new CastSpellExtraArgs(energizeAmount)
-                .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
+                GetCaster().CastSpell(GetCaster(), SpellIds.ElementalBlastEnergize, new CastSpellExtraArgs(energizeAmount)
+                    .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
         }
 
         void TriggerBuff()
@@ -548,7 +567,7 @@ namespace Scripts.Spells.Shaman
             AfterHit.Add(new HitHandler(InitializeVisualStalker));
         }
     }
-    
+
     [Script] // 73920 - Healing Rain (Aura)
     class spell_sha_healing_rain_AuraScript : AuraScript
     {
@@ -595,7 +614,7 @@ namespace Scripts.Spells.Shaman
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
-    
+
     [Script] // 52042 - Healing Stream Totem
     class spell_sha_healing_stream_totem_heal : SpellScript
     {
@@ -879,7 +898,7 @@ namespace Scripts.Spells.Shaman
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.LightingBoltEnergize, SpellIds.MaelstromController)
+            return ValidateSpellInfo(SpellIds.LightningBoltEnergize, SpellIds.MaelstromController)
                 && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 0;
         }
 
@@ -887,7 +906,7 @@ namespace Scripts.Spells.Shaman
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 0);
             if (energizeAmount != null)
-                GetCaster().CastSpell(GetCaster(), SpellIds.LightingBoltEnergize, new CastSpellExtraArgs(energizeAmount)
+                GetCaster().CastSpell(GetCaster(), SpellIds.LightningBoltEnergize, new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
         }
 
@@ -900,9 +919,9 @@ namespace Scripts.Spells.Shaman
     [Script] // 45284 - Lightning Bolt Overload
     class spell_sha_lightning_bolt_overload : SpellScript
     {
-        public override  bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.LightingBoltOverloadEnergize, SpellIds.MaelstromController)
+            return ValidateSpellInfo(SpellIds.LightningBoltOverloadEnergize, SpellIds.MaelstromController)
                 && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 1;
         }
 
@@ -910,7 +929,7 @@ namespace Scripts.Spells.Shaman
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 1);
             if (energizeAmount != null)
-                GetCaster().CastSpell(GetCaster(), SpellIds.LightingBoltOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
+                GetCaster().CastSpell(GetCaster(), SpellIds.LightningBoltOverloadEnergize, new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
         }
 
@@ -919,7 +938,7 @@ namespace Scripts.Spells.Shaman
             OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
     [Script] // 192223 - Liquid Magma Totem (erupting hit spell)
     class spell_sha_liquid_magma_totem : SpellScript
     {
@@ -953,6 +972,108 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 168534 - Mastery: Elemental Overload (passive)
+    class spell_sha_mastery_elemental_overload : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LightningBolt, SpellIds.LightningBoltOverload, SpellIds.ElementalBlast, SpellIds.ElementalBlastOverload, SpellIds.Icefury, SpellIds.IcefuryOverload, SpellIds.LavaBurst, SpellIds.LavaBurstOverload,
+                SpellIds.ChainLightning, SpellIds.ChainLightningOverload, SpellIds.LavaBeam, SpellIds.LavaBeamOverload, SpellIds.Stormkeeper);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null || !eventInfo.GetProcSpell())
+                return false;
+
+            if (GetTriggeredSpellId(spellInfo.Id) == 0)
+                return false;
+
+            float chance = aurEff.GetAmount();   // Mastery % amount
+
+            if (spellInfo.Id == SpellIds.ChainLightning)
+                chance /= 3.0f;
+
+            Aura stormkeeper = eventInfo.GetActor().GetAura(SpellIds.Stormkeeper);
+            if (stormkeeper != null)
+                if (eventInfo.GetProcSpell().m_appliedMods.Contains(stormkeeper))
+                    chance = 100.0f;
+
+            return RandomHelper.randChance(chance);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            PreventDefaultAction();
+
+            Unit caster = procInfo.GetActor();
+
+            caster.m_Events.AddEventAtOffset(() =>
+            {
+                var targets = new CastSpellTargetArg(procInfo.GetProcTarget());
+                var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);
+                var args = new CastSpellExtraArgs(procInfo.GetProcSpell());
+
+                caster.CastSpell(targets, overloadSpellId, args);
+            }, TimeSpan.FromMilliseconds(400));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+
+        uint GetTriggeredSpellId(uint triggeringSpellId)
+        {
+            switch (triggeringSpellId)
+            {
+                case SpellIds.LightningBolt:
+                    return SpellIds.LightningBoltOverload;
+                case SpellIds.ElementalBlast:
+                    return SpellIds.ElementalBlastOverload;
+                case SpellIds.Icefury:
+                    return SpellIds.IcefuryOverload;
+                case SpellIds.LavaBurst:
+                    return SpellIds.LavaBurstOverload;
+                case SpellIds.ChainLightning:
+                    return SpellIds.ChainLightningOverload;
+                case SpellIds.LavaBeam:
+                    return SpellIds.LavaBeamOverload;
+                default:
+                    break;
+            }
+            return 0;
+        }
+    }
+
+    // 45284 - Lightning Bolt Overload
+    // 45297 - Chain Lightning Overload
+    // 114738 - Lava Beam Overload
+    // 120588 - Elemental Blast Overload
+    // 219271 - Icefury Overload
+    [Script] // 285466 - Lava Burst Overload
+    class spell_sha_mastery_elemental_overload_proc : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MasteryElementalOverload);
+        }
+
+        void ApplyDamageModifier(uint effIndex)
+        {
+            AuraEffect elementalOverload = GetCaster().GetAuraEffect(SpellIds.MasteryElementalOverload, 1);
+            if (elementalOverload != null)
+                SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), elementalOverload.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(ApplyDamageModifier, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
     [Script] // 30884 - Nature's Guardian
     class spell_sha_natures_guardian : AuraScript
     {
@@ -966,19 +1087,19 @@ namespace Scripts.Spells.Shaman
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
-    
+
     [Script] // 210621 - Path of Flames Spread
     class spell_sha_path_of_flames_spread : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FlameShockMaelstrom);
+            return ValidateSpellInfo(SpellIds.FlameShock);
         }
 
         void FilterTargets(List<WorldObject> targets)
         {
             targets.Remove(GetExplTargetUnit());
-            targets.RandomResize(target => target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID()), 1);
+            targets.RandomResize(target => target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(SpellIds.FlameShock, GetCaster().GetGUID()), 1);
         }
 
         void HandleScript(uint effIndex)
@@ -986,10 +1107,10 @@ namespace Scripts.Spells.Shaman
             Unit mainTarget = GetExplTargetUnit();
             if (mainTarget)
             {
-                Aura flameShock = mainTarget.GetAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID());
+                Aura flameShock = mainTarget.GetAura(SpellIds.FlameShock, GetCaster().GetGUID());
                 if (flameShock != null)
                 {
-                    Aura newAura = GetCaster().AddAura(SpellIds.FlameShockMaelstrom, GetHitUnit());
+                    Aura newAura = GetCaster().AddAura(SpellIds.FlameShock, GetHitUnit());
                     if (newAura != null)
                     {
                         newAura.SetDuration(flameShock.GetDuration());
@@ -1034,7 +1155,7 @@ namespace Scripts.Spells.Shaman
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Any, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 51562 - Tidal Waves
     class spell_sha_tidal_waves : AuraScript
     {
@@ -1121,10 +1242,10 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
     }
-    
+
     [Script] // 64928 - Item - Shaman T8 Elemental 4P Bonus
     class spell_sha_t8_elemental_4p_bonus : AuraScript
     {
@@ -1258,6 +1379,31 @@ namespace Scripts.Spells.Shaman
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
+
+    [Script] // 260895 - Unlimited Power
+    class spell_sha_unlimited_power : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.UnlimitedPowerBuff);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            Unit caster = procInfo.GetActor();
+            Aura aura = caster.GetAura(SpellIds.UnlimitedPowerBuff);
+            if (aura != null)
+                aura.SetStackAmount((byte)(aura.GetStackAmount() + 1));
+            else
+                caster.CastSpell(caster, SpellIds.UnlimitedPowerBuff, procInfo.GetProcSpell());
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
     [Script] // 33757 - Windfury Weapon
     class spell_sha_windfury_weapon : SpellScript
     {
@@ -1285,7 +1431,7 @@ namespace Scripts.Spells.Shaman
             OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script] // 319773 - Windfury Weapon (proc)
     class spell_sha_windfury_weapon_proc : AuraScript
     {
