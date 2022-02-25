@@ -47,6 +47,7 @@ namespace Scripts.Spells.Mage
         public const uint DradonhawkForm = 32818;
         public const uint EverwarmSocks = 320913;
         public const uint FingersOfFrost = 44544;
+        public const uint Firestarter = 205026;
         public const uint FrostNova = 122;
         public const uint GiraffeForm = 32816;
         public const uint IceBarrier = 11426;
@@ -145,7 +146,7 @@ namespace Scripts.Spells.Mage
             OnEffectHit.Add(new EffectHandler(RemoveAlterTimeAura, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script] // 44425 - Arcane Barrage
     class spell_mage_arcane_barrage : SpellScript
     {
@@ -207,7 +208,7 @@ namespace Scripts.Spells.Mage
             OnEffectHitTarget.Add(new EffectHandler(RemoveArcaneCharge, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script] // 1449 - Arcane Explosion
     class spell_mage_arcane_explosion : SpellScript
     {
@@ -231,7 +232,7 @@ namespace Scripts.Spells.Mage
         void HandleReverberate(uint effIndex)
         {
             bool procTriggered = false;
-            
+
             Unit caster = GetCaster();
             AuraEffect triggerChance = caster.GetAuraEffect(SpellIds.Reverberate, 0);
             if (triggerChance != null)
@@ -251,7 +252,7 @@ namespace Scripts.Spells.Mage
             OnEffectHitTarget.Add(new EffectHandler(HandleReverberate, 2, SpellEffectName.Energize));
         }
     }
-    
+
     [Script] // 235313 - Blazing Barrier
     class spell_mage_blazing_barrier : AuraScript
     {
@@ -461,7 +462,52 @@ namespace Scripts.Spells.Mage
             AfterEffectProc.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy));
         }
     }
-    
+
+    // 133 - Fireball
+    [Script] // 11366 - Pyroblast
+    class spell_mage_firestarter : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Firestarter);
+        }
+
+        void CalcCritChance(Unit victim, ref float critChance)
+        {
+            AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.Firestarter, 0);
+            if (aurEff != null)
+                if (victim.GetHealthPct() >= aurEff.GetAmount())
+                    critChance = 100.0f;
+        }
+
+        public override void Register()
+        {
+            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+        }
+    }
+
+    [Script] // 321712 - Pyroblast
+    class spell_mage_firestarter_dots : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Firestarter);
+        }
+
+        void CalcCritChance(AuraEffect aurEff, Unit victim, ref float critChance)
+        {
+            AuraEffect aurEff0 = GetCaster().GetAuraEffect(SpellIds.Firestarter, 0);
+            if (aurEff0 != null)
+                if (victim.GetHealthPct() >= aurEff0.GetAmount())
+                    critChance = 100.0f;
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcCritChance.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
+        }
+    }
+
     [Script] // 11426 - Ice Barrier
     class spell_mage_ice_barrier : AuraScript
     {
@@ -521,7 +567,7 @@ namespace Scripts.Spells.Mage
             OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(PreventEverwarmSocks, 6, Targets.UnitCaster));
         }
     }
-    
+
     [Script] // Ice Lance - 30455
     class spell_mage_ice_lance : SpellScript
     {
@@ -594,7 +640,7 @@ namespace Scripts.Spells.Mage
             OnEffectHitTarget.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
     [Script] // 11119 - Ignite
     class spell_mage_ignite : AuraScript
     {
@@ -689,7 +735,7 @@ namespace Scripts.Spells.Mage
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script] // 44457 - Living Bomb
     class spell_mage_living_bomb : SpellScript
     {
@@ -751,7 +797,7 @@ namespace Scripts.Spells.Mage
 
             Unit caster = GetCaster();
             if (caster)
-                caster.CastSpell(GetTarget(), SpellIds.LivingBombExplosion, new CastSpellExtraArgs (TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount()));
+                caster.CastSpell(GetTarget(), SpellIds.LivingBombExplosion, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount()));
         }
 
         public override void Register()
@@ -988,7 +1034,7 @@ namespace Scripts.Spells.Mage
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] //228597 - Frostbolt   84721  - Frozen Orb   190357 - Blizzard
     class spell_mage_trigger_chilled : SpellScript
     {
