@@ -597,7 +597,7 @@ namespace Game.Entities
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
+                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
@@ -622,7 +622,7 @@ namespace Game.Entities
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
+                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
