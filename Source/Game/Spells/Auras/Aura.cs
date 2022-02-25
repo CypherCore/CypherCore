@@ -244,7 +244,7 @@ namespace Game.Spells
             AuraDataInfo auraData = auraInfo.AuraData.Value;
             auraData.CastID = aura.GetCastId();
             auraData.SpellID = (int)aura.GetId();
-            auraData.Visual= aura.GetSpellVisual();
+            auraData.Visual = aura.GetSpellVisual();
             auraData.Flags = GetFlags();
             if (aura.GetAuraType() != AuraObjectType.DynObj && aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.HideDuration))
                 auraData.Flags |= AuraFlags.Duration;
@@ -269,18 +269,24 @@ namespace Game.Spells
 
             if (auraData.Flags.HasFlag(AuraFlags.Scalable))
             {
+                bool hasEstimatedAmounts = false;
                 foreach (AuraEffect effect in GetBase().GetAuraEffects())
                 {
                     if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
                     {
                         auraData.Points.Add(effect.GetAmount());
                         if (effect.GetEstimatedAmount().HasValue)
-                            auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().Value);
+                            hasEstimatedAmounts = true;
                     }
                 }
 
-                if (!auraData.EstimatedPoints.Empty())
-                    auraData.EstimatedPoints.Resize((uint)auraData.Points.Count); // pad to equal sizes
+                if (hasEstimatedAmounts)
+                {
+                    // When sending EstimatedPoints all effects (at least up to the last one that uses GetEstimatedAmount) must have proper value in packet
+                    foreach (AuraEffect effect in GetBase().GetAuraEffects())
+                        if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
+                            auraData.EstimatedPoints[(int)effect.GetEffIndex()] = effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount());
+                }
             }
         }
 
