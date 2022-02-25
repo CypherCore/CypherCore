@@ -571,19 +571,6 @@ namespace Game.AI
                     }
                     break;
                 }
-                case SmartActions.AddAura:
-                {
-                    foreach (var target in targets)
-                    {
-                        if (IsUnit(target))
-                        {
-                            target.ToUnit().AddAura(e.Action.cast.spell, target.ToUnit());
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_ADD_AURA: Adding aura {0} to unit {1}",
-                                e.Action.cast.spell, target.GetGUID().ToString());
-                        }
-                    }
-                    break;
-                }
                 case SmartActions.ActivateGobject:
                 {
                     foreach (var target in targets)
@@ -2040,27 +2027,6 @@ namespace Game.AI
                     foreach (var target in targets)
                         if (IsCreature(target))
                             target.ToCreature().SetControlled(e.Action.setRoot.root != 0, UnitState.Root);
-                    break;
-                }
-                case SmartActions.SetGoFlag:
-                {
-                    foreach (var target in targets)
-                        if (IsGameObject(target))
-                            target.ToGameObject().SetFlags((GameObjectFlags)e.Action.goFlag.flag);
-                    break;
-                }
-                case SmartActions.AddGoFlag:
-                {
-                    foreach (var target in targets)
-                        if (IsGameObject(target))
-                            target.ToGameObject().AddFlag((GameObjectFlags)e.Action.goFlag.flag);
-                    break;
-                }
-                case SmartActions.RemoveGoFlag:
-                {
-                    foreach (var target in targets)
-                        if (IsGameObject(target))
-                            target.ToGameObject().RemoveFlag((GameObjectFlags)e.Action.goFlag.flag);
                     break;
                 }
                 case SmartActions.SummonCreatureGroup:

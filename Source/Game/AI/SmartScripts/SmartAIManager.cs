@@ -1070,10 +1070,10 @@ namespace Game.AI
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invoker cast action, but event does not provide any invoker!");
                         return false;
                     }
-                    // no break
-                    goto case SmartActions.AddAura;
+                    if (!IsSpellValid(e, e.Action.cast.spell))
+                        return false;
+                    break;
                 case SmartActions.SelfCast:
-                case SmartActions.AddAura:
                     if (!IsSpellValid(e, e.Action.cast.spell))
                         return false;
                     break;
@@ -2545,9 +2545,6 @@ namespace Game.AI
         public SetRoot setRoot;
 
         [FieldOffset(4)]
-        public GoFlag goFlag;
-
-        [FieldOffset(4)]
         public GoState goState;
 
         [FieldOffset(4)]
@@ -3034,10 +3031,6 @@ namespace Game.AI
         public struct SetRoot
         {
             public uint root;
-        }
-        public struct GoFlag
-        {
-            public uint flag;
         }
         public struct GoState
         {

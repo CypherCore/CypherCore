@@ -329,7 +329,7 @@ namespace Framework.Constants
         CloseGossip = 72,     // None
         TriggerTimedEvent = 73,     // Id(>1)
         RemoveTimedEvent = 74,     // Id(>1)
-        AddAura = 75,     // Spellid,  Targets
+        AddAura = 75,     // UNUSED, DO NOT REUSE
         OverrideScriptBaseObject = 76,     // Warning: Can Crash Core, Do Not Use If You Dont Know What You Are Doing
         ResetScriptBaseObject = 77,     // None
         CallScriptReset = 78,     // None
@@ -358,9 +358,9 @@ namespace Framework.Constants
         SetHomePos = 101,    // None
         SetHealthRegen = 102,    // 0/1
         SetRoot = 103,    // Off/On
-        SetGoFlag = 104,    // Flags
-        AddGoFlag = 105,    // Flags
-        RemoveGoFlag = 106,    // Flags
+        SetGoFlag = 104,    // UNUSED, DO NOT REUSE
+        AddGoFlag = 105,    // UNUSED, DO NOT REUSE
+        RemoveGoFlag = 106,    // UNUSED, DO NOT REUSE
         SummonCreatureGroup = 107,    // Group, Attackinvoker
         SetPower = 108,    // PowerType, newPower
         AddPower = 109,    // PowerType, newPower
