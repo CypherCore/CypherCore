@@ -2497,7 +2497,7 @@ namespace Game.Entities
                 do
                 {
                     uint spellId = spellsResult.Read<uint>(0);
-                    Difficulty difficulty = (Difficulty)spellsResult.Read<uint>(2);
+                    Difficulty difficulty = (Difficulty)spellsResult.Read<uint>(1);
                     if (CliDB.SpellNameStorage.HasRecord(spellId))
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} is already loaded from file. Overriding existing spells is not allowed.");
