@@ -2434,33 +2434,44 @@ namespace Game
                 case UnitConditionVariable.DamageArcanePct:
                     break;
                 case UnitConditionVariable.InCombat:
-                    break;
+                    return unit.IsInCombat() ? 1 : 0;
                 case UnitConditionVariable.IsMoving:
-                    break;
+                    return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight) ? 1:0;
                 case UnitConditionVariable.IsCasting:
-                    break;
-                case UnitConditionVariable.IsCastingSpell:
-                    break;
+                case UnitConditionVariable.IsCastingSpell: // this is supposed to return spell id by client code but data always has 0 or 1
+                    return unit.GetCurrentSpell(CurrentSpellTypes.Generic) != null ? 1 : 0;
                 case UnitConditionVariable.IsChanneling:
-                    break;
-                case UnitConditionVariable.IsChannelingSpell:
-                    break;
+                case UnitConditionVariable.IsChannelingSpell: // this is supposed to return spell id by client code but data always has 0 or 1
+                    return unit.GetChannelSpellId() != 0 ? 1 : 0;
                 case UnitConditionVariable.NumberOfMeleeAttackers:
-                    break;
+                    return unit.GetAttackers().Count(attacker =>
+                    {
+                        float distance = Math.Max(unit.GetCombatReach() + attacker.GetCombatReach() + 1.3333334f, 5.0f);
+                        if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || attacker.HasUnitFlag(UnitFlags.PlayerControlled))
+                            distance += 1.0f;
+                        return unit.GetExactDistSq(attacker) < distance * distance;
+                    });
                 case UnitConditionVariable.IsAttackingMe:
-                    break;
+                    return (otherUnit != null && unit.GetTarget() == otherUnit.GetGUID()) ? 1:0;
                 case UnitConditionVariable.Range:
-                    break;
+                    return otherUnit ? (int)unit.GetExactDist(otherUnit) : 0;
                 case UnitConditionVariable.InMeleeRange:
-                    break;
+                    if (otherUnit)
+                    {
+                        float distance = Math.Max(unit.GetCombatReach() + otherUnit.GetCombatReach() + 1.3333334f, 5.0f);
+                        if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || otherUnit.HasUnitFlag(UnitFlags.PlayerControlled))
+                            distance += 1.0f;
+                        return (unit.GetExactDistSq(otherUnit) < distance * distance) ? 1 : 0;
+                    }
+                    return 0;
                 case UnitConditionVariable.PursuitTime:
                     break;
                 case UnitConditionVariable.HasHarmfulAuraCanceledByDamage:
-                    break;
+                    return unit.HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags.Damage) ? 1 : 0;
                 case UnitConditionVariable.HasHarmfulAuraWithPeriodicDamage:
-                    break;
+                    return unit.HasAuraType(AuraType.PeriodicDamage) ? 1 : 0;
                 case UnitConditionVariable.NumberOfEnemies:
-                    break;
+                    return unit.GetThreatManager().GetThreatListSize();
                 case UnitConditionVariable.NumberOfFriends:
                     break;
                 case UnitConditionVariable.ThreatPhysicalPct:
@@ -2480,25 +2491,51 @@ namespace Game
                 case UnitConditionVariable.IsInterruptible:
                     break;
                 case UnitConditionVariable.NumberOfAttackers:
-                    break;
+                    return unit.GetAttackers().Count;
                 case UnitConditionVariable.NumberOfRangedAttackers:
-                    break;
+                    return unit.GetAttackers().Count(attacker =>
+                    {
+                        float distance = Math.Max(unit.GetCombatReach() + attacker.GetCombatReach() + 1.3333334f, 5.0f);
+                        if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || attacker.HasUnitFlag(UnitFlags.PlayerControlled))
+                            distance += 1.0f;
+                        return unit.GetExactDistSq(attacker) >= distance * distance;
+                    });
                 case UnitConditionVariable.CreatureType:
-                    break;
+                    return (int)unit.GetCreatureType();
                 case UnitConditionVariable.IsMeleeAttacking:
-                    break;
+                {
+                    Unit target = Global.ObjAccessor.GetUnit(unit, unit.GetTarget());
+                    if (target != null)
+                    {
+                        float distance = Math.Max(unit.GetCombatReach() + target.GetCombatReach() + 1.3333334f, 5.0f);
+                        if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || target.HasUnitFlag(UnitFlags.PlayerControlled))
+                            distance += 1.0f;
+                        return (unit.GetExactDistSq(target) < distance * distance) ? 1 : 0;
+                    }
+                    return 0;
+                }
                 case UnitConditionVariable.IsRangedAttacking:
-                    break;
+                {
+                    Unit target = Global.ObjAccessor.GetUnit(unit, unit.GetTarget());
+                    if (target != null)
+                    {
+                        float distance = Math.Max(unit.GetCombatReach() + target.GetCombatReach() + 1.3333334f, 5.0f);
+                        if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || target.HasUnitFlag(UnitFlags.PlayerControlled))
+                            distance += 1.0f;
+                        return (unit.GetExactDistSq(target) >= distance * distance) ? 1 : 0;
+                    }
+                    return 0;
+                }
                 case UnitConditionVariable.Health:
-                    break;
+                    return (int)unit.GetHealth();
                 case UnitConditionVariable.SpellKnown:
-                    break;
+                    return unit.HasSpell((uint)value) ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraEffect:
-                    break;
+                    return (value >= 0 && value < (int)AuraType.Total && unit.GetAuraEffectsByType((AuraType)value).Any(aurEff => aurEff.GetBase().GetApplicationOfTarget(unit.GetGUID()).GetFlags().HasFlag(AuraFlags.Negative))) ? 1 : 0;
                 case UnitConditionVariable.IsImmuneToAreaOfEffect:
                     break;
                 case UnitConditionVariable.IsPlayer:
-                    break;
+                    return unit.IsPlayer() ? 1 : 0;
                 case UnitConditionVariable.DamageMagicPct:
                     break;
                 case UnitConditionVariable.DamageTotalPct:
@@ -2510,57 +2547,60 @@ namespace Game
                 case UnitConditionVariable.HasCritter:
                     return unit.GetCritterGUID().IsEmpty() ? 0 : 1;
                 case UnitConditionVariable.HasTotemInSlot1:
-                    break;
+                    return unit.m_SummonSlot[(int)SummonSlot.Totem].IsEmpty() ? 0 : 1;
                 case UnitConditionVariable.HasTotemInSlot2:
-                    break;
+                    return unit.m_SummonSlot[(int)SummonSlot.Totem2].IsEmpty() ? 0 : 1;
                 case UnitConditionVariable.HasTotemInSlot3:
-                    break;
+                    return unit.m_SummonSlot[(int)SummonSlot.Totem3].IsEmpty() ? 0 : 1;
                 case UnitConditionVariable.HasTotemInSlot4:
-                    break;
+                    return unit.m_SummonSlot[(int)SummonSlot.Totem4].IsEmpty() ? 0 : 1;
                 case UnitConditionVariable.HasTotemInSlot5:
                     break;
                 case UnitConditionVariable.Creature:
-                    break;
+                    return (int)unit.GetEntry();
                 case UnitConditionVariable.StringID:
                     break;
                 case UnitConditionVariable.HasAura:
-                    break;
+                    return unit.HasAura((uint)value) ? value : 0;
                 case UnitConditionVariable.IsEnemy:
-                    break;
+                    return (otherUnit && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
-                    break;
+                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Flags.HasFlag(ChrSpecializationFlag.Melee)) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
-                    break;
+                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Role == 0) ? 1 : 0;
                 case UnitConditionVariable.IsSpecRanged:
-                    break;
+                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Flags.HasFlag(ChrSpecializationFlag.Ranged)) ? 1 : 0;
                 case UnitConditionVariable.IsSpecHealer:
-                    break;
+                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Role == 1) ? 1 : 0;
                 case UnitConditionVariable.IsPlayerControlledNPC:
-                    break;
+                    return unit.IsCreature() && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? 1 : 0;
                 case UnitConditionVariable.IsDying:
-                    break;
+                    return unit.GetHealth() == 0 ? 1 : 0;
                 case UnitConditionVariable.PathFailCount:
                     break;
                 case UnitConditionVariable.IsMounted:
-                    break;
+                    return unit.GetMountDisplayId() != 0 ? 1 : 0;
                 case UnitConditionVariable.Label:
                     break;
                 case UnitConditionVariable.IsMySummon:
-                    break;
+                    return (otherUnit && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsSummoner:
-                    break;
+                    return (otherUnit && (unit.GetCharmerGUID() == otherUnit.GetGUID() || unit.GetCreatorGUID() == otherUnit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsMyTarget:
-                    break;
+                    return (otherUnit && unit.GetTarget() == otherUnit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.Sex:
-                    break;
+                    return (int)unit.GetGender();
                 case UnitConditionVariable.LevelWithinContentTuning:
-                    break;
+                    var levelRange = Global.DB2Mgr.GetContentTuningData((uint)value, 0);
+                    if (levelRange.HasValue)
+                        return unit.GetLevel() >= levelRange.Value.MinLevel && unit.GetLevel() <= levelRange.Value.MaxLevel ? value : 0;
+                    return 0;
                 case UnitConditionVariable.IsFlying:
-                    break;
+                    return unit.IsFlying() ? 1 : 0;
                 case UnitConditionVariable.IsHovering:
-                    break;
+                    return unit.IsHovering() ? 1 : 0;
                 case UnitConditionVariable.HasHelpfulAuraEffect:
-                    break;
+                    return (value >= 0 && value < (int)AuraType.Total && unit.GetAuraEffectsByType((AuraType)value).Any(aurEff => !aurEff.GetBase().GetApplicationOfTarget(unit.GetGUID()).GetFlags().HasFlag(AuraFlags.Negative))) ? 1 : 0;
                 case UnitConditionVariable.HasHelpfulAuraSchool:
                     return unit.GetAuraApplication(aurApp =>
                     {
