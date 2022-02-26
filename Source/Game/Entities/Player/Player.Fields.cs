@@ -269,7 +269,7 @@ namespace Game.Entities
 
         public List<PlayerCreateInfoItem> item = new();
         public List<uint> customSpells = new();
-        public List<uint> castSpells = new();
+        public List<uint>[] castSpells = new List<uint>[(int)PlayerCreateMode.Max];
         public List<PlayerCreateInfoAction> action = new();
         public List<SkillRaceClassInfoRecord> skills = new();
 
@@ -278,6 +278,12 @@ namespace Game.Entities
         public Optional<uint> introSceneIdNPE;
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+
+        public PlayerInfo()
+        {
+            for (var i = 0; i < castSpells.Length; ++i)
+                castSpells[i] = new List<uint>();
+        }
 
         public struct CreatePosition
         {

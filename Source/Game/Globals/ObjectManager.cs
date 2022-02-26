@@ -6123,7 +6123,7 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                SQLResult result = DB.World.Query("SELECT raceMask, classMask, spell FROM playercreateinfo_cast_spell");
+                SQLResult result = DB.World.Query("SELECT raceMask, classMask, spell, createMode FROM playercreateinfo_cast_spell");
 
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create cast spells. DB table `playercreateinfo_cast_spell` is empty.");
@@ -6136,16 +6136,23 @@ namespace Game
                         ulong raceMask = result.Read<ulong>(0);
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
+                        sbyte playerCreateMode = result.Read<sbyte>(3);
 
                         if (raceMask != 0 && (raceMask & SharedConst.RaceMaskAllPlayable) == 0)
                         {
-                            Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_cast_spell` table, ignoring.", raceMask);
+                            Log.outError(LogFilter.Sql, $"Wrong race mask {raceMask} in `playercreateinfo_cast_spell` table, ignoring.");
                             continue;
                         }
 
-                        if (classMask != 0 && !classMask.HasAnyFlag<uint>((uint)Class.ClassMaskAllPlayable))
+                        if (classMask != 0 && !classMask.HasAnyFlag((uint)Class.ClassMaskAllPlayable))
                         {
-                            Log.outError(LogFilter.Sql, "Wrong class mask {0} in `playercreateinfo_cast_spell` table, ignoring.", classMask);
+                            Log.outError(LogFilter.Sql, $"Wrong class mask {classMask} in `playercreateinfo_cast_spell` table, ignoring.");
+                            continue;
+                        }
+
+                        if (playerCreateMode < 0 || playerCreateMode >= (sbyte)PlayerCreateMode.Max)
+                        {
+                            Log.outError(LogFilter.Sql, $"Uses invalid createMode {playerCreateMode} in `playercreateinfo_cast_spell` table, ignoring.");
                             continue;
                         }
 
@@ -6160,7 +6167,7 @@ namespace Game
                                         PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
                                         if (info != null)
                                         {
-                                            info.castSpells.Add(spellId);
+                                            info.castSpells[playerCreateMode].Add(spellId);
                                             ++count;
                                         }
                                     }

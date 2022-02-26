@@ -794,7 +794,9 @@ namespace Framework.Constants
     public enum PlayerCreateMode
     {
         Normal = 0,
-        NPE = 1
+        NPE = 1,
+
+        Max
     }
 
     public enum DuelState

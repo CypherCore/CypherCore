@@ -963,7 +963,7 @@ namespace Game
                 pCurrChar.RemoveAtLoginFlag(AtLoginFlags.FirstLogin);
 
                 PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(pCurrChar.GetRace(), pCurrChar.GetClass());
-                foreach (var spellId in info.castSpells)
+                foreach (var spellId in info.castSpells[(int)pCurrChar.GetCreateMode()])
                     pCurrChar.CastSpell(pCurrChar, spellId, new CastSpellExtraArgs(true));
 
                 // start with every map explored
