@@ -2468,6 +2468,8 @@ namespace Game.Entities
 
             if (anyObjectiveChangedCompletionState)
                 UpdateVisibleGameobjectsOrSpellClicks();
+
+            PhasingHandler.OnConditionChange(this);
         }
 
         public bool HasQuestForItem(uint itemid)
