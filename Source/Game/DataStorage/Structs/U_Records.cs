@@ -94,6 +94,15 @@ namespace Game.DataStorage
         public int RequiredTimeEventPassed; // serverside TimeEvent table, see ModifierTreeType::HasTimeEventPassed
     }
 
+    public sealed class UnitConditionRecord
+    {
+        public uint Id;
+        public byte Flags;
+        public byte[] Variable = new byte[8];
+        public sbyte[] Op = new sbyte[8];
+        public int[] Value = new int[8];
+    };
+
     public sealed class UnitPowerBarRecord
     {
         public uint Id;

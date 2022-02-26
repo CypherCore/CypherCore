@@ -1227,6 +1227,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN_LOCALE, "SELECT ID, Header_lang, TopLeftFeatureTitle_lang, TopLeftFeatureDesc_lang, " +
                 "BottomLeftFeatureTitle_lang, BottomLeftFeatureDesc_lang, RightFeatureTitle_lang, RightFeatureDesc_lang FROM ui_splash_screen_locale WHERE locale = ?");
 
+            // UnitCondition.db2
+            PrepareStatement(HotfixStatements.SEL_UNIT_CONDITION, "SELECT ID, Flags, Variable1, Variable2, Variable3, Variable4, Variable5, Variable6, Variable7, " +
+                "Variable8, Op1, Op2, Op3, Op4, Op5, Op6, Op7, Op8, Value1, Value2, Value3, Value4, Value5, Value6, Value7, Value8 FROM unit_condition");
+
             // UnitPowerBar.db2
             PrepareStatement(HotfixStatements.SEL_UNIT_POWER_BAR, "SELECT ID, Name, Cost, OutOfError, ToolTip, MinPower, MaxPower, StartPower, CenterPower, " +
                 "RegenerationPeace, RegenerationCombat, BarType, Flags, StartInset, EndInset, FileDataID1, FileDataID2, FileDataID3, FileDataID4, " +
@@ -1925,6 +1929,8 @@ namespace Framework.Database
 
         SEL_UI_SPLASH_SCREEN,
         SEL_UI_SPLASH_SCREEN_LOCALE,
+
+        SEL_UNIT_CONDITION,
 
         SEL_UNIT_POWER_BAR,
         SEL_UNIT_POWER_BAR_LOCALE,
