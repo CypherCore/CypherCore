@@ -725,7 +725,7 @@ namespace Game.DataStorage
         public static DB6Storage<UiMapLinkRecord> UiMapLinkStorage;
         public static DB6Storage<UiMapXMapArtRecord> UiMapXMapArtStorage;
         public static DB6Storage<UISplashScreenRecord> UISplashScreenStorage;
-        public static DB6Storage<UnitConditionRecord> sUnitConditionStorage;
+        public static DB6Storage<UnitConditionRecord> UnitConditionStorage;
         public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage;
         public static DB6Storage<VehicleRecord> VehicleStorage;
         public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage;

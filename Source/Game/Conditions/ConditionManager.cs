@@ -2366,6 +2366,258 @@ namespace Game
             return finalResult;
         }
 
+        static int GetUnitConditionVariable(Unit unit, Unit otherUnit, UnitConditionVariable variable, int value)
+        {
+            switch (variable)
+            {
+                case UnitConditionVariable.Race:
+                    return (int)unit.GetRace();
+                case UnitConditionVariable.Class:
+                    return (int)unit.GetClass();
+                case UnitConditionVariable.Level:
+                    return (int)unit.GetLevel();
+                case UnitConditionVariable.IsSelf:
+                    return unit == otherUnit ? 1 : 0;
+                case UnitConditionVariable.IsMyPet:
+                    return (otherUnit != null && unit.GetCharmerOrOwnerGUID() == otherUnit.GetGUID()) ? 1 : 0;
+                case UnitConditionVariable.IsMaster:
+                    return (otherUnit && otherUnit.GetCharmerOrOwnerGUID() == unit.GetGUID()) ? 1 : 0;
+                case UnitConditionVariable.IsTarget:
+                    return (otherUnit && otherUnit.GetTarget() == unit.GetGUID()) ? 1 : 0;
+                case UnitConditionVariable.CanAssist:
+                    return (otherUnit && unit.IsValidAssistTarget(otherUnit)) ? 1 : 0;
+                case UnitConditionVariable.CanAttack:
+                    return (otherUnit && unit.IsValidAttackTarget(otherUnit)) ? 1 : 0;
+                case UnitConditionVariable.HasPet:
+                    return (!unit.GetCharmedGUID().IsEmpty() || !unit.GetMinionGUID().IsEmpty()) ? 1 : 0;
+                case UnitConditionVariable.HasWeapon:
+                    Player player = unit.ToPlayer();
+                    if (player != null)
+                        return (player.GetWeaponForAttack(WeaponAttackType.BaseAttack) || player.GetWeaponForAttack(WeaponAttackType.OffAttack)) ? 1 : 0;
+                    return (unit.GetVirtualItemId(0) != 0 || unit.GetVirtualItemId(1) != 0) ? 1 : 0;
+                case UnitConditionVariable.HealthPct:
+                    return (int)unit.GetHealthPct();
+                case UnitConditionVariable.ManaPct:
+                    return (int)unit.GetPowerPct(PowerType.Mana);
+                case UnitConditionVariable.RagePct:
+                    return (int)unit.GetPowerPct(PowerType.Rage);
+                case UnitConditionVariable.EnergyPct:
+                    return (int)unit.GetPowerPct(PowerType.Energy);
+                case UnitConditionVariable.ComboPoints:
+                    return unit.GetPower(PowerType.ComboPoints);
+                case UnitConditionVariable.HasHelpfulAuraSpell:
+                    return unit.GetAuraApplication((uint)value, aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative)) != null ? value : 0;
+                case UnitConditionVariable.HasHelpfulAuraDispelType:
+                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
+                case UnitConditionVariable.HasHelpfulAuraMechanic:
+                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1 << value)) != 0) != null ? value : 0;
+                case UnitConditionVariable.HasHarmfulAuraSpell:
+                    return unit.GetAuraApplication((uint)value, aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative)) != null ? value : 0;
+                case UnitConditionVariable.HasHarmfulAuraDispelType:
+                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
+                case UnitConditionVariable.HasHarmfulAuraMechanic:
+                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1 << value)) != 0) != null ? value : 0;
+                case UnitConditionVariable.HasHarmfulAuraSchool:
+                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0) != null ? value : 0;
+                case UnitConditionVariable.DamagePhysicalPct:
+                    break;
+                case UnitConditionVariable.DamageHolyPct:
+                    break;
+                case UnitConditionVariable.DamageFirePct:
+                    break;
+                case UnitConditionVariable.DamageNaturePct:
+                    break;
+                case UnitConditionVariable.DamageFrostPct:
+                    break;
+                case UnitConditionVariable.DamageShadowPct:
+                    break;
+                case UnitConditionVariable.DamageArcanePct:
+                    break;
+                case UnitConditionVariable.InCombat:
+                    break;
+                case UnitConditionVariable.IsMoving:
+                    break;
+                case UnitConditionVariable.IsCasting:
+                    break;
+                case UnitConditionVariable.IsCastingSpell:
+                    break;
+                case UnitConditionVariable.IsChanneling:
+                    break;
+                case UnitConditionVariable.IsChannelingSpell:
+                    break;
+                case UnitConditionVariable.NumberOfMeleeAttackers:
+                    break;
+                case UnitConditionVariable.IsAttackingMe:
+                    break;
+                case UnitConditionVariable.Range:
+                    break;
+                case UnitConditionVariable.InMeleeRange:
+                    break;
+                case UnitConditionVariable.PursuitTime:
+                    break;
+                case UnitConditionVariable.HasHarmfulAuraCanceledByDamage:
+                    break;
+                case UnitConditionVariable.HasHarmfulAuraWithPeriodicDamage:
+                    break;
+                case UnitConditionVariable.NumberOfEnemies:
+                    break;
+                case UnitConditionVariable.NumberOfFriends:
+                    break;
+                case UnitConditionVariable.ThreatPhysicalPct:
+                    break;
+                case UnitConditionVariable.ThreatHolyPct:
+                    break;
+                case UnitConditionVariable.ThreatFirePct:
+                    break;
+                case UnitConditionVariable.ThreatNaturePct:
+                    break;
+                case UnitConditionVariable.ThreatFrostPct:
+                    break;
+                case UnitConditionVariable.ThreatShadowPct:
+                    break;
+                case UnitConditionVariable.ThreatArcanePct:
+                    break;
+                case UnitConditionVariable.IsInterruptible:
+                    break;
+                case UnitConditionVariable.NumberOfAttackers:
+                    break;
+                case UnitConditionVariable.NumberOfRangedAttackers:
+                    break;
+                case UnitConditionVariable.CreatureType:
+                    break;
+                case UnitConditionVariable.IsMeleeAttacking:
+                    break;
+                case UnitConditionVariable.IsRangedAttacking:
+                    break;
+                case UnitConditionVariable.Health:
+                    break;
+                case UnitConditionVariable.SpellKnown:
+                    break;
+                case UnitConditionVariable.HasHarmfulAuraEffect:
+                    break;
+                case UnitConditionVariable.IsImmuneToAreaOfEffect:
+                    break;
+                case UnitConditionVariable.IsPlayer:
+                    break;
+                case UnitConditionVariable.DamageMagicPct:
+                    break;
+                case UnitConditionVariable.DamageTotalPct:
+                    break;
+                case UnitConditionVariable.ThreatMagicPct:
+                    break;
+                case UnitConditionVariable.ThreatTotalPct:
+                    break;
+                case UnitConditionVariable.HasCritter:
+                    return unit.GetCritterGUID().IsEmpty() ? 0 : 1;
+                case UnitConditionVariable.HasTotemInSlot1:
+                    break;
+                case UnitConditionVariable.HasTotemInSlot2:
+                    break;
+                case UnitConditionVariable.HasTotemInSlot3:
+                    break;
+                case UnitConditionVariable.HasTotemInSlot4:
+                    break;
+                case UnitConditionVariable.HasTotemInSlot5:
+                    break;
+                case UnitConditionVariable.Creature:
+                    break;
+                case UnitConditionVariable.StringID:
+                    break;
+                case UnitConditionVariable.HasAura:
+                    break;
+                case UnitConditionVariable.IsEnemy:
+                    break;
+                case UnitConditionVariable.IsSpecMelee:
+                    break;
+                case UnitConditionVariable.IsSpecTank:
+                    break;
+                case UnitConditionVariable.IsSpecRanged:
+                    break;
+                case UnitConditionVariable.IsSpecHealer:
+                    break;
+                case UnitConditionVariable.IsPlayerControlledNPC:
+                    break;
+                case UnitConditionVariable.IsDying:
+                    break;
+                case UnitConditionVariable.PathFailCount:
+                    break;
+                case UnitConditionVariable.IsMounted:
+                    break;
+                case UnitConditionVariable.Label:
+                    break;
+                case UnitConditionVariable.IsMySummon:
+                    break;
+                case UnitConditionVariable.IsSummoner:
+                    break;
+                case UnitConditionVariable.IsMyTarget:
+                    break;
+                case UnitConditionVariable.Sex:
+                    break;
+                case UnitConditionVariable.LevelWithinContentTuning:
+                    break;
+                case UnitConditionVariable.IsFlying:
+                    break;
+                case UnitConditionVariable.IsHovering:
+                    break;
+                case UnitConditionVariable.HasHelpfulAuraEffect:
+                    break;
+                case UnitConditionVariable.HasHelpfulAuraSchool:
+                    return unit.GetAuraApplication(aurApp =>
+                    {
+                        return !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0;
+                    }) != null ? value : 0;
+                default:
+                    break;
+            }
+
+            return 0;
+        }
+
+        public static bool IsUnitMeetingCondition(Unit unit, Unit otherUnit, UnitConditionRecord condition)
+        {
+            for (int i = 0; i < condition.Variable.Length; ++i)
+            {
+                if (condition.Variable[i] == 0)
+                    break;
+                
+                int unitValue = GetUnitConditionVariable(unit, otherUnit, (UnitConditionVariable)condition.Variable[i], condition.Value[i]);
+                bool meets = false;
+                switch ((UnitConditionOp)condition.Op[i])
+                {
+                    case UnitConditionOp.EqualTo:
+                        meets = unitValue == condition.Value[i];
+                        break;
+                    case UnitConditionOp.NotEqualTo:
+                        meets = unitValue != condition.Value[i];
+                        break;
+                    case UnitConditionOp.LessThan:
+                        meets = unitValue < condition.Value[i];
+                        break;
+                    case UnitConditionOp.LessThanOrEqualTo:
+                        meets = unitValue <= condition.Value[i];
+                        break;
+                    case UnitConditionOp.GreaterThan:
+                        meets = unitValue > condition.Value[i];
+                        break;
+                    case UnitConditionOp.GreaterThanOrEqualTo:
+                        meets = unitValue >= condition.Value[i];
+                        break;
+                    default:
+                        break;
+                }
+
+                if (condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr))
+                {
+                    if (meets)
+                        return true;
+                }
+                else if (!meets)
+                    return false;
+            }
+
+            return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
+        }
+        
         static int EvalSingleValue(ByteBuffer buffer, Player player)
         {
             WorldStateExpressionValueType valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();

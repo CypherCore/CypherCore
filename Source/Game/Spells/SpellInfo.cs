@@ -3222,21 +3222,29 @@ namespace Game.Spells
             return false;
         }
 
-        public uint GetSpellXSpellVisualId(WorldObject caster = null)
+        public uint GetSpellXSpellVisualId(WorldObject caster = null, WorldObject viewer = null)
         {
             foreach (SpellXSpellVisualRecord visual in _visuals)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
-                if (playerCondition == null || (caster && caster.GetTypeId() == TypeId.Player && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
-                    return visual.Id;
+                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
+                if (playerCondition != null)
+                    if (!caster || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition))
+                        continue;
+
+                var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
+                if (unitCondition != null)
+                    if (!caster || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer.ToUnit(), unitCondition))
+                        continue;
+
+                return visual.Id;
             }
 
             return 0;
         }
 
-        public uint GetSpellVisual(WorldObject caster = null)
+        public uint GetSpellVisual(WorldObject caster = null, WorldObject viewer = null)
         {
-            var visual = CliDB.SpellXSpellVisualStorage.LookupByKey(GetSpellXSpellVisualId(caster));
+            var visual = CliDB.SpellXSpellVisualStorage.LookupByKey(GetSpellXSpellVisualId(caster, viewer));
             if (visual != null)
             {
                 //if (visual.LowViolenceSpellVisualID && forPlayer.GetViolenceLevel() operator 2)
