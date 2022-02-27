@@ -2413,6 +2413,8 @@ namespace Game.Spells
             // set timer base at cast time
             ReSetTimer();
 
+            CallScriptOnPrecastHandler();
+
             Log.outDebug(LogFilter.Spells, "Spell.prepare: spell id {0} source {1} caster {2} customCastFlags {3} mask {4}", m_spellInfo.Id, m_caster.GetEntry(), m_originalCaster != null ? (int)m_originalCaster.GetEntry() : -1, _triggeredCastFlags, m_targets.GetTargetMask());
 
             if (m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
@@ -7128,6 +7130,16 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
+            }
+        }
+
+        void CallScriptOnPrecastHandler()
+        {
+            foreach (var script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.OnPrecast);
+                script.OnPrecast();
+                script._FinishScriptCall();
             }
         }
 
