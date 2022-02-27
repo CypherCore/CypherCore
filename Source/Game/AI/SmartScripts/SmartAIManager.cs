@@ -1588,6 +1588,15 @@ namespace Game.AI
                 case SmartActions.DespawnSpawngroup:
                 case SmartActions.AddToStoredTargetList:
                     break;
+                case SmartActions.BecomePersonalCloneForPlayer:
+                {
+                    if (e.Action.becomePersonalClone.type < (uint)TempSummonType.TimedOrDeadDespawn || e.Action.becomePersonalClone.type > (uint)TempSummonType.ManualDespawn)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses incorrect TempSummonType {e.Action.becomePersonalClone.type}, skipped.");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
                     return false;
@@ -2620,6 +2629,9 @@ namespace Game.AI
         public AddToStoredTargets addToStoredTargets;
 
         [FieldOffset(4)]
+        public BecomePersonalClone becomePersonalClone;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -3161,6 +3173,11 @@ namespace Game.AI
         public struct AddToStoredTargets
         {
             public uint id;
+        }
+        public struct BecomePersonalClone
+        {
+            public uint type;
+            public uint duration;
         }
         public struct Raw
         {

@@ -1442,6 +1442,22 @@ namespace Game.Entities
             return null;
         }
 
+        public TempSummon SummonPersonalClone(TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
+        {
+            Map map = GetMap();
+            if (map != null)
+            {
+                TempSummon summon = map.SummonCreature(GetEntry(), GetPosition(), null, despawnTime, this, spellId, vehId, privateObjectOwner);
+                if (summon != null)
+                {
+                    summon.SetTempSummonType(despawnType);
+                    return summon;
+                }
+            }
+
+            return null;
+        }
+
         public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, uint respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (x == 0 && y == 0 && z == 0)

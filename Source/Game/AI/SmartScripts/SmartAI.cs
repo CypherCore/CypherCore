@@ -925,9 +925,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.FollowCompleted, player);
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
         {
-            GetScript().SetTimedActionList(e, entry, invoker);
+            GetScript().SetTimedActionList(e, entry, invoker, startFromEventId);
         }
 
         public override void OnGameEvent(bool start, ushort eventId)

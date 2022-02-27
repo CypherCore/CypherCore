@@ -397,6 +397,7 @@ namespace Framework.Constants
         SetUninteractible = 146,    // 0/1
         ActivateGameobject = 147,    // GameObjectActions
         AddToStoredTargetList = 148, // varID
+        BecomePersonalCloneForPlayer = 149, // summonType 1-8, duration in ms
         End
     }
 

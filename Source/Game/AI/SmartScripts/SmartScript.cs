@@ -2466,6 +2466,27 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.BecomePersonalCloneForPlayer:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        if (!IsPlayer(target))
+                            continue;
+
+                        ObjectGuid privateObjectOwner = target.GetGUID();
+                        Creature summon = GetBaseObject().SummonPersonalClone((TempSummonType)e.Action.becomePersonalClone.type, e.Action.becomePersonalClone.duration, 0, 0, privateObjectOwner);
+                        if (summon != null)
+                        {
+                            if (IsSmart(summon))
+                                ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, target.ToUnit(), e.EventId + 1);
+
+                        }
+                    }
+
+                    // action list will continue on personal clones
+                    _timedActionList.RemoveAll(script => { return script.EventId > e.EventId; });
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;
@@ -3879,15 +3900,17 @@ namespace Game.AI
             bool needCleanup = true;
             if (!_timedActionList.Empty())
             {
-                foreach (var holder in _timedActionList)
+                for (int i = 0; i < _timedActionList.Count; ++i)
                 {
-                    if (holder.EnableTimed)
+                    SmartScriptHolder scriptHolder = _timedActionList[i];
+                    if (scriptHolder.EnableTimed)
                     {
-                        UpdateTimer(holder, diff);
+                        UpdateTimer(scriptHolder, diff);
                         needCleanup = false;
                     }
                 }
             }
+
             if (needCleanup)
                 _timedActionList.Clear();
 
@@ -4129,7 +4152,7 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
         {
             // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
             if (e.Action.timedActionList.allowOverride == 0 && !_timedActionList.Empty())
@@ -4139,6 +4162,8 @@ namespace Game.AI
             _timedActionList = Global.SmartAIMgr.GetScript((int)entry, SmartScriptType.TimedActionlist);
             if (_timedActionList.Empty())
                 return;
+
+            _timedActionList.RemoveAll(script => { return script.EventId < startFromEventId; });
 
             mTimedActionListInvoker = invoker != null ? invoker.GetGUID() : ObjectGuid.Empty;
             for (var i = 0; i < _timedActionList.Count; ++i)
