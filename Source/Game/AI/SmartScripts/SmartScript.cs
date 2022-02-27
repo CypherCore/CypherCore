@@ -2468,19 +2468,32 @@ namespace Game.AI
                 }
                 case SmartActions.BecomePersonalCloneForPlayer:
                 {
-                    foreach (WorldObject target in targets)
+                    WorldObject baseObject = GetBaseObject();
+
+                    void doCreatePersonalClone(Position position, Unit owner)
                     {
-                        if (!IsPlayer(target))
-                            continue;
-
-                        ObjectGuid privateObjectOwner = target.GetGUID();
-                        Creature summon = GetBaseObject().SummonPersonalClone((TempSummonType)e.Action.becomePersonalClone.type, e.Action.becomePersonalClone.duration, 0, 0, privateObjectOwner);
+                        ObjectGuid privateObjectOwner = owner.GetGUID();
+                        Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, e.Action.becomePersonalClone.duration, 0, 0, privateObjectOwner);
                         if (summon != null)
-                        {
                             if (IsSmart(summon))
-                                ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, target.ToUnit(), e.EventId + 1);
+                                ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, owner, e.EventId + 1);
+                    }
 
+                    // if target is position then targets container was empty
+                    if (e.GetTargetType() != SmartTargets.Position)
+                    {
+                        foreach (WorldObject target in targets)
+                        {
+                            Player playerTarget = target?.ToPlayer();
+                            if (playerTarget != null)
+                                doCreatePersonalClone(baseObject.GetPosition(), playerTarget);
                         }
+                    }
+                    else
+                    {
+                        Player invoker = GetLastInvoker()?.ToPlayer();
+                        if (invoker != null)
+                            doCreatePersonalClone(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), invoker);
                     }
 
                     // action list will continue on personal clones
@@ -4155,7 +4168,7 @@ namespace Game.AI
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
         {
             // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
-            if (e.Action.timedActionList.allowOverride == 0 && !_timedActionList.Empty())
+            if (e.GetActionType() == SmartActions.CallTimedActionlist && e.Action.timedActionList.allowOverride == 0 && !_timedActionList.Empty())
                 return;
 
             _timedActionList.Clear();
