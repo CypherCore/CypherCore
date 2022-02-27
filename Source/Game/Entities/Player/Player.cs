@@ -5198,7 +5198,7 @@ namespace Game.Entities
             Creature creature = victim.ToCreature();
             if (creature != null)
             {
-                if (!creature.CanGiveExperience())
+                if (creature.IsCritter() || creature.IsTotem())
                     return false;
             }
             return true;
