@@ -258,7 +258,9 @@ namespace Game.Spells
             // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
             // stack amount has priority over charges (checked on retail with spell 50262)
             auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
-            if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
+            if (!aura.GetCasterGUID().IsUnit())
+                auraData.CastUnit = ObjectGuid.Empty; // optional data is filled in, but cast unit contains empty guid in packet
+            else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
                 auraData.CastUnit.Set(aura.GetCasterGUID());
 
             if (auraData.Flags.HasFlag(AuraFlags.Duration))
@@ -408,6 +410,14 @@ namespace Game.Spells
                 return aurApp.GetTarget();
 
             return Global.ObjAccessor.GetUnit(m_owner, m_casterGuid);
+        }
+
+        WorldObject GetWorldObjectCaster()
+        {
+            if (GetCasterGUID().IsUnit())
+                return GetCaster();
+
+            return Global.ObjAccessor.GetWorldObject(GetOwner(), GetCasterGUID());
         }
 
         public AuraObjectType GetAuraType()
@@ -2322,7 +2332,7 @@ namespace Game.Spells
             Cypher.Assert(GetAuraType() == AuraObjectType.DynObj);
             return m_owner.ToDynamicObject();
         }
-
+        
         public void SetCastItemGUID(ObjectGuid guid)
         {
             m_castItemGuid = guid;
@@ -2423,7 +2433,6 @@ namespace Game.Spells
 
         public DynObjAura ToDynObjAura() { if (GetAuraType() == AuraObjectType.DynObj) return (DynObjAura)this; else return null; }
 
-
         //Static Methods
         public static uint BuildEffectMaskForOwner(SpellInfo spellProto, uint availableEffectMask, WorldObject owner)
         {
@@ -2509,14 +2518,7 @@ namespace Game.Spells
             // try to get caster of aura
             if (!createInfo.CasterGUID.IsEmpty())
             {
-                // world gameobjects can't own auras and they send empty casterguid
-                // checked on sniffs with spell 22247
-                if (createInfo.CasterGUID.IsGameObject())
-                {
-                    createInfo.Caster = null;
-                    createInfo.CasterGUID.Clear();
-                }
-                else
+                if (createInfo.CasterGUID.IsUnit())
                 {
                     if (createInfo._owner.GetGUID() == createInfo.CasterGUID)
                         createInfo.Caster = createInfo._owner.ToUnit();

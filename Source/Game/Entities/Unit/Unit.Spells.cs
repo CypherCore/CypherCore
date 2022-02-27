@@ -3909,14 +3909,6 @@ namespace Game.Entities
             if (createInfo.CasterGUID.IsEmpty() && !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
                 createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
-            // world gameobjects can't own auras and they send empty casterguid
-            // checked on sniffs with spell 22247
-            if (createInfo.CasterGUID.IsGameObject())
-            {
-                createInfo.Caster = null;
-                createInfo.CasterGUID.Clear();
-            }
-
             // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
             if (!createInfo.GetSpellInfo().IsMultiSlotAura())
             {
