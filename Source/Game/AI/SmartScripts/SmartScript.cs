@@ -3423,6 +3423,7 @@ namespace Game.AI
                     break;
                 }
                 case SmartEvents.SummonedUnit:
+                case SmartEvents.SummonedUnitDies:
                 {
                     if (!IsCreature(unit))
                         return;
@@ -3711,9 +3712,6 @@ namespace Game.AI
                     ProcessAction(e, unit, var0, 0, false, null, null, varString);
                     break;
                 }
-                case SmartEvents.SpellEffectHit:
-                    ProcessAction(e, unit, var0);
-                    break;
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event type {0}", e.GetEventType());
                     break;

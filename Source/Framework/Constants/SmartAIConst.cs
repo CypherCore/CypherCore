@@ -244,12 +244,9 @@ namespace Framework.Constants
         SceneTrigger = 79,      // param_string : triggerName
         SceneCancel = 80,      // none
         SceneComplete = 81,      // none
+        SummonedUnitDies = 82, // CreatureId(0 all), CooldownMin, CooldownMax
 
-        //New
-        SpellEffectHit = 82,
-        SpellEffectHitTarget = 83,
-
-        End = 84
+        End = 83
     }
 
     public enum SmartActions

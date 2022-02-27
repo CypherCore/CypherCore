@@ -383,6 +383,7 @@ namespace Game.AI
                 case SmartEvents.Death:
                 case SmartEvents.Kill:
                 case SmartEvents.SummonedUnit:
+                case SmartEvents.SummonedUnitDies:
                 case SmartEvents.SpellHit:
                 case SmartEvents.SpellHitTarget:
                 case SmartEvents.Damaged:
@@ -679,6 +680,7 @@ namespace Game.AI
                         break;
                     case SmartEvents.SummonDespawned:
                     case SmartEvents.SummonedUnit:
+                    case SmartEvents.SummonedUnitDies:
                         if (e.Event.summoned.creature != 0 && !IsCreatureValid(e, e.Event.summoned.creature))
                             return false;
 
@@ -932,7 +934,6 @@ namespace Game.AI
                     case SmartEvents.SceneCancel:
                     case SmartEvents.SceneComplete:
                     case SmartEvents.SceneTrigger:
-                    case SmartEvents.SpellEffectHit:
                         break;
                     default:
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
@@ -1892,8 +1893,7 @@ namespace Game.AI
                 SmartEvents.SceneTrigger => SmartScriptTypeMaskId.Scene,
                 SmartEvents.SceneCancel => SmartScriptTypeMaskId.Scene,
                 SmartEvents.SceneComplete => SmartScriptTypeMaskId.Scene,
-                SmartEvents.SpellEffectHit => SmartScriptTypeMaskId.Spell,
-                SmartEvents.SpellEffectHitTarget => SmartScriptTypeMaskId.Spell,
+                SmartEvents.SummonedUnitDies => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
                 _ => 0,
             };
     }

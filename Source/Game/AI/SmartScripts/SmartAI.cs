@@ -641,6 +641,11 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SummonedUnit, summon);
         }
 
+        public override void SummonedCreatureDies(Creature summon, Unit killer)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SummonedUnitDies, summon);
+        }
+
         public override void AttackStart(Unit who)
         {
             // dont allow charmed npcs to act on their own
@@ -1197,6 +1202,11 @@ namespace Game.AI
         public override void JustSummoned(Creature creature)
         {
             GetScript().ProcessEventsFor(SmartEvents.SummonedUnit, creature);
+        }
+
+        public override void SummonedCreatureDies(Creature summon, Unit killer)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SummonedUnitDies, summon);
         }
 
         public override void SummonedCreatureDespawn(Creature unit)
