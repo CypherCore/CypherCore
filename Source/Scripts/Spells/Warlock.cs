@@ -84,6 +84,31 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 116858 - Chaos Bolt
+    class spell_warl_chaos_bolt : SpellScript
+    {
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
+        }
+
+        void CalcCritChance(Unit victim, ref float critChance)
+        {
+            critChance = 100.0f;
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.SchoolDamage));
+            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+        }
+    }
+    
     [Script] // 77220 - Mastery: Chaotic Energies
     class spell_warl_chaotic_energies : AuraScript
     {
