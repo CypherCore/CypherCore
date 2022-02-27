@@ -474,38 +474,13 @@ namespace Game.Misc
 
         public void SendQuestQueryResponse(Quest quest)
         {
-            if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
-                quest.InitializeQueryData();
-
-            QueryQuestInfoResponse queryQuestInfoResponse = quest.QueryData;
-
-            Locale loc = _session.GetSessionDbLocaleIndex();
-            if (loc != Locale.enUS)
+            if (WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                _session.SendPacket(quest.response[(int)_session.GetSessionDbLocaleIndex()]);
+            else
             {
-                QuestTemplateLocale questTemplateLocale = Global.ObjectMgr.GetQuestLocale(queryQuestInfoResponse.QuestID);
-                if (questTemplateLocale != null)
-                {
-                    ObjectManager.GetLocaleString(questTemplateLocale.LogTitle, loc, ref queryQuestInfoResponse.Info.LogTitle);
-                    ObjectManager.GetLocaleString(questTemplateLocale.LogDescription, loc, ref queryQuestInfoResponse.Info.LogDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.QuestDescription, loc, ref queryQuestInfoResponse.Info.QuestDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.AreaDescription, loc, ref queryQuestInfoResponse.Info.AreaDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.QuestCompletionLog, loc, ref queryQuestInfoResponse.Info.QuestCompletionLog);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverText, loc, ref queryQuestInfoResponse.Info.PortraitGiverText);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverName, loc, ref queryQuestInfoResponse.Info.PortraitGiverName);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInText, loc, ref queryQuestInfoResponse.Info.PortraitTurnInText);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInName, loc, ref queryQuestInfoResponse.Info.PortraitTurnInName);
-                }
-
-                foreach (QuestObjective questObjective in queryQuestInfoResponse.Info.Objectives)
-                {
-                    QuestObjectivesLocale questObjectivesLocaleData = Global.ObjectMgr.GetQuestObjectivesLocale(questObjective.Id);
-                    if (questObjectivesLocaleData != null)
-                        ObjectManager.GetLocaleString(questObjectivesLocaleData.Description, loc, ref questObjective.Description);
-                }
-
+                var queryPacket = quest.BuildQueryData(_session.GetSessionDbLocaleIndex(), _session.GetPlayer());
+                _session.SendPacket(queryPacket);
             }
-
-            _session.SendPacket(queryQuestInfoResponse);
         }
 
         public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool autoLaunched)

@@ -24,6 +24,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -41,27 +42,26 @@ namespace Game
             NextQuestInChain = fields.Read<uint>(7);
             RewardXPDifficulty = fields.Read<uint>(8);
             RewardXPMultiplier = fields.Read<float>(9);
-            RewardMoney = fields.Read<int>(10);
-            RewardMoneyDifficulty = fields.Read<uint>(11);
-            RewardMoneyMultiplier = fields.Read<float>(12);
-            RewardBonusMoney = fields.Read<uint>(13);
-            RewardSpell = fields.Read<uint>(14);
-            RewardHonor = fields.Read<uint>(15);
-            RewardKillHonor = fields.Read<uint>(16);
-            SourceItemId = fields.Read<uint>(17);
-            RewardArtifactXPDifficulty = fields.Read<uint>(18);
-            RewardArtifactXPMultiplier = fields.Read<float>(19);
-            RewardArtifactCategoryID = fields.Read<uint>(20);
-            Flags = (QuestFlags)fields.Read<uint>(21);
-            FlagsEx = (QuestFlagsEx)fields.Read<uint>(22);
-            FlagsEx2 = (QuestFlagsEx2)fields.Read<uint>(23);
+            RewardMoneyDifficulty = fields.Read<uint>(10);
+            RewardMoneyMultiplier = fields.Read<float>(11);
+            RewardBonusMoney = fields.Read<uint>(12);
+            RewardSpell = fields.Read<uint>(13);
+            RewardHonor = fields.Read<uint>(14);
+            RewardKillHonor = fields.Read<uint>(15);
+            SourceItemId = fields.Read<uint>(16);
+            RewardArtifactXPDifficulty = fields.Read<uint>(17);
+            RewardArtifactXPMultiplier = fields.Read<float>(18);
+            RewardArtifactCategoryID = fields.Read<uint>(19);
+            Flags = (QuestFlags)fields.Read<uint>(20);
+            FlagsEx = (QuestFlagsEx)fields.Read<uint>(21);
+            FlagsEx2 = (QuestFlagsEx2)fields.Read<uint>(22);
 
             for (int i = 0; i < SharedConst.QuestItemDropCount; ++i)
             {
-                RewardItemId[i] = fields.Read<uint>(24 + i * 4);
-                RewardItemCount[i] = fields.Read<uint>(25 + i * 4);
-                ItemDrop[i] = fields.Read<uint>(26 + i * 4);
-                ItemDropQuantity[i] = fields.Read<uint>(27 + i * 4);
+                RewardItemId[i] = fields.Read<uint>(23 + i * 4);
+                RewardItemCount[i] = fields.Read<uint>(24 + i * 4);
+                ItemDrop[i] = fields.Read<uint>(25 + i * 4);
+                ItemDropQuantity[i] = fields.Read<uint>(26 + i * 4);
 
                 if (RewardItemId[i] != 0)
                     ++_rewItemsCount;
@@ -69,67 +69,67 @@ namespace Game
 
             for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
             {
-                RewardChoiceItemId[i] = fields.Read<uint>(40 + i * 3);
-                RewardChoiceItemCount[i] = fields.Read<uint>(41 + i * 3);
-                RewardChoiceItemDisplayId[i] = fields.Read<uint>(42 + i * 3);
+                RewardChoiceItemId[i] = fields.Read<uint>(39 + i * 3);
+                RewardChoiceItemCount[i] = fields.Read<uint>(40 + i * 3);
+                RewardChoiceItemDisplayId[i] = fields.Read<uint>(41 + i * 3);
 
                 if (RewardChoiceItemId[i] != 0)
                     ++_rewChoiceItemsCount;
             }
 
-            POIContinent = fields.Read<uint>(58);
-            POIx = fields.Read<float>(59);
-            POIy = fields.Read<float>(60);
-            POIPriority = fields.Read<uint>(61);
+            POIContinent = fields.Read<uint>(57);
+            POIx = fields.Read<float>(58);
+            POIy = fields.Read<float>(59);
+            POIPriority = fields.Read<uint>(60);
 
-            RewardTitleId = fields.Read<uint>(62);
-            RewardArenaPoints = fields.Read<int>(63);
-            RewardSkillId = fields.Read<uint>(64);
-            RewardSkillPoints = fields.Read<uint>(65);
+            RewardTitleId = fields.Read<uint>(61);
+            RewardArenaPoints = fields.Read<int>(62);
+            RewardSkillId = fields.Read<uint>(63);
+            RewardSkillPoints = fields.Read<uint>(64);
 
-            QuestGiverPortrait = fields.Read<uint>(66);
-            QuestGiverPortraitMount = fields.Read<uint>(67);
-            QuestGiverPortraitModelSceneId = fields.Read<int>(68);
-            QuestTurnInPortrait = fields.Read<uint>(69);
+            QuestGiverPortrait = fields.Read<uint>(65);
+            QuestGiverPortraitMount = fields.Read<uint>(66);
+            QuestGiverPortraitModelSceneId = fields.Read<int>(67);
+            QuestTurnInPortrait = fields.Read<uint>(68);
 
             for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
-                RewardFactionId[i] = fields.Read<uint>(70 + i * 4);
-                RewardFactionValue[i] = fields.Read<int>(71 + i * 4);
-                RewardFactionOverride[i] = fields.Read<int>(72 + i * 4);
-                RewardFactionCapIn[i] = fields.Read<int>(73 + i * 4);
+                RewardFactionId[i] = fields.Read<uint>(69 + i * 4);
+                RewardFactionValue[i] = fields.Read<int>(70 + i * 4);
+                RewardFactionOverride[i] = fields.Read<int>(71 + i * 4);
+                RewardFactionCapIn[i] = fields.Read<int>(72 + i * 4);
             }
 
-            RewardReputationMask = fields.Read<uint>(90);
+            RewardReputationMask = fields.Read<uint>(89);
 
             for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                RewardCurrencyId[i] = fields.Read<uint>(91 + i * 2);
-                RewardCurrencyCount[i] = fields.Read<uint>(92 + i * 2);
+                RewardCurrencyId[i] = fields.Read<uint>(90 + i * 2);
+                RewardCurrencyCount[i] = fields.Read<uint>(91 + i * 2);
 
                 if (RewardCurrencyId[i] != 0)
                     ++_rewCurrencyCount;
             }
 
-            SoundAccept = fields.Read<uint>(99);
-            SoundTurnIn = fields.Read<uint>(100);
-            AreaGroupID = fields.Read<uint>(101);
-            LimitTime = fields.Read<uint>(102);
-            AllowableRaces = (long)fields.Read<ulong>(103);
-            TreasurePickerID = fields.Read<int>(104);
-            Expansion = fields.Read<int>(105);
-            ManagedWorldStateID = fields.Read<int>(106);
-            QuestSessionBonus = fields.Read<int>(107);
+            SoundAccept = fields.Read<uint>(98);
+            SoundTurnIn = fields.Read<uint>(99);
+            AreaGroupID = fields.Read<uint>(100);
+            LimitTime = fields.Read<uint>(101);
+            AllowableRaces = (long)fields.Read<ulong>(102);
+            TreasurePickerID = fields.Read<int>(103);
+            Expansion = fields.Read<int>(104);
+            ManagedWorldStateID = fields.Read<int>(105);
+            QuestSessionBonus = fields.Read<int>(106);
 
-            LogTitle = fields.Read<string>(108);
-            LogDescription = fields.Read<string>(109);
-            QuestDescription = fields.Read<string>(110);
-            AreaDescription = fields.Read<string>(111);
-            PortraitGiverText = fields.Read<string>(112);
-            PortraitGiverName = fields.Read<string>(113);
-            PortraitTurnInText = fields.Read<string>(114);
-            PortraitTurnInName = fields.Read<string>(115);
-            QuestCompletionLog = fields.Read<string>(116);
+            LogTitle = fields.Read<string>(107);
+            LogDescription = fields.Read<string>(108);
+            QuestDescription = fields.Read<string>(109);
+            AreaDescription = fields.Read<string>(110);
+            PortraitGiverText = fields.Read<string>(111);
+            PortraitGiverName = fields.Read<string>(112);
+            PortraitTurnInText = fields.Read<string>(113);
+            PortraitTurnInName = fields.Read<string>(114);
+            QuestCompletionLog = fields.Read<string>(115);
         }
 
         public void LoadRewardDisplaySpell(SQLFields fields)
@@ -329,6 +329,25 @@ namespace Game
                 return 0;
         }
 
+        public uint MaxMoneyValue()
+        {
+            uint value = 0;
+            var questLevels = Global.DB2Mgr.GetContentTuningData(ContentTuningId, 0);
+            if (questLevels.HasValue)
+            {
+                var money = CliDB.QuestMoneyRewardStorage.LookupByKey(questLevels.Value.MaxLevel);
+                if (money != null)
+                    value = (uint)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
+            }
+
+            return value;
+        }
+
+        public uint GetMaxMoneyReward()
+        {
+            return (uint)(MaxMoneyValue() * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
+        }
+        
         public QuestTagType? GetQuestTag()
         {
             QuestInfoRecord questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
@@ -458,116 +477,151 @@ namespace Game
 
         public void InitializeQueryData()
         {
-            QueryData = new QueryQuestInfoResponse();
+            for (var loc = Locale.enUS; loc < Locale.Total; ++loc)
+                response[(int)loc] = BuildQueryData(loc, null);
+        }
 
-            QueryData.Allow = true;
-            QueryData.QuestID = Id;
+        public QueryQuestInfoResponse BuildQueryData(Locale loc, Player player)
+        {
+            QueryQuestInfoResponse response = new();
 
-            QueryData.Info.LogTitle = LogTitle;
-            QueryData.Info.LogDescription = LogDescription;
-            QueryData.Info.QuestDescription = QuestDescription;
-            QueryData.Info.AreaDescription = AreaDescription;
-            QueryData.Info.QuestCompletionLog = QuestCompletionLog;
-            QueryData.Info.PortraitGiverText = PortraitGiverText;
-            QueryData.Info.PortraitGiverName = PortraitGiverName;
-            QueryData.Info.PortraitTurnInText = PortraitTurnInText;
-            QueryData.Info.PortraitTurnInName = PortraitTurnInName;
+            response.Allow = true;
+            response.QuestID = Id;
 
-            QueryData.Info.QuestID = Id;
-            QueryData.Info.QuestType = (int)Type;
-            QueryData.Info.ContentTuningID = ContentTuningId;
-            QueryData.Info.QuestPackageID = PackageID;
-            QueryData.Info.QuestSortID = QuestSortID;
-            QueryData.Info.QuestInfoID = QuestInfoID;
-            QueryData.Info.SuggestedGroupNum = SuggestedPlayers;
-            QueryData.Info.RewardNextQuest = NextQuestInChain;
-            QueryData.Info.RewardXPDifficulty = RewardXPDifficulty;
-            QueryData.Info.RewardXPMultiplier = RewardXPMultiplier;
+            response.Info.LogTitle = LogTitle;
+            response.Info.LogDescription = LogDescription;
+            response.Info.QuestDescription = QuestDescription;
+            response.Info.AreaDescription = AreaDescription;
+            response.Info.QuestCompletionLog = QuestCompletionLog;
+            response.Info.PortraitGiverText = PortraitGiverText;
+            response.Info.PortraitGiverName = PortraitGiverName;
+            response.Info.PortraitTurnInText = PortraitTurnInText;
+            response.Info.PortraitTurnInName = PortraitTurnInName;
+
+            if (loc != Locale.enUS)
+            {
+                var questTemplateLocale = Global.ObjectMgr.GetQuestLocale(Id);
+                if (questTemplateLocale != null)
+                {
+                    ObjectManager.GetLocaleString(questTemplateLocale.LogTitle, loc, ref response.Info.LogTitle);
+                    ObjectManager.GetLocaleString(questTemplateLocale.LogDescription, loc, ref response.Info.LogDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.QuestDescription, loc, ref response.Info.QuestDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.AreaDescription, loc, ref response.Info.AreaDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.QuestCompletionLog, loc, ref response.Info.QuestCompletionLog);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverText, loc, ref response.Info.PortraitGiverText);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverName, loc, ref response.Info.PortraitGiverName);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInText, loc, ref response.Info.PortraitTurnInText);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInName, loc, ref response.Info.PortraitTurnInName);
+                }
+            }
+
+            response.Info.QuestID = Id;
+            response.Info.QuestType = (int)Type;
+            response.Info.ContentTuningID = ContentTuningId;
+            response.Info.QuestPackageID = PackageID;
+            response.Info.QuestSortID = QuestSortID;
+            response.Info.QuestInfoID = QuestInfoID;
+            response.Info.SuggestedGroupNum = SuggestedPlayers;
+            response.Info.RewardNextQuest = NextQuestInChain;
+            response.Info.RewardXPDifficulty = RewardXPDifficulty;
+            response.Info.RewardXPMultiplier = RewardXPMultiplier;
 
             if (!HasFlag(QuestFlags.HiddenRewards))
-                QueryData.Info.RewardMoney = RewardMoney;
+                response.Info.RewardMoney = (int)(player != null ? player.GetQuestMoneyReward(this) : GetMaxMoneyReward());
 
-            QueryData.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
-            QueryData.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
-            QueryData.Info.RewardBonusMoney = RewardBonusMoney;
+            response.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
+            response.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
+            response.Info.RewardBonusMoney = RewardBonusMoney;
             foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
-                QueryData.Info.RewardDisplaySpell.Add(new QuestCompleteDisplaySpell(displaySpell.SpellId, displaySpell.PlayerConditionId));
+                response.Info.RewardDisplaySpell.Add(new QuestCompleteDisplaySpell(displaySpell.SpellId, displaySpell.PlayerConditionId));
 
-            QueryData.Info.RewardSpell = RewardSpell;
+            response.Info.RewardSpell = RewardSpell;
 
-            QueryData.Info.RewardHonor = RewardHonor;
-            QueryData.Info.RewardKillHonor = RewardKillHonor;
+            response.Info.RewardHonor = RewardHonor;
+            response.Info.RewardKillHonor = RewardKillHonor;
 
-            QueryData.Info.RewardArtifactXPDifficulty = (int)RewardArtifactXPDifficulty;
-            QueryData.Info.RewardArtifactXPMultiplier = RewardArtifactXPMultiplier;
-            QueryData.Info.RewardArtifactCategoryID = (int)RewardArtifactCategoryID;
+            response.Info.RewardArtifactXPDifficulty = (int)RewardArtifactXPDifficulty;
+            response.Info.RewardArtifactXPMultiplier = RewardArtifactXPMultiplier;
+            response.Info.RewardArtifactCategoryID = (int)RewardArtifactCategoryID;
 
-            QueryData.Info.StartItem = SourceItemId;
-            QueryData.Info.Flags = (uint)Flags;
-            QueryData.Info.FlagsEx = (uint)FlagsEx;
-            QueryData.Info.FlagsEx2 = (uint)FlagsEx2;
-            QueryData.Info.RewardTitle = RewardTitleId;
-            QueryData.Info.RewardArenaPoints = RewardArenaPoints;
-            QueryData.Info.RewardSkillLineID = RewardSkillId;
-            QueryData.Info.RewardNumSkillUps = RewardSkillPoints;
-            QueryData.Info.RewardFactionFlags = RewardReputationMask;
-            QueryData.Info.PortraitGiver = QuestGiverPortrait;
-            QueryData.Info.PortraitGiverMount = QuestGiverPortraitMount;
-            QueryData.Info.PortraitGiverModelSceneID = QuestGiverPortraitModelSceneId;
-            QueryData.Info.PortraitTurnIn = QuestTurnInPortrait;
+            response.Info.StartItem = SourceItemId;
+            response.Info.Flags = (uint)Flags;
+            response.Info.FlagsEx = (uint)FlagsEx;
+            response.Info.FlagsEx2 = (uint)FlagsEx2;
+            response.Info.RewardTitle = RewardTitleId;
+            response.Info.RewardArenaPoints = RewardArenaPoints;
+            response.Info.RewardSkillLineID = RewardSkillId;
+            response.Info.RewardNumSkillUps = RewardSkillPoints;
+            response.Info.RewardFactionFlags = RewardReputationMask;
+            response.Info.PortraitGiver = QuestGiverPortrait;
+            response.Info.PortraitGiverMount = QuestGiverPortraitMount;
+            response.Info.PortraitGiverModelSceneID = QuestGiverPortraitModelSceneId;
+            response.Info.PortraitTurnIn = QuestTurnInPortrait;
 
             for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
             {
-                QueryData.Info.ItemDrop[i] = (int)ItemDrop[i];
-                QueryData.Info.ItemDropQuantity[i] = (int)ItemDropQuantity[i];
+                response.Info.ItemDrop[i] = (int)ItemDrop[i];
+                response.Info.ItemDropQuantity[i] = (int)ItemDropQuantity[i];
             }
 
             if (!HasFlag(QuestFlags.HiddenRewards))
             {
                 for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
-                    QueryData.Info.RewardItems[i] = RewardItemId[i];
-                    QueryData.Info.RewardAmount[i] = RewardItemCount[i];
+                    response.Info.RewardItems[i] = RewardItemId[i];
+                    response.Info.RewardAmount[i] = RewardItemCount[i];
                 }
                 for (byte i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                 {
-                    QueryData.Info.UnfilteredChoiceItems[i].ItemID = RewardChoiceItemId[i];
-                    QueryData.Info.UnfilteredChoiceItems[i].Quantity = RewardChoiceItemCount[i];
+                    response.Info.UnfilteredChoiceItems[i].ItemID = RewardChoiceItemId[i];
+                    response.Info.UnfilteredChoiceItems[i].Quantity = RewardChoiceItemCount[i];
                 }
             }
 
             for (byte i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
-                QueryData.Info.RewardFactionID[i] = RewardFactionId[i];
-                QueryData.Info.RewardFactionValue[i] = RewardFactionValue[i];
-                QueryData.Info.RewardFactionOverride[i] = RewardFactionOverride[i];
-                QueryData.Info.RewardFactionCapIn[i] = RewardFactionCapIn[i];
+                response.Info.RewardFactionID[i] = RewardFactionId[i];
+                response.Info.RewardFactionValue[i] = RewardFactionValue[i];
+                response.Info.RewardFactionOverride[i] = RewardFactionOverride[i];
+                response.Info.RewardFactionCapIn[i] = RewardFactionCapIn[i];
             }
 
-            QueryData.Info.POIContinent = POIContinent;
-            QueryData.Info.POIx = POIx;
-            QueryData.Info.POIy = POIy;
-            QueryData.Info.POIPriority = POIPriority;
+            response.Info.POIContinent = POIContinent;
+            response.Info.POIx = POIx;
+            response.Info.POIy = POIy;
+            response.Info.POIPriority = POIPriority;
 
-            QueryData.Info.AllowableRaces = AllowableRaces;
-            QueryData.Info.TreasurePickerID = TreasurePickerID;
-            QueryData.Info.Expansion = Expansion;
-            QueryData.Info.ManagedWorldStateID = ManagedWorldStateID;
-            QueryData.Info.QuestSessionBonus = 0; //GetQuestSessionBonus(); // this is only sent while quest session is active
+            response.Info.AllowableRaces = AllowableRaces;
+            response.Info.TreasurePickerID = TreasurePickerID;
+            response.Info.Expansion = Expansion;
+            response.Info.ManagedWorldStateID = ManagedWorldStateID;
+            response.Info.QuestSessionBonus = 0; //GetQuestSessionBonus(); // this is only sent while quest session is active
 
             foreach (QuestObjective questObjective in Objectives)
-                QueryData.Info.Objectives.Add(questObjective);
+            {
+                response.Info.Objectives.Add(questObjective);
+
+                if (loc != Locale.enUS)
+                {
+                    var questObjectivesLocale = Global.ObjectMgr.GetQuestObjectivesLocale(questObjective.Id);
+                    if (questObjectivesLocale != null)
+                        ObjectManager.GetLocaleString(questObjectivesLocale.Description, loc, ref response.Info.Objectives.Last().Description);
+                }
+            }
 
             for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                QueryData.Info.RewardCurrencyID[i] = RewardCurrencyId[i];
-                QueryData.Info.RewardCurrencyQty[i] = RewardCurrencyCount[i];
+                response.Info.RewardCurrencyID[i] = RewardCurrencyId[i];
+                response.Info.RewardCurrencyQty[i] = RewardCurrencyCount[i];
             }
 
-            QueryData.Info.AcceptedSoundKitID = SoundAccept;
-            QueryData.Info.CompleteSoundKitID = SoundTurnIn;
-            QueryData.Info.AreaGroupID = AreaGroupID;
-            QueryData.Info.TimeAllowed = LimitTime;
+            response.Info.AcceptedSoundKitID = SoundAccept;
+            response.Info.CompleteSoundKitID = SoundTurnIn;
+            response.Info.AreaGroupID = AreaGroupID;
+            response.Info.TimeAllowed = LimitTime;
+
+            response.Write();
+            return response;
         }
 
         public static uint RoundXPValue(uint xp)
@@ -629,7 +683,6 @@ namespace Game
         public uint NextQuestInChain { get; set; }
         public uint RewardXPDifficulty;
         public float RewardXPMultiplier;
-        public int RewardMoney;
         public uint RewardMoneyDifficulty;
         public float RewardMoneyMultiplier;
         public uint RewardBonusMoney;
@@ -731,7 +784,7 @@ namespace Game
 
         public List<uint> DependentPreviousQuests = new();
         public List<uint> DependentBreadcrumbQuests = new();
-        public QueryQuestInfoResponse QueryData;
+        public QueryQuestInfoResponse[] response = new QueryQuestInfoResponse[(int)Locale.Total];
 
         uint _rewChoiceItemsCount;
         uint _rewItemsCount;
