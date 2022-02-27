@@ -7874,6 +7874,13 @@ namespace Game.Spells
             TransportGUID = ObjectGuid.Empty;
         }
 
+        public SpellDestination(WorldLocation loc) : this()
+        {
+            Position.WorldRelocate(loc);
+            TransportGUID.Clear();
+            TransportOffset.Relocate(0, 0, 0, 0);
+        }
+        
         public SpellDestination(WorldObject wObj) : this()
         {
             TransportGUID = wObj.GetTransGUID();

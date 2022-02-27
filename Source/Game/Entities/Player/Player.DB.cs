@@ -2773,7 +2773,12 @@ namespace Game.Entities
             SetRaidDifficultyID(CheckLoadedRaidDifficultyID(raidDifficulty));
             SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID(legacyRaidDifficulty));
 
-            var RelocateToHomebind = new Action(() => { instance_id = 0; Relocate(homebind); });
+            var RelocateToHomebind = new Action(() =>
+            {
+                mapId = homebind.GetMapId();
+                instance_id = 0;
+                Relocate(homebind);
+            });                
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
