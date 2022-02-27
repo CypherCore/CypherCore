@@ -805,7 +805,7 @@ namespace Game.Chat
                     if (mapInfo.IsContinent())
                         ss.Append(handler.GetCypherString(CypherStrings.Continent));
 
-                    switch ((MapTypes)mapInfo.MapType)
+                    switch (mapInfo.InstanceType)
                     {
                         case MapTypes.Instance:
                             ss.Append(handler.GetCypherString(CypherStrings.Instance));
