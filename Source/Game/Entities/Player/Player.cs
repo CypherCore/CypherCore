@@ -7174,6 +7174,9 @@ namespace Game.Entities
         public void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         public void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
 
+        public bool IsReagentBankUnlocked() { return HasPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
+        public void UnlockReagentBank() { AddPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
+
         //new
         public uint DoRandomRoll(uint minimum, uint maximum)
         {
