@@ -52,6 +52,7 @@ namespace Scripts.Spells.Priest
         public const uint LevitateEffect = 111759;
         public const uint MasochismTalent = 193063;
         public const uint MasochismPeriodicHeal = 193065;
+        public const uint MasteryGrace = 271534;
         public const uint MindBombStun = 226943;
         public const uint OracularHeal = 26170;
         public const uint PenanceR1 = 47540;
@@ -61,6 +62,7 @@ namespace Scripts.Spells.Priest
         public const uint PrayerOfMendingHeal = 33110;
         public const uint PrayerOfMendingJump = 155793;
         public const uint PrayerOfHealing = 596;
+        public const uint Rapture = 47536;
         public const uint Renew = 139;
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
@@ -572,22 +574,34 @@ namespace Scripts.Spells.Priest
         {
             return ValidateSpellInfo(SpellIds.BodyAndSoul, SpellIds.BodyAndSoulSpeed, SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.RenewedHope, SpellIds.RenewedHopeEffect,
                 SpellIds.VoidShield, SpellIds.VoidShieldEffect, SpellIds.Atonement, SpellIds.Trinity, SpellIds.AtonementTriggered, SpellIds.AtonementTriggeredPowerTrinity, SpellIds.ShieldDisciplinePassive,
-                SpellIds.ShieldDisciplineEnergize);
+                SpellIds.ShieldDisciplineEnergize, SpellIds.Rapture, SpellIds.MasteryGrace);
         }
 
         void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
 
-            Player player = GetCaster().ToPlayer();
-            if (player)
+            Unit caster = GetCaster();
+            if (caster != null)
             {
-                int playerMastery = (int)player.GetRatingBonusValue(CombatRating.Mastery);
-                int playerSpellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Holy);
-                int playerVersatileDamage = (int)player.GetRatingBonusValue(CombatRating.VersatilityDamageDone);
+                float amountF = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 1.65f;
 
-                //Formula taken from SpellWork
-                amount = (int)((playerSpellPower * 5.5f) + playerMastery) * (1 + playerVersatileDamage);
+                Player player = caster.ToPlayer();
+                if (player != null)
+                {
+                    MathFunctions.AddPct(ref amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+
+                    AuraEffect mastery = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
+                    if (mastery != null)
+                        if (GetUnitOwner().HasAura(SpellIds.AtonementTriggered) || GetUnitOwner().HasAura(SpellIds.AtonementTriggeredPowerTrinity))
+                            MathFunctions.AddPct(ref amountF, mastery.GetAmount());
+                }
+
+                AuraEffect rapture = caster.GetAuraEffect(SpellIds.Rapture, 1);
+                if (rapture != null)
+                    MathFunctions.AddPct(ref amountF, rapture.GetAmount());
+
+                amount = (int)amountF;
             }
         }
 
