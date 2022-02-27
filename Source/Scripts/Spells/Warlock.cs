@@ -36,6 +36,7 @@ namespace Scripts.Spells.Warlock
         public const uint GlyphOfDemonTraining = 56249;
         public const uint GlyphOfSoulSwap = 56226;
         public const uint GlyphOfSuccubus = 56250;
+        public const uint ImmolatePeriodic = 157736;
         public const uint ImprovedHealthFunnelBuffR1 = 60955;
         public const uint ImprovedHealthFunnelBuffR2 = 60956;
         public const uint ImprovedHealthFunnelR1 = 18703;
@@ -334,6 +335,25 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 348 - Immolate
+    class spell_warl_immolate : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ImmolatePeriodic);
+        }
+
+        void HandleOnEffectHit(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.ImmolatePeriodic, GetSpell());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 6358 - Seduction (Special Ability)
     class spell_warl_seduction : SpellScript
     {
