@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
@@ -47,6 +48,7 @@ namespace Scripts.Spells.Mage
         public const uint DradonhawkForm = 32818;
         public const uint EverwarmSocks = 320913;
         public const uint FingersOfFrost = 44544;
+        public const uint FireBlast = 108853;
         public const uint Firestarter = 205026;
         public const uint FrostNova = 122;
         public const uint GiraffeForm = 32816;
@@ -508,6 +510,28 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    // 205029 - Flame On
+    class spell_mage_flame_on : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FireBlast)
+                && CliDB.SpellCategoryStorage.HasRecord(Global.SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId)
+                && spellInfo.GetEffects().Count > 2;
+        }
+
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            amount = -(int)MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey(Global.SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
+        }
+    }
+    
     [Script] // 11426 - Ice Barrier
     class spell_mage_ice_barrier : AuraScript
     {
