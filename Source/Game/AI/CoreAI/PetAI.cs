@@ -136,7 +136,7 @@ namespace Game.AI
 
                         if (target)
                         {
-                            if (CanAIAttack(target) && spell.CanAutoCast(target))
+                            if (CanAttack(target) && spell.CanAutoCast(target))
                             {
                                 targetSpellStore.Add(Tuple.Create(target, spell));
                                 spellUsed = true;
@@ -174,7 +174,7 @@ namespace Game.AI
                         if (!spellUsed)
                             spell.Dispose();
                     }
-                    else if (me.GetVictim() && CanAIAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat())
+                    else if (me.GetVictim() && CanAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat())
                     {
                         Spell spell = new(me, spellInfo, TriggerCastFlags.None);
                         if (spell.CanAutoCast(me.GetVictim()))
@@ -248,7 +248,7 @@ namespace Game.AI
         public void _AttackStart(Unit target)
         {
             // Check all pet states to decide if we can attack this target
-            if (!CanAIAttack(target))
+            if (!CanAttack(target))
                 return;
 
             // Only chase if not commanded to stay or if stay but commanded to attack
@@ -354,6 +354,12 @@ namespace Game.AI
             // such as "Eyes of the Beast"
             if (me.IsCharmed())
                 return;
+
+            if (me.GetCharmInfo() == null)
+            {
+                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::HandleReturnMovement(). Debug info: {GetDebugInfo()}");
+                return;
+            }
 
             if (me.GetCharmInfo().HasCommandState(CommandStates.Stay))
             {
@@ -463,7 +469,7 @@ namespace Game.AI
             }
         }
 
-        public override bool CanAIAttack(Unit victim)
+        public bool CanAttack(Unit victim)
         {
             // Evaluates wether a pet can attack a specific target based on CommandState, ReactState and other flags
             // IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
@@ -483,7 +489,7 @@ namespace Game.AI
 
             if (me.GetCharmInfo() == null)
             {
-                Log.outError(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
+                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
                 return false;
             }
 
