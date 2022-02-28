@@ -5845,7 +5845,12 @@ namespace Game.Entities
 
             PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel));
+            int exp_max_lvl = (int)Global.ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
+            int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
+                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
+            else
+                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(GetLevel()));
             if (m_activePlayerData.XP >= m_activePlayerData.NextLevelXP)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), m_activePlayerData.NextLevelXP - 1);
@@ -6340,14 +6345,14 @@ namespace Game.Entities
                 var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                 if (areaLevels.HasValue)
                 {
-                    if (GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                    if (IsMaxLevel())
                     {
                         SendExplorationExperience(areaId, 0);
                     }
                     else
                     {
                         ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
-                        int diff = (int)(GetLevel()) - areaLevel;
+                        int diff = (int)GetLevel() - areaLevel;
                         uint XP;
                         if (diff < -5)
                         {
@@ -6635,7 +6640,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
 
             // XP to money conversion processed in Player.RewardQuest
-            if (level >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (IsMaxLevel())
                 return;
 
             uint bonus_xp;
@@ -6659,11 +6664,11 @@ namespace Game.Entities
             uint nextLvlXP = GetXPForNextLevel();
             uint newXP = GetXP() + xp + bonus_xp;
 
-            while (newXP >= nextLvlXP && level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            while (newXP >= nextLvlXP && !IsMaxLevel())
             {
                 newXP -= nextLvlXP;
 
-                if (level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                if (!IsMaxLevel())
                     GiveLevel(level + 1);
 
                 level = GetLevel();

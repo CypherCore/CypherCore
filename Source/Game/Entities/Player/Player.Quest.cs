@@ -1053,7 +1053,7 @@ namespace Game.Entities
             uint XP = GetQuestXPReward(quest);
 
             int moneyRew = 0;
-            if (GetLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (!IsMaxLevel())
                 GiveXP(XP, null);
             else
                 moneyRew = (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
@@ -2725,7 +2725,7 @@ namespace Game.Entities
 
             uint moneyReward;
 
-            if (GetLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (!IsMaxLevel())
             {
                 moneyReward = GetQuestMoneyReward(quest);
             }

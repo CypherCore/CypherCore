@@ -3129,7 +3129,7 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerIsAtMaxExpansionLevel: // 264
-                    if (referencePlayer.GetLevel() != Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
+                    if (!referencePlayer.IsMaxLevel())
                         return false;
                     break;
                 case ModifierTreeType.TransmogSource: // 265
