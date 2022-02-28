@@ -2449,21 +2449,27 @@ namespace Game.Entities
             if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
                 return false;
 
+            Unit unitOrOwner = unit;
+            GameObject go = ToGameObject();
+            if (go != null)
+                if (go.GetGoType() == GameObjectTypes.Trap)
+                    unitOrOwner = go.GetOwner();
+
             // ignore immunity flags when assisting
-            if (unit != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
+            if (unitOrOwner != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
             {
-                if (!unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToNPC())
+                if (!unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToNPC())
                     return false;
 
-                if (!unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit.IsImmuneToNPC())
+                if (!unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner.IsImmuneToNPC())
                     return false;
 
                 if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
                 {
-                    if (unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToPC())
+                    if (unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToPC())
                         return false;
 
-                    if (unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit.IsImmuneToPC())
+                    if (unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner.IsImmuneToPC())
                         return false;
                 }
             }
@@ -2519,7 +2525,7 @@ namespace Game.Entities
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (unitTarget && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.HasUnitFlag(UnitFlags.PlayerControlled) && (unitTarget.IsInSanctuary() || unit.IsInSanctuary()))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner != null && unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && (unitTarget.IsInSanctuary() || unitOrOwner.IsInSanctuary()))
                 return false;
 
             // additional checks - only PvP case
