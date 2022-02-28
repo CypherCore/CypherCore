@@ -3537,6 +3537,7 @@ namespace Game.Spells
                     case AuraType.ModRangedAttackPower:
                     case AuraType.ModDamagePercentDone:
                     case AuraType.ModSpeedSlowAll:
+                    case AuraType.MeleeSlow:
                     case AuraType.ModAttackPowerPct:
                         if (!_isPositiveTarget(effect) || bp < 0)
                             return false;
