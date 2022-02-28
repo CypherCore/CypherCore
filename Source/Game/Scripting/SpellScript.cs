@@ -649,9 +649,11 @@ namespace Game.Scripting
             }
             return m_spell.GetCorpseTargetCountForEffect(effect);
         }
-        
-        // methods useable only during spell hit on target, or during spell launch on target:
-        // returns: target of current effect if it was Unit otherwise null
+
+        /// <summary>
+        /// useable only during spell hit on target, or during spell launch on target
+        /// </summary>
+        /// <returns>target of current effect if it was Unit otherwise null</returns>
         public Unit GetHitUnit()
         {
             if (!IsInTargetHook())
@@ -661,7 +663,11 @@ namespace Game.Scripting
             }
             return m_spell.unitTarget;
         }
-        // returns: target of current effect if it was Creature otherwise null
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>target of current effect if it was Creature otherwise null</returns>
         public Creature GetHitCreature()
         {
             if (!IsInTargetHook())
@@ -674,7 +680,11 @@ namespace Game.Scripting
             else
                 return null;
         }
-        // returns: target of current effect if it was Player otherwise null
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>target of current effect if it was Player otherwise null</returns>
         public Player GetHitPlayer()
         {
             if (!IsInTargetHook())
@@ -687,7 +697,11 @@ namespace Game.Scripting
             else
                 return null;
         }
-        // returns: target of current effect if it was Item otherwise null
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>target of current effect if it was Item otherwise null</returns>
         public Item GetHitItem()
         {
             if (!IsInTargetHook())
@@ -697,7 +711,11 @@ namespace Game.Scripting
             }
             return m_spell.itemTarget;
         }
-        // returns: target of current effect if it was GameObject otherwise null
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>target of current effect if it was GameObject otherwise null</returns>
         public GameObject GetHitGObj()
         {
             if (!IsInTargetHook())
@@ -707,7 +725,25 @@ namespace Game.Scripting
             }
             return m_spell.gameObjTarget;
         }
-        // returns: destination of current effect
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>target of current effect if it was Corpse otherwise nullptr</returns>
+        public Corpse GetHitCorpse()
+        {
+            if (!IsInTargetHook())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetHitCorpse was called, but function has no effect in current hook!");
+                return null;
+            }
+            return m_spell.corpseTarget;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>destination of current effect</returns>
         public WorldLocation GetHitDest()
         {
             if (!IsInEffectHook())
@@ -717,6 +753,7 @@ namespace Game.Scripting
             }
             return m_spell.destTarget;
         }
+
         // setter/getter for for damage done by spell to target of spell hit
         // returns damage calculated before hit, and real dmg done after hit
         public int GetHitDamage()
