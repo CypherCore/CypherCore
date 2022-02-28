@@ -630,6 +630,18 @@ namespace Game.Spells
                         return;
                     }
                     break;
+                case SpellTargetObjectTypes.Corpse:
+                    Corpse corpseTarget = target.ToCorpse();
+                    if (corpseTarget != null)
+                        AddCorpseTarget(corpseTarget, effMask);
+                    else
+                    {
+                        Log.outDebug(LogFilter.Spells, $"Spell::SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected corpse, got {target.GetGUID().GetTypeId()}, effect {effMask}");
+                        SendCastResult(SpellCastResult.BadImplicitTargets);
+                        Finish(false);
+                        return;
+                    }
+                    break;
                 case SpellTargetObjectTypes.Dest:
                     SpellDestination dest = new(target);
                     CallScriptDestinationTargetSelectHandlers(ref dest, spellEffectInfo.EffectIndex, targetType);
@@ -694,12 +706,12 @@ namespace Game.Spells
 
                     foreach (var obj in targets)
                     {
-                        Unit unitTarget = obj.ToUnit();
-                        GameObject gObjTarget = obj.ToGameObject();
-                        if (unitTarget)
-                            AddUnitTarget(unitTarget, effMask, false);
-                        else if (gObjTarget)
-                            AddGOTarget(gObjTarget, effMask);
+                        if (obj.IsUnit())
+                            AddUnitTarget(obj.ToUnit(), effMask, false);
+                        else if (obj.IsGameObject())
+                            AddGOTarget(obj.ToGameObject(), effMask);
+                        else if (obj.IsCorpse())
+                            AddCorpseTarget(obj.ToCorpse(), effMask);
                     }
                 }
             }
@@ -825,12 +837,12 @@ namespace Game.Spells
 
                 foreach (var obj in targets)
                 {
-                    Unit unitTarget = obj.ToUnit();
-                    GameObject gObjTarget = obj.ToGameObject();
-                    if (unitTarget)
-                        AddUnitTarget(unitTarget, effMask, false, true, center);
-                    else if (gObjTarget)
-                        AddGOTarget(gObjTarget, effMask);
+                    if (obj.IsUnit())
+                        AddUnitTarget(obj.ToUnit(), effMask, false, true, center);
+                    else if (obj.IsGameObject())
+                        AddGOTarget(obj.ToGameObject(), effMask);
+                    else if (obj.IsCorpse())
+                        AddCorpseTarget(obj.ToCorpse(), effMask);
                 }
             }
         }
@@ -1157,15 +1169,12 @@ namespace Game.Spells
 
             if (target)
             {
-                Unit unit = target.ToUnit();
-                if (unit != null)
-                    AddUnitTarget(unit, 1u << (int)spellEffectInfo.EffectIndex, checkIfValid);
-                else
-                {
-                    GameObject go = target.ToGameObject();
-                    if (go != null)
-                        AddGOTarget(go, 1u << (int)spellEffectInfo.EffectIndex);
-                }
+                if (target.IsUnit())
+                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, checkIfValid);
+                else if (target.IsGameObject())
+                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                else if (target.IsCorpse())
+                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
             }
         }
 
@@ -1178,10 +1187,12 @@ namespace Game.Spells
             Item item = m_targets.GetItemTarget();
             if (target != null)
             {
-                if (target.ToUnit())
+                if (target.IsUnit())
                     AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, true, false);
-                else if (target.IsTypeId(TypeId.GameObject))
+                else if (target.IsGameObject())
                     AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                else if (target.IsCorpse())
+                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
 
                 SelectImplicitChainTargets(spellEffectInfo, targetType, target, 1u << (int)spellEffectInfo.EffectIndex);
             }
@@ -1370,15 +1381,12 @@ namespace Game.Spells
 
                     foreach (var obj in targets)
                     {
-                        Unit unit = obj.ToUnit();
-                        if (unit != null)
-                            AddUnitTarget(unit, effMask, false);
-                        else
-                        {
-                            GameObject gObjTarget = obj.ToGameObject();
-                            if (gObjTarget != null)
-                                AddGOTarget(gObjTarget, effMask);
-                        }
+                        if (obj.IsUnit())
+                            AddUnitTarget(obj.ToUnit(), effMask, false);
+                        else if (obj.IsGameObject())
+                            AddGOTarget(obj.ToGameObject(), effMask);
+                        else if (obj.IsCorpse())
+                            AddCorpseTarget(obj.ToCorpse(), effMask);
                     }
                 }
             }
@@ -1417,7 +1425,7 @@ namespace Game.Spells
                                 if (player.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, null))
                                     return;
 
-                                HandleEffects(player, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+                                HandleEffects(player, null, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
                             });
                         }
                     }
@@ -1451,12 +1459,7 @@ namespace Game.Spells
                         {
                             Corpse corpseTarget = m_targets.GetCorpseTarget();
                             if (corpseTarget != null)
-                            {
-                                // @todo this is a workaround - corpses should be added to spell target map too, but we can't do that so we add owner instead
-                                Player owner = Global.ObjAccessor.FindPlayer(corpseTarget.GetOwnerGUID());
-                                if (owner != null)
-                                    target = owner;
-                            }
+                                target = corpseTarget;
                         }
                         else //if (targetMask & TARGET_FLAG_UNIT_MASK)
                             target = m_caster;
@@ -1484,10 +1487,12 @@ namespace Game.Spells
 
             if (target != null)
             {
-                if (target.ToUnit())
+                if (target.IsUnit())
                     AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, false);
-                else if (target.IsTypeId(TypeId.GameObject))
+                else if (target.IsGameObject())
                     AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                else if (target.IsCorpse())
+                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
             }
         }
 
@@ -1501,6 +1506,12 @@ namespace Game.Spells
             {
                 case SpellTargetObjectTypes.Unit:
                 case SpellTargetObjectTypes.UnitAndDest:
+                    if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
+                    {
+                        retMask &= GridMapTypeMask.Player | GridMapTypeMask.Creature;
+                        break;
+                    }
+                    goto case SpellTargetObjectTypes.Corpse;
                 case SpellTargetObjectTypes.Corpse:
                 case SpellTargetObjectTypes.CorpseEnemy:
                 case SpellTargetObjectTypes.CorpseAlly:
@@ -1513,8 +1524,7 @@ namespace Game.Spells
                 default:
                     break;
             }
-            if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
-                retMask &= ~GridMapTypeMask.Corpse;
+
             if (m_spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers))
                 retMask &= GridMapTypeMask.Corpse | GridMapTypeMask.Player;
             if (m_spellInfo.HasAttribute(SpellAttr3.OnlyTargetGhosts))
@@ -1920,6 +1930,58 @@ namespace Game.Spells
             m_UniqueItemInfo.Add(target);
         }
 
+        void AddCorpseTarget(Corpse corpse, uint effectMask)
+        {
+            foreach (SpellEffectInfo spellEffectInfo in m_spellInfo.GetEffects())
+                if (!spellEffectInfo.IsEffect())
+                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+
+            // no effects left
+            if (effectMask == 0)
+                return;
+
+            ObjectGuid targetGUID = corpse.GetGUID();
+
+            // Lookup target in already in list
+            var corpseTargetInfo = m_UniqueCorpseTargetInfo.Find(target => { return target.TargetGUID == targetGUID; });
+            if (corpseTargetInfo != null) // Found in list
+            {
+                // Add only effect mask
+                corpseTargetInfo.EffectMask |= effectMask;
+                return;
+            }
+
+            // This is new target calculate data for him
+            CorpseTargetInfo target = new();
+            target.TargetGUID = targetGUID;
+            target.EffectMask = effectMask;
+
+            // Spell have speed - need calculate incoming time
+            if (m_caster != corpse)
+            {
+                float hitDelay = m_spellInfo.LaunchDelay;
+                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                    hitDelay += m_spellInfo.Speed;
+                else if (m_spellInfo.Speed > 0.0f)
+                {
+                    // calculate spell incoming interval
+                    float dist = Math.Max(m_caster.GetDistance(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ()), 5.0f);
+                    hitDelay += dist / m_spellInfo.Speed;
+                }
+
+                target.TimeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
+            }
+            else
+                target.TimeDelay = 0;
+
+            // Calculate minimum incoming time
+            if (target.TimeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > target.TimeDelay))
+                m_delayMoment = target.TimeDelay;
+
+            // Add target to list
+            m_UniqueCorpseTargetInfo.Add(target);
+        }
+
         void AddDestTarget(SpellDestination dest, uint effIndex)
         {
             m_destTargets[effIndex] = dest;
@@ -1940,6 +2002,11 @@ namespace Game.Spells
             return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
         }
 
+        public long GetCorpseTargetCountForEffect(uint effect)
+        {
+            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << (int)effect)) != 0);
+        }
+        
         public SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
         {
             if (unit == null)
@@ -2149,7 +2216,7 @@ namespace Game.Spells
             }
 
             spellAura = hitInfo.HitAura;
-            HandleEffects(unit, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+            HandleEffects(unit, null, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
             spellAura = null;
         }
 
@@ -2909,6 +2976,8 @@ namespace Game.Spells
 
             DoProcessTargetContainer(m_UniqueGOTargetInfo);
 
+            DoProcessTargetContainer(m_UniqueCorpseTargetInfo);
+
             FinishTargetProcessing();
 
             // spell is finished, perform some last features of the spell here
@@ -3043,7 +3112,7 @@ namespace Game.Spells
                     continue;
 
                 // call effect handlers to handle destination hit
-                HandleEffects(null, null, null, spellEffectInfo, SpellEffectHandleMode.Hit);
+                HandleEffects(null, null, null, null, spellEffectInfo, SpellEffectHandleMode.Hit);
             }
 
             // process items
@@ -3770,6 +3839,9 @@ namespace Game.Spells
             foreach (GOTargetInfo targetInfo in m_UniqueGOTargetInfo)
                 data.HitTargets.Add(targetInfo.TargetGUID); // Always hits
 
+            foreach (CorpseTargetInfo targetInfo in m_UniqueCorpseTargetInfo)
+                data.HitTargets.Add(targetInfo.TargetGUID); // Always hits
+
             // Reset m_needAliveTargetMask for non channeled spell
             if (!m_spellInfo.IsChanneled())
                 m_channelTargetEffectMask = 0;
@@ -4386,12 +4458,13 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
         }
 
-        public void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGOTarget, SpellEffectInfo spellEffectInfo, SpellEffectHandleMode mode)
+        public void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGoTarget, Corpse pCorpseTarget, SpellEffectInfo spellEffectInfo, SpellEffectHandleMode mode)
         {
             effectHandleMode = mode;
             unitTarget = pUnitTarget;
             itemTarget = pItemTarget;
-            gameObjTarget = pGOTarget;
+            gameObjTarget = pGoTarget;
+            corpseTarget = pCorpseTarget;
             destTarget = m_destTargets[spellEffectInfo.EffectIndex].Position;
             effectInfo = spellEffectInfo;
             unitCaster = m_originalCaster ? m_originalCaster : m_caster.ToUnit();
@@ -6923,7 +6996,7 @@ namespace Game.Spells
                 if (!spellEffectInfo.IsEffect())
                     continue;
 
-                HandleEffects(null, null, null, spellEffectInfo, SpellEffectHandleMode.Launch);
+                HandleEffects(null, null, null, null, spellEffectInfo, SpellEffectHandleMode.Launch);
             }
 
             PrepareTargetProcessing();
@@ -6966,7 +7039,7 @@ namespace Game.Spells
             m_damage = 0;
             m_healing = 0;
 
-            HandleEffects(unit, null, null, spellEffectInfo, SpellEffectHandleMode.LaunchTarget);
+            HandleEffects(unit, null, null, null, spellEffectInfo, SpellEffectHandleMode.LaunchTarget);
 
             if (m_originalCaster != null && m_damage > 0)
             {
@@ -7708,6 +7781,7 @@ namespace Game.Spells
         public Unit unitTarget;
         public Item itemTarget;
         public GameObject gameObjTarget;
+        public Corpse corpseTarget;
         public WorldLocation destTarget;
         public int damage;
         public SpellMissInfo targetMissInfo;
@@ -7741,8 +7815,8 @@ namespace Game.Spells
         uint m_channelTargetEffectMask;                        // Mask req. alive targets
 
         List<GOTargetInfo> m_UniqueGOTargetInfo = new();
-
         List<ItemTargetInfo> m_UniqueItemInfo = new();
+        List<CorpseTargetInfo> m_UniqueCorpseTargetInfo = new();
 
         SpellDestination[] m_destTargets = new SpellDestination[SpellConst.MaxEffects];
 
@@ -8296,7 +8370,7 @@ namespace Game.Spells
 
             spell.CallScriptBeforeHitHandlers(SpellMissInfo.None);
 
-            spell.HandleEffects(null, null, go, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+            spell.HandleEffects(null, null, go, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
 
             //AI functions
             if (go.GetAI() != null)
@@ -8320,13 +8394,33 @@ namespace Game.Spells
         {
             spell.CallScriptBeforeHitHandlers(SpellMissInfo.None);
 
-            spell.HandleEffects(null, TargetItem, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+            spell.HandleEffects(null, TargetItem, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
 
             spell.CallScriptOnHitHandlers();
             spell.CallScriptAfterHitHandlers();
         }
     }
 
+    public class CorpseTargetInfo : TargetInfoBase
+    {
+        public ObjectGuid TargetGUID;
+        public ulong TimeDelay;
+
+        public override void DoTargetSpellHit(Spell spell, SpellEffectInfo spellEffectInfo)
+        {
+            Corpse corpse = ObjectAccessor.GetCorpse(spell.GetCaster(), TargetGUID);
+            if (corpse == null)
+                return;
+
+            spell.CallScriptBeforeHitHandlers(SpellMissInfo.None);
+
+            spell.HandleEffects(null, null, null, corpse, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+
+            spell.CallScriptOnHitHandlers();
+            spell.CallScriptAfterHitHandlers();
+        }
+    }
+    
     public class SpellValue
     {
         public SpellValue(SpellInfo proto, WorldObject caster)
@@ -8418,13 +8512,13 @@ namespace Game.Spells
                 _condSrcInfo = new ConditionSourceInfo(null, caster);
         }
 
-        public virtual bool Invoke(WorldObject obj)
+        public virtual bool Invoke(WorldObject target)
         {
-            if (_spellInfo.CheckTarget(_caster, obj, true) != SpellCastResult.SpellCastOk)
+            if (_spellInfo.CheckTarget(_caster, target, true) != SpellCastResult.SpellCastOk)
                 return false;
 
-            Unit unitTarget = obj.ToUnit();
-            Corpse corpseTarget = obj.ToCorpse();
+            Unit unitTarget = target.ToUnit();
+            Corpse corpseTarget = target.ToCorpse();
             if (corpseTarget != null)
             {
                 // use owner for party/assistance checks
@@ -8444,13 +8538,15 @@ namespace Game.Spells
                     case SpellTargetCheckTypes.Enemy:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster.IsValidAttackTarget(unitTarget, _spellInfo))
+                        // TODO: restore IsValidAttackTarget for corpses using corpse owner (faction, etc)
+                        if (!target.IsCorpse() && !_caster.IsValidAttackTarget(unitTarget, _spellInfo))
                             return false;
                         break;
                     case SpellTargetCheckTypes.Ally:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
+                        // TODO: restore IsValidAttackTarget for corpses using corpse owner (faction, etc)
+                        if (!target.IsCorpse() && !_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         break;
                     case SpellTargetCheckTypes.Party:
@@ -8458,7 +8554,8 @@ namespace Game.Spells
                             return false;
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
+                        // TODO: restore IsValidAttackTarget for corpses using corpse owner (faction, etc)
+                        if (!target.IsCorpse() && !_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         if (!refUnit.IsInPartyWith(unitTarget))
                             return false;
@@ -8474,7 +8571,8 @@ namespace Game.Spells
                             return false;
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
+                        // TODO: restore IsValidAttackTarget for corpses using corpse owner (faction, etc)
+                        if (!target.IsCorpse() && !_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         if (!refUnit.IsInRaidWith(unitTarget))
                             return false;
@@ -8514,7 +8612,7 @@ namespace Game.Spells
             if (_condSrcInfo == null)
                 return true;
 
-            _condSrcInfo.mConditionTargets[0] = obj;
+            _condSrcInfo.mConditionTargets[0] = target;
             return Global.ConditionMgr.IsObjectMeetToConditions(_condSrcInfo, _condList);
         }
     }

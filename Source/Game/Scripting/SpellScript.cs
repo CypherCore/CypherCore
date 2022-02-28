@@ -640,6 +640,16 @@ namespace Game.Scripting
             return m_spell.GetItemTargetCountForEffect(effect);
         }
 
+        public long GetCorpseTargetCountForEffect(uint effect)
+        {
+            if (!IsAfterTargetSelectionPhase())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetCorpseTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                return 0;
+            }
+            return m_spell.GetCorpseTargetCountForEffect(effect);
+        }
+        
         // methods useable only during spell hit on target, or during spell launch on target:
         // returns: target of current effect if it was Unit otherwise null
         public Unit GetHitUnit()

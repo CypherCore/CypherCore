@@ -67,25 +67,27 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || unitTarget.IsAlive())
+            if (corpseTarget == null && unitTarget == null)
                 return;
 
-            if (!unitTarget.IsTypeId(TypeId.Player))
+            Player player = null;
+
+            if (corpseTarget)
+                player = Global.ObjAccessor.FindPlayer(corpseTarget.GetOwnerGUID());
+            else if (unitTarget)
+                player = unitTarget.ToPlayer();
+
+            if (player == null || player.IsAlive() || !player.IsInWorld)
                 return;
 
-            if (!unitTarget.IsInWorld)
-                return;
-
-            Player target = unitTarget.ToPlayer();
-
-            if (target.IsResurrectRequested())       // already have one active request
+            if (player.IsResurrectRequested())       // already have one active request
                 return;
 
             int health = damage;
             int mana = effectInfo.MiscValue;
-            ExecuteLogEffectResurrect(effectInfo.Effect, target);
-            target.SetResurrectRequestData(m_caster, (uint)health, (uint)mana, 0);
-            SendResurrectRequest(target);
+            ExecuteLogEffectResurrect(effectInfo.Effect, player);
+            player.SetResurrectRequestData(m_caster, (uint)health, (uint)mana, 0);
+            SendResurrectRequest(player);
         }
 
         [SpellEffectHandler(SpellEffectName.Instakill)]
@@ -178,7 +180,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (!unitTarget && !gameObjTarget && !itemTarget)
+            if (unitTarget == null && gameObjTarget == null && itemTarget == null && corpseTarget == null)
                 return;
 
             // pet auras
@@ -700,6 +702,8 @@ namespace Game.Spells
                     target = unitTarget;
                 else if (gameObjTarget != null)
                     target = gameObjTarget;
+                else if (corpseTarget != null)
+                    target = corpseTarget;
             }
             else // if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
@@ -3282,24 +3286,29 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
+            if (corpseTarget == null && unitTarget == null)
                 return;
 
-            if (unitTarget.IsAlive() || !unitTarget.IsInWorld)
+            Player player = null;
+
+            if (corpseTarget)
+                player = Global.ObjAccessor.FindPlayer(corpseTarget.GetOwnerGUID());
+            else if (unitTarget)
+                player = unitTarget.ToPlayer();
+
+            if (player == null || player.IsAlive() || !player.IsInWorld)
                 return;
 
-            Player target = unitTarget.ToPlayer();
-
-            if (target.IsResurrectRequested())       // already have one active request
+            if (player.IsResurrectRequested())       // already have one active request
                 return;
 
-            uint health = (uint)target.CountPctFromMaxHealth(damage);
-            uint mana = (uint)MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), damage);
+            uint health = (uint)player.CountPctFromMaxHealth(damage);
+            uint mana = (uint)MathFunctions.CalculatePct(player.GetMaxPower(PowerType.Mana), damage);
 
-            ExecuteLogEffectResurrect(effectInfo.Effect, target);
+            ExecuteLogEffectResurrect(effectInfo.Effect, player);
 
-            target.SetResurrectRequestData(m_caster, health, mana, 0);
-            SendResurrectRequest(target);
+            player.SetResurrectRequestData(m_caster, health, mana, 0);
+            SendResurrectRequest(player);
         }
 
         [SpellEffectHandler(SpellEffectName.AddExtraAttacks)]
@@ -4234,7 +4243,12 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "Effect: SkinPlayerCorpse");
 
             Player player = m_caster.ToPlayer();
-            Player target = unitTarget.ToPlayer();
+            Player target = null;
+            if (unitTarget != null)
+                target = unitTarget.ToPlayer();
+            else if (corpseTarget != null)
+                target = Global.ObjAccessor.FindPlayer(corpseTarget.GetOwnerGUID());
+
             if (player == null || target == null || target.IsAlive())
                 return;
 
