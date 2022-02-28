@@ -575,8 +575,6 @@ namespace Game.AI
             _despawnState = 0;
             _escortState = SmartEscortState.None;
 
-            me.SetVisible(true);
-
             _followGuid.Clear();//do not reset follower on Reset(), we need it after combat evade
             _followDist = 0;
             _followAngle = 0;
