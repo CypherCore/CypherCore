@@ -3502,8 +3502,7 @@ namespace Game.Spells
                 // non-positive aura use
                 switch (effect.ApplyAuraName)
                 {
-                    case AuraType.ModDamageDone:            // dependent from basepoint sign (negative . negative)
-                    case AuraType.ModStat:
+                    case AuraType.ModStat:                    // dependent from basepoint sign (negative -> negative)
                     case AuraType.ModSkill:
                     case AuraType.ModSkill2:
                     case AuraType.ModDodgePercent:
@@ -3520,17 +3519,21 @@ namespace Game.Spells
                     case AuraType.ModMeleeRangedHaste:
                     case AuraType.ModCastingSpeedNotStack:
                     case AuraType.HasteSpells:
-                    case AuraType.ModResistance:
                     case AuraType.ModRecoveryRateBySpellLabel:
                     case AuraType.ModDetectRange:
                     case AuraType.ModIncreaseHealthPercent:
                     case AuraType.ModTotalStatPercentage:
                     case AuraType.ModIncreaseSwimSpeed:
+                    case AuraType.ModPercentStat:
+                    case AuraType.ModIncreaseHealth:
+                    case AuraType.ModSpeedAlways:
                         if (bp < 0 || bpScalePerLevel < 0) //TODO: What if both are 0? Should it be a buff or debuff?
                             return false;
                         break;
                     case AuraType.ModAttackspeed:            // some buffs have negative bp, check both target and bp
                     case AuraType.ModMeleeHaste:
+                    case AuraType.ModDamageDone:
+                    case AuraType.ModResistance:
                     case AuraType.ModResistancePct:
                     case AuraType.ModRating:
                     case AuraType.ModAttackPower:
@@ -3539,14 +3542,13 @@ namespace Game.Spells
                     case AuraType.ModSpeedSlowAll:
                     case AuraType.MeleeSlow:
                     case AuraType.ModAttackPowerPct:
+                    case AuraType.ModHealingDonePercent:
                         if (!_isPositiveTarget(effect) || bp < 0)
                             return false;
                         break;
                     case AuraType.ModDamageTaken:           // dependent from basepoint sign (positive . negative)
                     case AuraType.ModMeleeDamageTaken:
                     case AuraType.ModMeleeDamageTakenPct:
-                    case AuraType.ModCooldown:
-                    case AuraType.ModChargeCooldown:
                     case AuraType.ModPowerCostSchool:
                     case AuraType.ModPowerCostSchoolPct:
                     case AuraType.ModMechanicDamageTakenPercent:
@@ -3616,6 +3618,19 @@ namespace Game.Spells
                     case AuraType.Dummy:
                     case AuraType.PeriodicDummy:
                     case AuraType.ModHealing:
+                    case AuraType.ModWeaponCritPercent:
+                    case AuraType.PowerBurn:
+                    case AuraType.ModCooldown:
+                    case AuraType.ModChargeCooldown:
+                    case AuraType.ModIncreaseSpeed:
+                    case AuraType.ModParryPercent:
+                    case AuraType.SetVehicleId:
+                    case AuraType.PeriodicEnergize:
+                    case AuraType.EffectImmunity:
+                    case AuraType.OverrideClassScripts:
+                    case AuraType.ModShapeshift:
+                    case AuraType.ModThreat:
+                    case AuraType.ProcTriggerSpellWithValue:
                         // check target for positive and negative spells
                         if (!_isPositiveTarget(effect))
                             return false;
