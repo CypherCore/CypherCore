@@ -3233,7 +3233,7 @@ namespace Game.Spells
 
                 var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
                 if (unitCondition != null)
-                    if (!caster || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer.ToUnit(), unitCondition))
+                    if (!caster || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer?.ToUnit(), unitCondition))
                         continue;
 
                 return visual.Id;
@@ -3517,6 +3517,7 @@ namespace Game.Spells
                     case AuraType.ModSpellHitChance:
                     case AuraType.ModSpellCritChance:
                     case AuraType.ModRangedHaste:
+                    case AuraType.ModMeleeRangedHaste:
                     case AuraType.ModCastingSpeedNotStack:
                     case AuraType.HasteSpells:
                     case AuraType.ModResistance:
