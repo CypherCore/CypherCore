@@ -290,12 +290,12 @@ namespace Scripts.World.GameObjects
     {
         // These Are In Seconds
         //Brewfestmusictime
-        public const uint EventBrewfestdwarf01Time = 95000;
-        public const uint EventBrewfestdwarf02Time = 155000;
-        public const uint EventBrewfestdwarf03Time = 23000;
-        public const uint EventBrewfestgoblin01Time = 68000;
-        public const uint EventBrewfestgoblin02Time = 93000;
-        public const uint EventBrewfestgoblin03Time = 28000;
+        public static TimeSpan EventBrewfestdwarf01Time = TimeSpan.FromSeconds(95);
+        public static TimeSpan EventBrewfestdwarf02Time = TimeSpan.FromSeconds(155);
+        public static TimeSpan EventBrewfestdwarf03Time = TimeSpan.FromSeconds(23);
+        public static TimeSpan EventBrewfestgoblin01Time = TimeSpan.FromSeconds(68);
+        public static TimeSpan EventBrewfestgoblin02Time = TimeSpan.FromSeconds(93);
+        public static TimeSpan EventBrewfestgoblin03Time = TimeSpan.FromSeconds(28);
 
         //Bellhourlymisc
         public const uint GameEventHourlyBells = 73;
@@ -816,7 +816,7 @@ namespace Scripts.World.GameObjects
     class go_brewfest_music : GameObjectAI
     {
         uint rnd = 0;
-        uint musicTime = 1000;
+        TimeSpan musicTime = TimeSpan.FromSeconds(1);
 
         public go_brewfest_music(GameObject go) : base(go)
         {
@@ -825,7 +825,7 @@ namespace Scripts.World.GameObjects
                 if (Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
                 {
                     rnd = RandomHelper.URand(0, 2); // Select random music sample
-                    task.Repeat(TimeSpan.FromMilliseconds(musicTime)); // Select new song music after play time is over
+                    task.Repeat(musicTime); // Select new song music after play time is over
                 }
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>

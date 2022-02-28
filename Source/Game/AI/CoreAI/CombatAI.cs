@@ -83,7 +83,7 @@ namespace Game.AI
                 DoCast(spellId);
                 AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
                 if (info != null)
-                    _events.ScheduleEvent(spellId, info.cooldown + RandomHelper.Rand32() % info.cooldown);
+                    _events.ScheduleEvent(spellId, info.cooldown, info.cooldown * 2);
             }
             else
                 DoMeleeAttackIfReady();
