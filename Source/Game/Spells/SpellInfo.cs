@@ -3557,6 +3557,10 @@ namespace Game.Spells
                         if (!_isPositiveTarget(effect) && bp > 0)
                             return false;
                         break;
+                    case AuraType.ModHealthRegenPercent:   // check targets and basepoints (target enemy and negative bp -> negative)
+                        if (!_isPositiveTarget(effect) && bp < 0)
+                            return false;
+                        break;
                     case AuraType.AddTargetTrigger:
                         return true;
                     case AuraType.PeriodicTriggerSpellWithValue:
