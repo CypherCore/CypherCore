@@ -2451,8 +2451,7 @@ namespace Game.Entities
 
             Unit unitOrOwner = unit;
             GameObject go = ToGameObject();
-            if (go != null)
-                if (go.GetGoType() == GameObjectTypes.Trap)
+            if (go?.GetGoType() == GameObjectTypes.Trap)
                     unitOrOwner = go.GetOwner();
 
             // ignore immunity flags when assisting
@@ -2476,15 +2475,24 @@ namespace Game.Entities
 
             // CvC case - can attack each other only when one of them is hostile
             if (unit && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
-                return IsHostileTo(target) || target.IsHostileTo(this);
+                return IsHostileTo(unitTarget) || unitTarget.IsHostileTo(this);
+
+            // Traps without owner or with NPC owner versus Creature case - can attack to creature only when one of them is hostile
+            if (go?.GetGoType() == GameObjectTypes.Trap)
+            {
+                Unit goOwner = go.GetOwner();
+                if (goOwner == null || !goOwner.HasUnitFlag(UnitFlags.PlayerControlled))
+                    if (unitTarget && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
+                        return IsHostileTo(unitTarget) || unitTarget.IsHostileTo(this);
+            }
 
             // PvP, PvC, CvP case
             // can't attack friendly targets
             if (IsFriendlyTo(target) || target.IsFriendlyTo(this))
                 return false;
 
-            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : IsGameObject() ? GetAffectingPlayer() : null;
-            Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) ? target.GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : go != null ? GetAffectingPlayer() : null;
+            Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) ? unitTarget.GetAffectingPlayer() : null;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
             if ((playerAffectingAttacker && !playerAffectingTarget) || (!playerAffectingAttacker && playerAffectingTarget))
