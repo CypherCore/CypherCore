@@ -2789,7 +2789,7 @@ namespace Game.Entities
         public virtual byte GetPetAutoSpellSize() { return 4; }
         public virtual uint GetPetAutoSpellOnPos(byte pos)
         {
-            if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
+            if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
                 return 0;
             else
                 return GetCharmInfo().GetCharmSpell(pos).GetAction();
