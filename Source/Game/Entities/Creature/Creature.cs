@@ -2994,7 +2994,7 @@ namespace Game.Entities
                 }
             }
 
-            if (!HasUnitFlag2(UnitFlags2.DisableTurn))
+            if (!HasUnitFlag2(UnitFlags2.CannotTurn))
             {
                 // Face the target - we need to do this before the unit state is modified for no-turn spells
                 if (target)
@@ -3041,7 +3041,7 @@ namespace Game.Entities
 
             if (IsPet()) // player pets do not use delay system
             {
-                if (!HasUnitFlag2(UnitFlags2.DisableTurn))
+                if (!HasUnitFlag2(UnitFlags2.CannotTurn))
                     ReacquireSpellFocusTarget();
             }
             else // don't allow re-target right away to prevent visual bugs
@@ -3060,7 +3060,7 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _spellFocusInfo.Target);
 
-            if (!HasUnitFlag2(UnitFlags2.DisableTurn))
+            if (!HasUnitFlag2(UnitFlags2.CannotTurn))
             {
                 if (!_spellFocusInfo.Target.IsEmpty())
                 {

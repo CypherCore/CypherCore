@@ -52,7 +52,7 @@ namespace Game.Entities
         public virtual bool CanSwim()
         {
             // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
-            if (HasUnitFlag(UnitFlags.CannotSwim))
+            if (HasUnitFlag(UnitFlags.CantSwim))
                 return false;
             if (HasUnitFlag(UnitFlags.PlayerControlled)) // is player
                 return true;
@@ -61,7 +61,7 @@ namespace Game.Entities
             if (IsPet() && HasUnitFlag(UnitFlags.PetInCombat))
                 return true;
 
-            return HasUnitFlag(UnitFlags.Rename | UnitFlags.Swimming);
+            return HasUnitFlag(UnitFlags.Rename | UnitFlags.CanSwim);
         }
         public bool IsInWater()
         {
