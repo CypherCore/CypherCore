@@ -3567,30 +3567,27 @@ namespace Game.Spells
                         return true;
                     case AuraType.PeriodicTriggerSpellWithValue:
                     case AuraType.PeriodicTriggerSpellFromClient:
-                    case AuraType.PeriodicTriggerSpell:
-                        if (!_isPositiveTarget(effect))
+                        SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
+                        if (spellTriggeredProto != null)
                         {
-                            SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
-                            if (spellTriggeredProto != null)
+                            // negative targets of main spell return early
+                            foreach (var spellTriggeredEffect in spellTriggeredProto.GetEffects())
                             {
-                                // negative targets of main spell return early
-                                foreach (var spellTriggeredEffect in spellTriggeredProto.GetEffects())
-                                {
-                                    // already seen this
-                                    if (visited.Contains(Tuple.Create(spellTriggeredProto, spellTriggeredEffect.EffectIndex)))
-                                        continue;
+                                // already seen this
+                                if (visited.Contains(Tuple.Create(spellTriggeredProto, spellTriggeredEffect.EffectIndex)))
+                                    continue;
 
-                                    if (!spellTriggeredEffect.IsEffect())
-                                        continue;
+                                if (!spellTriggeredEffect.IsEffect())
+                                    continue;
 
-                                    // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                                    // this will place this spell auras as debuffs
-                                    if (_isPositiveTarget(spellTriggeredEffect) && !_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect, visited))
-                                        return false;
-                                }
+                                // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                                // this will place this spell auras as debuffs
+                                if (_isPositiveTarget(spellTriggeredEffect) && !_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect, visited))
+                                    return false;
                             }
-                        }
+                        }                        
                         break;
+                    case AuraType.PeriodicTriggerSpell:
                     case AuraType.ModStun:
                     case AuraType.Transform:
                     case AuraType.ModDecreaseSpeed:
