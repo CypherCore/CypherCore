@@ -376,15 +376,11 @@ namespace Game.AI
         public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
         {
             // Queue respawn from the point it starts
-            Map map = me.GetMap();
-            if (map != null)
+            CreatureData cdata = me.GetCreatureData();
+            if (cdata != null)
             {
-                CreatureData cdata = me.GetCreatureData();
-                if (cdata != null)
-                {
-                    if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
-                        me.SaveRespawnTime(me.GetRespawnDelay());
-                }
+                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+                    me.SaveRespawnTime(me.GetRespawnDelay());
             }
 
             if (me.IsEngaged())

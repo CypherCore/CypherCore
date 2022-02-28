@@ -180,15 +180,11 @@ namespace Game.AI
 
         public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
-            Map map = me.GetMap();
-            if (map != null)
+            CreatureData cdata = me.GetCreatureData();
+            if (cdata != null)
             {
-                CreatureData cdata = me.GetCreatureData();
-                if (cdata != null)
-                {
-                    if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
-                        me.SaveRespawnTime(me.GetRespawnDelay());
-                }
+                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+                    me.SaveRespawnTime(me.GetRespawnDelay());
             }
 
             if (me.IsEngaged())

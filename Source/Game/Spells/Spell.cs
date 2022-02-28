@@ -1506,12 +1506,8 @@ namespace Game.Spells
             {
                 case SpellTargetObjectTypes.Unit:
                 case SpellTargetObjectTypes.UnitAndDest:
-                    if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
-                    {
-                        retMask &= GridMapTypeMask.Player | GridMapTypeMask.Creature;
-                        break;
-                    }
-                    goto case SpellTargetObjectTypes.Corpse;
+                    retMask &= GridMapTypeMask.Player | GridMapTypeMask.Creature;
+                    break;
                 case SpellTargetObjectTypes.Corpse:
                 case SpellTargetObjectTypes.CorpseEnemy:
                 case SpellTargetObjectTypes.CorpseAlly:
