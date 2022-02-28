@@ -823,12 +823,12 @@ namespace Game
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Game Event BattlegroundData...");
+            Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Battleground Holiday Data...");
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                //                                                   0         1
-                SQLResult result = DB.World.Query("SELECT eventEntry, bgflag FROM game_event_battleground_holiday");
+                //                                         0           1
+                SQLResult result = DB.World.Query("SELECT EventEntry, BattlegroundID FROM game_event_battleground_holiday");
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_battleground_holiday` is empty.");
                 else
@@ -836,15 +836,15 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ushort event_id = result.Read<byte>(0);
+                        ushort eventId = result.Read<byte>(0);
 
-                        if (event_id >= mGameEvent.Length)
+                        if (eventId >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_battleground_holiday` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql, "`game_event_battleground_holiday` game event id ({0}) not exist in `game_event`", eventId);
                             continue;
                         }
 
-                        mGameEventBattlegroundHolidays[event_id] = result.Read<uint>(1);
+                        mGameEventBattlegroundHolidays[eventId] = result.Read<uint>(1);
 
                         ++count;
                     }
@@ -1153,11 +1153,10 @@ namespace Game
 
         void UpdateBattlegroundSettings()
         {
-            uint mask = 0;
-            foreach (var eventId in m_ActiveEvents)
-                mask |= mGameEventBattlegroundHolidays[eventId];
+            Global.BattlegroundMgr.ResetHolidays();
 
-            Global.BattlegroundMgr.SetHolidayWeekends(mask);
+            foreach (ushort activeEventId in m_ActiveEvents)
+                Global.BattlegroundMgr.SetHolidayActive(mGameEventBattlegroundHolidays[activeEventId]);
         }
 
         void UpdateEventNPCVendor(ushort eventId, bool activate)
@@ -1678,10 +1677,10 @@ namespace Game
             return false;
         }
 
-        public bool IsEventActive(ushort event_id)
+        public bool IsEventActive(ushort eventId)
         {
             var ae = GetActiveEventList();
-            return ae.Contains(event_id);
+            return ae.Contains(eventId);
         }
 
         public List<ushort> GetActiveEventList() { return m_ActiveEvents; }

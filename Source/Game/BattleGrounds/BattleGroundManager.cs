@@ -501,15 +501,21 @@ namespace Game.BattleGrounds
             Global.WorldMgr.SendWorldText(m_ArenaTesting ? CypherStrings.DebugArenaOn : CypherStrings.DebugArenaOff);
         }
 
-        public void SetHolidayWeekends(uint mask)
+        public void ResetHolidays()
         {
-            // The current code supports battlegrounds up to BattlegroundTypeId(31)
-            for (var bgtype = 1; bgtype < (int)BattlegroundTypeId.Max && bgtype < 32; ++bgtype)
+            for (var i = BattlegroundTypeId.AV; i < BattlegroundTypeId.Max; i++)
             {
-                Battleground bg = GetBattlegroundTemplate((BattlegroundTypeId)bgtype);
-                if (bg)
-                    bg.SetHoliday(Convert.ToBoolean(mask & (1 << bgtype)));
+                Battleground bg = GetBattlegroundTemplate(i);
+                if (bg != null)
+                    bg.SetHoliday(false);
             }
+        }
+
+        public void SetHolidayActive(uint battlegroundId)
+        {
+            Battleground bg = GetBattlegroundTemplate((BattlegroundTypeId)battlegroundId);
+            if (bg != null)
+                bg.SetHoliday(true);
         }
 
         public bool IsValidQueueId(BattlegroundQueueTypeId bgQueueTypeId)
