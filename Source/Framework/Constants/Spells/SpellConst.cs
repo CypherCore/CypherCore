@@ -2430,7 +2430,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum ProcFlags
+    public enum ProcFlags : uint
     {
         None = 0x0,
 
@@ -2475,6 +2475,11 @@ namespace Framework.Constants
 
         EnterCombat = 0x08000000,    // 27 Entered combat
         EncounterStart = 0x10000000,    // 28 Encounter started
+
+        CastEnded = 0x20000000,    // 29 Cast Ended
+        Looted = 0x40000000,    // 30 Looted (took from loot, not opened loot window)
+
+        TakeHelpfulPeriodic = 0x80000000,    // 31 Take Helpful Periodic
 
         // flag masks
         AutoAttackMask = DoneMeleeAutoAttack | TakenMeleeAutoAttack | DoneRangedAutoAttack | TakenRangedAutoAttack,
