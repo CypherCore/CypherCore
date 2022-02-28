@@ -4215,6 +4215,22 @@ namespace Scripts.Spells.Generic
             OnEffectHit.Add(new EffectHandler(HandleSummon, 0, SpellEffectName.Summon));
         }
     }
+
+    [Script] // 45313 - Anchor Here
+    class spell_gen_anchor_here : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Creature creature = GetHitCreature();
+            if (creature != null)
+                creature.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
     
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
