@@ -585,7 +585,7 @@ namespace Game
                         roll -= obj.chance;
                         // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
                         // so this need explicit check for this case
-                        if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)))
+                        if (roll < 0 && (/*obj.guid == triggerFrom ||*/ !spawns.IsActiveObject<T>(obj.guid)))
                         {
                             rolledObjects.Add(obj);
                             break;
@@ -595,7 +595,7 @@ namespace Game
                 
                 if (!EqualChanced.Empty() && rolledObjects.Empty())
                 {
-                    rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)));
+                    rolledObjects.AddRange(EqualChanced.Where(obj => /*obj.guid == triggerFrom ||*/ !spawns.IsActiveObject<T>(obj.guid)));
                     rolledObjects.RandomResize((uint)count);
                 }
 
