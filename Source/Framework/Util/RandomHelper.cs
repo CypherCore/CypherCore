@@ -103,5 +103,13 @@ public class RandomHelper
 
         return args[randIndex];
     }
+
+    public static TimeSpan RandTime(TimeSpan min, TimeSpan max)
+    {
+        double diff = max.TotalMilliseconds - min.TotalMilliseconds;
+        Cypher.Assert(diff >= 0);
+        Cypher.Assert(diff <= 0xFFFFFFFF);
+        return min + TimeSpan.FromMilliseconds(URand(0, (uint)diff));
+    }
 }
 

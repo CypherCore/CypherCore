@@ -102,19 +102,25 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Creates new event entry in map.
+        /// Schedules a new event.
         /// </summary>
         /// <param name="eventId">The id of the new event.</param>
-        /// <param name="time">The time in milliseconds as TimeSpan until the event occurs.</param>
+        /// <param name="time">The time in milliseconds until the event occurs.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
         public void ScheduleEvent(uint eventId, TimeSpan time, uint group = 0, byte phase = 0)
         {
-            ScheduleEvent(eventId, (uint)time.TotalMilliseconds, group, phase);
+            if (group != 0 && group <= 8)
+                eventId |= (uint)(1 << ((int)group + 15));
+
+            if (phase != 0 && phase <= 8)
+                eventId |= (uint)(1 << (phase + 23));
+
+            _eventMap.Add(_time + (uint)time.TotalMilliseconds, eventId);
         }
 
         /// <summary>
-        /// Creates new event entry in map.
+        /// Schedules a new event.
         /// </summary>
         /// <param name="eventId">The id of the new event.</param>
         /// <param name="minTime">The minimum time until the event occurs as TimeSpan type.</param>
@@ -123,26 +129,7 @@ namespace Framework.Dynamic
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
         public void ScheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
         {
-            ScheduleEvent(eventId, RandomHelper.URand(minTime.TotalMilliseconds, maxTime.TotalMilliseconds), group, phase);
-        }
-        
-
-        /// <summary>
-        /// Creates new event entry in map.
-        /// </summary>
-        /// <param name="eventId">The id of the new event.</param>
-        /// <param name="time">The time in milliseconds until the event occurs.</param>
-        /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
-        /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void ScheduleEvent(uint eventId, uint time, uint group = 0, byte phase = 0)
-        {
-            if (group != 0 && group <= 8)
-                eventId |= (uint)(1 << ((int)group + 15));
-
-            if (phase != 0 && phase <= 8)
-                eventId |= (uint)(1 << (phase + 23));
-
-            _eventMap.Add(_time + time, eventId);
+            ScheduleEvent(eventId, RandomHelper.RandTime(minTime, maxTime), group, phase);
         }
 
         /// <summary>
@@ -154,7 +141,8 @@ namespace Framework.Dynamic
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
         public void RescheduleEvent(uint eventId, TimeSpan time, uint group = 0, byte phase = 0)
         {
-            RescheduleEvent(eventId, (uint)time.TotalMilliseconds, group, phase);
+            CancelEvent(eventId);
+            RescheduleEvent(eventId, time, group, phase);
         }
 
         /// <summary>
@@ -167,62 +155,30 @@ namespace Framework.Dynamic
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
         void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
         {
-            RescheduleEvent(eventId, RandomHelper.URand(minTime.TotalMilliseconds, maxTime.TotalMilliseconds), group, phase);
-        }
-        
-        /// <summary>
-        /// Cancels the given event and reschedules it.
-        /// </summary>
-        /// <param name="eventId">The id of the event.</param>
-        /// <param name="time">The time in milliseconds until the event occurs.</param>
-        /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
-        /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void RescheduleEvent(uint eventId, uint time, uint group = 0, byte phase = 0)
-        {
-            CancelEvent(eventId);
-            ScheduleEvent(eventId, time, group, phase);
+            RescheduleEvent(eventId, RandomHelper.RandTime(minTime, maxTime), group, phase);
         }
 
         /// <summary>
-        /// Repeats the mostly recently executed event.
+        /// Repeats the most recently executed event.
         /// </summary>
-        /// <param name="time">Time until in ms as TimeSpan the event occurs</param>
+        /// <param name="time">Time until the event occurs as TimeSpan.</param>
         public void Repeat(TimeSpan time)
         {
-            Repeat((uint)time.TotalMilliseconds);
+            _eventMap.Add(_time + (uint)time.TotalMilliseconds, _lastEvent);
         }
 
         /// <summary>
-        /// Repeats the mostly recently executed event.
+        /// Repeats the most recently executed event. Equivalent to Repeat(urand(minTime, maxTime)
         /// </summary>
-        /// <param name="time">Time until the event occurs</param>
-        public void Repeat(uint time)
-        {
-            _eventMap.Add(_time + time, _lastEvent);
-        }
-
-        /// <summary>
-        /// Repeats the mostly recently executed event. Equivalent to Repeat(urand(minTime, maxTime)
-        /// </summary>
-        /// <param name="minTime">Min Time as TimeSpan until the event occurs.</param>
-        /// <param name="maxTime">Max Time as TimeSpan until the event occurs.</param>
+        /// <param name="minTime">The minimum time until the event occurs as TimeSpan type.</param>
+        /// <param name="maxTime">The maximum time until the event occurs as TimeSpan type.</param>
         public void Repeat(TimeSpan minTime, TimeSpan maxTime)
         {
-            Repeat((uint)minTime.TotalMilliseconds, (uint)maxTime.TotalMilliseconds);
+            Repeat(RandomHelper.RandTime(minTime, maxTime));
         }
 
         /// <summary>
-        /// Repeats the mostly recently executed event. Equivalent to Repeat(urand(minTime, maxTime)
-        /// </summary>
-        /// <param name="minTime">Min Time until the event occurs.</param>
-        /// <param name="maxTime">Max Time until the event occurs.</param>
-        public void Repeat(uint minTime, uint maxTime)
-        {
-            Repeat(RandomHelper.URand(minTime, maxTime));
-        }
-
-        /// <summary>
-        /// Returns the next event to execute and removes it from map.
+        /// Returns the next event to be executed and removes it from map.
         /// </summary>
         /// <returns>Id of the event to execute.</returns>
         ///
@@ -256,39 +212,31 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Delays all events in the map. If delay is greater than or equal internal timer, delay will be 0.
+        /// Delays all events. If delay is greater than or equal internal timer, delay will be 0.
         /// </summary>
-        /// <param name="delay">Amount of delay in ms as TimeSpan.</param>
+        /// <param name="delay">Amount of delay as TimeSpan type.</param>
         public void DelayEvents(TimeSpan delay)
         {
-            DelayEvents((uint)delay.TotalMilliseconds);
-        }
-
-        /// <summary>
-        /// Delays all events in the map. If delay is greater than or equal internal timer, delay will be 0.
-        /// </summary>
-        /// <param name="delay">Amount of delay.</param>
-        public void DelayEvents(uint delay)
-        {
-            _time = delay < _time ? _time - delay : 0;
+            _time = (uint)(delay.TotalMilliseconds < _time ? _time - delay.TotalMilliseconds : 0);
         }
 
         /// <summary>
         /// Delay all events of the same group.
         /// </summary>
-        /// <param name="delay">Amount of delay.</param>
+        /// <param name="delay">Amount of delay as TimeSpan type.</param>
         /// <param name="group">Group of the events.</param>
-        public void DelayEvents(uint delay, uint group)
+        public void DelayEvents(TimeSpan delay, uint group)
         {
             if (group == 0 || group > 8 || Empty())
                 return;
+
             MultiMap<uint, uint> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
                 if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
                 {
-                    delayed.Add(pair.Key + delay, pair.Value);
+                    delayed.Add(pair.Key + (uint)delay.TotalMilliseconds, pair.Value);
                     _eventMap.Remove(pair.Key, pair.Value);
                 }
             }
@@ -330,7 +278,7 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Returns closest occurence of specified event.
+        /// Returns closest occurrence of specified event.
         /// </summary>
         /// <param name="eventId">Wanted event id.</param>
         /// <returns>Time of found event.</returns>
