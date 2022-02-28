@@ -4072,8 +4072,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0       1       2      3        4        5              6
-            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold, WorldEffectID, AIAnimKitID FROM gameobject_template_addon");
+            //                                         0       1       2      3        4        5        6        7        8        9        10             11
+            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold, artkit0, artkit1, artkit2, artkit3, artkit4, WorldEffectID, AIAnimKitID FROM gameobject_template_addon");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject template addon definitions. DB table `gameobject_template_addon` is empty.");
@@ -4097,8 +4097,23 @@ namespace Game
                 gameObjectAddon.Flags = (GameObjectFlags)result.Read<uint>(2);
                 gameObjectAddon.Mingold = result.Read<uint>(3);
                 gameObjectAddon.Maxgold = result.Read<uint>(4);
-                gameObjectAddon.WorldEffectID = result.Read<uint>(5);
-                gameObjectAddon.AIAnimKitID = result.Read<uint>(6);
+                gameObjectAddon.WorldEffectID = result.Read<uint>(10);
+                gameObjectAddon.AIAnimKitID = result.Read<uint>(11);
+
+                for (int i = 0; i < gameObjectAddon.ArtKits.Length; ++i)
+                {
+                    uint artKitID = result.Read<uint>(5 + i);
+                    if (artKitID == 0)
+                        continue;
+
+                    if (!CliDB.GameObjectArtKitStorage.ContainsKey(artKitID))
+                    {
+                        Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid `artkit{i}` ({artKitID}) defined, set to zero instead.");
+                        continue;
+                    }
+
+                    gameObjectAddon.ArtKits[i] = artKitID;
+                }
 
                 // checks
                 if (gameObjectAddon.Faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectAddon.Faction))

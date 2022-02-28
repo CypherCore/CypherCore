@@ -20,6 +20,13 @@ using System.Numerics;
 
 namespace Game.DataStorage
 {
+    public sealed class GameObjectArtKitRecord
+    {
+        public uint Id;
+        public int AttachModelFileID;
+        public int[] TextureVariationFileID = new int[3];
+    }
+
     public sealed class GameObjectDisplayInfoRecord
     {
         public uint Id;

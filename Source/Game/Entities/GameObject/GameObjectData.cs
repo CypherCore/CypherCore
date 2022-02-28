@@ -1410,6 +1410,7 @@ namespace Game.Entities
     {
         public uint Mingold;
         public uint Maxgold;
+        public uint[] ArtKits = new uint[5];
         public uint WorldEffectID;
         public uint AIAnimKitID;
     }

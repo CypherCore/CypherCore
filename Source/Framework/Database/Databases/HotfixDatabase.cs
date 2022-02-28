@@ -422,6 +422,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION, "SELECT Description, StandingModified, StandingChanged, ID, FactionID, TextureFileID, Flags FROM friendship_reputation");
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE, "SELECT ID, Description_lang, StandingModified_lang, StandingChanged_lang FROM friendship_reputation_locale WHERE locale = ?");
 
+            // GameobjectArtKit.db2
+            PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_ART_KIT, "SELECT ID, AttachModelFileID, TextureVariationFileID1, TextureVariationFileID2, TextureVariationFileID3 FROM gameobject_art_kit");
 
             // GameobjectDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO, "SELECT ID, GeoBoxMinX, GeoBoxMinY, GeoBoxMinZ, GeoBoxMaxX, GeoBoxMaxY, GeoBoxMaxZ, " +
@@ -1494,6 +1496,8 @@ namespace Framework.Database
 
         SEL_FRIENDSHIP_REPUTATION,
         SEL_FRIENDSHIP_REPUTATION_LOCALE,
+
+        SEL_GAMEOBJECT_ART_KIT,
 
         SEL_GAMEOBJECT_DISPLAY_INFO,
 

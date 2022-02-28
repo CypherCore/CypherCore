@@ -2880,7 +2880,7 @@ namespace Game.Entities
             SendMessageToSet(activateAnimKit, true);
         }
 
-        void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
+        public void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), spellVisualId);
 
