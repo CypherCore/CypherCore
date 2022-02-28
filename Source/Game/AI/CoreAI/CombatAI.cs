@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.AI
@@ -61,7 +62,7 @@ namespace Game.AI
                     if (info.condition == AICondition.Aggro)
                         me.CastSpell(victim, id, false);
                     else if (info.condition == AICondition.Combat)
-                        _events.ScheduleEvent(id, info.cooldown + RandomHelper.Rand32() % info.cooldown);
+                        _events.ScheduleEvent(id, info.cooldown, info.cooldown * 2);
                 }
             }
         }
@@ -90,7 +91,7 @@ namespace Game.AI
 
         public override void SpellInterrupted(uint spellId, uint unTimeMs)
         {
-            _events.RescheduleEvent(spellId, unTimeMs);
+            _events.RescheduleEvent(spellId, TimeSpan.FromMilliseconds(unTimeMs));
         }
     }
 
@@ -153,11 +154,11 @@ namespace Game.AI
                         me.CastSpell(victim, id, false);
                     else if (info.condition == AICondition.Combat)
                     {
-                        uint cooldown = info.realCooldown;
+                        TimeSpan cooldown = info.realCooldown;
                         if (count == spell)
                         {
                             DoCast(Spells[spell]);
-                            cooldown += (uint)me.GetCurrentSpellCastTime(id);
+                            cooldown += TimeSpan.FromMilliseconds(me.GetCurrentSpellCastTime(id));
                         }
                         _events.ScheduleEvent(id, cooldown);
                     }
@@ -188,7 +189,7 @@ namespace Game.AI
                 uint casttime = (uint)me.GetCurrentSpellCastTime(spellId);
                 AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
                 if (info != null)
-                    _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
+                    _events.ScheduleEvent(spellId, TimeSpan.FromMilliseconds(casttime != 0 ? casttime : 500) + info.realCooldown);
             }
         }
     }

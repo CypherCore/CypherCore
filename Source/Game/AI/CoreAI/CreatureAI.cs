@@ -22,6 +22,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -575,13 +576,13 @@ namespace Game.AI
         {
             target = AITarget.Self;
             condition = AICondition.Combat;
-            cooldown = SharedConst.AIDefaultCooldown;
+            cooldown = TimeSpan.FromMilliseconds(SharedConst.AIDefaultCooldown);
         }
 
         public AITarget target;
         public AICondition condition;
-        public uint cooldown;
-        public uint realCooldown;
+        public TimeSpan cooldown;
+        public TimeSpan realCooldown;
         public float maxRange;
 
         public byte Targets;                                          // set of enum SelectTarget
