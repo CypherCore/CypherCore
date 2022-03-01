@@ -3098,7 +3098,11 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
         }
-
+        bool IsCombatDisallowed()
+        {
+            return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.NoCombat);
+        }
+        
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
         public override bool CanSwim() { return GetMovementTemplate().IsSwimAllowed() || IsPet();}
         public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }

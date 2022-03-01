@@ -57,6 +57,12 @@ namespace Game.Combat
                 return false;
             if (a.HasUnitState(UnitState.InFlight) || b.HasUnitState(UnitState.InFlight))
                 return false;
+            Creature aCreature = a.ToCreature();
+            if (aCreature?.IsCombatDisallowed())
+                return false;
+            Creature bCreature = b.ToCreature();
+            if (bCreature?.IsCombatDisallowed())
+                return false;
             if (a.IsFriendlyTo(b) || b.IsFriendlyTo(a))
                 return false;
             Player playerA = a.GetCharmerOrOwnerPlayerOrPlayerItself();
