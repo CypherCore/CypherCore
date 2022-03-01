@@ -139,7 +139,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan min, TimeSpan max, Action<TaskContext> task)
         {
-            return Schedule(RandomDurationBetween(min, max), task);
+            return Schedule(RandomHelper.RandTime(min, max), task);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan min, TimeSpan max, uint group, Action<TaskContext> task)
         {
-            return Schedule(RandomDurationBetween(min, max), group, task);
+            return Schedule(RandomHelper.RandTime(min, max), group, task);
         }
 
         public TaskScheduler CancelAll()
@@ -200,7 +200,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler DelayAll(TimeSpan min, TimeSpan max)
         {
-            return DelayAll(RandomDurationBetween(min, max));
+            return DelayAll(RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler DelayGroup(uint group, TimeSpan min, TimeSpan max)
         {
-            return DelayGroup(group, RandomDurationBetween(min, max));
+            return DelayGroup(group, RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler RescheduleAll(TimeSpan min, TimeSpan max)
         {
-            return RescheduleAll(RandomDurationBetween(min, max));
+            return RescheduleAll(RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskScheduler RescheduleGroup(uint group, TimeSpan min, TimeSpan max)
         {
-            return RescheduleGroup(group, RandomDurationBetween(min, max));
+            return RescheduleGroup(group, RandomHelper.RandTime(min, max));
         }
 
         internal TaskScheduler InsertTask(Task task)
@@ -320,21 +320,6 @@ namespace Framework.Dynamic
         internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, uint group, Action<TaskContext> task)
         {
             return InsertTask(new Task(end + time, time, group, 0, task));
-        }
-
-        /// <summary>
-        /// Returns a random duration between min and max
-        /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <returns>TimeSpan</returns>
-        public static TimeSpan RandomDurationBetween(TimeSpan min, TimeSpan max)
-        {
-            var milli_min = min.TotalMilliseconds;
-            var milli_max = max.TotalMilliseconds;
-
-            // TC specific: use SFMT URandom
-            return TimeSpan.FromMilliseconds(RandomHelper.URand(milli_min, milli_max));
         }
 
         void Dispatch(success_t callback = null)
@@ -672,7 +657,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext Repeat(TimeSpan min, TimeSpan max)
         {
-            return Repeat(TaskScheduler.RandomDurationBetween(min, max));
+            return Repeat(RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -720,7 +705,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan min, TimeSpan max, Action<TaskContext> task)
         {
-            return Schedule(TaskScheduler.RandomDurationBetween(min, max), task);
+            return Schedule(RandomHelper.RandTime(min, max), task);
         }
         public TaskContext Schedule(TimeSpan min, TimeSpan max, Action task) { return Schedule(min, max, delegate (TaskContext task1) { task(); }); }
 
@@ -737,7 +722,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan min, TimeSpan max, uint group, Action<TaskContext> task)
         {
-            return Schedule(TaskScheduler.RandomDurationBetween(min, max), group, task);
+            return Schedule(RandomHelper.RandTime(min, max), group, task);
         }
         public TaskContext Schedule(TimeSpan min, TimeSpan max, uint group, Action task) { return Schedule(min, max, group, delegate (TaskContext task1) { task(); }); }
 
@@ -759,7 +744,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext DelayAll(TimeSpan min, TimeSpan max)
         {
-            return DelayAll(TaskScheduler.RandomDurationBetween(min, max));
+            return DelayAll(RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -782,7 +767,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext DelayGroup(uint group, TimeSpan min, TimeSpan max)
         {
-            return DelayGroup(group, TaskScheduler.RandomDurationBetween(min, max));
+            return DelayGroup(group, RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -803,7 +788,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext RescheduleAll(TimeSpan min, TimeSpan max)
         {
-            return RescheduleAll(TaskScheduler.RandomDurationBetween(min, max));
+            return RescheduleAll(RandomHelper.RandTime(min, max));
         }
 
         /// <summary>
@@ -826,7 +811,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext RescheduleGroup(uint group, TimeSpan min, TimeSpan max)
         {
-            return RescheduleGroup(group, TaskScheduler.RandomDurationBetween(min, max));
+            return RescheduleGroup(group, RandomHelper.RandTime(min, max));
         }
 
         // Associated task
