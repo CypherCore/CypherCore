@@ -17,9 +17,10 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.BattleGrounds;
 using Game.Entities;
 using Game.Networking.Packets;
-using Game.BattleGrounds;
+using System;
 
 namespace Game.Arenas
 {
@@ -95,7 +96,7 @@ namespace Game.Arenas
             DoorOpen(RingofValorObjectTypes.Elevator1);
             DoorOpen(RingofValorObjectTypes.Elevator2);
 
-            _events.ScheduleEvent(RingofValorEvents.OpenFences, 20133);
+            _events.ScheduleEvent(RingofValorEvents.OpenFences, TimeSpan.FromSeconds(20));
 
             // Should be false at first, TogglePillarCollision will do it.
             TogglePillarCollision(true);
@@ -141,17 +142,17 @@ namespace Game.Arenas
                         // Open fire (only at game start)
                         for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
                             DoorOpen(i);
-                        _events.ScheduleEvent(RingofValorEvents.CloseFire, 5000);
+                        _events.ScheduleEvent(RingofValorEvents.CloseFire, TimeSpan.FromSeconds(5));
                         break;
                     case RingofValorEvents.CloseFire:
                         for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
                             DoorClose(i);
                         // Fire got closed after five seconds, leaves twenty seconds before toggling pillars
-                        _events.ScheduleEvent(RingofValorEvents.SwitchPillars, 20000);
+                        _events.ScheduleEvent(RingofValorEvents.SwitchPillars, TimeSpan.FromSeconds(20));
                         break;
                     case RingofValorEvents.SwitchPillars:
                         TogglePillarCollision(true);
-                        _events.Repeat(25000);
+                        _events.Repeat(TimeSpan.FromSeconds(25));
                         break;
                 }
             });

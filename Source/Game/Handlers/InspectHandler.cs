@@ -58,13 +58,12 @@ namespace Game
             Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
             if (guild)
             {
-                inspectResult.GuildData.Value = new();
-
                 InspectGuildData guildData;
                 guildData.GuildGUID = guild.GetGUID();
                 guildData.NumGuildMembers = guild.GetMembersCount();
                 guildData.AchievementPoints = (int)guild.GetAchievementMgr().GetAchievementPoints();
-                inspectResult.GuildData.Set(guildData);
+
+                inspectResult.GuildData = guildData;
             }
 
             Item heartOfAzeroth = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);

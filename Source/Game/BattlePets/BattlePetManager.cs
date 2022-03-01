@@ -230,10 +230,11 @@ namespace Game.BattlePets
 
                         if (!ownerGuid.IsEmpty())
                         {
-                            pet.PacketInfo.OwnerInfo.Value = new();
-                            pet.PacketInfo.OwnerInfo.Value.Guid = ownerGuid;
-                            pet.PacketInfo.OwnerInfo.Value.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
-                            pet.PacketInfo.OwnerInfo.Value.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                            BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
+                            battlePetOwnerInfo.Guid = ownerGuid;
+                            battlePetOwnerInfo.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                            battlePetOwnerInfo.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                            pet.PacketInfo.OwnerInfo = battlePetOwnerInfo;
                         }
 
                         pet.SaveInfo = BattlePetSaveInfo.Unchanged;
@@ -398,10 +399,11 @@ namespace Game.BattlePets
             Player player = _owner.GetPlayer();
             if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotAccountWide))
             {
-                pet.PacketInfo.OwnerInfo.Value = new();
-                pet.PacketInfo.OwnerInfo.Value.Guid = player.GetGUID();
-                pet.PacketInfo.OwnerInfo.Value.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
-                pet.PacketInfo.OwnerInfo.Value.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
+                battlePetOwnerInfo.Guid = player.GetGUID();
+                battlePetOwnerInfo.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                battlePetOwnerInfo.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                pet.PacketInfo.OwnerInfo = battlePetOwnerInfo;
             }
 
             pet.SaveInfo = BattlePetSaveInfo.New;

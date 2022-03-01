@@ -212,7 +212,7 @@ namespace Game.Entities
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
     }
 
-    public struct AreaTriggerOrbitInfo
+    public class AreaTriggerOrbitInfo
     {
         public void Write(WorldPacket data)
         {
@@ -236,8 +236,8 @@ namespace Game.Entities
                 data.WriteVector3(Center.Value);
         }
 
-        public Optional<ObjectGuid> PathTarget;
-        public Optional<Vector3> Center;
+        public ObjectGuid? PathTarget;
+        public Vector3? Center;
         public bool CounterClockwise;
         public bool CanLoop;
         public uint TimeToTarget;
@@ -315,7 +315,7 @@ namespace Game.Entities
         public List<Vector2> PolygonVertices = new();
         public List<Vector2> PolygonVerticesTarget = new();
         public List<Vector3> SplinePoints = new();
-        public Optional<AreaTriggerOrbitInfo> OrbitInfo;
+        public AreaTriggerOrbitInfo OrbitInfo;
 
         public uint ScriptId;
     }

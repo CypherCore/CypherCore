@@ -2092,7 +2092,7 @@ namespace Game.Entities
 
             ContentTuningParams contentTuningParams = new();
             if (contentTuningParams.GenerateDataForUnits(log.attacker, log.target))
-                packet.ContentTuning.Set(contentTuningParams);
+                packet.ContentTuning = contentTuningParams;
 
             SendCombatLogMessage(packet);
         }
@@ -2121,7 +2121,7 @@ namespace Game.Entities
             ContentTuningParams contentTuningParams = new();
             Unit caster = Global.ObjAccessor.GetUnit(this, aura.GetCasterGUID());
             if (caster && contentTuningParams.GenerateDataForUnits(caster, this))
-                spellLogEffect.ContentTuning.Set(contentTuningParams);
+                spellLogEffect.ContentTuning = contentTuningParams;
 
             data.Effects.Add(spellLogEffect);
 

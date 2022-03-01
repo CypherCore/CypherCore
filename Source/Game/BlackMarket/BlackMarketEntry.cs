@@ -50,8 +50,8 @@ namespace Game.BlackMarket
 
             if (!bonusListIDs.Empty())
             {
-                Item.ItemBonus.Value = new();
-                Item.ItemBonus.Value.BonusListIDs = bonusListIDs;
+                Item.ItemBonus = new();
+                Item.ItemBonus.BonusListIDs = bonusListIDs;
             }
 
             if (Global.ObjectMgr.GetCreatureTemplate(SellerNPC) == null)

@@ -47,8 +47,8 @@ namespace Game.Movement
         public float time_perc;
         public uint splineId;
         public float initialOrientation;
-        public Optional<SpellEffectExtraData> spellEffectExtra;
-        public Optional<AnimTierTransition> animTier;
+        public SpellEffectExtraData spellEffectExtra;
+        public AnimTierTransition animTier;
         public bool walk;
         public bool HasVelocity;
         public bool TransformForTransport;
@@ -77,15 +77,15 @@ namespace Game.Movement
                 return false;
             if (!CHECK(_checkPathLengths(), false))
                 return false;
-            if (spellEffectExtra.HasValue)
+            if (spellEffectExtra != null)
             {
-                if (!CHECK(spellEffectExtra.Value.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ProgressCurveId), false))
+                if (!CHECK(spellEffectExtra.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ProgressCurveId), false))
                     return false;
-                if (!CHECK(spellEffectExtra.Value.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ParabolicCurveId), false))
+                if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), false))
                     return false;
-                if (!CHECK(spellEffectExtra.Value.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ProgressCurveId), true))
+                if (!CHECK(spellEffectExtra.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ProgressCurveId), true))
                     return false;
-                if (!CHECK(spellEffectExtra.Value.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.Value.ParabolicCurveId), true))
+                if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), true))
                     return false;
             }
             return true;

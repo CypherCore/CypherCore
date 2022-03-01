@@ -825,7 +825,7 @@ namespace Game.Entities
             ProcessTerrainStatusUpdate(oldLiquidStatus, data.LiquidInfo);
         }
 
-        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, Optional<LiquidData> newLiquidData)
+        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
         {
             if (!IsControlledByPlayer())
                 return;
@@ -838,8 +838,8 @@ namespace Game.Entities
 
             // liquid aura handling
             LiquidTypeRecord curLiquid = null;
-            if (IsInWater() && newLiquidData.HasValue)
-                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.Value.entry);
+            if (IsInWater() && newLiquidData != null)
+                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.entry);
             if (curLiquid != _lastLiquid)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
@@ -1804,7 +1804,8 @@ namespace Game.Entities
                 moveTeleport.MoverGUID = GetGUID();
                 moveTeleport.Pos = new Position(x, y, z, o);
                 if (GetTransGUID() != ObjectGuid.Empty)
-                    moveTeleport.TransportGUID.Set(GetTransGUID());
+                    moveTeleport.TransportGUID = GetTransGUID();
+
                 moveTeleport.Facing = o;
                 moveTeleport.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(moveTeleport);

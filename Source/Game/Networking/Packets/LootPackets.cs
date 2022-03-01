@@ -247,8 +247,8 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Owner;
         public ObjectGuid LootObj;
-        public Optional<ObjectGuid> Master;
-        public Optional<ObjectGuid> RoundRobinWinner;
+        public ObjectGuid? Master;
+        public ObjectGuid? RoundRobinWinner;
     }
 
     class SetLootSpecialization : ClientPacket

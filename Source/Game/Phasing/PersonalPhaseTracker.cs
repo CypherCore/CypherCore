@@ -30,7 +30,7 @@ namespace Game
 
         public List<WorldObject> Objects = new();
         public List<ushort> Grids = new();
-        public Optional<TimeSpan> DurationRemaining;
+        public TimeSpan? DurationRemaining;
 
         public bool IsEmpty() { return Objects.Empty() && Grids.Empty(); }
     }
@@ -57,21 +57,21 @@ namespace Game
             // Loop over all our tracked phases. If any don't exist - delete them
             foreach (var (phaseId, spawns) in _spawns)
                 if (!spawns.DurationRemaining.HasValue && !phaseShift.HasPhase(phaseId))
-                    spawns.DurationRemaining.Set(PersonalPhaseSpawns.DELETE_TIME_DEFAULT);
+                    spawns.DurationRemaining = PersonalPhaseSpawns.DELETE_TIME_DEFAULT;
 
             // loop over all owner phases. If any exist and marked for deletion - reset delete
             foreach (var phaseRef in phaseShift.GetPhases())
             {
                 PersonalPhaseSpawns spawns = _spawns.LookupByKey(phaseRef.Key);
                 if (spawns != null)
-                    spawns.DurationRemaining.Clear();
+                    spawns.DurationRemaining = null;
             }
         }
 
         public void MarkAllPhasesForDeletion()
         {
             foreach (var spawns in _spawns.Values)
-                spawns.DurationRemaining.Set(PersonalPhaseSpawns.DELETE_TIME_DEFAULT);
+                spawns.DurationRemaining = PersonalPhaseSpawns.DELETE_TIME_DEFAULT;
         }
 
         public void Update(Map map, uint diff)
@@ -80,7 +80,7 @@ namespace Game
             {
                 if (itr.Value.DurationRemaining.HasValue)
                 {
-                    itr.Value.DurationRemaining.Value = itr.Value.DurationRemaining.Value - TimeSpan.FromMilliseconds(diff);
+                    itr.Value.DurationRemaining = itr.Value.DurationRemaining.Value - TimeSpan.FromMilliseconds(diff);
                     if (itr.Value.DurationRemaining.Value <= TimeSpan.Zero)
                     {
                         DespawnPhase(map, itr.Value);

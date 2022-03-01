@@ -237,11 +237,11 @@ namespace Game.Spells
             if (remove)
                 return;
 
-            auraInfo.AuraData.Value = new();
+            auraInfo.AuraData = new();
 
             Aura aura = GetBase();
 
-            AuraDataInfo auraData = auraInfo.AuraData.Value;
+            AuraDataInfo auraData = auraInfo.AuraData;
             auraData.CastID = aura.GetCastId();
             auraData.SpellID = (int)aura.GetId();
             auraData.Visual = aura.GetSpellVisual();
@@ -261,12 +261,12 @@ namespace Game.Spells
             if (!aura.GetCasterGUID().IsUnit())
                 auraData.CastUnit = ObjectGuid.Empty; // optional data is filled in, but cast unit contains empty guid in packet
             else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
-                auraData.CastUnit.Set(aura.GetCasterGUID());
+                auraData.CastUnit = aura.GetCasterGUID();
 
             if (auraData.Flags.HasFlag(AuraFlags.Duration))
             {
-                auraData.Duration.Set(aura.GetMaxDuration());
-                auraData.Remaining.Set(aura.GetDuration());
+                auraData.Duration = aura.GetMaxDuration();
+                auraData.Remaining = aura.GetDuration();
             }
 
             if (auraData.Flags.HasFlag(AuraFlags.Scalable))

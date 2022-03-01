@@ -3019,16 +3019,16 @@ namespace Game.Guilds
                 bankLogEntry.EntryType = (sbyte)m_eventType;
 
                 if (hasStack)
-                    bankLogEntry.Count.Set(m_itemStackCount);
+                    bankLogEntry.Count = m_itemStackCount;
 
                 if (IsMoneyEvent())
-                    bankLogEntry.Money.Set(m_itemOrMoney);
+                    bankLogEntry.Money = m_itemOrMoney;
 
                 if (hasItem)
-                    bankLogEntry.ItemID.Set((int)m_itemOrMoney);
+                    bankLogEntry.ItemID = (int)m_itemOrMoney;
 
                 if (itemMoved)
-                    bankLogEntry.OtherTab.Set((sbyte)m_destTabId);
+                    bankLogEntry.OtherTab = (sbyte)m_destTabId;
 
                 packet.Entry.Add(bankLogEntry);
             }
@@ -3109,7 +3109,7 @@ namespace Game.Guilds
                 {
                     ItemInstance itemInstance = new();
                     itemInstance.ItemID = GetValue();
-                    newsEvent.Item.Set(itemInstance);
+                    newsEvent.Item = itemInstance;
                 }
 
                 newsPacket.NewsEvents.Add(newsEvent);

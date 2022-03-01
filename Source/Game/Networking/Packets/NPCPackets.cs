@@ -329,7 +329,7 @@ namespace Game.Networking.Packets
         public string Text;
         public string Confirm;
         public TreasureLootList Treasure = new();
-        public Optional<int> SpellID;
+        public int? SpellID;
     }
 
     public class ClientGossipText

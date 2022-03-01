@@ -207,9 +207,9 @@ namespace Game.Networking.Packets
                 bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
                 data.WriteBits(moveSpline.GetPath().Length, 16);
                 data.WriteBit(false);                                       // HasSplineFilter
-                data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
-                bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (!moveSpline.spell_effect_extra.HasValue || moveSpline.effect_start_time != 0));
-                data.WriteBit(moveSpline.anim_tier.HasValue);                   // HasAnimationTierTransition
+                data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
+                bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
+                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimationTierTransition
                 data.WriteBit(false);                                                   // HasUnknown901
                 data.FlushBits();
 
@@ -245,12 +245,12 @@ namespace Game.Networking.Packets
                 foreach (var vec in moveSpline.GetPath())
                     data.WriteVector3(vec);
 
-                if (moveSpline.spell_effect_extra.HasValue)
+                if (moveSpline.spell_effect_extra != null)
                 {
-                    data.WritePackedGuid(moveSpline.spell_effect_extra.Value.Target);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.Value.SpellVisualId);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.Value.ProgressCurveId);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.Value.ParabolicCurveId);
+                    data.WritePackedGuid(moveSpline.spell_effect_extra.Target);
+                    data.WriteUInt32(moveSpline.spell_effect_extra.SpellVisualId);
+                    data.WriteUInt32(moveSpline.spell_effect_extra.ProgressCurveId);
+                    data.WriteUInt32(moveSpline.spell_effect_extra.ParabolicCurveId);
                 }
 
                 if (hasJumpExtraData)
@@ -260,12 +260,12 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(0);                                                  // Duration (override)
                 }
 
-                if (moveSpline.anim_tier.HasValue)
+                if (moveSpline.anim_tier != null)
                 {
-                    data.WriteUInt32(moveSpline.anim_tier.Value.TierTransitionId);
+                    data.WriteUInt32(moveSpline.anim_tier.TierTransitionId);
                     data.WriteInt32(moveSpline.effect_start_time);
                     data.WriteUInt32(0);
-                    data.WriteUInt8(moveSpline.anim_tier.Value.AnimTier);
+                    data.WriteUInt8(moveSpline.anim_tier.AnimTier);
                 }
 
                 //if (HasUnknown901)
@@ -377,32 +377,35 @@ namespace Game.Networking.Packets
 
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {
-                movementSpline.AnimTierTransition.Value = new();
-                movementSpline.AnimTierTransition.Value.TierTransitionID = (int)moveSpline.anim_tier.Value.TierTransitionId;
-                movementSpline.AnimTierTransition.Value.StartTime = (uint)moveSpline.effect_start_time;
-                movementSpline.AnimTierTransition.Value.AnimTier = moveSpline.anim_tier.Value.AnimTier;
+                MonsterSplineAnimTierTransition animTierTransition = new();
+                animTierTransition.TierTransitionID = (int)moveSpline.anim_tier.TierTransitionId;
+                animTierTransition.StartTime = (uint)moveSpline.effect_start_time;
+                animTierTransition.AnimTier = moveSpline.anim_tier.AnimTier;
+                movementSpline.AnimTierTransition = animTierTransition;
             }
 
             movementSpline.MoveTime = (uint)moveSpline.Duration();
 
-            if (splineFlags.HasFlag(SplineFlag.Parabolic) && (!moveSpline.spell_effect_extra.HasValue || moveSpline.effect_start_time != 0))
+            if (splineFlags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0))
             {
-                movementSpline.JumpExtraData.Value = new();
-                movementSpline.JumpExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
-                movementSpline.JumpExtraData.Value.StartTime = (uint)moveSpline.effect_start_time;
+                MonsterSplineJumpExtraData jumpExtraData = new();
+                jumpExtraData.JumpGravity = moveSpline.vertical_acceleration;
+                jumpExtraData.StartTime = (uint)moveSpline.effect_start_time;
+                movementSpline.JumpExtraData = jumpExtraData;
             }
 
             if (splineFlags.HasFlag(SplineFlag.FadeObject))
                 movementSpline.FadeObjectTime = (uint)moveSpline.effect_start_time;
 
-            if (moveSpline.spell_effect_extra.HasValue)
+            if (moveSpline.spell_effect_extra != null)
             {
-                movementSpline.SpellEffectExtraData.Value = new();
-                movementSpline.SpellEffectExtraData.Value.TargetGuid = moveSpline.spell_effect_extra.Value.Target;
-                movementSpline.SpellEffectExtraData.Value.SpellVisualID = moveSpline.spell_effect_extra.Value.SpellVisualId;
-                movementSpline.SpellEffectExtraData.Value.ProgressCurveID = moveSpline.spell_effect_extra.Value.ProgressCurveId;
-                movementSpline.SpellEffectExtraData.Value.ParabolicCurveID = moveSpline.spell_effect_extra.Value.ParabolicCurveId;
-                movementSpline.SpellEffectExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
+                MonsterSplineSpellEffectExtraData spellEffectExtraData = new();
+                spellEffectExtraData.TargetGuid = moveSpline.spell_effect_extra.Target;
+                spellEffectExtraData.SpellVisualID = moveSpline.spell_effect_extra.SpellVisualId;
+                spellEffectExtraData.ProgressCurveID = moveSpline.spell_effect_extra.ProgressCurveId;
+                spellEffectExtraData.ParabolicCurveID = moveSpline.spell_effect_extra.ParabolicCurveId;
+                spellEffectExtraData.JumpGravity = moveSpline.vertical_acceleration;
+                movementSpline.SpellEffectExtraData = spellEffectExtraData;
             }
 
             Spline spline = moveSpline.spline;
@@ -540,11 +543,7 @@ namespace Game.Networking.Packets
 
     public class TransferPending : ServerPacket
     {
-        public TransferPending() : base(ServerOpcodes.TransferPending)
-        {
-            Ship = new Optional<ShipTransferPending>();
-            TransferSpellID = new Optional<int>();
-        }
+        public TransferPending() : base(ServerOpcodes.TransferPending) { }
 
         public override void Write()
         {
@@ -566,8 +565,8 @@ namespace Game.Networking.Packets
 
         public int MapID = -1;
         public Position OldMapPosition;
-        public Optional<ShipTransferPending> Ship;
-        public Optional<int> TransferSpellID;
+        public ShipTransferPending? Ship;
+        public int? TransferSpellID;
 
         public struct ShipTransferPending
         {
@@ -649,10 +648,10 @@ namespace Game.Networking.Packets
         }
 
         public Position Pos;
-        public Optional<VehicleTeleport> Vehicle;
+        public VehicleTeleport? Vehicle;
         public uint SequenceIndex;
         public ObjectGuid MoverGUID;
-        public Optional<ObjectGuid> TransportGUID;
+        public ObjectGuid? TransportGUID;
         public float Facing;
         public byte PreloadWorld;
     }
@@ -711,15 +710,15 @@ namespace Game.Networking.Packets
 
         public MovementInfo Status;
         public List<MovementForce> MovementForces;
-        public Optional<float> SwimBackSpeed;
-        public Optional<float> FlightSpeed;
-        public Optional<float> SwimSpeed;
-        public Optional<float> WalkSpeed;
-        public Optional<float> TurnRate;
-        public Optional<float> RunSpeed;
-        public Optional<float> FlightBackSpeed;
-        public Optional<float> RunBackSpeed;
-        public Optional<float> PitchRate;
+        public float? SwimBackSpeed;
+        public float? FlightSpeed;
+        public float? SwimSpeed;
+        public float? WalkSpeed;
+        public float? TurnRate;
+        public float? RunSpeed;
+        public float? FlightBackSpeed;
+        public float? RunBackSpeed;
+        public float? PitchRate;
     }
 
     class MoveApplyMovementForce : ServerPacket
@@ -915,13 +914,13 @@ namespace Game.Networking.Packets
             Ack.Read(_worldPacket);
             if (_worldPacket.HasBit())
             {
-                Speeds.Value = new();
+                Speeds = new();
                 Speeds.Value.Read(_worldPacket);
             }
         }
 
         public MovementAck Ack;
-        public Optional<MoveKnockBackSpeeds> Speeds;
+        public MoveKnockBackSpeeds? Speeds;
     }
 
     class MoveSetCollisionHeight : ServerPacket
@@ -1167,12 +1166,12 @@ namespace Game.Networking.Packets
                 data.WriteBit(KnockBack.HasValue);
                 data.WriteBit(VehicleRecID.HasValue);
                 data.WriteBit(CollisionHeight.HasValue);
-                data.WriteBit(MovementForce_.HasValue);
+                data.WriteBit(@MovementForce != null);
                 data.WriteBit(MovementForceGUID.HasValue);
                 data.FlushBits();
 
-                if (MovementForce_.HasValue)
-                    MovementForce_.Value.Write(data);
+                if (@MovementForce != null)
+                    @MovementForce.Write(data);
 
 
 
@@ -1203,12 +1202,12 @@ namespace Game.Networking.Packets
 
             public ServerOpcodes MessageID;
             public uint SequenceIndex;
-            public Optional<float> Speed;
-            public Optional<KnockBackInfo> KnockBack;
-            public Optional<int> VehicleRecID;
-            public Optional<CollisionHeightInfo> CollisionHeight;
-            public Optional<MovementForce> MovementForce_;
-            public Optional<ObjectGuid> MovementForceGUID;
+            public float? Speed;
+            public KnockBackInfo? KnockBack;
+            public int? VehicleRecID;
+            public CollisionHeightInfo? CollisionHeight;
+            public MovementForce MovementForce;
+            public ObjectGuid? MovementForceGUID;
         }
     }
 
@@ -1363,15 +1362,15 @@ namespace Game.Networking.Packets
             data.WriteBit(VehicleExitVoluntary);
             data.WriteBit(Interpolate);
             data.WriteBits(PackedDeltas.Count, 16);
-            data.WriteBit(SplineFilter.HasValue);
+            data.WriteBit(SplineFilter != null);
             data.WriteBit(SpellEffectExtraData.HasValue);
             data.WriteBit(JumpExtraData.HasValue);
             data.WriteBit(AnimTierTransition.HasValue);
-            data.WriteBit(Unknown901.HasValue);
+            data.WriteBit(Unknown901 != null);
             data.FlushBits();
 
-            if (SplineFilter.HasValue)
-                SplineFilter.Value.Write(data);
+            if (SplineFilter != null)
+                SplineFilter.Write(data);
 
             switch (Face)
             {
@@ -1402,8 +1401,8 @@ namespace Game.Networking.Packets
             if (AnimTierTransition.HasValue)
                 AnimTierTransition.Value.Write(data);
 
-            if (Unknown901.HasValue)
-                Unknown901.Value.Write(data);
+            if (Unknown901 != null)
+                Unknown901.Write(data);
         }
 
         public uint Flags; // Spline flags
@@ -1418,11 +1417,11 @@ namespace Game.Networking.Packets
         public ObjectGuid TransportGUID;
         public sbyte VehicleSeat = -1;
         public List<Vector3> PackedDeltas = new();
-        public Optional<MonsterSplineFilter> SplineFilter;
-        public Optional<MonsterSplineSpellEffectExtraData> SpellEffectExtraData;
-        public Optional<MonsterSplineJumpExtraData> JumpExtraData;
-        public Optional<MonsterSplineAnimTierTransition> AnimTierTransition;
-        public Optional<MonsterSplineUnknown901> Unknown901;
+        public MonsterSplineFilter SplineFilter;
+        public MonsterSplineSpellEffectExtraData? SpellEffectExtraData;
+        public MonsterSplineJumpExtraData? JumpExtraData;
+        public MonsterSplineAnimTierTransition? AnimTierTransition;
+        public MonsterSplineUnknown901 Unknown901;
         public float FaceDirection;
         public ObjectGuid FaceGUID;
         public Vector3 FaceSpot;

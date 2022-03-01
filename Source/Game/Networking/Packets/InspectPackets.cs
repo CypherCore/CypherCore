@@ -82,7 +82,7 @@ namespace Game.Networking.Packets
         public List<ushort> Glyphs = new();
         public List<ushort> Talents = new();
         public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
-        public Optional<InspectGuildData> GuildData = new();
+        public InspectGuildData? GuildData;
         public Array<PVPBracketData> Bracket = new(6, default);
         public uint? AzeriteLevel;
         public int ItemLevel;

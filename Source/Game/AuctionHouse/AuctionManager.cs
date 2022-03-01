@@ -817,7 +817,7 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, string name, byte minLevel, byte maxLevel, AuctionHouseFilterMask filters, Optional<AuctionSearchClassFilters> classFilters,
+        public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, string name, byte minLevel, byte maxLevel, AuctionHouseFilterMask filters, AuctionSearchClassFilters classFilters,
             byte[] knownPetBits, int knownPetBitsCount, byte maxKnownPetLevel, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
             List<uint> knownAppearanceIds = new();
@@ -860,21 +860,21 @@ namespace Game
                 if (!filters.HasFlag(bucketData.QualityMask))
                     continue;
 
-                if (classFilters.HasValue)
+                if (classFilters != null)
                 {
                     // if we dont want any class filters, Optional is not initialized
                     // if we dont want this class included, SubclassMask is set to FILTER_SKIP_CLASS
                     // if we want this class and did not specify and subclasses, its set to FILTER_SKIP_SUBCLASS
                     // otherwise full restrictions apply
-                    if (classFilters.Value.Classes[bucketData.ItemClass].SubclassMask == AuctionSearchClassFilters.FilterType.SkipClass)
+                    if (classFilters.Classes[bucketData.ItemClass].SubclassMask == AuctionSearchClassFilters.FilterType.SkipClass)
                         continue;
 
-                    if (classFilters.Value.Classes[bucketData.ItemClass].SubclassMask != AuctionSearchClassFilters.FilterType.SkipSubclass)
+                    if (classFilters.Classes[bucketData.ItemClass].SubclassMask != AuctionSearchClassFilters.FilterType.SkipSubclass)
                     {
-                        if (!classFilters.Value.Classes[bucketData.ItemClass].SubclassMask.HasAnyFlag((AuctionSearchClassFilters.FilterType)(1 << bucketData.ItemSubClass)))
+                        if (!classFilters.Classes[bucketData.ItemClass].SubclassMask.HasAnyFlag((AuctionSearchClassFilters.FilterType)(1 << bucketData.ItemSubClass)))
                             continue;
 
-                        if (!classFilters.Value.Classes[bucketData.ItemClass].InvTypes[bucketData.ItemSubClass].HasAnyFlag(1u << bucketData.InventoryType))
+                        if (!classFilters.Classes[bucketData.ItemClass].InvTypes[bucketData.ItemSubClass].HasAnyFlag(1u << bucketData.InventoryType))
                             continue;
                     }
                 }
@@ -1244,7 +1244,7 @@ namespace Game
                 return false;
             }
 
-            Optional<ObjectGuid> uniqueSeller = new();
+            ObjectGuid? uniqueSeller = new();
 
             // prepare items
             List<MailedItemsBatch> items = new();
@@ -1257,9 +1257,9 @@ namespace Game
             {
                 AuctionPosting auction = bucketItr.Auctions[i++];
                 if (!uniqueSeller.HasValue)
-                    uniqueSeller.Set(auction.Owner);
-                else if (uniqueSeller.Value != auction.Owner)
-                    uniqueSeller.Set(ObjectGuid.Empty);
+                    uniqueSeller = auction.Owner;
+                else if (uniqueSeller != auction.Owner)
+                    uniqueSeller = ObjectGuid.Empty;
 
                 uint boughtFromAuction = 0;
                 int removedItems = 0;
@@ -1657,17 +1657,13 @@ namespace Game
             if (IsCommodity())
             {
                 if (alwaysSendItem)
-                {
-                    auctionItem.Item.Value = new();
-                    auctionItem.Item.Value = new ItemInstance(Items[0]);
-                }
+                    auctionItem.Item = new ItemInstance(Items[0]);
 
-                auctionItem.UnitPrice.Set(BuyoutOrUnitPrice);
+                auctionItem.UnitPrice = BuyoutOrUnitPrice;
             }
             else
             {
-                auctionItem.Item.Value = new();
-                auctionItem.Item.Value = new ItemInstance(Items[0]);
+                auctionItem.Item = new ItemInstance(Items[0]);
                 auctionItem.Charges = new[] { Items[0].GetSpellCharges(0), Items[0].GetSpellCharges(1), Items[0].GetSpellCharges(2), Items[0].GetSpellCharges(3), Items[0].GetSpellCharges(4) }.Max();
                 for (EnchantmentSlot enchantmentSlot = 0; enchantmentSlot < EnchantmentSlot.MaxInspected; enchantmentSlot++)
                 {
@@ -1691,14 +1687,14 @@ namespace Game
                 }
 
                 if (MinBid != 0)
-                    auctionItem.MinBid.Set(MinBid);
+                    auctionItem.MinBid = MinBid;
 
                 ulong minIncrement = CalculateMinIncrement();
                 if (minIncrement != 0)
-                    auctionItem.MinIncrement.Set(minIncrement);
+                    auctionItem.MinIncrement = minIncrement;
 
                 if (BuyoutOrUnitPrice != 0)
-                    auctionItem.BuyoutPrice.Set(BuyoutOrUnitPrice);
+                    auctionItem.BuyoutPrice = BuyoutOrUnitPrice;
             }
 
             // all (not optional<>)
@@ -1715,17 +1711,17 @@ namespace Game
             auctionItem.CensorBidInfo = censorBidInfo;
             if (!Bidder.IsEmpty())
             {
-                auctionItem.Bidder.Set(Bidder);
-                auctionItem.BidAmount.Set(BidAmount);
+                auctionItem.Bidder = Bidder;
+                auctionItem.BidAmount = BidAmount;
             }
 
             // SMSG_AUCTION_LIST_BIDDER_ITEMS_RESULT, SMSG_AUCTION_LIST_OWNER_ITEMS_RESULT, SMSG_AUCTION_REPLICATE_RESPONSE (if commodity)
             if (sendKey)
-                auctionItem.AuctionBucketKey.Set(new AuctionBucketKey(AuctionsBucketKey.ForItem(Items[0])));
+                auctionItem.AuctionBucketKey = new(AuctionsBucketKey.ForItem(Items[0]));
 
             // all
             if (!Items[0].m_itemData.Creator._value.IsEmpty())
-                auctionItem.Creator.Set(Items[0].m_itemData.Creator);
+                auctionItem.Creator = Items[0].m_itemData.Creator;
         }
 
         public static ulong CalculateMinIncrement(ulong bidAmount)
@@ -1837,9 +1833,9 @@ namespace Game
                         byte quality = (byte)((breedData >> 24) & 0xFF);
                         byte level = (byte)(item.GetModifier(ItemModifier.BattlePetLevel));
 
-                        bucketInfo.MaxBattlePetQuality.Set(bucketInfo.MaxBattlePetQuality.HasValue ? Math.Max(bucketInfo.MaxBattlePetQuality.Value, quality) : quality);
-                        bucketInfo.MaxBattlePetLevel.Set(bucketInfo.MaxBattlePetLevel.HasValue ? Math.Max(bucketInfo.MaxBattlePetLevel.Value, level) : level);
-                        bucketInfo.BattlePetBreedID.Set((byte)breedId);
+                        bucketInfo.MaxBattlePetQuality = bucketInfo.MaxBattlePetQuality.HasValue ? Math.Max(bucketInfo.MaxBattlePetQuality.Value, quality) : quality;
+                        bucketInfo.MaxBattlePetLevel = bucketInfo.MaxBattlePetLevel.HasValue ? Math.Max(bucketInfo.MaxBattlePetLevel.Value, level) : level;
+                        bucketInfo.BattlePetBreedID = (byte)breedId;
                     }
                 }
 

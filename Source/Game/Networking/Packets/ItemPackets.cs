@@ -148,15 +148,15 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteUInt8(Result);
-            _worldPacket.WriteBit(Contents.HasValue);
+            _worldPacket.WriteBit(Contents != null);
             _worldPacket.FlushBits();
-            if (Contents.HasValue)
-                Contents.Value.Write(_worldPacket);
+            if (Contents != null)
+                Contents.Write(_worldPacket);
         }
 
         public byte Result;
         public ObjectGuid ItemGUID;
-        public Optional<ItemPurchaseContents> Contents;
+        public ItemPurchaseContents Contents;
     }
 
     class ItemExpirePurchaseRefund : ServerPacket
@@ -844,7 +844,7 @@ namespace Game.Networking.Packets
     public class ItemInstance
     {
         public uint ItemID;
-        public Optional<ItemBonuses> ItemBonus;
+        public ItemBonuses ItemBonus;
         public ItemModList Modifications = new();
 
         public ItemInstance() { }
@@ -855,9 +855,9 @@ namespace Game.Networking.Packets
             List<uint> bonusListIds = item.m_itemData.BonusListIDs;
             if (!bonusListIds.Empty())
             {
-                ItemBonus.Value = new();
-                ItemBonus.Value.BonusListIDs.AddRange(bonusListIds);
-                ItemBonus.Value.Context = item.GetContext();
+                ItemBonus = new();
+                ItemBonus.BonusListIDs.AddRange(bonusListIds);
+                ItemBonus.Context = item.GetContext();
             }
 
             foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
@@ -870,11 +870,11 @@ namespace Game.Networking.Packets
 
             if (!lootItem.BonusListIDs.Empty() || lootItem.randomBonusListId != 0)
             {
-                ItemBonus.Value = new();
-                ItemBonus.Value.BonusListIDs = lootItem.BonusListIDs;
-                ItemBonus.Value.Context = lootItem.context;
+                ItemBonus = new();
+                ItemBonus.BonusListIDs = lootItem.BonusListIDs;
+                ItemBonus.Context = lootItem.context;
                 if (lootItem.randomBonusListId != 0)
-                    ItemBonus.Value.BonusListIDs.Add(lootItem.randomBonusListId);
+                    ItemBonus.BonusListIDs.Add(lootItem.randomBonusListId);
             }
         }
 
@@ -890,9 +890,9 @@ namespace Game.Networking.Packets
 
             if (!voidItem.BonusListIDs.Empty())
             {
-                ItemBonus.Value = new();
-                ItemBonus.Value.Context = voidItem.Context;
-                ItemBonus.Value.BonusListIDs = voidItem.BonusListIDs;
+                ItemBonus = new();
+                ItemBonus.Context = voidItem.Context;
+                ItemBonus.BonusListIDs = voidItem.BonusListIDs;
             }
         }
 
@@ -907,20 +907,20 @@ namespace Game.Networking.Packets
                     bonus.BonusListIDs.Add(bonusListId);
 
             if (bonus.Context != 0 || !bonus.BonusListIDs.Empty())
-                ItemBonus.Set(bonus);
+                ItemBonus = bonus;
         }
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
 
-            data.WriteBit(ItemBonus.HasValue);
+            data.WriteBit(ItemBonus != null);
             data.FlushBits();
 
             Modifications.Write(data);
 
-            if (ItemBonus.HasValue)
-                ItemBonus.Value.Write(data);
+            if (ItemBonus != null)
+                ItemBonus.Write(data);
         }
 
         public void Read(WorldPacket data)
@@ -928,14 +928,14 @@ namespace Game.Networking.Packets
             ItemID = data.ReadUInt32();
 
             if (data.HasBit())
-                ItemBonus.Value = new();
+                ItemBonus = new();
 
             data.ResetBitPos();
 
             Modifications.Read(data);
 
-            if (ItemBonus.HasValue)
-                ItemBonus.Value.Read(data);
+            if (ItemBonus != null)
+                ItemBonus.Read(data);
         }
 
         public override int GetHashCode()
@@ -956,13 +956,10 @@ namespace Game.Networking.Packets
             if (left.ItemID != right.ItemID)
                 return false;
 
-            if (left.ItemBonus.HasValue != right.ItemBonus.HasValue)
+            if (left.ItemBonus != null && right.ItemBonus != null && left.ItemBonus != right.ItemBonus)
                 return false;
 
             if (left.Modifications != right.Modifications)
-                return false;
-
-            if (left.ItemBonus.HasValue && left.ItemBonus.Value != right.ItemBonus.Value)
                 return false;
 
             return true;

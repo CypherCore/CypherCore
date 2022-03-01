@@ -156,13 +156,13 @@ namespace Game.Networking.Packets
         public uint Type;
         public int Quantity;
         public uint Flags;
-        public Optional<int> WeeklyQuantity;
-        public Optional<int> TrackedQuantity;
-        public Optional<int> MaxQuantity;
-        public Optional<int> Unused901;
-        public Optional<int> QuantityChange;
-        public Optional<int> QuantityGainSource;
-        public Optional<int> QuantityLostSource;
+        public int? WeeklyQuantity;
+        public int? TrackedQuantity;
+        public int? MaxQuantity;
+        public int? Unused901;
+        public int? QuantityChange;
+        public int? QuantityGainSource;
+        public int? QuantityLostSource;
         public bool SuppressChatLog;
     }
 
@@ -232,11 +232,11 @@ namespace Game.Networking.Packets
         {
             public uint Type;
             public uint Quantity;
-            public Optional<uint> WeeklyQuantity;       // Currency count obtained this Week.  
-            public Optional<uint> MaxWeeklyQuantity;    // Weekly Currency cap.
-            public Optional<uint> TrackedQuantity;
-            public Optional<int> MaxQuantity;
-            public Optional<int> Unused901;
+            public uint? WeeklyQuantity;       // Currency count obtained this Week.  
+            public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
+            public uint? TrackedQuantity;
+            public int? MaxQuantity;
+            public int? Unused901;
             public byte Flags;                      // 0 = none, 
         }
     }
@@ -358,10 +358,10 @@ namespace Game.Networking.Packets
     {
         public WorldServerInfo() : base(ServerOpcodes.WorldServerInfo, ConnectionType.Instance)
         {
-            InstanceGroupSize = new Optional<uint>();
+            InstanceGroupSize = new uint?();
 
-            RestrictedAccountMaxLevel = new Optional<uint>();
-            RestrictedAccountMaxMoney = new Optional<ulong>();
+            RestrictedAccountMaxLevel = new uint?();
+            RestrictedAccountMaxMoney = new ulong?();
         }
 
         public override void Write()
@@ -390,9 +390,9 @@ namespace Game.Networking.Packets
         public bool XRealmPvpAlert;
         public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
                                                     // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
-        public Optional<uint> RestrictedAccountMaxLevel;
-        public Optional<ulong> RestrictedAccountMaxMoney;
-        public Optional<uint> InstanceGroupSize;
+        public uint? RestrictedAccountMaxLevel;
+        public ulong? RestrictedAccountMaxMoney;
+        public uint? InstanceGroupSize;
     }
 
     public class SetDungeonDifficulty : ClientPacket
@@ -1306,12 +1306,12 @@ namespace Game.Networking.Packets
 
         public DisplayGameError(GameError error, int arg) : this(error)
         {
-            Arg.Set(arg);
+            Arg = arg;
         }
         public DisplayGameError(GameError error, int arg1, int arg2) : this(error)
         {
-            Arg.Set(arg1);
-            Arg2.Set(arg2);
+            Arg = arg1;
+            Arg2 = arg2;
         }
 
         public override void Write()
@@ -1329,8 +1329,8 @@ namespace Game.Networking.Packets
         }
 
         GameError Error;
-        Optional<int> Arg;
-        Optional<int> Arg2;
+        int? Arg;
+        int? Arg2;
     }
 
     class AccountMountUpdate : ServerPacket

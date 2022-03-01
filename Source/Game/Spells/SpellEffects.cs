@@ -5587,28 +5587,28 @@ namespace Game.Spells
             if (jumpParams.TreatSpeedAsMoveTimeSeconds)
                 speed = unitCaster.GetExactDist(destTarget) / jumpParams.Speed;
 
-            Optional<JumpArrivalCastArgs> arrivalCast = new();
+            JumpArrivalCastArgs arrivalCast = null;
             if (effectInfo.TriggerSpell != 0)
             {
-                arrivalCast.Value = new();
-                arrivalCast.Value.SpellId = effectInfo.TriggerSpell;
+                arrivalCast = new();
+                arrivalCast.SpellId = effectInfo.TriggerSpell;
             }
 
-            Optional<SpellEffectExtraData> effectExtra = new();
+            SpellEffectExtraData effectExtra = null;
             if (jumpParams.SpellVisualId.HasValue || jumpParams.ProgressCurveId.HasValue || jumpParams.ParabolicCurveId.HasValue)
             {
-                effectExtra.Value = new();
+                effectExtra = new();
                 if (jumpParams.SpellVisualId.HasValue)
-                    effectExtra.Value.SpellVisualId = jumpParams.SpellVisualId.Value;
+                    effectExtra.SpellVisualId = jumpParams.SpellVisualId.Value;
 
                 if (jumpParams.ProgressCurveId.HasValue)
-                    effectExtra.Value.ProgressCurveId = jumpParams.ProgressCurveId.Value;
+                    effectExtra.ProgressCurveId = jumpParams.ProgressCurveId.Value;
 
                 if (jumpParams.ParabolicCurveId.HasValue)
-                    effectExtra.Value.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
+                    effectExtra.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
             }
 
-            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, false, arrivalCast.Value, effectExtra.Value);
+            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, false, arrivalCast, effectExtra);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]

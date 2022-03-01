@@ -234,11 +234,11 @@ namespace Game.Networking.Packets
             Name = _worldPacket.ReadString(nameLen);
 
             if (hasUnused910)
-                Unused910.Set(_worldPacket.ReadInt32());
+                Unused910 = _worldPacket.ReadInt32();
         }
 
         public string Name;
-        public Optional<int> Unused910;
+        public int? Unused910;
     }
 
     public class GuildInvite : ServerPacket
@@ -1094,13 +1094,13 @@ namespace Game.Networking.Packets
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
     }
 
@@ -1116,13 +1116,13 @@ namespace Game.Networking.Packets
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
     }
 
@@ -1138,13 +1138,13 @@ namespace Game.Networking.Packets
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
     }
 
@@ -1199,13 +1199,13 @@ namespace Game.Networking.Packets
             StackCount = _worldPacket.ReadUInt32();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
         public uint StackCount;
     }
@@ -1223,13 +1223,13 @@ namespace Game.Networking.Packets
             StackCount = _worldPacket.ReadUInt32();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
         public uint StackCount;
     }
@@ -1247,13 +1247,13 @@ namespace Game.Networking.Packets
             StackCount = _worldPacket.ReadUInt32();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
         public uint StackCount;
     }
@@ -1271,13 +1271,13 @@ namespace Game.Networking.Packets
             StackCount = _worldPacket.ReadUInt32();
 
             if (_worldPacket.HasBit())
-                ContainerSlot.Set(_worldPacket.ReadUInt8());
+                ContainerSlot = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public Optional<byte> ContainerSlot;
+        public byte? ContainerSlot;
         public byte ContainerItemSlot;
         public uint StackCount;
     }
@@ -1398,7 +1398,7 @@ namespace Game.Networking.Packets
 
         public int Tab;
         public List<GuildBankLogEntry> Entry;
-        public Optional<ulong> WeeklyBonusMoney;
+        public ulong? WeeklyBonusMoney;
     }
 
     public class GuildBankTextQuery : ClientPacket
@@ -1765,10 +1765,10 @@ namespace Game.Networking.Packets
         public ObjectGuid PlayerGUID;
         public uint TimeOffset;
         public sbyte EntryType;
-        public Optional<ulong> Money;
-        public Optional<int> ItemID;
-        public Optional<int> Count;
-        public Optional<sbyte> OtherTab;
+        public ulong? Money;
+        public int? ItemID;
+        public int? Count;
+        public sbyte? OtherTab;
     }
 
     public class GuildNewsEvent
@@ -1789,11 +1789,11 @@ namespace Game.Networking.Packets
             foreach (ObjectGuid memberGuid in MemberList)
                 data.WritePackedGuid(memberGuid);
 
-            data.WriteBit(Item.HasValue);
+            data.WriteBit(Item != null);
             data.FlushBits();
 
-            if (Item.HasValue)
-                Item.Value.Write(data);
+            if (Item != null)
+                Item.Write(data);
         }
 
         public int Id;
@@ -1803,6 +1803,6 @@ namespace Game.Networking.Packets
         public int[] Data = new int[2];
         public ObjectGuid MemberGuid;
         public List<ObjectGuid> MemberList = new();
-        public Optional<ItemInstance> Item;
+        public ItemInstance Item;
     }
 }

@@ -468,7 +468,7 @@ namespace Game.Networking.Packets
 
     public class LFGBlackList
     {     
-        public Optional<ObjectGuid> PlayerGuid;
+        public ObjectGuid? PlayerGuid;
         public List<LFGBlackListSlot> Slot = new();
 
         public void Write(WorldPacket data)
@@ -564,10 +564,10 @@ namespace Game.Networking.Packets
         public List<LfgPlayerQuestRewardItem> Item = new();
         public List<LfgPlayerQuestRewardCurrency> Currency = new();
         public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new();
-        public Optional<int> RewardSpellID;                              // Only used by SMSG_LFG_PLAYER_INFO
-        public Optional<int> Unused1;
-        public Optional<ulong> Unused2;
-        public Optional<int> Honor;                                      // Only used by SMSG_REQUEST_PVP_REWARDS_RESPONSE
+        public int? RewardSpellID;                              // Only used by SMSG_LFG_PLAYER_INFO
+        public int? Unused1;
+        public ulong? Unused2;
+        public int? Honor;                                      // Only used by SMSG_REQUEST_PVP_REWARDS_RESPONSE
     }
 
     public class LfgPlayerDungeonInfo
@@ -659,7 +659,7 @@ namespace Game.Networking.Packets
                 slot.Write(data);
         }
 
-        public Optional<ObjectGuid> PlayerGuid;
+        public ObjectGuid? PlayerGuid;
         public List<LFGBlackListSlot> Slot = new();
     }
 
@@ -669,34 +669,37 @@ namespace Game.Networking.Packets
         {
             Quantity = quantity;
             BonusQuantity = bonusQuantity;
-            RewardItem = new Optional<ItemInstance>();
-            RewardCurrency = new Optional<uint>();
+            RewardItem = null;
+            RewardCurrency = null;
 
             if (!isCurrency)
             {
-                RewardItem.Value = new();
-                RewardItem.Value.ItemID = id;
+                RewardItem = new();
+                RewardItem.ItemID = id;
             }
             else
             {
-                RewardCurrency.Set(id);
+                RewardCurrency = id;
             }
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteBit(RewardItem.HasValue);
+            data.WriteBit(RewardItem != null);
             data.WriteBit(RewardCurrency.HasValue);
-            if (RewardItem.HasValue)
-                RewardItem.Value.Write(data);
+
+            if (RewardItem != null)
+                RewardItem.Write(data);
+
             data.WriteUInt32(Quantity);
             data.WriteInt32(BonusQuantity);
+
             if (RewardCurrency.HasValue)
                 data.WriteUInt32(RewardCurrency.Value);
         }
 
-        public Optional<ItemInstance> RewardItem;
-        public Optional<uint> RewardCurrency;
+        public ItemInstance RewardItem;
+        public uint? RewardCurrency;
         public uint Quantity;
         public int BonusQuantity;
     }

@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt8(node);
         }
 
-        public Optional<ShowTaxiNodesWindowInfo> WindowInfo;
+        public ShowTaxiNodesWindowInfo? WindowInfo;
         public byte[] CanLandNodes = null; // Nodes known by player
         public byte[] CanUseNodes = null; // Nodes available for use - this can temporarily disable a known node
     }

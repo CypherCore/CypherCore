@@ -81,11 +81,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Flags, 7);
             _worldPacket.WriteBit(false); // Debug info
             WriteLogDataBit();
-            _worldPacket.WriteBit(ContentTuning.HasValue);
+            _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
             WriteLogData();
-            if (ContentTuning.HasValue)
-                ContentTuning.Value.Write(_worldPacket);
+            if (ContentTuning != null)
+                ContentTuning.Write(_worldPacket);
         }
 
         public ObjectGuid Me;
@@ -103,7 +103,7 @@ namespace Game.Networking.Packets
         public int Absorbed;
         public int Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-        public Optional<ContentTuningParams> ContentTuning = new();
+        public ContentTuningParams ContentTuning;
     }
 
     class EnvironmentalDamageLog : CombatLogServerPacket
@@ -213,7 +213,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(CritRollMade.HasValue);
             _worldPacket.WriteBit(CritRollNeeded.HasValue);
             WriteLogDataBit();
-            _worldPacket.WriteBit(ContentTuning.HasValue);
+            _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
 
             WriteLogData();
@@ -224,8 +224,8 @@ namespace Game.Networking.Packets
             if (CritRollNeeded.HasValue)
                 _worldPacket.WriteFloat(CritRollNeeded.Value);
 
-            if (ContentTuning.HasValue)
-                ContentTuning.Value.Write(_worldPacket);
+            if (ContentTuning != null)
+                ContentTuning.Write(_worldPacket);
         }
 
         public ObjectGuid CasterGUID;
@@ -236,9 +236,9 @@ namespace Game.Networking.Packets
         public uint OverHeal;
         public uint Absorbed;
         public bool Crit;
-        public Optional<float> CritRollMade;
-        public Optional<float> CritRollNeeded;
-        Optional<ContentTuningParams> ContentTuning = new();
+        public float? CritRollMade;
+        public float? CritRollNeeded;
+        public ContentTuningParams ContentTuning;
     }
 
     class SpellPeriodicAuraLog : CombatLogServerPacket
@@ -284,11 +284,11 @@ namespace Game.Networking.Packets
 
                 data.WriteBit(Crit);
                 data.WriteBit(DebugInfo.HasValue);
-                data.WriteBit(ContentTuning.HasValue);
+                data.WriteBit(ContentTuning != null);
                 data.FlushBits();
 
-                if (ContentTuning.HasValue)
-                    ContentTuning.Value.Write(data);
+                if (ContentTuning != null)
+                    ContentTuning.Write(data);
 
                 if (DebugInfo.HasValue)
                 {
@@ -305,8 +305,8 @@ namespace Game.Networking.Packets
             public uint AbsorbedOrAmplitude;
             public uint Resisted;
             public bool Crit;
-            public Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo;
-            public Optional<ContentTuningParams> ContentTuning = new();
+            public PeriodicalAuraLogEffectDebugInfo? DebugInfo;
+            public ContentTuningParams ContentTuning;
         }
     }
 
@@ -450,8 +450,8 @@ namespace Game.Networking.Packets
         public ObjectGuid Caster;
         public ObjectGuid Target;
         public uint SpellID;
-        public Optional<float> Rolled;
-        public Optional<float> Needed;
+        public float? Rolled;
+        public float? Needed;
     }
 
     class SpellOrDamageImmune : ServerPacket
@@ -505,10 +505,7 @@ namespace Game.Networking.Packets
 
     class AttackerStateUpdate : CombatLogServerPacket
     {
-        public AttackerStateUpdate() : base(ServerOpcodes.AttackerStateUpdate, ConnectionType.Instance)
-        {
-            SubDmg = new Optional<SubDamage>();
-        }
+        public AttackerStateUpdate() : base(ServerOpcodes.AttackerStateUpdate, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -587,7 +584,7 @@ namespace Game.Networking.Packets
         public int Damage;
         public int OriginalDamage;
         public int OverDamage = -1; // (damage - health) or -1 if unit is still alive
-        public Optional<SubDamage> SubDmg;
+        public SubDamage? SubDmg;
         public byte VictimState;
         public uint AttackerState;
         public uint MeleeSpellID;
@@ -684,7 +681,6 @@ namespace Game.Networking.Packets
         {
             Victim = victim;
             MissReason = missReason;
-            Debug = new Optional<SpellLogMissDebug>();
         }
 
         public void Write(WorldPacket data)
@@ -699,15 +695,15 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Victim;
         public byte MissReason;
-        Optional<SpellLogMissDebug> Debug;
+        SpellLogMissDebug? Debug;
     }
 
     struct SpellDispellData
     {
         public uint SpellID;
         public bool Harmful;
-        public Optional<int> Rolled;
-        public Optional<int> Needed;
+        public int? Rolled;
+        public int? Needed;
     }
 
     public struct SubDamage

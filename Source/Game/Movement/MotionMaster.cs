@@ -1233,9 +1233,9 @@ namespace Game.Movement
 
         public float JumpGravity;
 
-        public Optional<uint> SpellVisualId;
-        public Optional<uint> ProgressCurveId;
-        public Optional<uint> ParabolicCurveId;
+        public uint? SpellVisualId;
+        public uint? ProgressCurveId;
+        public uint? ParabolicCurveId;
     }
     
     public struct ChaseRange

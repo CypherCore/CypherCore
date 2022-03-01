@@ -230,7 +230,7 @@ namespace Game
                     continue;
 
                 LFGBlackList lfgBlackList = new();
-                lfgBlackList.PlayerGuid.Set(pguid);
+                lfgBlackList.PlayerGuid = pguid;
                 foreach (var locked in Global.LFGMgr.GetLockedDungeons(pguid))
                     lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
 
@@ -355,7 +355,7 @@ namespace Game
             foreach (var it in joinData.lockmap)
             {
                 var blackList = new LFGBlackListPkt();
-                blackList.PlayerGuid.Set(it.Key);
+                blackList.PlayerGuid = it.Key;
 
                 foreach (var lockInfo in it.Value)
                 {

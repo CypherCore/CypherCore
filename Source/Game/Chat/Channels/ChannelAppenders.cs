@@ -128,7 +128,7 @@ namespace Game.Chat
                 packet.Data.TargetGUID = _guid;
             }
 
-            packet.Data.ChannelGUID.Set(_channelGuid);
+            packet.Data.ChannelGUID = _channelGuid;
 
             return packet;
         }

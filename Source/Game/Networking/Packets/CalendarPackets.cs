@@ -746,19 +746,19 @@ namespace Game.Networking.Packets
             bool hasUnused801_3 = data.HasBit();
 
             if (hasUnused801_1)
-                Unused801_1.Set(data.ReadPackedGuid());
+                Unused801_1 = data.ReadPackedGuid();
             if (hasUnused801_2)
-                Unused801_2.Set(data.ReadUInt64());
+                Unused801_2 = data.ReadUInt64();
             if (hasUnused801_3)
-                Unused801_3.Set(data.ReadUInt64());
+                Unused801_3 = data.ReadUInt64();
         }
 
         public ObjectGuid Guid;
         public byte Status;
         public byte Moderator;
-        public Optional<ObjectGuid> Unused801_1;
-        public Optional<ulong> Unused801_2;
-        public Optional<ulong> Unused801_3;
+        public ObjectGuid? Unused801_1;
+        public ulong? Unused801_2;
+        public ulong? Unused801_3;
     }
 
     class CalendarAddEventInfo

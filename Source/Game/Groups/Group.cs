@@ -957,10 +957,10 @@ namespace Game.Groups
             lootList.LootObj = creature.loot.GetGUID();
 
             if (GetLootMethod() == LootMethod.MasterLoot && creature.loot.HasOverThresholdItem())
-                lootList.Master.Set(GetMasterLooterGuid());
+                lootList.Master = GetMasterLooterGuid();
 
             if (groupLooter)
-                lootList.RoundRobinWinner.Set(groupLooter.GetGUID());
+                lootList.RoundRobinWinner = groupLooter.GetGUID();
 
             BroadcastPacket(lootList, false);
         }
@@ -1483,46 +1483,52 @@ namespace Game.Groups
             if (GetMembersCount() > 1)
             {
                 // LootSettings
-                partyUpdate.LootSettings.Value = new();
+                PartyLootSettings lootSettings = new();
 
-                partyUpdate.LootSettings.Value.Method = (byte)m_lootMethod;
-                partyUpdate.LootSettings.Value.Threshold = (byte)m_lootThreshold;
-                partyUpdate.LootSettings.Value.LootMaster = m_lootMethod == LootMethod.MasterLoot ? m_masterLooterGuid : ObjectGuid.Empty;
+                lootSettings.Method = (byte)m_lootMethod;
+                lootSettings.Threshold = (byte)m_lootThreshold;
+                lootSettings.LootMaster = m_lootMethod == LootMethod.MasterLoot ? m_masterLooterGuid : ObjectGuid.Empty;
+
+                partyUpdate.LootSettings = lootSettings;
 
                 // Difficulty Settings
-                partyUpdate.DifficultySettings.Value = new();
+                PartyDifficultySettings difficultySettings = new();
 
-                partyUpdate.DifficultySettings.Value.DungeonDifficultyID = (uint)m_dungeonDifficulty;
-                partyUpdate.DifficultySettings.Value.RaidDifficultyID = (uint)m_raidDifficulty;
-                partyUpdate.DifficultySettings.Value.LegacyRaidDifficultyID = (uint)m_legacyRaidDifficulty;
+                difficultySettings.DungeonDifficultyID = (uint)m_dungeonDifficulty;
+                difficultySettings.RaidDifficultyID = (uint)m_raidDifficulty;
+                difficultySettings.LegacyRaidDifficultyID = (uint)m_legacyRaidDifficulty;
+
+                partyUpdate.DifficultySettings = difficultySettings;
             }
 
             // LfgInfos
             if (IsLFGGroup())
             {
-                partyUpdate.LfgInfos.Value = new();
+                PartyLFGInfo lfgInfos = new();
 
-                partyUpdate.LfgInfos.Value.Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid));
-                partyUpdate.LfgInfos.Value.BootCount = 0;
-                partyUpdate.LfgInfos.Value.Aborted = false;
+                lfgInfos.Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid));
+                lfgInfos.BootCount = 0;
+                lfgInfos.Aborted = false;
 
-                partyUpdate.LfgInfos.Value.MyFlags = (byte)(Global.LFGMgr.GetState(m_guid) == LfgState.FinishedDungeon ? 2 : 0);
-                partyUpdate.LfgInfos.Value.MyRandomSlot = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
+                lfgInfos.MyFlags = (byte)(Global.LFGMgr.GetState(m_guid) == LfgState.FinishedDungeon ? 2 : 0);
+                lfgInfos.MyRandomSlot = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
 
-                partyUpdate.LfgInfos.Value.MyPartialClear = 0;
-                partyUpdate.LfgInfos.Value.MyGearDiff = 0.0f;
-                partyUpdate.LfgInfos.Value.MyFirstReward = false;
+                lfgInfos.MyPartialClear = 0;
+                lfgInfos.MyGearDiff = 0.0f;
+                lfgInfos.MyFirstReward = false;
 
                 DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(partyUpdate.LfgInfos.Value.MyRandomSlot, player.GetLevel());
                 if (reward != null)
                 {
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
                     if (quest != null)
-                        partyUpdate.LfgInfos.Value.MyFirstReward = player.CanRewardQuest(quest, false);
+                        lfgInfos.MyFirstReward = player.CanRewardQuest(quest, false);
                 }
 
-                partyUpdate.LfgInfos.Value.MyStrangerCount = 0;
-                partyUpdate.LfgInfos.Value.MyKickVoteCount = 0;
+                lfgInfos.MyStrangerCount = 0;
+                lfgInfos.MyKickVoteCount = 0;
+
+                partyUpdate.LfgInfos = lfgInfos;
             }
 
             player.SendPacket(partyUpdate);

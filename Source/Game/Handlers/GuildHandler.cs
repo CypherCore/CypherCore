@@ -332,11 +332,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(depositGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot))
+            if (!Player.IsInventoryPos(depositGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), false, depositGuildBankItem.BankTab, depositGuildBankItem.BankSlot,
-                    depositGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot, 0);
+                    depositGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot, 0);
         }
 
         [WorldPacketHandler(ClientOpcodes.StoreGuildBankItem)]
@@ -349,11 +349,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(storeGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot))
+            if (!Player.IsInventoryPos(storeGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), true, storeGuildBankItem.BankTab, storeGuildBankItem.BankSlot,
-                    storeGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot, 0);
+                    storeGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot, 0);
         }
 
         [WorldPacketHandler(ClientOpcodes.SwapItemWithGuildBankItem)]
@@ -366,11 +366,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(swapItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot))
+            if (!Player.IsInventoryPos(swapItemWithGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), false, swapItemWithGuildBankItem.BankTab, swapItemWithGuildBankItem.BankSlot,
-                    swapItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot, 0);
+                    swapItemWithGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot, 0);
         }
 
         [WorldPacketHandler(ClientOpcodes.SwapGuildBankItemWithGuildBankItem)]
@@ -410,11 +410,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(mergeItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot))
+            if (!Player.IsInventoryPos(mergeItemWithGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), false, mergeItemWithGuildBankItem.BankTab, mergeItemWithGuildBankItem.BankSlot,
-                    mergeItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot, mergeItemWithGuildBankItem.StackCount);
+                    mergeItemWithGuildBankItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot, mergeItemWithGuildBankItem.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SplitItemToGuildBank)]
@@ -427,11 +427,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(splitItemToGuildBank.ContainerSlot.ValueOr(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot))
+            if (!Player.IsInventoryPos(splitItemToGuildBank.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), false, splitItemToGuildBank.BankTab, splitItemToGuildBank.BankSlot,
-                    splitItemToGuildBank.ContainerSlot.ValueOr(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot, splitItemToGuildBank.StackCount);
+                    splitItemToGuildBank.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot, splitItemToGuildBank.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithItem)]
@@ -444,11 +444,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(mergeGuildBankItemWithItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot))
+            if (!Player.IsInventoryPos(mergeGuildBankItemWithItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), true, mergeGuildBankItemWithItem.BankTab, mergeGuildBankItemWithItem.BankSlot,
-                    mergeGuildBankItemWithItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot, mergeGuildBankItemWithItem.StackCount);
+                    mergeGuildBankItemWithItem.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot, mergeGuildBankItemWithItem.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SplitGuildBankItemToInventory)]
@@ -461,11 +461,11 @@ namespace Game
             if (guild == null)
                 return;
 
-            if (!Player.IsInventoryPos(splitGuildBankItemToInventory.ContainerSlot.ValueOr(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot))
+            if (!Player.IsInventoryPos(splitGuildBankItemToInventory.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot))
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
                 guild.SwapItemsWithInventory(GetPlayer(), true, splitGuildBankItemToInventory.BankTab, splitGuildBankItemToInventory.BankSlot,
-                    splitGuildBankItemToInventory.ContainerSlot.ValueOr(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot, splitGuildBankItemToInventory.StackCount);
+                    splitGuildBankItemToInventory.ContainerSlot.GetValueOrDefault(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot, splitGuildBankItemToInventory.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.AutoStoreGuildBankItem)]

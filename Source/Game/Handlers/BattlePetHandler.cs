@@ -56,7 +56,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetModifyName)]
         void HandleBattlePetModifyName(BattlePetModifyName battlePetModifyName)
         {
-            GetBattlePetMgr().ModifyName(battlePetModifyName.PetGuid, battlePetModifyName.Name, battlePetModifyName.DeclinedNames.Value);
+            GetBattlePetMgr().ModifyName(battlePetModifyName.PetGuid, battlePetModifyName.Name, battlePetModifyName.DeclinedNames);
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryBattlePetName)]

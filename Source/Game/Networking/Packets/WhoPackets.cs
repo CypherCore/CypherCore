@@ -118,7 +118,7 @@ namespace Game.Networking.Packets
             ShowArenaPlayers = data.HasBit();
             ExactName = data.HasBit();
             if (data.HasBit())
-                ServerInfo.Value = new();
+                ServerInfo = new();
 
             data.ResetBitPos();
 
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
         public bool ShowEnemies;
         public bool ShowArenaPlayers;
         public bool ExactName;
-        public Optional<WhoRequestServerInfo> ServerInfo;
+        public WhoRequestServerInfo? ServerInfo;
     }
 
     public class WhoEntry

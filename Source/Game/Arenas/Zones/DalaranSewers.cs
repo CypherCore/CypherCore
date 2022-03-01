@@ -17,9 +17,10 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.BattleGrounds;
 using Game.Entities;
 using Game.Networking.Packets;
-using Game.BattleGrounds;
+using System;
 
 namespace Game.Arenas
 {
@@ -44,7 +45,7 @@ namespace Game.Arenas
             for (int i = DalaranSewersObjectTypes.Buff1; i <= DalaranSewersObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
 
-            _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, RandomHelper.URand(DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax));
+            _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax);
             _events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackFirstDelay);
 
             SpawnBGObject(DalaranSewersObjectTypes.Water2, BattlegroundConst.RespawnImmediately);
@@ -148,7 +149,7 @@ namespace Game.Arenas
                         DoorOpen(DalaranSewersObjectTypes.Water1);
                         DoorOpen(DalaranSewersObjectTypes.Water2);
                         _events.CancelEvent(DalaranSewersEvents.WaterfallKnockback);
-                        _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, RandomHelper.URand(DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax));
+                        _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax);
                         break;
                     case DalaranSewersEvents.WaterfallKnockback:
                     {
@@ -218,14 +219,14 @@ namespace Game.Arenas
     struct DalaranSewersData
     {
         // These values are NOT blizzlike... need the correct data!
-        public const uint WaterfallTimerMin = 30000;
-        public const uint WaterfallTimerMax = 60000;
-        public const uint WaterWarningDuration = 5000;
-        public const uint WaterfallDuration = 30000;
-        public const uint WaterfallKnockbackTimer = 1500;
+        public static TimeSpan WaterfallTimerMin = TimeSpan.FromSeconds(30);
+        public static TimeSpan WaterfallTimerMax = TimeSpan.FromSeconds(60);
+        public static TimeSpan WaterWarningDuration = TimeSpan.FromSeconds(5);
+        public static TimeSpan WaterfallDuration = TimeSpan.FromSeconds(30);
+        public static TimeSpan WaterfallKnockbackTimer = TimeSpan.FromSeconds(1.5);
 
-        public const uint PipeKnockbackFirstDelay = 5000;
-        public const uint PipeKnockbackDelay = 3000;
+        public static TimeSpan PipeKnockbackFirstDelay = TimeSpan.FromSeconds(5);
+        public static TimeSpan PipeKnockbackDelay = TimeSpan.FromSeconds(3);
         public const uint PipeKnockbackTotalCount = 2;
 
         public const uint NpcWaterSpout = 28567;

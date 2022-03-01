@@ -596,8 +596,8 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(NativeRealmAddress.Value);
         }
 
-        public Optional<uint> VirtualRealmAddress = new(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
-        public Optional<uint> NativeRealmAddress = new(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
+        public uint? VirtualRealmAddress = new(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
+        public uint? NativeRealmAddress = new(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
     }
 
     public class PlayerGuidLookupData

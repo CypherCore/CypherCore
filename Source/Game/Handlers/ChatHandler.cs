@@ -387,7 +387,7 @@ namespace Game
             HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target, chatAddonMessageTargeted.ChannelGUID);
         }
 
-        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "", Optional<ObjectGuid> channelGuid = default)
+        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "", ObjectGuid? channelGuid = null)
         {
             Player sender = GetPlayer();
 

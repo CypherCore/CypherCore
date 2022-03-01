@@ -702,8 +702,7 @@ namespace Game.BattleGrounds
             PVPMatchComplete pvpMatchComplete = new();
             pvpMatchComplete.Winner = (byte)GetWinner();
             pvpMatchComplete.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
-            pvpMatchComplete.LogData.Value = new();
-            BuildPvPLogDataPacket(out pvpMatchComplete.LogData.Value);
+            BuildPvPLogDataPacket(out pvpMatchComplete.LogData);
             pvpMatchComplete.Write();
 
             foreach (var pair in m_Players)

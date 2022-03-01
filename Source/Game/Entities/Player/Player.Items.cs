@@ -200,12 +200,12 @@ namespace Game.Entities
             itemPurchaseRefundResult.Result = error;
             if (error == 0)
             {
-                itemPurchaseRefundResult.Contents.Value = new();
-                itemPurchaseRefundResult.Contents.Value.Money = item.GetPaidMoney();
+                itemPurchaseRefundResult.Contents = new();
+                itemPurchaseRefundResult.Contents.Money = item.GetPaidMoney();
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // item cost data
                 {
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemCount = iece.ItemCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemID = iece.ItemID[i];
+                    itemPurchaseRefundResult.Contents.Items[i].ItemCount = iece.ItemCount[i];
+                    itemPurchaseRefundResult.Contents.Items[i].ItemID = iece.ItemID[i];
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost data
@@ -213,8 +213,8 @@ namespace Game.Entities
                     if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyID = iece.CurrencyID[i];
+                    itemPurchaseRefundResult.Contents.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
+                    itemPurchaseRefundResult.Contents.Currencies[i].CurrencyID = iece.CurrencyID[i];
                 }
             }
 

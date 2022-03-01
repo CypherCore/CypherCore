@@ -851,9 +851,9 @@ namespace Game.Networking.Packets
 
         public int SpellID;
         public SpellCastVisual Visual;
-        public Optional<SpellChannelStartInterruptImmunities> InterruptImmunities;
+        public SpellChannelStartInterruptImmunities? InterruptImmunities;
         public ObjectGuid CasterGUID;
-        public Optional<SpellTargetedHealPrediction> HealPrediction;
+        public SpellTargetedHealPrediction? HealPrediction;
         public uint ChannelDuration;
     }
 
@@ -1080,7 +1080,7 @@ namespace Game.Networking.Packets
 
             _worldPacket.ResetBitPos();
             if (hasStatus)
-                Status.Set(MovementExtensions.ReadMovementInfo(_worldPacket));
+                Status = MovementExtensions.ReadMovementInfo(_worldPacket);
         }
 
         public ObjectGuid Guid;
@@ -1091,7 +1091,7 @@ namespace Game.Networking.Packets
         public float Speed;
         public Vector3 FirePos;
         public Vector3 ImpactPos;
-        public Optional<MovementInfo> Status;
+        public MovementInfo Status;
     }
 
     public class SpellDelayed : ServerPacket
@@ -1434,10 +1434,10 @@ namespace Game.Networking.Packets
             data.WriteBit(TimeMod.HasValue);
             data.WriteBits(Points.Count, 6);
             data.WriteBits(EstimatedPoints.Count, 6);
-            data.WriteBit(ContentTuning.HasValue);
+            data.WriteBit(ContentTuning != null);
 
-            if (ContentTuning.HasValue)
-                ContentTuning.Value.Write(data);
+            if (ContentTuning != null)
+                ContentTuning.Write(data);
 
             if (CastUnit.HasValue)
                 data.WritePackedGuid(CastUnit.Value);
@@ -1466,11 +1466,11 @@ namespace Game.Networking.Packets
         public ushort CastLevel = 1;
         public byte Applications = 1;
         public int ContentTuningID;
-        Optional<ContentTuningParams> ContentTuning;
-        public Optional<ObjectGuid> CastUnit;
-        public Optional<int> Duration;
-        public Optional<int> Remaining;
-        Optional<float> TimeMod;
+        ContentTuningParams ContentTuning;
+        public ObjectGuid? CastUnit;
+        public int? Duration;
+        public int? Remaining;
+        float? TimeMod;
         public List<float> Points = new();
         public List<float> EstimatedPoints = new();
     }
@@ -1480,15 +1480,15 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data .WriteUInt8(Slot);
-            data.WriteBit(AuraData.HasValue);
+            data.WriteBit(AuraData != null);
             data.FlushBits();
 
-            if (AuraData.HasValue)
-                AuraData.Value.Write(data);
+            if (AuraData != null)
+                AuraData.Write(data);
         }
 
         public byte Slot;
-        public Optional<AuraDataInfo> AuraData;
+        public AuraDataInfo AuraData;
     }
 
     public struct TargetLocation
@@ -1520,16 +1520,13 @@ namespace Game.Networking.Packets
         {
             Flags = (SpellCastTargetFlags)data.ReadBits<uint>(26);
             if (data.HasBit())
-                SrcLocation.Value = new();
+                SrcLocation = new();
 
             if (data.HasBit())
-                DstLocation.Value = new();
+                DstLocation = new();
 
-            if (data.HasBit())
-                Orientation.Value = new();
-
-            if (data.HasBit())
-                MapID.Value = new();
+            bool hasOrientation = data.HasBit();
+            bool hasMapId = data.HasBit();
 
             uint nameLength = data.ReadBits<uint>(7);
 
@@ -1542,11 +1539,11 @@ namespace Game.Networking.Packets
             if (DstLocation.HasValue)
                 DstLocation.Value.Read(data);
 
-            if (Orientation.HasValue)
-                Orientation.Value = data.ReadFloat();
+            if (hasOrientation)
+                Orientation = data.ReadFloat();
 
-            if (MapID.HasValue)
-                MapID.Value = data.ReadInt32();
+            if (hasMapId)
+                MapID = data.ReadInt32();
 
             Name = data.ReadString(nameLength);
         }
@@ -1582,10 +1579,10 @@ namespace Game.Networking.Packets
         public SpellCastTargetFlags Flags;
         public ObjectGuid Unit;
         public ObjectGuid Item;
-        public Optional<TargetLocation> SrcLocation;
-        public Optional<TargetLocation> DstLocation;
-        public Optional<float> Orientation;
-        public Optional<int> MapID;
+        public TargetLocation? SrcLocation;
+        public TargetLocation? DstLocation;
+        public float? Orientation;
+        public int? MapID;
         public string Name = "";
     }
 
@@ -1640,7 +1637,7 @@ namespace Game.Networking.Packets
         public uint SendCastFlags;
         public SpellTargetData Target = new();
         public MissileTrajectoryRequest MissileTrajectory;
-        public Optional<MovementInfo> MoveUpdate;
+        public MovementInfo MoveUpdate;
         public List<SpellWeight> Weight = new();
         public Array<SpellOptionalReagent> OptionalReagents = new(3);
         public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
@@ -1669,14 +1666,13 @@ namespace Game.Networking.Packets
                 OptionalCurrencies[i].Read(data);
 
             SendCastFlags = data.ReadBits<uint>(5);
-            if (data.HasBit())
-                MoveUpdate.Value = new();
+            bool hasMoveUpdate = data.HasBit();
 
             var weightCount = data.ReadBits<uint>(2);
             Target.Read(data);
 
-            if (MoveUpdate.HasValue)
-                MoveUpdate.Value = MovementExtensions.ReadMovementInfo(data);
+            if (hasMoveUpdate)
+                MoveUpdate = MovementExtensions.ReadMovementInfo(data);
 
             for (var i = 0; i < weightCount; ++i)
             {
@@ -1834,7 +1830,7 @@ namespace Game.Networking.Packets
             data.WriteBits(HitStatus.Count, 16);
             data.WriteBits(MissStatus.Count, 16);
             data.WriteBits(RemainingPower.Count, 9);
-            data.WriteBit(RemainingRunes.HasValue);
+            data.WriteBit(RemainingRunes != null);
             data.WriteBits(TargetPoints.Count, 16);
             data.FlushBits();
 
@@ -1855,8 +1851,8 @@ namespace Game.Networking.Packets
             foreach (SpellPowerData power in RemainingPower)
                 power.Write(data);
 
-            if (RemainingRunes.HasValue)
-                RemainingRunes.Value.Write(data);
+            if (RemainingRunes != null)
+                RemainingRunes.Write(data);
 
             foreach (TargetLocation targetLoc in TargetPoints)
                 targetLoc.Write(data);
@@ -1877,7 +1873,7 @@ namespace Game.Networking.Packets
         public List<SpellMissStatus> MissStatus = new();
         public SpellTargetData Target = new();
         public List<SpellPowerData> RemainingPower = new();
-        public Optional<RuneData> RemainingRunes;
+        public RuneData RemainingRunes;
         public MissileTrajectoryResult MissileTrajectory;
         public SpellAmmo Ammo;
         public byte DestLocSpellCastIndex;
@@ -1960,8 +1956,8 @@ namespace Game.Networking.Packets
         public int CategoryRecoveryTime;
         public float ModRate = 1.0f;
         public bool OnHold;
-        Optional<uint> unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
-        Optional<uint> unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
+        uint? unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
+        uint? unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
     }
 
     public class SpellChargeEntry

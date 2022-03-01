@@ -441,11 +441,11 @@ namespace Game.Networking.Packets
             data.WriteUInt32(FollowerXP);
             data.WriteUInt32(GarrMssnBonusAbilityID);
             data.WriteInt32(ItemFileDataID);
-            data.WriteBit(ItemInstance.HasValue);
+            data.WriteBit(ItemInstance != null);
             data.FlushBits();
 
-            if (ItemInstance.HasValue)
-                ItemInstance.Value.Write(data);
+            if (ItemInstance != null)
+                ItemInstance.Write(data);
         }
 
         public int ItemID;
@@ -455,7 +455,7 @@ namespace Game.Networking.Packets
         public uint FollowerXP;
         public uint GarrMssnBonusAbilityID;
         public int ItemFileDataID;
-        public Optional<ItemInstance> ItemInstance;
+        public ItemInstance ItemInstance;
     }
 
     struct GarrisonMissionBonusAbility
@@ -501,7 +501,7 @@ namespace Game.Networking.Packets
         public int Rank;
         public long ResearchStartTime;
         public int Flags;
-        public Optional<GarrisonTalentSocketData> Socket;
+        public GarrisonTalentSocketData? Socket;
     }
 
     struct GarrisonCollectionEntry

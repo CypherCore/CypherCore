@@ -502,16 +502,16 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8(Winner);
             _worldPacket.WriteInt32(Duration);
-            _worldPacket.WriteBit(LogData.HasValue);
+            _worldPacket.WriteBit(LogData != null);
             _worldPacket.FlushBits();
 
-            if (LogData.HasValue)
-                LogData.Value.Write(_worldPacket);
+            if (LogData != null)
+                LogData.Write(_worldPacket);
         }
 
         public byte Winner;
         public int Duration;
-        public Optional<PVPMatchStatistics> LogData;
+        public PVPMatchStatistics LogData;
     }
 
     //Structs
@@ -561,7 +561,7 @@ namespace Game.Networking.Packets
     public class PVPMatchStatistics
     {
         public List<PVPMatchPlayerStatistics> Statistics = new();
-        public Optional<RatingData> Ratings;
+        public RatingData Ratings;
         public sbyte[] PlayerCount = new sbyte[2];
 
         public class RatingData
@@ -664,13 +664,13 @@ namespace Game.Networking.Packets
             public uint Kills;
             public byte Faction;
             public bool IsInWorld;
-            public Optional<HonorData> Honor;
+            public HonorData? Honor;
             public uint DamageDone;
             public uint HealingDone;
-            public Optional<uint> PreMatchRating;
-            public Optional<int> RatingChange;
-            public Optional<uint> PreMatchMMR;
-            public Optional<int> MmrChange;
+            public uint? PreMatchRating;
+            public int? RatingChange;
+            public uint? PreMatchMMR;
+            public int? MmrChange;
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
             public int Sex;
@@ -682,13 +682,13 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBit(Ratings.HasValue);
+            data.WriteBit(Ratings != null);
             data.WriteInt32(Statistics.Count);
             foreach (var count in PlayerCount)
                 data.WriteInt8(count);
 
-            if (Ratings.HasValue)
-                Ratings.Value.Write(data);
+            if (Ratings != null)
+                Ratings.Write(data);
 
             foreach (var player in Statistics)
                 player.Write(data);

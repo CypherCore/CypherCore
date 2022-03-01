@@ -5872,22 +5872,24 @@ namespace Game
 
                     if (!result.IsNull(7))
                     {
-                        info.createPositionNPE.Value = new();
+                        PlayerInfo.CreatePosition createPosition = new();
 
-                        info.createPositionNPE.Value.Loc = new WorldLocation(result.Read<uint>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
+                        createPosition.Loc = new WorldLocation(result.Read<uint>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
                         if (!result.IsNull(12))
-                            info.createPositionNPE.Value.TransportGuid = result.Read<ulong>(12);
+                            createPosition.TransportGuid = result.Read<ulong>(12);
+
+                        info.createPositionNPE = createPosition;
 
                         if (!CliDB.MapStorage.ContainsKey(info.createPositionNPE.Value.Loc.GetMapId()))
                         {
                             Log.outError(LogFilter.Sql, $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
-                            info.createPositionNPE.Clear();
+                            info.createPositionNPE = null;
                         }
 
                         if (info.createPositionNPE.HasValue && info.createPositionNPE.Value.TransportGuid.HasValue && Global.TransportMgr.GetTransportSpawn(info.createPositionNPE.Value.TransportGuid.Value) == null)
                         {
                             Log.outError(LogFilter.Sql, $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
-                            info.createPositionNPE.Clear(); // remove entire NPE data - assume user put transport offsets into npe_position fields
+                            info.createPositionNPE = null; // remove entire NPE data - assume user put transport offsets into npe_position fields
                         }
                     }
 
@@ -5895,7 +5897,7 @@ namespace Game
                     {
                         uint introMovieId = result.Read<uint>(13);
                         if (CliDB.MovieStorage.ContainsKey(introMovieId))
-                            info.introMovieId.Set(introMovieId);
+                            info.introMovieId = introMovieId;
                         else
                             Log.outError(LogFilter.Sql, $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
@@ -5904,7 +5906,7 @@ namespace Game
                     {
                         uint introSceneId = result.Read<uint>(14);
                         if (GetSceneTemplate(introSceneId) != null)
-                            info.introSceneId.Set(introSceneId);
+                            info.introSceneId = introSceneId;
                         else
                             Log.outError(LogFilter.Sql, $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
@@ -5913,7 +5915,7 @@ namespace Game
                     {
                         uint introSceneId = result.Read<uint>(15);
                         if (GetSceneTemplate(introSceneId) != null)
-                            info.introSceneIdNPE.Set(introSceneId);
+                            info.introSceneIdNPE = introSceneId;
                         else
                             Log.outError(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
@@ -9620,7 +9622,7 @@ namespace Game
                     response.Description = responses.Read<string>(14);
                     response.Confirmation = responses.Read<string>(15);
                     if (!responses.IsNull(16))
-                        response.RewardQuestID.Set(responses.Read<uint>(16));
+                        response.RewardQuestID = responses.Read<uint>(16);
 
                     choice.Responses.Add(response);
 
@@ -9680,7 +9682,7 @@ namespace Game
                         reward.SkillPointCount = 0;
                     }
 
-                    response.Reward.Set(reward);
+                    response.Reward = reward;
                     ++rewardCount;
 
                 } while (rewards.NextRow());
@@ -9718,7 +9720,7 @@ namespace Game
                         continue;
                     }
 
-                    if (!response.Reward.HasValue)
+                    if (response.Reward == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
                         continue;
@@ -9730,7 +9732,7 @@ namespace Game
                         continue;
                     }
 
-                    response.Reward.Value.Items.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
+                    response.Reward.Items.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
                     itemRewardCount++;
 
                 } while (rewardItem.NextRow());
@@ -9760,7 +9762,7 @@ namespace Game
                         continue;
                     }
 
-                    if (!response.Reward.HasValue)
+                    if (response.Reward == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
                         continue;
@@ -9772,7 +9774,7 @@ namespace Game
                         continue;
                     }
 
-                    response.Reward.Value.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
+                    response.Reward.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
                     currencyRewardCount++;
 
                 } while (rewardCurrency.NextRow());
@@ -9802,7 +9804,7 @@ namespace Game
                         continue;
                     }
 
-                    if (!response.Reward.HasValue)
+                    if (response.Reward == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
                         continue;
@@ -9814,7 +9816,7 @@ namespace Game
                         continue;
                     }
 
-                    response.Reward.Value.Faction.Add(new PlayerChoiceResponseRewardEntry(factionId, quantity));
+                    response.Reward.Faction.Add(new PlayerChoiceResponseRewardEntry(factionId, quantity));
                     factionRewardCount++;
 
                 } while (rewardFaction.NextRow());
@@ -9849,7 +9851,7 @@ namespace Game
                         continue;
                     }
 
-                    if (!response.Reward.HasValue)
+                    if (response.Reward == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
                         continue;
@@ -9861,7 +9863,7 @@ namespace Game
                         continue;
                     }
 
-                    response.Reward.Value.ItemChoices.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
+                    response.Reward.ItemChoices.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
                     itemChoiceRewardCount++;
 
                 } while (rewards.NextRow());
@@ -9895,7 +9897,7 @@ namespace Game
                     mawPower.RarityColor = mawPowersResult.Read<uint>(4);
                     mawPower.SpellID = mawPowersResult.Read<int>(5);
                     mawPower.MaxStacks = mawPowersResult.Read<int>(6);
-                    response.MawPower.Set(mawPower);
+                    response.MawPower = mawPower;
 
                     ++mawPowersCount;
 
@@ -10027,9 +10029,9 @@ namespace Game
                 float speed = result.Read<float>(1);
                 bool treatSpeedAsMoveTimeSeconds = result.Read<bool>(2);
                 float jumpGravity = result.Read<float>(3);
-                Optional<uint> spellVisualId = new();
-                Optional<uint> progressCurveId = new();
-                Optional<uint> parabolicCurveId = new();
+                uint? spellVisualId = null;
+                uint? progressCurveId = null;
+                uint? parabolicCurveId = null;
 
                 if (speed <= 0.0f)
                 {
@@ -10046,7 +10048,7 @@ namespace Game
                 if (!result.IsNull(4))
                 {
                     if (CliDB.SpellVisualStorage.ContainsKey(result.Read<uint>(4)))
-                        spellVisualId.Set(result.Read<uint>(4));
+                        spellVisualId = result.Read<uint>(4);
                     else
                         Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing SpellVisual: {result.Read<uint>(4)} for id {id}, ignored.");
                 }
@@ -10054,7 +10056,7 @@ namespace Game
                 if (!result.IsNull(5))
                 {
                     if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(5)))
-                        progressCurveId.Set(result.Read<uint>(5));
+                        progressCurveId = result.Read<uint>(5);
                     else
                         Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing progress Curve: {result.Read<uint>(5)} for id {id}, ignored.");
                 }
@@ -10062,7 +10064,7 @@ namespace Game
                 if (!result.IsNull(6))
                 {
                     if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(6)))
-                        parabolicCurveId.Set(result.Read<uint>(6));
+                        parabolicCurveId = result.Read<uint>(6);
                     else
                         Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing parabolic Curve: {result.Read<uint>(6)} for id {id}, ignored.");
                 }
@@ -11825,9 +11827,9 @@ namespace Game
         public string ButtonTooltip;
         public string Description;
         public string Confirmation;
-        public Optional<PlayerChoiceResponseReward> Reward;
-        public Optional<uint> RewardQuestID;
-        public Optional<PlayerChoiceResponseMawPower> MawPower;
+        public PlayerChoiceResponseReward Reward;
+        public uint? RewardQuestID;
+        public PlayerChoiceResponseMawPower? MawPower;
     }
 
     public class PlayerChoice

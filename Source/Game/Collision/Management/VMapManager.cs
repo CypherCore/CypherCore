@@ -260,7 +260,7 @@ namespace Game.Collision
                 int adtId, rootId, groupId;
                 uint flags;
                 if (GetAreaInfo(mapId, x, y, ref data.floorZ, out flags, out adtId, out rootId, out groupId))
-                    data.areaInfo.Set(new AreaAndLiquidData.AreaInfo(adtId, rootId, groupId, flags));
+                    data.areaInfo = new(adtId, rootId, groupId, flags);
                 return data;
             }
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
@@ -275,10 +275,10 @@ namespace Game.Collision
                     float liquidLevel = 0;
                     if (reqLiquidType == 0 || Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
                         if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
-                            data.liquidInfo.Set(new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel));
+                            data.liquidInfo = new(liquidType, liquidLevel);
 
                     if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLiquidStatus))
-                        data.areaInfo.Set(new AreaAndLiquidData.AreaInfo(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags()));
+                        data.areaInfo = new(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags());
                 }
             }
 
@@ -422,7 +422,7 @@ namespace Game.Collision
         }
 
         public float floorZ = MapConst.VMAPInvalidHeightValue;
-        public Optional<AreaInfo> areaInfo;
-        public Optional<LiquidInfo> liquidInfo;
+        public AreaInfo? areaInfo;
+        public LiquidInfo? liquidInfo;
     }
 }

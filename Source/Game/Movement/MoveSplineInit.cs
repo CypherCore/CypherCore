@@ -313,8 +313,8 @@ namespace Game.Movement
         public void SetAnimation(AnimType anim)
         {
             args.time_perc = 0.0f;
-            args.animTier.Value = new();
-            args.animTier.Value.AnimTier = (byte)anim;
+            args.animTier = new();
+            args.animTier.AnimTier = (byte)anim;
             args.flags.EnableAnimation();
         }
 
@@ -330,7 +330,7 @@ namespace Game.Movement
 
         public void SetSpellEffectExtraData(SpellEffectExtraData spellEffectExtraData)
         {
-            args.spellEffectExtra.Set(spellEffectExtraData);
+            args.spellEffectExtra = spellEffectExtraData;
         }
 
         public List<Vector3> Path() { return args.path; }

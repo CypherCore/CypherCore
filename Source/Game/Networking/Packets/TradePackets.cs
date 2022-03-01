@@ -241,18 +241,18 @@ namespace Game.Networking.Packets
                 data.WriteInt32(StackCount);
                 data.WritePackedGuid(GiftCreator);
                 Item.Write(data);
-                data.WriteBit(Unwrapped.HasValue);
+                data.WriteBit(Unwrapped != null);
                 data.FlushBits();
 
-                if (Unwrapped.HasValue)
-                    Unwrapped.Value.Write(data);
+                if (Unwrapped != null)
+                    Unwrapped.Write(data);
             }
 
             public byte Slot;
             public ItemInstance Item = new();
             public int StackCount;
             public ObjectGuid GiftCreator;
-            public Optional<UnwrappedTradeItem> Unwrapped;
+            public UnwrappedTradeItem Unwrapped;
         }
 
         public ulong Gold;

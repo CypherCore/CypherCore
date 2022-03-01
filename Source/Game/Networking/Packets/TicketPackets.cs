@@ -147,8 +147,9 @@ namespace Game.Networking.Packets
 
             if (hasClubMessage)
             {
-                CommunityMessage.Value = new();
-                CommunityMessage.Value.IsPlayerUsingVoice = _worldPacket.HasBit();
+                SupportTicketCommunityMessage communityMessage = new();
+                communityMessage.IsPlayerUsingVoice = _worldPacket.HasBit();
+                CommunityMessage = communityMessage;
                 _worldPacket.ResetBitPos();
             }
 
@@ -158,49 +159,49 @@ namespace Game.Networking.Packets
 
             if (hasMailInfo)
             {
-                MailInfo.Value = new();
+                MailInfo = new();
                 MailInfo.Value.Read(_worldPacket);
             }
 
             if (hasCalendarInfo)
             {
-                CalenderInfo.Value = new();
+                CalenderInfo = new();
                 CalenderInfo.Value.Read(_worldPacket);
             }
 
             if (hasPetInfo)
             {
-                PetInfo.Value = new();
+                PetInfo = new();
                 PetInfo.Value.Read(_worldPacket);
             }
 
             if (hasGuildInfo)
             {
-                GuildInfo.Value = new();
+                GuildInfo = new();
                 GuildInfo.Value.Read(_worldPacket);
             }
 
             if (hasLFGListSearchResult)
             {
-                LFGListSearchResult.Value = new();
+                LFGListSearchResult = new();
                 LFGListSearchResult.Value.Read(_worldPacket);
             }
 
             if (hasLFGListApplicant)
             {
-                LFGListApplicant.Value = new();
+                LFGListApplicant = new();
                 LFGListApplicant.Value.Read(_worldPacket);
             }
 
             if (hasClubFinderResult)
             {
-                ClubFinderResult.Value = new();
+                ClubFinderResult = new();
                 ClubFinderResult.Value.Read(_worldPacket);
             }
 
             if (hasUnk910)
             {
-                Unused910.Value = new();
+                Unused910 = new();
                 Unused910.Value.Read(_worldPacket);
             }
         }
@@ -211,15 +212,15 @@ namespace Game.Networking.Packets
         public byte ComplaintType;
         public string Note;
         public SupportTicketHorusChatLog HorusChatLog;
-        public Optional<SupportTicketMailInfo> MailInfo;
-        public Optional<SupportTicketCalendarEventInfo> CalenderInfo;
-        public Optional<SupportTicketPetInfo> PetInfo;
-        public Optional<SupportTicketGuildInfo> GuildInfo;
-        public Optional<SupportTicketLFGListSearchResult> LFGListSearchResult;
-        public Optional<SupportTicketLFGListApplicant> LFGListApplicant;
-        public Optional<SupportTicketCommunityMessage> CommunityMessage;
-        public Optional<SupportTicketClubFinderResult> ClubFinderResult;
-        public Optional<SupportTicketUnused910> Unused910;
+        public SupportTicketMailInfo? MailInfo;
+        public SupportTicketCalendarEventInfo? CalenderInfo;
+        public SupportTicketPetInfo? PetInfo;
+        public SupportTicketGuildInfo? GuildInfo;
+        public SupportTicketLFGListSearchResult? LFGListSearchResult;
+        public SupportTicketLFGListApplicant? LFGListApplicant;
+        public SupportTicketCommunityMessage? CommunityMessage;
+        public SupportTicketClubFinderResult? ClubFinderResult;
+        public SupportTicketUnused910? Unused910;
 
         public struct SupportTicketChatLine
         {
@@ -250,20 +251,19 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 uint linesCount = data.ReadUInt32();
-                if (data.HasBit())
-                    ReportLineIndex.Value = new();
+                bool hasReportLineIndex = data.HasBit();
 
                 data.ResetBitPos();
 
                 for (uint i = 0; i < linesCount; i++)
                     Lines.Add(new SupportTicketChatLine(data));
 
-                if (ReportLineIndex.HasValue)
-                    ReportLineIndex.Value = data.ReadUInt32();
+                if (hasReportLineIndex)
+                    ReportLineIndex = data.ReadUInt32();
             }
 
             public List<SupportTicketChatLine> Lines = new();
-            public Optional<uint> ReportLineIndex;
+            public uint? ReportLineIndex;
         }
 
         public struct SupportTicketHorusChatLine
@@ -280,30 +280,22 @@ namespace Game.Networking.Packets
                 uint textLength = data.ReadBits<uint>(12);
 
                 if (hasClubID)
-                {
-                    ClubID.Value = new();
-                    ClubID.Value = data.ReadUInt64();
-                }
+                    ClubID = data.ReadUInt64();
 
                 if (hasChannelGUID)
-                {
-                    ChannelGUID.Value = new();
-                    ChannelGUID.Value = data.ReadPackedGuid();
-                }
+                    ChannelGUID = data.ReadPackedGuid();
 
                 if (hasRealmAddress)
                 {
-                    RealmAddress.Value = new();
-                    RealmAddress.Value.VirtualRealmAddress = data.ReadUInt32();
-                    RealmAddress.Value.field_4 = data.ReadUInt16();
-                    RealmAddress.Value.field_6 = data.ReadUInt8();
+                    SenderRealm senderRealm = new();
+                    senderRealm.VirtualRealmAddress = data.ReadUInt32();
+                    senderRealm.field_4 = data.ReadUInt16();
+                    senderRealm.field_6 = data.ReadUInt8();
+                    RealmAddress = senderRealm;
                 }
 
                 if (hasSlashCmd)
-                {
-                    SlashCmd.Value = new();
-                    SlashCmd.Value = data.ReadInt32();
-                }
+                    SlashCmd = data.ReadInt32();
 
                 Text = data.ReadString(textLength);
             }
@@ -317,10 +309,10 @@ namespace Game.Networking.Packets
 
             public long Timestamp;
             public ObjectGuid AuthorGUID;
-            public Optional<ulong> ClubID;
-            public Optional<ObjectGuid> ChannelGUID;
-            public Optional<SenderRealm> RealmAddress;
-            public Optional<int> SlashCmd;
+            public ulong? ClubID;
+            public ObjectGuid? ChannelGUID;
+            public SenderRealm? RealmAddress;
+            public int? SlashCmd;
             public string Text;
         }
 

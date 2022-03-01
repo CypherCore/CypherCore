@@ -64,8 +64,7 @@ namespace Game
                     tradeItem.GiftCreator = item.GetGiftCreator();
                     if (!item.IsWrapped())
                     {
-                        tradeItem.Unwrapped.Value = new();
-                        TradeUpdated.UnwrappedTradeItem unwrappedItem = tradeItem.Unwrapped.Value;
+                        TradeUpdated.UnwrappedTradeItem unwrappedItem = new();
                         unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.Perm);
                         unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.Use);
                         unwrappedItem.Creator = item.GetCreator();
@@ -73,6 +72,8 @@ namespace Game
                         unwrappedItem.Lock = item.GetTemplate().GetLockID() != 0 && !item.HasItemFlag(ItemFieldFlags.Unlocked);
                         unwrappedItem.MaxDurability = item.m_itemData.MaxDurability;
                         unwrappedItem.Durability = item.m_itemData.Durability;
+
+                        tradeItem.Unwrapped = unwrappedItem;
 
                         byte g = 0;
                         foreach (SocketedGem gemData in item.m_itemData.Gems)
@@ -82,7 +83,7 @@ namespace Game
                                 ItemGemData gem = new();
                                 gem.Slot = g;
                                 gem.Item = new ItemInstance(gemData);
-                                tradeItem.Unwrapped.Value.Gems.Add(gem);
+                                tradeItem.Unwrapped.Gems.Add(gem);
                             }
                             ++g;
                         }

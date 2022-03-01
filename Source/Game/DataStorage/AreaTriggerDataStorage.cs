@@ -270,7 +270,7 @@ namespace Game.DataStorage
                     orbitInfo.CounterClockwise = circularMovementInfos.Read<bool>(6);
                     orbitInfo.CanLoop = circularMovementInfos.Read<bool>(7);
 
-                    createProperties.OrbitInfo.Set(orbitInfo);
+                    createProperties.OrbitInfo = orbitInfo;
                 }
                 while (circularMovementInfos.NextRow());
             }

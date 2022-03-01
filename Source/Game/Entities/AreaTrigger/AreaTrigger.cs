@@ -172,13 +172,13 @@ namespace Game.Entities
 
             uint timeToTarget = GetCreateProperties().TimeToTarget != 0 ? GetCreateProperties().TimeToTarget : m_areaTriggerData.Duration;
 
-            if (GetCreateProperties().OrbitInfo.HasValue)
+            if (GetCreateProperties().OrbitInfo != null)
             {
-                AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo.Value;
+                AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo;
                 if (target && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
-                    orbit.PathTarget.Set(target.GetGUID());
+                    orbit.PathTarget = target.GetGUID();
                 else
-                    orbit.Center.Set(new Vector3(pos.posX, pos.posY, pos.posZ));
+                    orbit.Center = new(pos.posX, pos.posY, pos.posZ);
 
                 InitOrbit(orbit, timeToTarget);
             }
@@ -759,10 +759,10 @@ namespace Game.Entities
 
                 AreaTriggerRePath reshape = new();
                 reshape.TriggerGUID = GetGUID();
-                reshape.AreaTriggerSpline.Value = new();
-                reshape.AreaTriggerSpline.Value.ElapsedTimeForMovement = GetElapsedTimeForMovement();
-                reshape.AreaTriggerSpline.Value.TimeToTarget = timeToTarget;
-                reshape.AreaTriggerSpline.Value.Points = splinePoints;
+                reshape.AreaTriggerSpline = new();
+                reshape.AreaTriggerSpline.ElapsedTimeForMovement = GetElapsedTimeForMovement();
+                reshape.AreaTriggerSpline.TimeToTarget = timeToTarget;
+                reshape.AreaTriggerSpline.Points = splinePoints;
                 SendMessageToSet(reshape, true);
             }
 
@@ -781,10 +781,10 @@ namespace Game.Entities
                 m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
             });
 
-            _orbitInfo.Set(orbit);
+            _orbitInfo = orbit;
 
-            _orbitInfo.Value.TimeToTarget = timeToTarget;
-            _orbitInfo.Value.ElapsedTimeForMovement = 0;
+            _orbitInfo.TimeToTarget = timeToTarget;
+            _orbitInfo.ElapsedTimeForMovement = 0;
 
             if (IsInWorld)
             {
@@ -798,23 +798,23 @@ namespace Game.Entities
 
         public bool HasOrbit()
         {
-            return _orbitInfo.HasValue;
+            return _orbitInfo != null;
         }
 
         Position GetOrbitCenterPosition()
         {
-            if (!_orbitInfo.HasValue)
+            if (_orbitInfo == null)
                 return null;
 
-            if (_orbitInfo.Value.PathTarget.HasValue)
+            if (_orbitInfo.PathTarget.HasValue)
             {
-                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.Value.PathTarget.Value);
+                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.PathTarget.Value);
                 if (center)
                     return center;
             }
 
-            if (_orbitInfo.Value.Center.HasValue)
-                return new Position(_orbitInfo.Value.Center.Value);
+            if (_orbitInfo.Center.HasValue)
+                return new Position(_orbitInfo.Center.Value);
 
             return null;
         }
@@ -825,7 +825,7 @@ namespace Game.Entities
             if (centerPos == null)
                 return GetPosition();
 
-            AreaTriggerOrbitInfo cmi = _orbitInfo.Value;
+            AreaTriggerOrbitInfo cmi = _orbitInfo;
 
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
             float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
@@ -858,10 +858,10 @@ namespace Game.Entities
 
         void UpdateOrbitPosition(uint diff)
         {
-            if (_orbitInfo.Value.StartDelay > GetElapsedTimeForMovement())
+            if (_orbitInfo.StartDelay > GetElapsedTimeForMovement())
                 return;
 
-            _orbitInfo.Value.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _orbitInfo.Value.StartDelay);
+            _orbitInfo.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _orbitInfo.StartDelay);
 
             Position pos = CalculateOrbitPosition();
 
@@ -1066,7 +1066,7 @@ namespace Game.Entities
         public Spline GetSpline() { return _spline; }
         public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
-        public Optional<AreaTriggerOrbitInfo> GetCircularMovementInfo() { return _orbitInfo; }
+        public AreaTriggerOrbitInfo GetCircularMovementInfo() { return _orbitInfo; }
 
         AreaTriggerFieldData m_areaTriggerData;
 
@@ -1093,7 +1093,7 @@ namespace Game.Entities
         int _lastSplineIndex;
         uint _movementTime;
 
-        Optional<AreaTriggerOrbitInfo> _orbitInfo;
+        AreaTriggerOrbitInfo _orbitInfo;
 
         AreaTriggerCreateProperties _areaTriggerCreateProperties;
         AreaTriggerTemplate _areaTriggerTemplate;

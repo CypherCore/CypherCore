@@ -242,7 +242,7 @@ namespace Game.SupportSystem
             _complaintType = (GMSupportComplaintType)fields.Read<byte>(++idx);
             int reportLineIndex = fields.Read<int>(++idx);
             if (reportLineIndex != -1)
-                _chatLog.ReportLineIndex.Set((uint)reportLineIndex);
+                _chatLog.ReportLineIndex = (uint)reportLineIndex;
 
             long closedBy = fields.Read<long>(++idx);
             if (closedBy == 0)

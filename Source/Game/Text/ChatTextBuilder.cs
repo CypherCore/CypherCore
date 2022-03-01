@@ -41,7 +41,7 @@ namespace Game.Chat
 
         // caches
         public ChatPkt UntranslatedPacket;
-        public Optional<ChatPkt> TranslatedPacket;
+        public ChatPkt TranslatedPacket;
 
         public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
         {
@@ -66,14 +66,14 @@ namespace Game.Chat
                 return;
             }
 
-            if (!TranslatedPacket.HasValue)
+            if (TranslatedPacket == null)
             {
-                TranslatedPacket.Value = new();
-                TranslatedPacket.Value.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language, player.GetSession().GetSessionDbcLocale()), AchievementId, "", Locale);
-                TranslatedPacket.Value.Write();
+                TranslatedPacket = new();
+                TranslatedPacket.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language, player.GetSession().GetSessionDbcLocale()), AchievementId, "", Locale);
+                TranslatedPacket.Write();
             }
 
-            player.SendPacket(TranslatedPacket.Value);
+            player.SendPacket(TranslatedPacket);
         }
     }
     

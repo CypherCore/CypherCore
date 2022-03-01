@@ -88,7 +88,6 @@ namespace Game.Spells
 
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
             {
-                data.SrcLocation.Value = new();
                 TargetLocation target = new();
                 target.Transport = m_src.TransportGUID; // relative position guid here - transport for example
                 if (!m_src.TransportGUID.IsEmpty())
@@ -96,12 +95,11 @@ namespace Game.Spells
                 else
                     target.Location = m_src.Position;
 
-                data.SrcLocation.Value = target;
+                data.SrcLocation = target;
             }
 
             if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation))
             {
-                data.DstLocation.Value = new();
                 TargetLocation target = new();
                 target.Transport = m_dst.TransportGUID; // relative position guid here - transport for example
                 if (!m_dst.TransportGUID.IsEmpty())
@@ -109,7 +107,7 @@ namespace Game.Spells
                 else
                     target.Location = m_dst.Position;
 
-                data.DstLocation.Value = target;
+                data.DstLocation = target;
             }
 
             if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.String))

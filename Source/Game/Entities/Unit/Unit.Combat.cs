@@ -616,7 +616,7 @@ namespace Game.Entities
             subDmg.Damage = (int)damageInfo.Damage;                 // Sub Damage
             subDmg.Absorbed = (int)damageInfo.Absorb;
             subDmg.Resisted = (int)damageInfo.Resist;
-            packet.SubDmg.Set(subDmg);
+            packet.SubDmg = subDmg;
 
             packet.VictimState = (byte)damageInfo.TargetState;
             packet.BlockAmount = (int)damageInfo.Blocked;

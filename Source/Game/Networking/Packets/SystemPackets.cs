@@ -25,11 +25,7 @@ namespace Game.Networking.Packets
 {
     public class FeatureSystemStatus : ServerPacket
     {
-        public FeatureSystemStatus() : base(ServerOpcodes.FeatureSystemStatus)
-        {
-            SessionAlert = new Optional<SessionAlertConfig>();
-            EuropaTicketSystemStatus = new Optional<EuropaTicketConfig>();
-        }
+        public FeatureSystemStatus() : base(ServerOpcodes.FeatureSystemStatus) { }
 
         public override void Write()
         {
@@ -140,10 +136,10 @@ namespace Game.Networking.Packets
         public bool BrowserEnabled;
         public bool BpayStoreAvailable;
         public bool BpayStoreEnabled;
-        public Optional<SessionAlertConfig> SessionAlert;
+        public SessionAlertConfig? SessionAlert;
         public uint ScrollOfResurrectionMaxRequestsPerDay;
         public bool ScrollOfResurrectionEnabled;
-        public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
+        public EuropaTicketConfig? EuropaTicketSystemStatus;
         public uint ScrollOfResurrectionRequestsRemaining;
         public uint CfgRealmID;
         public byte ComplaintStatus;
@@ -303,7 +299,7 @@ namespace Game.Networking.Packets
         public bool LiveRegionAccountCopyEnabled; // NYI
         public bool LiveRegionKeyBindingsCopyEnabled = false;
         public bool Unknown901CheckoutRelated = false; // NYI
-        public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
+        public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
         public long TokenBalanceAmount;     // NYI 

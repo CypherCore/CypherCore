@@ -775,8 +775,8 @@ namespace Game.Networking
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
         {
             AuthResponse response = new();
-            response.SuccessInfo.Clear();
-            response.WaitInfo.Clear();
+            response.SuccessInfo = null;
+            response.WaitInfo = null;
             response.Result = code;
             SendPacket(response);
         }

@@ -403,7 +403,7 @@ namespace Framework.Dynamic
         {
             _end = end;
             _duration = duration;
-            _group.Set(group);
+            _group = group;
             _repeated = repeated;
             _task = task;
         }
@@ -427,12 +427,12 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public bool IsInGroup(uint group)
         {
-            return _group.HasValue && _group.Value == group;
+            return _group.HasValue && _group == group;
         }
 
         internal DateTime _end;
         internal TimeSpan _duration;
-        internal Optional<uint> _group;
+        internal uint? _group;
         internal uint _repeated;
         internal Action<TaskContext> _task;
     }
@@ -551,7 +551,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         TaskContext SetGroup(uint group)
         {
-            _task._group.Set(group);
+            _task._group = group;
             return this;
         }
 
@@ -561,7 +561,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         TaskContext ClearGroup()
         {
-            _task._group.Clear();
+            _task._group = null;
             return this;
         }
 

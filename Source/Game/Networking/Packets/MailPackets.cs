@@ -384,13 +384,13 @@ namespace Game.Networking.Packets
             switch (mail.messageType)
             {
                 case MailMessageType.Normal:
-                    SenderCharacter.Set(ObjectGuid.Create(HighGuid.Player, mail.sender));
+                    SenderCharacter = ObjectGuid.Create(HighGuid.Player, mail.sender);
                     break;
                 case MailMessageType.Creature:
                 case MailMessageType.Gameobject:
                 case MailMessageType.Auction:
                 case MailMessageType.Calendar:
-                    AltSenderID.Set((uint)mail.sender);
+                    AltSenderID = (uint)mail.sender;
                     break;
             }
 
@@ -443,8 +443,8 @@ namespace Game.Networking.Packets
 
         public int MailID;
         public byte SenderType;
-        public Optional<ObjectGuid> SenderCharacter;
-        public Optional<uint> AltSenderID;
+        public ObjectGuid? SenderCharacter;
+        public uint? AltSenderID;
         public ulong Cod;
         public int StationeryID;
         public ulong SentMoney;

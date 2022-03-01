@@ -353,8 +353,8 @@ namespace Game
                     spellInfo = actualSpellInfo;
             }
 
-            if (cast.Cast.MoveUpdate.HasValue)
-                HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate.Value);
+            if (cast.Cast.MoveUpdate != null)
+                HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate);
 
             Spell spell = new(caster, spellInfo, triggerFlag);
 
@@ -660,9 +660,9 @@ namespace Game
             spell.m_targets.SetPitch(packet.Pitch);
             spell.m_targets.SetSpeed(packet.Speed);
 
-            if (packet.Status.HasValue)
+            if (packet.Status != null)
             {
-                GetPlayer().ValidateMovementInfo(packet.Status.Value);
+                GetPlayer().ValidateMovementInfo(packet.Status);
                 /*public uint opcode;
                 recvPacket >> opcode;
                 recvPacket.SetOpcode(CMSG_MOVE_STOP); // always set to CMSG_MOVE_STOP in client SetOpcode

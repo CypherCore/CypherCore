@@ -3548,7 +3548,7 @@ namespace Game.Entities
         public UpdateField<uint> HonorNextLevel = new(98, 103);
         public UpdateField<byte> NumBankSlots = new(98, 104);
         public UpdateField<ActivePlayerUnk901> Field_1410 = new(98, 106);
-        public UpdateField<Optional<QuestSession>> QuestSession = new(98, 105);
+        public OptionalUpdateField<QuestSession> QuestSession = new(98, 105);
         public UpdateField<int> UiChromieTimeExpansionID = new(98, 107);
         public UpdateField<int> TransportServerTime = new(98, 108);
         public UpdateField<uint> WeeklyRewardsPeriodSinceOrigin = new(98, 109);                // week count since Cfg_RegionsEntry::ChallengeOrigin
@@ -3830,11 +3830,11 @@ namespace Game.Entities
             data.WriteBit(BankAutoSortDisabled);
             data.WriteBit(SortBagsRightToLeft);
             data.WriteBit(InsertItemsLeftToRight);
-            data.WriteBits(QuestSession.GetValue().HasValue, 1);
+            data.WriteBits(QuestSession.HasValue(), 1);
             ((ActivePlayerUnk901)Field_1410).WriteCreate(data, owner, receiver);
-            if (QuestSession.GetValue().HasValue)
+            if (QuestSession.HasValue())
             {
-                QuestSession.GetValue().Value.WriteCreate(data, owner, receiver);
+                QuestSession.GetValue().WriteCreate(data, owner, receiver);
             }
             DungeonScore._value.Write(data);
             for (int i = 0; i < CharacterRestrictions.Size(); ++i)
@@ -4599,16 +4599,16 @@ namespace Game.Entities
             }
             if (changesMask[98])
             {
-                data.WriteBits(QuestSession.GetValue().HasValue, 1);
+                data.WriteBits(QuestSession.HasValue(), 1);
                 if (changesMask[106])
                 {
                     ((ActivePlayerUnk901)Field_1410).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (changesMask[105])
                 {
-                    if (QuestSession.GetValue().HasValue)
+                    if (QuestSession.HasValue())
                     {
-                        QuestSession.GetValue().Value.WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        QuestSession.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
                 if (changesMask[111])

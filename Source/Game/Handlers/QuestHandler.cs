@@ -796,9 +796,9 @@ namespace Game
 
             Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseID);
 
-            if (playerChoiceResponse.Reward.HasValue)
+            if (playerChoiceResponse.Reward != null)
             {
-                var reward = playerChoiceResponse.Reward.Value;
+                var reward = playerChoiceResponse.Reward;
                 if (reward.TitleId != 0)
                     _player.SetTitle(CliDB.CharTitlesStorage.LookupByKey(reward.TitleId), false);
 

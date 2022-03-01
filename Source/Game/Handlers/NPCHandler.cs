@@ -533,8 +533,8 @@ namespace Game
                     item.Item.ItemID = vendorItem.item;
                     if (!vendorItem.BonusListIDs.Empty())
                     {
-                        item.Item.ItemBonus.Value = new();
-                        item.Item.ItemBonus.Value.BonusListIDs = vendorItem.BonusListIDs;
+                        item.Item.ItemBonus = new();
+                        item.Item.ItemBonus.BonusListIDs = vendorItem.BonusListIDs;
                     }
 
                     packet.Items.Add(item);

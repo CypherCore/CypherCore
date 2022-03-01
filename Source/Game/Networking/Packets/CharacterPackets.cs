@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
         public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
-        public Optional<uint> DisabledClassesMask = new();
+        public uint? DisabledClassesMask = new();
 
         public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RaceUnlock> RaceUnlockData = new(); //
@@ -364,7 +364,7 @@ namespace Game.Networking.Packets
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (CreateInfo.TemplateSet.HasValue)
-                CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
+                CreateInfo.TemplateSet = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < customizationCount; ++i)
             {
@@ -435,10 +435,7 @@ namespace Game.Networking.Packets
 
     public class CharacterRenameResult : ServerPacket
     {
-        public CharacterRenameResult() : base(ServerOpcodes.CharacterRenameResult)
-        {
-            Guid = new Optional<ObjectGuid>();
-        }
+        public CharacterRenameResult() : base(ServerOpcodes.CharacterRenameResult) { }
 
         public override void Write()
         {
@@ -454,8 +451,8 @@ namespace Game.Networking.Packets
         }
 
         public string Name;
-        public ResponseCodes Result = 0;
-        public Optional<ObjectGuid> Guid;
+        public ResponseCodes Result;
+        public ObjectGuid? Guid;
     }
 
     public class CharCustomize : ClientPacket
@@ -523,27 +520,24 @@ namespace Game.Networking.Packets
 
     public class CharFactionChangeResult : ServerPacket
     {
-        public CharFactionChangeResult() : base(ServerOpcodes.CharFactionChangeResult)
-        {
-            Display = new Optional<CharFactionChangeDisplayInfo>();
-        }
+        public CharFactionChangeResult() : base(ServerOpcodes.CharFactionChangeResult) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8((byte)Result);
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteBit(Display.HasValue);
+            _worldPacket.WriteBit(Display != null);
             _worldPacket.FlushBits();
 
-            if (Display.HasValue)
+            if (Display != null)
             {
-                _worldPacket.WriteBits(Display.Value.Name.GetByteCount(), 6);
-                _worldPacket.WriteUInt8(Display.Value.SexID);
-                _worldPacket.WriteUInt8(Display.Value.RaceID);
-                _worldPacket.WriteInt32(Display.Value.Customizations.Count);
-                _worldPacket.WriteString(Display.Value.Name);
+                _worldPacket.WriteBits(Display.Name.GetByteCount(), 6);
+                _worldPacket.WriteUInt8(Display.SexID);
+                _worldPacket.WriteUInt8(Display.RaceID);
+                _worldPacket.WriteInt32(Display.Customizations.Count);
+                _worldPacket.WriteString(Display.Name);
 
-                foreach (ChrCustomizationChoice customization in Display.Value.Customizations)
+                foreach (ChrCustomizationChoice customization in Display.Customizations)
                 {
                     _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
                     _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
@@ -553,7 +547,7 @@ namespace Game.Networking.Packets
 
         public ResponseCodes Result = 0;
         public ObjectGuid Guid;
-        public Optional<CharFactionChangeDisplayInfo> Display;
+        public CharFactionChangeDisplayInfo Display;
 
         public class CharFactionChangeDisplayInfo
         {
@@ -1085,7 +1079,7 @@ namespace Game.Networking.Packets
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
         public Array<ChrCustomizationChoice> Customizations = new(50);
-        public Optional<uint> TemplateSet = new();
+        public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
         public string Name;

@@ -106,33 +106,29 @@ namespace Game.Networking.Packets
 
     class AuthResponse : ServerPacket
     {
-        public AuthResponse() : base(ServerOpcodes.AuthResponse)
-        {
-            WaitInfo = new Optional<AuthWaitInfo>();
-            SuccessInfo = new Optional<AuthSuccessInfo>();
-        }
+        public AuthResponse() : base(ServerOpcodes.AuthResponse) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32((uint)Result);
-            _worldPacket.WriteBit(SuccessInfo.HasValue);
+            _worldPacket.WriteBit(SuccessInfo != null);
             _worldPacket.WriteBit(WaitInfo.HasValue);
             _worldPacket.FlushBits();
 
-            if (SuccessInfo.HasValue)
+            if (SuccessInfo != null)
             {
-                _worldPacket.WriteUInt32(SuccessInfo.Value.VirtualRealmAddress);
-                _worldPacket.WriteInt32(SuccessInfo.Value.VirtualRealms.Count);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.TimeRested);
-                _worldPacket.WriteUInt8(SuccessInfo.Value.ActiveExpansionLevel);
-                _worldPacket.WriteUInt8(SuccessInfo.Value.AccountExpansionLevel);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.TimeSecondsUntilPCKick);
-                _worldPacket.WriteInt32(SuccessInfo.Value.AvailableClasses.Count);
-                _worldPacket.WriteInt32(SuccessInfo.Value.Templates.Count);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.CurrencyID);
-                _worldPacket.WriteInt64(SuccessInfo.Value.Time);
+                _worldPacket.WriteUInt32(SuccessInfo.VirtualRealmAddress);
+                _worldPacket.WriteInt32(SuccessInfo.VirtualRealms.Count);
+                _worldPacket.WriteUInt32(SuccessInfo.TimeRested);
+                _worldPacket.WriteUInt8(SuccessInfo.ActiveExpansionLevel);
+                _worldPacket.WriteUInt8(SuccessInfo.AccountExpansionLevel);
+                _worldPacket.WriteUInt32(SuccessInfo.TimeSecondsUntilPCKick);
+                _worldPacket.WriteInt32(SuccessInfo.AvailableClasses.Count);
+                _worldPacket.WriteInt32(SuccessInfo.Templates.Count);
+                _worldPacket.WriteUInt32(SuccessInfo.CurrencyID);
+                _worldPacket.WriteInt64(SuccessInfo.Time);
 
-                foreach (var raceClassAvailability in SuccessInfo.Value.AvailableClasses)
+                foreach (var raceClassAvailability in SuccessInfo.AvailableClasses)
                 {
                     _worldPacket.WriteUInt8(raceClassAvailability.RaceID);
                     _worldPacket.WriteInt32(raceClassAvailability.Classes.Count);
@@ -145,37 +141,37 @@ namespace Game.Networking.Packets
                     }
                 }
 
-                _worldPacket.WriteBit(SuccessInfo.Value.IsExpansionTrial);
-                _worldPacket.WriteBit(SuccessInfo.Value.ForceCharacterTemplate);
-                _worldPacket.WriteBit(SuccessInfo.Value.NumPlayersHorde.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.Value.NumPlayersAlliance.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.Value.ExpansionTrialExpiration.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.IsExpansionTrial);
+                _worldPacket.WriteBit(SuccessInfo.ForceCharacterTemplate);
+                _worldPacket.WriteBit(SuccessInfo.NumPlayersHorde.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.NumPlayersAlliance.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.ExpansionTrialExpiration.HasValue);
                 _worldPacket.FlushBits();
 
                 {
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.BillingPlan);
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.TimeRemain);
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.Unknown735);
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.BillingPlan);
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.TimeRemain);
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.Unknown735);
                     // 3x same bit is not a mistake - preserves legacy client behavior of BillingPlanFlags::SESSION_IGR
-                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
-                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
-                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // not used anywhere in the client
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // not used anywhere in the client
                     _worldPacket.FlushBits();
                 }
 
-                if (SuccessInfo.Value.NumPlayersHorde.HasValue)
-                    _worldPacket.WriteUInt16(SuccessInfo.Value.NumPlayersHorde.Value);
+                if (SuccessInfo.NumPlayersHorde.HasValue)
+                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersHorde.Value);
 
-                if (SuccessInfo.Value.NumPlayersAlliance.HasValue)
-                    _worldPacket.WriteUInt16(SuccessInfo.Value.NumPlayersAlliance.Value);
+                if (SuccessInfo.NumPlayersAlliance.HasValue)
+                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersAlliance.Value);
 
-                if(SuccessInfo.Value.ExpansionTrialExpiration.HasValue)
-                    _worldPacket.WriteInt32(SuccessInfo.Value.ExpansionTrialExpiration.Value);
+                if(SuccessInfo.ExpansionTrialExpiration.HasValue)
+                    _worldPacket.WriteInt32(SuccessInfo.ExpansionTrialExpiration.Value);
 
-                foreach (VirtualRealmInfo virtualRealm in SuccessInfo.Value.VirtualRealms)
+                foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
                     virtualRealm.Write(_worldPacket);
 
-                foreach (var templat in SuccessInfo.Value.Templates)
+                foreach (var templat in SuccessInfo.Templates)
                 {
                     _worldPacket.WriteUInt32(templat.TemplateSetId);
                     _worldPacket.WriteInt32(templat.Classes.Count);
@@ -198,8 +194,8 @@ namespace Game.Networking.Packets
                 WaitInfo.Value.Write(_worldPacket);            
         }
 
-        public Optional<AuthSuccessInfo> SuccessInfo; // contains the packet data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
-        public Optional<AuthWaitInfo> WaitInfo; // contains the queue wait information in case the account is in the login queue.
+        public AuthSuccessInfo SuccessInfo; // contains the packet data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
+        public AuthWaitInfo? WaitInfo; // contains the queue wait information in case the account is in the login queue.
         public BattlenetRpcErrorCode Result; // the result of the authentication process, possible values are @ref BattlenetRpcErrorCode
 
         public class AuthSuccessInfo
@@ -222,9 +218,9 @@ namespace Game.Networking.Packets
 
             public bool IsExpansionTrial;
             public bool ForceCharacterTemplate; // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
-            public Optional<ushort> NumPlayersHorde; // number of horde players in this realm. @todo implement
-            public Optional<ushort> NumPlayersAlliance; // number of alliance players in this realm. @todo implement
-            public Optional<int> ExpansionTrialExpiration; // expansion trial expiration unix timestamp
+            public ushort? NumPlayersHorde; // number of horde players in this realm. @todo implement
+            public ushort? NumPlayersAlliance; // number of alliance players in this realm. @todo implement
+            public int? ExpansionTrialExpiration; // expansion trial expiration unix timestamp
 
             public struct GameTime
             {

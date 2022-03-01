@@ -97,13 +97,13 @@ namespace Game.Networking.Packets
         {
             uint targetLen = _worldPacket.ReadBits<uint>(9);
             Params.Read(_worldPacket);
-            ChannelGUID.Set(_worldPacket.ReadPackedGuid());
+            ChannelGUID = _worldPacket.ReadPackedGuid();
             Target = _worldPacket.ReadString(targetLen);
         }
 
         public string Target;
         public ChatAddonMessageParams Params = new();
-        public Optional<ObjectGuid> ChannelGUID; // not optional in the packet. Optional for api reasons
+        public ObjectGuid? ChannelGUID; // not optional in the packet. Optional for api reasons
     }
 
     public class ChatMessageDND : ClientPacket
@@ -266,10 +266,10 @@ namespace Game.Networking.Packets
         public uint AchievementID;
         public ChatFlags _ChatFlags;
         public float DisplayTime;
-        public Optional<uint> Unused_801;
+        public uint? Unused_801;
         public bool HideChatLog;
         public bool FakeSenderName;
-        public Optional<ObjectGuid> ChannelGUID;
+        public ObjectGuid? ChannelGUID;
     }
 
     public class EmoteMessage : ServerPacket

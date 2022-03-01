@@ -104,12 +104,12 @@ namespace Game.Arenas
 
             if (IsRated())
             {
-                pvpLogData.Ratings.Value = new();
+                pvpLogData.Ratings = new();
                 for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
                 {
-                    pvpLogData.Ratings.Value.Postmatch[i] = _arenaTeamScores[i].PostMatchRating;
-                    pvpLogData.Ratings.Value.Prematch[i] = _arenaTeamScores[i].PreMatchRating;
-                    pvpLogData.Ratings.Value.PrematchMMR[i] = _arenaTeamScores[i].PreMatchMMR;
+                    pvpLogData.Ratings.Postmatch[i] = _arenaTeamScores[i].PostMatchRating;
+                    pvpLogData.Ratings.Prematch[i] = _arenaTeamScores[i].PreMatchRating;
+                    pvpLogData.Ratings.PrematchMMR[i] = _arenaTeamScores[i].PreMatchMMR;
                 }
             }
         }

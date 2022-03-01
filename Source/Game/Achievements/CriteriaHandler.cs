@@ -2079,10 +2079,10 @@ namespace Game.Achievements
 
                     foreach (Garrison.Plot plot in garrison.GetPlots())
                     {
-                        if (!plot.BuildingInfo.PacketInfo.HasValue)
+                        if (plot.BuildingInfo.PacketInfo == null)
                             continue;
 
-                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
                         if (building == null || building.UpgradeLevel < reqValue || building.BuildingType != secondaryAsset)
                             continue;
 
@@ -2109,7 +2109,7 @@ namespace Game.Achievements
                         return false;
 
                     foreach (var plot in garrison.GetPlots())
-                        if (!plot.BuildingInfo.PacketInfo.HasValue)
+                        if (plot.BuildingInfo.PacketInfo == null)
                             return false;
                     break;
                 }
@@ -2131,10 +2131,10 @@ namespace Game.Achievements
 
                     foreach (Garrison.Plot plot in garrison.GetPlots())
                     {
-                        if (!plot.BuildingInfo.PacketInfo.HasValue || plot.BuildingInfo.PacketInfo.Value.GarrBuildingID != reqValue)
+                        if (plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.GarrBuildingID != reqValue)
                             continue;
 
-                        return !plot.BuildingInfo.PacketInfo.Value.Active;
+                        return !plot.BuildingInfo.PacketInfo.Active;
                     }
                     return false;
                 }
@@ -2148,10 +2148,10 @@ namespace Game.Achievements
 
                     foreach (Garrison.Plot plot in garrison.GetPlots())
                     {
-                        if (!plot.BuildingInfo.PacketInfo.HasValue)
+                        if (plot.BuildingInfo.PacketInfo == null)
                             continue;
 
-                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
                         if (building == null || building.UpgradeLevel != secondaryAsset || building.BuildingType != reqValue)
                             continue;
 
@@ -2276,10 +2276,10 @@ namespace Game.Achievements
 
                     foreach (var plot in garrison.GetPlots())
                     {
-                        if (!plot.BuildingInfo.PacketInfo.HasValue || plot.BuildingInfo.PacketInfo.Value.GarrBuildingID != miscValue1)
+                        if (plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.GarrBuildingID != miscValue1)
                             continue;
 
-                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
                         if (building == null || building.UpgradeLevel != reqValue)
                             continue;
 
@@ -2297,7 +2297,7 @@ namespace Game.Achievements
                     if (plot == null)
                         return false;
 
-                    if (!plot.BuildingInfo.CanActivate() || !plot.BuildingInfo.PacketInfo.HasValue || plot.BuildingInfo.PacketInfo.Value.Active)
+                    if (!plot.BuildingInfo.CanActivate() || plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.Active)
                         return false;
                     break;
                 }
@@ -2398,10 +2398,10 @@ namespace Game.Achievements
 
                     foreach (var plot in garrison.GetPlots())
                     {
-                        if (!plot.BuildingInfo.PacketInfo.HasValue)
+                        if (plot.BuildingInfo.PacketInfo == null)
                             return false;
 
-                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
                         if (building == null || building.UpgradeLevel != reqValue)
                             return false;
                     }

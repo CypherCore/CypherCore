@@ -90,7 +90,7 @@ namespace Game.Networking.Packets
         public long CurrentTime;
         public uint ElapsedTime;
         public long CreationTime;
-        public Optional<ulong> RafAcceptanceID;
+        public ulong? RafAcceptanceID;
     }
 
     class AccountCriteriaUpdate : ServerPacket
@@ -350,7 +350,7 @@ namespace Game.Networking.Packets
         public long Date;
         public uint TimeFromStart;
         public uint TimeFromCreate;
-        public Optional<ulong> RafAcceptanceID;
+        public ulong? RafAcceptanceID;
     }
 
     public struct GuildCriteriaProgress

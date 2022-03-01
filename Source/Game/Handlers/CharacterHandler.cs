@@ -58,7 +58,7 @@ namespace Game
             EnumCharactersResult charResult = new();
             charResult.Success = true;
             charResult.IsDeletedCharacters = holder.IsDeletedCharacters();
-            charResult.DisabledClassesMask.Set(WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask));
+            charResult.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
 
             if (!charResult.IsDeletedCharacters)
                 _legitCharacters.Clear();
@@ -157,7 +157,7 @@ namespace Game
             EnumCharactersResult charEnum = new();
             charEnum.Success = true;
             charEnum.IsDeletedCharacters = true;
-            charEnum.DisabledClassesMask.Set(WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask));
+            charEnum.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
 
             if (!result.IsEmpty())
             {
@@ -1099,19 +1099,21 @@ namespace Game
             features.VoiceEnabled = false;
             features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 
-            features.EuropaTicketSystemStatus.Value = new();
-            features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 111111;
+            EuropaTicketConfig europaTicketSystemStatus = new();
+            europaTicketSystemStatus.ThrottleState.MaxTries = 10;
+            europaTicketSystemStatus.ThrottleState.PerMilliseconds = 60000;
+            europaTicketSystemStatus.ThrottleState.TryCount = 1;
+            europaTicketSystemStatus.ThrottleState.LastResetTimeBeforeNow = 111111;
             features.TutorialsEnabled = true;
             features.NPETutorialsEnabled = true;
             // END OF DUMMY VALUES
 
-            features.EuropaTicketSystemStatus.Value.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
-            features.EuropaTicketSystemStatus.Value.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
-            features.EuropaTicketSystemStatus.Value.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
-            features.EuropaTicketSystemStatus.Value.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+            europaTicketSystemStatus.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
+            europaTicketSystemStatus.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
+            europaTicketSystemStatus.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
+            europaTicketSystemStatus.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+
+            features.EuropaTicketSystemStatus = europaTicketSystemStatus;
 
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
@@ -2511,7 +2513,7 @@ namespace Game
             packet.Result = result;
             packet.Name = renameInfo.NewName;
             if (result == ResponseCodes.Success)
-                packet.Guid.Set(renameInfo.Guid);
+                packet.Guid = renameInfo.Guid;
 
             SendPacket(packet);
         }
@@ -2540,11 +2542,11 @@ namespace Game
 
             if (result == ResponseCodes.Success)
             {
-                packet.Display.Value = new();
-                packet.Display.Value.Name = factionChangeInfo.Name;
-                packet.Display.Value.SexID = (byte)factionChangeInfo.SexID;
-                packet.Display.Value.Customizations = factionChangeInfo.Customizations;
-                packet.Display.Value.RaceID = (byte)factionChangeInfo.RaceID;
+                packet.Display = new();
+                packet.Display.Name = factionChangeInfo.Name;
+                packet.Display.SexID = (byte)factionChangeInfo.SexID;
+                packet.Display.Customizations = factionChangeInfo.Customizations;
+                packet.Display.RaceID = (byte)factionChangeInfo.RaceID;
             }
 
             SendPacket(packet);

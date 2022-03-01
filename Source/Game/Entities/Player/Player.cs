@@ -1238,10 +1238,10 @@ namespace Game.Entities
                 packet.Type = (uint)id;
                 packet.Quantity = newTotalCount;
                 packet.SuppressChatLog = !printLog;
-                packet.WeeklyQuantity.Set(newWeekCount);
-                packet.TrackedQuantity.Set(newTrackedCount);
+                packet.WeeklyQuantity = newWeekCount;
+                packet.TrackedQuantity = newTrackedCount;
                 packet.Flags = playerCurrency.Flags;
-                packet.QuantityChange.Set(count);
+                packet.QuantityChange = count;
 
                 SendPacket(packet);
             }
@@ -1835,9 +1835,10 @@ namespace Game.Entities
                     transport = GetTransport();
                     if (transport)
                     {
-                        transferPending.Ship.Value = new();
-                        transferPending.Ship.Value.Id = transport.GetEntry();
-                        transferPending.Ship.Value.OriginMapID = (int)GetMapId();
+                        TransferPending.ShipTransferPending shipTransferPending = new();
+                        shipTransferPending.Id = transport.GetEntry();
+                        shipTransferPending.OriginMapID = (int)GetMapId();
+                        transferPending.Ship = shipTransferPending;
                     }
 
                     SendPacket(transferPending);
@@ -1879,7 +1880,7 @@ namespace Game.Entities
             return TeleportTo(m_bgData.joinPos);
         }
 
-        public uint GetStartLevel(Race race, Class playerClass, Optional<uint> characterTemplateId = default)
+        public uint GetStartLevel(Race race, Class playerClass, uint? characterTemplateId = null)
         {
             uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
             if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasAnyFlag(ChrRacesFlag.IsAlliedRace))
@@ -4980,32 +4981,32 @@ namespace Game.Entities
                     }
                 }
 
-                if (playerChoiceResponseTemplate.Reward.HasValue)
+                if (playerChoiceResponseTemplate.Reward != null)
                 {
                     var reward = new Networking.Packets.PlayerChoiceResponseReward();
-                    reward.TitleID = playerChoiceResponseTemplate.Reward.Value.TitleId;
-                    reward.PackageID = playerChoiceResponseTemplate.Reward.Value.PackageId;
-                    reward.SkillLineID = playerChoiceResponseTemplate.Reward.Value.SkillLineId;
-                    reward.SkillPointCount = playerChoiceResponseTemplate.Reward.Value.SkillPointCount;
-                    reward.ArenaPointCount = playerChoiceResponseTemplate.Reward.Value.ArenaPointCount;
-                    reward.HonorPointCount = playerChoiceResponseTemplate.Reward.Value.HonorPointCount;
-                    reward.Money = playerChoiceResponseTemplate.Reward.Value.Money;
-                    reward.Xp = playerChoiceResponseTemplate.Reward.Value.Xp;
+                    reward.TitleID = playerChoiceResponseTemplate.Reward.TitleId;
+                    reward.PackageID = playerChoiceResponseTemplate.Reward.PackageId;
+                    reward.SkillLineID = playerChoiceResponseTemplate.Reward.SkillLineId;
+                    reward.SkillPointCount = playerChoiceResponseTemplate.Reward.SkillPointCount;
+                    reward.ArenaPointCount = playerChoiceResponseTemplate.Reward.ArenaPointCount;
+                    reward.HonorPointCount = playerChoiceResponseTemplate.Reward.HonorPointCount;
+                    reward.Money = playerChoiceResponseTemplate.Reward.Money;
+                    reward.Xp = playerChoiceResponseTemplate.Reward.Xp;
 
-                    foreach (var item in playerChoiceResponseTemplate.Reward.Value.Items)
+                    foreach (var item in playerChoiceResponseTemplate.Reward.Items)
                     {
                         var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = item.Id;
                         rewardEntry.Quantity = item.Quantity;
                         if (!item.BonusListIDs.Empty())
                         {
-                            rewardEntry.Item.ItemBonus.Value = new();
-                            rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
+                            rewardEntry.Item.ItemBonus = new();
+                            rewardEntry.Item.ItemBonus.BonusListIDs = item.BonusListIDs;
                         }
                         reward.Items.Add(rewardEntry);
                     }
 
-                    foreach (var currency in playerChoiceResponseTemplate.Reward.Value.Currency)
+                    foreach (var currency in playerChoiceResponseTemplate.Reward.Currency)
                     {
                         var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = currency.Id;
@@ -5013,7 +5014,7 @@ namespace Game.Entities
                         reward.Items.Add(rewardEntry);
                     }
 
-                    foreach (var faction in playerChoiceResponseTemplate.Reward.Value.Faction)
+                    foreach (var faction in playerChoiceResponseTemplate.Reward.Faction)
                     {
                         var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = faction.Id;
@@ -5021,21 +5022,21 @@ namespace Game.Entities
                         reward.Items.Add(rewardEntry);
                     }
 
-                    foreach (PlayerChoiceResponseRewardItem item in playerChoiceResponseTemplate.Reward.Value.ItemChoices)
+                    foreach (PlayerChoiceResponseRewardItem item in playerChoiceResponseTemplate.Reward.ItemChoices)
                     {
                         var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = item.Id;
                         rewardEntry.Quantity = item.Quantity;
                         if (!item.BonusListIDs.Empty())
                         {
-                            rewardEntry.Item.ItemBonus.Value = new();
-                            rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
+                            rewardEntry.Item.ItemBonus = new();
+                            rewardEntry.Item.ItemBonus.BonusListIDs = item.BonusListIDs;
                         }
 
                         reward.ItemChoices.Add(rewardEntry);
                     }
 
-                    playerChoiceResponse.Reward.Set(reward);
+                    playerChoiceResponse.Reward = reward;
                     displayPlayerChoice.Responses[i] = playerChoiceResponse;
                 }
 
@@ -5050,7 +5051,7 @@ namespace Game.Entities
                     mawPower.SpellID = playerChoiceResponse.MawPower.Value.SpellID;
                     mawPower.MaxStacks = playerChoiceResponse.MawPower.Value.MaxStacks;
 
-                    playerChoiceResponse.MawPower.Set(mawPower);
+                    playerChoiceResponse.MawPower = mawPower;
                 }
             }
 
@@ -5662,10 +5663,10 @@ namespace Game.Entities
 
             // SMSG_WORLD_SERVER_INFO
             WorldServerInfo worldServerInfo = new();
-            worldServerInfo.InstanceGroupSize.Set(GetMap().GetMapDifficulty().MaxPlayers);         // @todo
+            worldServerInfo.InstanceGroupSize = GetMap().GetMapDifficulty().MaxPlayers;         // @todo
             worldServerInfo.IsTournamentRealm = 0;             // @todo
-            worldServerInfo.RestrictedAccountMaxLevel.Clear(); // @todo
-            worldServerInfo.RestrictedAccountMaxMoney.Clear(); // @todo
+            worldServerInfo.RestrictedAccountMaxLevel = null; // @todo
+            worldServerInfo.RestrictedAccountMaxMoney = null; // @todo
             worldServerInfo.DifficultyID = (uint)GetMap().GetDifficultyID();
             // worldServerInfo.XRealmPvpAlert;  // @todo
             SendPacket(worldServerInfo);
@@ -6240,9 +6241,9 @@ namespace Game.Entities
             SetupCurrency.Record record = new();
             record.Type = entry.Id;
             record.Quantity = Curr.Quantity;
-            record.WeeklyQuantity.Set(Curr.WeeklyQuantity);
-            record.MaxWeeklyQuantity.Set(GetCurrencyWeekCap(entry));
-            record.TrackedQuantity.Set(Curr.TrackedQuantity);
+            record.WeeklyQuantity = Curr.WeeklyQuantity;
+            record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
+            record.TrackedQuantity = Curr.TrackedQuantity;
             record.Flags = Curr.Flags;
 
             packet.Data.Add(record);
@@ -6265,9 +6266,9 @@ namespace Game.Entities
                 SetupCurrency.Record record = new();
                 record.Type = entry.Id;
                 record.Quantity = pair.Value.Quantity;
-                record.WeeklyQuantity.Set(pair.Value.WeeklyQuantity);
-                record.MaxWeeklyQuantity.Set(GetCurrencyWeekCap(entry));
-                record.TrackedQuantity.Set(pair.Value.TrackedQuantity);
+                record.WeeklyQuantity = pair.Value.WeeklyQuantity;
+                record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
+                record.TrackedQuantity = pair.Value.TrackedQuantity;
                 record.Flags = pair.Value.Flags;
 
                 packet.Data.Add(record);

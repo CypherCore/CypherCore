@@ -90,6 +90,35 @@ namespace Game.Entities
         public T GetValue() { return _value; }
     }
 
+    public class OptionalUpdateField<T> : IUpdateField<T> where T : new()
+    {
+        bool _hasValue;
+        public T _value;
+        public int BlockBit;
+        public int Bit;
+
+        public OptionalUpdateField(int blockBit, int bit)
+        {
+            BlockBit = blockBit;
+            Bit = bit;
+        }
+
+        public static implicit operator T(OptionalUpdateField<T> updateField)
+        {
+            return updateField._value;
+        }
+
+        public void SetValue(T value)
+        {
+            _hasValue = true;
+            _value = value;
+        }
+
+        public T GetValue() { return _value; }
+
+        public bool HasValue() { return _hasValue; }
+    }
+    
     public class UpdateFieldArray<T> where T : new()
     {
         public T[] _values;
@@ -346,6 +375,12 @@ namespace Game.Entities
         }
 
         public void ClearChangesMask<U>(UpdateField<U> updateField) where U : new()
+        {
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
+                ((IHasChangesMask)updateField._value).ClearChangesMask();
+        }
+
+        public void ClearChangesMask<U>(OptionalUpdateField<U> updateField) where U : new()
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
                 ((IHasChangesMask)updateField._value).ClearChangesMask();

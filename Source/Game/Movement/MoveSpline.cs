@@ -209,8 +209,8 @@ namespace Game.Movement
             {
                 float t_passedf = MSToSec((uint)(time_point - effect_start_time));
                 float t_durationf = MSToSec((uint)(Duration() - effect_start_time)); //client use not modified duration here
-                if (spell_effect_extra.HasValue && spell_effect_extra.Value.ParabolicCurveId != 0)
-                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.Value.ParabolicCurveId, (float)time_point / Duration());
+                if (spell_effect_extra != null && spell_effect_extra.ParabolicCurveId != 0)
+                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.ParabolicCurveId, (float)time_point / Duration());
 
                 el += (t_durationf - t_passedf) * 0.5f * vertical_acceleration * t_passedf;
             }
@@ -362,8 +362,8 @@ namespace Game.Movement
         public int point_Idx;
         public int point_Idx_offset;
         public float velocity;
-        public Optional<SpellEffectExtraData> spell_effect_extra;
-        public Optional<AnimTierTransition> anim_tier;
+        public SpellEffectExtraData spell_effect_extra;
+        public AnimTierTransition anim_tier;
         #endregion
 
         public class CommonInitializer : IInitializer

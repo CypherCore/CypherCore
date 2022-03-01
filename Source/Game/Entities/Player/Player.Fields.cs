@@ -265,7 +265,7 @@ namespace Game.Entities
     public class PlayerInfo
     {
         public CreatePosition createPosition;
-        public Optional<CreatePosition> createPositionNPE;
+        public CreatePosition? createPositionNPE;
 
         public List<PlayerCreateInfoItem> item = new();
         public List<uint> customSpells = new();
@@ -273,9 +273,9 @@ namespace Game.Entities
         public List<PlayerCreateInfoAction> action = new();
         public List<SkillRaceClassInfoRecord> skills = new();
 
-        public Optional<uint> introMovieId;
-        public Optional<uint> introSceneId;
-        public Optional<uint> introSceneIdNPE;
+        public uint? introMovieId;
+        public uint? introSceneId;
+        public uint? introSceneIdNPE;
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 

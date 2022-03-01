@@ -522,7 +522,7 @@ namespace Game.Entities
                 //    *data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
 
                 if (hasOrbit)
-                    areaTrigger.GetCircularMovementInfo().Value.Write(data);
+                    areaTrigger.GetCircularMovementInfo().Write(data);
             }
 
             if (flags.GameObject)
@@ -960,7 +960,7 @@ namespace Game.Entities
             if (GetTypeId() == TypeId.Player)
                 return;
 
-            m_visibilityDistanceOverride.Set(SharedConst.VisibilityDistances[(int)type]);
+            m_visibilityDistanceOverride = SharedConst.VisibilityDistances[(int)type];
         }
 
         public virtual void CleanupsBeforeDelete(bool finalCleanup = true)
@@ -3577,7 +3577,7 @@ namespace Game.Entities
         string _name;
         protected bool m_isActive;
         bool m_isFarVisible;
-        Optional<float> m_visibilityDistanceOverride;
+        float? m_visibilityDistanceOverride;
         bool m_isWorldObject;
         public ZoneScript m_zoneScript;
 

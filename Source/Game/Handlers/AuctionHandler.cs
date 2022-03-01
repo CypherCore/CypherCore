@@ -52,12 +52,12 @@ namespace Game
 
             Log.outDebug(LogFilter.Auctionhouse, $"Auctionhouse search ({browseQuery.Auctioneer}), searchedname: {browseQuery.Name}, levelmin: {browseQuery.MinLevel}, levelmax: {browseQuery.MaxLevel}, filters: {browseQuery.Filters}");
 
-            Optional<AuctionSearchClassFilters> classFilters = new();
+            AuctionSearchClassFilters classFilters = null;
 
             AuctionListBucketsResult listBucketsResult = new();
             if (!browseQuery.ItemClassFilters.Empty())
             {
-                classFilters.Value = new();
+                classFilters = new();
 
                 foreach (var classFilter in browseQuery.ItemClassFilters)
                 {
@@ -67,14 +67,14 @@ namespace Game
                         {
                             if (classFilter.ItemClass < (int)ItemClass.Max)
                             {
-                                classFilters.Value.Classes[classFilter.ItemClass].SubclassMask |= (AuctionSearchClassFilters.FilterType)(1 << subClassFilter.ItemSubclass);
+                                classFilters.Classes[classFilter.ItemClass].SubclassMask |= (AuctionSearchClassFilters.FilterType)(1 << subClassFilter.ItemSubclass);
                                 if (subClassFilter.ItemSubclass < ItemConst.MaxItemSubclassTotal)
-                                    classFilters.Value.Classes[classFilter.ItemClass].InvTypes[subClassFilter.ItemSubclass] = subClassFilter.InvTypeMask;
+                                    classFilters.Classes[classFilter.ItemClass].InvTypes[subClassFilter.ItemSubclass] = subClassFilter.InvTypeMask;
                             }
                         }
                     }
                     else
-                        classFilters.Value.Classes[classFilter.ItemClass].SubclassMask = AuctionSearchClassFilters.FilterType.SkipSubclass;
+                        classFilters.Classes[classFilter.ItemClass].SubclassMask = AuctionSearchClassFilters.FilterType.SkipSubclass;
                 }
             }
 
@@ -949,9 +949,9 @@ namespace Game
             CommodityQuote quote = auctionHouse.CreateCommodityQuote(_player, (uint)getCommodityQuote.ItemID, getCommodityQuote.Quantity);
             if (quote != null)
             {
-                commodityQuoteResult.TotalPrice.Set(quote.TotalPrice);
-                commodityQuoteResult.Quantity.Set(quote.Quantity);
-                commodityQuoteResult.QuoteDuration.Set((int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds);
+                commodityQuoteResult.TotalPrice = quote.TotalPrice;
+                commodityQuoteResult.Quantity = quote.Quantity;
+                commodityQuoteResult.QuoteDuration = (int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds;
             }
 
             commodityQuoteResult.ItemID = getCommodityQuote.ItemID;

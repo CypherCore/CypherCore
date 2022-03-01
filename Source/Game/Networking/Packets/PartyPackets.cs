@@ -150,12 +150,12 @@ namespace Game.Networking.Packets
 
             bool hasRolesDesired = _worldPacket.HasBit();
             if (hasRolesDesired)
-                RolesDesired.Set(_worldPacket.ReadUInt32());
+                RolesDesired = _worldPacket.ReadUInt32();
         }
 
         public byte PartyIndex;
         public bool Accept;
-        public Optional<uint> RolesDesired;
+        public uint? RolesDesired;
     }
 
     class PartyUninvite : ClientPacket
@@ -319,14 +319,14 @@ namespace Game.Networking.Packets
             {
                 Pet pet = player.GetPet();
 
-                MemberStats.PetStats.Value = new();
+                MemberStats.PetStats = new();
 
-                MemberStats.PetStats.Value.GUID = pet.GetGUID();
-                MemberStats.PetStats.Value.Name = pet.GetName();
-                MemberStats.PetStats.Value.ModelId = (short)pet.GetDisplayId();
+                MemberStats.PetStats.GUID = pet.GetGUID();
+                MemberStats.PetStats.Name = pet.GetName();
+                MemberStats.PetStats.ModelId = (short)pet.GetDisplayId();
 
-                MemberStats.PetStats.Value.CurrentHealth = (int)pet.GetHealth();
-                MemberStats.PetStats.Value.MaxHealth = (int)pet.GetMaxHealth();
+                MemberStats.PetStats.CurrentHealth = (int)pet.GetHealth();
+                MemberStats.PetStats.MaxHealth = (int)pet.GetMaxHealth();
 
                 foreach (AuraApplication aurApp in pet.GetVisibleAuras())
                 {
@@ -348,7 +348,7 @@ namespace Game.Networking.Packets
                         }
                     }
 
-                    MemberStats.PetStats.Value.Auras.Add(aura);
+                    MemberStats.PetStats.Auras.Add(aura);
                 }
 
             }
@@ -771,9 +771,9 @@ namespace Game.Networking.Packets
 
         public List<PartyPlayerInfo> PlayerList = new();
 
-        public Optional<PartyLFGInfo> LfgInfos;
-        public Optional<PartyLootSettings> LootSettings;
-        public Optional<PartyDifficultySettings> DifficultySettings;
+        public PartyLFGInfo? LfgInfos;
+        public PartyLootSettings? LootSettings;
+        public PartyDifficultySettings? DifficultySettings;
     }
 
     class SetEveryoneIsAssistant : ClientPacket
@@ -999,13 +999,13 @@ namespace Game.Networking.Packets
             foreach (PartyMemberAuraStates aura in Auras)
                 aura.Write(data);
 
-            data.WriteBit(PetStats.HasValue);
+            data.WriteBit(PetStats != null);
             data.FlushBits();
 
             DungeonScore.Write(data);
 
-            if (PetStats.HasValue)
-                PetStats.Value.Write(data);
+            if (PetStats != null)
+                PetStats.Write(data);
         }
 
         public ushort Level;
@@ -1027,7 +1027,7 @@ namespace Game.Networking.Packets
 
         public PartyMemberPhaseStates Phases = new();
         public List<PartyMemberAuraStates> Auras = new();
-        public Optional<PartyMemberPetStats> PetStats;
+        public PartyMemberPetStats PetStats;
 
         public ushort PowerDisplayID;
         public ushort SpecID;

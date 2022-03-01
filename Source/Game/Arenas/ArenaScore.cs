@@ -34,16 +34,16 @@ namespace Game.Arenas
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
             if (PreMatchRating != 0)
-                playerData.PreMatchRating.Set(PreMatchRating);
+                playerData.PreMatchRating = PreMatchRating;
 
             if (PostMatchRating != PreMatchRating)
-                playerData.RatingChange.Set((int)(PostMatchRating - PreMatchRating));
+                playerData.RatingChange = (int)(PostMatchRating - PreMatchRating);
 
             if (PreMatchMMR != 0)
-                playerData.PreMatchMMR.Set(PreMatchMMR);
+                playerData.PreMatchMMR = PreMatchMMR;
 
             if (PostMatchMMR != PreMatchMMR)
-                playerData.MmrChange.Set((int)(PostMatchMMR - PreMatchMMR));
+                playerData.MmrChange = (int)(PostMatchMMR - PreMatchMMR);
         }
 
         // For Logging purpose

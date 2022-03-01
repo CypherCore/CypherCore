@@ -3666,9 +3666,9 @@ namespace Game.Spells
 
             if (castFlags.HasAnyFlag(SpellCastFlags.RuneList)) // rune cooldowns list
             {
-                castData.RemainingRunes.Value = new();
+                castData.RemainingRunes = new();
 
-                RuneData runeData = castData.RemainingRunes.Value;
+                RuneData runeData = castData.RemainingRunes;
                 //TODO: There is a crash caused by a spell with CAST_FLAG_RUNE_LIST casted by a creature
                 //The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
 
@@ -3781,8 +3781,8 @@ namespace Game.Spells
 
             if (Convert.ToBoolean(castFlags & SpellCastFlags.RuneList))                   // rune cooldowns list
             {
-                castData.RemainingRunes.Value = new();
-                RuneData runeData = castData.RemainingRunes.Value;
+                castData.RemainingRunes = new();
+                RuneData runeData = castData.RemainingRunes;
 
                 Player player = m_caster.ToPlayer();
                 runeData.Start = m_runesState; // runes state before
@@ -4095,9 +4095,11 @@ namespace Game.Spells
 
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
             {
-                spellChannelStart.InterruptImmunities.Value = new();
-                spellChannelStart.InterruptImmunities.Value.SchoolImmunities = (int)schoolImmunityMask;
-                spellChannelStart.InterruptImmunities.Value.Immunities = (int)mechanicImmunityMask;
+                SpellChannelStartInterruptImmunities interruptImmunities = new();
+                interruptImmunities.SchoolImmunities = (int)schoolImmunityMask;
+                interruptImmunities.Immunities = (int)mechanicImmunityMask;
+
+                spellChannelStart.InterruptImmunities = interruptImmunities;
             }
             unitCaster.SendMessageToSet(spellChannelStart, true);
 
@@ -7177,7 +7179,7 @@ namespace Game.Spells
                     m_spellValue.DurationMul = (float)value / 100.0f;
                     break;
                 case SpellValueMod.Duration:
-                    m_spellValue.Duration.Set(value);
+                    m_spellValue.Duration = value;
                     break;
             }
         }
@@ -8439,7 +8441,7 @@ namespace Game.Spells
         public int AuraStackAmount;
         public float DurationMul;
         public float CriticalChance;
-        public Optional<int> Duration;
+        public int? Duration;
     }
 
     // Spell modifier (used for modify other spells)

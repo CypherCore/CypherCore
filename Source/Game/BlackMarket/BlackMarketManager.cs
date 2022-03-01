@@ -244,9 +244,9 @@ namespace Game.BlackMarket
             if (!item)
                 return;
 
-            if (templ.Item.ItemBonus.HasValue)
+            if (templ.Item.ItemBonus != null)
             {
-                foreach (uint bonusList in templ.Item.ItemBonus.Value.BonusListIDs)
+                foreach (uint bonusList in templ.Item.ItemBonus.BonusListIDs)
                     item.AddBonuses(bonusList);
             }
 

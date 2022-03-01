@@ -1313,9 +1313,9 @@ namespace Game.Networking.Packets
         public string ButtonTooltip;
         public string Description;
         public string Confirmation;
-        public Optional<PlayerChoiceResponseReward> Reward;
-        public Optional<uint> RewardQuestID;
-        public Optional<PlayerChoiceResponseMawPower> MawPower;
+        public PlayerChoiceResponseReward Reward;
+        public uint? RewardQuestID;
+        public PlayerChoiceResponseMawPower? MawPower;
 
         public void Write(WorldPacket data)
         {
@@ -1337,12 +1337,12 @@ namespace Game.Networking.Packets
             data.WriteBits(Confirmation.GetByteCount(), 7);
 
             data.WriteBit(RewardQuestID.HasValue);
-            data.WriteBit(Reward.HasValue);
+            data.WriteBit(Reward != null);
             data.WriteBit(MawPower.HasValue);
             data.FlushBits();
 
-            if (Reward.HasValue)
-                Reward.Value.Write(data);
+            if (Reward != null)
+                Reward.Write(data);
 
             data.WriteString(Answer);
             data.WriteString(Header);

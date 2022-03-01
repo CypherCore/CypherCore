@@ -2080,7 +2080,7 @@ namespace Game.Maps
             {
                 if (wmoData.areaInfo.HasValue)
                 {
-                    data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags));
+                    data.areaInfo = new(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags);
                     // wmo found
                     var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.GroupId);
                     data.outdoors = (wmoData.areaInfo.Value.MogpFlags & 0x8) != 0;
@@ -2144,11 +2144,11 @@ namespace Game.Maps
                     }
                 }
 
-                data.LiquidInfo.Value = new();
-                data.LiquidInfo.Value.level = wmoData.liquidInfo.Value.Level;
-                data.LiquidInfo.Value.depth_level = wmoData.floorZ;
-                data.LiquidInfo.Value.entry = liquidType;
-                data.LiquidInfo.Value.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
+                data.LiquidInfo = new();
+                data.LiquidInfo.level = wmoData.liquidInfo.Value.Level;
+                data.LiquidInfo.depth_level = wmoData.floorZ;
+                data.LiquidInfo.entry = liquidType;
+                data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
                 float delta = wmoData.liquidInfo.Value.Level - z;
                 if (delta > collisionHeight)
@@ -2169,7 +2169,7 @@ namespace Game.Maps
                 {
                     if (GetId() == 530 && gridMapLiquid.entry == 2)
                         gridMapLiquid.entry = 15;
-                    data.LiquidInfo.Set(gridMapLiquid);
+                    data.LiquidInfo = gridMapLiquid;
                     data.LiquidStatus = gridMapStatus;
                 }
             }
@@ -5702,8 +5702,8 @@ namespace Game.Maps
         public float FloorZ;
         public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;
-        public Optional<AreaInfo> areaInfo;
-        public Optional<LiquidData> LiquidInfo;
+        public AreaInfo? areaInfo;
+        public LiquidData LiquidInfo;
     }
 
     public class RespawnInfo

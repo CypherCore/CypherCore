@@ -2828,9 +2828,9 @@ namespace Game.Entities
 
         public BonusData(ItemInstance itemInstance) : this(Global.ObjectMgr.GetItemTemplate(itemInstance.ItemID))
         {
-            if (itemInstance.ItemBonus.HasValue)
+            if (itemInstance.ItemBonus != null)
             {
-                foreach (uint bonusListID in itemInstance.ItemBonus.Value.BonusListIDs)
+                foreach (uint bonusListID in itemInstance.ItemBonus.BonusListIDs)
                     AddBonusList(bonusListID);
             }
         }
