@@ -45,15 +45,6 @@ namespace Framework.Dynamic
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>Current timer in ms value.</returns>
-        uint GetTimer()
-        {
-            return _time;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <returns>Active phases as mask.</returns>
         byte GetPhaseMask()
         {
@@ -275,32 +266,6 @@ namespace Framework.Dynamic
                 if (Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))))
                     _eventMap.Remove(pair.Key, pair.Value);
             }
-        }
-
-        /// <summary>
-        /// Returns closest occurrence of specified event.
-        /// </summary>
-        /// <param name="eventId">Wanted event id.</param>
-        /// <returns>Time of found event.</returns>
-        public uint GetNextEventTime(uint eventId)
-        {
-            if (Empty())
-                return 0;
-
-            foreach (var pair in _eventMap.KeyValueList)
-                if (eventId == (pair.Value & 0x0000FFFF))
-                    return pair.Key;
-
-            return 0;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Time of next event.</returns>
-        uint GetNextEventTime()
-        {
-            return Empty() ? 0 : _eventMap[0][0];
         }
 
         /// <summary>
