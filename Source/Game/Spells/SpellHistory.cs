@@ -166,7 +166,7 @@ namespace Game.Spells
 
         public void Update()
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             foreach (var pair in _categoryCooldowns.ToList())
             {
                 if (pair.Value.CategoryEnd < now)
@@ -240,7 +240,7 @@ namespace Game.Spells
 
         public void WritePacket(SendSpellHistory sendSpellHistory)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             foreach (var p in _spellCooldowns)
             {
                 SpellHistoryEntry historyEntry = new();
@@ -272,7 +272,7 @@ namespace Game.Spells
 
         public void WritePacket(SendSpellCharges sendSpellCharges)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             foreach (var key in _categoryCharges.Keys)
             {
                 var list = _categoryCharges[key];
@@ -293,7 +293,7 @@ namespace Game.Spells
 
         public void WritePacket(PetSpells petSpells)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
 
             foreach (var pair in _spellCooldowns)
             {
@@ -344,7 +344,7 @@ namespace Game.Spells
             TimeSpan cooldown = TimeSpan.Zero;
             TimeSpan categoryCooldown = TimeSpan.Zero;
 
-            DateTime curTime = GameTime.GetGameTimeSystemPoint();
+            DateTime curTime = GameTime.GetSystemTime();
             DateTime catrecTime;
             DateTime recTime;
             bool needsCooldownPacket = false;
@@ -428,7 +428,7 @@ namespace Game.Spells
 
                         SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey(categoryId);
                         if (categoryEntry.Flags.HasAnyFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
-                            categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetGameTimeSystemPoint();
+                            categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetSystemTime();
                     }
                 }
                 else
@@ -496,7 +496,7 @@ namespace Game.Spells
 
         public void AddCooldown(uint spellId, uint itemId, TimeSpan cooldownDuration)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             AddCooldown(spellId, itemId, now + cooldownDuration, 0, now);
         }
 
@@ -525,7 +525,7 @@ namespace Game.Spells
             if (offset.TotalMilliseconds == 0 || cooldownEntry == null)
                 return;
 
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
 
             cooldownEntry.CooldownEnd += offset;
 
@@ -670,7 +670,7 @@ namespace Game.Spells
                 end = cooldownEntry.CategoryEnd;
             }
 
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             if (end < now)
                 return TimeSpan.Zero;
 
@@ -687,7 +687,7 @@ namespace Game.Spells
 
             end = cooldownEntry.CategoryEnd;
 
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             if (end < now)
                 return TimeSpan.Zero;
 
@@ -702,7 +702,7 @@ namespace Game.Spells
         
         public void LockSpellSchool(SpellSchoolMask schoolMask, TimeSpan lockoutTime)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             DateTime lockoutEnd = now + lockoutTime;
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 if (Convert.ToBoolean((SpellSchoolMask)(1 << i) & schoolMask))
@@ -761,7 +761,7 @@ namespace Game.Spells
 
         public bool IsSchoolLocked(SpellSchoolMask schoolMask)
         {
-            DateTime now = GameTime.GetGameTimeSystemPoint();
+            DateTime now = GameTime.GetSystemTime();
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 if (Convert.ToBoolean((SpellSchoolMask)(1 << i) & schoolMask))
                     if (_schoolLockouts[i] > now)
@@ -781,7 +781,7 @@ namespace Game.Spells
                 DateTime recoveryStart;
                 var charges = _categoryCharges.LookupByKey(chargeCategoryId);
                 if (charges.Empty())
-                    recoveryStart = GameTime.GetGameTimeSystemPoint();
+                    recoveryStart = GameTime.GetSystemTime();
                 else
                     recoveryStart = charges.Last().RechargeEnd;
 
@@ -802,7 +802,7 @@ namespace Game.Spells
             if (chargeList == null || chargeList.Empty())
                 return;
 
-            var now = GameTime.GetGameTimeSystemPoint();
+            var now = GameTime.GetSystemTime();
 
             for (var i = 0; i < chargeList.Count; ++i)
             {
@@ -910,12 +910,12 @@ namespace Game.Spells
 
         public bool HasGlobalCooldown(SpellInfo spellInfo)
         {
-            return _globalCooldowns.ContainsKey(spellInfo.StartRecoveryCategory) && _globalCooldowns[spellInfo.StartRecoveryCategory] > GameTime.GetGameTimeSystemPoint();
+            return _globalCooldowns.ContainsKey(spellInfo.StartRecoveryCategory) && _globalCooldowns[spellInfo.StartRecoveryCategory] > GameTime.GetSystemTime();
         }
 
         public void AddGlobalCooldown(SpellInfo spellInfo, TimeSpan durationMs)
         {
-            _globalCooldowns[spellInfo.StartRecoveryCategory] = GameTime.GetGameTimeSystemPoint() + durationMs;
+            _globalCooldowns[spellInfo.StartRecoveryCategory] = GameTime.GetSystemTime() + durationMs;
         }
 
         public void CancelGlobalCooldown(SpellInfo spellInfo)
@@ -1032,7 +1032,7 @@ namespace Game.Spells
 
                 foreach (var c in _spellCooldowns)
                 {
-                    DateTime now = GameTime.GetGameTimeSystemPoint();
+                    DateTime now = GameTime.GetSystemTime();
                     uint cooldownDuration = c.Value.CooldownEnd > now ? (uint)(c.Value.CooldownEnd - now).TotalMilliseconds : 0;
 
                     // cooldownDuration must be between 0 and 10 minutes in order to avoid any visual bugs

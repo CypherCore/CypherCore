@@ -55,7 +55,7 @@ namespace Game
             mNeutralAuctions = new AuctionHouseObject(1);
             mGoblinAuctions = new AuctionHouseObject(7);
             _replicateIdGenerator = 0;
-            _playerThrottleObjectsCleanupTime = GameTime.GetGameTimeSteadyPoint() + TimeSpan.FromHours(1);
+            _playerThrottleObjectsCleanupTime = GameTime.Now() + TimeSpan.FromHours(1);
         }
 
         public AuctionHouseObject GetAuctionsMap(uint factionTemplateId)
@@ -348,7 +348,7 @@ namespace Game
                     PendingAuctionInfo pendingAuction = playerPendingAuctions.Auctions[auctionIndex];
                     AuctionPosting auction = GetAuctionsById(pendingAuction.AuctionHouseId).GetAuction(pendingAuction.AuctionId);
                     if (auction != null)
-                        auction.EndTime = GameTime.GetGameTimeSystemPoint();
+                        auction.EndTime = GameTime.GetSystemTime();
 
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
                     stmt.AddValue(0, (uint)GameTime.GetGameTime());
@@ -388,7 +388,7 @@ namespace Game
                     {
                         AuctionPosting auction = GetAuctionsById(pendingAuction.AuctionHouseId).GetAuction(pendingAuction.AuctionId);
                         if (auction != null)
-                            auction.EndTime = GameTime.GetGameTimeSystemPoint();
+                            auction.EndTime = GameTime.GetSystemTime();
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
                         stmt.AddValue(0, (uint)GameTime.GetGameTime());
@@ -408,7 +408,7 @@ namespace Game
             mNeutralAuctions.Update();
             mGoblinAuctions.Update();
 
-            DateTime now = GameTime.GetGameTimeSteadyPoint();
+            DateTime now = GameTime.Now();
             if (now >= _playerThrottleObjectsCleanupTime)
             {
                 foreach (var pair in _playerThrottleObjects.ToList())
@@ -428,7 +428,7 @@ namespace Game
 
         public AuctionThrottleResult CheckThrottle(Player player, bool addonTainted, AuctionCommand command = AuctionCommand.SellItem)
         {
-            DateTime now = GameTime.GetGameTimeSteadyPoint();
+            DateTime now = GameTime.Now();
 
             if (!_playerThrottleObjects.ContainsKey(player.GetGUID()))
                 _playerThrottleObjects[player.GetGUID()] = new PlayerThrottleObject();
@@ -768,8 +768,8 @@ namespace Game
 
         public void Update()
         {
-            DateTime curTime = GameTime.GetGameTimeSystemPoint();
-            DateTime curTimeSteady = GameTime.GetGameTimeSteadyPoint();
+            DateTime curTime = GameTime.GetSystemTime();
+            DateTime curTimeSteady = GameTime.Now();
             ///- Handle expired auctions
 
             // Clear expired throttled players
@@ -1092,7 +1092,7 @@ namespace Game
 
         public void BuildReplicate(AuctionReplicateResponse replicateResponse, Player player, uint global, uint cursor, uint tombstone, uint count)
         {
-            DateTime curTime = GameTime.GetGameTimeSteadyPoint();
+            DateTime curTime = GameTime.Now();
 
             var throttleData = _replicateThrottleMap.LookupByKey(player.GetGUID());
             if (throttleData == null)
@@ -1172,7 +1172,7 @@ namespace Game
             CommodityQuote quote = _commodityQuotes[player.GetGUID()];
             quote.TotalPrice = totalPrice;
             quote.Quantity = quantity;
-            quote.ValidTo = GameTime.GetGameTimeSteadyPoint() + TimeSpan.FromSeconds(30);
+            quote.ValidTo = GameTime.Now() + TimeSpan.FromSeconds(30);
             return quote;
         }
 
@@ -1698,7 +1698,7 @@ namespace Game
             }
 
             // all (not optional<>)
-            auctionItem.DurationLeft = (int)Math.Max((EndTime - GameTime.GetGameTimeSystemPoint()).ToMilliseconds(), 0L);
+            auctionItem.DurationLeft = (int)Math.Max((EndTime - GameTime.GetSystemTime()).ToMilliseconds(), 0L);
             auctionItem.DeleteReason = 0;
 
             // SMSG_AUCTION_LIST_ITEMS_RESULT (only if owned)

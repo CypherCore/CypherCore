@@ -3881,7 +3881,7 @@ namespace Game.Entities
             if (pItem.GetTemplate().HasFlag(ItemFlags.NoEquipCooldown))
                 return;
 
-            DateTime now = GameTime.GetGameTimeSteadyPoint();
+            DateTime now = GameTime.Now();
             foreach (ItemEffectRecord effectData in pItem.GetEffects())
             {
                 SpellInfo effectSpellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);

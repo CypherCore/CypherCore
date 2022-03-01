@@ -1487,7 +1487,7 @@ namespace Game.Entities
 
         void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
         {
-            DateTime now = GameTime.GetGameTimeSteadyPoint();
+            DateTime now = GameTime.Now();
 
             // use provided list of auras which can proc
             if (procAuras != null)

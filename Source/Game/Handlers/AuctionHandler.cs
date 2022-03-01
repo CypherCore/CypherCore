@@ -658,7 +658,7 @@ namespace Game
             auction.OwnerAccount = GetAccountGUID();
             auction.BuyoutOrUnitPrice = sellCommodity.UnitPrice;
             auction.Deposit = deposit;
-            auction.StartTime = GameTime.GetGameTimeSystemPoint();
+            auction.StartTime = GameTime.GetSystemTime();
             auction.EndTime = auction.StartTime + auctionTime;
 
             // keep track of what was cloned to undo/modify counts later
@@ -853,7 +853,7 @@ namespace Game
             auction.BuyoutOrUnitPrice = sellItem.BuyoutPrice;
             auction.Deposit = deposit;
             auction.BidAmount = sellItem.MinBid;
-            auction.StartTime = GameTime.GetGameTimeSystemPoint();
+            auction.StartTime = GameTime.GetSystemTime();
             auction.EndTime = auction.StartTime + auctionTime;
 
             if (HasPermission(RBACPermissions.LogGmTrade))
@@ -951,7 +951,7 @@ namespace Game
             {
                 commodityQuoteResult.TotalPrice = quote.TotalPrice;
                 commodityQuoteResult.Quantity = quote.Quantity;
-                commodityQuoteResult.QuoteDuration = (int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds;
+                commodityQuoteResult.QuoteDuration = (int)(quote.ValidTo - GameTime.Now()).TotalMilliseconds;
             }
 
             commodityQuoteResult.ItemID = getCommodityQuote.ItemID;

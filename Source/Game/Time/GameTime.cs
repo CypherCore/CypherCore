@@ -27,12 +27,12 @@ public class GameTime
         return _gameMSTime;
     }
 
-    public static DateTime GetGameTimeSystemPoint()
+    public static DateTime GetSystemTime()
     {
         return _gameTimeSystemPoint;
     }
 
-    public static DateTime GetGameTimeSteadyPoint()
+    public static DateTime Now()
     {
         return _gameTimeSteadyPoint;
     }
