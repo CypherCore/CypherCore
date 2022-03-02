@@ -222,42 +222,88 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            FriendsResult friendResult = FriendsResult.NotFound;
-            ObjectGuid friendGuid = ObjectGuid.Empty;
-
-            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
-            if (characterInfo != null)
+            CharacterCacheEntry friendCharacterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
+            if (friendCharacterInfo == null)
             {
-                friendGuid = characterInfo.Guid;
-                ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, characterInfo.AccountId);
-                Team team = Player.TeamForRace(characterInfo.RaceId);
-                uint friendAccountId = characterInfo.AccountId;
-
-                if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Index)))
-                {
-                    if (friendGuid == GetPlayer().GetGUID())
-                        friendResult = FriendsResult.Self;
-                    else if (GetPlayer().GetTeam() != team && !HasPermission(RBACPermissions.TwoSideAddFriend))
-                        friendResult = FriendsResult.Enemy;
-                    else if (GetPlayer().GetSocial().HasFriend(friendGuid))
-                        friendResult = FriendsResult.Already;
-                    else
-                    {
-                        Player playerFriend = Global.ObjAccessor.FindPlayer(friendGuid);
-                        if (playerFriend && playerFriend.IsVisibleGloballyFor(GetPlayer()))
-                            friendResult = FriendsResult.AddedOnline;
-                        else
-                            friendResult = FriendsResult.AddedOffline;
-
-                        if (GetPlayer().GetSocial().AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
-                            GetPlayer().GetSocial().SetFriendNote(friendGuid, packet.Notes);
-                        else
-                            friendResult = FriendsResult.ListFull;
-                    }
-                }
+                Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
+                return;
             }
 
-            Global.SocialMgr.SendFriendStatus(GetPlayer(), friendResult, friendGuid);
+            void processFriendRequest()
+            {
+                var playerGuid = _player.GetGUID();
+                var friendGuid = friendCharacterInfo.Guid;
+                var friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, friendCharacterInfo.AccountId);
+                var team = Player.TeamForRace(friendCharacterInfo.RaceId);
+                var friendNote = packet.Notes;
+
+                if (playerGuid.GetCounter() != m_GUIDLow)
+                    return; // not the player initiating request, do nothing
+
+                FriendsResult friendResult = FriendsResult.NotFound;
+                if (friendGuid == GetPlayer().GetGUID())
+                    friendResult = FriendsResult.Self;
+                else if (GetPlayer().GetTeam() != team && !HasPermission(RBACPermissions.TwoSideAddFriend))
+                    friendResult = FriendsResult.Enemy;
+                else if (GetPlayer().GetSocial().HasFriend(friendGuid))
+                    friendResult = FriendsResult.Already;
+                else
+                {
+                    Player pFriend = Global.ObjAccessor.FindPlayer(friendGuid);
+                    if (pFriend != null && pFriend.IsVisibleGloballyFor(GetPlayer()))
+                        friendResult = FriendsResult.Online;
+                    else
+                        friendResult = FriendsResult.AddedOnline;
+                    if (GetPlayer().GetSocial().AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
+                        GetPlayer().GetSocial().SetFriendNote(friendGuid, friendNote);
+                    else
+                        friendResult = FriendsResult.ListFull;
+                }
+
+                Global.SocialMgr.SendFriendStatus(GetPlayer(), friendResult, friendGuid);
+            }
+
+            if (HasPermission(RBACPermissions.AllowGmFriend))
+            {
+                processFriendRequest();
+                return;
+            }
+
+            // First try looking up friend candidate security from online object
+            Player friendPlayer = Global.ObjAccessor.FindPlayer(friendCharacterInfo.Guid);
+            if (friendPlayer != null)
+            {
+                if (!Global.AccountMgr.IsPlayerAccount(friendPlayer.GetSession().GetSecurity()))
+                {
+                    Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
+                    return;
+                }
+
+                processFriendRequest();
+                return;
+            }
+
+            // When not found, consult database
+            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, (int)Global.WorldMgr.GetRealmId().Index, friendSecurity =>
+            {
+                if (!Global.AccountMgr.IsPlayerAccount((AccountTypes)friendSecurity))
+                {
+                    Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
+                    return;
+                }
+
+                processFriendRequest();
+            }));
+
+
+
+
+
+
+
+
+
+
         }
 
         [WorldPacketHandler(ClientOpcodes.DelFriend)]

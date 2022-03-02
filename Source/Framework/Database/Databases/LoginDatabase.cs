@@ -79,8 +79,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_ACCOUNT_ACCESS_BY_REALM, "DELETE FROM account_access WHERE AccountID = ? AND (RealmID = ? OR RealmID = -1)");
             PrepareStatement(LoginStatements.INS_ACCOUNT_ACCESS, "INSERT INTO account_access (AccountID, SecurityLevel, RealmID) VALUES (?, ?, ?)");
             PrepareStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME, "SELECT id FROM account WHERE username = ?");
-            PrepareStatement(LoginStatements.GET_ACCOUNT_ACCESS_GMLEVEL, "SELECT SecurityLevel FROM account_access WHERE AccountID = ?");
-            PrepareStatement(LoginStatements.GET_GMLEVEL_BY_REALMID, "SELECT SecurityLevel FROM account_access WHERE AccountID = ? AND (RealmID = ? OR RealmID = -1)");
+            PrepareStatement(LoginStatements.GET_GMLEVEL_BY_REALMID, "SELECT SecurityLevel FROM account_access WHERE AccountID = ? AND (RealmID = ? OR RealmID = -1) ORDER BY RealmID DESC");
             PrepareStatement(LoginStatements.GET_USERNAME_BY_ID, "SELECT username FROM account WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD, "SELECT salt, verifier FROM account WHERE id = ? AND salt IS NOT NULL AND verifier IS NOT NULL");
             PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD_BY_NAME, "SELECT salt, verifier FROM account WHERE username = ? AND salt IS NOT NULL AND verifier IS NOT NULL");
@@ -231,7 +230,6 @@ namespace Framework.Database
         DEL_ACCOUNT_ACCESS_BY_REALM,
         INS_ACCOUNT_ACCESS,
         GET_ACCOUNT_ID_BY_USERNAME,
-        GET_ACCOUNT_ACCESS_GMLEVEL,
         GET_GMLEVEL_BY_REALMID,
         GET_USERNAME_BY_ID,
         SEL_CHECK_PASSWORD,

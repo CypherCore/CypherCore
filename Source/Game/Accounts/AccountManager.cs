@@ -247,14 +247,6 @@ namespace Game
             return !result.IsEmpty() ? result.Read<uint>(0) : 0;
         }
 
-        public AccountTypes GetSecurity(uint accountId)
-        {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_ACCOUNT_ACCESS_GMLEVEL);
-            stmt.AddValue(0, accountId);
-            SQLResult result = DB.Login.Query(stmt);
-            return !result.IsEmpty() ? (AccountTypes)result.Read<byte>(0) : AccountTypes.Player;
-        }
-
         public AccountTypes GetSecurity(uint accountId, int realmId)
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
@@ -262,6 +254,17 @@ namespace Game
             stmt.AddValue(1, realmId);
             SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty() ? (AccountTypes)result.Read<uint>(0) : AccountTypes.Player;
+        }
+
+        public QueryCallback GetSecurityAsync(uint accountId, int realmId, Action<uint> callback)
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
+            stmt.AddValue(0, accountId);
+            stmt.AddValue(1, realmId);
+            return DB.Login.AsyncQuery(stmt).WithCallback(result =>
+            {
+                callback(!result.IsEmpty() ? result.Read<byte>(0) : (uint)AccountTypes.Player);
+            });
         }
 
         public bool GetName(uint accountId, out string name)
@@ -497,7 +500,7 @@ namespace Game
                 return false;
             }
 
-            RBACData rbac = new(accountId, "", (int)realmId);
+            RBACData rbac = new(accountId, "", (int)realmId, (byte)GetSecurity(accountId, (int)realmId));
             rbac.LoadFromDB();
             bool hasPermission = rbac.HasPermission(permissionId);
 

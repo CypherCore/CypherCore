@@ -34,7 +34,7 @@ namespace Game.Entities
         public const int FriendLimit = 50;
         public const int IgnoreLimit = 50;
 
-        public void GetFriendInfo(Player player, ObjectGuid friendGUID, FriendInfo friendInfo)
+        public static void GetFriendInfo(Player player, ObjectGuid friendGUID, FriendInfo friendInfo)
         {
             if (!player)
                 return;
@@ -283,7 +283,7 @@ namespace Game.Entities
                     if (++ignoredCount > SocialManager.IgnoreLimit)
                         continue;
 
-                Global.SocialMgr.GetFriendInfo(player, v.Key, v.Value);
+                SocialManager.GetFriendInfo(player, v.Key, v.Value);
 
                 contactList.Contacts.Add(new ContactInfo(v.Key, v.Value));
             }
