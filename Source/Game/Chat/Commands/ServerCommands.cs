@@ -344,19 +344,12 @@ namespace Game.Chat
             }
 
             [Command("loglevel", RBACPermissions.CommandServerSetLoglevel, true)]
-            static bool HandleServerSetLogLevelCommand(CommandHandler handler, StringArguments args)
+            static bool HandleServerSetLogLevelCommand(CommandHandler handler, string type, string name, int level)
             {
-                if (args.Empty())
+                if (name.IsEmpty() || level < 0 || (type != "a" && type != "l"))
                     return false;
 
-                string type = args.NextString();
-                string name = args.NextString();
-                string level = args.NextString();
-
-                if (type.IsEmpty() || name.IsEmpty() || level.IsEmpty() || (type[0] != 'a' && type[0] != 'l'))
-                    return false;
-
-                return Log.SetLogLevel(name, level, type[0] == 'l');
+                return Log.SetLogLevel(name, level, type == "l");
             }
 
             [Command("motd", RBACPermissions.CommandServerSetMotd, true)]

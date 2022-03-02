@@ -911,8 +911,6 @@ namespace Game.Maps
             return false;
         }
 
-        public virtual void Initialize() { }
-
         public virtual void Update(uint diff) { }
 
         // Called when a player successfully enters the instance.

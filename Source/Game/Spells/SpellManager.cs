@@ -3247,6 +3247,7 @@ namespace Game.Entities
                 58552, // Return to Orgrimmar
                 58533, // Return to Stormwind
                 21855, // Challenge Flag
+                38762, // Force of Neltharaku
                 51122, // Fierce Lightning Stike
                 71848  // Toxic Wasteling Find Target
             }, spellInfo =>

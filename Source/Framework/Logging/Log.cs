@@ -310,11 +310,12 @@ public class Log
         return GetLoggerByType(parentLogger);
     }
 
-    public static bool SetLogLevel(string name, string newLevelc, bool isLogger = true)
+    public static bool SetLogLevel(string name, int newLeveli, bool isLogger = true)
     {
-        LogLevel newLevel = (LogLevel)uint.Parse(newLevelc);
-        if (newLevel < 0)
+        if (newLeveli < 0)
             return false;
+
+        LogLevel newLevel = (LogLevel)newLeveli;
 
         if (isLogger)
         {

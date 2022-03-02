@@ -1115,6 +1115,14 @@ namespace Scripts.World.NpcSpecial
     [Script]
     class npc_garments_of_quests : EscortAI
     {
+        ObjectGuid CasterGUID;
+
+        bool IsHealed;
+        bool CanRun;
+
+        uint RunAwayTimer;
+        uint quest;
+
         public npc_garments_of_quests(Creature creature) : base(creature)
         {
             switch (me.GetEntry())
@@ -1139,25 +1147,22 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            Reset();
+            Initialize();
         }
 
-        ObjectGuid CasterGUID;
+        void Initialize()
+        {
+            IsHealed = false;
+            CanRun = false;
 
-        bool IsHealed;
-        bool CanRun;
-
-        uint RunAwayTimer;
-        uint quest;
+            RunAwayTimer = 5000;
+        }
 
         public override void Reset()
         {
             CasterGUID.Clear();
 
-            IsHealed = false;
-            CanRun = false;
-
-            RunAwayTimer = 5000;
+            Initialize();
 
             me.SetStandState(UnitStandStateType.Kneel);
             // expect database to have RegenHealth=0

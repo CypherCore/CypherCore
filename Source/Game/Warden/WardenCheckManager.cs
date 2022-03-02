@@ -132,7 +132,7 @@ namespace Game
                 if (action > WardenActions.Ban)
                     Log.outError(LogFilter.Warden, "Warden check override action out of range (ID: {0}, action: {1})", checkId, action);
                 // Check if check actually exists before accessing the CheckStore vector
-                else if (checkId > CheckStore.Count)
+                else if (checkId >= CheckStore.Count)
                     Log.outError(LogFilter.Warden, "Warden check action override for non-existing check (ID: {0}, action: {1}), skipped", checkId, action);
                 else
                 {
