@@ -118,6 +118,10 @@ namespace Scripts.World.NpcSpecial
         public const uint Gnimo = 32639;
         public const uint DrixBlackwrench = 32641;
         public const uint Mojodishu = 32642;
+
+        //Training Dummy
+        public const uint AdvancedTargetDummy = 2674;
+        public const uint TargetDummy = 2673;
     }
 
     struct GameobjectIds
@@ -1349,80 +1353,44 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_training_dummy : PassiveAI
+    class npc_training_dummy : NullCreatureAI
     {
+        Dictionary<ObjectGuid, TimeSpan> _combatTimer = new();
+
         public npc_training_dummy(Creature creature) : base(creature)
         {
-            _combatCheckTimer = 500;
             uint entry = me.GetEntry();
-            if (entry == TargetDummy || entry == AdvancedTargetDummy)
-            {
-                _combatCheckTimer = 0;
+            if (entry == CreatureIds.TargetDummy || entry == CreatureIds.AdvancedTargetDummy)
                 me.DespawnOrUnsummon(TimeSpan.FromSeconds(16));
-            }
         }
 
-        public override void Reset()
+        public override void DamageTaken(Unit attacker, ref uint damage)
         {
-            _damageTimes.Clear();
-        }
+            damage = 0;
 
-        public override void EnterEvadeMode(EvadeReason why)
-        {
-            if (!_EnterEvadeMode(why))
+            if (!attacker)
                 return;
 
-            Reset();
-        }
-
-        public override void DamageTaken(Unit doneBy, ref uint damage)
-        {
-            if (doneBy != null)
-                _damageTimes[doneBy.GetGUID()] = GameTime.GetGameTime();
-            damage = 0;
+            _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(5);
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (_combatCheckTimer == 0 || !me.IsInCombat())
-                return;
-
-            if (diff < _combatCheckTimer)
+            foreach (var key in _combatTimer.Keys.ToList())
             {
-                _combatCheckTimer -= diff;
-                return;
-            }
-
-            _combatCheckTimer = 500;
-
-            long now = GameTime.GetGameTime();
-            var pveRefs = me.GetCombatManager().GetPvECombatRefs();
-            foreach (var pair in _damageTimes.ToList())
-            {
-                // If unit has not dealt damage to training dummy for 5 seconds, remove him from combat
-                if (pair.Value < now - 5)
+                _combatTimer[key] -= TimeSpan.FromMilliseconds(diff);
+                if (_combatTimer[key] <= TimeSpan.Zero)
                 {
-                    var it = pveRefs.LookupByKey(pair.Key);
+                    // The attacker has not dealt any damage to the dummy for over 5 seconds. End combat.
+                    var pveRefs = me.GetCombatManager().GetPvECombatRefs();
+                    var it = pveRefs.LookupByKey(key);
                     if (it != null)
-                    {
                         it.EndCombat();
-                        _damageTimes.Remove(pair.Key);
-                    }
+
+                    _combatTimer.Remove(key);
                 }
             }
-
-            foreach (var pair in pveRefs)
-                if (!_damageTimes.ContainsKey(pair.Key))
-                    _damageTimes[pair.Key] = now;
         }
-
-        public override void MoveInLineOfSight(Unit who) { }
-
-        Dictionary<ObjectGuid, long> _damageTimes = new();
-        uint _combatCheckTimer;
-
-        const uint AdvancedTargetDummy = 2674;
-        const uint TargetDummy = 2673;
     }
 
     [Script]
