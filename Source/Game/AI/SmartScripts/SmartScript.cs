@@ -3901,6 +3901,9 @@ namespace Game.AI
                 && !GetBaseObject())
                 return;
 
+            if (_me != null && _me.IsInEvadeMode())
+                return;
+
             InstallEvents();//before UpdateTimers
 
             foreach (var holder in _events)
