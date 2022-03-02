@@ -346,9 +346,19 @@ public class TimeTrackerSmall
         i_expiryTime = expiry;
     }
 
+    public TimeTrackerSmall(TimeSpan expiry = default)
+    {
+        i_expiryTime = (int)expiry.TotalMilliseconds;
+    }
+
     public void Update(int diff)
     {
         i_expiryTime -= diff;
+    }
+
+    public void Update(TimeSpan diff)
+    {
+        Update((int)diff.TotalMilliseconds);
     }
 
     public bool Passed()
@@ -361,10 +371,16 @@ public class TimeTrackerSmall
         i_expiryTime = interval;
     }
 
-    public int GetExpiry()
+    public void Reset(TimeSpan expiry)
     {
-        return i_expiryTime;
+        Reset((int)expiry.TotalMilliseconds);
     }
+
+    public TimeSpan GetExpiry()
+    {
+        return TimeSpan.FromMilliseconds(i_expiryTime);
+    }
+
     int i_expiryTime;
 }
 
