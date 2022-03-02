@@ -5371,8 +5371,6 @@ namespace Game.Maps
             if (i_data == null)
                 return;
 
-            i_data.Initialize();
-
             if (load)
             {
                 // @todo make a global storage for this

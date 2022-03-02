@@ -22,6 +22,7 @@ using Framework.Realm;
 using Game.Accounts;
 using Game.BattleGrounds;
 using Game.BattlePets;
+using Game.Chat;
 using Game.Entities;
 using Game.Guilds;
 using Game.Maps;
@@ -33,8 +34,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
-using Game.Chat;
 
 namespace Game
 {
@@ -603,7 +602,7 @@ namespace Game
 
             return false;
         }
-        
+
         public bool DisallowHyperlinksAndMaybeKick(string str)
         {
             if (!str.Contains('|'))
@@ -616,7 +615,7 @@ namespace Game
 
             return false;
         }
-        
+
         public void SendNotification(CypherStrings str, params object[] args)
         {
             SendNotification(Global.ObjectMgr.GetCypherString(str), args);
@@ -705,26 +704,7 @@ namespace Game
         {
             _queryProcessor.ProcessReadyCallbacks();
             _transactionCallbacks.ProcessReadyCallbacks();
-
-            if (_realmAccountLoginCallback != null && _realmAccountLoginCallback.IsCompleted && _accountLoginCallback != null && _accountLoginCallback.IsCompleted)
-            {
-                InitializeSessionCallback(_realmAccountLoginCallback.Result, _accountLoginCallback.Result);
-                _realmAccountLoginCallback = null;
-                _accountLoginCallback = null;
-            }
-
-            // HandlePlayerLoginOpcode
-            if (_charLoginCallback != null && _charLoginCallback.IsCompleted)
-            {
-                HandlePlayerLogin((LoginQueryHolder)_charLoginCallback.Result);
-                _charLoginCallback = null;
-            }
-
-            if (_charEnumCallback != null && _charEnumCallback.IsCompleted)
-            {
-                HandleCharEnum((EnumCharactersQueryHolder)_charEnumCallback.Result);
-                _charEnumCallback = null;
-            }
+            _queryHolderProcessor.ProcessReadyCallbacks();
         }
 
         TransactionCallback AddTransactionCallback(TransactionCallback callback)
@@ -732,11 +712,16 @@ namespace Game
             return _transactionCallbacks.AddCallback(callback);
         }
 
+        SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
+        {
+            return (SQLQueryHolderCallback<R>)_queryHolderProcessor.AddCallback(callback);
+        }
+
         public bool CanAccessAlliedRaces()
         {
             return GetAccountExpansion() >= Expansion.BattleForAzeroth;
         }
-        
+
         void InitWarden(BigInteger k)
         {
             if (_os == "Win")
@@ -786,11 +771,25 @@ namespace Game
             AccountInfoQueryHolder holder = new();
             holder.Initialize(GetAccountId(), GetBattlenetAccountId());
 
-            _realmAccountLoginCallback = DB.Characters.DelayQueryHolder(realmHolder);
-            _accountLoginCallback = DB.Login.DelayQueryHolder(holder);
+            AccountInfoQueryHolderPerRealm characterHolder = null;
+            AccountInfoQueryHolder loginHolder = null;
+
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(realmHolder)).AfterComplete(result =>
+            {
+                characterHolder = (AccountInfoQueryHolderPerRealm)result;
+                if (loginHolder != null && characterHolder != null)
+                    InitializeSessionCallback(loginHolder, characterHolder);
+            });
+
+            AddQueryHolderCallback(DB.Login.DelayQueryHolder(holder)).AfterComplete(result =>
+            {
+                loginHolder = (AccountInfoQueryHolder)result;
+                if (loginHolder != null && characterHolder != null)
+                    InitializeSessionCallback(loginHolder, characterHolder);
+            });
         }
 
-        void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> realmHolder, SQLQueryHolder<AccountInfoQueryLoad> holder)
+        void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
         {
             LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
@@ -898,7 +897,7 @@ namespace Game
             else
                 return (uint)movementTime;
         }
-        
+
         public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
         public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
 
@@ -922,7 +921,7 @@ namespace Game
         // Packets cooldown
         public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
         public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
-        
+
         // Battle Pets
         public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
         public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
@@ -1005,13 +1004,9 @@ namespace Game
 
         BattlePetMgr _battlePetMgr;
 
-        Task<SQLQueryHolder<AccountInfoQueryLoad>> _realmAccountLoginCallback;
-        Task<SQLQueryHolder<AccountInfoQueryLoad>> _accountLoginCallback;
-        Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
-        Task<SQLQueryHolder<EnumCharacterQueryLoad>> _charEnumCallback;
-
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
+        AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
         #endregion
     }
 

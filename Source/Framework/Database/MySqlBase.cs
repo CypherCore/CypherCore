@@ -162,13 +162,13 @@ namespace Framework.Database
             return new QueryCallback(result);
         }
 
-        public Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
+        public SQLQueryHolderCallback<R> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
             SQLQueryHolderTask<R> task = new(holder);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
             Task<SQLQueryHolder<R>> result = task.GetFuture();
             _queue.Push(task);
-            return result;
+            return new(result);
         }
 
         public void LoadPreparedStatements()

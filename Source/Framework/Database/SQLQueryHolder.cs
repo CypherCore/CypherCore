@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -73,5 +74,32 @@ namespace Framework.Database
         }
 
         public Task<SQLQueryHolder<R>> GetFuture() { return m_result.Task; }
+    }
+
+    public class SQLQueryHolderCallback<R> : ISqlCallback
+    {
+        Task<SQLQueryHolder<R>> m_future;
+        Action<SQLQueryHolder<R>> m_callback;
+
+        public SQLQueryHolderCallback(Task<SQLQueryHolder<R>> future)
+        {
+            m_future = future;
+        }
+
+        public void AfterComplete(Action<SQLQueryHolder<R>> callback)
+        {
+            m_callback = callback;
+        }
+
+        public bool InvokeIfReady()
+        {
+            if (m_future != null && m_future.Wait(0))
+            {
+                m_callback(m_future.Result);
+                return true;
+            }
+
+            return false;
+        }
     }
 }

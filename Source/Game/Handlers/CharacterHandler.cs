@@ -50,7 +50,7 @@ namespace Game
                 return;
             }
 
-            _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(result => HandleCharEnum((EnumCharactersQueryHolder)result));
         }
 
         void HandleCharEnum(EnumCharactersQueryHolder holder)
@@ -148,8 +148,8 @@ namespace Game
                 HandleCharEnum(holder);
                 return;
             }
-            
-            _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
+
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(result => HandleCharEnum((EnumCharactersQueryHolder)result));
         }
 
         void HandleCharUndeleteEnumCallback(SQLResult result)
@@ -723,7 +723,7 @@ namespace Game
 
             SendPacket(new ResumeComms(ConnectionType.Instance));
 
-            _charLoginCallback = DB.Characters.DelayQueryHolder(holder);
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(holder => HandlePlayerLogin((LoginQueryHolder)holder));
         }
 
         public void HandlePlayerLogin(LoginQueryHolder holder)
