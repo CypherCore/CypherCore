@@ -166,7 +166,7 @@ namespace Game.Chat
             // the max level of the new profession.
             ushort max = maxPureSkill != 0 ? maxPureSkill : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
 
-            if (level == 0 || level > max || max <= 0)
+            if (level == 0 || level > max)
                 return false;
 
             // If the player has the skill, we get the current skill step. If they don't have the skill, we

@@ -645,7 +645,7 @@ namespace Game
                         if (!groupGuy)
                             continue;
 
-                        if (!groupGuy.IsInMap(groupGuy))
+                        if (!groupGuy.IsInWorld)
                             return;
 
                         if (groupGuy.GetMap().IsNonRaidDungeon())
@@ -725,7 +725,7 @@ namespace Game
                         if (!groupGuy)
                             continue;
 
-                        if (!groupGuy.IsInMap(groupGuy))
+                        if (!groupGuy.IsInWorld)
                             return;
 
                         if (groupGuy.GetMap().IsRaid())

@@ -2638,7 +2638,7 @@ namespace Game.Entities
 
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
                     if (unitTarget.IsPvP())
-                        if (unit != null && unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
+                        if (unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
                             return false;
                 }
             }

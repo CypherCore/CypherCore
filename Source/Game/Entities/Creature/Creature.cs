@@ -1740,7 +1740,7 @@ namespace Game.Entities
                 if (!_IsTargetAcceptable(who))
                     return false;
 
-                if (!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
+                if (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance))
                     return false;
             }
 

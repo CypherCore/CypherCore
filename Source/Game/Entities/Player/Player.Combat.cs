@@ -619,7 +619,7 @@ namespace Game.Entities
             if (pvpInfo.EndTimer == 0 || (currTime < pvpInfo.EndTimer + 300) || pvpInfo.IsHostile)
                 return;
 
-            if (pvpInfo.EndTimer != 0 && pvpInfo.EndTimer <= currTime)
+            if (pvpInfo.EndTimer <= currTime)
             {
                 pvpInfo.EndTimer = 0;
                 RemovePlayerFlag(PlayerFlags.PVPTimer);

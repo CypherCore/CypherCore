@@ -443,7 +443,7 @@ namespace Game.Entities
             CharmType type;
             if (HasUnitState(UnitState.Possessed))
                 type = CharmType.Possess;
-            else if (charmer && charmer.IsOnVehicle(this))
+            else if (charmer.IsOnVehicle(this))
                 type = CharmType.Vehicle;
             else
                 type = CharmType.Charm;
