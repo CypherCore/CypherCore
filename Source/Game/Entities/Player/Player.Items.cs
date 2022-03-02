@@ -5930,7 +5930,7 @@ namespace Game.Entities
         public void StoreLootItem(byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
             LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem);
-            if (item == null)
+            if (item == null || item.is_looted)
             {
                 SendEquipError(InventoryResult.LootGone);
                 return;
