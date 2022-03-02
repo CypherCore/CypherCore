@@ -482,7 +482,7 @@ namespace Game.AI
                                         !_me.IsWithinLOSInMap(target) || !hasPower || _me.HasUnitFlag(UnitFlags.Silenced))
                                         allowMove = true;
 
-                                    ((SmartAI)_me.GetAI()).SetCombatMove(allowMove);
+                                    ((SmartAI)_me.GetAI()).SetCombatMove(allowMove, true);
                                 }
 
                                 _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));

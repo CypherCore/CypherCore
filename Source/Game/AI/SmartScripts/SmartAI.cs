@@ -843,7 +843,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
 
-        public void SetCombatMove(bool on)
+        public void SetCombatMove(bool on, bool stopMoving = false)
         {
             if (_canCombatMove == on)
                 return;
@@ -870,7 +870,11 @@ namespace Game.AI
                 {
                     var movement = me.GetMotionMaster().GetMovementGenerator(a => a.GetMovementGeneratorType() == MovementGeneratorType.Chase && a.Mode == MovementGeneratorMode.Default && a.Priority == MovementGeneratorPriority.Normal);
                     if (movement != null)
+                    {
                         me.GetMotionMaster().Remove(movement);
+                        if (stopMoving)
+                            me.StopMoving();
+                    }
                 }
             }
         }
