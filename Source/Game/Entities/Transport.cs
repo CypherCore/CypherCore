@@ -152,7 +152,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            int positionUpdateDelay = 200;
+            uint positionUpdateDelay = 200;
 
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
@@ -236,7 +236,7 @@ namespace Game.Entities
             }
 
             // Set position
-            _positionChangeTimer.Update((int)diff);
+            _positionChangeTimer.Update(diff);
             if (_positionChangeTimer.Passed())
             {
                 _positionChangeTimer.Reset(positionUpdateDelay);
@@ -805,7 +805,7 @@ namespace Game.Entities
 
         KeyFrame _currentFrame;
         int _nextFrame;
-        TimeTrackerSmall _positionChangeTimer = new();
+        TimeTracker _positionChangeTimer = new();
         bool _isMoving;
         bool _pendingStop;
 

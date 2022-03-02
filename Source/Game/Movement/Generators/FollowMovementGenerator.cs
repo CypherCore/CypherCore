@@ -24,13 +24,13 @@ namespace Game.Movement
 {
     public class FollowMovementGenerator : MovementGenerator
     {
-        static int CHECK_INTERVAL = 100;
+        static uint CHECK_INTERVAL = 100;
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         float _range;
         ChaseAngle _angle;
 
-        TimeTrackerSmall _checkTimer;
+        TimeTracker _checkTimer;
         PathGenerator _path;
         Position _lastTargetPosition;
 
@@ -86,7 +86,7 @@ namespace Game.Movement
                 return true;
             }
 
-            _checkTimer.Update((int)diff);
+            _checkTimer.Update(diff);
             if (_checkTimer.Passed())
             {
                 _checkTimer.Reset(CHECK_INTERVAL);

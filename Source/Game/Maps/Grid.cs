@@ -33,7 +33,7 @@ namespace Game.Maps
 
         public GridInfo(long expiry, bool unload = true)
         {
-            i_timer = new TimeTracker((int)expiry);
+            i_timer = new TimeTracker((uint)expiry);
             vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
             i_unloadActiveLockCount = 0;
             i_unloadExplicitLock = !unload;
@@ -71,12 +71,12 @@ namespace Game.Maps
 
         public void ResetTimeTracker(long interval)
         {
-            i_timer.Reset(interval);
+            i_timer.Reset((uint)interval);
         }
 
         public void UpdateTimeTracker(long diff)
         {
-            i_timer.Update(diff);
+            i_timer.Update((uint)diff);
         }
 
         public PeriodicTimer GetRelocationTimer()

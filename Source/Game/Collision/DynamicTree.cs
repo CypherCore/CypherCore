@@ -179,7 +179,7 @@ namespace Game.Collision
     {
         public DynTreeImpl()
         {
-            rebalance_timer = new TimeTrackerSmall(200);
+            rebalance_timer = new TimeTracker(200);
             unbalanced_times = 0;
         }
 
@@ -206,7 +206,7 @@ namespace Game.Collision
             if (Empty())
                 return;
 
-            rebalance_timer.Update((int)difftime);
+            rebalance_timer.Update(difftime);
             if (rebalance_timer.Passed())
             {
                 rebalance_timer.Reset(200);
@@ -215,7 +215,7 @@ namespace Game.Collision
             }
         }
 
-        TimeTrackerSmall rebalance_timer;
+        TimeTracker rebalance_timer;
         int unbalanced_times;
     }
 }

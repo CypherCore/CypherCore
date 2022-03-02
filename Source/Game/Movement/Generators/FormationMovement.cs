@@ -25,7 +25,7 @@ namespace Game.Movement
     {
         AbstractFollower _abstractFollower;
 
-        static int FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
+        static uint FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
         float _range;
         float _angle;
         uint _point1;
@@ -34,7 +34,7 @@ namespace Game.Movement
         bool _hasPredictedDestination;
 
         Position _lastLeaderPosition;
-        TimeTrackerSmall _nextMoveTimer = new();
+        TimeTracker _nextMoveTimer = new();
 
         public FormationMovementGenerator(Unit leader, float range, float angle, uint point1, uint point2)
         {
@@ -128,7 +128,7 @@ namespace Game.Movement
                 return true;
             }
 
-            _nextMoveTimer.Update((int)diff);
+            _nextMoveTimer.Update(diff);
             if (_nextMoveTimer.Passed())
             {
                 _nextMoveTimer.Reset(FORMATION_MOVEMENT_INTERVAL);

@@ -24,14 +24,14 @@ namespace Game.Movement
 {
     class ChaseMovementGenerator : MovementGenerator
     {
-        static int RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
+        static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
 
         ChaseRange? _range;
         ChaseAngle? _angle;
 
         PathGenerator _path;
         Position _lastTargetPosition;
-        TimeTrackerSmall _rangeCheckTimer;
+        TimeTracker _rangeCheckTimer;
         bool _movingTowards = true;
         bool _mutualChase = true;
 
@@ -97,7 +97,7 @@ namespace Game.Movement
             ChaseAngle? angle = mutualChase ? null : _angle;
 
             // periodically check if we're already in the expected range...
-            _rangeCheckTimer.Update((int)diff);
+            _rangeCheckTimer.Update(diff);
             if (_rangeCheckTimer.Passed())
             {
                 _rangeCheckTimer.Reset(RANGE_CHECK_INTERVAL);

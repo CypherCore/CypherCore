@@ -151,7 +151,7 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(false);
-            int traveltime = init.Launch();
+            uint traveltime = (uint)init.Launch();
             _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
         }
 

@@ -188,7 +188,7 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(walk);
-            int splineDuration = init.Launch();
+            uint splineDuration = (uint)init.Launch();
 
             --_wanderSteps;
             if (_wanderSteps != 0) // Creature has yet to do steps before pausing

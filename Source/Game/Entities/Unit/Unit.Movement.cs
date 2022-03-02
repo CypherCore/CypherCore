@@ -1708,7 +1708,7 @@ namespace Game.Entities
 
             if (MoveSpline.IsCyclic())
             {
-                splineSyncTimer.Update((int)diff);
+                splineSyncTimer.Update(diff);
                 if (splineSyncTimer.Passed())
                 {
                     splineSyncTimer.Reset(5000); // Retail value, do not change

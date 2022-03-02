@@ -241,7 +241,7 @@ namespace Game.Entities
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
         int[] m_MirrorTimer = new int[3];
 
-        TimeTrackerSmall m_groupUpdateTimer;
+        TimeTracker m_groupUpdateTimer;
 
         ulong m_GuildIdInvited;
         DeclinedName _declinedname;

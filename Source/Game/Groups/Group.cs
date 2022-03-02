@@ -48,7 +48,7 @@ namespace Game.Groups
         {
             if (_isLeaderOffline)
             {
-                _leaderOfflineTimer.Update((int)diff);
+                _leaderOfflineTimer.Update(diff);
                 if (_leaderOfflineTimer.Passed())
                 {
                     SelectNewPartyOrRaidLeader();
@@ -2752,7 +2752,7 @@ namespace Game.Groups
         uint m_maxEnchantingLevel;
         uint m_dbStoreId;
         bool _isLeaderOffline;
-        TimeTrackerSmall _leaderOfflineTimer = new();
+        TimeTracker _leaderOfflineTimer = new();
 
         // Ready Check
         bool m_readyCheckStarted;

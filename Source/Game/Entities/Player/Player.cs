@@ -612,7 +612,7 @@ namespace Game.Entities
             }
 
             // group update
-            m_groupUpdateTimer.Update((int)diff);
+            m_groupUpdateTimer.Update(diff);
             if (m_groupUpdateTimer.Passed())
             {
                 SendUpdateToOutOfRangeGroupMembers();

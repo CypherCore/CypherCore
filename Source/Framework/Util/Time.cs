@@ -339,79 +339,49 @@ public static class Time
     }
 }
 
-public class TimeTrackerSmall
+public class TimeTracker
 {
-    public TimeTrackerSmall(int expiry = 0)
+    public TimeTracker(uint expiry = 0)
     {
-        i_expiryTime = expiry;
+        _expiryTime = TimeSpan.FromMilliseconds(expiry);
     }
 
-    public TimeTrackerSmall(TimeSpan expiry = default)
+    public TimeTracker(TimeSpan expiry)
     {
-        i_expiryTime = (int)expiry.TotalMilliseconds;
+        _expiryTime = expiry;
     }
 
-    public void Update(int diff)
+    public void Update(uint diff)
     {
-        i_expiryTime -= diff;
+        Update(TimeSpan.FromMilliseconds(diff));
     }
 
     public void Update(TimeSpan diff)
     {
-        Update((int)diff.TotalMilliseconds);
+        _expiryTime -= diff;
     }
 
     public bool Passed()
     {
-        return i_expiryTime <= 0;
+        return _expiryTime <= TimeSpan.Zero;
     }
 
-    public void Reset(int interval)
+    public void Reset(uint expiry)
     {
-        i_expiryTime = interval;
+        Reset(TimeSpan.FromMilliseconds(expiry));
     }
 
     public void Reset(TimeSpan expiry)
     {
-        Reset((int)expiry.TotalMilliseconds);
+        _expiryTime = expiry;
     }
 
     public TimeSpan GetExpiry()
     {
-        return TimeSpan.FromMilliseconds(i_expiryTime);
+        return _expiryTime;
     }
 
-    int i_expiryTime;
-}
-
-public class TimeTracker
-{
-    public TimeTracker(long expiry = 0)
-    {
-        i_expiryTime = expiry;
-    }
-
-    public void Update(long diff)
-    {
-        i_expiryTime -= diff;
-    }
-
-    public bool Passed()
-    {
-        return i_expiryTime <= 0;
-    }
-
-    public void Reset(long interval)
-    {
-        i_expiryTime = interval;
-    }
-
-    public long GetExpiry()
-    {
-        return i_expiryTime;
-    }
-
-    long i_expiryTime;
+    TimeSpan _expiryTime;
 }
 
 public class IntervalTimer

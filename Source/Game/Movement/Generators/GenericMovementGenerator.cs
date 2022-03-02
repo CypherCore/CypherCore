@@ -25,7 +25,7 @@ namespace Game.Movement
         MoveSplineInit _splineInit;
         MovementGeneratorType _type;
         uint _pointId;
-        TimeTrackerSmall _duration;
+        TimeTracker _duration;
 
         uint _arrivalSpellId;
         ObjectGuid _arrivalSpellTargetGuid;
@@ -57,7 +57,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            _duration.Reset(_splineInit.Launch());
+            _duration.Reset((uint)_splineInit.Launch());
         }
 
         public override void Reset(Unit owner)
@@ -72,7 +72,7 @@ namespace Game.Movement
 
             // Cyclic splines never expire, so update the duration only if it's not cyclic
             if (!owner.MoveSpline.IsCyclic())
-                _duration.Update((int)diff);
+                _duration.Update(diff);
 
             if (_duration.Passed() || owner.MoveSpline.Finalized())
             {

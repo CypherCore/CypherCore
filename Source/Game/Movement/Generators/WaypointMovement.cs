@@ -27,7 +27,7 @@ namespace Game.Movement
     {
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true)
         {
-            _nextMoveTime = new TimeTrackerSmall(0);
+            _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
             _repeating = repeating;
             _loadedFromDB = true;
@@ -40,7 +40,7 @@ namespace Game.Movement
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true)
         {
-            _nextMoveTime = new TimeTrackerSmall(0);
+            _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
             _path = path;
 
@@ -59,7 +59,7 @@ namespace Game.Movement
                     return;
 
                 AddFlag(MovementGeneratorFlags.TimedPaused);
-                _nextMoveTime.Reset((int)timer);
+                _nextMoveTime.Reset(timer);
                 RemoveFlag(MovementGeneratorFlags.Paused);
             }
             else
@@ -73,7 +73,7 @@ namespace Game.Movement
         public override void Resume(uint overrideTimer = 0)
         {
             if (overrideTimer != 0)
-                _nextMoveTime.Reset((int)overrideTimer);
+                _nextMoveTime.Reset(overrideTimer);
 
             if (_nextMoveTime.Passed())
                 _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
@@ -251,7 +251,7 @@ namespace Game.Movement
             if (waypoint.delay != 0)
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
-                _nextMoveTime.Reset((int)waypoint.delay);
+                _nextMoveTime.Reset(waypoint.delay);
             }
 
             if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
@@ -398,7 +398,7 @@ namespace Game.Movement
         
         bool UpdateTimer(uint diff)
         {
-            _nextMoveTime.Update((int)diff);
+            _nextMoveTime.Update(diff);
             if (_nextMoveTime.Passed())
             {
                 _nextMoveTime.Reset(0);
@@ -411,7 +411,7 @@ namespace Game.Movement
 
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
 
-        TimeTrackerSmall _nextMoveTime;
+        TimeTracker _nextMoveTime;
         uint _pathId;
         bool _repeating;
         bool _loadedFromDB;
