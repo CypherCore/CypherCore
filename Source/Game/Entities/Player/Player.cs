@@ -2751,7 +2751,6 @@ namespace Game.Entities
                     m_nextMailDelivereTime = deliver_time;
             }
         }
-        public bool IsMailsLoaded() { return m_mailsLoaded; }
         public void AddMItem(Item it)
         {
             mMitems[it.GetGUID().GetCounter()] = it;

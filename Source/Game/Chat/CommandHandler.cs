@@ -680,7 +680,7 @@ namespace Game.Chat
             if (target != null)
                 target_ac_sec = target.GetSecurity();
             else if (target_account != 0)
-                target_ac_sec = Global.AccountMgr.GetSecurity(target_account);
+                target_ac_sec = Global.AccountMgr.GetSecurity(target_account, (int)Global.WorldMgr.GetRealmId().Index);
             else
                 return true;                                        // caller must report error for (target == NULL && target_account == 0)
 

@@ -1180,47 +1180,36 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
-        void _LoadMailInit(SQLResult resultUnread, SQLResult resultDelivery)
-        {
-            if (!resultUnread.IsEmpty())
-                unReadMails = (byte)resultUnread.Read<ulong>(0);
 
-            if (!resultDelivery.IsEmpty())
-                m_nextMailDelivereTime = resultDelivery.Read<uint>(0);
-        }
-        public void _LoadMail()
+        public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult)
         {
             m_mail.Clear();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-
             Dictionary<uint, Mail> mailById = new();
 
-            if (!result.IsEmpty())
+            if (!mailsResult.IsEmpty())
             {
                 do
                 {
                     Mail m = new();
 
-                    m.messageID = result.Read<uint>(0);
-                    m.messageType = (MailMessageType)result.Read<byte>(1);
-                    m.sender = result.Read<uint>(2);
-                    m.receiver = result.Read<uint>(3);
-                    m.subject = result.Read<string>(4);
-                    m.body = result.Read<string>(5);
-                    m.expire_time = result.Read<long>(6);
-                    m.deliver_time = result.Read<long>(7);
-                    m.money = result.Read<ulong>(8);
-                    m.COD = result.Read<ulong>(9);
-                    m.checkMask = (MailCheckMask)result.Read<byte>(10);
-                    m.stationery = (MailStationery)result.Read<byte>(11);
-                    m.mailTemplateId = result.Read<ushort>(12);
+                    m.messageID = mailsResult.Read<uint>(0);
+                    m.messageType = (MailMessageType)mailsResult.Read<byte>(1);
+                    m.sender = mailsResult.Read<uint>(2);
+                    m.receiver = mailsResult.Read<uint>(3);
+                    m.subject = mailsResult.Read<string>(4);
+                    m.body = mailsResult.Read<string>(5);
+                    m.expire_time = mailsResult.Read<long>(6);
+                    m.deliver_time = mailsResult.Read<long>(7);
+                    m.money = mailsResult.Read<ulong>(8);
+                    m.COD = mailsResult.Read<ulong>(9);
+                    m.checkMask = (MailCheckMask)mailsResult.Read<byte>(10);
+                    m.stationery = (MailStationery)mailsResult.Read<byte>(11);
+                    m.mailTemplateId = mailsResult.Read<ushort>(12);
 
                     if (m.mailTemplateId != 0 && !CliDB.MailTemplateStorage.ContainsKey(m.mailTemplateId))
                     {
-                        Log.outError(LogFilter.Player, "Player:_LoadMail - Mail ({0}) have not existed MailTemplateId ({1}), remove at load", m.messageID, m.mailTemplateId);
+                        Log.outError(LogFilter.Player, $"Player:_LoadMail - Mail ({m.messageID}) have not existed MailTemplateId ({m.mailTemplateId}), remove at load");
                         m.mailTemplateId = 0;
                     }
 
@@ -1229,47 +1218,23 @@ namespace Game.Entities
                     m_mail.Add(m);
                     mailById[m.messageID] = m;
                 }
-                while (result.NextRow());
+                while (mailsResult.NextRow());
             }
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            result = DB.Characters.Query(stmt);
-
-            if (!result.IsEmpty())
+            if (!mailItemsResult.IsEmpty())
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                SQLResult artifactResult = DB.Characters.Query(stmt);
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                SQLResult azeriteResult = DB.Characters.Query(stmt);
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
-
                 Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
+                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteItemResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
                 do
                 {
-                    uint mailId = result.Read<uint>(52);
-                    _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], result.GetFields(), additionalData.LookupByKey(result.Read<ulong>(0)));
+                    uint mailId = mailItemsResult.Read<uint>(52);
+                    _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields(), additionalData.LookupByKey(mailItemsResult.Read<ulong>(0)));
                 }
-                while (result.NextRow());
+                while (mailItemsResult.NextRow());
             }
 
-            m_mailsLoaded = true;
+            UpdateNextMailTimeAndUnreads();
         }
 
         static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
@@ -2199,9 +2164,6 @@ namespace Game.Entities
         }
         public void _SaveMail(SQLTransaction trans)
         {
-            if (!m_mailsLoaded)
-                return;
-
             PreparedStatement stmt;
 
             foreach (var m in m_mail)
@@ -3174,7 +3136,13 @@ namespace Game.Entities
             _LoadActions(holder.GetResult(PlayerLoginQueryLoad.Actions));
 
             // unread mails and next delivery time, actual mails not loaded
-            _LoadMailInit(holder.GetResult(PlayerLoginQueryLoad.MailCount), holder.GetResult(PlayerLoginQueryLoad.MailDate));
+            _LoadMail(holder.GetResult(PlayerLoginQueryLoad.Mails),
+                holder.GetResult(PlayerLoginQueryLoad.MailItems),
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsArtifact),
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzerite),
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteMilestonePower),
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteUnlockedEssence),
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteEmpowered));
 
             m_social = Global.SocialMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.SocialList), GetGUID());
 

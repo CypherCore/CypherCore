@@ -127,7 +127,6 @@ namespace Game.Entities
         Dictionary<ulong, Item> mMitems = new();
         public byte unReadMails;
         long m_nextMailDelivereTime;
-        public bool m_mailsLoaded;
         public bool m_mailsUpdated;
 
         //Pets

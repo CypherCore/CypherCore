@@ -568,10 +568,6 @@ namespace Game
 
             Player player = GetPlayer();
 
-            //load players mails, and mailed items
-            if (!player.m_mailsLoaded)
-                player._LoadMail();
-
             var mails = player.GetMails();
 
             MailListResult response = new();
@@ -657,9 +653,6 @@ namespace Game
         void HandleQueryNextMailTime(MailQueryNextMailTime packet)
         {
             MailQueryNextTimeResult result = new();
-
-            if (!GetPlayer().m_mailsLoaded)
-                GetPlayer()._LoadMail();
 
             if (GetPlayer().unReadMails > 0)
             {

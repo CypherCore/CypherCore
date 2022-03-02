@@ -2693,14 +2693,33 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Actions, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_MAILCOUNT);
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL);
             stmt.AddValue(0, lowGuid);
-            stmt.AddValue(1, GameTime.GetGameTime());
-            SetQuery(PlayerLoginQueryLoad.MailCount, stmt);
+            SetQuery(PlayerLoginQueryLoad.Mails, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_MAILDATE);
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
             stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailDate, stmt);
+            SetQuery(PlayerLoginQueryLoad.MailItems, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsArtifact, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzerite, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteMilestonePower, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteUnlockedEssence, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteEmpowered, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_SOCIALLIST);
             stmt.AddValue(0, lowGuid);
@@ -2884,8 +2903,13 @@ namespace Game
         AzeriteUnlockedEssences,
         AzeriteEmpowered,
         Actions,
-        MailCount,
-        MailDate,
+        Mails,
+        MailItems,
+        MailItemsArtifact,
+        MailItemsAzerite,
+        MailItemsAzeriteMilestonePower,
+        MailItemsAzeriteUnlockedEssence,
+        MailItemsAzeriteEmpowered,
         SocialList,
         HomeBind,
         SpellCooldowns,

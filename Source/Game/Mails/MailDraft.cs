@@ -159,9 +159,9 @@ namespace Game.Mails
             // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
             else
                 if (m_COD != 0)
-                    expire_delay = 3 * Time.Day;
-                else
-                    expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
+                expire_delay = 3 * Time.Day;
+            else
+                expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
 
             long expire_time = deliver_time + expire_delay;
 
@@ -198,38 +198,34 @@ namespace Game.Mails
             {
                 pReceiver.AddNewMailDeliverTime(deliver_time);
 
-                if (pReceiver.IsMailsLoaded())
+
+                Mail m = new();
+                m.messageID = mailId;
+                m.mailTemplateId = GetMailTemplateId();
+                m.subject = GetSubject();
+                m.body = GetBody();
+                m.money = GetMoney();
+                m.COD = GetCOD();
+
+                foreach (var item in m_items.Values)
+                    m.AddItem(item.GetGUID().GetCounter(), item.GetEntry());
+
+                m.messageType = sender.GetMailMessageType();
+                m.stationery = sender.GetStationery();
+                m.sender = sender.GetSenderId();
+                m.receiver = receiver.GetPlayerGUIDLow();
+                m.expire_time = expire_time;
+                m.deliver_time = deliver_time;
+                m.checkMask = checkMask;
+                m.state = MailState.Unchanged;
+
+                pReceiver.AddMail(m);                           // to insert new mail to beginning of maillist
+
+                if (!m_items.Empty())
                 {
-                    Mail m = new();
-                    m.messageID = mailId;
-                    m.mailTemplateId = GetMailTemplateId();
-                    m.subject = GetSubject();
-                    m.body = GetBody();
-                    m.money = GetMoney();
-                    m.COD = GetCOD();
-
                     foreach (var item in m_items.Values)
-                        m.AddItem(item.GetGUID().GetCounter(), item.GetEntry());
-
-                    m.messageType = sender.GetMailMessageType();
-                    m.stationery = sender.GetStationery();
-                    m.sender = sender.GetSenderId();
-                    m.receiver = receiver.GetPlayerGUIDLow();
-                    m.expire_time = expire_time;
-                    m.deliver_time = deliver_time;
-                    m.checkMask = checkMask;
-                    m.state = MailState.Unchanged;
-
-                    pReceiver.AddMail(m);                           // to insert new mail to beginning of maillist
-
-                    if (!m_items.Empty())
-                    {
-                        foreach (var item in m_items.Values)
-                            pReceiver.AddMItem(item);
-                    }
+                        pReceiver.AddMItem(item);
                 }
-                else if (!m_items.Empty())
-                    DeleteIncludedItems(null);
             }
             else if (!m_items.Empty())
                 DeleteIncludedItems(null);

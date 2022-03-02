@@ -9440,27 +9440,21 @@ namespace Game
             uint returnedCount = 0;
             do
             {
+                ulong receiver = result.Read<ulong>(3);
+                if (serverUp && Global.ObjAccessor.FindConnectedPlayer(ObjectGuid.Create(HighGuid.Player, receiver)))
+                    continue;
+
                 Mail m = new();
                 m.messageID = result.Read<uint>(0);
                 m.messageType = (MailMessageType)result.Read<byte>(1);
                 m.sender = result.Read<uint>(2);
-                m.receiver = result.Read<ulong>(3);
+                m.receiver = receiver;
                 bool has_items = result.Read<bool>(4);
                 m.expire_time = result.Read<long>(5);
                 m.deliver_time = 0;
                 m.COD = result.Read<ulong>(6);
                 m.checkMask = (MailCheckMask)result.Read<byte>(7);
                 m.mailTemplateId = result.Read<ushort>(8);
-
-                Player player = null;
-                if (serverUp)
-                    player = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, m.receiver));
-
-                if (player && player.m_mailsLoaded)
-                {                                                   // this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
-                    // his in mailbox and he has already listed his mails)
-                    continue;
-                }
 
                 // Delete or return mail
                 if (has_items)
