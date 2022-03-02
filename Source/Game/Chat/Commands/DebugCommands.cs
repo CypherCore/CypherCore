@@ -757,13 +757,31 @@ namespace Game.Chat
 
             return true;
         }
-        
+
         [Command("objectcount", RBACPermissions.CommandDebug, true)]
         static bool HandleDebugObjectCountCommand(CommandHandler handler, uint? mapId)
         {
             void HandleDebugObjectCountMap(Map map)
             {
                 handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()}");
+
+                Dictionary<uint, uint> creatureIds = new();
+                foreach (var p in map.GetObjectsStore())
+                {
+                    if (p.Value.IsCreature())
+                    {
+                        if (!creatureIds.ContainsKey(p.Value.GetEntry()))
+                            creatureIds[p.Value.GetEntry()] = 0;
+
+                        creatureIds[p.Value.GetEntry()]++;
+                    }
+                }
+
+                var orderedCreatures = creatureIds.OrderBy(p => p.Value).Where(p => p.Value > 5);
+
+                handler.SendSysMessage("Top Creatures count:");
+                foreach (var p in orderedCreatures)
+                    handler.SendSysMessage($"Entry: {p.Key} Count: {p.Value}");
             }
 
             if (mapId.HasValue)
