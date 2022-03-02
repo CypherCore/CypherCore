@@ -9987,9 +9987,14 @@ namespace Game
         }
         public void InitializeQueriesData(QueryDataGroup mask)
         {
+            uint oldMSTime = Time.GetMSTime();
+
             // cache disabled
             if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Query data caching is disabled. Skipped initialization.");
                 return;
+            }
 
             // Initialize Query data for creatures
             if (mask.HasAnyFlag(QueryDataGroup.Creatures))
@@ -10010,6 +10015,8 @@ namespace Game
             if (mask.HasAnyFlag(QueryDataGroup.POIs))
                 foreach (var poiPair in _questPOIStorage)
                     poiPair.Value.InitializeQueryData();
+
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized query cache data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadJumpChargeParams()
         {
