@@ -259,7 +259,7 @@ namespace Game.AI
         }
 
         //Spawns a creature relative to me
-        public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, uint despawntime)
+        public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, TimeSpan despawntime)
         {
             return me.SummonCreature(entry, me.GetPositionX() + offsetX, me.GetPositionY() + offsetY, me.GetPositionZ() + offsetZ, angle, type, despawntime);
         }
@@ -639,8 +639,6 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
-        public void _DespawnAtEvade(uint delayToRespawn = 30, Creature who = null) { _DespawnAtEvade(TimeSpan.FromSeconds(delayToRespawn), who); }
-
         public void _DespawnAtEvade(TimeSpan delayToRespawn, Creature who = null)
         {
             if (delayToRespawn < TimeSpan.FromSeconds(2))
@@ -660,7 +658,7 @@ namespace Game.AI
                 return;
             }
 
-            who.DespawnOrUnsummon(0, delayToRespawn);
+            who.DespawnOrUnsummon(TimeSpan.Zero, delayToRespawn);
 
             if (instance != null && who == me)
                 instance.SetBossState(_bossId, EncounterState.Fail);

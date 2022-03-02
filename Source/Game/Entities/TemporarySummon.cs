@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -254,7 +255,7 @@ namespace Game.Entities
             {
                 ForcedUnsummonDelayEvent pEvent = new(this);
 
-                m_Events.AddEvent(pEvent, m_Events.CalculateTime(msTime));
+                m_Events.AddEvent(pEvent, m_Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
                 return;
             }
 

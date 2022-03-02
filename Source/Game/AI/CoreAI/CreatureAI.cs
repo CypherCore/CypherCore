@@ -322,7 +322,7 @@ namespace Game.AI
             return true;
         }
 
-        public CypherStrings VisualizeBoundary(int duration, Unit owner = null, bool fill = false)
+        public CypherStrings VisualizeBoundary(TimeSpan duration, Unit owner = null, bool fill = false)
         {
             if (!owner)
                 return 0;
@@ -380,7 +380,7 @@ namespace Game.AI
                 if (fill || hasOutOfBoundsNeighbor)
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);
-                    TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, (uint)(duration * Time.InMilliseconds));
+                    TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, duration);
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
@@ -417,18 +417,18 @@ namespace Game.AI
             }
         }
 
-        public Creature DoSummon(uint entry, Position pos, uint despawnTime = 30000, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummon(uint entry, Position pos, TimeSpan despawnTime, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
-        public Creature DoSummon(uint entry, WorldObject obj, float radius = 5.0f, uint despawnTime = 30000, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummon(uint entry, WorldObject obj, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
-        public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, uint despawnTime = 30000, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
             pos.posZ += flightZ;

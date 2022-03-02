@@ -279,7 +279,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
-            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, summonTime);
+            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
             Cypher.Assert(accessory);
 
             if (minion)
@@ -310,7 +310,7 @@ namespace Game.Entities
             // exits the vehicle will dismiss. That's why the actual adding the passenger to the vehicle is scheduled
             // asynchronously, so it can be cancelled easily in case the vehicle is uninstalled meanwhile.
             VehicleJoinEvent e = new(this, unit);
-            unit.m_Events.AddEvent(e, unit.m_Events.CalculateTime(0));
+            unit.m_Events.AddEvent(e, unit.m_Events.CalculateTime(TimeSpan.Zero));
 
             KeyValuePair<sbyte, VehicleSeat> seat = new();
             if (seatId < 0) // no specific seat requirement

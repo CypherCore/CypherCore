@@ -2573,7 +2573,7 @@ namespace Scripts.Spells.Items
             {
                 if (target.IsDead() && !target.IsPet())
                 {
-                    GetCaster().SummonGameObject(ObjectIds.ImprisonedDoomguard, target, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), (uint)(target.GetRespawnTime() - GameTime.GetGameTime()));
+                    GetCaster().SummonGameObject(ObjectIds.ImprisonedDoomguard, target, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(target.GetRespawnTime() - GameTime.GetGameTime()));
                     target.DespawnOrUnsummon();
                 }
             }

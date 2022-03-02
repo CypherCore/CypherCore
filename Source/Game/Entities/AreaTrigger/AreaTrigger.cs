@@ -1035,7 +1035,7 @@ namespace Game.Entities
                 Player player = caster.ToPlayer();
                 if (player)
                     if (player.IsDebugAreaTriggers)
-                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, GetTimeToTarget());
+                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(GetTimeToTarget()));
             }
         }
 

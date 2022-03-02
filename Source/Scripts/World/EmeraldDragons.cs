@@ -299,7 +299,7 @@ namespace Scripts.World.EmeraldDragons
             if (spellInfo.Id == SpellIds.DrawSpirit && target.IsPlayer())
             {
                 Position targetPos = target.GetPosition();
-                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, 50000);
+                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(50));
             }
         }
     }
@@ -326,7 +326,7 @@ namespace Scripts.World.EmeraldDragons
             if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
             {
                 me.CastSpell((Unit)null, SpellIds.DarkOffering, false);
-                me.DespawnOrUnsummon(1000);
+                me.DespawnOrUnsummon(TimeSpan.FromSeconds(1));
             }
         }
     }

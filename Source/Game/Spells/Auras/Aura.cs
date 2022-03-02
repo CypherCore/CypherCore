@@ -896,7 +896,7 @@ namespace Game.Spells
                 return;
 
             m_dropEvent = new ChargeDropEvent(this, removeMode);
-            owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(delay));
+            owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
         }
 
         public void SetStackAmount(byte stackAmount)

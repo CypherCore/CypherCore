@@ -58,7 +58,7 @@ namespace Framework.Dynamic
 
                 // Reschedule non deletable events to be checked at
                 // the next update tick
-                AddEvent(Event, CalculateTime(1), false);
+                AddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
             }
         }
 
@@ -87,38 +87,40 @@ namespace Framework.Dynamic
                 m_events.Clear();
         }
 
-        public void AddEvent(BasicEvent Event, ulong e_time, bool set_addtime = true)
+        public void AddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
         {
             if (set_addtime)
                 Event.m_addTime = m_time;
 
-            Event.m_execTime = e_time;
-            m_events.Add(e_time, Event);
+            Event.m_execTime = (ulong)e_time.TotalMilliseconds;
+            m_events.Add((ulong)e_time.TotalMilliseconds, Event);
         }
 
-        public void AddEvent(Action action, ulong e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
+        public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
+        
+        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime(offset)); }
 
-        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime((ulong)offset.TotalMilliseconds)); }
+        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2) { AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2))); }
 
         public void AddEventAtOffset(Action action, TimeSpan offset) { AddEventAtOffset(new LambdaBasicEvent(action), offset); }
 
-        public void ModifyEventTime(BasicEvent Event, ulong newTime)
+        public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
         {
             foreach (var pair in m_events)
             {
                 if (pair.Value != Event)
                     continue;
 
-                Event.m_execTime = newTime;
+                Event.m_execTime = (ulong)newTime.TotalMilliseconds;
                 m_events.Remove(pair);
-                m_events.Add(newTime, Event);
+                m_events.Add((ulong)newTime.TotalMilliseconds, Event);
                 break;
             }
         }
 
-        public ulong CalculateTime(ulong t_offset)
+        public TimeSpan CalculateTime(TimeSpan t_offset)
         {
-            return (m_time + t_offset);
+            return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
         public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }

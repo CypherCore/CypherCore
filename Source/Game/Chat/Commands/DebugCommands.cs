@@ -93,10 +93,12 @@ namespace Game.Chat
             string fill_str = args.NextString();
             string duration_str = args.NextString();
 
-            if (!int.TryParse(duration_str, out int duration))
-                duration = -1;
-            if (duration <= 0 || duration >= 30 * Time.Minute) // arbitary upper limit
-                duration = 3 * Time.Minute;
+            if (!int.TryParse(duration_str, out int tempDuration))
+                tempDuration = 0;
+
+            TimeSpan duration = TimeSpan.FromSeconds(tempDuration);
+            if (duration <= TimeSpan.Zero || duration >= TimeSpan.FromMinutes(30)) // arbitary upper limit
+                duration = TimeSpan.FromMinutes(3);
 
             bool doFill = fill_str.ToLower().Equals("fill");
 

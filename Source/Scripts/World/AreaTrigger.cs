@@ -21,6 +21,7 @@ using Game.Entities;
 using Game.Scripting;
 using System.Collections.Generic;
 using Game.AI;
+using System;
 
 namespace Scripts.World.Areatriggers
 {
@@ -210,7 +211,7 @@ namespace Scripts.World.Areatriggers
             if (!player.IsDead() && player.GetQuestStatus(QuestIds.ScentOfLarkorwi) == QuestStatus.Incomplete)
             {
                 if (!player.FindNearestCreature(CreatureIds.LarkorwiMate, 15))
-                    player.SummonCreature(CreatureIds.LarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, 100000);
+                    player.SummonCreature(CreatureIds.LarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
             }
 
             return false;
@@ -257,7 +258,7 @@ namespace Scripts.World.Areatriggers
             {
                 if (!player.FindNearestCreature(CreatureIds.LurkingShark, 20.0f))
                 {
-                    Creature shark = player.SummonCreature(CreatureIds.LurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, 100000);
+                    Creature shark = player.SummonCreature(CreatureIds.LurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
                     if (shark)
                         shark.GetAI().AttackStart(player);
 
@@ -361,7 +362,7 @@ namespace Scripts.World.Areatriggers
                     break;
             }
 
-            player.SummonCreature(CreatureIds.Spotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, 5000);
+            player.SummonCreature(CreatureIds.Spotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
             player.AddAura(SpellIds.A52Neuralyzer, player);
             _triggerTimes[areaTrigger.Id] = GameTime.GetGameTime();
             return false;
@@ -393,7 +394,7 @@ namespace Scripts.World.Areatriggers
             if (stormforgedEradictor)
                 return false;
 
-            stormforgedMonitor = player.SummonCreature(CreatureIds.StormforgedMonitor, Misc.StormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, 60000);
+            stormforgedMonitor = player.SummonCreature(CreatureIds.StormforgedMonitor, Misc.StormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(60));
             if (stormforgedMonitor)
             {
                 stormforgedMonitorGUID = stormforgedMonitor.GetGUID();
@@ -403,7 +404,7 @@ namespace Scripts.World.Areatriggers
                 stormforgedMonitor.GetMotionMaster().MovePath(CreatureIds.StormforgedMonitor * 100, false);
             }
 
-            stormforgedEradictor = player.SummonCreature(CreatureIds.StormforgedEradictor, Misc.StormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, 60000);
+            stormforgedEradictor = player.SummonCreature(CreatureIds.StormforgedEradictor, Misc.StormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(60));
             if (stormforgedEradictor)
             {
                 stormforgedEradictorGUID = stormforgedEradictor.GetGUID();

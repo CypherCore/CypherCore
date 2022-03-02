@@ -1959,7 +1959,7 @@ namespace Game.Entities
         {
             if (timeMSToDespawn != 0)
             {
-                m_Events.AddEvent(new ForcedDespawnDelayEvent(this, forceRespawnTimer), m_Events.CalculateTime(timeMSToDespawn));
+                m_Events.AddEvent(new ForcedDespawnDelayEvent(this, forceRespawnTimer), m_Events.CalculateTime(TimeSpan.FromMilliseconds(timeMSToDespawn)));
                 return;
             }
 
@@ -2008,15 +2008,13 @@ namespace Game.Entities
             }
         }
 
-        public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
-
-        public void DespawnOrUnsummon(uint msTimeToDespawn = 0, TimeSpan forceRespawnTimer = default)
+        public void DespawnOrUnsummon(TimeSpan msTimeToDespawn = default, TimeSpan forceRespawnTimer = default)
         {
             TempSummon summon = ToTempSummon();
             if (summon != null)
-                summon.UnSummon(msTimeToDespawn);
+                summon.UnSummon((uint)msTimeToDespawn.TotalMilliseconds);
             else
-                ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
+                ForcedDespawn((uint)msTimeToDespawn.TotalMilliseconds, forceRespawnTimer);
         }
 
         public void LoadTemplateImmunities()
@@ -2167,7 +2165,7 @@ namespace Game.Entities
                             e.AddAssistant(assistList.First().GetGUID());
                             assistList.Remove(assistList.First());
                         }
-                        m_Events.AddEvent(e, m_Events.CalculateTime(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay)));
+                        m_Events.AddEvent(e, m_Events.CalculateTime(TimeSpan.FromMilliseconds(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay))));
                     }
                 }
             }
@@ -3098,7 +3096,7 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
         }
-        bool IsCombatDisallowed()
+        public bool IsCombatDisallowed()
         {
             return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.NoCombat);
         }
@@ -3404,7 +3402,7 @@ namespace Game.Entities
         }
         public override bool Execute(ulong e_time, uint p_time)
         {
-            m_owner.DespawnOrUnsummon(0, m_respawnTimer);    // since we are here, we are not TempSummon as object type cannot change during runtime
+            m_owner.DespawnOrUnsummon(TimeSpan.Zero, m_respawnTimer);    // since we are here, we are not TempSummon as object type cannot change during runtime
             return true;
         }
 

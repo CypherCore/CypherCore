@@ -324,7 +324,7 @@ namespace Game.Spells
         public void RecalculateDelayMomentForDst()
         {
             m_delayMoment = CalculateDelayMomentForDst(0.0f);
-            m_caster.m_Events.ModifyEventTime(_spellEvent, GetDelayStart() + m_delayMoment);
+            m_caster.m_Events.ModifyEventTime(_spellEvent, TimeSpan.FromMilliseconds(GetDelayStart() + m_delayMoment));
         }
 
         void SelectEffectImplicitTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, ref uint processedEffectMask)
@@ -1830,7 +1830,7 @@ namespace Game.Spells
                 targetInfo.ReflectResult = unitCaster.SpellHitResult(unitCaster, m_spellInfo, false); // can't reflect twice
 
                 // Proc spell reflect aura when missile hits the original target
-                target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(targetInfo.TimeDelay));
+                target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(TimeSpan.FromMilliseconds(targetInfo.TimeDelay)));
 
                 // Increase time interval for reflected spells by 1.5
                 targetInfo.TimeDelay += targetInfo.TimeDelay >> 1;
@@ -2374,7 +2374,7 @@ namespace Game.Spells
 
             // create and add update event for this spell
             _spellEvent = new SpellEvent(this);
-            m_caster.m_Events.AddEvent(_spellEvent, m_caster.m_Events.CalculateTime(1));
+            m_caster.m_Events.AddEvent(_spellEvent, m_caster.m_Events.CalculateTime(TimeSpan.FromMilliseconds(1)));
 
             // check disables
             if (Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, m_caster))
@@ -8797,7 +8797,7 @@ namespace Game.Spells
                         if (n_offset != 0)
                         {
                             // re-add us to the queue
-                            m_Spell.GetCaster().m_Events.AddEvent(this, m_Spell.GetDelayStart() + n_offset, false);
+                            m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(m_Spell.GetDelayStart() + n_offset), false);
                             return false;                       // event not complete
                         }
                         // event complete
@@ -8815,7 +8815,7 @@ namespace Game.Spells
                             Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
 
                         // re-plan the event for the delay moment
-                        m_Spell.GetCaster().m_Events.AddEvent(this, e_time + m_Spell.GetDelayMoment(), false);
+                        m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(e_time + m_Spell.GetDelayMoment()), false);
                         return false;                               // event not complete
                     }
                     break;
@@ -8829,7 +8829,7 @@ namespace Game.Spells
             }
 
             // spell processing not complete, plan event on the next update interval
-            m_Spell.GetCaster().m_Events.AddEvent(this, e_time + 1, false);
+            m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(e_time + 1), false);
             return false;                                           // event not complete
         }
 

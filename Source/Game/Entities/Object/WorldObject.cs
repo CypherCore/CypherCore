@@ -1415,7 +1415,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, ObjectGuid privateObjectOwner = default)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
                 GetClosePoint(out x, out y, out z, GetCombatReach());
@@ -1426,12 +1426,12 @@ namespace Game.Entities
             return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, 0, privateObjectOwner);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, this, spellId, vehId, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(entry, pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1442,12 +1442,12 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, despawnTime, this, spellId, vehId, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1458,7 +1458,7 @@ namespace Game.Entities
             return null;
         }
 
-        public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, uint respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
+        public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (x == 0 && y == 0 && z == 0)
             {
@@ -1470,7 +1470,7 @@ namespace Game.Entities
             return SummonGameObject(entry, pos, rotation, respawnTime, summonType);
         }
 
-        public GameObject SummonGameObject(uint entry, Position pos, Quaternion rotation, uint respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
+        public GameObject SummonGameObject(uint entry, Position pos, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (!IsInWorld)
                 return null;
@@ -1489,7 +1489,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(go, this);
 
-            go.SetRespawnTime((int)respawnTime);
+            go.SetRespawnTime((int)respawnTime.TotalSeconds);
             if (IsPlayer() || (IsCreature() && summonType == GameObjectSummonType.TimedOrCorpseDespawn)) //not sure how to handle this
                 ToUnit().AddGameObject(go);
             else
@@ -1499,10 +1499,10 @@ namespace Game.Entities
             return go;
         }
 
-        public Creature SummonTrigger(float x, float y, float z, float ang, uint duration, CreatureAI AI = null)
+        public Creature SummonTrigger(float x, float y, float z, float ang, TimeSpan despawnTime, CreatureAI AI = null)
         {
-            TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
-            Creature summon = SummonCreature(SharedConst.WorldTrigger, x, y, z, ang, summonType, duration);
+            TempSummonType summonType = (despawnTime == TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+            Creature summon = SummonCreature(SharedConst.WorldTrigger, x, y, z, ang, summonType, despawnTime);
             if (summon == null)
                 return null;
 
@@ -1535,7 +1535,7 @@ namespace Game.Entities
 
             foreach (var tempSummonData in data)
             {
-                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
+                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, TimeSpan.FromMilliseconds(tempSummonData.time));
                 if (summon)
                     list.Add(summon);
             }

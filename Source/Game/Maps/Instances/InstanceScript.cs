@@ -548,7 +548,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
         }
 
-        public void DoRespawnGameObject(ObjectGuid guid, uint timeToDespawn)
+        public void DoRespawnGameObject(ObjectGuid guid, TimeSpan timeToDespawn)
         {
             GameObject go = instance.GetGameObject(guid);
             if (go)
@@ -569,7 +569,7 @@ namespace Game.Maps
                 if (go.IsSpawned())
                     return;
 
-                go.SetRespawnTime((int)timeToDespawn);
+                go.SetRespawnTime((int)timeToDespawn.TotalSeconds);
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject failed");

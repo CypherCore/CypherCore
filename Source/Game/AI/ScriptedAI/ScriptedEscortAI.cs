@@ -29,7 +29,7 @@ namespace Game.AI
     {
         public EscortAI(Creature creature) : base(creature)
         {
-            _pauseTimer = 2500;
+            _pauseTimer = TimeSpan.FromSeconds(2.5);
             _playerCheckTimer = 1000;
             _maxPlayerDistance = 100;
             _activeAttacker = true;
@@ -118,7 +118,7 @@ namespace Game.AI
                 SetCombatMovement(true);
 
             //add a small delay before going to first waypoint, normal in near all cases
-            _pauseTimer = 2000;
+            _pauseTimer = TimeSpan.FromSeconds(2);
 
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
@@ -182,11 +182,11 @@ namespace Game.AI
             //Waypoint Updating
             if (HasEscortState(EscortState.Escorting) && !me.IsEngaged() && !HasEscortState(EscortState.Returning))
             {
-                if (_pauseTimer <= diff)
+                if (_pauseTimer.TotalMilliseconds <= diff)
                 {
                     if (!HasEscortState(EscortState.Paused))
                     {
-                        _pauseTimer = 0;
+                        _pauseTimer = TimeSpan.Zero;
 
                         if (_ended)
                         {
@@ -231,7 +231,7 @@ namespace Game.AI
                     }
                 }
                 else
-                    _pauseTimer -= diff;
+                    _pauseTimer -= TimeSpan.FromMilliseconds(diff);
             }
 
 
@@ -252,7 +252,7 @@ namespace Game.AI
                         if (_instantRespawn)
                         {
                             if (!isEscort)
-                                me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(1));
+                                me.DespawnOrUnsummon(TimeSpan.Zero, TimeSpan.FromSeconds(1));
                             else
                                 me.GetMap().Respawn(SpawnObjectType.Creature, me.GetSpawnId());
                         }
@@ -288,8 +288,8 @@ namespace Game.AI
             //Combat start position reached, continue waypoint movement
             if (moveType == MovementGeneratorType.Point)
             {
-                if (_pauseTimer == 0)
-                    _pauseTimer = 2000;
+                if (_pauseTimer == TimeSpan.Zero)
+                    _pauseTimer = TimeSpan.FromSeconds(2);
 
                 if (Id == EscortPointIds.LastPoint)
                 {
@@ -317,12 +317,12 @@ namespace Game.AI
                 {
                     _started = false;
                     _ended = true;
-                    _pauseTimer = 1000;
+                    _pauseTimer = TimeSpan.FromSeconds(1);
                 }
             }
         }
 
-        public void AddWaypoint(uint id, float x, float y, float z, float orientation = 0, uint waitTime = 0)
+        public void AddWaypoint(uint id, float x, float y, float z, float orientation, TimeSpan waitTime)
         {
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
@@ -334,7 +334,7 @@ namespace Game.AI
             waypoint.z = z;
             waypoint.orientation = orientation;
             waypoint.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            waypoint.delay = waitTime;
+            waypoint.delay = (uint)waitTime.TotalMilliseconds;
             waypoint.eventId = 0;
             waypoint.eventChance = 100;
             _path.nodes.Add(waypoint);
@@ -456,7 +456,7 @@ namespace Game.AI
             }
         }
 
-        void SetPauseTimer(uint Timer) { _pauseTimer = Timer; }
+        public void SetPauseTimer(TimeSpan timer) { _pauseTimer = timer; }
 
         public bool HasEscortState(EscortState escortState) { return (_escortState & escortState) != 0; }
         public override bool IsEscorted() { return !_playerGUID.IsEmpty(); }
@@ -476,7 +476,7 @@ namespace Game.AI
         void RemoveEscortState(EscortState escortState) { _escortState &= ~escortState; }
 
         ObjectGuid _playerGUID;
-        uint _pauseTimer;
+        TimeSpan _pauseTimer;
         uint _playerCheckTimer;
         EscortState _escortState;
         float _maxPlayerDistance;

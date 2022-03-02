@@ -203,12 +203,24 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Delays all events. If delay is greater than or equal internal timer, delay will be 0.
+        /// Delays all events.
         /// </summary>
         /// <param name="delay">Amount of delay as TimeSpan type.</param>
         public void DelayEvents(TimeSpan delay)
         {
-            _time = (uint)(delay.TotalMilliseconds < _time ? _time - delay.TotalMilliseconds : 0);
+            if (Empty())
+                return;
+
+            MultiMap<uint, uint> delayed = new();
+
+            foreach (var pair in _eventMap.KeyValueList)
+            {
+                delayed.Add(pair.Key + (uint)delay.TotalMilliseconds, pair.Value);
+                _eventMap.Remove(pair.Key, pair.Value);
+            }
+
+            foreach (var del in delayed)
+                _eventMap.Add(del);
         }
 
         /// <summary>
@@ -269,17 +281,17 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        /// Returns time in milliseconds until next event.
+        /// Returns time as TimeSpan type until next event.
         /// </summary>
         /// <param name="eventId">Id of the event.</param>
-        /// <returns>Time of next event.</returns>
-        public uint GetTimeUntilEvent(uint eventId)
+        /// <returns>Time of next event. If event is not scheduled returns <see cref="TimeSpan.MaxValue"/></returns>
+        public TimeSpan GetTimeUntilEvent(uint eventId)
         {
             foreach (var pair in _eventMap)
                 if (eventId == (pair.Value & 0x0000FFFF))
-                    return pair.Key - _time;
+                    return TimeSpan.FromMilliseconds(pair.Key - _time);
 
-            return uint.MaxValue;
+            return TimeSpan.MaxValue;
         }
 
         /// <summary>

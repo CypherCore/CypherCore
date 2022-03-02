@@ -1185,7 +1185,7 @@ namespace Game.AI
                         y += e.Target.y;
                         z += e.Target.z;
                         o += e.Target.o;
-                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration, privateObjectOwner);
+                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
                         if (summon != null)
                             if (e.Action.summonCreature.attackInvoker != 0)
                                 summon.GetAI().AttackStart(target.ToUnit());
@@ -1194,7 +1194,7 @@ namespace Game.AI
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
-                    Creature summon1 = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration, privateObjectOwner);
+                    Creature summon1 = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
                     if (summon1 != null)
                         if (unit != null && e.Action.summonCreature.attackInvoker != 0)
                             summon1.GetAI().AttackStart(unit);
@@ -1210,14 +1210,14 @@ namespace Game.AI
                     {
                         Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
                         Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
-                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
+                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
                     Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
-                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
+                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
                     break;
                 }
                 case SmartActions.KillUnit:
@@ -2473,7 +2473,7 @@ namespace Game.AI
                     void doCreatePersonalClone(Position position, Unit owner)
                     {
                         ObjectGuid privateObjectOwner = owner.GetGUID();
-                        Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, e.Action.becomePersonalClone.duration, 0, 0, privateObjectOwner);
+                        Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, TimeSpan.FromMilliseconds(e.Action.becomePersonalClone.duration), 0, 0, privateObjectOwner);
                         if (summon != null)
                             if (IsSmart(summon))
                                 ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, owner, e.EventId + 1);

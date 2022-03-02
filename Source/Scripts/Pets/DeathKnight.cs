@@ -100,7 +100,7 @@ namespace Scripts.Pets
                 me.GetMotionMaster().MovePoint(0, x, y, z);
 
                 // Despawn as soon as possible
-                me.DespawnOrUnsummon(4 * Time.InMilliseconds);
+                me.DespawnOrUnsummon(TimeSpan.FromSeconds(4));
             }
 
 

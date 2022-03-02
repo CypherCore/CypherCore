@@ -464,7 +464,7 @@ namespace Scripts.World.NpcSpecial
         {
             Creature guard = ObjectAccessor.GetCreature(me, _myGuard);
 
-            if (guard == null && (guard = me.SummonCreature(_spawn.otherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, 300000)))
+            if (guard == null && (guard = me.SummonCreature(_spawn.otherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5))))
                 _myGuard = guard.GetGUID();
 
             return guard;
@@ -951,7 +951,7 @@ namespace Scripts.World.NpcSpecial
 
                     var index = RandomHelper.IRand(0, Coordinates.Count - 1);
 
-                    Creature Patient = me.SummonCreature(patientEntry, Coordinates[index], TempSummonType.TimedDespawnOutOfCombat, 5000);
+                    Creature Patient = me.SummonCreature(patientEntry, Coordinates[index], TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
                     if (Patient)
                     {
                         //303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
@@ -1727,7 +1727,7 @@ namespace Scripts.World.NpcSpecial
                             case 1:
                             case 2:
                             case 3:
-                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, 20000);
+                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(20));
                                 if (minion)
                                     minion.GetAI().AttackStart(me.SelectNearestPlayer(20.0f));
                                 break;
@@ -1742,7 +1742,7 @@ namespace Scripts.World.NpcSpecial
 
                 float displacement = 0.7f;
                 for (byte i = 0; i < 4; i++)
-                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), 1);
+                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(1));
             }
             else
                 //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
@@ -1894,7 +1894,7 @@ namespace Scripts.World.NpcSpecial
                 return target;
 
             me.HandleEmoteCommand(Emote.OneshotRude);
-            me.DespawnOrUnsummon(3 * Time.InMilliseconds);
+            me.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
             return null;
         }
 
@@ -1972,7 +1972,7 @@ namespace Scripts.World.NpcSpecial
                         }
                         me.UpdateEntry(CreatureIds.ExultingWindUpTrainWrecker);
                         me.SetEmoteState(Emote.OneshotDance);
-                        me.DespawnOrUnsummon(5 * Time.InMilliseconds);
+                        me.DespawnOrUnsummon(TimeSpan.FromSeconds(5));
                         _nextAction = 0;
                         break;
                     default:
@@ -2137,7 +2137,7 @@ namespace Scripts.World.NpcSpecial
             init.MoveTo(x, y, z, false);
             init.SetFacing(o);
             who.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
-            who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(1000));
+            who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
             Creature creature = who.ToCreature();
             if (creature)
                 creature.SetDisplayFromModel(0);

@@ -58,10 +58,10 @@ namespace Game.Combat
             if (a.HasUnitState(UnitState.InFlight) || b.HasUnitState(UnitState.InFlight))
                 return false;
             Creature aCreature = a.ToCreature();
-            if (aCreature?.IsCombatDisallowed())
+            if (aCreature != null && aCreature.IsCombatDisallowed())
                 return false;
             Creature bCreature = b.ToCreature();
-            if (bCreature?.IsCombatDisallowed())
+            if (bCreature != null && bCreature.IsCombatDisallowed())
                 return false;
             if (a.IsFriendlyTo(b) || b.IsFriendlyTo(a))
                 return false;

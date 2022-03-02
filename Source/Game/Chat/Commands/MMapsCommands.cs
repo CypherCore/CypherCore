@@ -20,6 +20,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Movement;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat
@@ -84,7 +85,7 @@ namespace Game.Chat
                 handler.SendSysMessage("Enable GM mode to see the path points.");
 
             for (uint i = 0; i < pointPath.Length; ++i)
-                player.SummonCreature(1, pointPath[i].X, pointPath[i].Y, pointPath[i].Z, 0, TempSummonType.TimedDespawn, 9000);
+                player.SummonCreature(1, pointPath[i].X, pointPath[i].Y, pointPath[i].Z, 0, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(9));
 
             return true;
         }

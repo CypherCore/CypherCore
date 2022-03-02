@@ -81,7 +81,7 @@ namespace Game.Entities
                         return;
 
                     player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
-                    m_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, 5 * Time.Minute * Time.InMilliseconds);
+                    m_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
                     if (m_CinematicObject)
                     {
                         m_CinematicObject.SetActive(true);

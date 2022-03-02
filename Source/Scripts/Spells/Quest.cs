@@ -285,7 +285,7 @@ namespace Scripts.Spells.Quest
     struct Misc
     {
         //Quests6124 6129
-        public const uint DespawnTime = 30000;
+        public static TimeSpan DespawnTime = TimeSpan.FromSeconds(30);
 
         //HodirsHelm
         public const byte Say1 = 1;
@@ -341,7 +341,7 @@ namespace Scripts.Spells.Quest
                         creatureTarget.EngageWithTarget(GetCaster());
 
                     if (_despawnTime != 0)
-                        creatureTarget.DespawnOrUnsummon(_despawnTime);
+                        creatureTarget.DespawnOrUnsummon(TimeSpan.FromMilliseconds(_despawnTime));
                 }
             }
         }
@@ -903,7 +903,7 @@ namespace Scripts.Spells.Quest
                 {
                     caster.KilledMonsterCredit(CreatureIds.VillagerKillCredit);
                     target.CastSpell(target, SpellIds.Flames, true);
-                    target.DespawnOrUnsummon(60000);
+                    target.DespawnOrUnsummon(TimeSpan.FromSeconds(60));
                 }
             }
         }
@@ -931,7 +931,7 @@ namespace Scripts.Spells.Quest
             {
                 caster.KilledMonsterCredit(CreatureIds.ShardKillCredit);
                 target.CastSpell(target, (uint)GetEffectValue(), true);
-                target.DespawnOrUnsummon(2000);
+                target.DespawnOrUnsummon(TimeSpan.FromSeconds(2));
             }
         }
 
@@ -1729,7 +1729,7 @@ namespace Scripts.Spells.Quest
 
         void HandleScript(uint effIndex)
         {
-            GetCaster().ToCreature().DespawnOrUnsummon(2 * Time.InMilliseconds);
+            GetCaster().ToCreature().DespawnOrUnsummon(TimeSpan.FromSeconds(2));
         }
 
         public override void Register()

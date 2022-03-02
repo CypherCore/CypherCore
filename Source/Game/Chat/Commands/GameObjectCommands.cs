@@ -645,10 +645,10 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
 
                 uint spawntime = args.NextUInt32();
-                uint spawntm = 300;
+                TimeSpan spawntm = TimeSpan.FromSeconds(300);
 
                 if (spawntime != 0)
-                    spawntm = spawntime;
+                    spawntm = TimeSpan.FromSeconds(spawntime);
 
                 Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
                 if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)

@@ -4738,7 +4738,7 @@ namespace Game.Maps
                                 float z = step.script.TempSummonCreature.PosZ;
                                 float o = step.script.TempSummonCreature.Orientation;
 
-                                if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, step.script.TempSummonCreature.DespawnDelay) == null)
+                                if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
                                     Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.script.GetDebugInfo(), step.script.TempSummonCreature.CreatureEntry);
                             }
                         }
@@ -4884,7 +4884,7 @@ namespace Game.Maps
                         // First try with target or source creature, then with target or source gameobject
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
                         if (cSource != null)
-                            cSource.DespawnOrUnsummon(step.script.DespawnSelf.DespawnDelay);
+                            cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
                         else
                         {
                             GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);

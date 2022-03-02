@@ -313,7 +313,7 @@ namespace Scripts.World.GameObjects
             {
                 if (player.GetQuestStatus(QuestIds.TheFirstTrial) == QuestStatus.Incomplete)
                 {
-                    Creature Stillblade = player.SummonCreature(CreatureIds.Stillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, 60000);
+                    Creature Stillblade = player.SummonCreature(CreatureIds.Stillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, TimeSpan.FromMinutes(1));
                     if (Stillblade)
                         Stillblade.GetAI().AttackStart(player);
                 }
@@ -350,7 +350,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % (CreatureIds.PrisonEntry.Length / sizeof(uint)));
 
-            Creature creature = player.SummonCreature(CreatureIds.PrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
+            Creature creature = player.SummonCreature(CreatureIds.PrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
             if (creature)
             {
                 if (!creature.IsHostileTo(player))
@@ -404,7 +404,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % CreatureIds.StasisEntry.Length / sizeof(uint));
 
-            player.SummonCreature(CreatureIds.StasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
+            player.SummonCreature(CreatureIds.StasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
 
             return false;
         }
@@ -418,7 +418,7 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
-                me.SummonCreature(CreatureIds.Goggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, 300000);
+                me.SummonCreature(CreatureIds.Goggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5));
 
             return false;
         }
@@ -434,7 +434,7 @@ namespace Scripts.World.GameObjects
             //implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
             //player.CastSpell(player, SpellSummonRizzle, false);
 
-            Creature creature = player.SummonCreature(CreatureIds.Rizzle, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.DeadDespawn, 0);
+            Creature creature = player.SummonCreature(CreatureIds.Rizzle, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.DeadDespawn);
             if (creature)
                 creature.CastSpell(player, SpellIds.Blackjack, false);
 
@@ -543,7 +543,7 @@ namespace Scripts.World.GameObjects
         {
             if (player.GetQuestStatus(QuestIds.PrisonBreak) == QuestStatus.Incomplete)
             {
-                me.SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TempSummonType.TimedDespawn, 60000);
+                me.SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
                 player.CastSpell(player, SpellIds.ArcanePrisonerKillCredit, true);
                 return true;
             }
@@ -559,7 +559,7 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
-                player.SummonCreature(CreatureIds.Zelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, 30000);
+                player.SummonCreature(CreatureIds.Zelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
 
             return true;
         }
@@ -691,8 +691,8 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             player.SendLoot(me.GetGUID(), LootType.Corpse);
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
+            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMinutes(1));
+            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMinutes(1));
             return true;
         }
     }
@@ -724,7 +724,7 @@ namespace Scripts.World.GameObjects
                 foreach (Creature creature in childrenList)
                 {
                     player.KilledMonsterCredit(CreatureIds.CaptiveChild, creature.GetGUID());
-                    creature.DespawnOrUnsummon(5000);
+                    creature.DespawnOrUnsummon(TimeSpan.FromSeconds(5));
                     creature.GetMotionMaster().MovePoint(1, me.GetPositionX() + 5, me.GetPositionY(), me.GetPositionZ());
                     creature.GetAI().Talk(TextIds.SayFree0);
                     creature.GetMotionMaster().Clear();
