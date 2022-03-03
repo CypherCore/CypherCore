@@ -420,6 +420,8 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
             }
 
+            SetIgnoringCombat(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoCombat));
+
             LoadTemplateRoot();
             InitializeMovementFlags();
 
@@ -3095,10 +3097,6 @@ namespace Game.Entities
         public bool IsGuard()
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
-        }
-        public bool IsCombatDisallowed()
-        {
-            return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.NoCombat);
         }
         
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }

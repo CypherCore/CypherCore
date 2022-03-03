@@ -57,11 +57,8 @@ namespace Game.Combat
                 return false;
             if (a.HasUnitState(UnitState.InFlight) || b.HasUnitState(UnitState.InFlight))
                 return false;
-            Creature aCreature = a.ToCreature();
-            if (aCreature != null && aCreature.IsCombatDisallowed())
-                return false;
-            Creature bCreature = b.ToCreature();
-            if (bCreature != null && bCreature.IsCombatDisallowed())
+            // ... both units must not be ignoring combat
+            if (a.IsIgnoringCombat() || b.IsIgnoringCombat())
                 return false;
             if (a.IsFriendlyTo(b) || b.IsFriendlyTo(a))
                 return false;

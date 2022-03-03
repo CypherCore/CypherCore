@@ -1420,7 +1420,7 @@ namespace Game.Entities
         }
 
         public bool IsWithinMeleeRange(Unit obj) { return IsWithinMeleeRangeAt(GetPosition(), obj); }
-        
+
         public bool IsWithinMeleeRangeAt(Position pos, Unit obj)
         {
             if (!obj || !IsInMap(obj) || !IsInPhase(obj))
@@ -1491,5 +1491,15 @@ namespace Game.Entities
             UpdateAttackTimeField(att);
             m_attackTimer[(int)att] = (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att] * remainingTimePct);
         }
+
+        /// <summary>
+        /// returns if the unit is ignoring any combat interaction
+        /// </summary>
+        public bool IsIgnoringCombat() { return _isIgnoringCombat; }
+
+        /// <summary>
+        /// enables/disables combat interaction of this unit.
+        /// </summary>
+        public void SetIgnoringCombat(bool apply) { _isIgnoringCombat = apply; }
     }
 }
