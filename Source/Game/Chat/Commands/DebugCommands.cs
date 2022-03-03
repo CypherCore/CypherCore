@@ -36,12 +36,13 @@ namespace Game.Chat
     class DebugCommands
     {
         [Command("anim", RBACPermissions.CommandDebugAnim)]
-        static bool HandleDebugAnimCommand(CommandHandler handler, uint emoteId)
+        static bool HandleDebugAnimCommand(CommandHandler handler, Emote emote)
         {
             Unit unit = handler.GetSelectedUnit();
             if (unit)
-                unit.HandleEmoteCommand((Emote)emoteId);
+                unit.HandleEmoteCommand(emote);
 
+            handler.SendSysMessage($"Playing emote {emote}");
             return true;
         }
 
