@@ -66,6 +66,9 @@ namespace Game.Chat
             if (Hyperlink.TryConsume(out value, type, args))
                 return value;
 
+            if (type.IsEnum)
+                type = type.GetEnumUnderlyingType();
+
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.SByte:

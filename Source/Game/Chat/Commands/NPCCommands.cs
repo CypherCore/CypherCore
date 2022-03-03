@@ -1122,13 +1122,8 @@ namespace Game.Chat
             }
 
             [Command("flag", RBACPermissions.CommandNpcSetFlag)]
-            static bool HandleNpcSetFlagCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetFlagCommand(CommandHandler handler, NPCFlags npcFlags, NPCFlags2 npcFlags2)
             {
-                if (args.Empty())
-                    return false;
-
-                ulong npcFlags = args.NextUInt64();
-
                 Creature creature = handler.GetSelectedCreature();
                 if (!creature)
                 {
@@ -1136,11 +1131,11 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
-                creature.SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
+                creature.SetNpcFlags(npcFlags);
+                creature.SetNpcFlags2(npcFlags2);
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
-                stmt.AddValue(0, npcFlags);
+                stmt.AddValue(0, (ulong)npcFlags | ((ulong)npcFlags2 << 32));
                 stmt.AddValue(1, creature.GetEntry());
                 DB.World.Execute(stmt);
 
