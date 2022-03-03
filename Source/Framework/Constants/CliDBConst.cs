@@ -1465,7 +1465,11 @@ namespace Framework.Constants
         StateWasit04 = 986,
         OneshotBarsweepStand = 987,
         TorghastTalkingHeadMawCastSound = 989,
-        TorghastTalkingHeadMawCastSound2 = 990
+        TorghastTalkingHeadMawCastSound2 = 990,
+        OneshotStandVar0 = 991,
+        OneshotFlycustomspell01 = 992,
+        OneshotSpelleffectDecay = 993,
+        CreatureSpecial = 994,
     }
 
     public enum GlyphSlotType

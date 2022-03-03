@@ -2817,7 +2817,7 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            GetCaster().HandleEmoteCommand(EmoteArray[RandomHelper.URand(0, 2)]);
+            GetCaster().HandleEmoteCommand(EmoteArray.SelectRandom());
         }
 
         public override void Register()
