@@ -2353,26 +2353,24 @@ namespace Game.Entities
             // Hook for OnDamage Event
             Global.ScriptMgr.OnDamage(attacker, victim, ref damage);
 
-            if (victim.IsTypeId(TypeId.Player))
+            // Signal to pets that their owner was attacked - except when DOT.
+            if (attacker != victim && damagetype != DamageEffectType.DOT)
             {
-                // Signal to pets that their owner was attacked - except when DOT.
-                if (attacker != victim && damagetype != DamageEffectType.DOT)
+                foreach (Unit controlled in victim.m_Controlled)
                 {
-                    foreach (Unit controlled in victim.m_Controlled)
+                    Creature cControlled = controlled.ToCreature();
+                    if (cControlled != null)
                     {
-                        Creature cControlled = controlled.ToCreature();
-                        if (cControlled != null)
-                        {
-                            CreatureAI controlledAI = cControlled.GetAI();
-                            if (controlledAI != null)
-                                controlledAI.OwnerAttackedBy(attacker);
-                        }
+                        CreatureAI controlledAI = cControlled.GetAI();
+                        if (controlledAI != null)
+                            controlledAI.OwnerAttackedBy(attacker);
                     }
                 }
-
-                if (victim.ToPlayer().GetCommandStatus(PlayerCommandStates.God))
-                    return 0;
             }
+            
+            Player player = victim.ToPlayer();
+            if (player != null && player.GetCommandStatus(PlayerCommandStates.God))
+                return 0;
 
             if (damagetype != DamageEffectType.NoDamage)
             {
