@@ -451,41 +451,14 @@ namespace Game.AI
                                 if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
                                     _me.InterruptNonMeleeSpells(false);
 
+                                SpellCastResult result = _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
+                                bool spellCastFailed = (result != SpellCastResult.SpellCastOk && result != SpellCastResult.SpellInProgress);
+
                                 if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.CombatMove))
-                                {
-                                    // If cast flag SMARTCAST_COMBAT_MOVE is set combat movement will not be allowed unless target is outside spell range, out of mana, or LOS.
-                                    bool allowMove = false;
-                                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, _me.GetMap().GetDifficultyID());
-                                    var costs = spellInfo.CalcPowerCost(_me, spellInfo.GetSchoolMask());
-                                    bool hasPower = true;
-                                    foreach (var cost in costs)
-                                    {
-                                        if (cost.Power == PowerType.Health)
-                                        {
-                                            if (_me.GetHealth() <= (uint)cost.Amount)
-                                            {
-                                                hasPower = false;
-                                                break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (_me.GetPower(cost.Power) < cost.Amount)
-                                            {
-                                                hasPower = false;
-                                                break;
-                                            }
-                                        }
-                                    }
+                                    ((SmartAI)_me.GetAI()).SetCombatMove(spellCastFailed, true);
 
-                                    if (_me.GetDistance(target) > spellInfo.GetMaxRange(true) || _me.GetDistance(target) < spellInfo.GetMinRange(true) ||
-                                        !_me.IsWithinLOSInMap(target) || !hasPower || _me.HasUnitFlag(UnitFlags.Silenced))
-                                        allowMove = true;
-
-                                    ((SmartAI)_me.GetAI()).SetCombatMove(allowMove, true);
-                                }
-
-                                _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
+                                if (spellCastFailed)
+                                    RecalcTimer(e, 500, 500);
                             }
                             else if (_go)
                                 _go.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
