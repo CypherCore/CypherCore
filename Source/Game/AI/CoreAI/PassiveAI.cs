@@ -68,13 +68,6 @@ namespace Game.AI
             me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }
 
-        public override void KilledUnit(Unit victim)
-        {
-            // We killed a creature, disable victim's loot
-            if (victim.IsTypeId(TypeId.Unit))
-                me.RemoveDynamicFlag(UnitDynFlags.Lootable);
-        }
-
         public override void MoveInLineOfSight(Unit who) { }
 
         public override void JustEnteredCombat(Unit who)
