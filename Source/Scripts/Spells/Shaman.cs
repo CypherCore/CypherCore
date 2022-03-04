@@ -24,6 +24,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Scripts.Spells.Shaman
 {
@@ -916,7 +917,7 @@ namespace Scripts.Spells.Shaman
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.PathOfFlamesTalent, SpellIds.PathOfFlamesSpread);
+            return ValidateSpellInfo(SpellIds.PathOfFlamesTalent, SpellIds.PathOfFlamesSpread, SpellIds.LavaSurge);
         }
 
         void HandleScript(uint effIndex)
@@ -929,9 +930,28 @@ namespace Scripts.Spells.Shaman
             }
         }
 
+        void EnsureLavaSurgeCanBeImmediatelyConsumed()
+        {
+            Unit caster = GetCaster();
+
+            Aura lavaSurge = caster.GetAura(SpellIds.LavaSurge);
+            if (lavaSurge != null)
+            {
+                if (!GetSpell().m_appliedMods.Contains(lavaSurge))
+                {
+                    uint chargeCategoryId = GetSpellInfo().ChargeCategoryId;
+
+                    // Ensure we have at least 1 usable charge after cast to allow next cast immediately
+                    if (!caster.GetSpellHistory().HasCharge(chargeCategoryId))
+                        caster.GetSpellHistory().RestoreCharge(chargeCategoryId);
+                }
+            }
+        }
+
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TriggerMissile));
+            AfterCast.Add(new CastHandler(EnsureLavaSurgeCanBeImmediatelyConsumed));
         }
     }
 
@@ -961,13 +981,23 @@ namespace Scripts.Spells.Shaman
             OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
         }
     }
-    
+
     [Script] // 77756 - Lava Surge
     class spell_sha_lava_surge : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.LavaSurge);
+            return ValidateSpellInfo(SpellIds.LavaSurge, SpellIds.IgneousPotential);
+        }
+
+        bool CheckProcChance(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            int procChance = aurEff.GetAmount();
+            AuraEffect igneousPotential = GetTarget().GetAuraEffect(SpellIds.IgneousPotential, 0);
+            if (igneousPotential != null)
+                procChance += igneousPotential.GetAmount();
+
+            return RandomHelper.randChance(procChance);
         }
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -978,6 +1008,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProcChance, 0, AuraType.Dummy));
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
