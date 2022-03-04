@@ -617,7 +617,7 @@ namespace Game
                 GossipMenuItems gMenuItem = new();
 
                 gMenuItem.MenuId = result.Read<uint>(0);
-                gMenuItem.OptionIndex = result.Read<uint>(1);
+                gMenuItem.OptionId = result.Read<uint>(1);
                 gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
@@ -632,7 +632,7 @@ namespace Game
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
                     gMenuItem.OptionIcon = GossipOptionIcon.None;
                 }
 
@@ -640,17 +640,17 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.OptionType >= GossipOption.Max)
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown option id {gMenuItem.OptionType}. Option will not be used");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has unknown option id {gMenuItem.OptionType}. Option will not be used");
 
                 if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
                     gMenuItem.ActionPoiId = 0;
                 }
 
@@ -658,7 +658,7 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
@@ -3238,7 +3238,7 @@ namespace Game
                         var gossipMenuItems = GetGossipMenuItemsMapBounds(gossipMenuId);
                         var gossipOptionItr = gossipMenuItems.Find(entry =>
                         {
-                            return entry.OptionIndex == gossipOptionIndex;
+                            return entry.OptionId == gossipOptionIndex;
                         });
 
                         if (gossipOptionItr == null)

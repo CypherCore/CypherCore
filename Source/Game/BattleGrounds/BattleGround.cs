@@ -1558,6 +1558,22 @@ namespace Game.BattleGrounds
             return false;
         }
 
+        bool RemoveObjectFromWorld(uint type)
+        {
+            if (BgObjects[type].IsEmpty())
+                return true;
+
+            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
+            if (obj != null)
+            {
+                obj.RemoveFromWorld();
+                BgObjects[type].Clear();
+                return true;
+            }
+            Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
+            return false;
+        }
+
         public bool AddSpiritGuide(int type, float x, float y, float z, float o, int teamIndex)
         {
             uint entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);

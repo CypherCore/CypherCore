@@ -29,22 +29,22 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
-        public uint AddMenuItem(int optionIndex, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
+        public uint AddMenuItem(int menuItemId, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
             // Find a free new id - script case
-            if (optionIndex == -1)
+            if (menuItemId == -1)
             {
-                optionIndex = 0;
+                menuItemId = 0;
                 if (!_menuItems.Empty())
                 {
                     foreach (var item in _menuItems)
                     {
-                        if (item.Key > optionIndex)
+                        if (item.Key > menuItemId)
                             break;
 
-                        optionIndex = (int)item.Key + 1;
+                        menuItemId = (int)item.Key + 1;
                     }
                 }
             }
@@ -59,18 +59,18 @@ namespace Game.Misc
             menuItem.BoxMessage = boxMessage;
             menuItem.BoxMoney = boxMoney;
 
-            _menuItems[(uint)optionIndex] = menuItem;
-            return (uint)optionIndex;
+            _menuItems[(uint)menuItemId] = menuItem;
+            return (uint)menuItemId;
         }
 
         /// <summary>
         /// Adds a localized gossip menu item from db by menu id and menu item id.
         /// </summary>
         /// <param name="menuId">menuId Gossip menu id.</param>
-        /// <param name="optionIndex">menuItemId Gossip menu item id.</param>
+        /// <param name="menuItemId">menuItemId Gossip menu item id.</param>
         /// <param name="sender">sender Identifier of the current menu.</param>
         /// <param name="action">action Custom action given to OnGossipHello.</param>
-        public void AddMenuItem(uint menuId, uint optionIndex, uint sender, uint action)
+        public void AddMenuItem(uint menuId, uint menuItemId, uint sender, uint action)
         {
             // Find items for given menu id.
             var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
@@ -82,7 +82,7 @@ namespace Game.Misc
             foreach (var item in bounds)
             {
                 // Find the one with the given menu item id.
-                if (item.OptionIndex != optionIndex)
+                if (item.OptionId != menuItemId)
                     continue;
 
                 // Store texts for localization.
@@ -108,7 +108,7 @@ namespace Game.Misc
                     if (optionBroadcastText == null)
                     {
                         // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, optionIndex);
+                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
                         if (gossipMenuLocale != null)
                             ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, GetLocale(), ref strOptionText);
                     }
@@ -116,7 +116,7 @@ namespace Game.Misc
                     if (boxBroadcastText == null)
                     {
                         // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, optionIndex);
+                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
                         if (gossipMenuLocale != null)
                             ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
                     }
@@ -124,19 +124,19 @@ namespace Game.Misc
                 }
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                uint newOptionIndex = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
-                AddGossipMenuItemData(newOptionIndex, item.ActionMenuId, item.ActionPoiId);
+                uint newOptionId = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
+                AddGossipMenuItemData(newOptionId, item.ActionMenuId, item.ActionPoiId);
             }
         }
 
-        public void AddGossipMenuItemData(uint optionIndex, uint gossipActionMenuId, uint gossipActionPoi)
+        public void AddGossipMenuItemData(uint menuItemId, uint gossipActionMenuId, uint gossipActionPoi)
         {
             GossipMenuItemData itemData = new();
 
             itemData.GossipActionMenuId = gossipActionMenuId;
             itemData.GossipActionPoi = gossipActionPoi;
 
-            _menuItemData[optionIndex] = itemData;
+            _menuItemData[menuItemId] = itemData;
         }
 
         public uint GetMenuItemSender(uint menuItemId)
@@ -728,7 +728,7 @@ namespace Game.Misc
     public class GossipMenuItems
     {
         public uint MenuId;
-        public uint OptionIndex;
+        public uint OptionId;
         public GossipOptionIcon OptionIcon;
         public string OptionText;
         public uint OptionBroadcastTextId;

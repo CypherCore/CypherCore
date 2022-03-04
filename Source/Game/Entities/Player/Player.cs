@@ -2368,7 +2368,7 @@ namespace Game.Entities
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2376,14 +2376,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId);
                 }
             }
         }
@@ -2411,7 +2411,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
-        public void OnGossipSelect(WorldObject source, uint optionIndex, uint menuId)
+        public void OnGossipSelect(WorldObject source, uint gossipListId, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
 
@@ -2419,7 +2419,7 @@ namespace Game.Entities
             if (menuId != gossipMenu.GetMenuId())
                 return;
 
-            GossipMenuItem item = gossipMenu.GetItem(optionIndex);
+            GossipMenuItem item = gossipMenu.GetItem(gossipListId);
             if (item == null)
                 return;
 
@@ -2435,7 +2435,7 @@ namespace Game.Entities
                 }
             }
 
-            GossipMenuItemData menuItemData = gossipMenu.GetItemData(optionIndex);
+            GossipMenuItemData menuItemData = gossipMenu.GetItemData(gossipListId);
             if (menuItemData == null)
                 return;
 
@@ -2463,7 +2463,7 @@ namespace Game.Entities
                         break;
                     }
                 case GossipOption.Outdoorpvp:
-                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), optionIndex);
+                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), gossipListId);
                     break;
                 case GossipOption.Spirithealer:
                     if (IsDead())
@@ -2481,7 +2481,7 @@ namespace Game.Entities
                     GetSession().SendStablePet(guid);
                     break;
                 case GossipOption.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, optionIndex));
+                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, gossipListId));
                     break;
                 case GossipOption.Learndualspec:
                     break;

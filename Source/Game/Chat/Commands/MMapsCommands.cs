@@ -147,7 +147,7 @@ namespace Game.Chat
                     if (tile != null)
                     {
                         handler.SendSysMessage("Dt     [{0:D2},{1:D2}]", tile.header.x, tile.header.y);
-                        return false;
+                        return true;
                     }
                 }
 
