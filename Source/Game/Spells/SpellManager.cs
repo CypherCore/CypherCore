@@ -4338,6 +4338,12 @@ namespace Game.Entities
                 });
             });
 
+            // Earthquake
+            ApplySpellFix(new [] { 61882 }, spellInfo =>
+            {
+                spellInfo.NegativeEffects[2] = true;
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell

@@ -2002,7 +2002,7 @@ namespace Game.Spells
         {
             return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << (int)effect)) != 0);
         }
-        
+
         public SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
         {
             if (unit == null)
@@ -7685,22 +7685,15 @@ namespace Game.Spells
             return m_delayMoment;
         }
 
-        public WorldObject GetCaster()
-        {
-            return m_caster;
-        }
-        public Unit GetOriginalCaster()
-        {
-            return m_originalCaster;
-        }
-        public SpellInfo GetSpellInfo()
-        {
-            return m_spellInfo;
-        }
-        public List<SpellPowerCost> GetPowerCost()
-        {
-            return m_powerCost;
-        }
+        public WorldObject GetCaster() { return m_caster; }
+
+        public ObjectGuid GetOriginalCasterGUID() { return m_originalCasterGUID; }
+
+        public Unit GetOriginalCaster() { return m_originalCaster; }
+
+        public SpellInfo GetSpellInfo() { return m_spellInfo; }
+
+        public List<SpellPowerCost> GetPowerCost() { return m_powerCost; }
 
         bool IsDelayableNoMore()
         {

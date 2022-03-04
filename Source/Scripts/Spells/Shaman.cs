@@ -441,6 +441,92 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    // 61882 - Earthquake
+    [Script] //  8382 - AreaTriggerId
+    class areatrigger_sha_earthquake : AreaTriggerAI
+    {
+        TimeSpan _refreshTimer;
+        TimeSpan _period;
+        HashSet<ObjectGuid> _stunnedUnits = new();
+
+        public areatrigger_sha_earthquake(AreaTrigger areatrigger) : base(areatrigger)
+        {
+            _refreshTimer = TimeSpan.Zero;
+            _period = TimeSpan.FromSeconds(1);
+        }
+
+        public override void OnCreate()
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                AuraEffect earthquake = caster.GetAuraEffect(SpellIds.Earthquake, 1);
+                if (earthquake != null)
+                    _period = TimeSpan.FromMilliseconds(earthquake.GetPeriod());
+            }
+        }
+
+        public override void OnUpdate(uint diff)
+        {
+            _refreshTimer -= TimeSpan.FromMilliseconds(diff);
+            while (_refreshTimer <= TimeSpan.Zero)
+            {
+                Unit caster = at.GetCaster();
+                if (caster != null)
+                    caster.CastSpell(at.GetPosition(), SpellIds.EarthquakeTick, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                        .SetOriginalCaster(at.GetGUID()));
+
+                _refreshTimer += _period;
+            }
+        }
+
+        // Each target can only be stunned once by each earthquake - keep track of who we already stunned
+        public bool AddStunnedTarget(ObjectGuid guid)
+        {
+            return _stunnedUnits.Add(guid);
+        }
+    }
+
+    [Script] // 77478 - Earthquake tick
+    class spell_sha_earthquake_tick : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EarthquakeKnockingDown) && spellInfo.GetEffects().Count > 1;
+        }
+
+        void HandleDamageCalc(uint effIndex)
+        {
+            SetEffectValue((int)(GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.391f));
+        }
+
+        void HandleOnHit()
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                if (RandomHelper.randChance(GetEffectInfo(1).CalcValue()))
+                {
+                    var areaTriggers = GetCaster().GetAreaTriggers(SpellIds.Earthquake);
+                    var foundAreaTrigger = areaTriggers.Find(at => at.GetGUID() == GetSpell().GetOriginalCasterGUID());
+                    if (foundAreaTrigger != null)
+                    {
+                        areatrigger_sha_earthquake eq = foundAreaTrigger.GetAI<areatrigger_sha_earthquake>();
+                        if (eq != null)
+                            if (eq.AddStunnedTarget(target.GetGUID()))
+                                GetCaster().CastSpell(target, SpellIds.EarthquakeKnockingDown, true);
+                    }
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
+            OnHit.Add(new HitHandler(HandleOnHit));
+        }
+    }
+    
     // 117014 - Elemental Blast
     [Script] // 120588 - Elemental Blast Overload
     class spell_sha_elemental_blast : SpellScript
