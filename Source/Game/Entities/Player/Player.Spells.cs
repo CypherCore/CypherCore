@@ -2868,7 +2868,11 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                flat += mod.value;
+                int value = mod.value;
+                if (value == 0)
+                    continue;
+
+                flat += value;
                 ApplyModToSpell(mod, spell);
             }
 
@@ -2877,7 +2881,11 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                flat += mod.value.ModifierValue;
+                int value = mod.value.ModifierValue;
+                if (value == 0)
+                    continue;
+
+                flat += value;
                 ApplyModToSpell(mod, spell);
             }
 
@@ -2890,14 +2898,18 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
+                int value = mod.value;
+                if (value == 0)
+                    continue;
+
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && mod.value <= -100)
+                    if (baseValue.CompareTo(10000) > 0 && value <= -100)
                         continue;
                 }
 
-                pct *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
+                pct *= 1.0f + MathFunctions.CalculatePct(1.0f, value);
                 ApplyModToSpell(mod, spell);
             }
 
@@ -2910,14 +2922,18 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
+                float value = mod.value.ModifierValue;
+                if (value == 1.0f)
+                    continue;
+
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && mod.value.ModifierValue <= -1.0f)
+                    if (baseValue.CompareTo(10000) > 0 && value <= -1.0f)
                         continue;
                 }
 
-                pct *= mod.value.ModifierValue;
+                pct *= value;
                 ApplyModToSpell(mod, spell);
             }
         }
@@ -2931,13 +2947,40 @@ namespace Game.Entities
             if (spell && mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0 && !spell.m_appliedMods.Contains(mod.ownerAura))
                 return false;
 
-            // +duration to infinite duration spells making them limited
-            if (mod.op == SpellModOp.Duration && spellInfo.GetDuration() == -1)
-                return false;
-
-            // mod crit to spells that can't crit
-            if (mod.op == SpellModOp.CritChance && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
-                return false;
+            switch (mod.op)
+            {
+                case SpellModOp.Duration: // +duration to infinite duration spells making them limited
+                    if (spellInfo.GetDuration() == -1)
+                        return false;
+                    break;
+                case SpellModOp.CritChance: // mod crit to spells that can't crit
+                    if (!spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
+                        return false;
+                    break;
+                case SpellModOp.PointsIndex0: // check if spell has any effect at that index
+                case SpellModOp.Points:
+                    if (spellInfo.GetEffects().Count <= 0)
+                        return false;
+                    break;
+                case SpellModOp.PointsIndex1: // check if spell has any effect at that index
+                    if (spellInfo.GetEffects().Count <= 1)
+                        return false;
+                    break;
+                case SpellModOp.PointsIndex2: // check if spell has any effect at that index
+                    if (spellInfo.GetEffects().Count <= 2)
+                        return false;
+                    break;
+                case SpellModOp.PointsIndex3: // check if spell has any effect at that index
+                    if (spellInfo.GetEffects().Count <= 3)
+                        return false;
+                    break;
+                case SpellModOp.PointsIndex4: // check if spell has any effect at that index
+                    if (spellInfo.GetEffects().Count <= 4)
+                        return false;
+                    break;
+                default:
+                    break;
+            }
 
             return spellInfo.IsAffectedBySpellMod(mod);
         }
