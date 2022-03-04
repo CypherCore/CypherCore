@@ -684,16 +684,6 @@ namespace Game.Entities
                                 if (caster.FindCurrentSpellBySpellId(5938) != null)
                                     crit_chance = 0.0f;
                                 break;
-                            case SpellFamilyNames.Shaman:
-                                // Lava Burst
-                                if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00001000u))
-                                {
-                                    if (GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000, 0, 0), caster.GetGUID()) != null)
-                                        if (GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
-                                            return 100.0f;
-                                    break;
-                                }
-                                break;
                         }
 
                         // Spell crit suppression

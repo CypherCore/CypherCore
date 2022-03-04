@@ -935,6 +935,33 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    // 285452 - Lava Burst damage
+    [Script] // 285466 - Lava Burst Overload damage
+    class spell_sha_lava_crit_chance : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LavaBurstRank2, SpellIds.FlameShock);
+        }
+
+        void CalcCritChance(Unit victim, ref float chance)
+        {
+            Unit caster = GetCaster();
+
+            if (caster == null || victim == null)
+                return;
+
+            if (caster.HasAura(SpellIds.LavaBurstRank2) && victim.HasAura(SpellIds.FlameShock, caster.GetGUID()))
+                if (victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
+                    chance = 100.0f;
+        }
+
+        public override void Register()
+        {
+            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+        }
+    }
+    
     [Script] // 77756 - Lava Surge
     class spell_sha_lava_surge : AuraScript
     {
