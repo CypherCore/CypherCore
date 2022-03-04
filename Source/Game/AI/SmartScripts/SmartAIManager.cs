@@ -1907,8 +1907,10 @@ namespace Game.AI
             };
     }
 
-    public class SmartScriptHolder
+    public class SmartScriptHolder : IComparer<SmartScriptHolder>
     {
+        public const uint DefaultPriority = uint.MaxValue;
+
         public int EntryOrGuid;
         public SmartScriptType SourceType;
         public uint EventId;
@@ -1917,6 +1919,7 @@ namespace Game.AI
         public SmartAction Action;
         public SmartTarget Target;
         public uint Timer;
+        public uint Priority;
         public bool Active;
         public bool RunOnce;
         public bool EnableTimed;
@@ -1945,6 +1948,21 @@ namespace Game.AI
         public override string ToString()
         {
             return $"Entry {EntryOrGuid} SourceType {GetScriptType()} Event {EventId} Action {GetActionType()}";
+        }
+
+        public int Compare(SmartScriptHolder left, SmartScriptHolder right)
+        {
+            int result = left.Priority.CompareTo(right.Priority);
+            if (result == 0)
+                result = left.EntryOrGuid.CompareTo(right.EntryOrGuid);
+            if (result == 0)
+                result = left.SourceType.CompareTo(right.SourceType);
+            if (result == 0)
+                result = left.EventId.CompareTo(right.EventId);
+            if (result == 0)
+                result = left.Link.CompareTo(right.Link);
+
+            return result;
         }
     }
 

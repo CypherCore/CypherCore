@@ -61,6 +61,8 @@ namespace Game.AI
         ObjectGuid _textGUID;
         uint _talkerEntry;
         bool _useTextTimer;
+        uint _currentPriority;
+        bool _eventSortingRequired;
 
         Dictionary<uint, ObjectGuidList> _storedTargets = new();
 
@@ -95,9 +97,16 @@ namespace Game.AI
                     InitTimer(holder);
                     holder.RunOnce = false;
                 }
+
+                if (holder.Priority != SmartScriptHolder.DefaultPriority)
+                {
+                    holder.Priority = SmartScriptHolder.DefaultPriority;
+                    _eventSortingRequired = true;
+                }
             }
+
             ProcessEventsFor(SmartEvents.Reset);
-            LastInvoker = ObjectGuid.Empty;
+            LastInvoker.Clear();
         }
 
         public void ProcessEventsFor(SmartEvents e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
@@ -427,6 +436,9 @@ namespace Game.AI
                     if (e.Action.cast.targetsLimit > 0 && targets.Count > e.Action.cast.targetsLimit)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
+                    bool failedSpellCast = false;
+                    bool successfulSpellCast = false;
+
                     foreach (var target in targets)
                     {
                         if (_go != null)
@@ -458,7 +470,9 @@ namespace Game.AI
                                     ((SmartAI)_me.GetAI()).SetCombatMove(spellCastFailed, true);
 
                                 if (spellCastFailed)
-                                    RecalcTimer(e, 500, 500);
+                                    failedSpellCast = true;
+                                else
+                                    successfulSpellCast = true;
                             }
                             else if (_go)
                                 _go.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
@@ -467,6 +481,11 @@ namespace Game.AI
                             Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
                                 e.Action.cast.spell, target.GetGUID(), target.GetEntry(), target.GetTypeId());
                     }
+
+                    // If there is at least 1 failed cast and no successful casts at all, retry again on next loop
+                    if (failedSpellCast && !successfulSpellCast)
+                        RaisePriority(e);
+
                     break;
                 }
                 case SmartActions.SelfCast:
@@ -3779,7 +3798,7 @@ namespace Game.AI
                     {
                         if (_me != null && _me.HasUnitState(UnitState.Casting))
                         {
-                            e.Timer = 1;
+                            RaisePriority(e);
                             return;
                         }
                     }
@@ -3839,6 +3858,18 @@ namespace Game.AI
                         break;
                     }
                 }
+
+                if (e.Priority != SmartScriptHolder.DefaultPriority)
+                {
+                    // Reset priority to default one only if the event hasn't been rescheduled again to next loop
+                    if (e.Timer > 1)
+                    {
+                        // Re-sort events if this was moved to the top of the queue
+                        _eventSortingRequired = true;
+                        // Reset priority to default one
+                        e.Priority = SmartScriptHolder.DefaultPriority;
+                    }
+                }
             }
             else
             {
@@ -3878,6 +3909,12 @@ namespace Game.AI
                 return;
 
             InstallEvents();//before UpdateTimers
+
+            if (_eventSortingRequired)
+            {
+                SortEvents(_events);
+                _eventSortingRequired = false;
+            }
 
             foreach (var holder in _events)
                 UpdateTimer(holder, diff);
@@ -3923,6 +3960,22 @@ namespace Game.AI
                     ProcessEventsFor(SmartEvents.TextOver, null, textID, entry);
                 }
                 else _textTimer -= diff;
+            }
+        }
+
+        void SortEvents(List<SmartScriptHolder> events)
+        {
+            events.Sort();
+        }
+
+        void RaisePriority(SmartScriptHolder e)
+        {
+            e.Timer = 1;
+            // Change priority only if it's set to default, otherwise keep the current order of events
+            if (e.Priority == SmartScriptHolder.DefaultPriority)
+            {
+                e.Priority = _currentPriority++;
+                _eventSortingRequired = true;
             }
         }
 
