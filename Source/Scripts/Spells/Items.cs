@@ -37,6 +37,12 @@ namespace Scripts.Spells.Items
         //ZezzaksShard
         public const uint EyeOfGrillok = 38495;
 
+        // LowerCityPrayerbook
+        public const uint BlessingOfLowerCityDruid = 37878;
+        public const uint BlessingOfLowerCityPaladin = 37879;
+        public const uint BlessingOfLowerCityPriest = 37880;
+        public const uint BlessingOfLowerCityShaman = 37881;
+
         //Alchemiststone
         public const uint AlchemistStoneExtraHeal = 21399;
         public const uint AlchemistStoneExtraMana = 21400;
@@ -583,6 +589,49 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
+    // 37877 - Blessing of Faith
+    class spell_item_blessing_of_faith : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlessingOfLowerCityDruid, SpellIds.BlessingOfLowerCityPaladin, SpellIds.BlessingOfLowerCityPriest, SpellIds.BlessingOfLowerCityShaman);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit unitTarget = GetHitUnit();
+            if (unitTarget != null)
+            {
+                uint spellId = 0;
+                switch (unitTarget.GetClass())
+                {
+                    case Class.Druid:
+                        spellId = SpellIds.BlessingOfLowerCityDruid;
+                        break;
+                    case Class.Paladin:
+                        spellId = SpellIds.BlessingOfLowerCityPaladin;
+                        break;
+                    case Class.Priest:
+                        spellId = SpellIds.BlessingOfLowerCityPriest;
+                        break;
+                    case Class.Shaman:
+                        spellId = SpellIds.BlessingOfLowerCityShaman;
+                        break;
+                    default:
+                        return; // ignore for non-healing classes
+                }
+
+                Unit caster = GetCaster();
+                caster.CastSpell(caster, spellId, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 

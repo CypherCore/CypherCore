@@ -32,10 +32,6 @@ namespace Scripts.Spells.Paladin
         public const uint AvengingWrath = 31884;
         public const uint BeaconOfLight = 53563;
         public const uint BeaconOfLightHeal = 53652;
-        public const uint BlessingOfLowerCityDruid = 37878;
-        public const uint BlessingOfLowerCityPaladin = 37879;
-        public const uint BlessingOfLowerCityPriest = 37880;
-        public const uint BlessingOfLowerCityShaman = 37881;
         public const uint BlindingLightEffect = 105421;
         public const uint ConcentractionAura = 19746;
         public const uint ConsecratedGroundPassive = 204054;
@@ -98,49 +94,6 @@ namespace Scripts.Spells.Paladin
         public const uint HolyShockDamageCrit = 83881;
         public const uint HolyShockHeal = 83732;
         public const uint HolyShockHealCrit = 83880;
-    }
-
-    // 37877 - Blessing of Faith
-    [Script]
-    class spell_pal_blessing_of_faith : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BlessingOfLowerCityDruid, SpellIds.BlessingOfLowerCityPaladin, SpellIds.BlessingOfLowerCityPriest, SpellIds.BlessingOfLowerCityShaman);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit unitTarget = GetHitUnit();
-            if (unitTarget)
-            {
-                uint spell_id;
-                switch (unitTarget.GetClass())
-                {
-                    case Class.Druid:
-                        spell_id = SpellIds.BlessingOfLowerCityDruid;
-                        break;
-                    case Class.Paladin:
-                        spell_id = SpellIds.BlessingOfLowerCityPaladin;
-                        break;
-                    case Class.Priest:
-                        spell_id = SpellIds.BlessingOfLowerCityPriest;
-                        break;
-                    case Class.Shaman:
-                        spell_id = SpellIds.BlessingOfLowerCityShaman;
-                        break;
-                    default:
-                        return; // ignore for non-healing classes
-                }
-                Unit caster = GetCaster();
-                caster.CastSpell(caster, spell_id, true);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
     }
 
     // 1022 - Blessing of Protection
