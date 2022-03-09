@@ -71,9 +71,9 @@ namespace Scripts.Spells.Paladin
         public const uint HolyPrismTargetAlly = 114871;
         public const uint HolyPrismTargetEnemy = 114852;
         public const uint HolyPrismTargetBeamVisual = 114862;
-        public const uint HolyShockR1 = 20473;
-        public const uint HolyShockR1Damage = 25912;
-        public const uint HolyShockR1Healing = 25914;
+        public const uint HolyShock = 20473;
+        public const uint HolyShockDamage = 25912;
+        public const uint HolyShockHealing = 25914;
         public const uint ImmuneShieldMarker = 61988;
         public const uint ItemHealingTrance = 37706;
         public const uint JudgmentGainHolyPower = 220637;
@@ -87,9 +87,10 @@ namespace Scripts.Spells.Paladin
         public const uint ZealAura = 269571;
     }
 
-    struct SpellVisualKits
+    struct SpellVisuals
     {
-        public const uint DivineStorm = 73892;
+        public const uint KitDivineStorm = 73892;
+        public const uint HolyShock = 83732;
     }
 
     // 37877 - Blessing of Faith
@@ -248,12 +249,12 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HolyShockR1);
+            return ValidateSpellInfo(SpellIds.HolyShock);
         }
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShockR1, TimeSpan.FromSeconds(aurEff.GetAmount()));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmount()));
         }
 
         public override void Register()
@@ -355,12 +356,12 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.SpellVisualKitStorage.HasRecord(SpellVisualKits.DivineStorm);
+            return CliDB.SpellVisualKitStorage.HasRecord(SpellVisuals.KitDivineStorm);
         }
 
         void HandleOnCast()
         {
-            GetCaster().SendPlaySpellVisualKit(SpellVisualKits.DivineStorm, 0, 0);
+            GetCaster().SendPlaySpellVisualKit(SpellVisuals.KitDivineStorm, 0, 0);
         }
 
         public override void Register()
@@ -620,7 +621,8 @@ namespace Scripts.Spells.Paladin
 
         void ShareTargets(List<WorldObject> targets)
         {
-            targets = _sharedTargets;
+            targets.Clear();
+            targets.AddRange(_sharedTargets);
         }
 
         void HandleScript(uint effIndex)
@@ -649,33 +651,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyShockR1, Difficulty.None);
-            if (firstRankSpellInfo == null)
-                return false;
-
-            // can't use other spell than holy shock due to spell_ranks dependency
-            if (!spellInfo.IsRankOf(firstRankSpellInfo))
-                return false;
-
-            byte rank = spellInfo.GetRank();
-            if (Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Damage, rank, true) == 0 || Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Healing, rank, true) == 0)
-                return false;
-
-            return true;
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            Unit unitTarget = GetHitUnit();
-            if (unitTarget)
-            {
-                byte rank = GetSpellInfo().GetRank();
-                if (caster.IsFriendlyTo(unitTarget))
-                    caster.CastSpell(unitTarget, Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Healing, rank), true);
-                else
-                    caster.CastSpell(unitTarget, Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Damage, rank), true);
-            }
+            return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, SpellIds.HolyShockDamage);
         }
 
         SpellCastResult CheckCast()
@@ -695,7 +671,23 @@ namespace Scripts.Spells.Paladin
             }
             else
                 return SpellCastResult.BadTargets;
+
             return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit unitTarget = GetHitUnit();
+            if (unitTarget != null)
+            {
+                if (caster.IsFriendlyTo(unitTarget))
+                    caster.CastSpell(unitTarget, SpellIds.HolyShockHealing, true);
+                else
+                    caster.CastSpell(unitTarget, SpellIds.HolyShockDamage, true);
+
+                caster.SendPlaySpellVisual(unitTarget, SpellVisuals.HolyShock, 0, 0, 0, false);
+            }
         }
 
         public override void Register()
