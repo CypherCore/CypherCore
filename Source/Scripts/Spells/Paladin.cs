@@ -87,10 +87,17 @@ namespace Scripts.Spells.Paladin
         public const uint ZealAura = 269571;
     }
 
-    struct SpellVisuals
+    struct SpellVisualKit
     {
-        public const uint KitDivineStorm = 73892;
-        public const uint HolyShock = 83732;
+        public const uint DivineStorm = 73892;
+    }
+
+    struct SpellVisual
+    {
+        public const uint HolyShockDamage = 83731;
+        public const uint HolyShockDamageCrit = 83881;
+        public const uint HolyShockHeal = 83732;
+        public const uint HolyShockHealCrit = 83880;
     }
 
     // 37877 - Blessing of Faith
@@ -356,12 +363,12 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.SpellVisualKitStorage.HasRecord(SpellVisuals.KitDivineStorm);
+            return CliDB.SpellVisualKitStorage.HasRecord(SpellVisualKit.DivineStorm);
         }
 
         void HandleOnCast()
         {
-            GetCaster().SendPlaySpellVisualKit(SpellVisuals.KitDivineStorm, 0, 0);
+            GetCaster().SendPlaySpellVisualKit(SpellVisualKit.DivineStorm, 0, 0);
         }
 
         public override void Register()
@@ -682,11 +689,9 @@ namespace Scripts.Spells.Paladin
             if (unitTarget != null)
             {
                 if (caster.IsFriendlyTo(unitTarget))
-                    caster.CastSpell(unitTarget, SpellIds.HolyShockHealing, true);
+                    caster.CastSpell(unitTarget, SpellIds.HolyShockHealing, new CastSpellExtraArgs(GetSpell()));
                 else
-                    caster.CastSpell(unitTarget, SpellIds.HolyShockDamage, true);
-
-                caster.SendPlaySpellVisual(unitTarget, SpellVisuals.HolyShock, 0, 0, 0, false);
+                    caster.CastSpell(unitTarget, SpellIds.HolyShockDamage, new CastSpellExtraArgs(GetSpell()));
             }
         }
 
@@ -697,6 +702,46 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 25912 - Holy Shock
+    class spell_pal_holy_shock_damage_visual : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamage)
+                && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamageCrit);
+        }
+
+        void PlayVisual()
+        {
+            GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? SpellVisual.HolyShockDamageCrit : SpellVisual.HolyShockDamage, 0, 0, 0.0f, false);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(PlayVisual));
+        }
+    }
+
+    [Script] // 25914 - Holy Shock
+    class spell_pal_holy_shock_heal_visual : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHeal)
+                && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHealCrit);
+        }
+
+        void PlayVisual()
+        {
+            GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? SpellVisual.HolyShockHealCrit : SpellVisual.HolyShockHeal, 0, 0, 0.0f, false);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(PlayVisual));
+        }
+    }
+    
     [Script] // 37705 - Healing Discount
     class spell_pal_item_healing_discount : AuraScript
     {
