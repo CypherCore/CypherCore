@@ -107,8 +107,6 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            RestoreReplacedObject();
-
             if (!ObjectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
                 UpdateObjectVisibilityOnDestroy();
 
@@ -159,7 +157,7 @@ namespace Game.Entities
             if (GetAIAnimKitId() != 0 || GetMovementAnimKitId() != 0 || GetMeleeAnimKitId() != 0)
                 flags.AnimKit = true;
 
-            if (IsReplacingObjectFor(target))
+            if (GetSmoothPhasing()?.GetInfoForSeer(target.GetGUID()) != null)
                 flags.SmoothPhasing = true;
 
             Unit unit = ToUnit();
@@ -558,14 +556,15 @@ namespace Game.Entities
 
             if (flags.SmoothPhasing)
             {
-                ReplaceObjectInfo replacedObjectInfo = GetReplacedObjectFor(target);
-                Cypher.Assert(replacedObjectInfo != null);
+                SmoothPhasingInfo smoothPhasingInfo = GetSmoothPhasing().GetInfoForSeer(target.GetGUID());
+                Cypher.Assert(smoothPhasingInfo != null);
 
-                data.WriteBit(true); // ReplaceActive
-                data.WriteBit(replacedObjectInfo.StopAnimKits);
-                data.WriteBit(true);
+                data.WriteBit(smoothPhasingInfo.ReplaceActive);
+                data.WriteBit(smoothPhasingInfo.StopAnimKits);
+                data.WriteBit(smoothPhasingInfo.ReplaceObject.HasValue);
                 data.FlushBits();
-                data.WritePackedGuid(replacedObjectInfo.ReplaceObject);
+                if (smoothPhasingInfo.ReplaceObject.HasValue)
+                    data.WritePackedGuid(smoothPhasingInfo.ReplaceObject.Value);
             }
 
             if (flags.SceneObject)
@@ -1095,77 +1094,16 @@ namespace Game.Entities
             return false;
         }
 
-        void SetReplacedObject(ObjectGuid seer, ObjectGuid replacedObject, bool stopAnimKits = true)
+        public SmoothPhasing GetOrCreateSmoothPhasing()
         {
-            ReplaceObjectInfo replaceObjectInfo = new();
-            replaceObjectInfo.ReplaceObject = replacedObject;
-            replaceObjectInfo.StopAnimKits = stopAnimKits;
-            _replacedObjects[seer] = replaceObjectInfo;
+            if (_smoothPhasing == null)
+                _smoothPhasing = new();
+
+            return _smoothPhasing;
         }
 
-        public void ReplaceWith(WorldObject seer, WorldObject replaceWithObject, bool stopAnimKits = true)
-        {
-            _objectsWhichReplaceMeForSeer[seer.GetGUID()] = replaceWithObject.GetGUID();
-            replaceWithObject.SetReplacedObject(seer.GetGUID(), GetGUID(), stopAnimKits);
-        }
-
-        void ReplaceWith(ObjectGuid seerGuid, ObjectGuid replaceWithObjectGuid, bool stopAnimKits = true)
-        {
-            WorldObject replaceWithObject = Global.ObjAccessor.GetWorldObject(this, replaceWithObjectGuid);
-            if (replaceWithObject == null)
-                return;
-
-            _objectsWhichReplaceMeForSeer[seerGuid] = replaceWithObjectGuid;
-            replaceWithObject.SetReplacedObject(seerGuid, GetGUID(), stopAnimKits);
-        }
-
-        void RestoreReplacedObject()
-        {
-            if (_replacedObjects.Empty() || !IsPrivateObject())
-                return;
-
-            var itr = _replacedObjects.FirstOrDefault();
-            WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(this, itr.Value.ReplaceObject);
-            if (replacedObject == null)
-                return;
-
-            ReplaceWith(itr.Key, itr.Value.ReplaceObject, itr.Value.StopAnimKits);
-            replacedObject.RemoveObjectWhichReplacesMe(itr.Key);
-            _replacedObjects.Remove(itr.Key);
-
-            Player player = Global.ObjAccessor.FindPlayer(itr.Key);
-            if (player == null)
-                return;
-
-            player.UpdateVisibilityOf(new[] { replacedObject, this });
-        }
-
-        void RemoveObjectWhichReplacesMe(WorldObject seer) { RemoveObjectWhichReplacesMe(seer.GetGUID()); }
-
-        void RemoveObjectWhichReplacesMe(ObjectGuid seerGuid) { _objectsWhichReplaceMeForSeer.Remove(seerGuid); }
-
-        ReplaceObjectInfo GetReplacedObjectFor(WorldObject seer)
-        {
-            return _replacedObjects.LookupByKey(seer.GetGUID());
-        }
-
-        bool IsReplacingObjectFor(WorldObject seer) { return GetReplacedObjectFor(seer) != null; }
-
-        bool IsBeingReplacedFor(WorldObject seer) { return _objectsWhichReplaceMeForSeer.ContainsKey(seer.GetGUID()); }
+        public SmoothPhasing GetSmoothPhasing() { return _smoothPhasing; }
         
-        bool CheckReplacedObjectVisibility(WorldObject seer)
-        {
-            Creature creature = ToCreature();
-            if (creature != null)
-            {
-                Player player = seer.ToPlayer();
-                if (player != null && IsBeingReplacedFor(player))
-                    return false;
-            }
-
-            return true;
-        }
-
         public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
@@ -1180,7 +1118,8 @@ namespace Game.Entities
             if (!obj.CheckPrivateObjectOwnerVisibility(this))
                 return false;
 
-            if (!obj.CheckReplacedObjectVisibility(this))
+            SmoothPhasing smoothPhasing = obj.GetSmoothPhasing();
+            if (smoothPhasing != null && smoothPhasing.IsBeingReplacedForSeer(GetGUID()))
                 return false;
 
             if (!Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
@@ -1539,7 +1478,7 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner, GetGUID());
+                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner, new SmoothPhasingInfo(GetGUID(), true, true));
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -2896,7 +2835,7 @@ namespace Game.Entities
         public virtual void UpdateObjectVisibility(bool force = true)
         {
             //updates object's visibility for nearby players
-            var notifier = new VisibleChangesNotifier(this);
+            var notifier = new VisibleChangesNotifier(new[] { this });
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
 
@@ -2971,7 +2910,8 @@ namespace Game.Entities
         public bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
         public bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
         public bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
-
+        public bool IsSceneObject() { return GetTypeId() == TypeId.SceneObject; }
+        
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
         public GameObject ToGameObject() { return IsGameObject() ? (this as GameObject) : null; }
@@ -2980,6 +2920,7 @@ namespace Game.Entities
         public DynamicObject ToDynamicObject() { return IsDynObject() ? (this as DynamicObject) : null; }
         public AreaTrigger ToAreaTrigger() { return IsAreaTrigger() ? (this as AreaTrigger) : null; }
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
+        public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
 
         public virtual void Update(uint diff) { }
 
@@ -3690,8 +3631,7 @@ namespace Game.Entities
 
         ObjectGuid _privateObjectOwner;
 
-        Dictionary<ObjectGuid, ReplaceObjectInfo> _replacedObjects = new();
-        Dictionary<ObjectGuid, ObjectGuid> _objectsWhichReplaceMeForSeer = new();
+        SmoothPhasing _smoothPhasing;
 
         public FlaggedArray<StealthType> m_stealth = new(2);
         public FlaggedArray<StealthType> m_stealthDetect = new(2);
@@ -3924,11 +3864,5 @@ namespace Game.Entities
 
             player.SendPacket(i_message);
         }
-    }
-
-    class ReplaceObjectInfo
-    {
-        public ObjectGuid ReplaceObject;
-        public bool StopAnimKits = true;
     }
 }

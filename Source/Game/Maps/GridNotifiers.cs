@@ -167,9 +167,11 @@ namespace Game.Maps
 
     public class VisibleChangesNotifier : Notifier
     {
-        public VisibleChangesNotifier(WorldObject obj)
+        ICollection<WorldObject> i_objects;
+
+        public VisibleChangesNotifier(ICollection<WorldObject> objects)
         {
-            i_object = obj;
+            i_objects = objects;
         }
 
         public override void Visit(IList<Player> objs)
@@ -177,19 +179,14 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Player player = objs[i];
-                if (player.GetGUID() == i_object.GetGUID())
-                    return;
 
-                player.UpdateVisibilityOf(i_object);
+                player.UpdateVisibilityOf(i_objects);
 
-                if (player.HasSharedVision())
+                foreach (var visionPlayer in player.GetSharedVisionList())
                 {
-                    foreach (var visionPlayer in player.GetSharedVisionList())
-                    {
-                        if (visionPlayer.seerView == player)
-                            visionPlayer.UpdateVisibilityOf(i_object);
-                    }
-                }
+                    if (visionPlayer.seerView == player)
+                        visionPlayer.UpdateVisibilityOf(i_objects);
+                }                
             }
         }
 
@@ -198,12 +195,9 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.HasSharedVision())
-                {
-                    foreach (var visionPlayer in creature.GetSharedVisionList())
-                        if (visionPlayer.seerView == creature)
-                            visionPlayer.UpdateVisibilityOf(i_object);
-                }
+                foreach (var visionPlayer in creature.GetSharedVisionList())
+                    if (visionPlayer.seerView == creature)
+                        visionPlayer.UpdateVisibilityOf(i_objects);
             }
         }
 
@@ -217,12 +211,10 @@ namespace Game.Maps
                 {
                     Player pl = caster.ToPlayer();
                     if (pl && pl.seerView == dynamicObject)
-                        pl.UpdateVisibilityOf(i_object);
+                        pl.UpdateVisibilityOf(i_objects);
                 }
             }
         }
-
-        WorldObject i_object;
     }
 
     public class PlayerRelocationNotifier : VisibleNotifier

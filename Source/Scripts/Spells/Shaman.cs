@@ -24,7 +24,6 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Scripts.Spells.Shaman
 {

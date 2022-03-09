@@ -4022,7 +4022,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, ObjectGuid replaceObject = default)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -4072,10 +4072,6 @@ namespace Game.Maps
                 }
             }
 
-            WorldObject objectOwner = Global.ObjAccessor.GetWorldObject(summoner, privateObjectOwner);
-            if (objectOwner != null)
-                summoner = objectOwner;
-
             Unit summonerUnit = summoner != null ? summoner.ToUnit() : null;
 
             TempSummon summon;
@@ -4112,8 +4108,19 @@ namespace Game.Maps
             summon.InitStats(duration);
             summon.SetPrivateObjectOwner(privateObjectOwner);
 
-            if (summoner != null && !replaceObject.IsEmpty())
-                PhasingHandler.ReplaceObject(summoner, summon, replaceObject);
+            if (smoothPhasingInfo != null)
+            {
+                if (summoner != null && smoothPhasingInfo.ReplaceObject.HasValue)
+                {
+                    SmoothPhasingInfo originalSmoothPhasingInfo = smoothPhasingInfo;
+                    originalSmoothPhasingInfo.ReplaceObject = summon.GetGUID();
+                    summoner.GetOrCreateSmoothPhasing().SetViewerDependentInfo(privateObjectOwner, originalSmoothPhasingInfo);
+
+                    summon.SetDemonCreatorGUID(privateObjectOwner);
+                }
+
+                summon.GetOrCreateSmoothPhasing().SetSingleInfo(smoothPhasingInfo);
+            }
 
             if (!AddToMap(summon.ToCreature()))
             {

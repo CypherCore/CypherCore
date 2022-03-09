@@ -6063,16 +6063,49 @@ namespace Game.Entities
                 ((Pet)obj).Remove(PetSaveMode.NotInSlot, true);
         }
 
-        public void UpdateVisibilityOf(WorldObject[] targets)
+        public void UpdateVisibilityOf(ICollection<WorldObject> targets)
         {
             if (targets.Empty())
                 return;
 
             UpdateData udata = new(GetMapId());
-            List<Unit> visibleNow = new();
+            List<Unit> newVisibleUnits = new();
 
             foreach (WorldObject target in targets)
-                UpdateVisibilityOf(target, udata, visibleNow);
+            {
+                if (target == this)
+                    continue;
+
+                switch (target.GetTypeId())
+                {
+                    case TypeId.Unit:
+                        UpdateVisibilityOf(target.ToCreature(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.Player:
+                        UpdateVisibilityOf(target.ToPlayer(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.GameObject:
+                        UpdateVisibilityOf(target.ToGameObject(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.DynamicObject:
+                        UpdateVisibilityOf(target.ToDynamicObject(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.Corpse:
+                        UpdateVisibilityOf(target.ToCorpse(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.AreaTrigger:
+                        UpdateVisibilityOf(target.ToAreaTrigger(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.SceneObject:
+                        UpdateVisibilityOf(target.ToSceneObject(), udata, newVisibleUnits);
+                        break;
+                    case TypeId.Conversation:
+                        UpdateVisibilityOf(target.ToConversation(), udata, newVisibleUnits);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             if (!udata.HasData())
                 return;
@@ -6080,8 +6113,8 @@ namespace Game.Entities
             udata.BuildPacket(out UpdateObject packet);
             SendPacket(packet);
 
-            foreach (var target in visibleNow)
-                SendInitialVisiblePackets(target);
+            foreach (var visibleUnit in newVisibleUnits)
+                SendInitialVisiblePackets(visibleUnit);
         }
 
         public void UpdateVisibilityOf(WorldObject target)

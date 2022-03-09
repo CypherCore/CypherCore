@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using System;
 using System.Collections.Generic;
+using Game.Maps;
 
 namespace Game.Entities
 {
@@ -241,7 +242,45 @@ namespace Game.Entities
 
         public override void UpdateObjectVisibilityOnCreate()
         {
-            UpdateObjectVisibility(true);
+            List<WorldObject> objectsToUpdate = new();
+            objectsToUpdate.Add(this);
+
+            SmoothPhasing smoothPhasing = GetSmoothPhasing();
+            WorldObject original = GetSummoner();
+            if (original != null)
+                if (smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
+                    objectsToUpdate.Add(original);
+
+            VisibleChangesNotifier notifier = new(objectsToUpdate);
+            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+        }
+
+        public override void UpdateObjectVisibilityOnDestroy()
+        {
+            List<WorldObject> objectsToUpdate = new();
+            objectsToUpdate.Add(this);
+
+            WorldObject original = GetSummoner();
+            SmoothPhasing smoothPhasing = GetSmoothPhasing();
+            if (original != null && smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
+            {
+                objectsToUpdate.Add(original);
+
+                // disable replacement without removing - it is still needed for next step (visibility update)
+                SmoothPhasing originalSmoothPhasing = original.GetSmoothPhasing();
+                if (originalSmoothPhasing != null)
+                    originalSmoothPhasing.DisableReplacementForSeer(GetDemonCreatorGUID());
+            }
+
+            VisibleChangesNotifier notifier = new(objectsToUpdate);
+            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+
+            if (original != null && smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
+            {
+                SmoothPhasing originalSmoothPhasing = original.GetSmoothPhasing();
+                if (originalSmoothPhasing != null)
+                    originalSmoothPhasing.ClearViewerDependentInfo(GetDemonCreatorGUID());
+            }
         }
 
         public void SetTempSummonType(TempSummonType type)

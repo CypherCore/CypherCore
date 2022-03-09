@@ -1887,7 +1887,9 @@ namespace Game.Entities
         public void SetCritterGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Critter), guid); }
         public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
-
+        public ObjectGuid GetDemonCreatorGUID() { return m_unitData.DemonCreator; }
+        public void SetDemonCreatorGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DemonCreator), guid); }
+        
         public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
 
         public Unit GetCharmer() { return m_charmer; }
