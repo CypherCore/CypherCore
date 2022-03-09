@@ -7802,7 +7802,7 @@ namespace Game.Spells
         // Spell target subsystem
         // *****************************************
         // Targets store structures and data
-        List<TargetInfo> m_UniqueTargetInfo = new();
+        public List<TargetInfo> m_UniqueTargetInfo = new();
         uint m_channelTargetEffectMask;                        // Mask req. alive targets
 
         List<GOTargetInfo> m_UniqueGOTargetInfo = new();

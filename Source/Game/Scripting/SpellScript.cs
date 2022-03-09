@@ -797,6 +797,29 @@ namespace Game.Scripting
         }
         void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>true if spell critically hits current HitUnit</returns>
+        public bool IsHitCrit()
+        {
+            if (!IsInTargetHook())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::IsHitCrit was called, but function has no effect in current hook!");
+                return false;
+            }
+
+            Unit hitUnit = GetHitUnit();
+            if (hitUnit != null)
+            {
+                var targetInfo = m_spell.m_UniqueTargetInfo.Find(targetInfo => targetInfo.TargetGUID == hitUnit.GetGUID());
+                Cypher.Assert(targetInfo != null);
+                return targetInfo.IsCrit;
+            }
+            return false;
+        }
+
         // returns current spell hit target aura
         public Aura GetHitAura(bool dynObjAura = false)
         {
@@ -815,6 +838,7 @@ namespace Game.Scripting
 
             return aura;
         }
+
         // prevents applying aura on current spell hit target
         public void PreventHitAura()
         {
