@@ -167,7 +167,7 @@ namespace Game.Entities
                     ai.CorpseRemoved(respawnDelay);
 
                 if (destroyForNearbyPlayers)
-                    DestroyForNearbyPlayers();
+                    UpdateObjectVisibilityOnDestroy();
 
                 // Should get removed later, just keep "compatibility" with scripts
                 if (setSpawnTime)
@@ -1907,7 +1907,7 @@ namespace Game.Entities
 
             if (m_respawnCompatibilityMode)
             {
-                DestroyForNearbyPlayers();
+                UpdateObjectVisibilityOnDestroy();
                 RemoveCorpse(false, false);
 
                 if (GetDeathState() == DeathState.Dead)
@@ -1971,7 +1971,7 @@ namespace Game.Entities
                 uint respawnDelay = GetRespawnDelay();
 
                 // do it before killing creature
-                DestroyForNearbyPlayers();
+                UpdateObjectVisibilityOnDestroy();
 
                 bool overrideRespawnTime = false;
                 if (IsAlive())

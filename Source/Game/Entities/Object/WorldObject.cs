@@ -107,7 +107,7 @@ namespace Game.Entities
                 return;
 
             if (!ObjectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
-                DestroyForNearbyPlayers();
+                UpdateObjectVisibilityOnDestroy();
 
             IsInWorld = false;
             ClearUpdateMask(true);
@@ -2812,6 +2812,8 @@ namespace Game.Entities
         {
             UpdateObjectVisibility(true);
         }
+
+        public virtual void UpdateObjectVisibilityOnDestroy() { DestroyForNearbyPlayers(); }
 
         public virtual void BuildUpdate(Dictionary<Player, UpdateData> data)
         {

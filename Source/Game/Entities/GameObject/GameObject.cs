@@ -865,7 +865,7 @@ namespace Game.Entities
                         m_respawnTime = 0;
 
                         if (m_spawnId != 0)
-                            DestroyForNearbyPlayers();
+                            UpdateObjectVisibilityOnDestroy();
                         else
                             Delete();
 
@@ -883,7 +883,7 @@ namespace Game.Entities
                     SaveRespawnTime();
 
                     if (m_respawnCompatibilityMode)
-                        DestroyForNearbyPlayers();
+                        UpdateObjectVisibilityOnDestroy();
                     else
                         AddObjectToRemoveList();
 

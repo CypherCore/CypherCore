@@ -956,7 +956,7 @@ namespace Game.Maps
             SendRemoveTransports(player);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
-                player.DestroyForNearbyPlayers(); // previous player.UpdateObjectVisibility(true)
+                player.UpdateObjectVisibilityOnDestroy();
 
             Cell cell = player.GetCurrentCell();
             RemoveFromGrid(player, cell);
@@ -977,7 +977,7 @@ namespace Game.Maps
             GetMultiPersonalPhaseTracker().UnregisterTrackedObject(obj);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
-                obj.DestroyForNearbyPlayers(); // previous obj.UpdateObjectVisibility(true)
+                obj.UpdateObjectVisibilityOnDestroy();
 
             Cell cell = obj.GetCurrentCell();
             RemoveFromGrid(obj, cell);
@@ -3323,7 +3323,7 @@ namespace Game.Maps
         {
             Cypher.Assert(corpse);
 
-            corpse.DestroyForNearbyPlayers();
+            corpse.UpdateObjectVisibilityOnDestroy();
             if (corpse.GetCurrentCell() != null)
                 RemoveFromMap(corpse, false);
             else
