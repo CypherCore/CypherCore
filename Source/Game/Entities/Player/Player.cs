@@ -6071,7 +6071,11 @@ namespace Game.Entities
                     if (target.IsTypeId(TypeId.Unit))
                         BeforeVisibilityDestroy(target.ToCreature(), this);
 
-                    target.DestroyForPlayer(this);
+                    if (!target.IsDestroyedObject())
+                        target.SendOutOfRangeForPlayer(this);
+                    else
+                        target.DestroyForPlayer(this);
+
                     m_clientGUIDs.Remove(target.GetGUID());
                 }
             }
@@ -6097,7 +6101,11 @@ namespace Game.Entities
                 {
                     BeforeVisibilityDestroy(target, this);
 
-                    target.BuildOutOfRangeUpdateBlock(data);
+                    if (!target.IsDestroyedObject())
+                        target.BuildOutOfRangeUpdateBlock(data);
+                    else
+                        target.BuildDestroyUpdateBlock(data);
+
                     m_clientGUIDs.Remove(target.GetGUID());
                 }
             }

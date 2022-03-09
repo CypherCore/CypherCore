@@ -286,6 +286,7 @@ namespace Game.Maps
                 if (obj.IsTypeId(TypeId.Player))
                     continue;
 
+                obj.SetDestroyedObject(true);
                 obj.CleanupsBeforeDelete();
             }       
         }

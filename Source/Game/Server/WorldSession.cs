@@ -209,7 +209,8 @@ namespace Game
                 // the player may not be in the world when logging out
                 // e.g if he got disconnected during a transfer to another map
                 // calls to GetMap in this case may cause crashes
-                GetPlayer().CleanupsBeforeDelete();
+                _player.SetDestroyedObject(true);
+                _player.CleanupsBeforeDelete();
                 Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
                 Map map = GetPlayer().GetMap();

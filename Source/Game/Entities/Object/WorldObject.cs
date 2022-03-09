@@ -211,7 +211,7 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer);
         }
 
-        void BuildDestroyUpdateBlock(UpdateData data)
+        public void BuildDestroyUpdateBlock(UpdateData data)
         {
             data.AddDestroyObject(GetGUID());
         }
@@ -230,6 +230,16 @@ namespace Game.Entities
             target.SendPacket(packet);
         }
 
+        public void SendOutOfRangeForPlayer(Player target)
+        {
+            Cypher.Assert(target);
+
+            UpdateData updateData = new(target.GetMapId());
+            BuildOutOfRangeUpdateBlock(updateData);
+            updateData.BuildPacket(out UpdateObject packet);
+            target.SendPacket(packet);
+        }
+        
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags)
         {
             int PauseTimesCount = 0;
@@ -2868,7 +2878,9 @@ namespace Game.Entities
         public virtual bool HasQuest(uint questId) { return false; }
         public virtual bool HasInvolvedQuest(uint questId) { return false; }
         public void SetIsNewObject(bool enable) { _isNewObject = enable; }
-
+        public bool IsDestroyedObject() { return _isDestroyedObject; }
+        public void SetDestroyedObject(bool destroyed) { _isDestroyedObject = destroyed; }
+        
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
         public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
@@ -2926,7 +2938,7 @@ namespace Game.Entities
         public virtual float GetCollisionHeight() { return 0.0f; }
         public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }
 
-        public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld; }
+        public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld || IsDestroyedObject(); }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
         public virtual bool IsInvisibleDueToDespawn() { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }
@@ -3558,6 +3570,7 @@ namespace Game.Entities
         protected CreateObjectBits m_updateFlag;
         ObjectGuid m_guid;
         bool _isNewObject;
+        bool _isDestroyedObject;
 
         public UpdateFieldHolder m_values;
         public ObjectFieldData m_objectData;

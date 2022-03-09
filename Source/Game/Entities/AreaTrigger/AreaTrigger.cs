@@ -1020,10 +1020,7 @@ namespace Game.Entities
 
         public override bool IsNeverVisibleFor(WorldObject seer)
         {
-            if (IsServerSide())
-                return true;
-
-            return base.IsNeverVisibleFor(seer);
+            return base.IsNeverVisibleFor(seer) || IsServerSide();
         }
         
         [System.Diagnostics.Conditional("DEBUG")]
