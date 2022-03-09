@@ -93,7 +93,7 @@ namespace Game.Entities
             MapId = 0;
         }
 
-        public bool HasData() { return BlockCount > 0 || outOfRangeGUIDs.Count != 0; }
+        public bool HasData() { return BlockCount > 0 || !outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty(); }
 
         public List<ObjectGuid> GetOutOfRangeGUIDs() { return outOfRangeGUIDs; }
 

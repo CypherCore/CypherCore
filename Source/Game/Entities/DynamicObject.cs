@@ -163,10 +163,7 @@ namespace Game.Entities
         public void Remove()
         {
             if (IsInWorld)
-            {
-                RemoveFromWorld();
                 AddObjectToRemoveList();
-            }
         }
 
         int GetDuration()
