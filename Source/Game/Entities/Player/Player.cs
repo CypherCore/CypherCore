@@ -6062,6 +6062,28 @@ namespace Game.Entities
             if (p.GetPetGUID() == obj.GetGUID() && obj.ToCreature().IsPet())
                 ((Pet)obj).Remove(PetSaveMode.NotInSlot, true);
         }
+
+        public void UpdateVisibilityOf(WorldObject[] targets)
+        {
+            if (targets.Empty())
+                return;
+
+            UpdateData udata = new(GetMapId());
+            List<Unit> visibleNow = new();
+
+            foreach (WorldObject target in targets)
+                UpdateVisibilityOf(target, udata, visibleNow);
+
+            if (!udata.HasData())
+                return;
+
+            udata.BuildPacket(out UpdateObject packet);
+            SendPacket(packet);
+
+            foreach (var target in visibleNow)
+                SendInitialVisiblePackets(target);
+        }
+
         public void UpdateVisibilityOf(WorldObject target)
         {
             if (HaveAtClient(target))
@@ -6093,6 +6115,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public void UpdateVisibilityOf<T>(T target, UpdateData data, List<Unit> visibleNow) where T : WorldObject
         {
             if (HaveAtClient(target))
@@ -6118,6 +6141,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
         {
             switch (target.GetTypeId())

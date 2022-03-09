@@ -663,6 +663,19 @@ namespace Game
             return false;
         }
 
+        public static void ReplaceObject(WorldObject obj, WorldObject newObject, ObjectGuid replacedObjectGuid, bool stopAnimKits = true)
+        {
+            WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(obj, replacedObjectGuid);
+            if (replacedObject == null)
+                return;
+
+            replacedObject.ReplaceWith(obj, newObject, stopAnimKits);
+
+            Player player = obj.ToPlayer();
+            if (player != null)
+                player.UpdateVisibilityOf(new[] { newObject, replacedObject });
+        }
+        
         static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)
         {
             if (changed && obj.IsInWorld)

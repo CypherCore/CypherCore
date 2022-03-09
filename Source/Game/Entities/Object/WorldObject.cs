@@ -28,6 +28,7 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -106,6 +107,8 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
+            RestoreReplacedObject();
+
             if (!ObjectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
                 UpdateObjectVisibilityOnDestroy();
 
@@ -156,6 +159,9 @@ namespace Game.Entities
             if (GetAIAnimKitId() != 0 || GetMovementAnimKitId() != 0 || GetMeleeAnimKitId() != 0)
                 flags.AnimKit = true;
 
+            if (IsReplacingObjectFor(target))
+                flags.SmoothPhasing = true;
+
             Unit unit = ToUnit();
             if (unit)
             {
@@ -169,7 +175,7 @@ namespace Game.Entities
             buffer.WritePackedGuid(GetGUID());
             buffer.WriteUInt8((byte)tempObjectType);
 
-            BuildMovementUpdate(buffer, flags);
+            BuildMovementUpdate(buffer, flags, target);
             BuildValuesCreate(buffer, target);
             data.AddUpdateBlock(buffer);
         }
@@ -240,7 +246,7 @@ namespace Game.Entities
             target.SendPacket(packet);
         }
         
-        public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags)
+        public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags, Player target)
         {
             int PauseTimesCount = 0;
 
@@ -550,15 +556,17 @@ namespace Game.Entities
                     data.WriteUInt32(Int1);
             }
 
-            //if (flags.SmoothPhasing)
-            //{
-            //    data.WriteBit(ReplaceActive);
-            //    data.WriteBit(StopAnimKits);
-            //    data.WriteBit(HasReplaceObjectt);
-            //    data.FlushBits();
-            //    if (HasReplaceObject)
-            //        *data << ObjectGuid(ReplaceObject);
-            //}
+            if (flags.SmoothPhasing)
+            {
+                ReplaceObjectInfo replacedObjectInfo = GetReplacedObjectFor(target);
+                Cypher.Assert(replacedObjectInfo != null);
+
+                data.WriteBit(true); // ReplaceActive
+                data.WriteBit(replacedObjectInfo.StopAnimKits);
+                data.WriteBit(true);
+                data.FlushBits();
+                data.WritePackedGuid(replacedObjectInfo.ReplaceObject);
+            }
 
             if (flags.SceneObject)
             {
@@ -1087,6 +1095,77 @@ namespace Game.Entities
             return false;
         }
 
+        void SetReplacedObject(ObjectGuid seer, ObjectGuid replacedObject, bool stopAnimKits = true)
+        {
+            ReplaceObjectInfo replaceObjectInfo = new();
+            replaceObjectInfo.ReplaceObject = replacedObject;
+            replaceObjectInfo.StopAnimKits = stopAnimKits;
+            _replacedObjects[seer] = replaceObjectInfo;
+        }
+
+        public void ReplaceWith(WorldObject seer, WorldObject replaceWithObject, bool stopAnimKits = true)
+        {
+            _objectsWhichReplaceMeForSeer[seer.GetGUID()] = replaceWithObject.GetGUID();
+            replaceWithObject.SetReplacedObject(seer.GetGUID(), GetGUID(), stopAnimKits);
+        }
+
+        void ReplaceWith(ObjectGuid seerGuid, ObjectGuid replaceWithObjectGuid, bool stopAnimKits = true)
+        {
+            WorldObject replaceWithObject = Global.ObjAccessor.GetWorldObject(this, replaceWithObjectGuid);
+            if (replaceWithObject == null)
+                return;
+
+            _objectsWhichReplaceMeForSeer[seerGuid] = replaceWithObjectGuid;
+            replaceWithObject.SetReplacedObject(seerGuid, GetGUID(), stopAnimKits);
+        }
+
+        void RestoreReplacedObject()
+        {
+            if (_replacedObjects.Empty() || !IsPrivateObject())
+                return;
+
+            var itr = _replacedObjects.FirstOrDefault();
+            WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(this, itr.Value.ReplaceObject);
+            if (replacedObject == null)
+                return;
+
+            ReplaceWith(itr.Key, itr.Value.ReplaceObject, itr.Value.StopAnimKits);
+            replacedObject.RemoveObjectWhichReplacesMe(itr.Key);
+            _replacedObjects.Remove(itr.Key);
+
+            Player player = Global.ObjAccessor.FindPlayer(itr.Key);
+            if (player == null)
+                return;
+
+            player.UpdateVisibilityOf(new[] { replacedObject, this });
+        }
+
+        void RemoveObjectWhichReplacesMe(WorldObject seer) { RemoveObjectWhichReplacesMe(seer.GetGUID()); }
+
+        void RemoveObjectWhichReplacesMe(ObjectGuid seerGuid) { _objectsWhichReplaceMeForSeer.Remove(seerGuid); }
+
+        ReplaceObjectInfo GetReplacedObjectFor(WorldObject seer)
+        {
+            return _replacedObjects.LookupByKey(seer.GetGUID());
+        }
+
+        bool IsReplacingObjectFor(WorldObject seer) { return GetReplacedObjectFor(seer) != null; }
+
+        bool IsBeingReplacedFor(WorldObject seer) { return _objectsWhichReplaceMeForSeer.ContainsKey(seer.GetGUID()); }
+        
+        bool CheckReplacedObjectVisibility(WorldObject seer)
+        {
+            Creature creature = ToCreature();
+            if (creature != null)
+            {
+                Player player = seer.ToPlayer();
+                if (player != null && IsBeingReplacedFor(player))
+                    return false;
+            }
+
+            return true;
+        }
+
         public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
@@ -1099,6 +1178,9 @@ namespace Game.Entities
                 return true;
 
             if (!obj.CheckPrivateObjectOwnerVisibility(this))
+                return false;
+
+            if (!obj.CheckReplacedObjectVisibility(this))
                 return false;
 
             if (!Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
@@ -1457,7 +1539,7 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner, GetGUID());
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -3608,6 +3690,9 @@ namespace Game.Entities
 
         ObjectGuid _privateObjectOwner;
 
+        Dictionary<ObjectGuid, ReplaceObjectInfo> _replacedObjects = new();
+        Dictionary<ObjectGuid, ObjectGuid> _objectsWhichReplaceMeForSeer = new();
+
         public FlaggedArray<StealthType> m_stealth = new(2);
         public FlaggedArray<StealthType> m_stealthDetect = new(2);
 
@@ -3839,5 +3924,11 @@ namespace Game.Entities
 
             player.SendPacket(i_message);
         }
+    }
+
+    class ReplaceObjectInfo
+    {
+        public ObjectGuid ReplaceObject;
+        public bool StopAnimKits = true;
     }
 }

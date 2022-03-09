@@ -4022,7 +4022,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, ObjectGuid replaceObject = default)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -4072,6 +4072,10 @@ namespace Game.Maps
                 }
             }
 
+            WorldObject objectOwner = Global.ObjAccessor.GetWorldObject(summoner, privateObjectOwner);
+            if (objectOwner != null)
+                summoner = objectOwner;
+
             Unit summonerUnit = summoner != null ? summoner.ToUnit() : null;
 
             TempSummon summon;
@@ -4108,7 +4112,15 @@ namespace Game.Maps
             summon.InitStats(duration);
             summon.SetPrivateObjectOwner(privateObjectOwner);
 
-            AddToMap(summon.ToCreature());
+            if (summoner != null && !replaceObject.IsEmpty())
+                PhasingHandler.ReplaceObject(summoner, summon, replaceObject);
+
+            if (!AddToMap(summon.ToCreature()))
+            {
+                summon.Dispose();
+                return null;
+            }
+
             summon.InitSummon();
 
             // call MoveInLineOfSight for nearby creatures
