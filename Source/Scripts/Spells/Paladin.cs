@@ -76,8 +76,10 @@ namespace Scripts.Spells.Paladin
         public const uint HolyShockR1Healing = 25914;
         public const uint ImmuneShieldMarker = 61988;
         public const uint ItemHealingTrance = 37706;
-        public const uint JudementGainHolyPower = 220637;
-        public const uint JudgementProtRetR3 = 315867;
+        public const uint JudgmentGainHolyPower = 220637;
+        public const uint JudgmentHolyR3 = 231644;
+        public const uint JudgmentHolyR3Debuff = 214222;
+        public const uint JudgmentProtRetR3 = 315867;
         public const uint RighteousDefenseTaunt = 31790;
         public const uint RighteousVerdictAura = 267611;
         public const uint SealOfRighteousness = 25742;
@@ -533,19 +535,22 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    [Script] // 20271/275779 - Judgement Ret/Prot
-    class spell_pal_judgement : SpellScript
+    [Script] // 20271/275779/275773 - Judgement (Retribution/Protection/Holy)
+    class spell_pal_judgment : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.JudgementProtRetR3, SpellIds.JudementGainHolyPower);
+            return ValidateSpellInfo(SpellIds.JudgmentProtRetR3, SpellIds.JudgmentGainHolyPower, SpellIds.JudgmentHolyR3, SpellIds.JudgmentHolyR3Debuff);
         }
 
         void HandleOnHit()
         {
             Unit caster = GetCaster();
-            if (caster.HasSpell(SpellIds.JudgementProtRetR3))
-                caster.CastSpell(caster, SpellIds.JudementGainHolyPower, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            if (caster.HasSpell(SpellIds.JudgmentProtRetR3))
+                caster.CastSpell(caster, SpellIds.JudgmentGainHolyPower, GetSpell());
+
+            if (caster.HasSpell(SpellIds.JudgmentHolyR3))
+                caster.CastSpell(GetHitUnit(), SpellIds.JudgmentHolyR3Debuff, GetSpell());
         }
 
         public override void Register()
