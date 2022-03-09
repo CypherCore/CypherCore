@@ -2702,7 +2702,7 @@ namespace Game.Guilds
                          field.Read<ushort>(18),                        // characters.zone
                          field.Read<uint>(19),                          // characters.account
                          0);
-                m_logoutTime = field.Read<uint>(20);                    // characters.logout_time
+                m_logoutTime = field.Read<ulong>(20);                    // characters.logout_time
                 m_totalActivity = 0;
                 m_weekActivity = 0;
                 m_weekReputation = 0;
