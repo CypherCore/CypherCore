@@ -792,6 +792,10 @@ namespace Game
                 pCurrChar.SetGuildLevel(0);
             }
 
+            // Send stable contents to display icons on Call Pet spells
+            if (pCurrChar.HasSpell(SharedConst.CallPetSpellId))
+                SendStablePet(ObjectGuid.Empty);
+
             pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
 
             pCurrChar.SendInitialPacketsBeforeAddToMap();

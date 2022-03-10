@@ -96,13 +96,14 @@ namespace Game.Entities
             }
         }
 
-        public static Tuple<PetStable.PetInfo, PetSaveMode> GetLoadPetInfo(PetStable stable, uint petEntry, uint petnumber, bool current)
+        public static Tuple<PetStable.PetInfo, PetSaveMode> GetLoadPetInfo(PetStable stable, uint petEntry, uint petnumber, PetSaveMode? slot)
         {
             if (petnumber != 0)
             {
                 // Known petnumber entry
-                if (stable.CurrentPet != null && stable.CurrentPet.PetNumber == petnumber)
-                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+                for (var activeSlot = 0; activeSlot < stable.ActivePets.Length; ++activeSlot)
+                    if (stable.ActivePets[activeSlot] != null && stable.ActivePets[activeSlot].PetNumber == petnumber)
+                        return Tuple.Create(stable.ActivePets[activeSlot], PetSaveMode.FirstActiveSlot + activeSlot);
 
                 for (var stableSlot = 0; stableSlot < stable.StabledPets.Length; ++stableSlot)
                     if (stable.StabledPets[stableSlot] != null && stable.StabledPets[stableSlot].PetNumber == petnumber)
@@ -112,17 +113,24 @@ namespace Game.Entities
                     if (pet.PetNumber == petnumber)
                         return Tuple.Create(pet, PetSaveMode.NotInSlot);
             }
-            else if (current)
+            else if (slot.HasValue)
             {
-                // Current pet (slot 0)
-                if (stable.CurrentPet != null)
-                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+                // Current pet
+                if (slot == PetSaveMode.AsCurrent)
+                    if (stable.GetCurrentActivePetIndex().HasValue && stable.ActivePets[stable.GetCurrentActivePetIndex().Value] != null)
+                        return Tuple.Create(stable.ActivePets[stable.GetCurrentActivePetIndex().Value], (PetSaveMode)stable.GetCurrentActivePetIndex());
+
+                if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
+                    if (stable.ActivePets[(int)slot.Value] != null)
+                        return Tuple.Create(stable.ActivePets[(int)slot.Value], slot.Value);
+
+                if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
+                    if (stable.StabledPets[(int)slot.Value] != null)
+                        return Tuple.Create(stable.StabledPets[(int)slot.Value], slot.Value);
             }
             else if (petEntry != 0)
             {
                 // known petEntry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
-                if (stable.CurrentPet != null && stable.CurrentPet.CreatureId == petEntry)
-                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
 
                 foreach (var pet in stable.UnslottedPets)
                     if (pet.CreatureId == petEntry)
@@ -131,8 +139,8 @@ namespace Game.Entities
             else
             {
                 // Any current or other non-stabled pet (for hunter "call pet")
-                if (stable.CurrentPet != null)
-                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+                if (stable.ActivePets[0] != null)
+                    return Tuple.Create(stable.ActivePets[0], PetSaveMode.FirstActiveSlot);
 
                 if (!stable.UnslottedPets.Empty())
                     return Tuple.Create(stable.UnslottedPets.First(), PetSaveMode.NotInSlot);
@@ -141,22 +149,22 @@ namespace Game.Entities
             return Tuple.Create<PetStable.PetInfo, PetSaveMode>(null, PetSaveMode.AsDeleted);
         }
 
-        public bool LoadPetFromDB(Player owner, uint petEntry = 0, uint petnumber = 0, bool current = false)
+        public bool LoadPetFromDB(Player owner, uint petEntry = 0, uint petnumber = 0, bool current = false, PetSaveMode? forcedSlot = null)
         {
             m_loading = true;
 
             PetStable petStable = owner.GetPetStable();
 
             ulong ownerid = owner.GetGUID().GetCounter();
-            (PetStable.PetInfo petInfo, PetSaveMode slot) = GetLoadPetInfo(petStable, petEntry, petnumber, current);
-            if (petInfo == null)
+            (PetStable.PetInfo petInfo, PetSaveMode slot) = GetLoadPetInfo(petStable, petEntry, petnumber, forcedSlot);
+            if (petInfo == null || (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot))
             {
                 m_loading = false;
                 return false;
             }
 
             // Don't try to reload the current pet
-            if (petStable.CurrentPet != null && owner.GetPet() != null && petStable.CurrentPet.PetNumber == petInfo.PetNumber)
+            if (petStable.GetCurrentPet() != null && owner.GetPet() != null && petStable.GetCurrentPet().PetNumber == petInfo.PetNumber)
                 return false;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petInfo.CreatedBySpellId, owner.GetMap().GetDifficultyID());
@@ -273,36 +281,28 @@ namespace Game.Entities
             }
 
             // set current pet as current
-            // 0=current
-            // 1..MAX_PET_STABLES in stable slot
-            // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
+            // 0-4=current
+            // PET_SAVE_NOT_IN_SLOT(-1) = not stable slot (summoning))
             if (slot == PetSaveMode.NotInSlot)
             {
                 uint petInfoNumber = petInfo.PetNumber;
-                if (petStable.CurrentPet != null)
+                if (petStable.CurrentPetIndex != 0)
                     owner.RemovePet(null, PetSaveMode.NotInSlot);
 
-                var unslottedPetInfo = petStable.UnslottedPets.Find(unslottedPet => unslottedPet.PetNumber == petInfoNumber);
-                Cypher.Assert(petStable.CurrentPet == null);
-                Cypher.Assert(unslottedPetInfo != null);
+                var unslottedPetIndex = petStable.UnslottedPets.FindIndex(unslottedPet => unslottedPet.PetNumber == petInfoNumber);
+                Cypher.Assert(petStable.CurrentPetIndex == 0);
+                Cypher.Assert(unslottedPetIndex != -1);
 
-                petStable.CurrentPet = unslottedPetInfo;
-                petStable.UnslottedPets.Remove(unslottedPetInfo);
-
-                // old petInfo is no longer valid, refresh it
-                petInfo = petStable.CurrentPet;
+                petStable.SetCurrentUnslottedPetIndex((uint)unslottedPetIndex);
             }
-            else if (PetSaveMode.FirstStableSlot <= slot && slot <= PetSaveMode.LastStableSlot)
+            else if (PetSaveMode.FirstActiveSlot <= slot && slot <= PetSaveMode.LastActiveSlot)
             {
-                var index = Array.FindIndex(petStable.StabledPets, pet => pet?.PetNumber == petnumber);
-                var stabledPet = petStable.StabledPets[index];
-                Cypher.Assert(index != -1);
+                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petnumber);
 
-                petStable.StabledPets[index] = petStable.CurrentPet;
-                petStable.CurrentPet = stabledPet;
+                Cypher.Assert(petStable.CurrentPetIndex == 0);
+                Cypher.Assert(activePetIndex != -1);
 
-                // old petInfo pointer is no longer valid, refresh it
-                petInfo = petStable.CurrentPet;
+                petStable.SetCurrentActivePetIndex((uint)activePetIndex);
             }
 
             // Send fake summon spell cast - this is needed for correct cooldown application for spells
@@ -437,8 +437,15 @@ namespace Game.Entities
             // save auras before possibly removing them    
             _SaveAuras(trans);
 
+            if (mode == PetSaveMode.AsCurrent)
+            {
+                var activeSlot = owner.GetPetStable().GetCurrentActivePetIndex();
+                if (activeSlot.HasValue)
+                    mode = (PetSaveMode)activeSlot;
+            }
+
             // stable and not in slot saves
-            if (mode > PetSaveMode.AsCurrent)
+            if (mode < PetSaveMode.FirstActiveSlot || mode >= PetSaveMode.LastActiveSlot)
                 RemoveAllAuras();
 
             _SaveSpells(trans);
@@ -446,7 +453,7 @@ namespace Game.Entities
             DB.Characters.CommitTransaction(trans);
 
             // current/stable/not_in_slot
-            if (mode >= PetSaveMode.AsCurrent)
+            if (mode != PetSaveMode.AsDeleted)
             {
                 ulong ownerLowGUID = GetOwnerGUID().GetCounter();
                 trans = new SQLTransaction();
@@ -456,21 +463,11 @@ namespace Game.Entities
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
-                // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
-                if (GetPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode == PetSaveMode.LastStableSlot))
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_SLOT);
-                    stmt.AddValue(0, ownerLowGUID);
-                    stmt.AddValue(1, (short)mode);
-                    stmt.AddValue(2, (short)PetSaveMode.NotInSlot);
-                    trans.Append(stmt);
-                }
-
                 // save pet
                 string actionBar = GenerateActionBarData();
 
-                Cypher.Assert(owner.GetPetStable().CurrentPet != null && owner.GetPetStable().CurrentPet.PetNumber == GetCharmInfo().GetPetNumber());
-                FillPetInfo(owner.GetPetStable().CurrentPet);
+                Cypher.Assert(owner.GetPetStable().GetCurrentPet() != null && owner.GetPetStable().GetCurrentPet().PetNumber == GetCharmInfo().GetPetNumber());
+                FillPetInfo(owner.GetPetStable().GetCurrentPet());
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET);
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -480,7 +477,7 @@ namespace Game.Entities
                 stmt.AddValue(4, GetLevel());
                 stmt.AddValue(5, m_unitData.PetExperience);
                 stmt.AddValue(6, (byte)GetReactState());
-                stmt.AddValue(7, (byte)mode);
+                stmt.AddValue(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
                 stmt.AddValue(8, GetName());
                 stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
                 stmt.AddValue(10, curhealth);
@@ -1676,6 +1673,8 @@ namespace Game.Entities
 
     public class PetStable
     {
+        static uint UnslottedPetIndexMask = 0x80000000;
+
         public class PetInfo
         {
             public string Name;
@@ -1695,14 +1694,31 @@ namespace Game.Entities
             public bool WasRenamed;
         }
 
-        public PetInfo CurrentPet;                                   // PET_SAVE_AS_CURRENT
+        public uint? CurrentPetIndex;                                   // index into ActivePets or UnslottedPets if highest bit is set
+        public PetInfo[] ActivePets = new PetInfo[SharedConst.MaxActivePets];      // PET_SAVE_FIRST_ACTIVE_SLOT - PET_SAVE_LAST_ACTIVE_SLOT
         public PetInfo[] StabledPets = new PetInfo[SharedConst.MaxPetStables];     // PET_SAVE_FIRST_STABLE_SLOT - PET_SAVE_LAST_STABLE_SLOT
         public List<PetInfo> UnslottedPets = new();                             // PET_SAVE_NOT_IN_SLOT
 
-        public PetInfo GetUnslottedHunterPet()
+        public PetInfo GetCurrentPet()
         {
-            return UnslottedPets.Count == 1 && UnslottedPets[0].Type == PetType.Hunter ? UnslottedPets[0] : null;
+            if (!CurrentPetIndex.HasValue)
+                return null;
+
+            uint? activePetIndex = GetCurrentActivePetIndex();
+            if (activePetIndex.HasValue)
+                return ActivePets[activePetIndex.Value] != null ? ActivePets[activePetIndex.Value] : null;
+
+            uint? unslottedPetIndex = GetCurrentUnslottedPetIndex();
+            if (unslottedPetIndex.HasValue)
+                return unslottedPetIndex < UnslottedPets.Count ? UnslottedPets[(int)unslottedPetIndex.Value] : null;
+
+            return null;
         }
+
+        public uint? GetCurrentActivePetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null; }
+        public void SetCurrentActivePetIndex(uint index) { CurrentPetIndex = index; }
+        uint? GetCurrentUnslottedPetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex & ~UnslottedPetIndexMask) : null; }
+        public void SetCurrentUnslottedPetIndex(uint index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
     }
     
     public enum ActiveStates

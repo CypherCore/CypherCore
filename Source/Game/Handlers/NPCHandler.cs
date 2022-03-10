@@ -324,7 +324,7 @@ namespace Game
             GetPlayer().PlayerTalkClass.SendCloseGossip();
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestStabledPets)]
+        [WorldPacketHandler(ClientOpcodes.RequestStabledPets, Processing = PacketProcessing.Inplace)]
         void HandleRequestStabledPets(RequestStabledPets packet)
         {
             if (!CheckStableMaster(packet.StableMaster))
@@ -353,58 +353,40 @@ namespace Game
                 return;
             }
 
-            uint petSlot = 0;
-            if (petStable.CurrentPet != null)
+            for (uint petSlot = 0; petSlot < petStable.ActivePets.Length; ++petSlot)
             {
-                PetStable.PetInfo pet = petStable.CurrentPet;
+                if (petStable.ActivePets[petSlot] == null)
+                    continue;
 
+                PetStable.PetInfo pet = petStable.ActivePets[petSlot];
                 PetStableInfo stableEntry;
-                stableEntry.PetSlot = petSlot;
+                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstActiveSlot;
                 stableEntry.PetNumber = pet.PetNumber;
                 stableEntry.CreatureID = pet.CreatureId;
                 stableEntry.DisplayID = pet.DisplayId;
                 stableEntry.ExperienceLevel = pet.Level;
                 stableEntry.PetFlags = PetStableinfo.Active;
                 stableEntry.PetName = pet.Name;
-                ++petSlot;
 
                 packet.Pets.Add(stableEntry);
             }
-            else
+
+            for (uint petSlot = 0; petSlot < petStable.StabledPets.Length; ++petSlot)
             {
-                PetStable.PetInfo pet = petStable.GetUnslottedHunterPet();
-                if (pet != null)
-                {
-                    PetStableInfo stableEntry;
-                    stableEntry.PetSlot = petSlot;
-                    stableEntry.PetNumber = pet.PetNumber;
-                    stableEntry.CreatureID = pet.CreatureId;
-                    stableEntry.DisplayID = pet.DisplayId;
-                    stableEntry.ExperienceLevel = pet.Level;
-                    stableEntry.PetFlags = PetStableinfo.Active;
-                    stableEntry.PetName = pet.Name;
+                if (petStable.StabledPets[petSlot] == null)
+                    continue;
 
-                    ++petSlot;
-                    packet.Pets.Add(stableEntry);
-                }
-            }
+                PetStable.PetInfo pet = petStable.StabledPets[petSlot];
+                PetStableInfo stableEntry;
+                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstStableSlot;
+                stableEntry.PetNumber = pet.PetNumber;
+                stableEntry.CreatureID = pet.CreatureId;
+                stableEntry.DisplayID = pet.DisplayId;
+                stableEntry.ExperienceLevel = pet.Level;
+                stableEntry.PetFlags = PetStableinfo.Inactive;
+                stableEntry.PetName = pet.Name;
 
-            foreach (var pet in petStable.StabledPets)
-            {
-                if (pet != null)
-                {
-                    PetStableInfo stableEntry;
-                    stableEntry.PetSlot = petSlot;
-                    stableEntry.PetNumber = pet.PetNumber;
-                    stableEntry.CreatureID = pet.CreatureId;
-                    stableEntry.DisplayID = pet.DisplayId;
-                    stableEntry.ExperienceLevel = pet.Level;
-                    stableEntry.PetFlags = PetStableinfo.Inactive;
-                    stableEntry.PetName = pet.Name;
-
-                    ++petSlot;
-                    packet.Pets.Add(stableEntry);
-                }
+                packet.Pets.Add(stableEntry);
             }
 
             SendPacket(packet);
@@ -417,6 +399,152 @@ namespace Game
             SendPacket(petStableResult);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SetPetSlot)]
+        void HandleSetPetSlot(SetPetSlot setPetSlot)
+        {
+            if (!CheckStableMaster(setPetSlot.StableMaster) || setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
+            {
+                SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            PetStable petStable = GetPlayer().GetPetStable();
+            if (petStable == null)
+            {
+                SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            (PetStable.PetInfo srcPet, PetSaveMode srcPetSlot) = Pet.GetLoadPetInfo(petStable, 0, setPetSlot.PetNumber, null);
+            PetSaveMode dstPetSlot = (PetSaveMode)setPetSlot.DestSlot;
+            PetStable.PetInfo dstPet = Pet.GetLoadPetInfo(petStable, 0, 0, dstPetSlot).Item1;
+
+            if (srcPet == null || srcPet.Type != PetType.Hunter)
+            {
+                SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            if (dstPet != null && dstPet.Type != PetType.Hunter)
+            {
+                SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            PetStable.PetInfo src = null;
+            PetStable.PetInfo dst = null;
+            PetSaveMode? newActivePetIndex = null;
+
+            if (SharedConst.IsActivePetSlot(srcPetSlot) && SharedConst.IsActivePetSlot(dstPetSlot))
+            {
+                // active<.active: only swap ActivePets and CurrentPetIndex (do not despawn pets)
+                src = petStable.ActivePets[srcPetSlot - PetSaveMode.FirstActiveSlot];
+                dst = petStable.ActivePets[dstPetSlot - PetSaveMode.FirstActiveSlot];
+
+                if (petStable.GetCurrentActivePetIndex().Value == (uint)srcPetSlot)
+                    newActivePetIndex = dstPetSlot;
+                else if (petStable.GetCurrentActivePetIndex().Value == (uint)dstPetSlot)
+                    newActivePetIndex = srcPetSlot;
+            }
+            else if (SharedConst.IsStabledPetSlot(srcPetSlot) && SharedConst.IsStabledPetSlot(dstPetSlot))
+            {
+                // stabled<.stabled: only swap StabledPets
+                src = petStable.StabledPets[srcPetSlot - PetSaveMode.FirstStableSlot];
+                dst = petStable.StabledPets[dstPetSlot - PetSaveMode.FirstStableSlot];
+            }
+            else if (SharedConst.IsActivePetSlot(srcPetSlot) && SharedConst.IsStabledPetSlot(dstPetSlot))
+            {
+                // active<.stabled: swap petStable contents and despawn active pet if it is involved in swap
+                if (petStable.CurrentPetIndex.Value == (uint)srcPetSlot)
+                {
+                    Pet oldPet = _player.GetPet();
+                    if (oldPet != null && !oldPet.IsAlive())
+                    {
+                        SendPetStableResult(StableResult.InternalError);
+                        return;
+                    }
+
+                    _player.RemovePet(oldPet, PetSaveMode.NotInSlot);
+                }
+
+                if (dstPet != null)
+                {
+                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(dstPet.CreatureId);
+                    if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets()))
+                    {
+                        SendPetStableResult(StableResult.CantControlExotic);
+                        return;
+                    }
+                }
+
+                src = petStable.ActivePets[srcPetSlot - PetSaveMode.FirstActiveSlot];
+                dst = petStable.StabledPets[dstPetSlot - PetSaveMode.FirstStableSlot];
+            }
+            else if (SharedConst.IsStabledPetSlot(srcPetSlot) && SharedConst.IsActivePetSlot(dstPetSlot))
+            {
+                // stabled<.active: swap petStable contents and despawn active pet if it is involved in swap
+                if (petStable.CurrentPetIndex.Value == (uint)dstPetSlot)
+                {
+                    Pet oldPet = _player.GetPet();
+                    if (oldPet != null && !oldPet.IsAlive())
+                    {
+                        SendPetStableResult(StableResult.InternalError);
+                        return;
+                    }
+
+                    _player.RemovePet(oldPet, PetSaveMode.NotInSlot);
+                }
+
+                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(srcPet.CreatureId);
+                if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets()))
+                {
+                    SendPetStableResult(StableResult.CantControlExotic);
+                    return;
+                }
+
+                src = petStable.StabledPets[srcPetSlot - PetSaveMode.FirstStableSlot];
+                dst = petStable.ActivePets[dstPetSlot - PetSaveMode.FirstActiveSlot];
+            }
+
+            SQLTransaction trans = new();
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+            stmt.AddValue(0, (short)dstPetSlot);
+            stmt.AddValue(1, _player.GetGUID().GetCounter());
+            stmt.AddValue(2, srcPet.PetNumber);
+            trans.Append(stmt);
+
+            if (dstPet != null)
+            {
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+                stmt.AddValue(0, (short)srcPetSlot);
+                stmt.AddValue(1, _player.GetGUID().GetCounter());
+                stmt.AddValue(2, dstPet.PetNumber);
+                trans.Append(stmt);
+            }
+
+            AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
+            {
+                var currentPlayerGuid = _player.GetGUID();
+                if (_player && _player.GetGUID() == currentPlayerGuid)
+                {
+                    if (success)
+                    {
+                        Extensions.Swap(ref src, ref dst);
+                        if (newActivePetIndex.HasValue)
+                            GetPlayer().GetPetStable().SetCurrentActivePetIndex((uint)newActivePetIndex.Value);
+                        SendPetStableResult(StableResult.StableSuccess);
+                    }
+                    else
+                    {
+                        SendPetStableResult(StableResult.InternalError);
+                    }
+                }
+            });
+        }
+        
         [WorldPacketHandler(ClientOpcodes.RepairItem, Processing = PacketProcessing.Inplace)]
         void HandleRepairItem(RepairItem packet)
         {

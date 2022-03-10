@@ -405,6 +405,8 @@ namespace Scripts.Spells.Hunter
     [Script]
     class spell_hun_tame_beast : SpellScript
     {
+        static uint[] CallPetSpellIds = { 883, 83242, 83243, 83244, 83245, };
+
         SpellCastResult CheckCast()
         {
             Player caster = GetCaster().ToPlayer();
@@ -427,10 +429,18 @@ namespace Scripts.Spells.Hunter
                 PetStable petStable = caster.GetPetStable();
                 if (petStable != null)
                 {
-                    if (petStable.CurrentPet != null)
+                    if (petStable.CurrentPetIndex.HasValue)
                         return SpellCastResult.AlreadyHaveSummon;
 
-                    if (petStable.GetUnslottedHunterPet() != null)
+                    var freeSlotIndex = Array.FindIndex(petStable.ActivePets, petInfo => petInfo == null);
+                    if (freeSlotIndex == -1)
+                    {
+                        caster.SendTameFailure(PetTameResult.TooMany);
+                        return SpellCastResult.DontReport;
+                    }
+
+                    // Check for known Call Pet X spells
+                    if (!caster.HasSpell(CallPetSpellIds[freeSlotIndex]))
                     {
                         caster.SendTameFailure(PetTameResult.TooMany);
                         return SpellCastResult.DontReport;

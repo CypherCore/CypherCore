@@ -5148,12 +5148,19 @@ namespace Game.Spells
                     }
                     case SpellEffectName.ResurrectPet:
                     {
-                        if (unitCaster == null)
+                        Player playerCaster = m_caster.ToPlayer();
+                        if (playerCaster == null || playerCaster.GetPetStable() == null)
                             return SpellCastResult.BadTargets;
 
-                        Creature pet = unitCaster.GetGuardianPet();
+                        Pet pet = playerCaster.GetPet();
                         if (pet != null && pet.IsAlive())
                             return SpellCastResult.AlreadyHaveSummon;
+
+                        PetStable petStable = playerCaster.GetPetStable();
+                        var deadPetInfo = petStable.ActivePets.FirstOrDefault(petInfo => petInfo?.Health == 0);
+
+                        if (deadPetInfo == null)
+                            return SpellCastResult.BadTargets;
 
                         break;
                     }
@@ -5221,17 +5228,27 @@ namespace Game.Spells
                         Player playerCaster = unitCaster.ToPlayer();
                         if (playerCaster != null && playerCaster.GetPetStable() != null)
                         {
-                            var info = Pet.GetLoadPetInfo(playerCaster.GetPetStable(), (uint)spellEffectInfo.MiscValue, 0, false);
-                            if (info.Item1 != null)
+                            PetSaveMode? petSlot = null;
+                            if (spellEffectInfo.MiscValue == 0)
                             {
-                                if (info.Item1.Type == PetType.Hunter)
+                                petSlot = (PetSaveMode)spellEffectInfo.CalcValue();
+
+                                // No pet can be summoned if any pet is dead
+                                foreach (var activePet in playerCaster.GetPetStable().ActivePets)
                                 {
-                                    if (info.Item1.Health == 0)
+                                    if (activePet?.Health == 0)
                                     {
                                         playerCaster.SendTameFailure(PetTameResult.Dead);
                                         return SpellCastResult.DontReport;
                                     }
+                                }
+                            }
 
+                            var info = Pet.GetLoadPetInfo(playerCaster.GetPetStable(), (uint)spellEffectInfo.MiscValue, 0, petSlot);
+                            if (info.Item1 != null)
+                            {
+                                if (info.Item1.Type == PetType.Hunter)
+                                {
                                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
                                     if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
                                     {
@@ -5251,6 +5268,21 @@ namespace Game.Spells
                                 return SpellCastResult.DontReport;
                             }
                         }
+                        break;
+                    }
+                    case SpellEffectName.DismissPet:
+                    {
+                        Player playerCaster = m_caster.ToPlayer();
+                        if (playerCaster == null)
+                            return SpellCastResult.BadTargets;
+
+                        Pet pet = playerCaster.GetPet();
+                        if (pet == null)
+                            return SpellCastResult.NoPet;
+
+                        if (!pet.IsAlive())
+                            return SpellCastResult.TargetsDead;
+
                         break;
                     }
                     case SpellEffectName.SummonPlayer:

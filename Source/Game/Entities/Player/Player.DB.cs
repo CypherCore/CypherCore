@@ -1538,7 +1538,7 @@ namespace Game.Entities
             m_bgData.taxiPath[1] = result.Read<uint>(8);
             m_bgData.mountSpell = result.Read<uint>(9);
         }
-        void _LoadPetStable(SQLResult result)
+        void _LoadPetStable(uint summonedPetNumber, SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1568,15 +1568,18 @@ namespace Game.Entities
                     petInfo.CreatedBySpellId = result.Read<uint>(13);
                     petInfo.Type = (PetType)result.Read<byte>(14);
                     petInfo.SpecializationId = result.Read<ushort>(15);
-                    if (slot == PetSaveMode.AsCurrent)
-                        m_petStable.CurrentPet = petInfo;
-                    else if (slot >= PetSaveMode.FirstStableSlot && slot <= PetSaveMode.LastStableSlot)
-                        m_petStable.StabledPets[(int)slot - 1] = petInfo;
+                    if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
+                        m_petStable.ActivePets[(int)slot] = petInfo;
+                    else if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
+                        m_petStable.StabledPets[slot - PetSaveMode.FirstStableSlot] = petInfo;
                     else if (slot == PetSaveMode.NotInSlot)
                         m_petStable.UnslottedPets.Add(petInfo);
 
                 } while (result.NextRow());
             }
+
+            if (Pet.GetLoadPetInfo(m_petStable, 0, summonedPetNumber, null).Item1 != null)
+                m_temporaryUnsummonedPetNumber = summonedPetNumber;
         }
 
 
@@ -3080,8 +3083,7 @@ namespace Game.Entities
 
             m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
-            _LoadPetStable(holder.GetResult(PlayerLoginQueryLoad.PetSlots));
-            m_temporaryUnsummonedPetNumber = summonedPetNumber;
+            _LoadPetStable(summonedPetNumber, holder.GetResult(PlayerLoginQueryLoad.PetSlots));
 
             // Honor system
             // Update Honor kills data
@@ -3590,7 +3592,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 PetStable petStable = GetPetStable();
                 if (petStable != null)
-                    stmt.AddValue(index++, petStable.CurrentPet != null && petStable.CurrentPet.Health > 0 ? petStable.CurrentPet.PetNumber : 0); // summonedPetNumber
+                    stmt.AddValue(index++, petStable.GetCurrentPet() != null && petStable.GetCurrentPet().Health > 0 ? petStable.GetCurrentPet().PetNumber : 0); // summonedPetNumber
                 else
                     stmt.AddValue(index++, 0); // summonedPetNumber
                 stmt.AddValue(index++, (ushort)atLoginFlags);

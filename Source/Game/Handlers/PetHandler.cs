@@ -541,7 +541,7 @@ namespace Game
             // check it!
             if (!pet || !pet.IsPet() || pet.ToPet().GetPetType() != PetType.Hunter || !pet.HasPetFlag(UnitPetFlags.CanBeRenamed) ||
                 pet.GetOwnerGUID() != _player.GetGUID() || pet.GetCharmInfo() == null ||
-                petStable == null || petStable.CurrentPet == null || petStable.CurrentPet.PetNumber != pet.GetCharmInfo().GetPetNumber())
+                petStable == null || petStable.GetCurrentPet() == null || petStable.GetCurrentPet().PetNumber != pet.GetCharmInfo().GetPetNumber())
                 return;
 
             PetNameInvalidReason res = ObjectManager.CheckPetName(name);
@@ -561,8 +561,8 @@ namespace Game
             pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Name);
             pet.RemovePetFlag(UnitPetFlags.CanBeRenamed);
 
-            petStable.CurrentPet.Name = name;
-            petStable.CurrentPet.WasRenamed = true;
+            petStable.GetCurrentPet().Name = name;
+            petStable.GetCurrentPet().WasRenamed = true;
 
             PreparedStatement stmt;
             SQLTransaction trans = new();

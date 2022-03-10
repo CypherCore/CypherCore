@@ -761,7 +761,9 @@ namespace Game.Entities
         {
             Player player = ToPlayer();
             PetStable petStable = player.GetOrInitPetStable();
-            if (petStable.CurrentPet != null || petStable.GetUnslottedHunterPet() != null)
+
+            var freeActiveSlot = Array.FindIndex(petStable.ActivePets, petInfo => petInfo == null);
+            if (freeActiveSlot == -1)
                 return false;
 
             pet.SetCreatorGUID(GetGUID());
@@ -784,8 +786,11 @@ namespace Game.Entities
             pet.InitPetCreateSpells();
             pet.SetFullHealth();
 
-            petStable.CurrentPet = new();
-            pet.FillPetInfo(petStable.CurrentPet);
+            petStable.SetCurrentActivePetIndex((uint)freeActiveSlot);
+
+            PetStable.PetInfo petInfo = new();
+            pet.FillPetInfo(petInfo);
+            petStable.ActivePets[freeActiveSlot] = petInfo;
             return true;
         }
 

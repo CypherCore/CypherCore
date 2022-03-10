@@ -219,7 +219,9 @@ namespace Framework.Constants
         /// <summary>
         /// Pet Const
         /// </summary>
-        public const int MaxPetStables = 4;
+        public const int MaxActivePets = 5;
+        public const int MaxPetStables = 200;
+        public const uint CallPetSpellId = 883;
         public const float PetFollowDist = 1.0f;
         public const float PetFollowAngle = MathF.PI;
         public const int MaxSpellCharm = 4;
@@ -433,6 +435,16 @@ namespace Framework.Constants
         public static long GetMaskForRace(Race raceId)
         {
             return raceId < Race.Max && raceBits[(int)raceId] >= 0 && raceBits[(int)raceId] < 64 ? (1 << raceBits[(int)raceId]) : 0;
+        }
+
+        public static bool IsActivePetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot;
+        }
+
+        public static bool IsStabledPetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
         }
     }
 

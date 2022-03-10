@@ -292,6 +292,22 @@ namespace Game.Networking.Packets
         public ObjectGuid StableMaster;
     }
 
+    class SetPetSlot : ClientPacket
+    {
+        public SetPetSlot(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetNumber = _worldPacket.ReadUInt32();
+            DestSlot = _worldPacket.ReadUInt8();
+            StableMaster = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid StableMaster;
+        public uint PetNumber;
+        public byte DestSlot;
+    }
+    
     //Structs
     public struct TreasureItem
     {

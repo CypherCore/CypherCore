@@ -721,7 +721,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_PET_NAME, "UPDATE character_pet SET name = ?, renamed = 1 WHERE owner = ? AND id = ?");
             PrepareStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND id = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_BY_ID, "DELETE FROM character_pet WHERE id = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_PET_BY_SLOT, "DELETE FROM character_pet WHERE owner = ? AND slot IN (?, ?)");
             PrepareStatement(CharStatements.DEL_ALL_PET_SPELLS_BY_OWNER, "DELETE FROM pet_spell WHERE guid in (SELECT id FROM character_pet WHERE owner=?)");
             PrepareStatement(CharStatements.UPD_PET_SPECS_BY_OWNER, "UPDATE character_pet SET specialization = 0 WHERE owner=?");
             PrepareStatement(CharStatements.INS_PET, "INSERT INTO character_pet (id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization) " +
@@ -1353,7 +1352,6 @@ namespace Framework.Database
         UPD_CHAR_PET_NAME,
         UPD_CHAR_PET_SLOT_BY_ID,
         DEL_CHAR_PET_BY_ID,
-        DEL_CHAR_PET_BY_SLOT,
         DEL_ALL_PET_SPELLS_BY_OWNER,
         UPD_PET_SPECS_BY_OWNER,
         INS_PET,

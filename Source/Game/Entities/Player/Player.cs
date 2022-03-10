@@ -4701,12 +4701,19 @@ namespace Game.Entities
             return null;
         }
 
-        public Pet SummonPet(uint entry, float x, float y, float z, float ang, PetType petType, uint duration)
+        public Pet SummonPet(uint entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration)
         {
+            return SummonPet(entry, slot, x, y, z, ang, duration, out _);
+        }
+
+        public Pet SummonPet(uint entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration, out bool isNew)
+        {
+            isNew = false;
+
             PetStable petStable = GetOrInitPetStable();
 
-            Pet pet = new(this, petType);
-            if (petType == PetType.Summon && pet.LoadPetFromDB(this, entry, 0, false))
+            Pet pet = new(this, PetType.Summon);
+            if (pet.LoadPetFromDB(this, entry, 0, false, slot))
             {
                 if (duration > 0)
                     pet.SetDuration(duration);
@@ -4717,6 +4724,8 @@ namespace Game.Entities
             // petentry == 0 for hunter "call pet" (current pet summoned if any)
             if (entry == 0)
                 return null;
+
+            // only SUMMON_PET are handled here
 
             pet.Relocate(x, y, z, ang);
             if (!pet.IsPositionValid())
@@ -4734,7 +4743,7 @@ namespace Game.Entities
                 return null;
             }
 
-            if (petType == PetType.Summon && petStable.CurrentPet != null)
+            if (petStable.GetCurrentPet() != null)
                 RemovePet(null, PetSaveMode.NotInSlot);
 
             PhasingHandler.InheritPhaseShift(pet, this);
@@ -4747,43 +4756,33 @@ namespace Game.Entities
 
             SetMinion(pet, true);
 
-            Cypher.Assert(petStable.CurrentPet == null && (petType != PetType.Hunter || petStable.GetUnslottedHunterPet() == null));
-            petStable.CurrentPet = new();
-            pet.FillPetInfo(petStable.CurrentPet);
-
-            switch (petType)
-            {
-                case PetType.Summon:
-                    // this enables pet details window (Shift+P)
-                    pet.GetCharmInfo().SetPetNumber(petNumber, true);
-                    pet.SetClass(Class.Mage);
-                    pet.SetPetExperience(0);
-                    pet.SetPetNextLevelExperience(1000);
-                    pet.SetFullHealth();
-                    pet.SetFullPower(PowerType.Mana);
-                    pet.SetPetNameTimestamp((uint)GameTime.GetGameTime());
-                    break;
-                default:
-                    break;
-            }
+            // this enables pet details window (Shift+P)
+            pet.GetCharmInfo().SetPetNumber(petNumber, true);
+            pet.SetClass(Class.Mage);
+            pet.SetPetExperience(0);
+            pet.SetPetNextLevelExperience(1000);
+            pet.SetFullHealth();
+            pet.SetFullPower(PowerType.Mana);
+            pet.SetPetNameTimestamp((uint)GameTime.GetGameTime());
 
             map.AddToMap(pet.ToCreature());
 
-            switch (petType)
-            {
-                case PetType.Summon:
-                    pet.InitPetCreateSpells();
-                    pet.SavePetToDB(PetSaveMode.AsCurrent);
-                    PetSpellInitialize();
-                    break;
-                default:
-                    break;
-            }
+            Cypher.Assert(petStable.CurrentPetIndex == 0);
+            petStable.SetCurrentUnslottedPetIndex((uint)petStable.UnslottedPets.Count);
+            PetStable.PetInfo petInfo = new();
+            pet.FillPetInfo(petInfo);
+            petStable.UnslottedPets.Add(petInfo);
+
+            pet.InitPetCreateSpells();
+            pet.SavePetToDB(PetSaveMode.AsCurrent);
+            PetSpellInitialize();
 
             if (duration > 0)
                 pet.SetDuration(duration);
 
             //ObjectAccessor.UpdateObjectVisibility(pet);
+
+            isNew = true;
 
             return pet;
         }
@@ -4829,49 +4828,22 @@ namespace Game.Entities
 
             if (pet == null)
             {
-                if (mode == PetSaveMode.NotInSlot && m_petStable?.CurrentPet != null)
-                {
-                    // Handle removing pet while it is in "temporarily unsummoned" state, for example on mount
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-                    stmt.AddValue(0, (short)PetSaveMode.NotInSlot);
-                    stmt.AddValue(1, GetGUID().GetCounter());
-                    stmt.AddValue(2, m_petStable.CurrentPet.PetNumber);
-                    DB.Characters.Execute(stmt);
-
-                    m_petStable.UnslottedPets.Add(m_petStable.CurrentPet);
-                    m_petStable.CurrentPet = null;
-                }
+                // Handle removing pet while it is in "temporarily unsummoned" state, for example on mount
+                if (mode == PetSaveMode.NotInSlot && m_petStable != null && m_petStable.CurrentPetIndex.HasValue)
+                    m_petStable.CurrentPetIndex = null;
 
                 return;
             }
 
             pet.CombatStop();
 
-            if (returnreagent)
-            {
-                switch (pet.GetEntry())
-                {
-                    //warlock pets except imp are removed(?) when logging out
-                    case 1860:
-                    case 1863:
-                    case 417:
-                    case 17252:
-                        mode = PetSaveMode.NotInSlot;
-                        break;
-                }
-            }
-
             // only if current pet in slot
             pet.SavePetToDB(mode);
 
-            Cypher.Assert(m_petStable.CurrentPet != null && m_petStable.CurrentPet.PetNumber == pet.GetCharmInfo().GetPetNumber());
-            if (mode == PetSaveMode.NotInSlot)
-            {
-                m_petStable.UnslottedPets.Add(m_petStable.CurrentPet);
-                m_petStable.CurrentPet = null;
-            }
-            else if (mode == PetSaveMode.AsDeleted)
-                m_petStable.CurrentPet = null;
+            PetStable.PetInfo currentPet = m_petStable.GetCurrentPet();
+            Cypher.Assert(currentPet != null && currentPet.PetNumber == pet.GetCharmInfo().GetPetNumber());
+            if (mode == PetSaveMode.NotInSlot || mode == PetSaveMode.AsDeleted)
+                m_petStable.CurrentPetIndex = null;
             // else if (stable slots) handled in opcode handlers due to required swaps
             // else (current pet) doesnt need to do anything
 

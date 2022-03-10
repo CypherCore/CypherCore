@@ -2298,26 +2298,33 @@ namespace Game.Spells
                     return;
             }
 
+            PetSaveMode? petSlot = null;
+            if (petentry == 0)
+                petSlot = (PetSaveMode)damage;
+
             float x, y, z;
             owner.GetClosePoint(out x, out y, out z, owner.GetCombatReach());
-            Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0);
-            if (!pet)
+            Pet pet = owner.SummonPet(petentry, petSlot, x, y, z, owner.Orientation, 0, out bool isNew);
+            if (pet == null)
                 return;
 
-            if (m_caster.IsTypeId(TypeId.Unit))
+            if (isNew)
             {
-                if (m_caster.ToCreature().IsTotem())
-                    pet.SetReactState(ReactStates.Aggressive);
-                else
-                    pet.SetReactState(ReactStates.Defensive);
+                if (m_caster.IsCreature())
+                {
+                    if (m_caster.ToCreature().IsTotem())
+                        pet.SetReactState(ReactStates.Aggressive);
+                    else
+                        pet.SetReactState(ReactStates.Defensive);
+                }
+
+                pet.SetCreatedBySpell(m_spellInfo.Id);
+
+                // generate new name for summon pet
+                string new_name = Global.ObjectMgr.GeneratePetName(petentry);
+                if (!string.IsNullOrEmpty(new_name))
+                    pet.SetName(new_name);
             }
-
-            pet.SetCreatedBySpell(m_spellInfo.Id);
-
-            // generate new name for summon pet
-            string new_name = Global.ObjectMgr.GeneratePetName(petentry);
-            if (!string.IsNullOrEmpty(new_name))
-                pet.SetName(new_name);
 
             ExecuteLogEffectSummonObject(effectInfo.Effect, pet);
         }
@@ -4012,42 +4019,68 @@ namespace Game.Spells
         }
 
         [SpellEffectHandler(SpellEffectName.ResurrectPet)]
-        void EffectSummonDeadPet()
+        void EffectResurrectPet()
         {
             if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            if (damage < 0)
                 return;
 
             Player player = m_caster.ToPlayer();
             if (player == null)
                 return;
 
-            Pet pet = player.GetPet();
-            if (pet != null && pet.IsAlive())
-                return;
+            // Maybe player dismissed dead pet or pet despawned?
+            bool hadPet = true;
 
-            if (damage < 0)
-                return;
-
-            float x, y, z;
-            player.GetPosition(out x, out y, out z);
-            if (pet == null)
+            if (player.GetPet() == null)
             {
-                player.SummonPet(0, x, y, z, player.Orientation, PetType.Summon, 0);
-                pet = player.GetPet();
+                PetStable petStable = player.GetPetStable();
+                var deadPetIndex = Array.FindIndex(petStable.ActivePets, petInfo => petInfo?.Health == 0);
+
+                PetSaveMode slot = (PetSaveMode)deadPetIndex;
+
+                player.SummonPet(0, slot, 0f, 0f, 0f, 0f, 0);
+                hadPet = false;
             }
-            if (pet == null)
+
+            // TODO: Better to fail Hunter's "Revive Pet" at cast instead of here when casting ends
+            Pet pet = player.GetPet(); // Attempt to get current pet
+            if (pet == null || pet.IsAlive())
                 return;
 
-            player.GetMap().CreatureRelocation(pet, x, y, z, player.GetOrientation());
+            // If player did have a pet before reviving, teleport it
+            if (hadPet)
+            {
+                // Reposition the pet's corpse before reviving so as not to grab aggro
+                // We can use a different, more accurate version of GetClosePoint() since we have a pet
+                // Will be used later to reposition the pet if we have one
+                player.GetClosePoint(out float x, out float y, out float z, pet.GetCombatReach(), SharedConst.PetFollowDist, pet.GetFollowAngle());
+                pet.NearTeleportTo(x, y, z, player.GetOrientation());
+                pet.Relocate(x, y, z, player.GetOrientation()); // This is needed so SaveStayPosition() will get the proper coords.
+            }
 
-            pet.SetDynamicFlags(UnitDynFlags.HideModel);
+            pet.SetDynamicFlags(UnitDynFlags.None);
             pet.RemoveUnitFlag(UnitFlags.Skinnable);
             pet.SetDeathState(DeathState.Alive);
             pet.ClearUnitState(UnitState.AllErasable);
             pet.SetHealth(pet.CountPctFromMaxHealth(damage));
 
-            pet.InitializeAI();
-            player.PetSpellInitialize();
+            // Reset things for when the AI to takes over
+            CharmInfo ci = pet.GetCharmInfo();
+            if (ci != null)
+            {
+                // In case the pet was at stay, we don't want it running back
+                ci.SaveStayPosition();
+                ci.SetIsAtStay(ci.HasCommandState(CommandStates.Stay));
+
+                ci.SetIsFollowing(false);
+                ci.SetIsCommandAttack(false);
+                ci.SetIsCommandFollow(false);
+                ci.SetIsReturning(false);
+            }
+
             pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
 
