@@ -34,11 +34,11 @@ namespace Framework.Constants
 
     public enum PetSaveMode
     {
-        AsDeleted = -1,                        // not saved in fact
+        NotInSlot = -1,                       // for avoid conflict with stable size grow will use negative value
+        AsDeleted = -2,                        // not saved in fact
         AsCurrent = 0,                        // in current slot (with player)
         FirstStableSlot = 1,
-        LastStableSlot = 4,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
-        NotInSlot = 100                       // for avoid conflict with stable size grow will use 100
+        LastStableSlot = SharedConst.MaxPetStables,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
     }
 
     public enum PetSpellState

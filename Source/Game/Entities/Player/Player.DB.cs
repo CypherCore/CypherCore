@@ -1558,7 +1558,7 @@ namespace Game.Entities
                     petInfo.Level = result.Read<byte>(3);
                     petInfo.Experience = result.Read<uint>(4);
                     petInfo.ReactState = (ReactStates)result.Read<byte>(5);
-                    PetSaveMode slot = (PetSaveMode)result.Read<byte>(6);
+                    PetSaveMode slot = (PetSaveMode)result.Read<short>(6);
                     petInfo.Name = result.Read<string>(7);
                     petInfo.WasRenamed = result.Read<bool>(8);
                     petInfo.Health = result.Read<uint>(9);

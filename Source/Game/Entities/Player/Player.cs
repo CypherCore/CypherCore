@@ -4833,7 +4833,7 @@ namespace Game.Entities
                 {
                     // Handle removing pet while it is in "temporarily unsummoned" state, for example on mount
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-                    stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
+                    stmt.AddValue(0, (short)PetSaveMode.NotInSlot);
                     stmt.AddValue(1, GetGUID().GetCounter());
                     stmt.AddValue(2, m_petStable.CurrentPet.PetNumber);
                     DB.Characters.Execute(stmt);

@@ -457,12 +457,12 @@ namespace Game.Entities
                 trans.Append(stmt);
 
                 // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
-                if (GetPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode > PetSaveMode.LastStableSlot))
+                if (GetPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode == PetSaveMode.LastStableSlot))
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_SLOT);
                     stmt.AddValue(0, ownerLowGUID);
-                    stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
-                    stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
+                    stmt.AddValue(1, (short)mode);
+                    stmt.AddValue(2, (short)PetSaveMode.NotInSlot);
                     trans.Append(stmt);
                 }
 
