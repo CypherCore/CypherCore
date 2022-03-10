@@ -1697,7 +1697,6 @@ namespace Game.Entities
 
         public PetInfo CurrentPet;                                   // PET_SAVE_AS_CURRENT
         public PetInfo[] StabledPets = new PetInfo[SharedConst.MaxPetStables];     // PET_SAVE_FIRST_STABLE_SLOT - PET_SAVE_LAST_STABLE_SLOT
-        public uint MaxStabledPets = 0;
         public List<PetInfo> UnslottedPets = new();                             // PET_SAVE_NOT_IN_SLOT
 
         public PetInfo GetUnslottedHunterPet()

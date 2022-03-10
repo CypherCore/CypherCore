@@ -1538,18 +1538,12 @@ namespace Game.Entities
             m_bgData.taxiPath[1] = result.Read<uint>(8);
             m_bgData.mountSpell = result.Read<uint>(9);
         }
-        void _LoadPetStable(byte petStableSlots, SQLResult result)
+        void _LoadPetStable(SQLResult result)
         {
-            if (petStableSlots == 0 && result.IsEmpty())
+            if (result.IsEmpty())
                 return;
 
             m_petStable = new();
-            m_petStable.MaxStabledPets = petStableSlots;
-            if (m_petStable.MaxStabledPets > SharedConst.MaxPetStables)
-            {
-                Log.outError(LogFilter.Player, $"Player::LoadFromDB: Player ({GetGUID()}) can't have more stable slots than {SharedConst.MaxPetStables}, but has {m_petStable.MaxStabledPets} in DB");
-                m_petStable.MaxStabledPets = SharedConst.MaxPetStables;
-            }
 
             //         0      1        2      3    4           5     6     7        8          9       10      11        12              13       14              15
             // SELECT id, entry, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?
@@ -2605,7 +2599,6 @@ namespace Game.Entities
             float trans_o = result.Read<float>(fieldIndex++);
             ulong transguid = result.Read<ulong>(fieldIndex++);
             PlayerExtraFlags extra_flags = (PlayerExtraFlags)result.Read<ushort>(fieldIndex++);
-            byte stable_slots = result.Read<byte>(fieldIndex++);
             ushort at_login = result.Read<ushort>(fieldIndex++);
             ushort zone = result.Read<ushort>(fieldIndex++);
             byte online = result.Read<byte>(fieldIndex++);
@@ -3086,7 +3079,7 @@ namespace Game.Entities
 
             m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
-            _LoadPetStable(stable_slots, holder.GetResult(PlayerLoginQueryLoad.PetSlots));
+            _LoadPetStable(holder.GetResult(PlayerLoginQueryLoad.PetSlots));
 
             // Honor system
             // Update Honor kills data
@@ -3453,7 +3446,6 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetTalentResetTime());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
-                stmt.AddValue(index++, m_petStable != null ? m_petStable.MaxStabledPets : 0);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, m_deathExpireTime);
 
@@ -3593,7 +3585,6 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
-                stmt.AddValue(index++, m_petStable != null ? m_petStable.MaxStabledPets : 0);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, GetZoneId());
                 stmt.AddValue(index++, m_deathExpireTime);
