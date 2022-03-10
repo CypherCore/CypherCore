@@ -2366,8 +2366,8 @@ namespace Scripts.Spells.Generic
                 if (newPet.LoadPetFromDB(player, 0, player.GetLastPetNumber(), true))
                 {
                     // revive the pet if it is dead
-                    if (newPet.GetDeathState() == DeathState.Dead)
-                        newPet.SetDeathState(DeathState.Alive);
+                    if (newPet.GetDeathState() != DeathState.Alive && newPet.GetDeathState() != DeathState.JustRespawned)
+                        newPet.SetDeathState(DeathState.JustRespawned);
 
                     newPet.SetFullHealth();
                     newPet.SetFullPower(newPet.GetPowerType());

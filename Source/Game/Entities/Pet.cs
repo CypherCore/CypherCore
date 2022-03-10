@@ -109,7 +109,7 @@ namespace Game.Entities
                         return Tuple.Create(stable.StabledPets[stableSlot], PetSaveMode.FirstStableSlot + stableSlot);
 
                 foreach (var pet in stable.UnslottedPets)
-                    if (pet.CreatureId == petEntry)
+                    if (pet.PetNumber == petnumber)
                         return Tuple.Create(pet, PetSaveMode.NotInSlot);
             }
             else if (current)
@@ -280,6 +280,9 @@ namespace Game.Entities
 
                 petStable.CurrentPet = unslottedPetInfo;
                 petStable.UnslottedPets.Remove(unslottedPetInfo);
+
+                // old petInfo is no longer valid, refresh it
+                petInfo = petStable.CurrentPet;
             }
 
             // Send fake summon spell cast - this is needed for correct cooldown application for spells
