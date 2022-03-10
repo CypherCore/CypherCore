@@ -299,6 +299,10 @@ namespace Game.Spells
                 }
             }
 
+            TimeSpan delay = TimeSpan.Zero;
+            if (effectInfo.Effect == SpellEffectName.TriggerSpell)
+                delay = TimeSpan.FromMilliseconds(effectInfo.MiscValue);
+
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.SetOriginalCaster(m_originalCasterGUID);
             args.SetOriginalCastId(m_castId);
@@ -307,8 +311,11 @@ namespace Game.Spells
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
                     args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
-            // original caster guid only for GO cast
-            m_caster.CastSpell(targets, spellInfo.Id, args);
+            m_caster.m_Events.AddEventAtOffset(() =>
+            {
+                // original caster guid only for GO cast
+                m_caster.CastSpell(targets, triggered_spell_id, args);
+            }, delay);
         }
 
         [SpellEffectHandler(SpellEffectName.TriggerMissile)]
