@@ -1538,6 +1538,53 @@ namespace Game.Entities
             m_bgData.taxiPath[1] = result.Read<uint>(8);
             m_bgData.mountSpell = result.Read<uint>(9);
         }
+        void _LoadPetStable(byte petStableSlots, SQLResult result)
+        {
+            if (petStableSlots == 0 && result.IsEmpty())
+                return;
+
+            m_petStable = new();
+            m_petStable.MaxStabledPets = petStableSlots;
+            if (m_petStable.MaxStabledPets > SharedConst.MaxPetStables)
+            {
+                Log.outError(LogFilter.Player, $"Player::LoadFromDB: Player ({GetGUID()}) can't have more stable slots than {SharedConst.MaxPetStables}, but has {m_petStable.MaxStabledPets} in DB");
+                m_petStable.MaxStabledPets = SharedConst.MaxPetStables;
+            }
+
+            //         0      1        2      3    4           5     6     7        8          9       10      11        12              13       14              15
+            // SELECT id, entry, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    PetStable.PetInfo petInfo = new();
+                    petInfo.PetNumber = result.Read<uint>(0);
+                    petInfo.CreatureId = result.Read<uint>(1);
+                    petInfo.DisplayId = result.Read<uint>(2);
+                    petInfo.Level = result.Read<byte>(3);
+                    petInfo.Experience = result.Read<uint>(4);
+                    petInfo.ReactState = (ReactStates)result.Read<byte>(5);
+                    PetSaveMode slot = (PetSaveMode)result.Read<byte>(6);
+                    petInfo.Name = result.Read<string>(7);
+                    petInfo.WasRenamed = result.Read<bool>(8);
+                    petInfo.Health = result.Read<uint>(9);
+                    petInfo.Mana = result.Read<uint>(10);
+                    petInfo.ActionBar = result.Read<string>(11);
+                    petInfo.LastSaveTime = result.Read<uint>(12);
+                    petInfo.CreatedBySpellId = result.Read<uint>(13);
+                    petInfo.Type = (PetType)result.Read<byte>(14);
+                    petInfo.SpecializationId = result.Read<ushort>(15);
+                    if (slot == PetSaveMode.AsCurrent)
+                        m_petStable.CurrentPet = petInfo;
+                    else if (slot >= PetSaveMode.FirstStableSlot && slot <= PetSaveMode.LastStableSlot)
+                        m_petStable.StabledPets[(int)slot - 1] = petInfo;
+                    else if (slot == PetSaveMode.NotInSlot)
+                        m_petStable.UnslottedPets.Add(petInfo);
+
+                } while (result.NextRow());
+            }
+        }
+
 
         void _SaveInventory(SQLTransaction trans)
         {
@@ -3039,12 +3086,7 @@ namespace Game.Entities
 
             m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
-            m_stableSlots = stable_slots;
-            if (m_stableSlots > 4)
-            {
-                Log.outError(LogFilter.Player, "Player can have not more {0} stable slots, but have in DB {1}", 4, m_stableSlots);
-                m_stableSlots = 4;
-            }
+            _LoadPetStable(stable_slots, holder.GetResult(PlayerLoginQueryLoad.PetSlots));
 
             // Honor system
             // Update Honor kills data
@@ -3411,7 +3453,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetTalentResetTime());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
-                stmt.AddValue(index++, m_stableSlots);
+                stmt.AddValue(index++, m_petStable != null ? m_petStable.MaxStabledPets : 0);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, m_deathExpireTime);
 
@@ -3551,7 +3593,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
-                stmt.AddValue(index++, m_stableSlots);
+                stmt.AddValue(index++, m_petStable != null ? m_petStable.MaxStabledPets : 0);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, GetZoneId());
                 stmt.AddValue(index++, m_deathExpireTime);
@@ -3937,7 +3979,7 @@ namespace Game.Entities
 
                     // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
                     // NOW we can finally clear other DB data related to character
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PETS);
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_IDS);
                     stmt.AddValue(0, guid);
                     SQLResult resultPets = DB.Characters.Query(stmt);
 

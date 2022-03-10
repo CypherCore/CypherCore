@@ -730,7 +730,11 @@ namespace Game.Entities
 
             uint level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
 
-            InitTamedPet(pet, level, spell_id);
+            if (!InitTamedPet(pet, level, spell_id))
+            {
+                pet.Dispose();
+                return null;
+            }
 
             return pet;
         }
@@ -754,6 +758,11 @@ namespace Game.Entities
 
         bool InitTamedPet(Pet pet, uint level, uint spell_id)
         {
+            Player player = ToPlayer();
+            PetStable petStable = player.GetOrInitPetStable();
+            if (petStable.CurrentPet != null || petStable.GetUnslottedHunterPet() != null)
+                return false;
+
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
             pet.SetCreatedBySpell(spell_id);
@@ -773,6 +782,9 @@ namespace Game.Entities
             // this enables pet details window (Shift+P)
             pet.InitPetCreateSpells();
             pet.SetFullHealth();
+
+            petStable.CurrentPet = new();
+            pet.FillPetInfo(petStable.CurrentPet);
             return true;
         }
 

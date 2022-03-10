@@ -343,59 +343,68 @@ namespace Game
 
         public void SendStablePet(ObjectGuid guid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SLOTS_DETAIL);
-            stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, (byte)PetSaveMode.FirstStableSlot);
-            stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
-
-            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(SendStablePetCallback, guid));
-        }
-
-        void SendStablePetCallback(ObjectGuid guid, SQLResult result)
-        {
-            if (!GetPlayer())
-                return;
-
             PetStableList packet = new();
             packet.StableMaster = guid;
 
-            Pet pet = GetPlayer().GetPet();
+            PetStable petStable = GetPlayer().GetPetStable();
+            if (petStable == null)
+            {
+                SendPacket(packet);
+                return;
+            }
 
             uint petSlot = 0;
-            // not let move dead pet in slot
-            if (pet && pet.IsAlive() && pet.GetPetType() == PetType.Hunter)
+            if (petStable.CurrentPet != null)
             {
-                PetStableInfo stableEntry;// = new PetStableInfo();
+                PetStable.PetInfo pet = petStable.CurrentPet;
+
+                PetStableInfo stableEntry;
                 stableEntry.PetSlot = petSlot;
-                stableEntry.PetNumber = pet.GetCharmInfo().GetPetNumber();
-                stableEntry.CreatureID = pet.GetEntry();
-                stableEntry.DisplayID = pet.GetDisplayId();
-                stableEntry.ExperienceLevel = pet.GetLevel();
+                stableEntry.PetNumber = pet.PetNumber;
+                stableEntry.CreatureID = pet.CreatureId;
+                stableEntry.DisplayID = pet.DisplayId;
+                stableEntry.ExperienceLevel = pet.Level;
                 stableEntry.PetFlags = PetStableinfo.Active;
-                stableEntry.PetName = pet.GetName();
+                stableEntry.PetName = pet.Name;
                 ++petSlot;
 
                 packet.Pets.Add(stableEntry);
             }
-
-            if (!result.IsEmpty())
+            else
             {
-                do
+                PetStable.PetInfo pet = petStable.GetUnslottedHunterPet();
+                if (pet != null)
                 {
-                    PetStableInfo stableEntry;// = new PetStableInfo();
-
+                    PetStableInfo stableEntry;
                     stableEntry.PetSlot = petSlot;
-                    stableEntry.PetNumber = result.Read<uint>(1);          // petnumber
-                    stableEntry.CreatureID = result.Read<uint>(2);         // creature entry
-                    stableEntry.DisplayID = result.Read<uint>(5);          // creature displayid
-                    stableEntry.ExperienceLevel = result.Read<ushort>(3);    // level
-                    stableEntry.PetFlags = PetStableinfo.Inactive;
-                    stableEntry.PetName = result.Read<string>(4);            // Name
+                    stableEntry.PetNumber = pet.PetNumber;
+                    stableEntry.CreatureID = pet.CreatureId;
+                    stableEntry.DisplayID = pet.DisplayId;
+                    stableEntry.ExperienceLevel = pet.Level;
+                    stableEntry.PetFlags = PetStableinfo.Active;
+                    stableEntry.PetName = pet.Name;
 
                     ++petSlot;
                     packet.Pets.Add(stableEntry);
                 }
-                while (result.NextRow());
+            }
+
+            foreach (var pet in petStable.StabledPets)
+            {
+                if (pet != null)
+                {
+                    PetStableInfo stableEntry;
+                    stableEntry.PetSlot = petSlot;
+                    stableEntry.PetNumber = pet.PetNumber;
+                    stableEntry.CreatureID = pet.CreatureId;
+                    stableEntry.DisplayID = pet.DisplayId;
+                    stableEntry.ExperienceLevel = pet.Level;
+                    stableEntry.PetFlags = PetStableinfo.Inactive;
+                    stableEntry.PetName = pet.Name;
+
+                    ++petSlot;
+                    packet.Pets.Add(stableEntry);
+                }
             }
 
             SendPacket(packet);

@@ -536,10 +536,12 @@ namespace Game
             bool isdeclined = packet.RenameData.HasDeclinedNames;
             string name = packet.RenameData.NewName;
 
+            PetStable petStable = _player.GetPetStable();
             Pet pet = ObjectAccessor.GetPet(GetPlayer(), petguid);
             // check it!
             if (!pet || !pet.IsPet() || pet.ToPet().GetPetType() != PetType.Hunter || !pet.HasPetFlag(UnitPetFlags.CanBeRenamed) ||
-                pet.GetOwnerGUID() != GetPlayer().GetGUID() || pet.GetCharmInfo() == null)
+                pet.GetOwnerGUID() != _player.GetGUID() || pet.GetCharmInfo() == null ||
+                petStable == null || petStable.CurrentPet == null || petStable.CurrentPet.PetNumber != pet.GetCharmInfo().GetPetNumber())
                 return;
 
             PetNameInvalidReason res = ObjectManager.CheckPetName(name);
@@ -558,6 +560,9 @@ namespace Game
             pet.SetName(name);
             pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Name);
             pet.RemovePetFlag(UnitPetFlags.CanBeRenamed);
+
+            petStable.CurrentPet.Name = name;
+            petStable.CurrentPet.WasRenamed = true;
 
             PreparedStatement stmt;
             SQLTransaction trans = new();

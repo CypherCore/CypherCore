@@ -713,7 +713,7 @@ namespace Game
             return _transactionCallbacks.AddCallback(callback);
         }
 
-        SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
+        public SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
         {
             return (SQLQueryHolderCallback<R>)_queryHolderProcessor.AddCallback(callback);
         }

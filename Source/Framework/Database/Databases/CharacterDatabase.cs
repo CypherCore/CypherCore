@@ -693,13 +693,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CALENDAR_INVITE, "DELETE FROM calendar_invites WHERE InviteID = ?");
 
             // Pet
-            PrepareStatement(CharStatements.SEL_PET_SLOTS, "SELECT owner, slot FROM character_pet WHERE owner = ?  AND slot >= ? AND slot <= ? ORDER BY slot");
-            PrepareStatement(CharStatements.SEL_PET_SLOTS_DETAIL, "SELECT owner, id, entry, level, name, modelid FROM character_pet WHERE owner = ? AND slot >= ? AND slot <= ? ORDER BY slot");
-            PrepareStatement(CharStatements.SEL_PET_ENTRY, "SELECT entry FROM character_pet WHERE owner = ? AND id = ? AND slot >= ? AND slot <= ?");
-            PrepareStatement(CharStatements.SEL_PET_SLOT_BY_ID, "SELECT slot, entry FROM character_pet WHERE owner = ? AND id = ?");
-            PrepareStatement(CharStatements.SEL_PET_SPELL_LIST, "SELECT DISTINCT pet_spell.spell FROM pet_spell, character_pet WHERE character_pet.owner = ? AND character_pet.id = pet_spell.guid AND character_pet.id <> ?");
-            PrepareStatement(CharStatements.SEL_CHAR_PET, "SELECT id FROM character_pet WHERE owner = ? AND id <> ?");
-            PrepareStatement(CharStatements.SEL_CHAR_PETS, "SELECT id FROM character_pet WHERE owner = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_PET_IDS, "SELECT id FROM character_pet WHERE owner = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME_BY_OWNER, "DELETE FROM character_pet_declinedname WHERE owner = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME, "DELETE FROM character_pet_declinedname WHERE id = ?");
             PrepareStatement(CharStatements.INS_CHAR_PET_DECLINEDNAME, "INSERT INTO character_pet_declinedname (id, owner, genitive, dative, accusative, instrumental, prepositional) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -722,14 +716,9 @@ namespace Framework.Database
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_PET_AURA_EFFECT, "INSERT INTO pet_aura_effect (guid, casterGuid, spell, effectMask, effectIndex, amount, baseAmount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY, "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ? AND id = ?");
-            PrepareStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2, "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ? AND entry = ? AND (slot = ? OR slot > ?)");
-            PrepareStatement(CharStatements.SEL_CHAR_PET_BY_SLOT, "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ? AND (slot = ? OR slot > ?) ");
-            PrepareStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT, "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ? AND slot = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_PETS, "SELECT id, entry, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_BY_OWNER, "DELETE FROM character_pet WHERE owner = ?");
             PrepareStatement(CharStatements.UPD_CHAR_PET_NAME, "UPDATE character_pet SET name = ?, renamed = 1 WHERE owner = ? AND id = ?");
-            PrepareStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? AND id <> ?");
-            PrepareStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ?");
             PrepareStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND id = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_BY_ID, "DELETE FROM character_pet WHERE id = ?");
             PrepareStatement(CharStatements.DEL_CHAR_PET_BY_SLOT, "DELETE FROM character_pet WHERE owner = ? AND (slot = ? OR slot > ?)");
@@ -1356,23 +1345,12 @@ namespace Framework.Database
         DEL_PET_SPELLS,
         DEL_CHAR_PET_BY_OWNER,
         DEL_CHAR_PET_DECLINEDNAME_BY_OWNER,
-        SEL_CHAR_PET_BY_ENTRY_AND_SLOT,
-        SEL_PET_SLOTS,
-        SEL_PET_SLOTS_DETAIL,
-        SEL_PET_ENTRY,
-        SEL_PET_SLOT_BY_ID,
-        SEL_PET_SPELL_LIST,
-        SEL_CHAR_PET,
+        SEL_CHAR_PET_IDS,
         SEL_CHAR_PETS,
         INS_CHAR_PET,
-        SEL_CHAR_PET_BY_ENTRY,
-        SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2,
-        SEL_CHAR_PET_BY_SLOT,
         DEL_CHAR_PET_DECLINEDNAME,
         INS_CHAR_PET_DECLINEDNAME,
         UPD_CHAR_PET_NAME,
-        UPD_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID,
-        UPD_CHAR_PET_SLOT_BY_SLOT,
         UPD_CHAR_PET_SLOT_BY_ID,
         DEL_CHAR_PET_BY_ID,
         DEL_CHAR_PET_BY_SLOT,

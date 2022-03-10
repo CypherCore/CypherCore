@@ -2293,14 +2293,14 @@ namespace Game.Spells
                 }
 
                 if (owner.IsTypeId(TypeId.Player))
-                    owner.ToPlayer().RemovePet(OldSummon, (OldSummon.GetPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot), false);
+                    owner.ToPlayer().RemovePet(OldSummon, PetSaveMode.NotInSlot, false);
                 else
                     return;
             }
 
             float x, y, z;
             owner.GetClosePoint(out x, out y, out z, owner.GetCombatReach());
-            Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0, true);
+            Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0);
             if (!pet)
                 return;
 

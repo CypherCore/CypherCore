@@ -52,41 +52,23 @@ namespace Game.Chat
             }
 
             // Everything looks OK, create new pet
-            Pet pet = new(player, PetType.Hunter);
-            if (!pet.CreateBaseAtCreature(creatureTarget))
-            {
-                handler.SendSysMessage("Error 1");
-                return false;
-            }
+            Pet pet = player.CreateTamedPetFrom(creatureTarget);
 
-            creatureTarget.SetDeathState(DeathState.JustDied);
-            creatureTarget.RemoveCorpse();
-            creatureTarget.SetHealth(0); // just for nice GM-mode view
-
-            pet.SetCreatorGUID(player.GetGUID());
-            pet.SetFaction(player.GetFaction());
-
-            if (!pet.InitStatsForLevel(creatureTarget.GetLevel()))
-            {
-                Log.outError(LogFilter.ChatSystem, "InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
-                handler.SendSysMessage("Error 2");
-                return false;
-            }
+            // "kill" original creature
+            creatureTarget.DespawnOrUnsummon();
 
             // prepare visual effect for levelup
-            pet.SetLevel(creatureTarget.GetLevel() - 1);
+            pet.SetLevel(player.GetLevel() - 1);
 
-            pet.GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
-            // this enables pet details window (Shift+P)
-            pet.InitPetCreateSpells();
-            pet.SetFullHealth();
-
+            // add to world
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetLevel(creatureTarget.GetLevel());
+            pet.SetLevel(player.GetLevel());
 
+            // caster have pet now
             player.SetMinion(pet, true);
+
             pet.SavePetToDB(PetSaveMode.AsCurrent);
             player.PetSpellInitialize();
 

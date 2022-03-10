@@ -407,8 +407,8 @@ namespace Scripts.Spells.Hunter
     {
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
-            if (!caster.IsTypeId(TypeId.Player))
+            Player caster = GetCaster().ToPlayer();
+            if (caster == null)
                 return SpellCastResult.DontReport;
 
             if (!GetExplTargetUnit())
@@ -421,11 +421,21 @@ namespace Scripts.Spells.Hunter
                     return SpellCastResult.Highlevel;
 
                 // use SMSG_PET_TAME_FAILURE?
-                if (!target.GetCreatureTemplate().IsTameable(caster.ToPlayer().CanTameExoticPets()))
+                if (!target.GetCreatureTemplate().IsTameable(caster.CanTameExoticPets()))
                     return SpellCastResult.BadTargets;
 
-                if (!caster.GetPetGUID().IsEmpty())
-                    return SpellCastResult.AlreadyHaveSummon;
+                PetStable petStable = caster.GetPetStable();
+                if (petStable != null)
+                {
+                    if (petStable.CurrentPet != null)
+                        return SpellCastResult.AlreadyHaveSummon;
+
+                    if (petStable.GetUnslottedHunterPet() != null)
+                    {
+                        caster.SendTameFailure(PetTameResult.TooMany);
+                        return SpellCastResult.DontReport;
+                    }
+                }
 
                 if (!caster.GetCharmedGUID().IsEmpty())
                     return SpellCastResult.AlreadyHaveCharm;

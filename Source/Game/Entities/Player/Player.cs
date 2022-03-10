@@ -884,7 +884,16 @@ namespace Game.Entities
         public void SetCommandStatusOff(PlayerCommandStates command) { _activeCheats &= ~command; }
 
         //Pet - Summons - Vehicles
+        public PetStable GetPetStable() { return m_petStable; }
 
+        public PetStable GetOrInitPetStable()
+        {
+            if (m_petStable == null)
+                m_petStable = new();
+
+            return m_petStable;
+        }
+        
         // last used pet number (for BG's)
         public uint GetLastPetNumber() { return m_lastpetnumber; }
         public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
@@ -892,7 +901,7 @@ namespace Game.Entities
         {
             //fixme: the pet should still be loaded if the player is not in world
             // just not added to the map
-            if (IsInWorld)
+            if (m_petStable != null && IsInWorld)
             {
                 Pet pet = new(this);
                 pet.LoadPetFromDB(this, 0, 0, true);
@@ -4702,18 +4711,13 @@ namespace Game.Entities
             return null;
         }
 
-        public Pet SummonPet(uint entry, float x, float y, float z, float ang, PetType petType, uint duration, bool aliveOnly = false)
+        public Pet SummonPet(uint entry, float x, float y, float z, float ang, PetType petType, uint duration)
         {
-            Pet pet = new(this, petType);
-            if (petType == PetType.Summon && pet.LoadPetFromDB(this, entry))
-            {
-                if (aliveOnly && !pet.IsAlive())
-                {
-                    pet.DespawnOrUnsummon();
-                    SendTameFailure(PetTameResult.Dead);
-                    return null;
-                }
+            PetStable petStable = GetOrInitPetStable();
 
+            Pet pet = new(this, petType);
+            if (petType == PetType.Summon && pet.LoadPetFromDB(this, entry, 0, false))
+            {
                 if (duration > 0)
                     pet.SetDuration(duration);
 
@@ -4733,8 +4737,8 @@ namespace Game.Entities
             }
 
             Map map = GetMap();
-            uint pet_number = Global.ObjectMgr.GeneratePetNumber();
-            if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry))
+            uint petNumber = Global.ObjectMgr.GeneratePetNumber();
+            if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
                 Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
                 return null;
@@ -4750,11 +4754,15 @@ namespace Game.Entities
 
             SetMinion(pet, true);
 
+            Cypher.Assert(petStable.CurrentPet == null && (petType != PetType.Hunter || petStable.GetUnslottedHunterPet() == null));
+            petStable.CurrentPet = new();
+            pet.FillPetInfo(petStable.CurrentPet);
+
             switch (petType)
             {
                 case PetType.Summon:
                     // this enables pet details window (Shift+P)
-                    pet.GetCharmInfo().SetPetNumber(pet_number, true);
+                    pet.GetCharmInfo().SetPetNumber(petNumber, true);
                     pet.SetClass(Class.Mage);
                     pet.SetPetExperience(0);
                     pet.SetPetNextLevelExperience(1000);
@@ -4848,6 +4856,17 @@ namespace Game.Entities
             // only if current pet in slot
             pet.SavePetToDB(mode);
 
+            Cypher.Assert(m_petStable.CurrentPet != null && m_petStable.CurrentPet.PetNumber == pet.GetCharmInfo().GetPetNumber());
+            if (mode == PetSaveMode.NotInSlot)
+            {
+                m_petStable.UnslottedPets.Add(m_petStable.CurrentPet);
+                m_petStable.CurrentPet = null;
+            }
+            else if (mode == PetSaveMode.AsDeleted)
+                m_petStable.CurrentPet = null;
+            // else if (stable slots) handled in opcode handlers due to required swaps
+            // else (current pet) doesnt need to do anything
+
             SetMinion(pet, false);
 
             pet.AddObjectToRemoveList();
@@ -4862,7 +4881,7 @@ namespace Game.Entities
             }
         }
 
-        void SendTameFailure(PetTameResult result)
+        public void SendTameFailure(PetTameResult result)
         {
             PetTameFailure petTameFailure = new();
             petTameFailure.Result = (byte)result;

@@ -96,89 +96,95 @@ namespace Game.Entities
             }
         }
 
-        public bool LoadPetFromDB(Player owner, uint petEntry = 0, uint petnumber = 0, bool current = false)
+        public static Tuple<PetStable.PetInfo, PetSaveMode> GetLoadPetInfo(PetStable stable, uint petEntry, uint petnumber, bool current)
         {
-            m_loading = true;
-
-            ulong ownerid = owner.GetGUID().GetCounter();
-
-            PreparedStatement stmt;
-
             if (petnumber != 0)
             {
                 // Known petnumber entry
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY);
-                stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, petnumber);
+                if (stable.CurrentPet != null && stable.CurrentPet.PetNumber == petnumber)
+                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+
+                for (var stableSlot = 0; stableSlot < stable.StabledPets.Length; ++stableSlot)
+                    if (stable.StabledPets[stableSlot] != null && stable.StabledPets[stableSlot].PetNumber == petnumber)
+                        return Tuple.Create(stable.StabledPets[stableSlot], PetSaveMode.FirstStableSlot + stableSlot);
+
+                foreach (var pet in stable.UnslottedPets)
+                    if (pet.CreatureId == petEntry)
+                        return Tuple.Create(pet, PetSaveMode.NotInSlot);
             }
             else if (current)
             {
                 // Current pet (slot 0)
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT);
-                stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
+                if (stable.CurrentPet != null)
+                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
             }
             else if (petEntry != 0)
             {
                 // known petEntry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2);
-                stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, petEntry);
-                stmt.AddValue(2, (byte)PetSaveMode.AsCurrent);
-                stmt.AddValue(3, (byte)PetSaveMode.LastStableSlot);
+                if (stable.CurrentPet != null && stable.CurrentPet.CreatureId == petEntry)
+                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+
+                foreach (var pet in stable.UnslottedPets)
+                    if (pet.CreatureId == petEntry)
+                        return Tuple.Create(pet, PetSaveMode.NotInSlot);
             }
             else
             {
                 // Any current or other non-stabled pet (for hunter "call pet")
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_SLOT);
-                stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
-                stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
+                if (stable.CurrentPet != null)
+                    return Tuple.Create(stable.CurrentPet, PetSaveMode.AsCurrent);
+
+                if (!stable.UnslottedPets.Empty())
+                    return Tuple.Create(stable.UnslottedPets.First(), PetSaveMode.NotInSlot);
             }
 
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
+            return Tuple.Create<PetStable.PetInfo, PetSaveMode>(null, PetSaveMode.AsDeleted);
+        }
+
+        public bool LoadPetFromDB(Player owner, uint petEntry = 0, uint petnumber = 0, bool current = false)
+        {
+            m_loading = true;
+
+            PetStable petStable = owner.GetPetStable();
+
+            ulong ownerid = owner.GetGUID().GetCounter();
+            (PetStable.PetInfo petInfo, PetSaveMode slot) = GetLoadPetInfo(petStable, petEntry, petnumber, current);
+            if (petInfo == null)
             {
                 m_loading = false;
                 return false;
             }
 
-            // update for case of current pet "slot = 0"
-            petEntry = result.Read<uint>(1);
-            if (petEntry == 0)
-                return false;
-
-            uint summonSpellId = result.Read<uint>(14);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(summonSpellId, owner.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petInfo.CreatedBySpellId, owner.GetMap().GetDifficultyID());
 
             bool isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
             if (current && isTemporarySummon)
                 return false;
 
-            PetType petType = (PetType)result.Read<byte>(15);
-            if (petType == PetType.Hunter)
+            if (petInfo.Type == PetType.Hunter)
             {
-                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petEntry);
+                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petInfo.CreatureId);
                 if (creatureInfo == null || !creatureInfo.IsTameable(owner.CanTameExoticPets()))
                     return false;
             }
 
-            uint petId = result.Read<uint>(0);
             if (current && owner.IsPetNeedBeTemporaryUnsummoned())
             {
-                owner.SetTemporaryUnsummonedPetNumber(petId);
+                owner.SetTemporaryUnsummonedPetNumber(petInfo.PetNumber);
                 return false;
             }
 
             Map map = owner.GetMap();
-            if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, petEntry))
+            ulong guid = map.GenerateLowGuid(HighGuid.Pet);
+
+            if (!Create(guid, map, petInfo.CreatureId, petInfo.PetNumber))
                 return false;
 
             PhasingHandler.InheritPhaseShift(this, owner);
 
-            SetPetType(petType);
+            SetPetType(petInfo.Type);
             SetFaction(owner.GetFaction());
-            SetCreatedBySpell(summonSpellId);
+            SetCreatedBySpell(petInfo.CreatedBySpellId);
 
             float px, py, pz;
             if (IsCritter())
@@ -197,14 +203,14 @@ namespace Game.Entities
                 return true;
             }
 
-            GetCharmInfo().SetPetNumber(petId, IsPermanentPetFor(owner));
+            GetCharmInfo().SetPetNumber(petInfo.PetNumber, IsPermanentPetFor(owner));
 
-            SetDisplayId(result.Read<uint>(3));
-            SetNativeDisplayId(result.Read<uint>(3));
-            uint petlevel = result.Read<ushort>(4);
+            SetDisplayId(petInfo.DisplayId);
+            SetNativeDisplayId(petInfo.DisplayId);
+            uint petlevel = petInfo.Level;
             SetNpcFlags(NPCFlags.None);
             SetNpcFlags2(NPCFlags2.None);
-            SetName(result.Read<string>(8));
+            SetName(petInfo.Name);
 
             switch (GetPetType())
             {
@@ -218,7 +224,7 @@ namespace Game.Entities
                     SetClass(Class.Warrior);
                     SetGender(Gender.None);
                     SetSheath(SheathState.Melee);
-                    SetPetFlags(result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+                    SetPetFlags(petInfo.WasRenamed ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
                     SetUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet abandon, cancel)
                     break;
                 default:
@@ -231,7 +237,7 @@ namespace Game.Entities
             SetCreatorGUID(owner.GetGUID());
 
             InitStatsForLevel(petlevel);
-            SetPetExperience(result.Read<uint>(5));
+            SetPetExperience(petInfo.Experience);
 
             SynchronizeLevelWithOwner();
 
@@ -244,15 +250,15 @@ namespace Game.Entities
                 return false;
             }
 
-            SetReactState((ReactStates)result.Read<byte>(6));
+            SetReactState(petInfo.ReactState);
             SetCanModifyStats(true);
 
             if (GetPetType() == PetType.Summon && !current)              //all (?) summon pets come with full health when called, but not when they are current
                 SetFullPower(PowerType.Mana);
             else
             {
-                uint savedhealth = result.Read<uint>(10);
-                uint savedmana = result.Read<uint>(11);
+                uint savedhealth = petInfo.Health;
+                uint savedmana = petInfo.Mana;
                 if (savedhealth == 0 && GetPetType() == PetType.Hunter)
                     SetDeathState(DeathState.JustDied);
                 else
@@ -266,102 +272,108 @@ namespace Game.Entities
             // 0=current
             // 1..MAX_PET_STABLES in stable slot
             // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
-            if (result.Read<byte>(7) != 0)
+            if (slot == PetSaveMode.NotInSlot)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID);
-                stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
-                stmt.AddValue(1, ownerid);
-                stmt.AddValue(2, (byte)PetSaveMode.AsCurrent);
-                stmt.AddValue(3, GetCharmInfo().GetPetNumber());
-                DB.Characters.Execute(stmt);
+                var unslottedPetInfo = petStable.UnslottedPets.Find(unslottedPet => unslottedPet.PetNumber == petInfo.PetNumber);
+                Cypher.Assert(petStable.CurrentPet == null);
+                Cypher.Assert(unslottedPetInfo != null);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-                stmt.AddValue(0, (byte)PetSaveMode.AsCurrent);
-                stmt.AddValue(1, ownerid);
-                stmt.AddValue(2, GetCharmInfo().GetPetNumber());
-                DB.Characters.Execute(stmt);
+                petStable.CurrentPet = unslottedPetInfo;
+                petStable.UnslottedPets.Remove(unslottedPetInfo);
             }
 
             // Send fake summon spell cast - this is needed for correct cooldown application for spells
             // Example: 46584 - without this cooldown (which should be set always when pet is loaded) isn't set clientside
             // @todo pets should be summoned from real cast instead of just faking it?
-            if (summonSpellId != 0)
+            if (petInfo.CreatedBySpellId != 0)
             {
                 SpellGo spellGo = new();
                 SpellCastData castData = spellGo.Cast;
 
                 castData.CasterGUID = owner.GetGUID();
                 castData.CasterUnit = owner.GetGUID();
-                castData.CastID = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, owner.GetMapId(), summonSpellId, map.GenerateLowGuid(HighGuid.Cast));
-                castData.SpellID = (int)summonSpellId;
+                castData.CastID = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, owner.GetMapId(), petInfo.CreatedBySpellId, map.GenerateLowGuid(HighGuid.Cast));
+                castData.SpellID = (int)petInfo.CreatedBySpellId;
                 castData.CastFlags = SpellCastFlags.Unk9;
                 castData.CastTime = Time.GetMSTime();
                 owner.SendMessageToSet(spellGo, true);
             }
 
             owner.SetMinion(this, true);
+
+            if (!isTemporarySummon)
+                GetCharmInfo().LoadPetActionBar(petInfo.ActionBar);
+
             map.AddToMap(ToCreature());
 
-            uint timediff = (uint)(GameTime.GetGameTime() - result.Read<uint>(13));
-            _LoadAuras(timediff);
-
-            // load action bar, if data broken will fill later by default spells.
-            if (!isTemporarySummon)
-            {
-                GetCharmInfo().LoadPetActionBar(result.Read<string>(12));
-
-                _LoadSpells();
-                _LoadSpellCooldowns();
-                LearnPetPassives();
-                InitLevelupSpellsForLevel();
-                if (map.IsBattleArena())
-                    RemoveArenaAuras();
-
-                CastPetAuras(current);
-            }
-
-            Log.outDebug(LogFilter.Pet, "New Pet has guid {0}", GetGUID().ToString());
-
-            ushort specId = result.Read<ushort>(16);
-            ChrSpecializationRecord petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
-            if (petSpec != null)
-                specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
-
-            SetSpecialization(specId);
-
-            // The SetSpecialization function will run these functions if the pet's spec is not 0
-            if (GetSpecialization() == 0)
-            {
-                CleanupActionBar();                                     // remove unknown spells from action bar after load
-                owner.PetSpellInitialize();
-            }
-
-            SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
-
-            if (GetPetType() == PetType.Hunter)
-            {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
-                stmt.AddValue(0, owner.GetGUID().GetCounter());
-                stmt.AddValue(1, GetCharmInfo().GetPetNumber());
-                result = DB.Characters.Query(stmt);
-
-                if (!result.IsEmpty())
-                {
-                    _declinedname = new DeclinedName();
-                    for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    {
-                        _declinedname.name[i] = result.Read<string>(i);
-                    }
-                }
-            }
-
             //set last used pet number (for use in BG's)
-            if (owner.IsTypeId(TypeId.Player) && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
-                owner.ToPlayer().SetLastPetNumber(petId);
+            if (owner.IsPlayer() && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
+                owner.ToPlayer().SetLastPetNumber(petInfo.PetNumber);
 
-            // must be after SetMinion (owner guid check)
-            LoadTemplateImmunities();
-            m_loading = false;
+            owner.GetSession().AddQueryHolderCallback(DB.Characters.DelayQueryHolder(new PetLoadQueryHolder(ownerid, petInfo.PetNumber)))
+                .AfterComplete(holder =>
+                {
+                    var session = owner.GetSession();
+                    var lastSaveTime = petInfo.LastSaveTime;
+                    var specializationId = petInfo.SpecializationId;
+                    if (session.GetPlayer() != owner || owner.GetPet() != this)
+                        return;
+
+                    // passing previous checks ensure that 'this' is still valid
+                    if (m_removed)
+                        return;
+
+                    uint timediff = (uint)(GameTime.GetGameTime() - lastSaveTime);
+                    _LoadAuras(holder.GetResult(PetLoginQueryLoad.Auras), holder.GetResult(PetLoginQueryLoad.AuraEffects), timediff);
+
+                    // load action bar, if data broken will fill later by default spells.
+                    if (!isTemporarySummon)
+                    {
+                        _LoadSpells(holder.GetResult(PetLoginQueryLoad.Spells));
+                        GetSpellHistory().LoadFromDB<Pet>(holder.GetResult(PetLoginQueryLoad.Cooldowns), holder.GetResult(PetLoginQueryLoad.Charges));
+                        LearnPetPassives();
+                        InitLevelupSpellsForLevel();
+                        if (GetMap().IsBattleArena())
+                            RemoveArenaAuras();
+
+                        CastPetAuras(current);
+                    }
+
+                    Log.outDebug(LogFilter.Pet, $"New Pet has {GetGUID()}");
+
+                    ushort specId = specializationId;
+                    var petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
+                    if (petSpec != null)
+                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
+
+                    SetSpecialization(specId);
+
+                    // The SetSpecialization function will run these functions if the pet's spec is not 0
+                    if (GetSpecialization() == 0)
+                    {
+                        CleanupActionBar();                                     // remove unknown spells from action bar after load
+
+                        owner.PetSpellInitialize();
+                    }
+
+
+                    SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
+
+                    if (GetPetType() == PetType.Hunter)
+                    {
+                        SQLResult result = holder.GetResult(PetLoginQueryLoad.DeclinedNames);
+                        if (!result.IsEmpty())
+                        {
+                            _declinedname = new();
+                            for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                                _declinedname.name[i] = result.Read<string>(i);
+                        }
+                    }
+
+                    // must be after SetMinion (owner guid check)
+                    LoadTemplateImmunities();
+                    m_loading = false;
+                });
 
             return true;
         }
@@ -421,16 +433,6 @@ namespace Game.Entities
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
-                // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
-                if (mode <= PetSaveMode.LastStableSlot)
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT);
-                    stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
-                    stmt.AddValue(1, ownerLowGUID);
-                    stmt.AddValue(2, (byte)mode);
-                    trans.Append(stmt);
-                }
-
                 // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
                 if (GetPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode > PetSaveMode.LastStableSlot))
                 {
@@ -442,6 +444,11 @@ namespace Game.Entities
                 }
 
                 // save pet
+                string actionBar = GenerateActionBarData();
+
+                Cypher.Assert(owner.GetPetStable().CurrentPet != null && owner.GetPetStable().CurrentPet.PetNumber == GetCharmInfo().GetPetNumber());
+                FillPetInfo(owner.GetPetStable().CurrentPet);
+
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET);
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                 stmt.AddValue(1, GetEntry());
@@ -455,11 +462,13 @@ namespace Game.Entities
                 stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
                 stmt.AddValue(10, curhealth);
                 stmt.AddValue(11, curmana);
-                stmt.AddValue(12, GenerateActionBarData());
+
+                stmt.AddValue(12, actionBar);
+
                 stmt.AddValue(13, GameTime.GetGameTime());
                 stmt.AddValue(14, m_unitData.CreatedBySpell);
                 stmt.AddValue(15, (byte)GetPetType());
-                stmt.AddValue(16, m_petSpecialization);
+                stmt.AddValue(16, GetSpecialization());
                 trans.Append(stmt);
 
                 DB.Characters.CommitTransaction(trans);
@@ -472,36 +481,55 @@ namespace Game.Entities
             }
         }
 
-        public static void DeleteFromDB(uint guidlow)
+        public void FillPetInfo(PetStable.PetInfo petInfo)
+        {
+            petInfo.PetNumber = GetCharmInfo().GetPetNumber();
+            petInfo.CreatureId = GetEntry();
+            petInfo.DisplayId = GetNativeDisplayId();
+            petInfo.Level = (byte)GetLevel();
+            petInfo.Experience = m_unitData.PetExperience;
+            petInfo.ReactState = GetReactState();
+            petInfo.Name = GetName();
+            petInfo.WasRenamed = !HasPetFlag(UnitPetFlags.CanBeRenamed);
+            petInfo.Health = (uint)GetHealth();
+            petInfo.Mana = (uint)GetPower(PowerType.Mana);
+            petInfo.ActionBar = GenerateActionBarData();
+            petInfo.LastSaveTime = (uint)GameTime.GetGameTime();
+            petInfo.CreatedBySpellId = m_unitData.CreatedBySpell;
+            petInfo.Type = GetPetType();
+            petInfo.SpecializationId = GetSpecialization();
+        }
+        
+        public static void DeleteFromDB(uint petNumber)
         {
             SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_AURAS);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELLS);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
-            stmt.AddValue(0, guidlow);
+            stmt.AddValue(0, petNumber);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -536,72 +564,73 @@ namespace Game.Entities
             switch (m_deathState)
             {
                 case DeathState.Corpse:
+                {
+                    if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= GameTime.GetGameTime())
                     {
-                        if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= GameTime.GetGameTime())
-                        {
-                            Remove(PetSaveMode.NotInSlot);               //hunters' pets never get removed because of death, NEVER!
-                            return;
-                        }
-                        break;
+                        Remove(PetSaveMode.NotInSlot);               //hunters' pets never get removed because of death, NEVER!
+                        return;
                     }
+                    break;
+                }
                 case DeathState.Alive:
+                {
+                    // unsummon pet that lost owner
+                    Player owner = GetOwner();
+                    if (owner == null || (!IsWithinDistInMap(owner, GetMap().GetVisibilityRange()) && !IsPossessed()) || (IsControlled() && owner.GetPetGUID().IsEmpty()))
                     {
-                        // unsummon pet that lost owner
-                        Player owner = GetOwner();
-                        if (owner == null || (!IsWithinDistInMap(owner, GetMap().GetVisibilityRange()) && !IsPossessed()) || (IsControlled() && owner.GetPetGUID().IsEmpty()))
+                        Remove(PetSaveMode.NotInSlot, true);
+                        return;
+                    }
+
+                    if (IsControlled())
+                    {
+                        if (owner.GetPetGUID() != GetGUID())
                         {
-                            Remove(PetSaveMode.NotInSlot, true);
+                            Log.outError(LogFilter.Pet, $"Pet {GetEntry()} is not pet of owner {GetOwner().GetName()}, removed");
+                            Cypher.Assert(GetPetType() != PetType.Hunter, $"Unexpected unlinked pet found for owner {owner.GetSession().GetPlayerInfo()}");
+                            Remove(PetSaveMode.NotInSlot);
                             return;
                         }
-
-                        if (IsControlled())
-                        {
-                            if (owner.GetPetGUID() != GetGUID())
-                            {
-                                Log.outError(LogFilter.Pet, "Pet {0} is not pet of owner {1}, removed", GetEntry(), GetOwner().GetName());
-                                Remove(GetPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
-                                return;
-                            }
-                        }
-
-                        if (m_duration > 0)
-                        {
-                            if (m_duration > diff)
-                                m_duration -= (int)diff;
-                            else
-                            {
-                                Remove(GetPetType() != PetType.Summon ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
-                                return;
-                            }
-                        }
-
-                        //regenerate focus for hunter pets or energy for deathknight's ghoul
-                        if (m_focusRegenTimer != 0)
-                        {
-                            if (m_focusRegenTimer > diff)
-                                m_focusRegenTimer -= diff;
-                            else
-                            {
-                                switch (GetPowerType())
-                                {
-                                    case PowerType.Focus:
-                                        Regenerate(PowerType.Focus);
-                                        m_focusRegenTimer += PetFocusRegenInterval - diff;
-                                        if (m_focusRegenTimer == 0)
-                                            ++m_focusRegenTimer;
-
-                                        // Reset if large diff (lag) causes focus to get 'stuck'
-                                        if (m_focusRegenTimer > PetFocusRegenInterval)
-                                            m_focusRegenTimer = PetFocusRegenInterval;
-                                        break;
-                                    default:
-                                        m_focusRegenTimer = 0;
-                                        break;
-                                }
-                            }
-                        }
-                        break;
                     }
+
+                    if (m_duration > 0)
+                    {
+                        if (m_duration > diff)
+                            m_duration -= (int)diff;
+                        else
+                        {
+                            Remove(GetPetType() != PetType.Summon ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
+                            return;
+                        }
+                    }
+
+                    //regenerate focus for hunter pets or energy for deathknight's ghoul
+                    if (m_focusRegenTimer != 0)
+                    {
+                        if (m_focusRegenTimer > diff)
+                            m_focusRegenTimer -= diff;
+                        else
+                        {
+                            switch (GetPowerType())
+                            {
+                                case PowerType.Focus:
+                                    Regenerate(PowerType.Focus);
+                                    m_focusRegenTimer += PetFocusRegenInterval - diff;
+                                    if (m_focusRegenTimer == 0)
+                                        ++m_focusRegenTimer;
+
+                                    // Reset if large diff (lag) causes focus to get 'stuck'
+                                    if (m_focusRegenTimer > PetFocusRegenInterval)
+                                        m_focusRegenTimer = PetFocusRegenInterval;
+                                    break;
+                                default:
+                                    m_focusRegenTimer = 0;
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -714,7 +743,7 @@ namespace Game.Entities
         bool CreateBaseAtTamed(CreatureTemplate cinfo, Map map)
         {
             Log.outDebug(LogFilter.Pet, "CreateBaseForTamed");
-            if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry))
+            if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry, Global.ObjectMgr.GeneratePetNumber()))
                 return false;
 
             SetPetNameTimestamp(0);
@@ -753,24 +782,8 @@ namespace Game.Entities
             return diet.HasAnyFlag(FoodMask);
         }
 
-        void _LoadSpellCooldowns()
+        void _LoadSpells(SQLResult result)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-            SQLResult cooldownsResult = DB.Characters.Query(stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_CHARGES);
-            SQLResult chargesResult = DB.Characters.Query(stmt);
-
-            GetSpellHistory().LoadFromDB<Pet>(cooldownsResult, chargesResult);
-        }
-
-        void _LoadSpells()
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-            SQLResult result = DB.Characters.Query(stmt);
-
             if (!result.IsEmpty())
             {
                 do
@@ -827,58 +840,52 @@ namespace Game.Entities
             }
         }
 
-        void _LoadAuras(uint timediff)
+        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
         {
             Log.outDebug(LogFilter.Pet, "Loading auras for {0}", GetGUID().ToString());
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-
-            ObjectGuid casterGuid = new();
-            ObjectGuid itemGuid = new();
+            ObjectGuid casterGuid = default;
+            ObjectGuid itemGuid = default;
             Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new();
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
+
+            if (!effectResult.IsEmpty())
             {
                 do
                 {
-                    uint effectIndex = result.Read<byte>(3);
+                    uint effectIndex = effectResult.Read<byte>(3);
                     if (effectIndex < SpellConst.MaxEffects)
                     {
-                        casterGuid.SetRawValue(result.Read<byte[]>(0));
+                        casterGuid.SetRawValue(effectResult.Read<byte[]>(0));
                         if (casterGuid.IsEmpty())
                             casterGuid = GetGUID();
 
-                        AuraKey key = new(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
+                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(1), effectResult.Read<uint>(2));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
                         var info = effectInfo[key];
-                        info.Amounts[effectIndex] = result.Read<int>(4);
-                        info.BaseAmounts[effectIndex] = result.Read<int>(5);
+                        info.Amounts[effectIndex] = effectResult.Read<int>(4);
+                        info.BaseAmounts[effectIndex] = effectResult.Read<int>(5);
                     }
-                } while (result.NextRow());
+                } while (effectResult.NextRow());
             }
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-            result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
+            if (!auraResult.IsEmpty())
             {
                 do
                 {
                     // NULL guid stored - pet is the caster of the spell - see Pet._SaveAuras
-                    casterGuid.SetRawValue(result.Read<byte[]>(0));
+                    casterGuid.SetRawValue(auraResult.Read<byte[]>(0));
                     if (casterGuid.IsEmpty())
                         casterGuid = GetGUID();
 
-                    AuraKey key = new(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
-                    uint recalculateMask = result.Read<uint>(3);
-                    Difficulty difficulty = (Difficulty)result.Read<byte>(4);
-                    byte stackCount = result.Read<byte>(5);
-                    int maxDuration = result.Read<int>(6);
-                    int remainTime = result.Read<int>(7);
-                    byte remainCharges = result.Read<byte>(8);
+                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<uint>(1), auraResult.Read<uint>(2));
+                    uint recalculateMask = auraResult.Read<uint>(3);
+                    Difficulty difficulty = (Difficulty)auraResult.Read<byte>(4);
+                    byte stackCount = auraResult.Read<byte>(5);
+                    int maxDuration = auraResult.Read<int>(6);
+                    int remainTime = auraResult.Read<int>(7);
+                    byte remainCharges = auraResult.Read<byte>(8);
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
@@ -931,7 +938,7 @@ namespace Game.Entities
                         Log.outInfo(LogFilter.Pet, "Added aura spellid {0}, effectmask {1}", spellInfo.Id, key.EffectMask);
                     }
                 }
-                while (result.NextRow());
+                while (auraResult.NextRow());
             }
         }
 
@@ -1152,9 +1159,9 @@ namespace Game.Entities
             PetDefaultSpellsEntry defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry((int)GetEntry());
             if (defSpells != null)
             {
-                for (byte i = 0; i < SharedConst.MaxCreatureSpellDataSlots; ++i)
+                foreach (uint spellId in defSpells.spellid)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(defSpells.spellid[i], Difficulty.None);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null)
                         continue;
 
@@ -1334,17 +1341,18 @@ namespace Game.Entities
             }
         }
 
-        public bool Create(ulong guidlow, Map map, uint Entry)
+        public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
         {
             Cypher.Assert(map);
             SetMap(map);
 
-            _Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), Entry, guidlow));
+            // TODO: counter should be constructed as (summon_count << 32) | petNumber
+            _Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), entry, guidlow));
 
             m_spawnId = guidlow;
-            m_originalEntry = Entry;
+            m_originalEntry = entry;
 
-            if (!InitEntry(Entry))
+            if (!InitEntry(entry))
                 return false;
 
             // Force regen flag for player pets, just like we do for players themselves
@@ -1379,8 +1387,8 @@ namespace Game.Entities
                 // For general hunter pets skill 270
                 // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
                 // Scale 01~03 (34902~34904, bonus from owner, not used)
-                foreach (var petSet in petStore)
-                    AddSpell(petSet, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
+                foreach (var spellId in petStore)
+                    AddSpell(spellId, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
             }
         }
 
@@ -1420,10 +1428,9 @@ namespace Game.Entities
 
             // if the owner has that pet aura, return true
             foreach (var petAura in owner.m_petAuras)
-            {
                 if (petAura.GetAura(GetEntry()) == aura.GetId())
                     return true;
-            }
+
             return false;
         }
 
@@ -1476,7 +1483,7 @@ namespace Game.Entities
 
             return base.GetNativeObjectScale();
         }
-        
+
         public override void SetDisplayId(uint modelId, float displayScale = 1f)
         {
             base.SetDisplayId(modelId, displayScale);
@@ -1619,9 +1626,9 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()}";
+            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()} PetNumber: {GetCharmInfo().GetPetNumber()}";
         }
-        
+
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
         public new Dictionary<uint, PetSpell> m_spells = new();
@@ -1644,6 +1651,38 @@ namespace Game.Entities
         public PetSpellType type;
     }
 
+    public class PetStable
+    {
+        public class PetInfo
+        {
+            public string Name;
+            public string ActionBar;
+            public uint PetNumber;
+            public uint CreatureId;
+            public uint DisplayId;
+            public uint Experience;
+            public uint Health;
+            public uint Mana;
+            public uint LastSaveTime;
+            public uint CreatedBySpellId;
+            public ushort SpecializationId;
+            public byte Level = 0;
+            public ReactStates ReactState;
+            public PetType Type = PetType.Max;
+            public bool WasRenamed;
+        }
+
+        public PetInfo CurrentPet;                                   // PET_SAVE_AS_CURRENT
+        public PetInfo[] StabledPets = new PetInfo[SharedConst.MaxPetStables];     // PET_SAVE_FIRST_STABLE_SLOT - PET_SAVE_LAST_STABLE_SLOT
+        public uint MaxStabledPets = 0;
+        public List<PetInfo> UnslottedPets = new();                             // PET_SAVE_NOT_IN_SLOT
+
+        public PetInfo GetUnslottedHunterPet()
+        {
+            return UnslottedPets.Count == 1 && UnslottedPets[0].Type == PetType.Hunter ? UnslottedPets[0] : null;
+        }
+    }
+    
     public enum ActiveStates
     {
         Passive = 0x01,                                    // 0x01 - passive
@@ -1652,5 +1691,46 @@ namespace Game.Entities
         Command = 0x07,                                    // 0x01 | 0x02 | 0x04
         Reaction = 0x06,                                    // 0x02 | 0x04
         Decide = 0x00                                     // custom
+    }
+
+    enum PetLoginQueryLoad
+    {
+        DeclinedNames,
+        Auras,
+        AuraEffects,
+        Spells,
+        Cooldowns,
+        Charges
+    }
+
+    class PetLoadQueryHolder : SQLQueryHolder<PetLoginQueryLoad>
+    {
+        public PetLoadQueryHolder(ulong ownerGuid, uint petNumber)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
+            stmt.AddValue(0, ownerGuid);
+            stmt.AddValue(1, petNumber);
+            SetQuery(PetLoginQueryLoad.DeclinedNames, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA);
+            stmt.AddValue(0, petNumber);
+            SetQuery(PetLoginQueryLoad.Auras, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
+            stmt.AddValue(0, petNumber);
+            SetQuery(PetLoginQueryLoad.AuraEffects, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
+            stmt.AddValue(0, petNumber);
+            SetQuery(PetLoginQueryLoad.Spells, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
+            stmt.AddValue(0, petNumber);
+            SetQuery(PetLoginQueryLoad.Cooldowns, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_CHARGES);
+            stmt.AddValue(0, petNumber);
+            SetQuery(PetLoginQueryLoad.Charges, stmt);
+        }
     }
 }

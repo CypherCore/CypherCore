@@ -2820,6 +2820,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.CorpseLocation, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PETS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.PetSlots, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Garrison, stmt);
@@ -2938,6 +2942,7 @@ namespace Game
         Currency,
         CufProfiles,
         CorpseLocation,
+        PetSlots,
         Garrison,
         GarrisonBlueprints,
         GarrisonBuildings,

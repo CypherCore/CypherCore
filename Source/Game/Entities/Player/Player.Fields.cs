@@ -130,8 +130,8 @@ namespace Game.Entities
         public bool m_mailsUpdated;
 
         //Pets
+        PetStable m_petStable;
         public List<PetAura> m_petAuras = new();
-        public uint m_stableSlots;
         uint m_temporaryUnsummonedPetNumber;
         uint m_lastpetnumber;
 
