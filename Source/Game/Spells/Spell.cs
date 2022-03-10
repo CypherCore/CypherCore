@@ -5222,31 +5222,33 @@ namespace Game.Spells
                         if (playerCaster != null && playerCaster.GetPetStable() != null)
                         {
                             var info = Pet.GetLoadPetInfo(playerCaster.GetPetStable(), (uint)spellEffectInfo.MiscValue, 0, false);
-                            if (info.Item1 == null)
+                            if (info.Item1 != null)
+                            {
+                                if (info.Item1.Type == PetType.Hunter)
+                                {
+                                    if (info.Item1.Health == 0)
+                                    {
+                                        playerCaster.SendTameFailure(PetTameResult.Dead);
+                                        return SpellCastResult.DontReport;
+                                    }
+
+                                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
+                                    if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
+                                    {
+                                        // if problem in exotic pet
+                                        if (creatureInfo != null && creatureInfo.IsTameable(true))
+                                            playerCaster.SendTameFailure(PetTameResult.CantControlExotic);
+                                        else
+                                            playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);
+
+                                        return SpellCastResult.DontReport;
+                                    }
+                                }
+                            }
+                            else if (spellEffectInfo.MiscValue == 0) // when miscvalue is present it is allowed to create new pets
                             {
                                 playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);
                                 return SpellCastResult.DontReport;
-                            }
-
-                            if (info.Item1.Type == PetType.Hunter)
-                            {
-                                if (info.Item1.Health == 0)
-                                {
-                                    playerCaster.SendTameFailure(PetTameResult.Dead);
-                                    return SpellCastResult.DontReport;
-                                }
-
-                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
-                                if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
-                                {
-                                    // if problem in exotic pet
-                                    if (creatureInfo != null && creatureInfo.IsTameable(true))
-                                        playerCaster.SendTameFailure(PetTameResult.CantControlExotic);
-                                    else
-                                        playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);
-
-                                    return SpellCastResult.DontReport;
-                                }
                             }
                         }
                         break;
