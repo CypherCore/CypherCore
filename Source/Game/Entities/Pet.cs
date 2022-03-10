@@ -155,6 +155,10 @@ namespace Game.Entities
                 return false;
             }
 
+            // Don't try to reload the current pet
+            if (petStable.CurrentPet != null && owner.GetPet() != null && petStable.CurrentPet.PetNumber == petInfo.PetNumber)
+                return false;
+
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petInfo.CreatedBySpellId, owner.GetMap().GetDifficultyID());
 
             bool isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
@@ -274,7 +278,11 @@ namespace Game.Entities
             // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
             if (slot == PetSaveMode.NotInSlot)
             {
-                var unslottedPetInfo = petStable.UnslottedPets.Find(unslottedPet => unslottedPet.PetNumber == petInfo.PetNumber);
+                uint petInfoNumber = petInfo.PetNumber;
+                if (petStable.CurrentPet != null)
+                    owner.RemovePet(null, PetSaveMode.NotInSlot);
+
+                var unslottedPetInfo = petStable.UnslottedPets.Find(unslottedPet => unslottedPet.PetNumber == petInfoNumber);
                 Cypher.Assert(petStable.CurrentPet == null);
                 Cypher.Assert(unslottedPetInfo != null);
 
@@ -282,6 +290,18 @@ namespace Game.Entities
                 petStable.UnslottedPets.Remove(unslottedPetInfo);
 
                 // old petInfo is no longer valid, refresh it
+                petInfo = petStable.CurrentPet;
+            }
+            else if (PetSaveMode.FirstStableSlot <= slot && slot <= PetSaveMode.LastStableSlot)
+            {
+                var index = Array.FindIndex(petStable.StabledPets, pet => pet?.PetNumber == petnumber);
+                var stabledPet = petStable.StabledPets[index];
+                Cypher.Assert(index != -1);
+
+                petStable.StabledPets[index] = petStable.CurrentPet;
+                petStable.CurrentPet = stabledPet;
+
+                // old petInfo pointer is no longer valid, refresh it
                 petInfo = petStable.CurrentPet;
             }
 

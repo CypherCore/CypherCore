@@ -4744,6 +4744,9 @@ namespace Game.Entities
                 return null;
             }
 
+            if (petType == PetType.Summon && petStable.CurrentPet != null)
+                RemovePet(null, PetSaveMode.NotInSlot);
+
             PhasingHandler.InheritPhaseShift(pet, this);
 
             pet.SetCreatorGUID(GetGUID());
@@ -4836,7 +4839,7 @@ namespace Game.Entities
 
             if (pet == null)
             {
-                if (mode == PetSaveMode.NotInSlot && m_petStable.CurrentPet != null)
+                if (mode == PetSaveMode.NotInSlot && m_petStable?.CurrentPet != null)
                 {
                     // Handle removing pet while it is in "temporarily unsummoned" state, for example on mount
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
