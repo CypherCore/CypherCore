@@ -127,8 +127,9 @@ namespace Game.Entities
                         if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
                         {
                             // remove existing minion pet
-                            if (oldPet.IsPet())
-                                ((Pet)oldPet).Remove(PetSaveMode.AsCurrent);
+                            Pet oldPetAsPet = oldPet.ToPet();
+                            if (oldPetAsPet != null)
+                                oldPetAsPet.Remove(PetSaveMode.NotInSlot);
                             else
                                 oldPet.UnSummon();
                             SetPetGUID(minion.GetGUID());
