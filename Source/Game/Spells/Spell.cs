@@ -5228,22 +5228,25 @@ namespace Game.Spells
                                 return SpellCastResult.DontReport;
                             }
 
-                            if (info.Item1.Type == PetType.Hunter && info.Item1.Health == 0)
+                            if (info.Item1.Type == PetType.Hunter)
                             {
-                                playerCaster.SendTameFailure(PetTameResult.Dead);
-                                return SpellCastResult.DontReport;
-                            }
+                                if (info.Item1.Health == 0)
+                                {
+                                    playerCaster.SendTameFailure(PetTameResult.Dead);
+                                    return SpellCastResult.DontReport;
+                                }
 
-                            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
-                            if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
-                            {
-                                // if problem in exotic pet
-                                if (creatureInfo != null && creatureInfo.IsTameable(true))
-                                    playerCaster.SendTameFailure(PetTameResult.CantControlExotic);
-                                else
-                                    playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);
+                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
+                                if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
+                                {
+                                    // if problem in exotic pet
+                                    if (creatureInfo != null && creatureInfo.IsTameable(true))
+                                        playerCaster.SendTameFailure(PetTameResult.CantControlExotic);
+                                    else
+                                        playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);
 
-                                return SpellCastResult.DontReport;
+                                    return SpellCastResult.DontReport;
+                                }
                             }
                         }
                         break;
