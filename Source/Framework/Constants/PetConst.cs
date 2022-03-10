@@ -41,13 +41,6 @@ namespace Framework.Constants
         NotInSlot = 100                       // for avoid conflict with stable size grow will use 100
     }
 
-    public enum HappinessState
-    {
-        UnHappy = 1,
-        Content = 2,
-        Happy = 3
-    }
-
     public enum PetSpellState
     {
         Unchanged = 0,

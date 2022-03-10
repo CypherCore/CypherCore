@@ -897,16 +897,6 @@ namespace Game.Entities
         // last used pet number (for BG's)
         public uint GetLastPetNumber() { return m_lastpetnumber; }
         public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
-        public void LoadPet()
-        {
-            //fixme: the pet should still be loaded if the player is not in world
-            // just not added to the map
-            if (m_petStable != null && IsInWorld)
-            {
-                Pet pet = new(this);
-                pet.LoadPetFromDB(this, 0, 0, true);
-            }
-        }
         public uint GetTemporaryUnsummonedPetNumber() { return m_temporaryUnsummonedPetNumber; }
         public void SetTemporaryUnsummonedPetNumber(uint petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
         public void UnsummonPetTemporaryIfAny()

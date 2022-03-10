@@ -934,7 +934,7 @@ namespace Game
             }
 
             // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
-            pCurrChar.LoadPet();
+            pCurrChar.ResummonPetTemporaryUnSummonedIfAny();
 
             // Set FFA PvP for non GM in non-rest mode
             if (Global.WorldMgr.IsFFAPvPRealm() && !pCurrChar.IsGameMaster() && !pCurrChar.HasPlayerFlag(PlayerFlags.Resting))
@@ -2867,8 +2867,7 @@ namespace Game
 
             bool result = true;
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][withDeclinedNames ? 1 : 0]);
-            stmt.AddValue(0, (byte)PetSaveMode.AsCurrent);
-            stmt.AddValue(1, accountId);
+            stmt.AddValue(0, accountId);
             SetQuery(EnumCharacterQueryLoad.Characters, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][2]);

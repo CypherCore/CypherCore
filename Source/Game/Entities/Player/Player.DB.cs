@@ -2599,6 +2599,7 @@ namespace Game.Entities
             float trans_o = result.Read<float>(fieldIndex++);
             ulong transguid = result.Read<ulong>(fieldIndex++);
             PlayerExtraFlags extra_flags = (PlayerExtraFlags)result.Read<ushort>(fieldIndex++);
+            uint summonedPetNumber = result.Read<uint>(fieldIndex++);
             ushort at_login = result.Read<ushort>(fieldIndex++);
             ushort zone = result.Read<ushort>(fieldIndex++);
             byte online = result.Read<byte>(fieldIndex++);
@@ -3080,6 +3081,7 @@ namespace Game.Entities
             m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
             _LoadPetStable(holder.GetResult(PlayerLoginQueryLoad.PetSlots));
+            m_temporaryUnsummonedPetNumber = summonedPetNumber;
 
             // Honor system
             // Update Honor kills data
@@ -3446,6 +3448,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetTalentResetTime());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
+                stmt.AddValue(index++, 0); // summonedPetNumber
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, m_deathExpireTime);
 
@@ -3585,6 +3588,11 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
+                PetStable petStable = GetPetStable();
+                if (petStable != null)
+                    stmt.AddValue(index++, petStable.CurrentPet != null && petStable.CurrentPet.Health > 0 ? petStable.CurrentPet.PetNumber : 0); // summonedPetNumber
+                else
+                    stmt.AddValue(index++, 0); // summonedPetNumber
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, GetZoneId());
                 stmt.AddValue(index++, m_deathExpireTime);
