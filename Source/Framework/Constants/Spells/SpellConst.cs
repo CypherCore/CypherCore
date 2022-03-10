@@ -1673,7 +1673,7 @@ namespace Framework.Constants
         Unk27 = 0x8000000, // 27
         IgnoreActionAuraInterruptFlags = 0x10000000, // 28 doesnt break auras with SpellAuraInterruptFlags::Action and SpellAuraInterruptFlags::ActionDelayed
         CantCrit = 0x20000000, // 29 Spell Can'T Crit
-        TriggeredCanTriggerProc = 0x40000000, // 30 Spell Can Trigger Even If Triggered
+        ActiveThreat = 0x40000000, // 30 Active Threat
         FoodBuff = 0x80000000  // 31 Food Or Drink Buff (Like Well Fed)
     }
     public enum SpellAttr3 : uint
@@ -1687,7 +1687,7 @@ namespace Framework.Constants
         Unk6 = 0x40, //  6
         StackForDiffCasters = 0x80, //  7 Separate Stack For Every Caster
         OnlyTargetPlayers = 0x100, //  8 Can Only Target Players
-        TriggeredCanTriggerProc2 = 0x200, //  9 Triggered From Effect?
+        NotAProc = 0x200, //  9 Without this attribute, any triggered spell will be unable to trigger other auras' procs
         MainHand = 0x400, // 10 Main Hand Weapon Required
         Battleground = 0x800, // 11 Can Casted Only On Battleground
         OnlyTargetGhosts = 0x1000, // 12
@@ -1704,7 +1704,7 @@ namespace Framework.Constants
         Unk23 = 0x800000, // 23
         ReqOffhand = 0x1000000, // 24 Req Offhand Weapon
         TreatAsPeriodic = 0x2000000, // 25 Makes the spell appear as periodic in client combat logs - used by spells that trigger another spell on each tick
-        CanProcWithTriggered = 0x4000000, // 26 Auras With This Attribute Can Proc From Triggered Spell Casts With TriggeredCanTriggerProc2 (67736 + 52999)
+        CanProcFromProcs = 0x4000000, // 26 Can Proc From Procs
         DrainSoul = 0x8000000, // 27 Only Drain Soul Has This Flag
         Unk28 = 0x10000000, // 28
         NoDoneBonus = 0x20000000, // 29 Ignore Caster Spellpower And Done Damage Mods?  Client Doesn'T Apply Spellmods For Those Spells

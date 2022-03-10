@@ -487,22 +487,6 @@ namespace Game.Entities
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
                 return true;
 
-            // Do not consider autoattacks as triggered spells
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
-            {
-                Spell spell = eventInfo.GetProcSpell();
-                if (spell)
-                {
-                    if (spell.IsTriggered())
-                    {
-                        SpellInfo spellInfo = spell.GetSpellInfo();
-                        if (!spellInfo.HasAttribute(SpellAttr3.TriggeredCanTriggerProc2) &&
-                            !spellInfo.HasAttribute(SpellAttr2.TriggeredCanTriggerProc))
-                            return false;
-                    }
-                }
-            }
-
             // check school mask (if set) for other trigger types
             if (procEntry.SchoolMask != 0 && !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
                 return false;

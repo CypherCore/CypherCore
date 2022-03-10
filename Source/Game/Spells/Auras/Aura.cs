@@ -1709,8 +1709,8 @@ namespace Game.Spells
                     return 0;
 
                 // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
-                if (spell.IsTriggered() && !procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
-                    if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcWithTriggered))
+                if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcFromProcs) && !procEntry.AttributesMask.HasFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
+                    if (spell.IsTriggered() && !spell.GetSpellInfo().HasAttribute(SpellAttr3.NotAProc))
                         return 0;
             }
 
