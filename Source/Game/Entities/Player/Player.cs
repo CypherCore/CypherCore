@@ -4834,8 +4834,23 @@ namespace Game.Entities
                 m_temporaryUnsummonedPetNumber = 0;
             }
 
-            if (!pet || pet.GetOwnerGUID() != GetGUID())
+            if (pet == null)
+            {
+                if (mode == PetSaveMode.NotInSlot && m_petStable.CurrentPet != null)
+                {
+                    // Handle removing pet while it is in "temporarily unsummoned" state, for example on mount
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+                    stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
+                    stmt.AddValue(1, GetGUID().GetCounter());
+                    stmt.AddValue(2, m_petStable.CurrentPet.PetNumber);
+                    DB.Characters.Execute(stmt);
+
+                    m_petStable.UnslottedPets.Add(m_petStable.CurrentPet);
+                    m_petStable.CurrentPet = null;
+                }
+
                 return;
+            }
 
             pet.CombatStop();
 

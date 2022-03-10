@@ -3351,7 +3351,7 @@ namespace Game.Spells
             Pet pet = unitTarget.ToPet();
 
             ExecuteLogEffectUnsummonObject(effectInfo.Effect, pet);
-            pet.GetOwner().RemovePet(pet, PetSaveMode.NotInSlot);
+            pet.Remove(PetSaveMode.NotInSlot);
         }
 
         [SpellEffectHandler(SpellEffectName.SummonObjectSlot1)]
