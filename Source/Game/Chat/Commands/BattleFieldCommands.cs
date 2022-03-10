@@ -25,24 +25,22 @@ namespace Game.Chat
     class BattleFieldCommands
     {
         [Command("enable", RBACPermissions.CommandBfEnable)]
-        static bool HandleBattlefieldEnable(CommandHandler handler, StringArguments args)
+        static bool HandleBattlefieldEnable(CommandHandler handler, uint battleId)
         {
-            uint battleid = args.NextUInt32();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
-
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
             if (bf == null)
                 return false;
 
             if (bf.IsEnabled())
             {
                 bf.ToggleBattlefield(false);
-                if (battleid == 1)
+                if (battleId == 1)
                     handler.SendGlobalGMSysMessage("Wintergrasp is disabled");
             }
             else
             {
                 bf.ToggleBattlefield(true);
-                if (battleid == 1)
+                if (battleId == 1)
                     handler.SendGlobalGMSysMessage("Wintergrasp is enabled");
             }
 
@@ -50,69 +48,59 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandBfStart)]
-        static bool HandleBattlefieldStart(CommandHandler handler, StringArguments args)
+        static bool HandleBattlefieldStart(CommandHandler handler, uint battleId)
         {
-            uint battleid = args.NextUInt32();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
-
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
             if (bf == null)
                 return false;
 
             bf.StartBattle();
 
-            if (battleid == 1)
+            if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command start used)");
 
             return true;
         }
 
         [Command("stop", RBACPermissions.CommandBfStop)]
-        static bool HandleBattlefieldEnd(CommandHandler handler, StringArguments args)
+        static bool HandleBattlefieldEnd(CommandHandler handler, uint battleId)
         {
-            uint battleid = args.NextUInt32();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
-
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
             if (bf == null)
                 return false;
 
             bf.EndBattle(true);
 
-            if (battleid == 1)
+            if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command stop used)");
 
             return true;
         }
 
         [Command("switch", RBACPermissions.CommandBfSwitch)]
-        static bool HandleBattlefieldSwitch(CommandHandler handler, StringArguments args)
+        static bool HandleBattlefieldSwitch(CommandHandler handler, uint battleId)
         {
-            uint battleid = args.NextUInt32();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
-
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
             if (bf == null)
                 return false;
 
             bf.EndBattle(false);
-            if (battleid == 1)
+            if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command switch used)");
 
             return true;
         }
 
         [Command("timer", RBACPermissions.CommandBfTimer)]
-        static bool HandleBattlefieldTimer(CommandHandler handler, StringArguments args)
+        static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, uint time)
         {
-            uint battleid = args.NextUInt32();
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
-
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
             if (bf == null)
                 return false;
 
-            uint time = args.NextUInt32();
-
             bf.SetTimer(time * Time.InMilliseconds);
             bf.SendInitWorldStatesToAll();
-            if (battleid == 1)
+            if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command timer used)");
 
             return true;
