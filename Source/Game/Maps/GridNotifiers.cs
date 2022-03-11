@@ -1859,6 +1859,34 @@ namespace Game.Maps
         ulong i_hp;
     }
 
+    class MostHPPercentMissingInRange : ICheck<Unit>
+    {
+        Unit _obj;
+        float _range;
+        float _minHpPct;
+        float _maxHpPct;
+        float _hpPct;
+
+        public MostHPPercentMissingInRange(Unit obj, float range, uint minHpPct, uint maxHpPct)
+        {
+            _obj = obj;
+            _range = range;
+            _minHpPct = minHpPct;
+            _maxHpPct = maxHpPct;
+            _hpPct = 101.0f;
+        }
+
+        public bool Invoke(Unit u)
+        {
+            if (u.IsAlive() && u.IsInCombat() && !_obj.IsHostileTo(u) && _obj.IsWithinDistInMap(u, _range) && _minHpPct <= u.GetHealthPct() && u.GetHealthPct() <= _maxHpPct && u.GetHealthPct() < _hpPct)
+            {
+                _hpPct = u.GetHealthPct();
+                return true;
+            }
+            return false;
+        }
+    }
+    
     public class FriendlyBelowHpPctEntryInRange : ICheck<Unit>
     {
         public FriendlyBelowHpPctEntryInRange(Unit obj, uint entry, float range, byte pct, bool excludeSelf)

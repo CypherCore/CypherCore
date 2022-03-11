@@ -818,6 +818,10 @@ namespace Game.AI
                             case SmartTargets.PlayerRange:
                             case SmartTargets.PlayerDistance:
                                 break;
+                            case SmartTargets.ActionInvoker:
+                                if (!NotNULL(e, e.Event.friendlyHealthPct.radius))
+                                    return false;
+                                break;
                             default:
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid target_type {e.GetTargetType()}, skipped.");
                                 return false;
@@ -2303,6 +2307,7 @@ namespace Game.AI
             public uint maxHpPct;
             public uint repeatMin;
             public uint repeatMax;
+            public uint radius;
         }
         public struct Distance
         {

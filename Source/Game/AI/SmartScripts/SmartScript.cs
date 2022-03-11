@@ -3614,7 +3614,7 @@ namespace Game.AI
                     if (_me == null || !_me.IsEngaged())
                         return;
 
-                    List<WorldObject> targets;
+                    Unit unitTarget = null;
 
                     switch (e.GetTargetType())
                     {
@@ -3625,28 +3625,27 @@ namespace Game.AI
                         case SmartTargets.ClosestPlayer:
                         case SmartTargets.PlayerRange:
                         case SmartTargets.PlayerDistance:
-                            targets = GetTargets(e);
+                        {
+                            var targets = GetTargets(e);
+                            foreach (WorldObject target in targets)
+                            {
+                                if (IsUnit(target) && _me.IsFriendlyTo(target.ToUnit()) && target.ToUnit().IsAlive() && target.ToUnit().IsInCombat())
+                                {
+                                    uint healthPct = (uint)target.ToUnit().GetHealthPct();
+                                    if (healthPct > e.Event.friendlyHealthPct.maxHpPct || healthPct < e.Event.friendlyHealthPct.minHpPct)
+                                        continue;
+
+                                    unitTarget = target.ToUnit();
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                        case SmartTargets.ActionInvoker:
+                            unitTarget = DoSelectLowestHpPercentFriendly((float)e.Event.friendlyHealthPct.radius, e.Event.friendlyHealthPct.minHpPct, e.Event.friendlyHealthPct.maxHpPct);
                             break;
                         default:
                             return;
-                    }
-
-                    if (targets == null)
-                        return;
-
-                    Unit unitTarget = null;
-                    foreach (var target in targets)
-                    {
-                        if (IsUnit(target) && _me.IsFriendlyTo(target.ToUnit()) && target.ToUnit().IsAlive() && target.ToUnit().IsInCombat())
-                        {
-                            uint healthPct = (uint)target.ToUnit().GetHealthPct();
-
-                            if (healthPct > e.Event.friendlyHealthPct.maxHpPct || healthPct < e.Event.friendlyHealthPct.minHpPct)
-                                continue;
-
-                            unitTarget = target.ToUnit();
-                            break;
-                        }
                     }
 
                     if (unitTarget == null)
@@ -4180,6 +4179,17 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
+        Unit DoSelectLowestHpPercentFriendly(float range, uint minHpPct, uint maxHpPct)
+        {
+            if (_me == null)
+                return null;
+
+            MostHPPercentMissingInRange u_check = new(_me, range, minHpPct, maxHpPct);
+            UnitLastSearcher searcher = new(_me, u_check);
+            Cell.VisitGridObjects(_me, searcher, range);
+            return searcher.GetTarget();
+        }
+        
         void DoFindFriendlyCC(List<Creature> creatures, float range)
         {
             if (_me == null)
