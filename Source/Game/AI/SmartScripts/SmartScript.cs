@@ -3906,7 +3906,24 @@ namespace Game.AI
                 return;
 
             if (_me != null && _me.IsInEvadeMode())
+            {
+                // Check if the timed action list finished and clear it if so.
+                // This is required by SMART_ACTION_CALL_TIMED_ACTIONLIST failing if mTimedActionList is not empty.
+                if (!_timedActionList.Empty())
+                {
+                    bool needCleanup1 = true;
+                    foreach (SmartScriptHolder scriptholder in _timedActionList)
+                    {
+                        if (scriptholder.EnableTimed)
+                            needCleanup1 = false;
+                    }
+
+                    if (needCleanup1)
+                        _timedActionList.Clear();
+                }
+
                 return;
+            }
 
             InstallEvents();//before UpdateTimers
 
