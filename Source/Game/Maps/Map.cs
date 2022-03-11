@@ -5147,9 +5147,11 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, Map _parent)
-            : base(id, expiry, InstanceId, spawnMode, _parent)
+        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, Map parent, int instanceTeam)
+            : base(id, expiry, InstanceId, spawnMode, parent)
         {
+            scriptTeam = instanceTeam;
+
             //lets initialize visibility distance for dungeons
             InitVisibilityDistance();
 
@@ -5542,7 +5544,7 @@ namespace Game.Maps
                 player.SendInstanceResetWarning(GetId(), player.GetDifficultyID(GetEntry()), timeLeft, true);
         }
 
-        void SetResetSchedule(bool on)
+        public void SetResetSchedule(bool on)
         {
             // only for normal instances
             // the reset time is only scheduled when there are no payers inside
@@ -5576,12 +5578,16 @@ namespace Game.Maps
             return GetEntry().MaxPlayers;
         }
 
-        private uint GetMaxResetDelay()
+        public uint GetMaxResetDelay()
         {
             MapDifficultyRecord mapDiff = GetMapDifficulty();
             return mapDiff != null ? mapDiff.GetRaidDuration() : 0;
         }
 
+        public int GetTeamIdInInstance() { return scriptTeam; }
+
+        public Team GetTeamInInstance() { return scriptTeam == TeamId.Alliance ? Team.Alliance : Team.Horde; }
+        
         public uint GetScriptId()
         {
             return i_script_id;
@@ -5602,6 +5608,7 @@ namespace Game.Maps
 
         InstanceScript i_data;
         uint i_script_id;
+        int scriptTeam;
         InstanceScenario i_scenario;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;

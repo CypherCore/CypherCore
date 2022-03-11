@@ -196,7 +196,7 @@ namespace Game.Maps
 
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
 
-                InstanceMap map = new(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
+                InstanceMap map = new(GetId(), GetGridExpiry(), InstanceId, difficulty, this, teamId);
                 Cypher.Assert(map.IsDungeon());
 
                 map.LoadRespawnTimes();
