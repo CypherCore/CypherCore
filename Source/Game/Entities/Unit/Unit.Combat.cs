@@ -20,6 +20,7 @@ using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Combat;
+using Game.Groups;
 using Game.Loots;
 using Game.Maps;
 using Game.Networking.Packets;
@@ -685,8 +686,32 @@ namespace Game.Entities
                     creature.SetLootRecipient(null);
             }
 
-            if (isRewardAllowed && creature != null && creature.GetLootRecipient() != null)
-                player = creature.GetLootRecipient();
+            if (isRewardAllowed && creature)
+            {
+                Player lootRecipient = creature.GetLootRecipient();
+                if (lootRecipient != null)
+                {
+                    // Loot recipient can be in a different map
+                    if (!creature.IsInMap(lootRecipient))
+                    {
+                        Group group = creature.GetLootRecipientGroup();
+                        if (group != null)
+                        {
+                            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                            {
+                                Player member = itr.GetSource();
+                                if (!member || !creature.IsInMap(member))
+                                    continue;
+
+                                player = member;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        player = creature.GetLootRecipient();
+                }
+            }
 
             // Exploit fix
             if (creature && creature.IsPet() && creature.GetOwnerGUID().IsPlayer())
