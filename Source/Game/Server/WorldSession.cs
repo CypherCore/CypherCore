@@ -328,9 +328,6 @@ namespace Game
                     break;
             }
 
-            if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
-                _warden.Update();
-
             if (!updater.ProcessUnsafe()) // <=> updater is of type MapSessionFilter
             {
                 // Send time sync packet every 10s.
@@ -347,6 +344,9 @@ namespace Game
 
             if (updater.ProcessUnsafe())
             {
+                if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
+                    _warden.Update();
+
                 // If necessary, log the player out
                 if (ShouldLogOut(currentTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
