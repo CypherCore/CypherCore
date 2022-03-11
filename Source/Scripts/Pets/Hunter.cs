@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.AI;
+using Game.Combat;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
@@ -73,24 +74,21 @@ namespace Scripts.Pets
                 if (me.IsSummon() && !me.GetThreatManager().GetFixateTarget())
                 { // find new target
                     Unit summoner = me.ToTempSummon().GetSummonerUnit();
-
                     List<Unit> targets = new();
-                    foreach (var pair in summoner.GetCombatManager().GetPvPCombatRefs())
+
+                    void addTargetIfValid(CombatReference refe)
                     {
-                        Unit enemy = pair.Value.GetOther(summoner);
+                        Unit enemy = refe.GetOther(summoner);
                         if (!enemy.HasBreakableByDamageCrowdControlAura() && me.CanCreatureAttack(enemy) && me.IsWithinDistInMap(enemy, me.GetAttackDistance(enemy)))
                             targets.Add(enemy);
                     }
 
+                    foreach (var pair in summoner.GetCombatManager().GetPvPCombatRefs())
+                        addTargetIfValid(pair.Value);
+
                     if (targets.Empty())
-                    {
                         foreach (var pair in summoner.GetCombatManager().GetPvECombatRefs())
-                        {
-                            Unit enemy = pair.Value.GetOther(summoner);
-                            if (!enemy.HasBreakableByDamageCrowdControlAura() && me.CanCreatureAttack(enemy) && me.IsWithinDistInMap(enemy, me.GetAttackDistance(enemy)))
-                                targets.Add(enemy);
-                        }
-                    }
+                            addTargetIfValid(pair.Value);
 
                     foreach (Unit target in targets)
                         me.EngageWithTarget(target);

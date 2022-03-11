@@ -53,11 +53,11 @@ namespace Scripts.Pets
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 30.0f);
-                foreach (var iter in targets)
+                foreach (var target in targets)
                 {
-                    if (iter.GetAura(SpellIds.SummonGargoyle1, ownerGuid) != null)
+                    if (target.HasAura(SpellIds.SummonGargoyle1, ownerGuid))
                     {
-                        me.Attack(iter, false);
+                        me.Attack(target, false);
                         break;
                     }
                 }
