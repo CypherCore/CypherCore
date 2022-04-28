@@ -624,7 +624,7 @@ namespace Game.Movement
         public void MoveLand(uint id, Position pos)
         {
             MoveSplineInit init = new(_owner);
-            init.MoveTo(pos);
+            init.MoveTo(pos, false);
             init.SetAnimation(AnimType.ToGround);
             Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
         }
