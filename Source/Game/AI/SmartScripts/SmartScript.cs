@@ -136,7 +136,7 @@ namespace Game.AI
                 }
             }
 
-            --mNestedEventsCounter;
+            --_nestedEventsCounter;
         }
 
         void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")

@@ -1581,9 +1581,9 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public GameObject FindNearestGameObject(uint entry, float range)
+        public GameObject FindNearestGameObject(uint entry, float range, bool spawnedOnly = true)
         {
-            var checker = new NearestGameObjectEntryInObjectRangeCheck(this, entry, range);
+            var checker = new NearestGameObjectEntryInObjectRangeCheck(this, entry, range, spawnedOnly);
             var searcher = new GameObjectLastSearcher(this, checker);
 
             Cell.VisitGridObjects(this, searcher, range);

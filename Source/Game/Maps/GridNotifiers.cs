@@ -2770,26 +2770,28 @@ namespace Game.Maps
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
     class NearestGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
     {
-        public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range)
+        public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = true)
         {
-            i_obj = obj;
-            i_entry = entry;
-            i_range = range;
+            _obj = obj;
+            _entry = entry;
+            _range = range;
+            _spawnedOnly = spawnedOnly;
         }
 
         public bool Invoke(GameObject go)
         {
-            if (go.IsSpawned() && go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(go, i_range))
+            if ((!_spawnedOnly || go.IsSpawned()) && go.GetEntry() == _entry && go.GetGUID() != _obj.GetGUID() && _obj.IsWithinDistInMap(go, _range))
             {
-                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                _range = _obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
             }
             return false;
         }
 
-        WorldObject i_obj;
-        uint i_entry;
-        float i_range;
+        WorldObject _obj;
+        uint _entry;
+        float _range;
+        bool _spawnedOnly;
     }
 
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest unspawned GO)
