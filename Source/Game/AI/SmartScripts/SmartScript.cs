@@ -3493,13 +3493,13 @@ namespace Game.AI
                     break;
                 }
                 case SmartEvents.TransportRelocate:
-                case SmartEvents.WaypointStart:
                 {
-                    if (e.Event.waypoint.pathID != 0 && var0 != e.Event.waypoint.pathID)
+                    if (e.Event.transportRelocate.pointID != 0 && var0 != e.Event.transportRelocate.pointID)
                         return;
                     ProcessAction(e, unit, var0);
                     break;
                 }
+                case SmartEvents.WaypointStart:
                 case SmartEvents.WaypointReached:
                 case SmartEvents.WaypointResumed:
                 case SmartEvents.WaypointPaused:

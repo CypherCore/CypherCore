@@ -114,10 +114,8 @@ namespace Game.AI
             if (invoker && invoker.IsPlayer())
             {
                 _escortNPCFlags = me.m_unitData.NpcFlags[0];
-                me.SetNpcFlags((NPCFlags)0);
+                me.SetNpcFlags(0);
             }
-
-            GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, _currentWaypointNode, GetScript().GetPathId());
 
             me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
         }
@@ -394,17 +392,12 @@ namespace Game.AI
 
         public override void WaypointPathStarted(uint pathId)
         {
-            if (!HasEscortState(SmartEscortState.Escorting))
-            {
-                // @todo remove the constant 1 at some point, it's never anything different
-                GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, 1, pathId);
-                return;
-            }
+            // SmartAI::WaypointStarted() already handles the case of starting the 1st waypoint
         }
 
         public override void WaypointStarted(uint nodeId, uint pathId)
         {
-
+            GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, nodeId, pathId);
         }
 
         public override void WaypointReached(uint nodeId, uint pathId)

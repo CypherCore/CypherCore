@@ -334,12 +334,7 @@ namespace Game.AI
                 if (AIInfo.cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
                     AIInfo.cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
 
-                if (spellInfo.GetMaxRange(false) == 0)
-                {
-                    if (AIInfo.target < AITarget.Self)
-                        AIInfo.target = AITarget.Self;
-                }
-                else
+                if (spellInfo.GetMaxRange(false) != 0)
                 {
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
@@ -370,6 +365,7 @@ namespace Game.AI
                         }
                     }
                 }
+
                 AIInfo.realCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
                 AIInfo.maxRange = spellInfo.GetMaxRange(false) * 3 / 4;
 
