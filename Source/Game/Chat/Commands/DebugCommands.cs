@@ -88,9 +88,6 @@ namespace Game.Chat
             if (!target || !target.IsAIEnabled())
                 return false;
 
-            if (!int.TryParse(duration_str, out int tempDuration))
-                tempDuration = 0;
-
             TimeSpan duration = durationArg != 0 ? TimeSpan.FromSeconds(durationArg) : TimeSpan.Zero;
             if (duration <= TimeSpan.Zero || duration >= TimeSpan.FromMinutes(30)) // arbitrary upper limit
                 duration = TimeSpan.FromMinutes(3);

@@ -5,11 +5,12 @@ CypherCore is an open source server project for World of Warcraft written in C#.
 The current support game version is: 9.1.5.41488
 
 ### Prerequisites
-* Visual Studio 2022 with .NET 6.0 [Download](https://www.visualstudio.com/downloads/)
-* Mysql Database 5.6 or higher [Download](https://dev.mysql.com/downloads/mysql/)
+* .NET 6.0 SDK [Download](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+* MariaDB 10.6 or higher [Download](https://mariadb.org/download/)
+* Optional: Visual Studio 2022, Visual Studio Code or Jetbrains Rider
 
 ### Server Setup
-* Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)
+* ~~Download and Complie the Extractor [Download](https://github.com/CypherCore/Tools)~~ Use TrinityCore extractors for now
 * Run all extractors in the wow directory
 * Copy all created folders into server directory (ex: C:\CypherCore\Data)
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
@@ -19,7 +20,7 @@ The current support game version is: 9.1.5.41488
 * Extract the sql files into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
-* Must use Arctium WoW Client Launcher [Download](https://arctium.io) (World of Warcraft -> Private Server Launcher -> Shadowlands)
+* Must use Arctium WoW Client Launcher [Download](https://arctium.io/wow)
 
 ### Support / General Info
 * Check out our Discord [Here](https://discord.gg/tCx3JbJ5qQ)

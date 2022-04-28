@@ -566,49 +566,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_jotunheim_cage : GameObjectAI
-    {
-        public go_jotunheim_cage(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            me.UseDoorOrButton();
-            Creature pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerHuman, 5.0f, true);
-            if (!pPrisoner)
-            {
-                pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerTroll, 5.0f, true);
-                if (!pPrisoner)
-                {
-                    pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerOrc, 5.0f, true);
-                    if (!pPrisoner)
-                        pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerNe, 5.0f, true);
-                }
-            }
-            if (!pPrisoner || !pPrisoner.IsAlive())
-                return false;
-
-            pPrisoner.DisappearAndDie();
-            player.KilledMonsterCredit(CreatureIds.EbonBladePrisonerHuman);
-            switch (pPrisoner.GetEntry())
-            {
-                case CreatureIds.EbonBladePrisonerHuman:
-                    player.CastSpell(player, SpellIds.SummonBladeKnightH, true);
-                    break;
-                case CreatureIds.EbonBladePrisonerNe:
-                    player.CastSpell(player, SpellIds.SummonBladeKnightNe, true);
-                    break;
-                case CreatureIds.EbonBladePrisonerTroll:
-                    player.CastSpell(player, SpellIds.SummonBladeKnightTroll, true);
-                    break;
-                case CreatureIds.EbonBladePrisonerOrc:
-                    player.CastSpell(player, SpellIds.SummonBladeKnightOrc, true);
-                    break;
-            }
-            return true;
-        }
-    }
-
-    [Script]
     class go_table_theka : GameObjectAI
     {
         public go_table_theka(GameObject go) : base(go) { }
