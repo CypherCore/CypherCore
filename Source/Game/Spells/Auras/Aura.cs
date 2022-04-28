@@ -1712,6 +1712,9 @@ namespace Game.Spells
                 if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcFromProcs) && !procEntry.AttributesMask.HasFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
                     if (spell.IsTriggered() && !spell.GetSpellInfo().HasAttribute(SpellAttr3.NotAProc))
                         return 0;
+
+                if (spell.m_CastItem != null && procEntry.AttributesMask.HasFlag(ProcAttributes.CantProcFromItemCast))
+                    return 0;
             }
 
             // check don't break stealth attr present
