@@ -38,8 +38,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_ACCOUNT_BANNED, "DELETE FROM account_banned WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION, "UPDATE account SET session_key_bnet = ? WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION, "SELECT username, session_key_bnet FROM account WHERE id = ? AND LENGTH(session_key_bnet) = 40");
-            PrepareStatement(LoginStatements.UPD_LOGON, "UPDATE account SET salt = ?, verifier = ?, s = DEFAULT, v = DEFAULT WHERE id = ?");
-            PrepareStatement(LoginStatements.UPD_LOGON_LEGACY, "UPDATE account SET sha_pass_hash = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.UPD_LOGON, "UPDATE account SET salt = ?, verifier = ? WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME, "SELECT id FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME, "SELECT id, username FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME, "SELECT a.id, a.session_key_bnet, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.SecurityLevel, " +
@@ -81,8 +80,8 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME, "SELECT id FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.GET_GMLEVEL_BY_REALMID, "SELECT SecurityLevel FROM account_access WHERE AccountID = ? AND (RealmID = ? OR RealmID = -1) ORDER BY RealmID DESC");
             PrepareStatement(LoginStatements.GET_USERNAME_BY_ID, "SELECT username FROM account WHERE id = ?");
-            PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD, "SELECT salt, verifier FROM account WHERE id = ? AND salt IS NOT NULL AND verifier IS NOT NULL");
-            PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD_BY_NAME, "SELECT salt, verifier FROM account WHERE username = ? AND salt IS NOT NULL AND verifier IS NOT NULL");
+            PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD, "SELECT salt, verifier FROM account WHERE id = ?");
+            PrepareStatement(LoginStatements.SEL_CHECK_PASSWORD_BY_NAME, "SELECT salt, verifier FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_PINFO, "SELECT a.username, aa.SecurityLevel, a.email, a.reg_mail, a.last_ip, DATE_FORMAT(a.last_login, '%Y-%m-%d %T'), a.mutetime, a.mutereason, a.muteby, a.failed_logins, a.locked, a.OS FROM account a LEFT JOIN account_access aa ON (a.id = aa.AccountID AND (aa.RealmID = ? OR aa.RealmID = -1)) WHERE a.id = ?");
             PrepareStatement(LoginStatements.SEL_PINFO_BANS, "SELECT unbandate, bandate = unbandate, bannedby, banreason FROM account_banned WHERE id = ? AND active ORDER BY bandate ASC LIMIT 1");
             PrepareStatement(LoginStatements.SEL_GM_ACCOUNTS, "SELECT a.username, aa.SecurityLevel FROM account a, account_access aa WHERE a.id = aa.AccountID AND aa.SecurityLevel >= ? AND (aa.RealmID = -1 OR aa.RealmID = ?)");
@@ -193,7 +192,6 @@ namespace Framework.Database
         UPD_ACCOUNT_INFO_CONTINUED_SESSION,
         SEL_ACCOUNT_INFO_CONTINUED_SESSION,
         UPD_LOGON,
-        UPD_LOGON_LEGACY,
         SEL_ACCOUNT_ID_BY_NAME,
         SEL_ACCOUNT_LIST_BY_NAME,
         SEL_ACCOUNT_INFO_BY_NAME,

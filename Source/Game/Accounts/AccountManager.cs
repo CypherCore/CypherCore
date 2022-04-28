@@ -173,11 +173,6 @@ namespace Game
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
-            stmt.AddValue(0, CalculateShaPassHash(newUsername, newPassword));
-            stmt.AddValue(1, accountId);
-            DB.Login.Execute(stmt);
-
             return AccountOpResult.Ok;
         }
 
@@ -197,11 +192,6 @@ namespace Game
             stmt.AddValue(0, salt);
             stmt.AddValue(1, verifier);
             stmt.AddValue(2, accountId);
-            DB.Login.Execute(stmt);
-
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
-            stmt.AddValue(0, CalculateShaPassHash(username, newPassword));
-            stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
             return AccountOpResult.Ok;
@@ -339,12 +329,6 @@ namespace Game
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Characters.Query(stmt);
             return result.IsEmpty() ? 0 : (uint)result.Read<ulong>(0);
-        }
-
-        string CalculateShaPassHash(string name, string password)
-        {
-            SHA1 sha = SHA1.Create();
-            return sha.ComputeHash(Encoding.UTF8.GetBytes(name + ":" + password)).ToHexString();
         }
 
         public bool IsBannedAccount(string name)
