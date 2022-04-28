@@ -154,6 +154,7 @@ namespace Game.Arenas
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ARENA_TEAM_MEMBER);
             stmt.AddValue(0, teamId);
             stmt.AddValue(1, playerGuid.GetCounter());
+            stmt.AddValue(2, (ushort)personalRating);
             DB.Characters.Execute(stmt);
 
             // Inform player if online

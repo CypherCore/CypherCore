@@ -393,7 +393,7 @@ namespace Framework.Database
             // Arena teams
             PrepareStatement(CharStatements.SEL_CHARACTER_ARENAINFO, "SELECT arenaTeamId, weekGames, seasonGames, seasonWins, personalRating FROM arena_team_member WHERE guid = ?");
             PrepareStatement(CharStatements.INS_ARENA_TEAM, "INSERT INTO arena_team (arenaTeamId, name, captainGuid, type, rating, backgroundColor, emblemStyle, emblemColor, borderStyle, borderColor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.INS_ARENA_TEAM_MEMBER, "INSERT INTO arena_team_member (arenaTeamId, guid) VALUES (?, ?)");
+            PrepareStatement(CharStatements.INS_ARENA_TEAM_MEMBER, "INSERT INTO arena_team_member (arenaTeamId, guid, personalRating) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.DEL_ARENA_TEAM, "DELETE FROM arena_team where arenaTeamId = ?");
             PrepareStatement(CharStatements.DEL_ARENA_TEAM_MEMBERS, "DELETE FROM arena_team_member WHERE arenaTeamId = ?");
             PrepareStatement(CharStatements.UPD_ARENA_TEAM_CAPTAIN, "UPDATE arena_team SET captainGuid = ? WHERE arenaTeamId = ?");
