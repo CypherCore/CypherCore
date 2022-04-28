@@ -414,17 +414,18 @@ namespace Game.Scripting
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
-            uint triggerId = trigger.Id;
             InstanceScript instance = player.GetInstanceScript();
-            if (instance != null)
-            {
-                if (instance.IsAreaTriggerDone(triggerId))
-                    return true;
-                else
-                    instance.MarkAreaTriggerDone(triggerId);
-            }
-            return _OnTrigger(player, trigger);
+            if (instance != null && instance.IsAreaTriggerDone(trigger.Id))
+                return true;
+
+            if (TryHandleOnce(player, trigger) && instance != null)
+                instance.MarkAreaTriggerDone(trigger.Id);
+
+            return true;
         }
+
+        // returns true if the trigger was successfully handled, false if we should try again next time
+        public virtual bool TryHandleOnce(Player player, AreaTriggerRecord trigger) { return false; }
 
         void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
         {
@@ -437,8 +438,6 @@ namespace Game.Scripting
             if (instance != null)
                 ResetAreaTriggerDone(instance, trigger.Id);
         }
-
-        public virtual bool _OnTrigger(Player player, AreaTriggerRecord trigger) { return false; }
     }
 
     public class BattlefieldScript : ScriptObject
