@@ -795,6 +795,25 @@ namespace Game.Maps
                     foreach (Unit unit in toVisit)
                         VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
                 }
+
+                { // Update player's summons
+                    List<Unit> toVisit = new();
+
+                    // Totems
+                    foreach (ObjectGuid summonGuid in player.m_SummonSlot)
+                    {
+                        if (!summonGuid.IsEmpty())
+                        {
+                            Creature unit = GetCreature(summonGuid);
+                            if (unit != null)
+                                if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
+                                    toVisit.Add(unit);
+                        }
+                    }
+
+                    foreach (Unit unit in toVisit)
+                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                }
             }
 
             for (var i = 0; i < m_activeNonPlayers.Count; ++i)
