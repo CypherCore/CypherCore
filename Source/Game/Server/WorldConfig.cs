@@ -860,7 +860,7 @@ namespace Game
             Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", 10);
             Values[WorldCfg.RespawnGuidWarningFrequency] = GetDefaultValue("Respawn.WarningFrequency", 1800);
 
-            Values[WorldCfg.EnableMmaps] = GetDefaultValue("mmap.EnablePathFinding", false);
+            Values[WorldCfg.EnableMmaps] = GetDefaultValue("mmap.EnablePathFinding", true);
             Values[WorldCfg.VmapIndoorCheck] = GetDefaultValue("vmap.EnableIndoorCheck", false);
 
             Values[WorldCfg.MaxWho] = GetDefaultValue("MaxWhoListReturns", 49);
