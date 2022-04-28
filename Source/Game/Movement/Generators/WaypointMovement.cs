@@ -119,11 +119,6 @@ namespace Game.Movement
             owner.StopMoving();
 
             _nextMoveTime.Reset(1000);
-
-            // inform AI
-            CreatureAI ai = owner.GetAI();
-            if (ai != null)
-                ai.WaypointPathStarted(_path.id);
         }
 
         public override void DoReset(Creature owner)

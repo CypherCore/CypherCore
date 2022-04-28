@@ -390,11 +390,6 @@ namespace Game.AI
             return true;
         }
 
-        public override void WaypointPathStarted(uint pathId)
-        {
-            // SmartAI::WaypointStarted() already handles the case of starting the 1st waypoint
-        }
-
         public override void WaypointStarted(uint nodeId, uint pathId)
         {
             GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, nodeId, pathId);

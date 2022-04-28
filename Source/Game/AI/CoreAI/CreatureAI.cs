@@ -546,8 +546,6 @@ namespace Game.AI
 
         /// == Waypoints system =============================
         /// 
-        public virtual void WaypointPathStarted(uint pathId) { }
-
         public virtual void WaypointStarted(uint nodeId, uint pathId) { }
 
         public virtual void WaypointReached(uint nodeId, uint pathId) { }
