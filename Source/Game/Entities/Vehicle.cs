@@ -699,6 +699,9 @@ namespace Game.Entities
             init.SetTransportEnter();
             Passenger.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
 
+            foreach (var (_, threatRef) in Passenger.GetThreatManager().GetThreatenedByMeList())
+                threatRef.GetOwner().GetThreatManager().AddThreat(Target.GetBase(), threatRef.GetThreat(), null, true, true);
+
             Creature creature = Target.GetBase().ToCreature();
             if (creature != null)
             {
