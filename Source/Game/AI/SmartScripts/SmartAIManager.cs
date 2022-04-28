@@ -893,6 +893,14 @@ namespace Game.AI
                             return false;
                         }
                         break;
+                    case SmartEvents.Reset:
+                        if (e.Action.type == SmartActions.CallScriptReset)
+                        {
+                            // There might be SMART_TARGET_* cases where this should be allowed, they will be handled if needed
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event SMART_EVENT_RESET and action SMART_ACTION_CALL_SCRIPT_RESET, skipped.");
+                            return false;
+                        }
+                        break;
                     case SmartEvents.QuestObjCompletion:
                         if (Global.ObjectMgr.GetQuestObjective(e.Event.questObjective.id) == null)
                         {
@@ -921,7 +929,6 @@ namespace Game.AI
                     case SmartEvents.Death:
                     case SmartEvents.Evade:
                     case SmartEvents.ReachedHome:
-                    case SmartEvents.Reset:
                     case SmartEvents.JustSummoned:
                     case SmartEvents.WaypointStart:
                     case SmartEvents.WaypointReached:
