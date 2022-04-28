@@ -32,6 +32,9 @@ namespace Game.AI
 {
     public class SmartScript
     {
+        // Max number of nested ProcessEventsFor() calls to avoid infinite loops
+        const uint MaxNestedEvents = 10;
+
         public ObjectGuid LastInvoker;
 
         Dictionary<uint, uint> _counterList = new();
@@ -63,6 +66,7 @@ namespace Game.AI
         bool _useTextTimer;
         uint _currentPriority;
         bool _eventSortingRequired;
+        uint _nestedEventsCounter;
 
         Dictionary<uint, ObjectGuidList> _storedTargets = new();
 
@@ -111,16 +115,28 @@ namespace Game.AI
 
         public void ProcessEventsFor(SmartEvents e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
-            foreach (var Event in _events)
-            {
-                SmartEvents eventType = Event.GetEventType();
-                if (eventType == SmartEvents.Link)//special handling
-                    continue;
+            _nestedEventsCounter++;
 
-                if (eventType == e)
-                    if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(Event.EntryOrGuid, Event.EventId, Event.SourceType, unit, GetBaseObject()))
-                        ProcessEvent(Event, unit, var0, var1, bvar, spell, gob, varString);
+            // Allow only a fixed number of nested ProcessEventsFor calls
+            if (_nestedEventsCounter > MaxNestedEvents)
+            {
+                Log.outWarn(LogFilter.ScriptsAi, $"SmartScript::ProcessEventsFor: reached the limit of max allowed nested ProcessEventsFor() calls with event {e}, skipping!\n{GetBaseObject().GetDebugInfo()}");
             }
+            else
+            {
+                foreach (var Event in _events)
+                {
+                    SmartEvents eventType = Event.GetEventType();
+                    if (eventType == SmartEvents.Link)//special handling
+                        continue;
+
+                    if (eventType == e)
+                        if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(Event.EntryOrGuid, Event.EventId, Event.SourceType, unit, GetBaseObject()))
+                            ProcessEvent(Event, unit, var0, var1, bvar, spell, gob, varString);
+                }
+            }
+
+            --mNestedEventsCounter;
         }
 
         void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
