@@ -112,7 +112,7 @@ namespace Game.Spells
             data.SpellID = m_spellInfo.Id;
             m_caster.SendMessageToSet(data, true);
 
-            Unit.Kill(unitCaster, unitTarget, false);
+            Unit.Kill(GetUnitCasterForEffectHandlers(), unitTarget, false);
         }
 
         [SpellEffectHandler(SpellEffectName.EnvironmentalDamage)]
@@ -129,6 +129,7 @@ namespace Game.Spells
                 unitTarget.ToPlayer().EnvironmentalDamage(EnviromentalDamage.Fire, (uint)damage);
             else
             {
+                Unit unitCaster = GetUnitCasterForEffectHandlers();
                 DamageInfo damageInfo = new(unitCaster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 Unit.CalcAbsorbResist(damageInfo);
 
@@ -163,6 +164,7 @@ namespace Game.Spells
                         damage /= (int)count;
                 }
 
+                Unit unitCaster = GetUnitCasterForEffectHandlers();
                 if (unitCaster != null && apply_direct_bonus)
                 {
                     uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
@@ -472,6 +474,7 @@ namespace Game.Spells
 
         void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out float speedXY, out float speedZ)
         {
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             float runSpeed = unitCaster.IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)UnitMoveType.Run] : SharedConst.baseMoveSpeed[(int)UnitMoveType.Run];
             Creature creature = unitCaster.ToCreature();
             if (creature != null)
@@ -504,6 +507,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -527,6 +531,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -670,6 +675,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             // add spell damage bonus
             if (unitCaster != null)
             {
@@ -755,7 +761,7 @@ namespace Game.Spells
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
             // NO - Not a typo - EffectPowerBurn uses effect value multiplier - not effect damage multiplier
-            float dmgMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
+            float dmgMultiplier = effectInfo.CalcValueMultiplier(GetUnitCasterForEffectHandlers(), this);
 
             // add log data before multiplication (need power amount, not damage)
             ExecuteLogEffectTakeTargetPower(effectInfo.Effect, unitTarget, powerType, (uint)newDamage, 0.0f);
@@ -773,6 +779,8 @@ namespace Game.Spells
 
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
+
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
 
             // Skip if m_originalCaster not available
             if (unitCaster == null)
@@ -823,6 +831,7 @@ namespace Game.Spells
                 return;
 
             uint heal = (uint)unitTarget.CountPctFromMaxHealth(damage);
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster)
             {
                 heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
@@ -841,6 +850,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             uint heal = (uint)damage;
             if (unitCaster)
                 heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
@@ -861,6 +871,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             uint bonus = 0;
             if (unitCaster != null)
                 unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
@@ -1052,6 +1063,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -1099,6 +1111,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || unitTarget == null)
                 return;
 
@@ -1144,6 +1157,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || unitTarget == null)
                 return;
 
@@ -1521,6 +1535,8 @@ namespace Game.Spells
                     privateObjectOwner = caster.ToPlayer().GetGroup().GetGUID();
 
             int duration = m_spellInfo.CalcDuration(caster);
+
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
 
             TempSummon summon = null;
 
@@ -2203,6 +2219,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || !unitCaster.GetPetGUID().IsEmpty())
                 return;
 
@@ -2258,6 +2275,8 @@ namespace Game.Spells
                 return;
 
             Player owner = null;
+
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster != null)
             {
                 owner = unitCaster.ToPlayer();
@@ -2369,6 +2388,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -2412,6 +2432,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -2539,6 +2560,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || !unitCaster.IsAlive())
                 return;
 
@@ -2557,6 +2579,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -2597,6 +2620,7 @@ namespace Game.Spells
                         || (spell.GetState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
+                        Unit unitCaster = GetUnitCasterForEffectHandlers();
                         if (unitCaster != null)
                         {
                             int duration = m_spellInfo.GetDuration();
@@ -2681,8 +2705,9 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            // @todo we must implement hunter pet summon at login there (spell 6962)
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
 
+            // @todo we must implement hunter pet summon at login there (spell 6962)
             /// @todo: move this to scripts
             switch (m_spellInfo.SpellFamilyName)
             {
@@ -3016,6 +3041,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -3374,6 +3400,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -3565,6 +3592,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -3698,6 +3726,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -3755,6 +3784,7 @@ namespace Game.Spells
             if (destTarget == null)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -4097,6 +4127,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -4199,6 +4230,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || unitTarget == null)
                 return;
 
@@ -4211,6 +4243,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -4661,6 +4694,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -4710,6 +4744,7 @@ namespace Game.Spells
 
         void SummonGuardian(SpellEffectInfo effect, uint entry, SummonPropertiesRecord properties, uint numGuardians, ObjectGuid privateObjectOwner)
         {
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -5138,6 +5173,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
@@ -5210,6 +5246,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
@@ -5547,6 +5584,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (!unitCaster || !m_targets.HasDst())
                 return;
 
@@ -5565,6 +5603,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (!unitCaster || !m_targets.HasDst())
                 return;
 
@@ -5613,6 +5652,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 
@@ -5710,6 +5750,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null || unitTarget == null || !unitTarget.IsPlayer())
                 return;
 
@@ -5722,6 +5763,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
                 return;
 

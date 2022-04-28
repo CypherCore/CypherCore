@@ -2327,6 +2327,7 @@ namespace Game.Spells
                             }
                             else // aura is dispelled
                             {
+                                Unit unitCaster = m_caster.ToUnit();
                                 if (unitCaster != null)
                                     unitCaster.RemoveChannelObject(targetInfo.TargetGUID);
                                 continue;
@@ -4465,7 +4466,6 @@ namespace Game.Spells
             corpseTarget = pCorpseTarget;
             destTarget = m_destTargets[spellEffectInfo.EffectIndex].Position;
             effectInfo = spellEffectInfo;
-            unitCaster = m_originalCaster ? m_originalCaster : m_caster.ToUnit();
 
             damage = CalculateDamage(spellEffectInfo, unitTarget, out _variance);
 
@@ -7042,6 +7042,11 @@ namespace Game.Spells
                 m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered());
         }
 
+        public Unit GetUnitCasterForEffectHandlers()
+        {
+            return m_originalCaster != null ? m_originalCaster : m_caster.ToUnit();
+        }
+        
         bool IsValidDeadOrAliveTarget(Unit target)
         {
             if (target.IsAlive())
@@ -7846,7 +7851,6 @@ namespace Game.Spells
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;
         // used in effects handlers
-        Unit unitCaster;
         internal UnitAura spellAura;
         internal DynObjAura dynObjAura;
 
