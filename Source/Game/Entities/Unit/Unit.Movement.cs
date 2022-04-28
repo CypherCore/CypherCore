@@ -1308,6 +1308,8 @@ namespace Game.Entities
                     GetMotionMaster().Remove(MovementGeneratorType.Fleeing);
                     if (GetVictim() != null)
                         SetTarget(GetVictim().GetGUID());
+                    if (!IsPlayer() && !IsInCombat())
+                        GetMotionMaster().MoveTargetedHome();
                 }
             }
 
