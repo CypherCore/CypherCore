@@ -146,11 +146,12 @@ namespace Game.Entities
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
-            // @todo possibly all negative auras immune?
-            if (GetEntry() == 5925)
-                return false;
-
-            if (spellEffectInfo == null)
+            // immune to all positive spells, except of stoneclaw totem absorb and sentry totem bind sight
+            // totems positive spells have unit_caster target
+            if (spellEffectInfo.Effect != SpellEffectName.Dummy &&
+                spellEffectInfo.Effect != SpellEffectName.ScriptEffect &&
+                spellInfo.IsPositive() && spellEffectInfo.TargetA.GetTarget() != Targets.UnitCaster &&
+                spellEffectInfo.TargetA.GetCheckType() != SpellTargetCheckTypes.Entry)
                 return true;
 
             switch (spellEffectInfo.ApplyAuraName)
