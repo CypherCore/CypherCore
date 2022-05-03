@@ -77,10 +77,9 @@ namespace Game
         public Guild GetGuildByName(string guildName)
         {
             foreach (var guild in GuildStore.Values)
-            {
                 if (guildName == guild.GetName())
                     return guild;
-            }
+
             return null;
         }
 
