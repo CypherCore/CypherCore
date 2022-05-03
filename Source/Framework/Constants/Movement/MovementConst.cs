@@ -120,14 +120,6 @@ namespace Framework.Constants
         public const uint SmartEscortLastOCCPoint = 0xFFFFFF;
     }
 
-    public enum AnimType
-    {
-        ToGround = 0, // 460 = ToGround, index of AnimationData.dbc
-        FlyToFly = 1, // 461 = FlyToFly?
-        ToFly = 2, // 458 = ToFly
-        FlyToGround = 3  // 463 = FlyToGround
-    }
-
     public enum RotateDirection
     {
         Left,

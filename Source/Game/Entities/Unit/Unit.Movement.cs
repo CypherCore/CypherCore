@@ -659,7 +659,7 @@ namespace Game.Entities
             return IsInDist(obj, objBoundaryRadius);
         }
 
-        public bool SetDisableGravity(bool disable)
+        public bool SetDisableGravity(bool disable, bool updateAnimationTier = true)
         {
             if (disable == IsGravityDisabled())
                 return false;
@@ -690,6 +690,16 @@ namespace Game.Entities
                 MoveSplineSetFlag packet = new(disable ? ServerOpcodes.MoveSplineDisableGravity : ServerOpcodes.MoveSplineEnableGravity);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
+            }
+
+            if (IsCreature() && updateAnimationTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            {
+                if (IsGravityDisabled())
+                    SetAnimTier(AnimTier.Fly);
+                else if (IsHovering())
+                    SetAnimTier(AnimTier.Hover);
+                else
+                    SetAnimTier(AnimTier.Ground);
             }
 
             return true;
@@ -1011,7 +1021,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool SetHover(bool enable)
+        public bool SetHover(bool enable, bool updateAnimationTier = true)
         {
             if (enable == HasUnitMovementFlag(MovementFlag.Hover))
                 return false;
@@ -1056,6 +1066,17 @@ namespace Game.Entities
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
+
+            if (IsCreature() && updateAnimationTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            {
+                if (IsGravityDisabled())
+                    SetAnimTier(AnimTier.Fly);
+                else if (IsHovering())
+                    SetAnimTier(AnimTier.Hover);
+                else
+                    SetAnimTier(AnimTier.Ground);
+            }
+
             return true;
         }
 
@@ -1723,10 +1744,17 @@ namespace Game.Entities
             }
 
             if (arrived)
+            {
                 DisableSpline();
 
+                AnimTier? animTier = MoveSpline.GetAnimation();
+                if (animTier.HasValue)
+                    SetAnimTier(animTier.Value);
+            }
+            
             UpdateSplinePosition();
         }
+
         void UpdateSplinePosition()
         {
             Vector4 loc = MoveSpline.ComputePosition();

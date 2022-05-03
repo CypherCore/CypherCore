@@ -347,6 +347,8 @@ namespace Game.Movement
         public Vector3 FinalDestination() { return Initialized() ? spline.GetPoint(spline.Last()) : Vector3.Zero; }
         public Vector3 CurrentDestination() { return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero; }
 
+        public AnimTier? GetAnimation() { return anim_tier != null ? (AnimTier)anim_tier.AnimTier : null; }
+        
         #region Fields
         public MoveSplineInitArgs InitArgs;
         public Spline spline = new();

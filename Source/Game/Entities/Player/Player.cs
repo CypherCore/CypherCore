@@ -4149,9 +4149,6 @@ namespace Game.Entities
 
             StopMirrorTimers();                                     //disable timers(bars)
 
-            // set and clear other
-            SetAnimTier(UnitBytes1Flags.AlwaysStand, false);
-
             // OnPlayerRepop hook
             Global.ScriptMgr.OnPlayerRepop(this);
         }
@@ -4358,7 +4355,6 @@ namespace Game.Entities
             // speed change, land walk
 
             // remove death flag + set aura
-            SetAnimTier(UnitBytes1Flags.None, false);
             RemovePlayerFlag(PlayerFlags.IsOutOfBounds);
 
             // This must be called always even on Players with race != RACE_NIGHTELF in case of faction change

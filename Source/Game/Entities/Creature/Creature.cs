@@ -1807,6 +1807,7 @@ namespace Game.Entities
                 uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
                 if (scalingMode != 0)
                     GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
+
                 // @todo remove the boss respawn time hack in a dynspawn follow-up once we have creature groups in instances
                 if (m_respawnCompatibilityMode)
                 {
@@ -1841,8 +1842,9 @@ namespace Game.Entities
                 if (m_formation != null && m_formation.GetLeader() == this)
                     m_formation.FormationReset(true);
 
-                bool needsFalling = IsFlying() || IsHovering();
-                SetHover(false);
+                bool needsFalling = (IsFlying() || IsHovering()) && !IsUnderWater();
+                SetHover(false, false);
+                SetDisableGravity(false, false);
 
                 if (needsFalling)
                     GetMotionMaster().MoveFall();
@@ -2374,7 +2376,7 @@ namespace Game.Entities
 
                 SetStandState((UnitStandStateType)(cainfo.bytes1 & 0xFF));
                 SetVisFlags((UnitVisFlags)((cainfo.bytes1 >> 16) & 0xFF));
-                SetAnimTier((UnitBytes1Flags)((cainfo.bytes1 >> 24) & 0xFF), false);
+                SetAnimTier((AnimTier)((cainfo.bytes1 >> 24) & 0xFF), false);
 
                 //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
                 //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)

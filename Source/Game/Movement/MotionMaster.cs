@@ -625,7 +625,7 @@ namespace Game.Movement
         {
             MoveSplineInit init = new(_owner);
             init.MoveTo(pos, false);
-            init.SetAnimation(AnimType.ToGround);
+            init.SetAnimation(AnimTier.Ground);
             Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
         }
 
@@ -633,7 +633,7 @@ namespace Game.Movement
         {
             MoveSplineInit init = new(_owner);
             init.MoveTo(pos);
-            init.SetAnimation(AnimType.ToFly);
+            init.SetAnimation(AnimTier.Hover);
 
             Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
         }
@@ -820,7 +820,7 @@ namespace Game.Movement
             {
                 init.SetFly();
                 init.SetCyclic();
-                init.SetAnimation(AnimType.ToFly);
+                init.SetAnimation(AnimTier.Hover);
             }
             else
             {

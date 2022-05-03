@@ -1841,9 +1841,7 @@ namespace Game.AI
                                     target.ToUnit().AddVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
                                     break;
                                 case 3:
-                                    // this is totally wrong to maintain compatibility with existing scripts
-                                    // TODO: fix with animtier overhaul
-                                    target.ToUnit().SetAnimTier((UnitBytes1Flags)(target.ToUnit().m_unitData.AnimTier | e.Action.setunitByte.byte1), false);
+                                    target.ToUnit().SetAnimTier((AnimTier)e.Action.setunitByte.byte1);
                                     break;
                             }
                         }
@@ -1868,7 +1866,7 @@ namespace Game.AI
                                     target.ToUnit().RemoveVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
                                     break;
                                 case 3:
-                                    target.ToUnit().SetAnimTier((UnitBytes1Flags)(target.ToUnit().m_unitData.AnimTier & ~e.Action.setunitByte.byte1), false);
+                                    target.ToUnit().SetAnimTier(AnimTier.Ground);
                                     break;
                             }
                         }

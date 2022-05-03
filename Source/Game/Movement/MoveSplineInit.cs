@@ -310,7 +310,7 @@ namespace Game.Movement
             args.flags.EnableParabolic();
         }
 
-        public void SetAnimation(AnimType anim)
+        public void SetAnimation(AnimTier anim)
         {
             args.time_perc = 0.0f;
             args.animTier = new();

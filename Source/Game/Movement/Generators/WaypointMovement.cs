@@ -358,10 +358,10 @@ namespace Game.Movement
             switch (waypoint.moveType)
             {
                 case WaypointMoveType.Land:
-                    init.SetAnimation(AnimType.ToGround);
+                    init.SetAnimation(AnimTier.Ground);
                     break;
                 case WaypointMoveType.Takeoff:
-                    init.SetAnimation(AnimType.ToFly);
+                    init.SetAnimation(AnimTier.Hover);
                     break;
                 case WaypointMoveType.Run:
                     init.SetWalk(false);

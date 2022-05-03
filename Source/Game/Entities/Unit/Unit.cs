@@ -2154,7 +2154,9 @@ namespace Game.Entities
             }
         }
 
-        public void SetAnimTier(UnitBytes1Flags animTier, bool notifyClient)
+        public AnimTier GetAnimTier() { return (AnimTier)(byte)m_unitData.AnimTier; }
+        
+        public void SetAnimTier(AnimTier animTier, bool notifyClient = true)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AnimTier), (byte)animTier);
 

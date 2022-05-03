@@ -277,13 +277,13 @@ namespace Framework.Constants
         All = 0xFF
     }
 
-    public enum UnitBytes1Flags
+    public enum AnimTier
     {
-        None = 0x00,
-        AlwaysStand = 0x01,
-        Hover = 0x02,
-        Unk3 = 0x04,
-        All = 0xFF
+        Ground = 0, // plays ground tier animations
+        Swim = 1, // falls back to ground tier animations, not handled by the client, should never appear in sniffs, will prevent tier change animations from playing correctly if used
+        Hover = 2, // plays flying tier animations or falls back to ground tier animations, automatically enables hover clientside when entering visibility with this value
+        Fly = 3, // plays flying tier animations
+        Submerged = 4
     }
 
     public enum UnitPVPStateFlags
