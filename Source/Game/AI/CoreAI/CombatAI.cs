@@ -24,7 +24,7 @@ namespace Game.AI
 {
     public class CombatAI : CreatureAI
     {
-        public List<uint> Spells = new();
+        protected List<uint> _spells = new();
 
         public CombatAI(Creature c) : base(c) { }
 
@@ -32,7 +32,7 @@ namespace Game.AI
         {
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 if (me.m_spells[i] != 0 && Global.SpellMgr.HasSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID()))
-                    Spells.Add(me.m_spells[i]);
+                    _spells.Add(me.m_spells[i]);
 
             base.InitializeAI();
         }
@@ -44,7 +44,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            foreach (var id in Spells)
+            foreach (var id in _spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info != null && info.condition == AICondition.Die)
@@ -54,7 +54,7 @@ namespace Game.AI
 
         public override void JustEngagedWith(Unit victim)
         {
-            foreach (var id in Spells)
+            foreach (var id in _spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info != null)
@@ -122,7 +122,7 @@ namespace Game.AI
             base.InitializeAI();
 
             _attackDistance = 30.0f;
-            foreach (var id in Spells)
+            foreach (var id in _spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info != null && info.condition == AICondition.Combat && _attackDistance > info.maxRange)
@@ -140,12 +140,12 @@ namespace Game.AI
 
         public override void JustEngagedWith(Unit victim)
         {
-            if (Spells.Empty())
+            if (_spells.Empty())
                 return;
 
-            int spell = (int)(RandomHelper.Rand32() % Spells.Count);
+            int spell = (int)(RandomHelper.Rand32() % _spells.Count);
             uint count = 0;
-            foreach (var id in Spells)
+            foreach (var id in _spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info != null)
@@ -157,7 +157,7 @@ namespace Game.AI
                         TimeSpan cooldown = info.realCooldown;
                         if (count == spell)
                         {
-                            DoCast(Spells[spell]);
+                            DoCast(_spells[spell]);
                             cooldown += TimeSpan.FromMilliseconds(me.GetCurrentSpellCastTime(id));
                         }
                         _events.ScheduleEvent(id, cooldown);
