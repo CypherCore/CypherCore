@@ -480,7 +480,8 @@ namespace Game.Entities
             if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 phaseShiftOwner = summoner;
 
-            PhasingHandler.InheritPhaseShift(summon, phaseShiftOwner);
+            if (phaseShiftOwner != null)
+                PhasingHandler.InheritPhaseShift(summon, phaseShiftOwner);
 
             summon.SetCreatedBySpell(spellId);
 
