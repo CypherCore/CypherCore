@@ -2653,6 +2653,9 @@ namespace Game.AI
         public OverrideWeather overrideWeather;
 
         [FieldOffset(4)]
+        public Evade evade;
+
+        [FieldOffset(4)]
         public Conversation conversation;
 
         [FieldOffset(4)]
@@ -3195,6 +3198,10 @@ namespace Game.AI
             public uint zoneId;
             public uint weatherId;
             public uint intensity;
+        }
+        public struct Evade
+        {
+            public uint toRespawnPosition;
         }
         public struct Conversation
         {

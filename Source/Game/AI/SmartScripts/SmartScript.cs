@@ -711,6 +711,13 @@ namespace Game.AI
                     if (_me == null)
                         break;
 
+                    // Reset home position to respawn position if specified in the parameters
+                    if (e.Action.evade.toRespawnPosition == 0)
+                    {
+                        _me.GetRespawnPosition(out float homeX, out float homeY, out float homeZ, out float homeO);
+                        _me.SetHomePosition(homeX, homeY, homeZ, homeO);
+                    }
+
                     _me.GetAI().EnterEvadeMode();
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_EVADE: Creature {0} EnterEvadeMode", _me.GetGUID().ToString());
                     break;
