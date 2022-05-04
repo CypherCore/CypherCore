@@ -1547,6 +1547,31 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 200071 - Undulation
+    class spell_sha_undulation_passive : AuraScript
+    {
+        byte _castCounter = 1; // first proc happens after two casts, then one every 3 casts
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.UndulationProc);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            if (++_castCounter == 3)
+            {
+                GetTarget().CastSpell(GetTarget(), SpellIds.UndulationProc, true);
+                _castCounter = 0;
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 33757 - Windfury Weapon
     class spell_sha_windfury_weapon : SpellScript
     {
