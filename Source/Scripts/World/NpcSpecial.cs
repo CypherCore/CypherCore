@@ -600,13 +600,13 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        public override void QuestAccept(Player player, Quest quest)
+        public override void OnQuestAccept(Player player, Quest quest)
         {
             if (quest.Id == QuestConst.Cluck)
                 Reset();
         }
 
-        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
         {
             if (quest.Id == QuestConst.Cluck)
                 Reset();
@@ -978,7 +978,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void QuestAccept(Player player, Quest quest)
+        public override void OnQuestAccept(Player player, Quest quest)
         {
             if ((quest.Id == 6624) || (quest.Id == 6622))
                 BeginEvent(player);
@@ -1411,7 +1411,7 @@ namespace Scripts.World.NpcSpecial
             Initialize();
         }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (me.IsSummon())
             {
@@ -1433,7 +1433,7 @@ namespace Scripts.World.NpcSpecial
             return true;
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.PlayerTalkClass.ClearMenus();
@@ -1477,7 +1477,7 @@ namespace Scripts.World.NpcSpecial
     {
         public npc_experience(Creature creature) : base(creature) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
             {
@@ -1492,7 +1492,7 @@ namespace Scripts.World.NpcSpecial
             return true;
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.PlayerTalkClass.ClearMenus();
@@ -1996,7 +1996,7 @@ namespace Scripts.World.NpcSpecial
             });
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             switch (gossipListId)
             {

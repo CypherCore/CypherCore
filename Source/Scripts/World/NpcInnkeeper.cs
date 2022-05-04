@@ -51,7 +51,7 @@ namespace Scripts.World.NpcInnkeeper
     {
         public npc_innkeeper(Creature creature) : base(creature) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) && !player.HasAura(SpellIds.TrickOrTreated))
             {
@@ -124,7 +124,7 @@ namespace Scripts.World.NpcInnkeeper
             return true;
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
