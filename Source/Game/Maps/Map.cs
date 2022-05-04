@@ -4118,6 +4118,17 @@ namespace Game.Maps
             if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId, true))
                 return null;
 
+            Transport transport = summoner != null ? summoner.GetTransport() : null;
+            if (transport)
+            {
+                pos.GetPosition(out float x, out float y, out float z, out float o);
+                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+                summon.m_movementInfo.transport.pos.Relocate(x, y, z, o);
+
+                // This object must be added to transport before adding to map for the client to properly display it
+                transport.AddPassenger(summon);
+            }
+
             // Set the summon to the summoner's phase
             if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 PhasingHandler.InheritPhaseShift(summon, summoner);
@@ -4143,6 +4154,10 @@ namespace Game.Maps
 
             if (!AddToMap(summon.ToCreature()))
             {
+                // Returning false will cause the object to be deleted - remove from transport
+                if (transport)
+                    transport.RemovePassenger(summon);
+
                 summon.Dispose();
                 return null;
             }
