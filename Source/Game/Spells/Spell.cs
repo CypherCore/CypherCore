@@ -2728,8 +2728,14 @@ namespace Game.Spells
             // The spell focusing is making sure that we have a valid cast target guid when we need it so only check for a guid value here.
             Creature creatureCaster = m_caster.ToCreature();
             if (creatureCaster != null)
+            {
                 if (!creatureCaster.GetTarget().IsEmpty() && !creatureCaster.HasUnitFlag(UnitFlags.Possessed))
-                    creatureCaster.SetInFront(Global.ObjAccessor.GetUnit(creatureCaster, creatureCaster.GetTarget()));
+                {
+                    WorldObject target = Global.ObjAccessor.GetUnit(creatureCaster, creatureCaster.GetTarget());
+                    if (target != null)
+                        creatureCaster.SetInFront(target);
+                }
+            }
 
             SelectSpellTargets();
 
