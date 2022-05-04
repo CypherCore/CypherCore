@@ -80,6 +80,10 @@ namespace Scripts.Spells.Paladin
         public const uint JudgmentHolyR3 = 231644;
         public const uint JudgmentHolyR3Debuff = 214222;
         public const uint JudgmentProtRetR3 = 315867;
+        public const uint LightHammerCosmetic = 122257;
+        public const uint LightHammerDamage = 114919;
+        public const uint LightHammerHealing = 119952;
+        public const uint LightHammerPeriodic = 114918;
         public const uint RighteousDefenseTaunt = 31790;
         public const uint RighteousVerdictAura = 267611;
         public const uint SealOfRighteousness = 25742;
@@ -905,6 +909,60 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 122773 - Light's Hammer
+    class spell_pal_light_hammer_init_summon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LightHammerCosmetic, SpellIds.LightHammerPeriodic);
+        }
+
+        void InitSummon()
+        {
+            foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
+            {
+                Unit hammer = Global.ObjAccessor.GetUnit(GetCaster(), summonedObject.Victim);
+                if (hammer != null)
+                {
+                    hammer.CastSpell(hammer, SpellIds.LightHammerCosmetic,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+                    hammer.CastSpell(hammer, SpellIds.LightHammerPeriodic,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(InitSummon));
+        }
+    }
+
+    [Script] // 114918 - Light's Hammer (Periodic)
+    class spell_pal_light_hammer_periodic : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LightHammerHealing, SpellIds.LightHammerDamage);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            Unit lightHammer = GetTarget();
+            Unit originalCaster = lightHammer.GetOwner();
+            if (originalCaster != null)
+            {
+                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerHealing, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 204074 - Righteous Protector
     class spell_pal_righteous_protector : AuraScript
     {

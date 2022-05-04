@@ -3929,7 +3929,7 @@ namespace Game.Spells
             m_caster.SendCombatLogMessage(spellExecuteLog);
         }
 
-        SpellLogEffect GetExecuteLogEffect(SpellEffectName effect)
+        public SpellLogEffect GetExecuteLogEffect(SpellEffectName effect)
         {
             var spellLogEffect = _executeLogEffects.LookupByKey(effect);
             if (spellLogEffect != null)
