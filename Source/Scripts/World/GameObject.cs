@@ -307,7 +307,7 @@ namespace Scripts.World.GameObjects
     {
         public go_gilded_brazier(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
             {
@@ -328,7 +328,7 @@ namespace Scripts.World.GameObjects
         public go_tablet_of_the_seven(GameObject go) : base(go) { }
 
         /// @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() != GameObjectTypes.QuestGiver)
                 return true;
@@ -345,7 +345,7 @@ namespace Scripts.World.GameObjects
     {
         public go_ethereum_prison(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % (CreatureIds.PrisonEntry.Length / sizeof(uint)));
@@ -399,7 +399,7 @@ namespace Scripts.World.GameObjects
     {
         public go_ethereum_stasis(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % CreatureIds.StasisEntry.Length / sizeof(uint));
@@ -415,7 +415,7 @@ namespace Scripts.World.GameObjects
     {
         public go_resonite_cask(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
                 me.SummonCreature(CreatureIds.Goggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5));
@@ -429,7 +429,7 @@ namespace Scripts.World.GameObjects
     {
         public go_southfury_moonstone(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             //implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
             //player.CastSpell(player, SpellSummonRizzle, false);
@@ -447,7 +447,7 @@ namespace Scripts.World.GameObjects
     {
         public go_tele_to_dalaran_crystal(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (player.GetQuestRewardStatus(QuestIds.TeleCrystalFlag))
                 return false;
@@ -462,7 +462,7 @@ namespace Scripts.World.GameObjects
     {
         public go_tele_to_violet_stand(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (player.GetQuestRewardStatus(QuestIds.LearnLeaveReturn) || player.GetQuestStatus(QuestIds.LearnLeaveReturn) == QuestStatus.Incomplete)
                 return false;
@@ -476,7 +476,7 @@ namespace Scripts.World.GameObjects
     {
         public go_matrix_punchograph(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             switch (me.GetEntry())
             {
@@ -520,7 +520,7 @@ namespace Scripts.World.GameObjects
     {
         public go_scourge_cage(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.UseDoorOrButton();
             Creature pNearestPrisoner = me.FindNearestCreature(CreatureIds.ScourgePrisoner, 5.0f, true);
@@ -539,7 +539,7 @@ namespace Scripts.World.GameObjects
     {
         public go_arcane_prison(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (player.GetQuestStatus(QuestIds.PrisonBreak) == QuestStatus.Incomplete)
             {
@@ -556,7 +556,7 @@ namespace Scripts.World.GameObjects
     {
         public go_blood_filled_orb(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (me.GetGoType() == GameObjectTypes.Goober)
                 player.SummonCreature(CreatureIds.Zelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
@@ -570,7 +570,7 @@ namespace Scripts.World.GameObjects
     {
         public go_table_theka(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             if (player.GetQuestStatus(QuestIds.SpiderGold) == QuestStatus.Incomplete)
                 player.AreaExploredOrEventHappens(QuestIds.SpiderGold);
@@ -585,7 +585,7 @@ namespace Scripts.World.GameObjects
     {
         public go_soulwell(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             Unit owner = me.GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player) || !player.IsInSameRaidWith(owner.ToPlayer()))
@@ -599,7 +599,7 @@ namespace Scripts.World.GameObjects
     {
         public go_amberpine_outhouse(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             QuestStatus status = player.GetQuestStatus(QuestIds.DoingYourDuty);
             if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
@@ -613,7 +613,7 @@ namespace Scripts.World.GameObjects
             return true;
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
@@ -645,7 +645,7 @@ namespace Scripts.World.GameObjects
     {
         public go_hive_pod(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             player.SendLoot(me.GetGUID(), LootType.Corpse);
             me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMinutes(1));
@@ -659,7 +659,7 @@ namespace Scripts.World.GameObjects
     {
         public go_massive_seaforium_charge(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.SetLootState(LootState.JustDeactivated);
             return true;
@@ -671,7 +671,7 @@ namespace Scripts.World.GameObjects
     {
         public go_veil_skith_cage(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.UseDoorOrButton();
             if (player.GetQuestStatus(QuestIds.MissingFriends) == QuestStatus.Incomplete)
@@ -696,7 +696,7 @@ namespace Scripts.World.GameObjects
     {
         public go_frostblade_shrine(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             me.UseDoorOrButton(10);
             if (!player.HasAura(SpellIds.RecentMeditation))
@@ -716,7 +716,7 @@ namespace Scripts.World.GameObjects
     {
         public go_midsummer_bonfire(GameObject go) : base(go) { }
 
-        public override bool GossipSelect(Player player, uint menuId, uint ssipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint ssipListId)
         {
             player.CastSpell(player, SpellIds.StampOutBonfireQuestComplete, true);
             player.CloseGossipMenu();
@@ -729,7 +729,7 @@ namespace Scripts.World.GameObjects
     {
         public go_midsummer_ribbon_pole(GameObject go) : base(go) { }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             Creature creature = me.FindNearestCreature(CreatureIds.PoleRibbonBunny, 10.0f);
             if (creature)

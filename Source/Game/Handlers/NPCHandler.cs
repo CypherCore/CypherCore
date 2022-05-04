@@ -160,7 +160,7 @@ namespace Game
             }
 
             _player.PlayerTalkClass.ClearMenus();
-            if (!unit.GetAI().GossipHello(_player))
+            if (!unit.GetAI().OnGossipHello(_player))
             {
                 GetPlayer().PrepareGossipMenu(unit, unit.GetCreatureTemplate().GossipMenuId, true);
                 GetPlayer().SendPreparedGossip(unit);
@@ -222,12 +222,12 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().GossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
+                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().GossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
+                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
                         _player.OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
                 }
             }
@@ -235,12 +235,12 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().GossipSelect(_player, packet.GossipID, packet.GossipIndex))
+                    if (!unit.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().GossipSelect(_player, packet.GossipID, packet.GossipIndex))
+                    if (!go.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
                         GetPlayer().OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
                 }
             }

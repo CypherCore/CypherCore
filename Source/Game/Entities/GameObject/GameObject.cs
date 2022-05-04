@@ -1485,7 +1485,7 @@ namespace Game.Entities
                     playerUser.RemoveAurasByType(AuraType.Mounted);
 
                 playerUser.PlayerTalkClass.ClearMenus();
-                if (GetAI().GossipHello(playerUser))
+                if (GetAI().OnGossipHello(playerUser))
                     return;
             }
 

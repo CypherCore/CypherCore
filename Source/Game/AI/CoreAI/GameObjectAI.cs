@@ -55,27 +55,27 @@ namespace Game.AI
         /// <summary>
         /// Called when a player opens a gossip dialog with the gameobject.
         /// </summary>
-        public virtual bool GossipHello(Player player) { return false; }
+        public virtual bool OnGossipHello(Player player) { return false; }
 
         /// <summary>
         /// Called when a player selects a gossip item in the gameobject's gossip menu.
         /// </summary>
-        public virtual bool GossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
 
         /// <summary>
         /// Called when a player selects a gossip with a code in the gameobject's gossip menu.
         /// </summary>
-        public virtual bool GossipSelectCode(Player player, uint sender, uint action, string code) { return false; }
+        public virtual bool OnGossipSelectCode(Player player, uint sender, uint action, string code) { return false; }
 
         /// <summary>
         /// Called when a player accepts a quest from the gameobject.
         /// </summary>
-        public virtual void QuestAccept(Player player, Quest quest) { }
+        public virtual void OnQuestAccept(Player player, Quest quest) { }
 
         /// <summary>
         /// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
         /// </summary>
-        public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
+        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         // Called when a Player clicks a GameObject, before GossipHello
         // prevents achievement tracking if returning true

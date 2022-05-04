@@ -1199,7 +1199,7 @@ namespace Game.Spells
                 }
 
                 player.PlayerTalkClass.ClearMenus();
-                if (gameObjTarget.GetAI().GossipHello(player))
+                if (gameObjTarget.GetAI().OnGossipHello(player))
                     return;
 
                 switch (gameObjTarget.GetGoType())

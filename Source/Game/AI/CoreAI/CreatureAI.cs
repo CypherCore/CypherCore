@@ -527,22 +527,22 @@ namespace Game.AI
         }
 
         // Called when a player opens a gossip dialog with the creature.
-        public virtual bool GossipHello(Player player) { return false; }
+        public virtual bool OnGossipHello(Player player) { return false; }
 
         // Called when a player selects a gossip item in the creature's gossip menu.
-        public virtual bool GossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
 
         // Called when a player selects a gossip with a code in the creature's gossip menu.
-        public virtual bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        public virtual bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
         {
             return false;
         }
 
         // Called when a player accepts a quest from the creature.
-        public virtual void QuestAccept(Player player, Quest quest) { }
+        public virtual void OnQuestAccept(Player player, Quest quest) { }
 
         // Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
-        public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
+        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         /// == Waypoints system =============================
         /// 

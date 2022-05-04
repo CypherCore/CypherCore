@@ -802,31 +802,31 @@ namespace Game.AI
             _evadeDisabled = disable;
         }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player);
             return _gossipReturn;
         }
 
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId);
             return _gossipReturn;
         }
 
-        public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        public override bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
         {
             return false;
         }
 
-        public override void QuestAccept(Player player, Quest quest)
+        public override void OnQuestAccept(Player player, Quest quest)
         {
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id);
         }
 
-        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
@@ -1116,11 +1116,33 @@ namespace Game.AI
             GetScript().OnReset();
         }
 
-        public override bool GossipHello(Player player)
+        public override bool OnGossipHello(Player player)
         {
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, 0, 0, false, null, me);
             return _gossipReturn;
+        }
+
+        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        {
+            _gossipReturn = false;
+            GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId, false, null, me);
+            return _gossipReturn;
+        }
+
+        public override bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        {
+            return false;
+        }
+
+        public override void OnQuestAccept(Player player, Quest quest)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, me);
+        }
+
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
 
         public override bool OnReportUse(Player player)
@@ -1128,28 +1150,6 @@ namespace Game.AI
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, 1, 0, false, null, me);
             return _gossipReturn;
-        }
-
-        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            _gossipReturn = false;
-            GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId, false, null, me);
-            return _gossipReturn;
-        }
-
-        public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
-        {
-            return false;
-        }
-
-        public override void QuestAccept(Player player, Quest quest)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, me);
-        }
-
-        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
 
         public override void Destroyed(WorldObject attacker, uint eventId)

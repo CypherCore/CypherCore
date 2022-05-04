@@ -77,7 +77,7 @@ namespace Game
             creature.SetHomePosition(creature.GetPosition());
 
             _player.PlayerTalkClass.ClearMenus();
-            if (creature.GetAI().GossipHello(_player))
+            if (creature.GetAI().OnGossipHello(_player))
                 return;
 
             GetPlayer().PrepareGossipMenu(creature, creature.GetCreatureTemplate().GossipMenuId, true);
@@ -379,7 +379,7 @@ namespace Game
                             _player.PlayerTalkClass.ClearMenus();
                             Creature creatureQGiver = obj.ToCreature();
                             if (creatureQGiver != null)
-                                creatureQGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
+                                creatureQGiver.GetAI().OnQuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
                         case TypeId.GameObject:
@@ -400,7 +400,7 @@ namespace Game
                             }
 
                             _player.PlayerTalkClass.ClearMenus();
-                            questGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
+                            questGiver.GetAI().OnQuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
                         default:

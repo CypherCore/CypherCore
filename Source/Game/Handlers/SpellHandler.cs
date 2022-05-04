@@ -261,7 +261,7 @@ namespace Game
             GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
             if (go)
             {
-                if (go.GetAI().GossipHello(GetPlayer()))
+                if (go.GetAI().OnGossipHello(GetPlayer()))
                     return;
 
                 GetPlayer().UpdateCriteria(CriteriaType.UseGameobject, go.GetEntry());

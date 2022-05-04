@@ -693,7 +693,7 @@ namespace Game.Entities
             {
                 case TypeId.Unit:
                     PlayerTalkClass.ClearMenus();
-                    questGiver.ToCreature().GetAI().QuestAccept(this, quest);
+                    questGiver.ToCreature().GetAI().OnQuestAccept(this, quest);
                     break;
                 case TypeId.Item:
                 case TypeId.Container:
@@ -726,7 +726,7 @@ namespace Game.Entities
                 }
                 case TypeId.GameObject:
                     PlayerTalkClass.ClearMenus();
-                    questGiver.ToGameObject().GetAI().QuestAccept(this, quest);
+                    questGiver.ToGameObject().GetAI().OnQuestAccept(this, quest);
                     break;
                 default:
                     break;
