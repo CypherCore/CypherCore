@@ -1219,20 +1219,25 @@ namespace Game.DungeonFinding
 
             boot.votes[guid] = (LfgAnswer)Convert.ToInt32(accept);
 
-            byte votesNum = 0;
             byte agreeNum = 0;
-            foreach (var itVotes in boot.votes)
+            byte denyNum = 0;
+            foreach (var (_, answer) in boot.votes)
             {
-                if (itVotes.Value != LfgAnswer.Pending)
+                switch (answer)
                 {
-                    ++votesNum;
-                    if (itVotes.Value == LfgAnswer.Agree)
+                    case LfgAnswer.Pending:
+                        break;
+                    case LfgAnswer.Agree:
                         ++agreeNum;
+                        break;
+                    case LfgAnswer.Deny:
+                        ++denyNum;
+                        break;
                 }
             }
 
             // if we don't have enough votes (agree or deny) do nothing
-            if (agreeNum < SharedConst.LFGKickVotesNeeded && (votesNum - agreeNum) < SharedConst.LFGKickVotesNeeded)
+            if (agreeNum < SharedConst.LFGKickVotesNeeded && (boot.votes.Count - denyNum) >= SharedConst.LFGKickVotesNeeded)
                 return;
 
             // Send update info to all players
