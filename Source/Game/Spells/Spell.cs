@@ -2138,7 +2138,7 @@ namespace Game.Spells
                     // delayed spells with multiple targets need to create a new aura object, otherwise we'll access a deleted aura
                     if (hitInfo.HitAura == null)
                     {
-                        bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
+                        bool resetPeriodicTimer = (m_spellInfo.StackAmount < 2) && !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
                         uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
 
                         AuraCreateInfo createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), allAuraEffectMask, unit);
