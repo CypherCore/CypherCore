@@ -72,6 +72,7 @@ namespace Framework.Constants
         Gamemaster = 50,             // canBeGM          0              0                  true if player is gamemaster (or can be gamemaster)
         ObjectEntryGuid = 51,        // TypeID           entry          guid               true if object is type TypeID and the entry is 0 or matches entry of the object or matches guid of the object
         TypeMask = 52,               // TypeMask         0              0                  true if object is type object's TypeMask matches provided TypeMask
+        BattlePetCount = 53,         // SpecieId         count          ComparisonType     true if player has `count` of battle pet species
         Max
     }
 

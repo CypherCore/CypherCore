@@ -1724,6 +1724,23 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionTypes.BattlePetCount:
+                    if (!CliDB.BattlePetSpeciesStorage.ContainsKey(cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing BattlePet SpeciesId in value1 ({cond.ConditionValue1}), skipped.");
+                        return false;
+                    }
+                    if (cond.ConditionValue2 > SharedConst.DefaultMaxBattlePetsPerSpecies)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has invalid (greater than {SharedConst.DefaultMaxBattlePetsPerSpecies}) value2 ({cond.ConditionValue2}), skipped.");
+                        return false;
+                    }
+                    if (cond.ConditionValue3 >= (uint)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has invalid ComparisionType ({cond.ConditionValue3}), skipped.");
+                        return false;
+                    }
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionType in `condition` table, ignoring.");
                     return false;

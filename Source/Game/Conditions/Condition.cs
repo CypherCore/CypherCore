@@ -393,6 +393,12 @@ namespace Game.Conditions
                     }
                     break;
                 }
+                case ConditionTypes.BattlePetCount:
+                {
+                    if (player != null)
+                        condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, player.GetSession().GetBattlePetMgr().GetPetCount(CliDB.BattlePetSpeciesStorage.LookupByKey(ConditionValue1), player.GetGUID()), ConditionValue2);
+                    break;
+                }
                 default:
                     condMeets = false;
                     break;
@@ -503,6 +509,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.DailyQuestDone:
                 case ConditionTypes.ObjectiveProgress:
+                case ConditionTypes.BattlePetCount:
                     mask |= GridMapTypeMask.Player;
                     break;
                 default:
