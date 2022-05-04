@@ -54,9 +54,8 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_IP_NOT_BANNED, "DELETE FROM ip_banned WHERE ip = ?");
             PrepareStatement(LoginStatements.INS_ACCOUNT_BANNED, "INSERT INTO account_banned (id, bandate, unbandate, bannedby, banreason, active) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)");
             PrepareStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED, "UPDATE account_banned SET active = 0 WHERE id = ? AND active != 0");
-            PrepareStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM, "DELETE FROM realmcharacters WHERE acctid = ? AND realmid = ?");
             PrepareStatement(LoginStatements.DEL_REALM_CHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ?");
-            PrepareStatement(LoginStatements.INS_REALM_CHARACTERS, "INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (?, ?, ?)");
+            PrepareStatement(LoginStatements.REP_REALM_CHARACTERS, "REPLACE INTO realmcharacters (numchars, acctid, realmid) VALUES (?, ?, ?)");
             PrepareStatement(LoginStatements.SEL_SUM_REALM_CHARACTERS, "SELECT SUM(numchars) FROM realmcharacters WHERE acctid = ?");
             PrepareStatement(LoginStatements.INS_ACCOUNT, "INSERT INTO account (username, salt, verifier, reg_mail, email, joindate, battlenet_account, battlenet_index) VALUES(?, ?, ?, ?, ?, NOW(), ?, ?)");
             PrepareStatement(LoginStatements.INS_REALM_CHARACTERS_INIT, "INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist, account LEFT JOIN realmcharacters ON acctid = account.id WHERE acctid IS NULL");
@@ -204,9 +203,8 @@ namespace Framework.Database
         SEL_ACCOUNT_BY_ID,
         INS_ACCOUNT_BANNED,
         UPD_ACCOUNT_NOT_BANNED,
-        DEL_REALM_CHARACTERS_BY_REALM,
         DEL_REALM_CHARACTERS,
-        INS_REALM_CHARACTERS,
+        REP_REALM_CHARACTERS,
         SEL_SUM_REALM_CHARACTERS,
         INS_ACCOUNT,
         INS_REALM_CHARACTERS_INIT,

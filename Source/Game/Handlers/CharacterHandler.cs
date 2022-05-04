@@ -547,12 +547,7 @@ namespace Game
                     newChar.SaveToDB(loginTransaction, characterTransaction, true);
                     createInfo.CharCount += 1;
 
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
-                    stmt.AddValue(0, GetAccountId());
-                    stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Index);
-                    loginTransaction.Append(stmt);
-
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS);
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
                     stmt.AddValue(0, createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
                     stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);

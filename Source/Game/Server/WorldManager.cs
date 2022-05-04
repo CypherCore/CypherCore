@@ -1959,20 +1959,11 @@ namespace Game
                 uint Id = result.Read<uint>(0);
                 uint charCount = result.Read<uint>(1);
 
-                SQLTransaction trans = new();
-
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
-                stmt.AddValue(0, Id);
-                stmt.AddValue(1, _realm.Id.Index);
-                trans.Append(stmt);
-
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS);
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
                 stmt.AddValue(0, charCount);
                 stmt.AddValue(1, Id);
                 stmt.AddValue(2, _realm.Id.Index);
-                trans.Append(stmt);
-
-                DB.Login.CommitTransaction(trans);
+                DB.Login.DirectExecute(stmt);
             }
         }
 
