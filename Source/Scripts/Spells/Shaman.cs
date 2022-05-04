@@ -745,6 +745,27 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 210714 - Icefury
+    class spell_sha_icefury : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrostShockEnergize);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(caster, SpellIds.FrostShockEnergize, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 1, AuraType.AddPctModifier));
+        }
+    }
+    
     [Script] // 23551 - Lightning Shield T2 Bonus
     class spell_sha_item_lightning_shield : AuraScript
     {
