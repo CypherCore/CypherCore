@@ -1066,6 +1066,8 @@ namespace Game.Entities
 
                 if (moneyRew > 0)
                     UpdateCriteria(CriteriaType.MoneyEarnedFromQuesting, (uint)moneyRew);
+
+                SendDisplayToast(0, DisplayToastType.Money, false, (uint)moneyRew, DisplayToastMethod.QuestComplete, questId);
             }
 
             // honor reward
@@ -3060,6 +3062,37 @@ namespace Game.Entities
                 if (!quest.IsUnavailable() && CanTakeQuest(quest, false))
                     AddQuestAndCheckCompletion(quest, null);
             }
+        }
+
+        void SendDisplayToast(uint entry, DisplayToastType type, bool isBonusRoll, uint quantity, DisplayToastMethod method, uint questId, Item item = null)
+        {
+            DisplayToast displayToast = new();
+            displayToast.Quantity = quantity;
+            displayToast.DisplayToastMethod = method;
+            displayToast.QuestID = questId;
+            displayToast.Type = type;
+
+            switch (type)
+            {
+                case DisplayToastType.NewItem:
+                {
+                    if (!item)
+                        return;
+
+                    displayToast.BonusRoll = isBonusRoll;
+                    displayToast.Item = new(item);
+                    displayToast.LootSpec = 0; // loot spec that was selected when loot was generated (not at loot time)
+                    displayToast.Gender = GetNativeGender();
+                    break;
+                }
+                case DisplayToastType.NewCurrency:
+                    displayToast.CurrencyID = entry;
+                    break;
+                default:
+                    break;
+            }
+
+            SendPacket(displayToast);
         }
     }
 }

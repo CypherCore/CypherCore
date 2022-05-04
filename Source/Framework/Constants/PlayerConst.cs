@@ -806,4 +806,35 @@ namespace Framework.Constants
         InProgress,
         Completed
     }
+
+    public enum DisplayToastType : byte
+    {
+        NewItem = 0,
+        NewCurrency = 1,
+        Money = 2,
+        Honor = 3
+    }
+
+    public enum DisplayToastMethod : byte
+    {
+        DoNotDisplay = 0,
+        Loot = 1,
+        PetBattle = 2,
+        PersonalLoot = 3,
+        GarrisonMissionLoot = 4,
+        QuestUpgrade = 5,
+        QuestUpgradeEpic = 6,
+        Shipment = 7,
+        GarrisonMissionSalvage = 8,
+        PvPFactionReward = 9,
+        GarrisonCurrency = 10,
+        LessAwesomeLoot = 11,
+        UpgradedLoot = 12,
+        LegendaryLoot = 13,
+        InvasionLoot = 14,
+        Default = 15,
+        QuestComplete = 16,
+        RatedPvPReward = 17,
+        CorruptedLoot = 19
+    }
 }
