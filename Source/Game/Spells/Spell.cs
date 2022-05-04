@@ -92,7 +92,7 @@ namespace Game.Spells
             m_spellState = SpellState.None;
             _triggeredCastFlags = triggerFlags;
             if (m_spellInfo.HasAttribute(SpellAttr4.CanCastWhileCasting))
-                _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly;
+                _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.IgnoreCastInProgress;
 
             effectHandleMode = SpellEffectHandleMode.Launch;
 
@@ -2490,6 +2490,12 @@ namespace Game.Spells
                 Cast(true);
             else
             {
+                // commented out !m_spellInfo->StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
+                // as a result a spell that passed CheckCast and should be processed instantly may suffer from this delayed process
+                // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
+                // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
+                bool willCastDirectly = m_casttime == 0 && /*!m_spellInfo->StartRecoveryTime && */ GetCurrentContainer() == CurrentSpellTypes.Generic;
+
                 Unit unitCaster = m_caster.ToUnit();
                 if (unitCaster != null)
                 {
@@ -2498,7 +2504,10 @@ namespace Game.Spells
                     if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth() && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
                         unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action);
 
-                    unitCaster.SetCurrentCastSpell(this);
+                    // Do not register as current spell when requested to ignore cast in progress
+                    // We don't want to interrupt that other spell with cast time
+                    if (!willCastDirectly || !_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCastInProgress))
+                        unitCaster.SetCurrentCastSpell(this);
                 }
 
                 SendSpellStart();
@@ -2506,11 +2515,7 @@ namespace Game.Spells
                 if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreGCD))
                     TriggerGlobalCooldown();
 
-                // commented out !m_spellInfo.StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
-                // as a result a spell that passed CheckCast and should be processed instantly may suffer from this delayed process
-                // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
-                // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
-                if (m_casttime == 0 && /*m_spellInfo.StartRecoveryTime == 0 && */ GetCurrentContainer() == CurrentSpellTypes.Generic)
+                if (willCastDirectly)
                     Cast(true);
             }
 
