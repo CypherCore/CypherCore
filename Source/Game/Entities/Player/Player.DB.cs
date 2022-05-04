@@ -4236,9 +4236,14 @@ namespace Game.Entities
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
+                    loginTransaction.Append(stmt);
+
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS_BY_OWNER);
                     stmt.AddValue(0, guid);
-                    stmt.AddValue(0, Global.WorldMgr.GetRealmId().Index);
+                    stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
                     loginTransaction.Append(stmt);
 
                     Corpse.DeleteFromDB(playerGuid, trans);

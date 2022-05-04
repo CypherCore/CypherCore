@@ -159,6 +159,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_BATTLE_PET_SLOTS, "DELETE FROM battle_pet_slots WHERE battlenetAccountId = ?");
             PrepareStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME, "INSERT INTO battle_pet_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES (?, ?, ?, ?, ?, ?)");
             PrepareStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME, "DELETE FROM battle_pet_declinedname WHERE guid = ?");
+            PrepareStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME_BY_OWNER, "DELETE dn FROM battle_pet_declinedname dn INNER JOIN battle_pets bp ON dn.guid = bp.guid WHERE bp.owner = ? AND bp.ownerRealmId = ?");
 
             PrepareStatement(LoginStatements.SEL_ACCOUNT_HEIRLOOMS, "SELECT itemId, flags FROM battlenet_account_heirlooms WHERE accountId = ?");
             PrepareStatement(LoginStatements.REP_ACCOUNT_HEIRLOOMS, "REPLACE INTO battlenet_account_heirlooms (accountId, itemId, flags) VALUES (?, ?, ?)");
@@ -304,6 +305,7 @@ namespace Framework.Database
         DEL_BATTLE_PET_SLOTS,
         INS_BATTLE_PET_DECLINED_NAME,
         DEL_BATTLE_PET_DECLINED_NAME,
+        DEL_BATTLE_PET_DECLINED_NAME_BY_OWNER,
 
         SEL_ACCOUNT_HEIRLOOMS,
         REP_ACCOUNT_HEIRLOOMS,
