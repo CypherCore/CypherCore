@@ -28,6 +28,10 @@ namespace Scripts.Spells.Paladin
 {
     struct SpellIds
     {
+        public const uint AshenHallow = 316958;
+        public const uint AshenHallowDamage = 317221;
+        public const uint AshenHallowHeal = 317223;
+        public const uint AshenHallowAllowHammer = 330382;
         public const uint AvengersShield = 31935;
         public const uint AvengingWrath = 31884;
         public const uint BeaconOfLight = 53563;
@@ -96,6 +100,63 @@ namespace Scripts.Spells.Paladin
         public const uint HolyShockHealCrit = 83880;
     }
 
+    [Script] // 19042 - Ashen Hallow
+    class areatrigger_pal_ashen_hallow : AreaTriggerAI
+    {
+        TimeSpan _refreshTimer;
+        TimeSpan _period;
+
+        public areatrigger_pal_ashen_hallow(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        void RefreshPeriod()
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                AuraEffect ashen = caster.GetAuraEffect(SpellIds.AshenHallow, 1);
+                if (ashen != null)
+                    _period = TimeSpan.FromMilliseconds(ashen.GetPeriod());
+            }
+        }
+
+        public override void OnCreate()
+        {
+            RefreshPeriod();
+            _refreshTimer = _period;
+        }
+
+        public override void OnUpdate(uint diff)
+        {
+            _refreshTimer -= TimeSpan.FromMilliseconds(diff);
+
+            while (_refreshTimer <= TimeSpan.Zero)
+            {
+                Unit caster = at.GetCaster();
+                if (caster != null)
+                {
+                    caster.CastSpell(at.GetPosition(), SpellIds.AshenHallowHeal, new CastSpellExtraArgs());
+                    caster.CastSpell(at.GetPosition(), SpellIds.AshenHallowDamage, new CastSpellExtraArgs());
+                }
+
+                RefreshPeriod();
+
+                _refreshTimer += _period;
+            }
+        }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            if (unit.GetGUID() == at.GetCasterGuid())
+                unit.CastSpell(unit, SpellIds.AshenHallowAllowHammer, true);
+        }
+
+        public override void OnUnitExit(Unit unit)
+        {
+            if (unit.GetGUID() == at.GetCasterGuid())
+                unit.RemoveAura(SpellIds.AshenHallowAllowHammer);
+        }
+    }
+    
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
     class spell_pal_blessing_of_protection : SpellScript
