@@ -2975,39 +2975,15 @@ namespace Game.Entities
             _spellFocusInfo.Spell = focusSpell;
 
             bool noTurnDuringCast = spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast);
+            bool turnDisabled = HasUnitFlag2(UnitFlags2.CannotTurn);
             // set target, then force send update packet to players if it changed to provide appropriate facing
-            ObjectGuid newTarget = target ? target.GetGUID() : ObjectGuid.Empty;
+            ObjectGuid newTarget = (target != null && !noTurnDuringCast && !turnDisabled) ? target.GetGUID() : ObjectGuid.Empty;
             if (GetTarget() != newTarget)
-            {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), newTarget);
 
-                // here we determine if the (relatively expensive) forced update is worth it, or whether we can afford to wait until the scheduled update tick
-                // only require instant update for spells that actually have a visual
-                if (spellInfo.GetSpellVisual() != 0 && (focusSpell.GetCastTime() == 0 || // if the spell is instant cast
-                   noTurnDuringCast)) // client gets confused if we attempt to turn at the regularly scheduled update packet
-                {
-                    List<Unit> playersNearby = GetPlayerListInGrid(GetVisibilityRange());
-                    foreach (Player player in playersNearby)
-                    {
-                        // only update players that are known to the client (have already been created)
-                        if (player.HaveAtClient(this))
-                            SendUpdateToPlayer(player);
-                    }
-                }
-            }
-
-            if (!HasUnitFlag2(UnitFlags2.CannotTurn))
-            {
-                // Face the target - we need to do this before the unit state is modified for no-turn spells
-                if (target)
-                    SetFacingToObject(target, false);
-                else if (!noTurnDuringCast)
-                {
-                    Unit victim = GetVictim();
-                    if (victim)
-                        SetFacingToObject(victim, false); // ensure server-side orientation is correct at beginning of cast
-                }
-            }
+            // If we are not allowed to turn during cast but have a focus target, face the target
+            if (!turnDisabled && noTurnDuringCast && target)
+                SetFacingToObject(target, false);
 
             if (!noTurnDuringCast)
                 AddUnitState(UnitState.Focusing);

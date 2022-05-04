@@ -2462,16 +2462,15 @@ namespace Game.Spells
                 }
             }
 
-            // focus if not controlled creature
-            if (m_caster.GetTypeId() == TypeId.Unit && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
+            // Creatures focus their target when possible
+            if (m_casttime != 0 && m_caster.IsCreature() && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
             {
-                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat()))
-                {
-                    if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
-                        m_caster.ToCreature().SetSpellFocus(this, m_targets.GetObjectTarget());
-                    else if (m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
-                        m_caster.ToCreature().SetSpellFocus(this, null);
-                }
+                // Channeled spells and some triggered spells do not focus a cast target. They face their target later on via channel object guid and via spell attribute or not at all
+                bool focusTarget = !m_spellInfo.IsChanneled() && !_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing);
+                if (focusTarget && m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
+                    m_caster.ToCreature().SetSpellFocus(this, m_targets.GetObjectTarget());
+                else
+                    m_caster.ToCreature().SetSpellFocus(this, null);
             }
 
             // set timer base at cast time
@@ -2641,10 +2640,6 @@ namespace Game.Spells
 
             SetExecutedCurrently(true);
 
-            if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreSetFacing))
-                if (m_caster.IsTypeId(TypeId.Unit) && m_targets.GetObjectTarget() != null && m_caster != m_targets.GetObjectTarget())
-                    m_caster.ToCreature().SetInFront(m_targets.GetObjectTarget());
-
             // Should this be done for original caster?
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner != null)
@@ -2730,17 +2725,11 @@ namespace Game.Spells
                 }
             }
 
-            // if the spell allows the creature to turn while casting, then adjust server-side orientation to face the target now
-            // client-side orientation is handled by the client itself, as the cast target is targeted due to Creature::FocusTarget
-            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
-            {
-                if (!m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
-                {
-                    WorldObject objTarget = m_targets.GetObjectTarget();
-                    if (objTarget != null)
-                        m_caster.ToCreature().SetInFront(objTarget);
-                }
-            }
+            // The spell focusing is making sure that we have a valid cast target guid when we need it so only check for a guid value here.
+            Creature creatureCaster = m_caster.ToCreature();
+            if (creatureCaster != null)
+                if (!creatureCaster.GetTarget().IsEmpty() && !creatureCaster.HasUnitFlag(UnitFlags.Possessed))
+                    creatureCaster.SetInFront(Global.ObjAccessor.GetUnit(creatureCaster, creatureCaster.GetTarget()));
 
             SelectSpellTargets();
 
@@ -2816,11 +2805,8 @@ namespace Game.Spells
             SendSpellGo();
 
             if (!m_spellInfo.IsChanneled())
-            {
-                Creature creatureCaster = m_caster.ToCreature();
                 if (creatureCaster != null)
                     creatureCaster.ReleaseSpellFocus(this);
-            }
 
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
             if ((m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled()) || m_spellInfo.HasAttribute(SpellAttr4.Unk4))

@@ -513,6 +513,18 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
+            // Update serverside orientation of tracking channeled auras on periodic update ticks
+            if (caster != null && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget) && !caster.m_unitData.ChannelObjects.Empty())
+            {
+                ObjectGuid channelGuid = caster.m_unitData.ChannelObjects[0];
+                if (channelGuid != caster.GetGUID())
+                {
+                    WorldObject objectTarget = Global.ObjAccessor.GetWorldObject(caster, channelGuid);
+                    if (objectTarget != null)
+                        caster.SetInFront(objectTarget);
+                }
+            }
+
             switch (GetAuraType())
             {
                 case AuraType.PeriodicDummy:
