@@ -41,6 +41,8 @@ namespace Scripts.Spells.Mage
         public const uint Blink = 1953;
         public const uint Cauterized = 87024;
         public const uint CauterizeDot = 87023;
+        public const uint CometStormDamage = 153596;
+        public const uint CometStormVisual = 228601;
         public const uint ConeOfCold = 120;
         public const uint ConeOfColdSlow = 212792;
         public const uint ConjureRefreshment = 116136;
@@ -385,6 +387,72 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    class CometStormEvent : BasicEvent
+    {
+        Unit _caster;
+        ObjectGuid _originalCastId;
+        Position _dest;
+        byte _count;
+
+        public CometStormEvent(Unit caster, ObjectGuid originalCastId, Position dest)
+        {
+            _caster = caster;
+            _originalCastId = originalCastId;
+            _dest = dest;
+        }
+
+        public override bool Execute(ulong time, uint diff)
+        {
+            Position destPosition = new(_dest.GetPositionX() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionY() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionZ());
+            _caster.CastSpell(destPosition, SpellIds.CometStormVisual, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(_originalCastId));
+            ++_count;
+
+            if (_count >= 7)
+                return true;
+
+            _caster.m_Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            return false;
+        }
+    }
+
+    [Script] // 153595 - Comet Storm (launch)
+    class spell_mage_comet_storm : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CometStormVisual);
+        }
+
+        void EffectHit(uint effIndex)
+        {
+            GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(EffectHit, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 228601 - Comet Storm (damage)
+    class spell_mage_comet_storm_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CometStormDamage);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell().m_originalCastId));
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 120 - Cone of Cold
     class spell_mage_cone_of_cold : SpellScript
     {
