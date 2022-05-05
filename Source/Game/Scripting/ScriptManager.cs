@@ -866,6 +866,15 @@ namespace Game.Scripting
             RunScript<TransportScript>(p => p.OnRelocate(transport, waypointId, mapId, x, y, z), transport.GetScriptId());
         }
 
+        // Achievement
+        public void OnAchievementCompleted(Player player, AchievementRecord achievement)
+        {
+            Cypher.Assert(player != null);
+            Cypher.Assert(achievement != null);
+
+            RunScript<AchievementScript>(p => p.OnCompleted(player, achievement), Global.AchievementMgr.GetAchievementScriptId(achievement.Id));
+        }
+        
         // AchievementCriteriaScript
         public bool OnCriteriaCheck(uint ScriptId, Player source, Unit target)
         {

@@ -20,6 +20,7 @@ using Game.BattleGrounds;
 using Game.BattleGrounds.Zones;
 using Game.Entities;
 using Game.Scripting;
+using Game.DataStorage;
 
 namespace Scripts.World.Achievements
 {
@@ -43,7 +44,7 @@ namespace Scripts.World.Achievements
     }
 
     struct VehicleIds
-    { 
+    {
         //BgSA Artillery
         public const uint AntiPersonnalCannon = 27894;
     }
@@ -308,6 +309,29 @@ namespace Scripts.World.Achievements
         public override bool OnCheck(Player player, Unit target)
         {
             return target && player.IsHonorOrXPTarget(target);
+        }
+    }
+
+    [Script] // 7433 - Newbie
+    class achievement_newbie : AchievementScript
+    {
+        public achievement_newbie() : base("achievement_newbie") { }
+
+        public override void OnCompleted(Player player, AchievementRecord achievement)
+        {
+            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
+            // TODO: Unlock trap
+        }
+    }
+
+    [Script] // 6566 - Just a Pup
+    class achievement_just_a_pup : AchievementScript
+    {
+        public achievement_just_a_pup() : base("achievement_just_a_pup") { }
+
+        public override void OnCompleted(Player player, AchievementRecord achievement)
+        {
+            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
         }
     }
 }

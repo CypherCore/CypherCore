@@ -586,6 +586,19 @@ namespace Game.Scripting
         public virtual void OnUpdate(Transport obj, uint diff) { }
     }
 
+    public class AchievementScript : ScriptObject
+    {
+        public AchievementScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when an achievement is completed.
+        public virtual void OnCompleted(Player player, AchievementRecord achievement) { }
+    }
+    
     public class AchievementCriteriaScript : ScriptObject
     {
         public AchievementCriteriaScript(string name) : base(name)
@@ -593,7 +606,7 @@ namespace Game.Scripting
             Global.ScriptMgr.AddScript(this);
         }
 
-        public override bool IsDatabaseBound() { return false; }
+        public override bool IsDatabaseBound() { return true; }
 
         // Called when an additional criteria is checked.
         public virtual bool OnCheck(Player source, Unit target) { return false; }

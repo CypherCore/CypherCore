@@ -818,6 +818,8 @@ namespace Game
             Global.CriteriaMgr.LoadCriteriaData();
             Log.outInfo(LogFilter.ServerLoading, "Loading Achievements...");
             Global.AchievementMgr.LoadAchievementReferenceList();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Achievements Scripts...");
+            Global.AchievementMgr.LoadAchievementScripts();
             Log.outInfo(LogFilter.ServerLoading, "Loading Achievement Rewards...");
             Global.AchievementMgr.LoadRewards();
             Log.outInfo(LogFilter.ServerLoading, "Loading Achievement Reward Locales...");

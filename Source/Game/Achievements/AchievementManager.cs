@@ -541,6 +541,8 @@ namespace Game.Achievements
             UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
 
+            Global.ScriptMgr.OnAchievementCompleted(referencePlayer, achievement);
+
             // reward items and titles if any
             AchievementReward reward = Global.AchievementMgr.GetAchievementReward(achievement);
 
@@ -1021,6 +1023,8 @@ namespace Game.Achievements
 
             UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
+
+            Global.ScriptMgr.OnAchievementCompleted(referencePlayer, achievement);
         }
 
         public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
@@ -1095,6 +1099,7 @@ namespace Game.Achievements
 
         Dictionary<uint, AchievementReward> _achievementRewards = new();
         Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new();
+        Dictionary<uint, uint> _achievementScripts = new();
 
         AchievementGlobalMgr() { }
 
@@ -1169,6 +1174,37 @@ namespace Game.Achievements
                 achievement1.InstanceID = 631;    // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public void LoadAchievementScripts()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _achievementScripts.Clear();                            // need for reload case
+
+            SQLResult result = DB.World.Query("SELECT AchievementId, ScriptName FROM achievement_scripts");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement scripts. DB table `achievement_scripts` is empty.");
+                return;
+            }
+
+            do
+            {
+                uint achievementId = result.Read<uint>(0);
+                string scriptName = result.Read<string>(1);
+
+                AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
+                if (achievement == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `achievement_scripts` contains non-existing Achievement (ID: {achievementId}), skipped.");
+                    continue;
+                }
+                _achievementScripts[achievementId] = Global.ObjectMgr.GetScriptId(scriptName);
+            }
+            while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementScripts.Count} achievement scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadCompletedAchievements()
@@ -1353,7 +1389,7 @@ namespace Game.Achievements
 
                 AchievementRewardLocale data = new();
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale  == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 ObjectManager.AddLocaleString(result.Read<string>(2), locale, data.Subject);
@@ -1364,6 +1400,11 @@ namespace Game.Achievements
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement reward locale strings in {1} ms.", _achievementRewardLocales.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public uint GetAchievementScriptId(uint achievementId)
+        {
+            return _achievementScripts.LookupByKey(achievementId);
         }
     }
 
