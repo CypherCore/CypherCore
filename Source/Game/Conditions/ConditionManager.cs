@@ -1998,7 +1998,7 @@ namespace Game
                         if ((uint)forcedRank > condition.MaxReputation)
                             return false;
                     }
-                    else if ((uint)player.GetReputationRank(condition.MaxFactionID) > condition.MaxReputation)
+                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation) && (uint)player.GetReputationRank(condition.MaxFactionID) > condition.MaxReputation)
                         return false;
                 }
                 else
@@ -2009,7 +2009,7 @@ namespace Game
 
                     for (var i = 0; i < condition.MinFactionID.Length; ++i)
                     {
-                        if (condition.MinFactionID[i] != 0)
+                        if (CliDB.FactionStorage.HasRecord(condition.MinFactionID[i]))
                         {
                             ReputationRank forcedRank = player.GetReputationMgr().GetForcedRankIfAny(condition.MinFactionID[i]);
                             if (forcedRank != 0)
@@ -2021,7 +2021,7 @@ namespace Game
                     ReputationRank forcedRank1 = player.GetReputationMgr().GetForcedRankIfAny(condition.MaxFactionID);
                     if (forcedRank1 != 0)
                         results[3] = (uint)forcedRank1 <= condition.MaxReputation;
-                    else
+                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation))
                         results[3] = (uint)player.GetReputationRank(condition.MaxFactionID) <= condition.MaxReputation;
 
                     if (!PlayerConditionLogic(condition.ReputationLogic, results))
