@@ -28,6 +28,7 @@ namespace Scripts.Spells.Paladin
 {
     struct SpellIds
     {
+        public const uint ArtOfWarTriggered = 231843;
         public const uint AshenHallow = 316958;
         public const uint AshenHallowDamage = 317221;
         public const uint AshenHallowHeal = 317223;
@@ -36,6 +37,7 @@ namespace Scripts.Spells.Paladin
         public const uint AvengingWrath = 31884;
         public const uint BeaconOfLight = 53563;
         public const uint BeaconOfLightHeal = 53652;
+        public const uint BladeOfJustice = 184575;
         public const uint BlindingLightEffect = 105421;
         public const uint ConcentractionAura = 19746;
         public const uint ConsecratedGroundPassive = 204054;
@@ -104,6 +106,32 @@ namespace Scripts.Spells.Paladin
         public const uint HolyShockHealCrit = 83880;
     }
 
+    [Script] // 267344 - Art of War
+    class spell_pal_art_of_war : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ArtOfWarTriggered, SpellIds.BladeOfJustice);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ResetCooldown(SpellIds.BladeOfJustice, true);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ArtOfWarTriggered, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 19042 - Ashen Hallow
     class areatrigger_pal_ashen_hallow : AreaTriggerAI
     {
