@@ -758,8 +758,8 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock))
                 return SpellMissInfo.None;
 
-            bool canDodge = true;
-            bool canParry = true;
+            bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
+            bool canParry = !spellInfo.HasAttribute(SpellAttr7.NoAttackParry);
             bool canBlock = spellInfo.HasAttribute(SpellAttr3.BlockableSpell);
 
             // if victim is casting or cc'd it can't avoid attacks

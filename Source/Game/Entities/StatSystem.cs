@@ -794,6 +794,9 @@ namespace Game.Entities
         //Chances
         public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
+            if (spellInfo != null && spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
+                return 0.0f;
+
             //calculate miss chance
             float missChance = victim.GetUnitMissChance();
 

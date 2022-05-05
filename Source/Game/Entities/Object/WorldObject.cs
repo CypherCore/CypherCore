@@ -1920,56 +1920,66 @@ namespace Game.Entities
             if (!victim.IsAlive() && !victim.IsPlayer())
                 return SpellMissInfo.None;
 
-            SpellSchoolMask schoolMask = spellInfo.GetSchoolMask();
-            // PvP - PvE spell misschances per leveldif > 2
-            int lchance = victim.IsPlayer() ? 7 : 11;
-            uint thisLevel = GetLevelForTarget(victim);
-            if (IsCreature() && ToCreature().IsTrigger())
-                thisLevel = Math.Max(thisLevel, spellInfo.SpellLevel);
-            int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
-            int levelBasedHitDiff = leveldif;
-
-            // Base hit chance from attacker and victim levels
-            int modHitChance = 100;
-            if (levelBasedHitDiff >= 0)
+            float missChance;
+            if (spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
             {
-                if (!victim.IsPlayer())
-                {
-                    modHitChance = 94 - 3 * Math.Min(levelBasedHitDiff, 3);
-                    levelBasedHitDiff -= 3;
-                }
-                else
-                {
-                    modHitChance = 96 - Math.Min(levelBasedHitDiff, 2);
-                    levelBasedHitDiff -= 2;
-                }
-                if (levelBasedHitDiff > 0)
-                    modHitChance -= lchance * Math.Min(levelBasedHitDiff, 7);
+                missChance = 0.0f;
             }
             else
-                modHitChance = 97 - levelBasedHitDiff;
-
-            // Spellmod from SpellModOp::HitChance
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
-
-            // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
-            if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
             {
-                // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
-                modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
+                SpellSchoolMask schoolMask = spellInfo.GetSchoolMask();
+                // PvP - PvE spell misschances per leveldif > 2
+                int lchance = victim.IsPlayer() ? 7 : 11;
+                uint thisLevel = GetLevelForTarget(victim);
+                if (IsCreature() && ToCreature().IsTrigger())
+                    thisLevel = Math.Max(thisLevel, spellInfo.SpellLevel);
+                int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
+                int levelBasedHitDiff = leveldif;
+
+                // Base hit chance from attacker and victim levels
+                int modHitChance = 100;
+                if (levelBasedHitDiff >= 0)
+                {
+                    if (!victim.IsPlayer())
+                    {
+                        modHitChance = 94 - 3 * Math.Min(levelBasedHitDiff, 3);
+                        levelBasedHitDiff -= 3;
+                    }
+                    else
+                    {
+                        modHitChance = 96 - Math.Min(levelBasedHitDiff, 2);
+                        levelBasedHitDiff -= 2;
+                    }
+                    if (levelBasedHitDiff > 0)
+                        modHitChance -= lchance * Math.Min(levelBasedHitDiff, 7);
+                }
+                else
+                    modHitChance = 97 - levelBasedHitDiff;
+
+                // Spellmod from SpellModOp::HitChance
+                Player modOwner = GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
+
+                // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
+                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                {
+                    // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
+                    modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
+                }
+
+                float HitChance = modHitChance;
+                // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
+                Unit unit = ToUnit();
+                if (unit != null)
+                    HitChance += unit.ModSpellHitChance;
+
+                MathFunctions.RoundToInterval(ref HitChance, 0.0f, 100.0f);
+
+                missChance = 100.0f - HitChance;
             }
 
-            int HitChance = modHitChance * 100;
-            // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
-            Unit unit = ToUnit();
-            if (unit != null)
-                HitChance += (int)(unit.ModSpellHitChance * 100.0f);
-
-            MathFunctions.RoundToInterval(ref HitChance, 0, 10000);
-
-            int tmp = 10000 - HitChance;
+            int tmp = (int)(missChance * 100.0f);
 
             int rand = RandomHelper.IRand(0, 9999);
             if (tmp > 0 && rand < tmp)

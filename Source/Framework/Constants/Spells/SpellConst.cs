@@ -1841,9 +1841,9 @@ namespace Framework.Constants
         Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
         Unk21 = 0x200000, // 21 Not Set
         Unk22 = 0x400000, // 22
-        Unk23 = 0x800000, // 23 Motivate, Mutilate, Shattering Throw
-        Unk24 = 0x1000000, // 24 Motivate, Mutilate, Perform Speech, Shattering Throw
-        Unk25 = 0x2000000, // 25
+        NoAttackDodge = 0x800000, // 23 No Attack Dodge
+        NoAttackParry = 0x1000000, // 24 No Attack Parry
+        NoAttackMiss = 0x2000000, // No Attack Miss
         Unk26 = 0x4000000, // 26
         BypassNoResurrectAura = 0x8000000, // 27 Bypass No Resurrect Aura
         ConsolidatedRaidBuff = 0x10000000, // 28 Related To Player Positive Buff
