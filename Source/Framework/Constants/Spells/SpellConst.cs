@@ -1557,7 +1557,7 @@ namespace Framework.Constants
         Unknown7 = 0x40,
         Unknown8 = 0x80,
         Unknown9 = 0x100,
-        Unknown10 = 0x200,
+        IgnoreCooldown = 0x200, // makes client not automatically start cooldown after SPELL_GO
         Unknown11 = 0x400,
         Unknown12 = 0x800,
         Unknown13 = 0x1000,

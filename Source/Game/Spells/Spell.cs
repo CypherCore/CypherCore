@@ -43,6 +43,10 @@ namespace Game.Spells
             m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
             m_spellValue = new SpellValue(m_spellInfo, caster);
             m_castItemLevel = -1;
+
+            if (IsIgnoringCooldowns())
+                m_castFlagsEx |= SpellCastFlagsEx.IgnoreCooldown;
+
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
             m_originalCastId = originalCastId;
             m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
