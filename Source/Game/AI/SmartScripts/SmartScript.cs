@@ -2483,13 +2483,12 @@ namespace Game.AI
                 {
                     WorldObject baseObject = GetBaseObject();
 
-                    void doCreatePersonalClone(Position position, Unit owner)
+                    void doCreatePersonalClone(Position position, Player privateObjectOwner)
                     {
-                        ObjectGuid privateObjectOwner = owner.GetGUID();
                         Creature summon = GetBaseObject().SummonPersonalClone(position, (TempSummonType)e.Action.becomePersonalClone.type, TimeSpan.FromMilliseconds(e.Action.becomePersonalClone.duration), 0, 0, privateObjectOwner);
                         if (summon != null)
                             if (IsSmart(summon))
-                                ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, owner, e.EventId + 1);
+                                ((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, privateObjectOwner, e.EventId + 1);
                     }
 
                     // if target is position then targets container was empty

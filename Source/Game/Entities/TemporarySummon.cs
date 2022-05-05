@@ -246,10 +246,16 @@ namespace Game.Entities
             objectsToUpdate.Add(this);
 
             SmoothPhasing smoothPhasing = GetSmoothPhasing();
-            WorldObject original = GetSummoner();
-            if (original != null)
-                if (smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
-                    objectsToUpdate.Add(original);
+            if (smoothPhasing != null)
+            {
+                SmoothPhasingInfo infoForSeer = smoothPhasing.GetInfoForSeer(GetDemonCreatorGUID());
+                if (infoForSeer != null && infoForSeer.ReplaceObject.HasValue && smoothPhasing.IsReplacing(infoForSeer.ReplaceObject.Value))
+                {
+                    WorldObject original = Global.ObjAccessor.GetWorldObject(this, infoForSeer.ReplaceObject.Value);
+                    if (original != null)
+                        objectsToUpdate.Add(original);
+                }
+            }
 
             VisibleChangesNotifier notifier = new(objectsToUpdate);
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
@@ -260,22 +266,29 @@ namespace Game.Entities
             List<WorldObject> objectsToUpdate = new();
             objectsToUpdate.Add(this);
 
-            WorldObject original = GetSummoner();
+            WorldObject original = null;
             SmoothPhasing smoothPhasing = GetSmoothPhasing();
-            if (original != null && smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
+            if (smoothPhasing != null)
             {
-                objectsToUpdate.Add(original);
+                SmoothPhasingInfo infoForSeer = smoothPhasing.GetInfoForSeer(GetDemonCreatorGUID());
+                if (infoForSeer != null && infoForSeer.ReplaceObject.HasValue && smoothPhasing.IsReplacing(infoForSeer.ReplaceObject.Value))
+                    original = Global.ObjAccessor.GetWorldObject(this, infoForSeer.ReplaceObject.Value);
 
-                // disable replacement without removing - it is still needed for next step (visibility update)
-                SmoothPhasing originalSmoothPhasing = original.GetSmoothPhasing();
-                if (originalSmoothPhasing != null)
-                    originalSmoothPhasing.DisableReplacementForSeer(GetDemonCreatorGUID());
+                if (original != null)
+                {
+                    objectsToUpdate.Add(original);
+
+                    // disable replacement without removing - it is still needed for next step (visibility update)
+                    SmoothPhasing originalSmoothPhasing = original.GetSmoothPhasing();
+                    if (originalSmoothPhasing != null)
+                        originalSmoothPhasing.DisableReplacementForSeer(GetDemonCreatorGUID());
+                }
             }
 
             VisibleChangesNotifier notifier = new(objectsToUpdate);
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
 
-            if (original != null && smoothPhasing != null && smoothPhasing.IsReplacing(original.GetGUID()))
+            if (original != null) // original is only != null when it was replaced
             {
                 SmoothPhasing originalSmoothPhasing = original.GetSmoothPhasing();
                 if (originalSmoothPhasing != null)
