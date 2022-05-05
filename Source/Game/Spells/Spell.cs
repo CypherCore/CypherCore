@@ -2234,7 +2234,7 @@ namespace Game.Spells
                     if (CanExecuteTriggersOnHit(effMask, hit.triggeredByAura) && RandomHelper.randChance(hit.chance))
                     {
                         m_caster.CastSpell(unit, hit.triggeredSpell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCastId(m_castId)
+                            .SetTriggeringSpell(this)
                             .SetCastDifficulty(hit.triggeredSpell.Difficulty));
                         Log.outDebug(LogFilter.Spells, "Spell {0} triggered spell {1} by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo.Id, hit.triggeredSpell.Id);
 
@@ -2268,7 +2268,7 @@ namespace Game.Spells
                     if (id < 0)
                         unit.RemoveAurasDueToSpell((uint)-id);
                     else
-                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()).SetOriginalCastId(m_castId));
+                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()).SetTriggeringSpell(this));
                 }
             }
         }
@@ -2860,7 +2860,7 @@ namespace Game.Spells
                             unitCaster.RemoveAurasDueToSpell((uint)-spellId);
                     }
                     else
-                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
+                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(this));
                 }
             }
 
@@ -5215,7 +5215,7 @@ namespace Game.Spells
                                     {
                                         pet.CastSpell(pet, 32752, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                             .SetOriginalCaster(pet.GetGUID())
-                                            .SetOriginalCastId(m_castId));
+                                            .SetTriggeringSpell(this));
                                     }
                                 }
                             }
@@ -6413,7 +6413,7 @@ namespace Game.Spells
                                         }
                                         else if (m_spellInfo.GetEffects().Count > 1)
                                             player.CastSpell(player, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs()
-                                                .SetOriginalCastId(m_castId));        // move this to anywhere
+                                                .SetTriggeringSpell(this));        // move this to anywhere
                                         return SpellCastResult.DontReport;
                                     }
                                 }
@@ -8371,7 +8371,7 @@ namespace Game.Spells
 
                 // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
                 if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
-                    caster.CastSpell(unit, 32747, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(spell.m_castId));
+                    caster.CastSpell(unit, 32747, new CastSpellExtraArgs(spell));
             }
 
             if (_spellHitTarget)
@@ -8997,6 +8997,7 @@ namespace Game.Spells
         public ObjectGuid OriginalCaster = ObjectGuid.Empty;
         public Difficulty CastDifficulty;
         public ObjectGuid OriginalCastId = ObjectGuid.Empty;
+        public int? OriginalCastItemLevel;
         public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
 
         public CastSpellExtraArgs() { }
@@ -9053,7 +9054,11 @@ namespace Game.Spells
 
         public CastSpellExtraArgs SetTriggeringSpell(Spell triggeringSpell)
         {
-            OriginalCastId = triggeringSpell.m_castId;
+            if (triggeringSpell != null)
+            {
+                OriginalCastItemLevel = triggeringSpell.m_castItemLevel;
+                OriginalCastId = triggeringSpell.m_castId;
+            }
             return this;
         }
         

@@ -1058,8 +1058,7 @@ namespace Scripts.Spells.Items
             Unit target = GetHitUnit();
 
             uint spellId = RandomHelper.RAND(SpellIds.PersonalizedWeather1, SpellIds.PersonalizedWeather2, SpellIds.PersonalizedWeather3, SpellIds.PersonalizedWeather4);
-            target.CastSpell(target, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                .SetOriginalCastId(GetSpell().m_castId));
+            target.CastSpell(target, spellId, new CastSpellExtraArgs(GetSpell()));
         }
 
         public override void Register()
@@ -3565,8 +3564,7 @@ namespace Scripts.Spells.Items
             }
 
             Unit caster = GetCaster();
-            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                .SetOriginalCastId(GetSpell().m_castId));
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(GetSpell()));
         }
 
         public override void Register()

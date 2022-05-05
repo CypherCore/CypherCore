@@ -2323,6 +2323,9 @@ namespace Game.Entities
                 spell.SetSpellValue(pair.Key, pair.Value);
 
             spell.m_CastItem = args.CastItem;
+            if (args.OriginalCastItemLevel.HasValue)
+                spell.m_castItemLevel = args.OriginalCastItemLevel.Value;
+
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 

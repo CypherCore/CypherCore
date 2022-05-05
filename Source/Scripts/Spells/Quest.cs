@@ -370,8 +370,7 @@ namespace Scripts.Spells.Quest
                 return;
 
             uint spellId = RandomHelper.randChance(20) ? SpellIds.BendingShinbone1 : SpellIds.BendingShinbone2;
-            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                .SetOriginalCastId(GetSpell().m_castId));
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(GetSpell()));
         }
 
         public override void Register()

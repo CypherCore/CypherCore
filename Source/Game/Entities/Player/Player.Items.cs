@@ -5204,7 +5204,7 @@ namespace Game.Entities
                 else if (apply)
                 {
                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.CastItem = artifact;
+                    args.SetCastItem(artifact);
                     if (artifactPowerRank.AuraPointsOverride != 0)
                     {
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
