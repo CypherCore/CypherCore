@@ -4142,11 +4142,15 @@ namespace Game.Maps
             {
                 if (summoner != null && smoothPhasingInfo.ReplaceObject.HasValue)
                 {
-                    SmoothPhasingInfo originalSmoothPhasingInfo = smoothPhasingInfo;
-                    originalSmoothPhasingInfo.ReplaceObject = summon.GetGUID();
-                    summoner.GetOrCreateSmoothPhasing().SetViewerDependentInfo(privateObjectOwner, originalSmoothPhasingInfo);
+                    WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(summoner, smoothPhasingInfo.ReplaceObject.Value);
+                    if (replacedObject != null)
+                    {
+                        SmoothPhasingInfo originalSmoothPhasingInfo = smoothPhasingInfo;
+                        originalSmoothPhasingInfo.ReplaceObject = summon.GetGUID();
+                        replacedObject.GetOrCreateSmoothPhasing().SetViewerDependentInfo(privateObjectOwner, originalSmoothPhasingInfo);
 
-                    summon.SetDemonCreatorGUID(privateObjectOwner);
+                        summon.SetDemonCreatorGUID(privateObjectOwner);
+                    }
                 }
 
                 summon.GetOrCreateSmoothPhasing().SetSingleInfo(smoothPhasingInfo);

@@ -206,7 +206,7 @@ namespace Game.Chat
                         WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
                         uint zoneId = result.Read<ushort>(1);
 
-                        Player.SavePositionInDB(loc, zoneId, targetGuid, null);
+                        Player.SavePositionInDB(loc, zoneId, targetGuid);
                     }
                 }
 
@@ -258,7 +258,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.TeleportingTo, nameLink, handler.GetCypherString(CypherStrings.Offline), tele.name);
 
                 Player.SavePositionInDB(new WorldLocation(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation),
-                    Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, tele.mapId, tele.posX, tele.posY, tele.posZ), targetGuid, null);
+                    Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, tele.mapId, tele.posX, tele.posY, tele.posZ), targetGuid);
             }
 
             return true;

@@ -730,7 +730,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool LevelUp(CommandHandler handler, StringArguments args)
+        static bool HandleLevelUpCommand(CommandHandler handler, StringArguments args)
         {
             string nameStr;
             string levelStr;

@@ -286,9 +286,9 @@ namespace Game.Achievements
                     case CriteriaType.LearnTradeskillSkillLine:
                     {
                         uint spellCount = 0;
-                        foreach (var spell in referencePlayer.GetSpellMap())
+                        foreach (var (spellId, _) in referencePlayer.GetSpellMap())
                         {
-                            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell.Key);
+                            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
                             foreach (var skill in bounds)
                             {
                                 if (skill.SkillLine == criteria.Entry.Asset)
