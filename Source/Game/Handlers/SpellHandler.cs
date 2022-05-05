@@ -512,13 +512,17 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SelfRes)]
         void HandleSelfRes(SelfRes selfRes)
         {
-            if (_player.HasAuraType(AuraType.PreventResurrection))
-                return; // silent return, client should display error by itself and not send this opcode
-
             List<uint> selfResSpells = _player.m_activePlayerData.SelfResSpells;
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
-            
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return;
+
+            if (_player.HasAuraType(AuraType.PreventResurrection) && !spellInfo.HasAttribute(SpellAttr7.BypassNoResurrectAura))
+                return; // silent return, client should display error by itself and not send this opcode
+
             _player.CastSpell(_player, selfRes.SpellId, new CastSpellExtraArgs(_player.GetMap().GetDifficultyID()));
             _player.RemoveSelfResSpell(selfRes.SpellId);
         }

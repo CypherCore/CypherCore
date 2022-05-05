@@ -1160,7 +1160,7 @@ namespace Game.Spells
             if (ExcludeTargetAuraSpell != 0 && unitTarget.HasAura(ExcludeTargetAuraSpell))
                 return SpellCastResult.TargetAurastate;
 
-            if (unitTarget.HasAuraType(AuraType.PreventResurrection))
+            if (unitTarget.HasAuraType(AuraType.PreventResurrection) && !HasAttribute(SpellAttr7.BypassNoResurrectAura))
                 if (HasEffect(SpellEffectName.SelfResurrect) || HasEffect(SpellEffectName.Resurrect))
                     return SpellCastResult.TargetCannotBeResurrected;
 

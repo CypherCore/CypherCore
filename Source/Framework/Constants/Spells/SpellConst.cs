@@ -1845,7 +1845,7 @@ namespace Framework.Constants
         Unk24 = 0x1000000, // 24 Motivate, Mutilate, Perform Speech, Shattering Throw
         Unk25 = 0x2000000, // 25
         Unk26 = 0x4000000, // 26
-        Unk27 = 0x8000000, // 27 Not Set
+        BypassNoResurrectAura = 0x8000000, // 27 Bypass No Resurrect Aura
         ConsolidatedRaidBuff = 0x10000000, // 28 Related To Player Positive Buff
         Unk29 = 0x20000000, // 29 Only 69028, 71237
         Unk30 = 0x40000000, // 30 Burning Determination, Divine Sacrifice, Earth Shield, Prayer Of Mending
