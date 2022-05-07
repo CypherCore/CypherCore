@@ -45,7 +45,7 @@ namespace Scripts.Spells.Paladin
         public const uint Consecration = 26573;
         public const uint ConsecrationDamage = 81297;
         public const uint ConsecrationProtectionAura = 188370;
-        public const uint DivinePurposeProc = 90174;
+        public const uint DivinePurposeTriggerred = 223819;
         public const uint DivineSteedHuman = 221883;
         public const uint DivineSteedDwarf = 276111;
         public const uint DivineSteedDraenei = 221887;
@@ -316,6 +316,39 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 223817 - Divine Purpose
+    class spell_pal_divine_purpose : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DivinePurposeTriggerred);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (!procSpell)
+                return false;
+
+            if (!procSpell.HasPowerTypeCost(PowerType.HolyPower))
+                return false;
+
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.DivinePurposeTriggerred,
+                new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(eventInfo.GetProcSpell()));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 642 - Divine Shield
     class spell_pal_divine_shield : SpellScript
     {
