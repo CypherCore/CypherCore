@@ -19,104 +19,119 @@ using System;
 
 namespace Framework.Dynamic
 {
-    public class FlagArray128
+    public class FlagsArray<T> where T : struct
     {
-        public FlagArray128(params uint[] parts)
+        protected dynamic[] _storage;
+
+        public FlagsArray(uint length)
         {
-            _values = new uint[4];
-            for (var i = 0; i < parts.Length; ++i)
-                _values[i] = parts[i];
+            _storage = new dynamic[length];
         }
 
-        public FlagArray128(int[] parts)
+        public FlagsArray(params T[] parts)
         {
-            _values = new uint[4];
+            _storage = new dynamic[parts.Length];
             for (var i = 0; i < parts.Length; ++i)
-                _values[i] = (uint)parts[i];
+                _storage[i] = parts[i];
         }
+
+        public FlagsArray(T[] parts, uint length)
+        {
+            _storage = new dynamic[length];
+            for (var i = 0; i < length && i < parts.Length; ++i)
+                _storage[i] = parts[i];
+        }
+
+        public static bool operator <(FlagsArray<T> left, FlagsArray<T> right)
+        {
+            for (var i = left._storage.Length; i > 0; --i)
+            {
+                if ((dynamic)left._storage[i - 1] < right._storage[i - 1])
+                    return true;
+                else if ((dynamic)left._storage[i - 1] > right._storage[i - 1])
+                    return false;
+            }
+            return false;
+        }
+        public static bool operator >(FlagsArray<T> left, FlagsArray<T> right)
+        {
+            for (var i = left._storage.Length; i > 0; --i)
+            {
+                if ((dynamic)left._storage[i - 1] > right._storage[i - 1])
+                    return true;
+                else if ((dynamic)left._storage[i - 1] < right._storage[i - 1])
+                    return false;
+            }
+            return false;
+        }
+
+        public static FlagArray128 operator &(FlagsArray<T> left, FlagsArray<T> right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] & right._storage[i];
+            return fl;
+        }
+        public static FlagArray128 operator |(FlagsArray<T> left, FlagsArray<T> right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] | right._storage[i];
+            return fl;
+        }
+        public static FlagArray128 operator ^(FlagsArray<T> left, FlagsArray<T> right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] ^ right._storage[i];
+            return fl;
+        }
+
+        public static implicit operator bool(FlagsArray<T> left)
+        {
+            for (var i = 0; i < left._storage.Length; ++i)
+                if (left._storage[i] != 0)
+                    return true;
+
+            return false;
+        }
+
+        public T this[int i]
+        {
+            get
+            {
+                return _storage[i];
+            }
+            set
+            {
+                _storage[i] = value;
+            }
+        }
+    }
+
+    public class FlagArray128 : FlagsArray<uint>
+    {
+        public FlagArray128(params uint[] parts) : base(parts, 4) { }
 
         public bool IsEqual(params uint[] parts)
         {
-            for (var i = 0; i < _values.Length; ++i)
-                if (_values[i] == parts[i])
+            for (var i = 0; i < _storage.Length; ++i)
+                if (_storage[i] == parts[i])
                     return false;
 
             return true;
         }
 
+        public bool HasFlag(params uint[] parts)
+        {
+            return (_storage[0] & parts[0] || _storage[1] & parts[1] || _storage[2] & parts[2] || _storage[3] & parts[3]);
+        }
+
         public void Set(params uint[] parts)
         {
             for (var i = 0; i < parts.Length; ++i)
-                _values[i] = parts[i];
+                _storage[i] = parts[i];
         }
-
-        public static bool operator <(FlagArray128 left, FlagArray128 right)
-        {
-            for (var i = left._values.Length; i > 0; --i)
-            {
-                if (left._values[i - 1] < right._values[i - 1])
-                    return true;
-                else if (left._values[i - 1] > right._values[i - 1])
-                    return false;
-            }
-            return false;
-        }
-        public static bool operator >(FlagArray128 left, FlagArray128 right)
-        {
-            for (var i = left._values.Length; i > 0; --i)
-            {
-                if (left._values[i - 1] > right._values[i - 1])
-                    return true;
-                else if (left._values[i - 1] < right._values[i - 1])
-                    return false;
-            }
-            return false;
-        }
-
-        public static FlagArray128 operator &(FlagArray128 left, FlagArray128 right)
-        {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._values.Length; ++i)
-                fl[i] = left._values[i] & right._values[i];
-            return fl;
-        }
-        public static FlagArray128 operator |(FlagArray128 left, FlagArray128 right)
-        {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._values.Length; ++i)
-                fl[i] = left._values[i] | right._values[i];
-            return fl;
-        }
-        public static FlagArray128 operator ^(FlagArray128 left, FlagArray128 right)
-        {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._values.Length; ++i)
-                fl[i] = left._values[i] ^ right._values[i];
-            return fl;
-        }
-
-        public static implicit operator bool (FlagArray128 left)
-        {
-            for (var i = 0; i < left._values.Length; ++i)
-                if (left._values[i] != 0)
-                    return true;
-
-            return false;
-        }
-
-        public uint this[int i]
-        {
-            get
-            {
-                return _values[i];
-            }
-            set
-            {
-                _values[i] = value;
-            }
-        }
-
-        uint[] _values { get; set; }
     }
 
     public class FlaggedArray<T> where T : struct

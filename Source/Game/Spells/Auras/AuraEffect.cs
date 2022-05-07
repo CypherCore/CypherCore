@@ -90,7 +90,7 @@ namespace Game.Spells
                 case AuraType.Transform:
                 case AuraType.ModRoot2:
                     m_canBeRecalculated = false;
-                    if (m_spellInfo.ProcFlags == 0)
+                    if (!m_spellInfo.ProcFlags)
                         break;
                     amount = (int)(GetBase().GetUnitOwner().CountPctFromMaxHealth(10));
                     break;
@@ -5065,14 +5065,14 @@ namespace Game.Spells
             Unit.DealDamageMods(caster, target, ref damage, ref absorb);
 
             // Set trigger flag
-            ProcFlags procAttacker = ProcFlags.DonePeriodic;
-            ProcFlags procVictim = ProcFlags.TakenPeriodic;
+            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
+            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
 
             if (damage != 0)
             {
                 hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-                procVictim |= ProcFlags.TakenDamage;
+                procVictim.Or(ProcFlags.TakenDamage);
             }
 
             int overkill = (int)(damage - target.GetHealth());
@@ -5156,14 +5156,14 @@ namespace Game.Spells
                 log.HitInfo |= HitInfo.CriticalHit;
 
             // Set trigger flag
-            ProcFlags procAttacker = ProcFlags.DonePeriodic;
-            ProcFlags procVictim = ProcFlags.TakenPeriodic;
+            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
+            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
 
             if (damage != 0)
             {
                 hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-                procVictim |= ProcFlags.TakenDamage;
+                procVictim.Or(ProcFlags.TakenDamage);
             }
 
             int new_damage = (int)Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
@@ -5182,7 +5182,7 @@ namespace Game.Spells
             caster.HealBySpell(healInfo);
 
             caster.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
-            Unit.ProcSkillsAndAuras(caster, caster, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
+            Unit.ProcSkillsAndAuras(caster, caster, new ProcFlagsInit(ProcFlags.DonePeriodic), new ProcFlagsInit(ProcFlags.TakenPeriodic), ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
 
             caster.SendSpellNonMeleeDamageLog(log);
         }
@@ -5214,7 +5214,7 @@ namespace Game.Spells
 
             HealInfo healInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.HealBySpell(healInfo);
-            Unit.ProcSkillsAndAuras(caster, target, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Normal, null, null, healInfo);
+            Unit.ProcSkillsAndAuras(caster, target, new ProcFlagsInit(ProcFlags.DonePeriodic), new ProcFlagsInit(ProcFlags.TakenPeriodic), ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Normal, null, null, healInfo);
         }
 
         void HandlePeriodicHealAurasTick(Unit target, Unit caster)
@@ -5271,8 +5271,8 @@ namespace Game.Spells
             if (GetAuraType() == AuraType.ObsModHealth)
                 return;
 
-            ProcFlags procAttacker = ProcFlags.DonePeriodic;
-            ProcFlags procVictim = ProcFlags.TakenPeriodic;
+            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
+            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
             // ignore item heals
             if (GetBase().GetCastItemGUID().IsEmpty())
@@ -5426,13 +5426,13 @@ namespace Game.Spells
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
             // Set trigger flag
-            ProcFlags procAttacker = ProcFlags.DonePeriodic;
-            ProcFlags procVictim = ProcFlags.TakenPeriodic;
+            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
+            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             ProcFlagsHit hitMask = Unit.CreateProcHitMask(damageInfo, SpellMissInfo.None);
             ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.NoDmgHeal;
             if (damageInfo.damage != 0)
             {
-                procVictim |= ProcFlags.TakenDamage;
+                procVictim.Or(ProcFlags.TakenDamage);
                 spellTypeMask |= ProcFlagsSpellType.Damage;
             }
 

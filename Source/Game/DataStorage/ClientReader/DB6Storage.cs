@@ -180,7 +180,7 @@ namespace Game.DataStorage
                                     }
                                     else if (type == typeof(FlagArray128))
                                     {
-                                        f.SetValue(obj, new FlagArray128(ReadArray<int>(result, dbIndex, 4)));
+                                        f.SetValue(obj, new FlagArray128(ReadArray<uint>(result, dbIndex, 4)));
                                         dbIndex += 4;
                                     }
                                     break;

@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Networking.Packets;
 using Game.Scenarios;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -367,7 +368,7 @@ namespace Game.Maps
                                 var playerList = instance.GetPlayers();
                                 foreach (var player in playerList)
                                         if (player.IsAlive())
-                                            Unit.ProcSkillsAndAuras(player, null, ProcFlags.EncounterStart, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                                            Unit.ProcSkillsAndAuras(player, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                                 break;
                             }
                         case EncounterState.Fail:

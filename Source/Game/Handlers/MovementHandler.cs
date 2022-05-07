@@ -24,6 +24,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -205,7 +206,7 @@ namespace Game
                 if (opcode == ClientOpcodes.MoveJump)
                 {
                     plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Jump); // Mind Control
-                    Unit.ProcSkillsAndAuras(plrMover, null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    Unit.ProcSkillsAndAuras(plrMover, null, new ProcFlagsInit(ProcFlags.Jump), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
             }
         }

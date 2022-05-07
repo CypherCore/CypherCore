@@ -1698,29 +1698,29 @@ namespace Game.Spells
             // Create base triggers flags for Attacker and Victim (m_procAttacker, m_procVictim and m_hitMask)
             //==========================================================================================
 
-            m_procVictim = m_procAttacker = 0;
+            m_procVictim = m_procAttacker = new ProcFlagsInit();
             // Get data for type of attack and fill base info for trigger
             switch (m_spellInfo.DmgClass)
             {
                 case SpellDmgClass.Melee:
-                    m_procAttacker = ProcFlags.DoneSpellMeleeDmgClass;
+                    m_procAttacker = new ProcFlagsInit(ProcFlags.DoneSpellMeleeDmgClass);
                     if (m_attackType == WeaponAttackType.OffAttack)
-                        m_procAttacker |= ProcFlags.DoneOffHandAttack;
+                        m_procAttacker.Or(ProcFlags.DoneOffHandAttack);
                     else
-                        m_procAttacker |= ProcFlags.DoneMainHandAttack;
-                    m_procVictim = ProcFlags.TakenSpellMeleeDmgClass;
+                        m_procAttacker.Or(ProcFlags.DoneMainHandAttack);
+                    m_procVictim = new ProcFlagsInit(ProcFlags.TakenSpellMeleeDmgClass);
                     break;
                 case SpellDmgClass.Ranged:
                     // Auto attack
                     if (m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                     {
-                        m_procAttacker = ProcFlags.DoneRangedAutoAttack;
-                        m_procVictim = ProcFlags.TakenRangedAutoAttack;
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneRangedAutoAttack);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenRangedAutoAttack);
                     }
                     else // Ranged spell attack
                     {
-                        m_procAttacker = ProcFlags.DoneSpellRangedDmgClass;
-                        m_procVictim = ProcFlags.TakenSpellRangedDmgClass;
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneSpellRangedDmgClass);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenSpellRangedDmgClass);
                     }
                     break;
                 default:
@@ -1728,8 +1728,8 @@ namespace Game.Spells
                         Convert.ToBoolean(m_spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassWeapon.Wand))
                         && m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag)) // Wands auto attack
                     {
-                        m_procAttacker = ProcFlags.DoneRangedAutoAttack;
-                        m_procVictim = ProcFlags.TakenRangedAutoAttack;
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneRangedAutoAttack);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenRangedAutoAttack);
                     }
                     break;
                     // For other spells trigger procflags are set in Spell::TargetInfo::DoDamageAndTriggers
@@ -1741,18 +1741,18 @@ namespace Game.Spells
                 m_spellInfo.Id == 57879 || // Snake Trap - done this way to avoid double proc
                 m_spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x00024000u))) // Explosive and Immolation Trap
             {
-                m_procAttacker |= ProcFlags.DoneTrapActivation;
+                m_procAttacker.Or(ProcFlags.DoneTrapActivation);
 
                 // also fill up other flags (TargetInfo::DoDamageAndTriggers only fills up flag if both are not set)
-                m_procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
-                m_procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
+                m_procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassNeg);
+                m_procVictim.Or(ProcFlags.TakenSpellMagicDmgClassNeg);
             }
 
             // Hellfire Effect - trigger as DOT
             if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000040u))
             {
-                m_procAttacker = ProcFlags.DonePeriodic;
-                m_procVictim = ProcFlags.TakenPeriodic;
+                m_procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
+                m_procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             }
         }
 
@@ -2882,13 +2882,13 @@ namespace Game.Spells
                 return;
 
             // Handle procs on cast
-            ProcFlags procAttacker = m_procAttacker;
-            if (procAttacker == 0)
+            ProcFlagsInit procAttacker = m_procAttacker;
+            if (!procAttacker)
             {
                 if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg);
                 else
-                    procAttacker = IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg);
             }
 
             ProcFlagsHit hitMask = m_hitMask;
@@ -2898,7 +2898,7 @@ namespace Game.Spells
             if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
                 m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
 
-            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSuccessfulSpellCast
             Creature caster = m_originalCaster.ToCreature();
@@ -3144,16 +3144,16 @@ namespace Game.Spells
             if (!m_originalCaster)
                 return;
 
-            ProcFlags procAttacker = m_procAttacker;
-            if (procAttacker == 0)
+            ProcFlagsInit procAttacker = m_procAttacker;
+            if (!procAttacker)
             {
                 if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg);
                 else
-                    procAttacker = IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg);
             }
 
-            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -7047,7 +7047,7 @@ namespace Game.Spells
         {
             return m_originalCaster != null ? m_originalCaster : m_caster.ToUnit();
         }
-        
+
         bool IsValidDeadOrAliveTarget(Unit target)
         {
             if (target.IsAlive())
@@ -7865,8 +7865,8 @@ namespace Game.Spells
         // ******************************************
         // Spell trigger system
         // ******************************************
-        internal ProcFlags m_procAttacker;                // Attacker trigger flags
-        internal ProcFlags m_procVictim;                  // Victim   trigger flags
+        internal ProcFlagsInit m_procAttacker;                // Attacker trigger flags
+        internal ProcFlagsInit m_procVictim;                  // Victim   trigger flags
         internal ProcFlagsHit m_hitMask;
 
         // *****************************************
@@ -8028,7 +8028,7 @@ namespace Game.Spells
             TransportGUID.Clear();
             TransportOffset.Relocate(0, 0, 0, 0);
         }
-        
+
         public SpellDestination(WorldObject wObj) : this()
         {
             TransportGUID = wObj.GetTransGUID();
@@ -8190,8 +8190,8 @@ namespace Game.Spells
             if (caster != null)
             {
                 // Fill base trigger info
-                ProcFlags procAttacker = spell.m_procAttacker;
-                ProcFlags procVictim = spell.m_procVictim;
+                ProcFlagsInit procAttacker = spell.m_procAttacker;
+                ProcFlagsInit procVictim = spell.m_procVictim;
                 ProcFlagsSpellType procSpellType = ProcFlagsSpellType.None;
                 ProcFlagsHit hitMask = ProcFlagsHit.None;
 
@@ -8200,7 +8200,7 @@ namespace Game.Spells
                     (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
 
                 // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
-                if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
+                if (canEffectTrigger && !procAttacker && !procVictim)
                 {
                     bool positive = true;
                     if (spell.m_damage > 0)
@@ -8226,25 +8226,25 @@ namespace Game.Spells
                         case SpellDmgClass.Magic:
                             if (positive)
                             {
-                                procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
-                                procVictim |= ProcFlags.TakenSpellMagicDmgClassPos;
+                                procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassPos);
+                                procVictim.Or(ProcFlags.TakenSpellMagicDmgClassPos);
                             }
                             else
                             {
-                                procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
-                                procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
+                                procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassNeg);
+                                procVictim.Or(ProcFlags.TakenSpellMagicDmgClassNeg);
                             }
                             break;
                         case SpellDmgClass.None:
                             if (positive)
                             {
-                                procAttacker |= ProcFlags.DoneSpellNoneDmgClassPos;
-                                procVictim |= ProcFlags.TakenSpellNoneDmgClassPos;
+                                procAttacker.Or(ProcFlags.DoneSpellNoneDmgClassPos);
+                                procVictim.Or(ProcFlags.TakenSpellNoneDmgClassPos);
                             }
                             else
                             {
-                                procAttacker |= ProcFlags.DoneSpellNoneDmgClassNeg;
-                                procVictim |= ProcFlags.TakenSpellNoneDmgClassNeg;
+                                procAttacker.Or(ProcFlags.DoneSpellNoneDmgClassNeg);
+                                procVictim.Or(ProcFlags.TakenSpellNoneDmgClassNeg);
                             }
                             break;
                     }
@@ -8297,7 +8297,7 @@ namespace Game.Spells
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
-                        procVictim |= ProcFlags.TakenDamage;
+                        procVictim.Or(ProcFlags.TakenDamage);
 
                         spell.m_damage = (int)damageInfo.damage;
 
@@ -8482,7 +8482,7 @@ namespace Game.Spells
             spell.CallScriptAfterHitHandlers();
         }
     }
-    
+
     public class SpellValue
     {
         public SpellValue(SpellInfo proto, WorldObject caster)
@@ -8934,7 +8934,7 @@ namespace Game.Spells
             ProcFlagsSpellPhase spellPhaseMask = ProcFlagsSpellPhase.None;
             ProcFlagsHit hitMask = ProcFlagsHit.Reflect;
 
-            Unit.ProcSkillsAndAuras(caster, _victim, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, null, null, null);
+            Unit.ProcSkillsAndAuras(caster, _victim, new ProcFlagsInit(typeMaskActor), new ProcFlagsInit(typeMaskActionTarget), spellTypeMask, spellPhaseMask, hitMask, null, null, null);
             return true;
         }
 
@@ -8988,7 +8988,7 @@ namespace Game.Spells
             Targets = targets;
         }
     }
-    
+
     public class CastSpellExtraArgs
     {
         public TriggerCastFlags TriggerFlags;
@@ -9061,7 +9061,7 @@ namespace Game.Spells
             }
             return this;
         }
-        
+
         public CastSpellExtraArgs SetTriggeringAura(AuraEffect triggeringAura)
         {
             TriggeringAura = triggeringAura;
@@ -9106,6 +9106,38 @@ namespace Game.Spells
         public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new();
         public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new();
         public List<SpellLogEffectFeedPetParams> FeedPetTargets = new();
+    }
 
+    public class ProcFlagsInit : FlagsArray<int>
+    {
+        public ProcFlagsInit(ProcFlags procFlags = 0, ProcFlags2 procFlags2 = 0) : base(2)
+        {
+            _storage[0] = (int)procFlags;
+            _storage[1] = (int)procFlags2;
+        }
+
+        public ProcFlagsInit(params int[] flags) : base(flags) { }
+
+        public ProcFlagsInit Or(ProcFlags procFlags)
+        {
+            _storage[0] |= (int)procFlags;
+            return this;
+        }
+
+        public ProcFlagsInit Or(ProcFlags2 procFlags2)
+        {
+            _storage[1] |= (int)procFlags2;
+            return this;
+        }
+
+        public bool HasFlag(ProcFlags procFlags)
+        {
+            return (_storage[0] & procFlags) != 0;
+        }
+
+        public bool HasFlag(ProcFlags2 procFlags)
+        {
+            return (_storage[1] & procFlags) != 0;
+        }
     }
 }

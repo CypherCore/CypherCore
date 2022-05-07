@@ -47,7 +47,7 @@ namespace Game.Entities
                     InterruptNonMeleeSpells(false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
-            ProcSkillsAndAuras(this, null, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+            ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EnterCombat), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         public virtual void AtExitCombat()
@@ -793,14 +793,14 @@ namespace Game.Entities
                 // proc only once for victim
                 Unit owner = attacker.GetOwner();
                 if (owner != null)
-                    ProcSkillsAndAuras(owner, victim, ProcFlags.Kill, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    ProcSkillsAndAuras(owner, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
             }
 
             if (!victim.IsCritter())
-                ProcSkillsAndAuras(attacker, victim, ProcFlags.Kill, ProcFlags.Killed, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Killed), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // Proc auras on death - must be before aura/combat remove
-            ProcSkillsAndAuras(victim, victim, ProcFlags.None, ProcFlags.Death, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+            ProcSkillsAndAuras(victim, victim, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.Death), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // update get killing blow achievements, must be done before setDeathState to be able to require auras on target
             // and before Spirit of Redemption as it also removes auras
@@ -1026,8 +1026,8 @@ namespace Game.Entities
             damageInfo.TargetState = 0;
 
             damageInfo.AttackType = attackType;
-            damageInfo.ProcAttacker = ProcFlags.None;
-            damageInfo.ProcVictim = ProcFlags.None;
+            damageInfo.ProcAttacker = new ProcFlagsInit();
+            damageInfo.ProcVictim = new ProcFlagsInit();
             damageInfo.CleanDamage = 0;
             damageInfo.HitOutCome = MeleeHitOutcome.Evade;
 
@@ -1041,12 +1041,12 @@ namespace Game.Entities
             switch (attackType)
             {
                 case WeaponAttackType.BaseAttack:
-                    damageInfo.ProcAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneMainHandAttack;
-                    damageInfo.ProcVictim = ProcFlags.TakenMeleeAutoAttack;
+                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneMainHandAttack);
+                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakenMeleeAutoAttack);
                     break;
                 case WeaponAttackType.OffAttack:
-                    damageInfo.ProcAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneOffHandAttack;
-                    damageInfo.ProcVictim = ProcFlags.TakenMeleeAutoAttack;
+                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneOffHandAttack);
+                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakenMeleeAutoAttack);
                     damageInfo.HitInfo = HitInfo.OffHand;
                     break;
                 default:
@@ -1185,7 +1185,7 @@ namespace Game.Entities
             // Calculate absorb resist
             if (damageInfo.Damage > 0)
             {
-                damageInfo.ProcVictim |= ProcFlags.TakenDamage;
+                damageInfo.ProcVictim.Or(ProcFlags.TakenDamage);
                 // Calculate absorb & resists
                 DamageInfo dmgInfo = new(damageInfo);
                 CalcAbsorbResist(dmgInfo);

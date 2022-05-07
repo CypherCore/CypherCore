@@ -162,7 +162,7 @@ namespace Game.Entities
 
     public class ProcEventInfo
     {
-        public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, ProcFlags typeMask, ProcFlagsSpellType spellTypeMask,
+        public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsSpellType spellTypeMask,
             ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             _actor = actor;
@@ -181,7 +181,7 @@ namespace Game.Entities
         public Unit GetActionTarget() { return _actionTarget; }
         public Unit GetProcTarget() { return _procTarget; }
 
-        public ProcFlags GetTypeMask() { return _typeMask; }
+        public ProcFlagsInit GetTypeMask() { return _typeMask; }
         public ProcFlagsSpellType GetSpellTypeMask() { return _spellTypeMask; }
         public ProcFlagsSpellPhase GetSpellPhaseMask() { return _spellPhaseMask; }
         public ProcFlagsHit GetHitMask() { return _hitMask; }
@@ -217,7 +217,7 @@ namespace Game.Entities
         Unit _actor;
         Unit _actionTarget;
         Unit _procTarget;
-        ProcFlags _typeMask;
+        ProcFlagsInit _typeMask;
         ProcFlagsSpellType _spellTypeMask;
         ProcFlagsSpellPhase _spellPhaseMask;
         ProcFlagsHit _hitMask;
@@ -444,8 +444,8 @@ namespace Game.Entities
 
         // Helper
         public WeaponAttackType AttackType { get; set; }
-        public ProcFlags ProcAttacker { get; set; }
-        public ProcFlags ProcVictim { get; set; }
+        public ProcFlagsInit ProcAttacker { get; set; }
+        public ProcFlagsInit ProcVictim { get; set; }
         public uint CleanDamage { get; set; }        // Used only for rage calculation
         public MeleeHitOutcome HitOutCome { get; set; }  // TODO: remove this field (need use TargetState)
     }

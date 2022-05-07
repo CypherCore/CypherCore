@@ -2627,9 +2627,9 @@ namespace Game.Spells
                             duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
                             unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
                             if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
+                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, new ProcFlagsInit(ProcFlags.DoneSpellMagicDmgClassNeg), new ProcFlagsInit(ProcFlags.TakenSpellMagicDmgClassNeg), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                             else if (m_spellInfo.DmgClass == SpellDmgClass.Melee)
-                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, ProcFlags.DoneSpellMeleeDmgClass, ProcFlags.TakenSpellMeleeDmgClass, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
+                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, new ProcFlagsInit(ProcFlags.DoneSpellMeleeDmgClass), new ProcFlagsInit(ProcFlags.TakenSpellMeleeDmgClass), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                         }
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);

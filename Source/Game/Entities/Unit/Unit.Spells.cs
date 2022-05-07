@@ -1419,28 +1419,28 @@ namespace Game.Entities
 
             return false;
         }
-
-        public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        
+        public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
-            if (typeMaskActor != 0 && actor != null)
+            if (typeMaskActor && actor != null)
                 actor.ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
-            if (typeMaskActionTarget != 0 && actionTarget)
+            if (typeMaskActionTarget && actionTarget)
                 actionTarget.ProcSkillsAndReactives(true, actor, typeMaskActionTarget, hitMask, attType);
 
             if (actor != null)
                 actor.TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
         }
 
-        void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlags typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
+        void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
         {
             // Player is loaded now - do not allow passive spell casts to proc
             if (IsPlayer() && ToPlayer().GetSession().PlayerLoading())
                 return;
 
             // For melee/ranged based attack need update skills and set some Aura states if victim present
-            if (typeMask.HasAnyFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
+            if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
             {
                 // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
                 if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
@@ -1508,12 +1508,12 @@ namespace Game.Entities
             }
         }
 
-        void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             // prepare data for self trigger
             ProcEventInfo myProcEventInfo = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new();
-            if (typeMaskActor != 0)
+            if (typeMaskActor)
             {
                 GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
 
@@ -1537,12 +1537,12 @@ namespace Game.Entities
             // prepare data for target trigger
             ProcEventInfo targetProcEventInfo = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new();
-            if (typeMaskActionTarget != 0 && actionTarget)
+            if (typeMaskActionTarget && actionTarget)
                 actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
 
             TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
 
-            if (typeMaskActionTarget != 0 && actionTarget)
+            if (typeMaskActionTarget && actionTarget)
                 actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
         }
 

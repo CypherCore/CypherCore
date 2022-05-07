@@ -94,7 +94,7 @@ namespace Game.Spells
             SpellAuraOptionsRecord _options = data.AuraOptions;
             if (_options != null)
             {
-                ProcFlags = (ProcFlags)_options.ProcTypeMask[0];
+                ProcFlags = new ProcFlagsInit(_options.ProcTypeMask);
                 ProcChance = _options.ProcChance;
                 ProcCharges = (uint)_options.ProcCharges;
                 ProcCooldown = _options.ProcCategoryRecovery;
@@ -3948,7 +3948,7 @@ namespace Game.Spells
         public SpellAuraInterruptFlags2 AuraInterruptFlags2 { get; set; }
         public SpellAuraInterruptFlags ChannelInterruptFlags { get; set; }
         public SpellAuraInterruptFlags2 ChannelInterruptFlags2 { get; set; }
-        public ProcFlags ProcFlags { get; set; }
+        public ProcFlagsInit ProcFlags { get; set; }
         public uint ProcChance { get; set; }
         public uint ProcCharges { get; set; }
         public uint ProcCooldown { get; set; }
