@@ -797,8 +797,20 @@ namespace Game.Entities
             }
 
             if (!victim.IsCritter())
+            {
                 ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Killed), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-
+                if (player != null && player.GetGroup() != null)
+                {
+                    for (GroupReference itr = player.GetGroup().GetFirstMember(); itr != null; itr = itr.Next())
+                    {
+                        Player member = itr.GetSource();
+                        if (member != null)
+                            if (member.IsAtGroupRewardDistance(victim))
+                                Unit.ProcSkillsAndAuras(member, victim, new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    }
+                }
+            }
+            
             // Proc auras on death - must be before aura/combat remove
             ProcSkillsAndAuras(victim, victim, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.Death), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 

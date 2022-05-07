@@ -3853,6 +3853,8 @@ namespace Game.Spells
                 origin = new(m_caster.GetPosition());
 
             unitTarget.KnockbackFrom(origin, speedxy, speedz);
+
+            Unit.ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.None, ProcFlags2.Knockback), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, null, null);
         }
 
         [SpellEffectHandler(SpellEffectName.LeapBack)]

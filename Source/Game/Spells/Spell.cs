@@ -2891,6 +2891,8 @@ namespace Game.Spells
                     procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg);
             }
 
+            procAttacker.Or(ProcFlags2.CastSuccessful);
+
             ProcFlagsHit hitMask = m_hitMask;
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
                 hitMask |= ProcFlagsHit.Normal;

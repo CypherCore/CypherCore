@@ -203,7 +203,7 @@ namespace Scripts.Spells.Rogue
                             continue;
 
                         // Do not reproc deadly
-                        if (spellInfo.SpellFamilyFlags == new FlagArray128(0x10000, 0x80000, 0, 0))
+                        if (spellInfo.SpellFamilyFlags & new FlagArray128(0x10000))
                             continue;
 
                         if (spellInfo.IsPositive())
