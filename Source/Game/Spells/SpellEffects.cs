@@ -3869,7 +3869,7 @@ namespace Game.Spells
             float speedxy = effectInfo.MiscValue / 10.0f;
             float speedz = damage / 10.0f;
             // Disengage
-            unitTarget.JumpTo(speedxy, speedz, m_spellInfo.IconFileDataId != 132572);
+            unitTarget.JumpTo(speedxy, speedz, effectInfo.PositionFacing);
 
             // changes fall time
             if (m_caster.GetTypeId() == TypeId.Player)
@@ -3965,7 +3965,7 @@ namespace Game.Spells
                 return;
             }
 
-            unitTarget.JumpTo(speedXY, speedZ, true, pos);
+            unitTarget.JumpTo(speedXY, speedZ, 0.0f, pos);
         }
 
         [SpellEffectHandler(SpellEffectName.PullTowardsDest)]
@@ -4002,7 +4002,7 @@ namespace Game.Spells
                 return;
             }
 
-            unitTarget.JumpTo(speedXY, speedZ, true, pos);
+            unitTarget.JumpTo(speedXY, speedZ, 0.0f, pos);
         }
 
         [SpellEffectHandler(SpellEffectName.ChangeRaidMarker)]

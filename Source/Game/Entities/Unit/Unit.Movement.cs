@@ -395,9 +395,8 @@ namespace Game.Entities
             return true;
         }
 
-        public void JumpTo(float speedXY, float speedZ, bool forward, Position dest = null)
+        public void JumpTo(float speedXY, float speedZ, float angle, Position dest = null)
         {
-            float angle = forward ? 0 : MathFunctions.PI;
             if (dest != null)
                 angle += GetRelativeAngle(dest);
 
