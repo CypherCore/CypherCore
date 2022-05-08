@@ -1703,24 +1703,24 @@ namespace Game.Spells
             switch (m_spellInfo.DmgClass)
             {
                 case SpellDmgClass.Melee:
-                    m_procAttacker = new ProcFlagsInit(ProcFlags.DoneSpellMeleeDmgClass);
+                    m_procAttacker = new ProcFlagsInit(ProcFlags.DealMeleeAbility);
                     if (m_attackType == WeaponAttackType.OffAttack)
-                        m_procAttacker.Or(ProcFlags.DoneOffHandAttack);
+                        m_procAttacker.Or(ProcFlags.OffHandWeaponSwing);
                     else
-                        m_procAttacker.Or(ProcFlags.DoneMainHandAttack);
-                    m_procVictim = new ProcFlagsInit(ProcFlags.TakenSpellMeleeDmgClass);
+                        m_procAttacker.Or(ProcFlags.MainHandWeaponSwing);
+                    m_procVictim = new ProcFlagsInit(ProcFlags.TakeMeleeAbility);
                     break;
                 case SpellDmgClass.Ranged:
                     // Auto attack
                     if (m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                     {
-                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneRangedAutoAttack);
-                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenRangedAutoAttack);
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DealRangedAttack);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakeRangedAttack);
                     }
                     else // Ranged spell attack
                     {
-                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneSpellRangedDmgClass);
-                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenSpellRangedDmgClass);
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DealRangedAbility);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakeRangedAbility);
                     }
                     break;
                 default:
@@ -1728,31 +1728,12 @@ namespace Game.Spells
                         Convert.ToBoolean(m_spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassWeapon.Wand))
                         && m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag)) // Wands auto attack
                     {
-                        m_procAttacker = new ProcFlagsInit(ProcFlags.DoneRangedAutoAttack);
-                        m_procVictim = new ProcFlagsInit(ProcFlags.TakenRangedAutoAttack);
+                        m_procAttacker = new ProcFlagsInit(ProcFlags.DealRangedAttack);
+                        m_procVictim = new ProcFlagsInit(ProcFlags.TakeRangedAttack);
                     }
                     break;
                     // For other spells trigger procflags are set in Spell::TargetInfo::DoDamageAndTriggers
                     // Because spell positivity is dependant on target
-            }
-
-            // Hunter trap spells - activation proc for Lock and Load, Entrapment and Misdirection
-            if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Hunter && (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x18u) ||     // Freezing and Frost Trap, Freezing Arrow
-                m_spellInfo.Id == 57879 || // Snake Trap - done this way to avoid double proc
-                m_spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x00024000u))) // Explosive and Immolation Trap
-            {
-                m_procAttacker.Or(ProcFlags.DoneTrapActivation);
-
-                // also fill up other flags (TargetInfo::DoDamageAndTriggers only fills up flag if both are not set)
-                m_procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassNeg);
-                m_procVictim.Or(ProcFlags.TakenSpellMagicDmgClassNeg);
-            }
-
-            // Hellfire Effect - trigger as DOT
-            if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000040u))
-            {
-                m_procAttacker = new ProcFlagsInit(ProcFlags.DonePeriodic);
-                m_procVictim = new ProcFlagsInit(ProcFlags.TakenPeriodic);
             }
         }
 
@@ -2885,10 +2866,27 @@ namespace Game.Spells
             ProcFlagsInit procAttacker = m_procAttacker;
             if (!procAttacker)
             {
-                if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg);
+                if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
+                }
+                else if (m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                }
                 else
-                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg);
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                }
             }
 
             procAttacker.Or(ProcFlags2.CastSuccessful);
@@ -3149,10 +3147,27 @@ namespace Game.Spells
             ProcFlagsInit procAttacker = m_procAttacker;
             if (!procAttacker)
             {
-                if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg);
+                if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
+                }
+                else if (m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulAbility);
+                }
                 else
-                    procAttacker = new ProcFlagsInit(IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg);
+                {
+                    if (IsPositive())
+                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
+                    else
+                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                }
             }
 
             Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
@@ -3293,6 +3308,8 @@ namespace Game.Spells
             Creature creatureCaster = unitCaster.ToCreature();
             if (creatureCaster != null)
                 creatureCaster.ReleaseSpellFocus(this);
+
+            Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
 
             if (!ok)
                 return;
@@ -8225,28 +8242,46 @@ namespace Game.Spells
 
                     switch (spell.m_spellInfo.DmgClass)
                     {
-                        case SpellDmgClass.Magic:
-                            if (positive)
-                            {
-                                procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassPos);
-                                procVictim.Or(ProcFlags.TakenSpellMagicDmgClassPos);
-                            }
-                            else
-                            {
-                                procAttacker.Or(ProcFlags.DoneSpellMagicDmgClassNeg);
-                                procVictim.Or(ProcFlags.TakenSpellMagicDmgClassNeg);
-                            }
-                            break;
                         case SpellDmgClass.None:
-                            if (positive)
+                        case SpellDmgClass.Magic:
+                            if (spell.m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
                             {
-                                procAttacker.Or(ProcFlags.DoneSpellNoneDmgClassPos);
-                                procVictim.Or(ProcFlags.TakenSpellNoneDmgClassPos);
+                                if (positive)
+                                {
+                                    procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
+                                    procVictim.Or(ProcFlags.TakeHelpfulPeriodic);
+                                }
+                                else
+                                {
+                                    procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
+                                    procVictim.Or(ProcFlags.TakeHarmfulPeriodic);
+                                }
+                            }
+                            else if (spell.m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                            {
+                                if (positive)
+                                {
+                                    procAttacker.Or(ProcFlags.DealHelpfulAbility);
+                                    procVictim.Or(ProcFlags.TakeHelpfulAbility);
+                                }
+                                else
+                                {
+                                    procAttacker.Or(ProcFlags.DealHarmfulAbility);
+                                    procVictim.Or(ProcFlags.TakeHarmfulAbility);
+                                }
                             }
                             else
                             {
-                                procAttacker.Or(ProcFlags.DoneSpellNoneDmgClassNeg);
-                                procVictim.Or(ProcFlags.TakenSpellNoneDmgClassNeg);
+                                if (positive)
+                                {
+                                    procAttacker.Or(ProcFlags.DealHelpfulSpell);
+                                    procVictim.Or(ProcFlags.TakeHelpfulSpell);
+                                }
+                                else
+                                {
+                                    procAttacker.Or(ProcFlags.DealHarmfulSpell);
+                                    procVictim.Or(ProcFlags.TakeHarmfulSpell);
+                                }
                             }
                             break;
                     }
@@ -8299,7 +8334,7 @@ namespace Game.Spells
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
-                        procVictim.Or(ProcFlags.TakenDamage);
+                        procVictim.Or(ProcFlags.TakeAnyDamage);
 
                         spell.m_damage = (int)damageInfo.damage;
 
@@ -8931,7 +8966,7 @@ namespace Game.Spells
                 return true;
 
             ProcFlags typeMaskActor = ProcFlags.None;
-            ProcFlags typeMaskActionTarget = ProcFlags.TakenSpellMagicDmgClassNeg | ProcFlags.TakenSpellNoneDmgClassNeg;
+            ProcFlags typeMaskActionTarget = ProcFlags.TakeHarmfulSpell | ProcFlags.TakeHarmfulAbility;
             ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
             ProcFlagsSpellPhase spellPhaseMask = ProcFlagsSpellPhase.None;
             ProcFlagsHit hitMask = ProcFlagsHit.Reflect;

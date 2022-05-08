@@ -484,7 +484,7 @@ namespace Game.Entities
             }
 
             // always trigger for these types
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.Heartbeat | ProcFlags.Kill | ProcFlags.Death))
                 return true;
 
             // check school mask (if set) for other trigger types

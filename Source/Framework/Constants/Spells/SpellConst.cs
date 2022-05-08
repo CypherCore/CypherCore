@@ -2434,44 +2434,47 @@ namespace Framework.Constants
     {
         None = 0x0,
 
-        Killed = 0x01,    // 00 Killed by agressor - not sure about this flag
+        Heartbeat = 0x01,    // 00 Killed by agressor - not sure about this flag
         Kill = 0x02,    // 01 Kill target (in most cases need XP/Honor reward)
 
-        DoneMeleeAutoAttack = 0x04,    // 02 Done melee auto attack
-        TakenMeleeAutoAttack = 0x08,    // 03 Taken melee auto attack
+        DealMeleeSwing = 0x04,    // 02 Done melee auto attack
+        TakeMeleeSwing = 0x08,    // 03 Taken melee auto attack
 
-        DoneSpellMeleeDmgClass = 0x10,    // 04 Done attack by Spell that has dmg class melee
-        TakenSpellMeleeDmgClass = 0x20,    // 05 Taken attack by Spell that has dmg class melee
+        DealMeleeAbility = 0x10,    // 04 Done attack by Spell that has dmg class melee
+        TakeMeleeAbility = 0x20,    // 05 Taken attack by Spell that has dmg class melee
 
-        DoneRangedAutoAttack = 0x40,    // 06 Done ranged auto attack
-        TakenRangedAutoAttack = 0x80,    // 07 Taken ranged auto attack
+        DealRangedAttack = 0x40,    // 06 Done ranged auto attack
+        TakeRangedAttack = 0x80,    // 07 Taken ranged auto attack
 
-        DoneSpellRangedDmgClass = 0x100,    // 08 Done attack by Spell that has dmg class ranged
-        TakenSpellRangedDmgClass = 0x200,    // 09 Taken attack by Spell that has dmg class ranged
+        DealRangedAbility = 0x100,    // 08 Done attack by Spell that has dmg class ranged
+        TakeRangedAbility = 0x200,    // 09 Taken attack by Spell that has dmg class ranged
 
-        DoneSpellNoneDmgClassPos = 0x400,    // 10 Done positive spell that has dmg class none
-        TakenSpellNoneDmgClassPos = 0x800,    // 11 Taken positive spell that has dmg class none
+        DealHelpfulAbility = 0x400,    // 10 Done positive spell that has dmg class none
+        TakeHelpfulAbility = 0x800,    // 11 Taken positive spell that has dmg class none
 
-        DoneSpellNoneDmgClassNeg = 0x1000,    // 12 Done negative spell that has dmg class none
-        TakenSpellNoneDmgClassNeg = 0x2000,    // 13 Taken negative spell that has dmg class none
+        DealHarmfulAbility = 0x1000,    // 12 Done negative spell that has dmg class none
+        TakeHarmfulAbility = 0x2000,    // 13 Taken negative spell that has dmg class none
 
-        DoneSpellMagicDmgClassPos = 0x4000,    // 14 Done positive spell that has dmg class magic
-        TakenSpellMagicDmgClassPos = 0x8000,    // 15 Taken positive spell that has dmg class magic
+        DealHelpfulSpell = 0x4000,    // 14 Done positive spell that has dmg class magic
+        TakeHelpfulSpell = 0x8000,    // 15 Taken positive spell that has dmg class magic
 
-        DoneSpellMagicDmgClassNeg = 0x10000,    // 16 Done negative spell that has dmg class magic
-        TakenSpellMagicDmgClassNeg = 0x20000,    // 17 Taken negative spell that has dmg class magic
+        DealHarmfulSpell = 0x10000,    // 16 Done negative spell that has dmg class magic
+        TakeHarmfulSpell = 0x20000,    // 17 Taken negative spell that has dmg class magic
 
-        DonePeriodic = 0x40000,    // 18 Successful do periodic (damage / healing)
-        TakenPeriodic = 0x80000,    // 19 Taken spell periodic (damage / healing)
+        DealHarmfulPeriodic = 0x40000,    // 18 Successful do periodic damage
+        TakeHarmfulPeriodic = 0x80000,    // 19 Taken spell periodic damage
 
-        TakenDamage = 0x100000,    // 20 Taken any damage
-        DoneTrapActivation = 0x200000,    // 21 On trap activation (possibly needs name change to ONGAMEOBJECTCAST or USE)
+        TakeAnyDamage = 0x100000,    // 20 Taken any damage
 
-        DoneMainHandAttack = 0x400000,    // 22 Done main-hand melee attacks (spell and autoattack)
-        DoneOffHandAttack = 0x800000,    // 23 Done off-hand melee attacks (spell and autoattack)
+        DealHelpfulPeriodic = 0x200000,    // 21 On trap activation (possibly needs name change to ONGAMEOBJECTCAST or USE)
+
+        MainHandWeaponSwing = 0x400000,    // 22 Done main-hand melee attacks (spell and autoattack)
+        OffHandWeaponSwing = 0x800000,    // 23 Done off-hand melee attacks (spell and autoattack)
 
         Death = 0x1000000,    // 24 Died in any way
         Jump = 0x02000000,    // 25 Jumped
+
+        CloneSpell = 0x4000000,    // 26 Proc Clone Spell
 
         EnterCombat = 0x08000000,    // 27 Entered combat
         EncounterStart = 0x10000000,    // 28 Encounter started
@@ -2482,30 +2485,30 @@ namespace Framework.Constants
         TakeHelpfulPeriodic = 0x80000000,    // 31 Take Helpful Periodic
 
         // flag masks
-        AutoAttackMask = DoneMeleeAutoAttack | TakenMeleeAutoAttack | DoneRangedAutoAttack | TakenRangedAutoAttack,
+        AutoAttackMask = DealMeleeSwing | TakeMeleeSwing | DealRangedAttack | TakeRangedAttack,
 
-        MeleeMask = DoneMeleeAutoAttack | TakenMeleeAutoAttack | DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass
-            | DoneMainHandAttack | DoneOffHandAttack,
+        MeleeMask = DealMeleeSwing | TakeMeleeSwing | DealMeleeAbility | TakeMeleeAbility
+            | MainHandWeaponSwing | OffHandWeaponSwing,
 
-        RangedMask = DoneRangedAutoAttack | TakenRangedAutoAttack | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass,
+        RangedMask = DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility,
 
-        SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass |  DoneRangedAutoAttack | TakenRangedAutoAttack
-            | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass | DoneSpellNoneDmgClassPos | TakenSpellNoneDmgClassPos
-            | DoneSpellNoneDmgClassNeg | TakenSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | TakenSpellMagicDmgClassPos
-            | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg | DonePeriodic | TakenPeriodic | DoneTrapActivation,
+        SpellMask = DealMeleeAbility | TakeMeleeAbility |  DealRangedAttack | TakeRangedAttack
+            | DealRangedAbility | TakeRangedAbility | DealHelpfulAbility | TakeHelpfulAbility
+            | DealHarmfulAbility | TakeHarmfulAbility | DealHelpfulSpell | TakeHelpfulSpell
+            | DealHarmfulSpell | TakeHarmfulSpell | DealHarmfulPeriodic | TakeHarmfulPeriodic | DealHelpfulPeriodic | TakeHelpfulPeriodic,
 
-        DoneHitMask = DoneMeleeAutoAttack | DoneRangedAutoAttack | DoneSpellMeleeDmgClass | DoneSpellRangedDmgClass
-            | DoneSpellNoneDmgClassPos | DoneSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | DoneSpellMagicDmgClassNeg
-            | DonePeriodic | DoneTrapActivation | DoneMainHandAttack | DoneOffHandAttack,
+        DoneHitMask = DealMeleeSwing | DealRangedAttack | DealMeleeAbility | DealRangedAbility
+            | DealHelpfulAbility | DealHarmfulAbility | DealHelpfulSpell | DealHarmfulSpell
+            | DealHarmfulPeriodic | DealHelpfulPeriodic | MainHandWeaponSwing | OffHandWeaponSwing,
 
-        TakenHitMask = TakenMeleeAutoAttack | TakenRangedAutoAttack | TakenSpellMeleeDmgClass | TakenSpellRangedDmgClass
-            | TakenSpellNoneDmgClassPos | TakenSpellNoneDmgClassNeg | TakenSpellMagicDmgClassPos | TakenSpellMagicDmgClassNeg
-            | TakenPeriodic | TakenDamage,
+        TakenHitMask = TakeMeleeSwing | TakeRangedAttack | TakeMeleeAbility | TakeRangedAbility
+            | TakeHelpfulAbility | TakeHarmfulAbility | TakeHelpfulSpell | TakeHarmfulSpell
+            | TakeHarmfulPeriodic | TakeAnyDamage,
 
         ReqSpellPhaseMask = SpellMask & DoneHitMask,
 
-        MeleeBasedTriggerMask = (DoneMeleeAutoAttack | TakenMeleeAutoAttack | DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass |
-                                  DoneRangedAutoAttack | TakenRangedAutoAttack | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass)
+        MeleeBasedTriggerMask = (DealMeleeSwing | TakeMeleeSwing | DealMeleeAbility | TakeMeleeAbility |
+                                  DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility)
     }
 
     public enum ProcFlags2

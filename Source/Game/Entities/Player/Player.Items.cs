@@ -5873,6 +5873,8 @@ namespace Game.Entities
                 Item pItem = StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
                 SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
             }
+
+            Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.Looted), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         public byte GetInventorySlotCount() { return m_activePlayerData.NumBackpackSlots; }

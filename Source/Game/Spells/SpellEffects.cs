@@ -2620,17 +2620,10 @@ namespace Game.Spells
                         || (spell.GetState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
-                        Unit unitCaster = GetUnitCasterForEffectHandlers();
-                        if (unitCaster != null)
-                        {
-                            int duration = m_spellInfo.GetDuration();
-                            duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
-                            unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
-                            if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, new ProcFlagsInit(ProcFlags.DoneSpellMagicDmgClassNeg), new ProcFlagsInit(ProcFlags.TakenSpellMagicDmgClassNeg), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
-                            else if (m_spellInfo.DmgClass == SpellDmgClass.Melee)
-                                Unit.ProcSkillsAndAuras(unitCaster, unitTarget, new ProcFlagsInit(ProcFlags.DoneSpellMeleeDmgClass), new ProcFlagsInit(ProcFlags.TakenSpellMeleeDmgClass), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
-                        }
+                        int duration = m_spellInfo.GetDuration();
+                        duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
+                        unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
+                        m_hitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
                     }

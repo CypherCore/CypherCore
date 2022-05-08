@@ -3513,7 +3513,7 @@ namespace Game.Entities
                     caster.SendSpellNonMeleeDamageLog(log);
 
                     // break 'Fear' and similar auras
-                    ProcSkillsAndAuras(damageInfo.GetAttacker(), caster, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.TakenSpellMagicDmgClassNeg), ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, damageInfo, null);
+                    ProcSkillsAndAuras(damageInfo.GetAttacker(), caster, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.TakeHarmfulSpell), ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, damageInfo, null);
                 }
             }
         }

@@ -798,7 +798,7 @@ namespace Game.Entities
 
             if (!victim.IsCritter())
             {
-                ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Killed), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Heartbeat), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 if (player != null && player.GetGroup() != null)
                 {
                     for (GroupReference itr = player.GetGroup().GetFirstMember(); itr != null; itr = itr.Next())
@@ -1053,12 +1053,12 @@ namespace Game.Entities
             switch (attackType)
             {
                 case WeaponAttackType.BaseAttack:
-                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneMainHandAttack);
-                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakenMeleeAutoAttack);
+                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DealMeleeSwing | ProcFlags.MainHandWeaponSwing);
+                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakeMeleeSwing);
                     break;
                 case WeaponAttackType.OffAttack:
-                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneOffHandAttack);
-                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakenMeleeAutoAttack);
+                    damageInfo.ProcAttacker = new ProcFlagsInit(ProcFlags.DealMeleeSwing | ProcFlags.OffHandWeaponSwing);
+                    damageInfo.ProcVictim = new ProcFlagsInit(ProcFlags.TakeMeleeSwing);
                     damageInfo.HitInfo = HitInfo.OffHand;
                     break;
                 default:
@@ -1197,7 +1197,7 @@ namespace Game.Entities
             // Calculate absorb resist
             if (damageInfo.Damage > 0)
             {
-                damageInfo.ProcVictim.Or(ProcFlags.TakenDamage);
+                damageInfo.ProcVictim.Or(ProcFlags.TakeAnyDamage);
                 // Calculate absorb & resists
                 DamageInfo dmgInfo = new(damageInfo);
                 CalcAbsorbResist(dmgInfo);

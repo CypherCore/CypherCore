@@ -23,7 +23,7 @@ using Game.Loots;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
+using Game.Spells;
 using System.Collections.Generic;
 
 namespace Game
@@ -109,6 +109,8 @@ namespace Game
                     player.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
                 }
             }
+
+            Unit.ProcSkillsAndAuras(player, null, new ProcFlagsInit(ProcFlags.Looted), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         [WorldPacketHandler(ClientOpcodes.LootMoney)]
