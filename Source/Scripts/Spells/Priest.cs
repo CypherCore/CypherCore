@@ -80,6 +80,7 @@ namespace Scripts.Spells.Priest
         public const uint VampiricTouchDispel = 64085;
         public const uint VoidShield = 199144;
         public const uint VoidShieldEffect = 199145;
+        public const uint WeakenedSoul = 6788;
 
         public const uint GenReplenishment = 57669;
     }
@@ -428,7 +429,7 @@ namespace Scripts.Spells.Priest
             AfterEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 47540 - Penance
     class spell_pri_penance : SpellScript
     {
@@ -568,7 +569,43 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    class spell_pri_power_word_shield : AuraScript
+    class spell_pri_power_word_shield : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WeakenedSoul);
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit caster = GetCaster();
+            Unit target = GetExplTargetUnit();
+            if (target != null)
+                if (!caster.HasAura(SpellIds.Rapture))
+                    if (target.HasAura(SpellIds.WeakenedSoul, caster.GetGUID()))
+                        return SpellCastResult.BadTargets;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleEffectHit()
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (target != null)
+                if (!caster.HasAura(SpellIds.Rapture))
+                    caster.CastSpell(target, SpellIds.WeakenedSoul, true);
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            AfterHit.Add(new HitHandler(HandleEffectHit));
+        }
+    }
+
+    [Script] // 17 - Power Word: Shield
+    class spell_pri_power_word_shield_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
