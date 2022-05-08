@@ -188,6 +188,47 @@ namespace Scripts.Spells.Paladin
                 unit.RemoveAura(SpellIds.AshenHallowAllowHammer);
         }
     }
+
+    [Script] // 248033 - Awakening
+    class spell_pal_awakening : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AvengingWrath)
+                && spellInfo.GetEffects().Count >= 1;
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            TimeSpan extraDuration = TimeSpan.Zero;
+            AuraEffect durationEffect = GetEffect(1);
+            if (durationEffect != null)
+            extraDuration = TimeSpan.FromSeconds(durationEffect.GetAmount());
+
+            Aura avengingWrath = GetTarget().GetAura(SpellIds.AvengingWrath);
+            if (avengingWrath != null)
+            {
+                avengingWrath.SetDuration((int)(avengingWrath.GetDuration() + extraDuration.TotalMilliseconds));
+                avengingWrath.SetMaxDuration((int)(avengingWrath.GetMaxDuration() + extraDuration.TotalMilliseconds));
+            }
+            else
+                GetTarget().CastSpell(GetTarget(), SpellIds.AvengingWrath,
+                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreSpellAndCategoryCD)
+                        .SetTriggeringSpell(eventInfo.GetProcSpell())
+                        .AddSpellMod(SpellValueMod.Duration, (int)extraDuration.TotalMilliseconds));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
     
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
