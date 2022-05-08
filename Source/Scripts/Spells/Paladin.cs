@@ -23,6 +23,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Scripts.Spells.Paladin
 {
@@ -76,6 +77,8 @@ namespace Scripts.Spells.Paladin
         public const uint HolyShock = 20473;
         public const uint HolyShockDamage = 25912;
         public const uint HolyShockHealing = 25914;
+        public const uint HolyLight = 82326;
+        public const uint InfusionOfLightEnergize = 356717;
         public const uint ImmuneShieldMarker = 61988;
         public const uint ItemHealingTrance = 37706;
         public const uint JudgmentGainHolyPower = 220637;
@@ -644,6 +647,42 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 54149 - Infusion of Light
+    class spell_pal_infusion_of_light : AuraScript
+    {
+        static FlagArray128 HolyLightSpellClassMask = new FlagArray128(0, 0, 0x400);
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.InfusionOfLightEnergize);
+        }
+
+        bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell().m_appliedMods.Contains(GetAura());
+        }
+
+        bool CheckHolyLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Paladin, HolyLightSpellClassMask);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.InfusionOfLightEnergize,
+                new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(eventInfo.GetProcSpell()));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 0, AuraType.AddPctModifier));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 2, AuraType.AddFlatModifier));
+
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 327193 - Moment of Glory
     class spell_pal_moment_of_glory : SpellScript
     {
