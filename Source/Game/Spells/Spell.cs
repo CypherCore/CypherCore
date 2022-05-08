@@ -4565,7 +4565,7 @@ namespace Game.Spells
                         return SpellCastResult.NotReady;
                 }
 
-                if (m_caster.IsUnit() && !m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry, IsIgnoringCooldowns()))
+                if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null && !m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
                 {
                     if (m_triggeredByAuraSpell != null)
                         return SpellCastResult.DontReport;

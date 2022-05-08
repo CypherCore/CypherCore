@@ -223,13 +223,13 @@ namespace Game.Spells
             StartCooldown(spellInfo, itemId, spell);
         }
 
-        public bool IsReady(SpellInfo spellInfo, uint itemId = 0, bool ignoreCategoryCooldown = false)
+        public bool IsReady(SpellInfo spellInfo, uint itemId = 0)
         {
             if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                 if (IsSchoolLocked(spellInfo.GetSchoolMask()))
                     return false;
 
-            if (HasCooldown(spellInfo, itemId, ignoreCategoryCooldown))
+            if (HasCooldown(spellInfo, itemId))
                 return false;
 
             if (!HasCharge(spellInfo.ChargeCategoryId))
@@ -630,18 +630,15 @@ namespace Game.Spells
             _spellCooldowns.Clear();
         }
 
-        public bool HasCooldown(uint spellId, uint itemId = 0, bool ignoreCategoryCooldown = false)
+        public bool HasCooldown(uint spellId, uint itemId = 0)
         {
-            return HasCooldown(Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID()), itemId, ignoreCategoryCooldown);
+            return HasCooldown(Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID()), itemId);
         }
 
-        public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0, bool ignoreCategoryCooldown = false)
+        public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0)
         {
             if (_spellCooldowns.ContainsKey(spellInfo.Id))
                 return true;
-
-            if (ignoreCategoryCooldown)
-                return false;
 
             uint category = 0;
             GetCooldownDurations(spellInfo, itemId, ref category);
