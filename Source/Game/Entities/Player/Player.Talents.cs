@@ -86,7 +86,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (talent.OverridesSpellID != 0)
+            if (spec == GetActiveTalentGroup() && talent.OverridesSpellID != 0)
                 AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
 
             if (GetTalentMap(spec).ContainsKey(talent.Id))
