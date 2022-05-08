@@ -25,6 +25,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Game.AI;
 
 namespace Scripts.Spells.Mage
 {
@@ -39,8 +40,11 @@ namespace Scripts.Spells.Mage
         public const uint ArcaneMage = 137021;
         public const uint BlazingBarrierTrigger = 235314;
         public const uint Blink = 1953;
+        public const uint BlizzardDamage = 190357;
+        public const uint BlizzardSlow = 12486;
         public const uint Cauterized = 87024;
         public const uint CauterizeDot = 87023;
+        public const uint Chilled = 205708;
         public const uint CometStormDamage = 153596;
         public const uint CometStormVisual = 228601;
         public const uint ConeOfCold = 120;
@@ -71,7 +75,6 @@ namespace Scripts.Spells.Mage
         public const uint SquirrelForm = 32813;
         public const uint TemporalDisplacement = 80354;
         public const uint WorgenForm = 32819;
-        public const uint Chilled = 205708;
         public const uint IceLanceTrigger = 228598;
         public const uint ThermalVoid = 155149;
         public const uint IcyVeins = 12472;
@@ -290,6 +293,51 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    // 190356 - Blizzard
+    [Script] // 4658 - AreaTrigger Create Properties
+    class areatrigger_mage_blizzard : AreaTriggerAI
+    {
+        TimeSpan _tickTimer;
+
+        public areatrigger_mage_blizzard(AreaTrigger areatrigger) : base(areatrigger)
+        {
+            _tickTimer = TimeSpan.FromMilliseconds(1000);
+        }
+
+        public override void OnUpdate(uint diff)
+        {
+            _tickTimer -= TimeSpan.FromMilliseconds(diff);
+
+            while (_tickTimer <= TimeSpan.Zero)
+            {
+                Unit caster = at.GetCaster();
+                if (caster != null)
+                    caster.CastSpell(at.GetPosition(), SpellIds.BlizzardDamage, new CastSpellExtraArgs());
+
+                _tickTimer += TimeSpan.FromMilliseconds(1000);
+            }
+        }
+    }
+
+    [Script] // 190357 - Blizzard (Damage)
+    class spell_mage_blizzard_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlizzardSlow);
+        }
+
+        void HandleSlow(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.BlizzardSlow, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 198063 - Burning Determination
     class spell_mage_burning_determination : AuraScript
     {
@@ -597,6 +645,27 @@ namespace Scripts.Spells.Mage
         public override void Register()
         {
             DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
+        }
+    }
+
+    [Script] // 116 - Frostbolt
+    class spell_mage_frostbolt : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.Chilled);
+        }
+
+        void HandleChilled()
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+                GetCaster().CastSpell(target, SpellIds.Chilled, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new HitHandler(HandleChilled));
         }
     }
     
@@ -1124,27 +1193,6 @@ namespace Scripts.Spells.Mage
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-        }
-    }
-
-    [Script] //228597 - Frostbolt   84721  - Frozen Orb   190357 - Blizzard
-    class spell_mage_trigger_chilled : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.Chilled);
-        }
-
-        void HandleChilled()
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                GetCaster().CastSpell(target, SpellIds.Chilled, true);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleChilled));
         }
     }
 
