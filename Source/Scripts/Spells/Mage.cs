@@ -406,27 +406,24 @@ namespace Scripts.Spells.Mage
     [Script] // 235219 - Cold Snap
     class spell_mage_cold_snap : SpellScript
     {
+        static uint[] SpellsToReset =
+        {
+            SpellIds.ConeOfCold,
+            SpellIds.IceBarrier,
+            SpellIds.IceBlock
+        };
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ConeOfCold, SpellIds.FrostNova, SpellIds.IceBarrier, SpellIds.IceBlock);
+            return ValidateSpellInfo(SpellsToReset) && ValidateSpellInfo(SpellIds.FrostNova);
         }
 
         void HandleDummy(uint effIndex)
         {
-            GetCaster().GetSpellHistory().ResetCooldowns(p =>
-            {
-                switch (p.Key)
-                {
-                    case SpellIds.ConeOfCold:
-                    case SpellIds.FrostNova:
-                    case SpellIds.IceBarrier:
-                    case SpellIds.IceBlock:
-                        return true;
-                    default:
-                        break;
-                }
-                return false;
-            }, true);
+            foreach (uint spellId in SpellsToReset)
+                GetCaster().GetSpellHistory().ResetCooldown(spellId, true);
+
+            GetCaster().GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.FrostNova, GetCastDifficulty()).ChargeCategoryId);
         }
 
         public override void Register()
