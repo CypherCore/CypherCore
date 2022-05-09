@@ -58,6 +58,7 @@ namespace Scripts.Spells.Priest
         public const uint PenanceR1 = 47540;
         public const uint PenanceR1Damage = 47758;
         public const uint PenanceR1Heal = 47757;
+        public const uint PowerWordSolaceEnergize = 129253;
         public const uint PrayerOfMendingAura = 41635;
         public const uint PrayerOfMendingHeal = 33110;
         public const uint PrayerOfMendingJump = 155793;
@@ -678,6 +679,27 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 129250 - Power Word: Solace
+    class spell_pri_power_word_solace : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerWordSolaceEnergize);
+        }
+
+        void RestoreMana(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.PowerWordSolaceEnergize,
+                new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell())
+                    .AddSpellMod(SpellValueMod.BasePoint0, GetEffectValue() / 100));
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunch.Add(new EffectHandler(RestoreMana, 1, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 33076 - Prayer of Mending
     class spell_pri_prayer_of_mending : SpellScript
     {
