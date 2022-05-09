@@ -3814,6 +3814,12 @@ namespace Game.Maps
             i_worldObjects.Remove(obj);
         }
 
+        public void DoOnPlayers(Action<Player> action)
+        {
+            foreach (var player in GetPlayers())
+                action(player);
+        }
+
         public List<Player> GetPlayers()
         {
             return m_activePlayers;

@@ -360,17 +360,18 @@ namespace Game.Maps
                     switch (state)
                     {
                         case EncounterState.InProgress:
-                            {
-                                uint resInterval = GetCombatResurrectionChargeInterval();
-                                InitializeCombatResurrections(1, resInterval);
-                                SendEncounterStart(1, 9, resInterval, resInterval);
+                        {
+                            uint resInterval = GetCombatResurrectionChargeInterval();
+                            InitializeCombatResurrections(1, resInterval);
+                            SendEncounterStart(1, 9, resInterval, resInterval);
 
-                                var playerList = instance.GetPlayers();
-                                foreach (var player in playerList)
-                                        if (player.IsAlive())
-                                            Unit.ProcSkillsAndAuras(player, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-                                break;
-                            }
+                            instance.DoOnPlayers(player =>
+                            {
+                                if (player.IsAlive())
+                                    Unit.ProcSkillsAndAuras(player, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                            });
+                            break;
+                        }
                         case EncounterState.Fail:
                         case EncounterState.Done:
                             ResetCombatResurrections();
@@ -577,70 +578,38 @@ namespace Game.Maps
         }
 
         public void DoUpdateWorldState(uint uiStateId, uint uiStateData)
-        {
-            var lPlayers = instance.GetPlayers();
-
-            if (!lPlayers.Empty())
-            {
-                foreach (var player in lPlayers)
-                    player.SendUpdateWorldState(uiStateId, uiStateData);
-            }
-            else
-                Log.outDebug(LogFilter.Scripts, "DoUpdateWorldState attempt send data but no players in map.");
+        {            
+            instance.DoOnPlayers(player => player.SendUpdateWorldState(uiStateId, uiStateData));
         }
 
         // Send Notify to all players in instance
         void DoSendNotifyToInstance(string format, params object[] args)
         {
-            var players = instance.GetPlayers();
-
-            if (!players.Empty())
-            {
-                foreach (var player in players)
-                {
-                    WorldSession session = player.GetSession();
-                    if (session != null)
-                        session.SendNotification(format, args);
-                }
-            }
+            instance.DoOnPlayers(player => player.GetSession()?.SendNotification(format, args));
         }
 
         // Update Achievement Criteria for all players in instance
         public void DoUpdateCriteria(CriteriaType type, uint miscValue1 = 0, uint miscValue2 = 0, Unit unit = null)
         {
-            var PlayerList = instance.GetPlayers();
-
-            if (!PlayerList.Empty())
-                foreach (var player in PlayerList)
-                    player.UpdateCriteria(type, miscValue1, miscValue2, 0, unit);
+            instance.DoOnPlayers(player => player.UpdateCriteria(type, miscValue1, miscValue2, 0, unit));
         }
 
         // Start timed achievement for all players in instance
         public void DoStartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
-            var PlayerList = instance.GetPlayers();
-
-            if (!PlayerList.Empty())
-                foreach (var player in PlayerList)
-                    player.StartCriteriaTimer(startEvent, entry);
+            instance.DoOnPlayers(player => player.StartCriteriaTimer(startEvent, entry));
         }
 
         // Stop timed achievement for all players in instance
         public void DoStopCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
-            var PlayerList = instance.GetPlayers();
-
-            if (!PlayerList.Empty())
-                foreach (var player in PlayerList)
-                    player.RemoveCriteriaTimer(startEvent, entry);
+            instance.DoOnPlayers(player => player.RemoveCriteriaTimer(startEvent, entry));
         }
 
         // Remove Auras due to Spell on all players in instance
         public void DoRemoveAurasDueToSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {
-            var playerList = instance.GetPlayers();
-            foreach (var player in playerList)
-                DoRemoveAurasDueToSpellOnPlayer(player, spell, includePets, includeControlled);
+            instance.DoOnPlayers(player => DoRemoveAurasDueToSpellOnPlayer(player, spell, includePets, includeControlled));
         }
 
         public void DoRemoveAurasDueToSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
@@ -679,9 +648,7 @@ namespace Game.Maps
         // Cast spell on all players in instance
         public void DoCastSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {
-            var playerList = instance.GetPlayers();
-            foreach (var player in playerList)
-                DoCastSpellOnPlayer(player, spell, includePets, includeControlled);
+            instance.DoOnPlayers(player => DoCastSpellOnPlayer(player, spell, includePets, includeControlled));
         }
 
         public void DoCastSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
@@ -816,7 +783,7 @@ namespace Game.Maps
                     if (encounter.lastEncounterDungeon != 0)
                     {
                         dungeonId = encounter.lastEncounterDungeon;
-                        Log.outDebug(LogFilter.Lfg, "UpdateEncounterState: Instance {0} (instanceId {1}) completed encounter {2}. Credit Dungeon: {3}", 
+                        Log.outDebug(LogFilter.Lfg, "UpdateEncounterState: Instance {0} (instanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
                             instance.GetMapName(), instance.GetInstanceId(), encounter.dbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()], dungeonId);
                         break;
                     }
@@ -841,9 +808,7 @@ namespace Game.Maps
 
         void UpdatePhasing()
         {
-            var players = instance.GetPlayers();
-            foreach (var player in players)
-                PhasingHandler.SendToPlayer(player);
+            instance.DoOnPlayers(player => PhasingHandler.SendToPlayer(player));
         }
 
         public void UpdateCombatResurrection(uint diff)
@@ -942,7 +907,7 @@ namespace Game.Maps
         public void MarkAreaTriggerDone(uint id) { _activatedAreaTriggers.Add(id); }
         public void ResetAreaTriggerDone(uint id) { _activatedAreaTriggers.Remove(id); }
         public bool IsAreaTriggerDone(uint id) { return _activatedAreaTriggers.Contains(id); }
-        
+
         public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         public int GetEncounterCount() { return bosses.Count; }
