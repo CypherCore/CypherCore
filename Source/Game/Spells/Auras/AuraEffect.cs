@@ -5182,7 +5182,7 @@ namespace Game.Spells
             caster.HealBySpell(healInfo);
 
             caster.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
-            Unit.ProcSkillsAndAuras(caster, caster, new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic), new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic), ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
+            Unit.ProcSkillsAndAuras(caster, caster, new ProcFlagsInit(ProcFlags.DealHelpfulPeriodic), new ProcFlagsInit(ProcFlags.TakeHelpfulPeriodic), ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
 
             caster.SendSpellNonMeleeDamageLog(log);
         }
@@ -5271,8 +5271,8 @@ namespace Game.Spells
             if (GetAuraType() == AuraType.ObsModHealth)
                 return;
 
-            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic);
-            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic);
+            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHelpfulPeriodic);
+            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHelpfulPeriodic);
             ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
             // ignore item heals
             if (GetBase().GetCastItemGUID().IsEmpty())
