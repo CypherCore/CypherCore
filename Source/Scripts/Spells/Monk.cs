@@ -32,6 +32,9 @@ namespace Scripts.Spells.Monk
         public const uint CracklingJadeLightningKnockbackCd = 117953;
         public const uint ProvokeSingleTarget = 116189;
         public const uint ProvokeAoe = 118635;
+        public const uint NoFeatherFall = 79636;
+        public const uint RollBackward = 109131;
+        public const uint RollForward = 107427;
         public const uint SoothingMist = 115175;
         public const uint StanceOfTheSpiritedCrane = 154436;
         public const uint StaggerDamageAura = 124255;
@@ -142,9 +145,73 @@ namespace Scripts.Spells.Monk
         }
     }
 
-    //static constexpr SpellEffIndex AuraStaggerEffectTick = EFFECT_0;
-    //static constexpr SpellEffIndex AuraStaggerEffectTotal = EFFECT_1;
+    [Script] // 109132 - Roll
+    class spell_monk_roll : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RollBackward, SpellIds.RollForward, SpellIds.NoFeatherFall);
+        }
 
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster().HasUnitState(UnitState.Root))
+                return SpellCastResult.Rooted;
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), GetCaster().HasUnitMovementFlag(MovementFlag.Backward) ? SpellIds.RollBackward : SpellIds.RollForward,
+               new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+            GetCaster().CastSpell(GetCaster(), SpellIds.NoFeatherFall, true);
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 107427 - Roll
+    [Script] // 109131 - Roll (backward)
+    class spell_monk_roll_aura : AuraScript
+    {
+        void CalcMovementAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            amount += 100;
+        }
+
+        void CalcImmunityAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            amount -= 100;
+        }
+
+        void ChangeRunBackSpeed(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().SetSpeed(UnitMoveType.RunBack, GetTarget().GetSpeed(UnitMoveType.Run));
+        }
+
+        void RestoreRunBackSpeed(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().UpdateSpeed(UnitMoveType.RunBack);
+        }
+
+        public override void Register()
+        {
+            // Values need manual correction
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
+
+            // This is a special aura that sets backward run speed equal to forward speed
+            AfterEffectApply.Add(new EffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 115069 - Stagger
     class spell_monk_stagger : AuraScript
     {
