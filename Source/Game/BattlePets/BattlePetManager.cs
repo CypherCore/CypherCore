@@ -689,17 +689,6 @@ namespace Game.BattlePets
             List<BattlePet> updates = new();
             updates.Add(pet);
             SendUpdates(updates, false);
-
-            // Update battle pet related update fields
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-            {
-                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                {
-                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
-                    player.SetBattlePetData(pet);
-                }
-            }
         }
 
         public void GrantBattlePetLevel(ObjectGuid guid, ushort grantedLevels)
@@ -720,14 +709,12 @@ namespace Game.BattlePets
             if (level >= SharedConst.MaxBattlePetLevel)
                 return;
 
-            Player player = _owner.GetPlayer();
-
             while (grantedLevels > 0 && level < SharedConst.MaxBattlePetLevel)
             {
                 ++level;
                 --grantedLevels;
 
-                player.UpdateCriteria(CriteriaType.BattlePetReachLevel, pet.PacketInfo.Species, level);
+                _owner.GetPlayer().UpdateCriteria(CriteriaType.BattlePetReachLevel, pet.PacketInfo.Species, level);
             }
 
             pet.PacketInfo.Level = level;
@@ -742,17 +729,6 @@ namespace Game.BattlePets
             List<BattlePet> updates = new List<BattlePet>();
             updates.Add(pet);
             SendUpdates(updates, false);
-
-            // Update battle pet related update fields
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-            {
-                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                {
-                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
-                    player.SetBattlePetData(pet);
-                }
-            }
         }
 
         public void HealBattlePetsPct(byte pct)
@@ -775,6 +751,26 @@ namespace Game.BattlePets
             }
 
             SendUpdates(updates, false);
+        }
+
+        public void UpdateBattlePetData(ObjectGuid guid)
+        {
+            BattlePet pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            Player player = _owner.GetPlayer();
+
+            // Update battle pet related update fields
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet != null)
+            {
+                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                {
+                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
+                    player.SetBattlePetData(pet);
+                }
+            }
         }
 
         public void SummonPet(ObjectGuid guid)

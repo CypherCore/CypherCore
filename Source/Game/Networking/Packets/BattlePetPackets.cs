@@ -301,7 +301,18 @@ namespace Game.Networking.Packets
         public ObjectGuid PetGuid;
     }
 
+    class BattlePetUpdateNotify : ClientPacket
+    {
+        public ObjectGuid PetGuid;
 
+        public BattlePetUpdateNotify(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGuid = _worldPacket.ReadPackedGuid();
+        }
+    }
+    
     //Structs
     public struct BattlePetStruct
     {

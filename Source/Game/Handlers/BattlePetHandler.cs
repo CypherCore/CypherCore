@@ -146,5 +146,11 @@ namespace Game
             else
                 GetBattlePetMgr().DismissPet();
         }
+
+        [WorldPacketHandler(ClientOpcodes.BattlePetUpdateNotify)]
+        void HandleBattlePetUpdateNotify(BattlePetUpdateNotify battlePetUpdateNotify)
+        {
+            GetBattlePetMgr().UpdateBattlePetData(battlePetUpdateNotify.PetGuid);
+        }
     }
 }
