@@ -8916,7 +8916,7 @@ namespace Game.Spells
                             Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
 
                         // re-plan the event for the delay moment
-                        m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(e_time + m_Spell.GetDelayMoment()), false);
+                        m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(e_time + n_offset), false);
                         return false;                               // event not complete
                     }
                     break;
