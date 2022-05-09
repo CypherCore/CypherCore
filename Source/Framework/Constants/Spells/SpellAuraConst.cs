@@ -457,7 +457,7 @@ namespace Framework.Constants
         Unk433 = 433,
         Unk434 = 434,
         Unk435 = 435,
-        ModEnvironmentalDamageTaken = 436, // NYI
+        ModEnvironmentalDamageTaken = 436,
         ModMinimumSpeedRate = 437,
         PreloadPhase = 438, // NYI
         Unk439 = 439,

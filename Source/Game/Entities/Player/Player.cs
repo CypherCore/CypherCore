@@ -3995,6 +3995,8 @@ namespace Game.Entities
             if (IsImmuneToEnvironmentalDamage())
                 return 0;
 
+            damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModEnvironmentalDamageTaken));
+
             // Absorb, resist some environmental damage type
             uint absorb = 0;
             uint resist = 0;
