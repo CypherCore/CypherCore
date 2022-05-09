@@ -1009,8 +1009,22 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 15286 - Vampiric Embrace
-    [Script]
+    // 109142 - Twist of Fate (Shadow)
+    [Script] // 265259 - Twist of Fate (Discipline)
+    class spell_pri_twist_of_fate : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget().GetHealthPct() < aurEff.GetAmount();
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+    
+    [Script] // 15286 - Vampiric Embrace
     class spell_pri_vampiric_embrace : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
