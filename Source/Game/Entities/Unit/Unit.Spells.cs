@@ -89,7 +89,7 @@ namespace Game.Entities
             }
 
             int DoneTotal = 0;
-            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype);
+            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
 
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
@@ -154,7 +154,7 @@ namespace Game.Entities
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
-        public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype)
+        public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo)
         {
             if (spellProto == null || !victim || damagetype == DamageEffectType.Direct)
                 return 1.0f;
@@ -172,7 +172,7 @@ namespace Game.Entities
             {
                 Unit owner = GetOwner();
                 if (owner != null)
-                    return owner.SpellDamagePctDone(victim, spellProto, damagetype);
+                    return owner.SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
             }
 
             // Done total percent damage auras
@@ -215,7 +215,10 @@ namespace Game.Entities
             });
 
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
-            MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
+            if (spellEffectInfo.Mechanic != 0)
+                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
+            else if (spellProto.Mechanic != 0)
+                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
             // Custom scripted damage
             switch (spellProto.SpellFamilyName)
