@@ -55,9 +55,9 @@ namespace Scripts.Spells.Priest
         public const uint MasteryGrace = 271534;
         public const uint MindBombStun = 226943;
         public const uint OracularHeal = 26170;
-        public const uint PenanceR1 = 47540;
-        public const uint PenanceR1Damage = 47758;
-        public const uint PenanceR1Heal = 47757;
+        public const uint Penance = 47540;
+        public const uint PenanceChannelDamage = 47758;
+        public const uint PenanceChannelHealing = 47757;
         public const uint PowerWordSolaceEnergize = 129253;
         public const uint PrayerOfMendingAura = 41635;
         public const uint PrayerOfMendingHeal = 33110;
@@ -434,51 +434,14 @@ namespace Scripts.Spells.Priest
     [Script] // 47540 - Penance
     class spell_pri_penance : SpellScript
     {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PenanceR1, Difficulty.None);
-            if (firstRankSpellInfo == null)
-                return false;
-
-            // can't use other spell than this penance due to spell_ranks dependency
-            if (!spellInfo.IsRankOf(firstRankSpellInfo))
-                return false;
-
-            byte rank = spellInfo.GetRank();
-            if (Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Damage, rank, true) == 0)
-                return false;
-            if (Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Heal, rank, true) == 0)
-                return false;
-
-            return true;
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
-            if (target)
-            {
-                if (!target.IsAlive())
-                    return;
-
-                byte rank = GetSpellInfo().GetRank();
-
-                if (caster.IsFriendlyTo(target))
-                    caster.CastSpell(target, Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Heal, rank), false);
-                else
-                    caster.CastSpell(target, Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Damage, rank), false);
-            }
+            return ValidateSpellInfo(SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing);
         }
 
         SpellCastResult CheckCast()
         {
-            Player caster = GetCaster().ToPlayer();
+            Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
             if (target)
             {
@@ -494,10 +457,23 @@ namespace Scripts.Spells.Priest
             return SpellCastResult.SpellCastOk;
         }
 
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (target)
+            {
+                if (caster.IsFriendlyTo(target))
+                    caster.CastSpell(target, SpellIds.PenanceChannelHealing, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+                else
+                    caster.CastSpell(target, SpellIds.PenanceChannelDamage, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+            }
+        }
+
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
             OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
