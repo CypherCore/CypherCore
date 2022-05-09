@@ -801,7 +801,7 @@ namespace Game.Entities
             float missChance = victim.GetUnitMissChance();
 
             // melee attacks while dual wielding have +19% chance to miss
-            if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm())
+            if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm() && !HasAuraType(AuraType.IgnoreDualWieldHitPenalty))
                 missChance += 19.0f;
 
             // Spellmod from SpellModOp.HitChance
