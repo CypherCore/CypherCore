@@ -2585,6 +2585,9 @@ namespace Game.Entities
                 }
             }
 
+            if (spellProto != null && spellProto.HasAttribute(SpellAttr3.NoDurabilityLoss))
+                durabilityLoss = false;
+
             if (killed)
                 Kill(attacker, victim, durabilityLoss, skipSettingDeathState);
             else
@@ -2609,7 +2612,7 @@ namespace Game.Entities
                 else                                                // victim is a player
                 {
                     // random durability for items (HIT TAKEN)
-                    if (WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage) > RandomHelper.randChance())
+                    if (durabilityLoss && WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage) > RandomHelper.randChance())
                     {
                         byte slot = (byte)RandomHelper.IRand(0, EquipmentSlot.End - 1);
                         victim.ToPlayer().DurabilityPointLossForEquipSlot(slot);
@@ -2619,7 +2622,7 @@ namespace Game.Entities
                 if (attacker != null && attacker.IsPlayer())
                 {
                     // random durability for items (HIT DONE)
-                    if (RandomHelper.randChance(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage)))
+                    if (durabilityLoss && RandomHelper.randChance(WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossDamage)))
                     {
                         byte slot = (byte)RandomHelper.IRand(0, EquipmentSlot.End - 1);
                         attacker.ToPlayer().DurabilityPointLossForEquipSlot(slot);

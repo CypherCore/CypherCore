@@ -1683,7 +1683,7 @@ namespace Framework.Constants
         Unk2 = 0x04, //  2
         BlockableSpell = 0x08, //  3 Only Dmg Class Melee In 3.1.3
         IgnoreResurrectionTimer = 0x10, //  4 You Don'T Have To Wait To Be Resurrected With These Spells
-        Unk5 = 0x20, //  5
+        NoDurabilityLoss = 0x20, //  5 No Durability Loss
         Unk6 = 0x40, //  6
         StackForDiffCasters = 0x80, //  7 Separate Stack For Every Caster
         OnlyTargetPlayers = 0x100, //  8 Can Only Target Players
