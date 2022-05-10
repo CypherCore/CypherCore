@@ -357,7 +357,10 @@ namespace Framework.Constants
         AscensionCrafting = 2791,
         PetMammoth = 2805,
         PetCourser = 2806,
-        PetCamel = 2807
+        PetCamel = 2807,
+        StygiaCrafting = 2811,
+        LanguageCypher = 2817,
+        PhotoformSynthesis = 2819,
     }
 
     public enum SkillState

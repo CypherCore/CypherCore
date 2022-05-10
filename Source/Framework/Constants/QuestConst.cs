@@ -294,7 +294,14 @@ namespace Framework.Constants
         AbominableStitching = 593,
         TimewalkingCampaign = 594,
         PathOfAscension = 595,
-        LegendaryCrafting = 596
+        LegendaryCrafting = 596,
+        Campaign91 = 600,
+        CyphersOfTheFirstOnes = 601,
+        ZerethMortisCampaign = 602,
+        TheArchivistsCodex = 603,
+        CovenantAssaults = 604,
+        ProtoformSynthesis = 606,
+        Ch6SymbolTracking = 607,
     }
 
     public enum QuestFailedReasons

@@ -1342,6 +1342,16 @@ namespace Framework.Constants
         YouMustBeAMemberOfTheVenthyrCovenantOrHaveReachedRenown80WithTheVenthyr = 622, // You Must Be A Member Of The Venthyr Covenant Or Have Reached Renown 80 With The Venthyr.
         YouAlreadyHaveThatMuchRenownWithYourActiveCovenant = 627, // You Already Have That Much Renown With Your Active Covenant.
         CannotExceedTheMaximumForThatCurrency = 628, // Cannot Exceed The Maximum For That Currency.
+        RequiresAdditionalCosmicEnergy = 629, // Requires Additional Cosmic Energy.
+        RequiresArchitect = 630, // Requires Architect.
+        YouMustBeSittingToDoThat = 631, // You Must Be Sitting To Do That.
+        RequiresPollenCloud = 632, // Requires Pollen Cloud.
+        Requires5LostOvoids = 633, // Requires 5 Lost Ovoids.
+        YouHaveTooManyTemporaryEnhancements = 634, // You Have Too Many Temporary Enhancements.
+        YouHaveOtherWaysToSummonPocopoc = 635, // You Have Other Ways To Summon Pocopoc While In Zereth Mortis.
+        RequiresMoreSyllabicRecall = 636, // Requires More Syllabic Recall.
+        ThisBattlePetCannotRideOnMagicSaucer = 637, // This Battle Pet Is Unable To Ride On The Magic Saucer.
+        PocopocIsUnavailableOnQuestline = 640, // Pocopoc Is Unavailable To Summon During The Questline A Means To An End.
     }
 
     public enum SpellMissInfo

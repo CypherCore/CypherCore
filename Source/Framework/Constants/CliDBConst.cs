@@ -2074,7 +2074,11 @@ namespace Framework.Constants
         Alliance = 519,
         Horde = 520,
         Meow = 521,
-        Boop = 522
+        Boop = 522,
+        Wince = 623,
+        Huzzah = 624,
+        Impressed = 625,
+        Magnificent = 626,
     }
 
     public enum ExpectedStatType : byte

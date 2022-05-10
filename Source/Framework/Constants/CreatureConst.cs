@@ -359,7 +359,8 @@ namespace Framework.Constants
         BloodBeast = 296,
         Camel = 298,
         Courser = 299,
-        Mammoth = 300
+        Mammoth = 300,
+        Incubus = 302
     }
 
     public enum InhabitType
