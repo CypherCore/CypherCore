@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Networking.Packets;
 using Game.Scripting;
 
 namespace Game.DungeonFinding
@@ -84,12 +85,14 @@ namespace Game.DungeonFinding
                     return;
                 }
 
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                QueryPlayerNameResponse response = new();
+                foreach (MemberSlot memberSlot in group.GetMemberSlots())
                 {
-                    Player member = refe.GetSource();
-                    if (member)
-                        player.GetSession().SendNameQuery(member.GetGUID());
+                    player.GetSession().BuildNameQueryData(memberSlot.guid, out NameCacheLookupResult nameCacheLookupResult);
+                    response.Players.Add(nameCacheLookupResult);
                 }
+                
+                player.SendPacket(response);
 
                 if (Global.LFGMgr.SelectedRandomLfgDungeon(player.GetGUID()))
                     player.CastSpell(player, SharedConst.LFGSpellLuckOfTheDraw, true);

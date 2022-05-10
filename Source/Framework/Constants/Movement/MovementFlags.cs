@@ -93,4 +93,11 @@ namespace Framework.Constants
         InterpolatedTurning = 0x40000,
         InterpolatedPitching = 0x80000
     }
+
+    [Flags]
+    public enum MovementFlags3
+    {
+        None = 0x00,
+        DisableInertia = 0x01,
+    }
 }

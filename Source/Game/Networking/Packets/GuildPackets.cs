@@ -44,7 +44,6 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WritePackedGuid(PlayerGuid);
             _worldPacket.WriteBit(HasGuildInfo);
             _worldPacket.FlushBits();
 
@@ -76,7 +75,6 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid GuildGUID;
-        public ObjectGuid PlayerGuid;
         public GuildInfo Info = new();
         public bool HasGuildInfo;
 

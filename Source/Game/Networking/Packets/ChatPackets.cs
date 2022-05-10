@@ -281,7 +281,8 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteUInt32(EmoteID);
             _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
-            
+            _worldPacket.WriteInt32(SequenceVariation);
+
             foreach (var id in SpellVisualKitIDs)
                 _worldPacket.WriteUInt32(id);
         }
@@ -289,6 +290,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public uint EmoteID;
         public List<uint> SpellVisualKitIDs = new();
+        public int SequenceVariation;
     }
 
     public class CTextEmote : ClientPacket
@@ -302,6 +304,7 @@ namespace Game.Networking.Packets
             SoundIndex = _worldPacket.ReadInt32();
 
             SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
+            SequenceVariation = _worldPacket.ReadInt32();
             for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
                 SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
         }
@@ -310,6 +313,7 @@ namespace Game.Networking.Packets
         public int EmoteID;
         public int SoundIndex;
         public uint[] SpellVisualKitIDs;
+        public int SequenceVariation;
     }
 
     public class STextEmote : ServerPacket

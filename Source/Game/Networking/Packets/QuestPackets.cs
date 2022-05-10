@@ -850,8 +850,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteInt32(UiTextureKitID);
             _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteUInt32(CloseUISoundKitID);
             _worldPacket.WriteUInt8(NumRerolls);
+            _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
+            _worldPacket.WriteBits(PendingChoiceText.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.WriteBit(HideWarboardHeader);
             _worldPacket.WriteBit(KeepOpenAfterChoice);
@@ -861,14 +864,18 @@ namespace Game.Networking.Packets
                 response.Write(_worldPacket);
 
             _worldPacket.WriteString(Question);
+            _worldPacket.WriteString(PendingChoiceText);
         }
 
         public ObjectGuid SenderGUID;
         public int ChoiceID;
         public int UiTextureKitID;
         public uint SoundKitID;
+        public uint CloseUISoundKitID;
         public byte NumRerolls;
+        public long Duration;
         public string Question;
+        public string PendingChoiceText;
         public List<PlayerChoiceResponse> Responses = new();
         public bool CloseChoiceFrame;
         public bool HideWarboardHeader;
@@ -1278,8 +1285,8 @@ namespace Game.Networking.Packets
     {
         public int Unused901_1;
         public int TypeArtFileID;
-        public int Rarity;
-        public uint RarityColor;
+        public int? Rarity;
+        public uint? RarityColor;
         public int Unused901_2;
         public int SpellID;
         public int MaxStacks;
@@ -1288,11 +1295,18 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Unused901_1);
             data.WriteInt32(TypeArtFileID);
-            data.WriteInt32(Rarity);
-            data.WriteUInt32(RarityColor);
             data.WriteInt32(Unused901_2);
             data.WriteInt32(SpellID);
             data.WriteInt32(MaxStacks);
+            data.WriteBit(Rarity.HasValue);
+            data.WriteBit(RarityColor.HasValue);
+            data.FlushBits();
+
+            if (Rarity.HasValue)
+                data.WriteInt32(Rarity.Value);
+
+            if (RarityColor.HasValue)
+                data.WriteUInt32(RarityColor.Value);
         }
     }
 

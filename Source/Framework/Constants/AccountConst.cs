@@ -31,12 +31,13 @@ namespace Framework.Constants
         PerCharacterTtsCache = 9,
         GlobalFlaggedCache = 10,
         PerCharacterFlaggedCache = 11,
+        PerCharacterClickBindingsCache = 12,
 
-        Max = 12,
+        Max = 13,
 
-        AllAccountDataCacheMask = 0xFFF,
+        AllAccountDataCacheMask = 0x1FFF,
         GlobalCacheMask = 0x515,
-        PerCharacterCacheMask = 0xAEA
+        PerCharacterCacheMask = 0x1AEA
     }
 
     public enum TutorialAction

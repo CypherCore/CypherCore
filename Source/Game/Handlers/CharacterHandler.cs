@@ -763,10 +763,10 @@ namespace Game
             // Send PVPSeason
             {
                 SeasonInfo seasonInfo = new();
-                seasonInfo.PreviousSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
+                seasonInfo.MythicPlusMilestoneSeasonID = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
-                    seasonInfo.CurrentSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
+                    seasonInfo.PreviousArenaSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
 
                 SendPacket(seasonInfo);
             }

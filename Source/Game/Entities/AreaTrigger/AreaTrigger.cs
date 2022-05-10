@@ -370,6 +370,9 @@ namespace Game.Entities
                 case AreaTriggerTypes.Cylinder:
                     SearchUnitInCylinder(targetList);
                     break;
+                case AreaTriggerTypes.Disk:
+                    SearchUnitInDisk(targetList);
+                    break;
                 default:
                     break;
             }
@@ -450,6 +453,18 @@ namespace Game.Entities
             float maxZ = GetPositionZ() + height;
 
             targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
+        }
+
+        void SearchUnitInDisk(List<Unit> targetList)
+        {
+            SearchUnits(targetList, GetMaxSearchRadius(), false);
+
+            float innerRadius = _shape.DiskDatas.InnerRadius;
+            float height = _shape.DiskDatas.Height;
+            float minZ = GetPositionZ() - height;
+            float maxZ = GetPositionZ() + height;
+
+            targetList.RemoveAll(unit => unit.IsInDist2d(this, innerRadius) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
         void HandleUnitEnterExit(List<Unit> newTargetList)

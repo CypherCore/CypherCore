@@ -144,10 +144,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ObjectGUID);
             _worldPacket.WriteInt32(UILink);
+            _worldPacket.WriteInt32(UIItemInteractionID);
         }
 
         public ObjectGuid ObjectGUID;
         public int UILink;
+        public int UIItemInteractionID;
     }
 
     class GameObjectPlaySpellVisual : ServerPacket

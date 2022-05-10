@@ -213,7 +213,7 @@ namespace Framework.Constants
         /// <summary>
         /// AreaTrigger Const
         /// </summary>
-        public const int MaxAreatriggerEntityData = 6;
+        public const int MaxAreatriggerEntityData = 8;
         public const int MaxAreatriggerScale = 7;
 
         /// <summary>

@@ -1219,24 +1219,23 @@ namespace Game.Entities
         public UpdateField<int> LookAtControllerID = new(96, 115);
         public UpdateField<int> TaxiNodesID = new(96, 116);
         public UpdateField<ObjectGuid> GuildGUID = new(96, 117);
-        public UpdateField<ObjectGuid> SkinningOwnerGUID = new(96, 118);
-        public UpdateField<uint> SilencedSchoolMask = new(96, 119);
-        public UpdateField<ObjectGuid> NameplateAttachToGUID = new(96, 120);                     // When set, nameplate of this unit will instead appear on that object
-        public UpdateFieldArray<uint> NpcFlags = new(2, 121, 122);
-        public UpdateFieldArray<int> Power = new(7, 124, 125);
-        public UpdateFieldArray<uint> MaxPower = new(7, 124, 132);
-        public UpdateFieldArray<float> PowerRegenFlatModifier = new(7, 124, 139);
-        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new(7, 124, 146);
-        public UpdateFieldArray<VisibleItem> VirtualItems = new(3, 153, 154);
-        public UpdateFieldArray<uint> AttackRoundBaseTime = new(2, 157, 158);
-        public UpdateFieldArray<int> Stats = new(4, 160, 161);
-        public UpdateFieldArray<int> StatPosBuff = new(4, 160, 165);
-        public UpdateFieldArray<int> StatNegBuff = new(4, 160, 169);
-        public UpdateFieldArray<int> Resistances = new(7, 173, 174);
-        public UpdateFieldArray<int> BonusResistanceMods = new(7, 173, 181);
-        public UpdateFieldArray<int> ManaCostModifier = new(7, 173, 188);
+        public UpdateField<uint> SilencedSchoolMask = new(96, 118);
+        public UpdateField<ObjectGuid> NameplateAttachToGUID = new(96, 119);                     // When set, nameplate of this unit will instead appear on that object
+        public UpdateFieldArray<uint> NpcFlags = new(2, 120, 121);
+        public UpdateFieldArray<int> Power = new(7, 123, 124);
+        public UpdateFieldArray<uint> MaxPower = new(7, 123, 131);
+        public UpdateFieldArray<float> PowerRegenFlatModifier = new(7, 123, 138);
+        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new(7, 123, 145);
+        public UpdateFieldArray<VisibleItem> VirtualItems = new(3, 152, 153);
+        public UpdateFieldArray<uint> AttackRoundBaseTime = new(2, 156, 157);
+        public UpdateFieldArray<int> Stats = new(4, 159, 160);
+        public UpdateFieldArray<int> StatPosBuff = new(4, 159, 164);
+        public UpdateFieldArray<int> StatNegBuff = new(4, 159, 168);
+        public UpdateFieldArray<int> Resistances = new(7, 172, 173);
+        public UpdateFieldArray<int> BonusResistanceMods = new(7, 172, 180);
+        public UpdateFieldArray<int> ManaCostModifier = new(7, 172, 187);
 
-        public UnitData() : base(0, TypeId.Unit, 195) { }
+        public UnitData() : base(0, TypeId.Unit, 194) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
@@ -1415,7 +1414,6 @@ namespace Game.Entities
             data.WriteInt32(PassiveSpells.Size());
             data.WriteInt32(WorldEffects.Size());
             data.WriteInt32(ChannelObjects.Size());
-            data.WritePackedGuid(SkinningOwnerGUID);
             data.WriteUInt32(SilencedSchoolMask);
             data.WritePackedGuid(NameplateAttachToGUID);
 
@@ -1431,7 +1429,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new(195, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0xFE0007FFu, 0x00000000u, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new(195, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x7F0003FFu, 0x00000000u, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -1439,16 +1437,16 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00002000u, 0x1E008000u, 0xFFE10000u, 0x1000007Eu, 0x01FFF800u, 0xFFFFFFFFu, 0x00000007u }));
+                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00002000u, 0x1E008000u, 0xFFE10000u, 0x0800007Eu, 0x80FFFC00u, 0xFFFFFFFFu, 0x00000003u }));
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x10000000u, 0x01FFF800u, 0x00000000u, 0x00000000u }));
+                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x08000000u, 0x00FFFC00u, 0x00000000u, 0x00000000u }));
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00000000u, 0x1E000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x001FE000u, 0x00000000u }));
+                allowedMaskForTarget.OR(new UpdateMask(195, new uint[] { 0x00000000u, 0x1E000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x000FF000u, 0x00000000u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new(195, new[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0xFE0007FFu, 0x00000000u, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new(195, new[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x7F0003FFu, 0x00000000u, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -1980,100 +1978,96 @@ namespace Game.Entities
                 }
                 if (changesMask[118])
                 {
-                    data.WritePackedGuid(SkinningOwnerGUID);
-                }
-                if (changesMask[119])
-                {
                     data.WriteUInt32(SilencedSchoolMask);
                 }
-                if (changesMask[120])
+                if (changesMask[119])
                 {
                     data.WritePackedGuid(NameplateAttachToGUID);
                 }
             }
-            if (changesMask[121])
+            if (changesMask[120])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[122 + i])
+                    if (changesMask[121 + i])
                     {
                         data.WriteUInt32(GetViewerDependentNpcFlags(this, i, owner, receiver));
                     }
                 }
             }
-            if (changesMask[124])
+            if (changesMask[123])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[125 + i])
+                    if (changesMask[124 + i])
                     {
                         data.WriteInt32(Power[i]);
                     }
-                    if (changesMask[132 + i])
+                    if (changesMask[131 + i])
                     {
                         data.WriteUInt32(MaxPower[i]);
                     }
-                    if (changesMask[139 + i])
+                    if (changesMask[138 + i])
                     {
                         data.WriteFloat(PowerRegenFlatModifier[i]);
                     }
-                    if (changesMask[146 + i])
+                    if (changesMask[145 + i])
                     {
                         data.WriteFloat(PowerRegenInterruptedFlatModifier[i]);
                     }
                 }
             }
-            if (changesMask[153])
+            if (changesMask[152])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (changesMask[154 + i])
+                    if (changesMask[153 + i])
                     {
                         VirtualItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[157])
+            if (changesMask[156])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[158 + i])
+                    if (changesMask[157 + i])
                     {
                         data.WriteUInt32(AttackRoundBaseTime[i]);
                     }
                 }
             }
-            if (changesMask[160])
+            if (changesMask[159])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[161 + i])
+                    if (changesMask[160 + i])
                     {
                         data.WriteInt32(Stats[i]);
                     }
-                    if (changesMask[165 + i])
+                    if (changesMask[164 + i])
                     {
                         data.WriteInt32(StatPosBuff[i]);
                     }
-                    if (changesMask[169 + i])
+                    if (changesMask[168 + i])
                     {
                         data.WriteInt32(StatNegBuff[i]);
                     }
                 }
             }
-            if (changesMask[173])
+            if (changesMask[172])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[174 + i])
+                    if (changesMask[173 + i])
                     {
                         data.WriteInt32(Resistances[i]);
                     }
-                    if (changesMask[181 + i])
+                    if (changesMask[180 + i])
                     {
                         data.WriteInt32(BonusResistanceMods[i]);
                     }
-                    if (changesMask[188 + i])
+                    if (changesMask[187 + i])
                     {
                         data.WriteInt32(ManaCostModifier[i]);
                     }
@@ -2197,7 +2191,6 @@ namespace Game.Entities
             ClearChangesMask(LookAtControllerID);
             ClearChangesMask(TaxiNodesID);
             ClearChangesMask(GuildGUID);
-            ClearChangesMask(SkinningOwnerGUID);
             ClearChangesMask(SilencedSchoolMask);
             ClearChangesMask(NameplateAttachToGUID);
             ClearChangesMask(NpcFlags);
@@ -5140,22 +5133,22 @@ namespace Game.Entities
     public class DynamicObjectData : BaseUpdateData<DynamicObject>
     {
         public UpdateField<ObjectGuid> Caster = new(0, 1);
-        public UpdateField<SpellCastVisualField> SpellVisual = new(0, 2);
-        public UpdateField<uint> SpellID = new(0, 3);
-        public UpdateField<float> Radius = new(0, 4);
-        public UpdateField<uint> CastTime = new(0, 5);
-        public UpdateField<byte> Type = new(0, 6);
+        public UpdateField<byte> Type = new(0, 2);
+        public UpdateField<SpellCastVisualField> SpellVisual = new(0, 3);
+        public UpdateField<uint> SpellID = new(0, 4);
+        public UpdateField<float> Radius = new(0, 5);
+        public UpdateField<uint> CastTime = new(0, 6);
 
         public DynamicObjectData() : base(0, TypeId.DynamicObject, 7) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
         {
             data.WritePackedGuid(Caster);
+            data.WriteUInt8(Type);
             ((SpellCastVisualField)SpellVisual).WriteCreate(data, owner, receiver);
             data.WriteUInt32(SpellID);
             data.WriteFloat(Radius);
             data.WriteUInt32(CastTime);
-            data.WriteUInt8(Type);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
@@ -5176,23 +5169,23 @@ namespace Game.Entities
                 }
                 if (_changesMask[2])
                 {
-                    ((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    data.WriteUInt8(Type);
                 }
                 if (_changesMask[3])
                 {
-                    data.WriteUInt32(SpellID);
+                    ((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (_changesMask[4])
                 {
-                    data.WriteFloat(Radius);
+                    data.WriteUInt32(SpellID);
                 }
                 if (_changesMask[5])
                 {
-                    data.WriteUInt32(CastTime);
+                    data.WriteFloat(Radius);
                 }
                 if (_changesMask[6])
                 {
-                    data.WriteUInt8(Type);
+                    data.WriteUInt32(CastTime);
                 }
             }
         }
@@ -5200,11 +5193,11 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(Caster);
+            ClearChangesMask(Type);
             ClearChangesMask(SpellVisual);
             ClearChangesMask(SpellID);
             ClearChangesMask(Radius);
             ClearChangesMask(CastTime);
-            ClearChangesMask(Type);
             _changesMask.ResetAll();
         }
     }
@@ -5511,10 +5504,12 @@ namespace Game.Entities
         public UpdateField<float> BoundsRadius2D = new(0, 11);
         public UpdateField<uint> DecalPropertiesID = new(0, 12);
         public UpdateField<ObjectGuid> CreatingEffectGUID = new(0, 13);
-        public UpdateField<ObjectGuid> Field_80 = new(0, 14);
-        public UpdateField<VisualAnim> VisualAnim = new(0, 15);
+        public UpdateField<uint> Field_80 = new(0, 14);
+        public UpdateField<uint> Field_84 = new(0, 15);
+        public UpdateField<ObjectGuid> Field_88 = new(0, 16);
+        public UpdateField<VisualAnim> VisualAnim = new(0, 17);
 
-        public AreaTriggerFieldData() : base(0, TypeId.AreaTrigger, 16) { }
+        public AreaTriggerFieldData() : base(0, TypeId.AreaTrigger, 18) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
         {
@@ -5532,7 +5527,11 @@ namespace Game.Entities
             data.WriteFloat(BoundsRadius2D);
             data.WriteUInt32(DecalPropertiesID);
             data.WritePackedGuid(CreatingEffectGUID);
+            data.WriteUInt32(Field_80);
+            data.WriteUInt32(Field_84);
+            data.WritePackedGuid(Field_88);
             ((ScaleCurve)ExtraScaleCurve).WriteCreate(data, owner, receiver);
+            ((VisualAnim)VisualAnim).WriteCreate(data, owner, receiver);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
@@ -5542,7 +5541,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
         {
-            data.WriteBits(_changesMask.GetBlock(0), 14);
+            data.WriteBits(_changesMask.GetBlock(0), 18);
 
             data.FlushBits();
             if (_changesMask[0])
@@ -5595,9 +5594,25 @@ namespace Game.Entities
                 {
                     data.WritePackedGuid(CreatingEffectGUID);
                 }
+                if (changesMask[14])
+                {
+                    data.WriteUInt32(Field_80);
+                }
+                if (changesMask[15])
+                {
+                    data.WriteUInt32(Field_84);
+                }
+                if (changesMask[16])
+                {
+                    data.WritePackedGuid(Field_88);
+                }
                 if (_changesMask[2])
                 {
                     ((ScaleCurve)ExtraScaleCurve).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                }
+                if (changesMask[17])
+                {
+                    ((VisualAnim)VisualAnim).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
             }
         }
@@ -5617,6 +5632,10 @@ namespace Game.Entities
             ClearChangesMask(BoundsRadius2D);
             ClearChangesMask(DecalPropertiesID);
             ClearChangesMask(CreatingEffectGUID);
+            ClearChangesMask(Field_80);
+            ClearChangesMask(Field_84);
+            ClearChangesMask(Field_88);
+            ClearChangesMask(VisualAnim);
             _changesMask.ResetAll();
         }
     }

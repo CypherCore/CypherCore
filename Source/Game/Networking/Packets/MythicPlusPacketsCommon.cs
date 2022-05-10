@@ -42,11 +42,13 @@ namespace Game.Networking.Packets
     public class DungeonScoreSummary
     {
         public float CurrentSeasonScore;
+        public float LifetimeBestSeasonScore;
         public List<DungeonScoreMapSummary> Runs = new();
 
         public void Write(WorldPacket data)
         {
             data.WriteFloat(CurrentSeasonScore);
+            data.WriteFloat(LifetimeBestSeasonScore);
             data.WriteInt32(Runs.Count);
             foreach (var dungeonScoreMapSummary in Runs)
                 dungeonScoreMapSummary.Write(data);
@@ -61,7 +63,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GuildGUID;
         public uint NativeRealmAddress;
         public uint VirtualRealmAddress;
-        public short ChrSpecializationID;
+        public int ChrSpecializationID;
         public short RaceID;
         public int ItemLevel;
         public int CovenantID;
@@ -75,7 +77,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(GuildGUID);
             data.WriteUInt32(NativeRealmAddress);
             data.WriteUInt32(VirtualRealmAddress);
-            data.WriteInt16(ChrSpecializationID);
+            data.WriteInt32(ChrSpecializationID);
             data.WriteInt16(RaceID);
             data.WriteInt32(ItemLevel);
             data.WriteInt32(CovenantID);
@@ -157,7 +159,13 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Season);
             data.WriteInt32(Maps.Count);
+            data.WriteUInt32(0);
             data.WriteFloat(SeasonScore);
+            data.WriteFloat(0);
+
+            foreach (var map in Maps)
+                map.Write(data);
+
             foreach (var map in Maps)
                 map.Write(data);
         }

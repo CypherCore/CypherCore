@@ -33,31 +33,26 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Player = _worldPacket.ReadPackedGuid();
+            Players = new ObjectGuid[_worldPacket.ReadInt32()];
+            for (var i = 0; i < Players.Length; ++i)
+                Players[i] = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Player;
+        public ObjectGuid[] Players;
     }
 
     public class QueryPlayerNameResponse : ServerPacket
     {
-        public QueryPlayerNameResponse() : base(ServerOpcodes.QueryPlayerNameResponse)
-        {
-            Data = new PlayerGuidLookupData();
-        }
+        public List<NameCacheLookupResult> Players = new();
+
+        public QueryPlayerNameResponse() : base(ServerOpcodes.QueryPlayerNameResponse) { }
 
         public override void Write()
         {
-            _worldPacket.WriteInt8((sbyte)Result);
-            _worldPacket.WritePackedGuid(Player);
-
-            if (Result == ResponseCodes.Success)
-                Data.Write(_worldPacket);
+            _worldPacket.WriteInt32(Players.Count);
+            foreach (NameCacheLookupResult lookupResult in Players)
+                lookupResult.Write(_worldPacket);
         }
-
-        public ObjectGuid Player;
-        public ResponseCodes Result; // 0 - full packet, != 0 - only guid
-        public PlayerGuidLookupData Data;
     }
 
     public class QueryCreature : ClientPacket
@@ -683,6 +678,46 @@ namespace Game.Networking.Packets
         public byte Level;
         public byte Unused915;
         public DeclinedName DeclinedNames = new();
+    }
+
+    public struct NameCacheUnused920
+    {
+        public uint Unused1;
+        public ObjectGuid Unused2;
+        public string Unused3 = "";
+        
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Unused1);
+            data.WritePackedGuid(Unused2);
+            data.WriteBits(Unused3.GetByteCount(), 7);
+            data.FlushBits();
+
+            data.WriteString(Unused3);
+        }
+    }
+
+    public struct NameCacheLookupResult
+    {
+        public ObjectGuid Player;
+        public byte Result = 0; // 0 - full packet, != 0 - only guid
+        public PlayerGuidLookupData Data;
+        public NameCacheUnused920? Unused920;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Result);
+            data.WritePackedGuid(Player);
+            data.WriteBit(Data != null);
+            data.WriteBit(Unused920.HasValue);
+            data.FlushBits();
+
+            if (Data != null)
+                Data.Write(data);
+
+            if (Unused920.HasValue)
+                Unused920.Value.Write(data);
+        }
     }
 
     public class CreatureXDisplay

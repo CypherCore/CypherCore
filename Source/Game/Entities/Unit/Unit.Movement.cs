@@ -1714,6 +1714,12 @@ namespace Game.Entities
             m_movementInfo.SetMovementFlags2(f);
         }
 
+        public void AddExtraUnitMovementFlag2(MovementFlags3 f) { m_movementInfo.AddExtraMovementFlag2(f); }
+        public void RemoveExtraUnitMovementFlag2(MovementFlags3 f) { m_movementInfo.RemoveExtraMovementFlag2(f); }
+        public bool HasExtraUnitMovementFlag2(MovementFlags3 f) { return m_movementInfo.HasExtraMovementFlag2(f); }
+        public MovementFlags3 GetExtraUnitMovementFlags2() { return m_movementInfo.GetExtraMovementFlags2(); }
+        public void SetExtraUnitMovementFlags2(MovementFlags3 f) { m_movementInfo.SetExtraMovementFlags2(f); }
+        
         //Spline
         public bool IsSplineEnabled()
         {

@@ -31,16 +31,12 @@ namespace Game
             Guild guild = Global.GuildMgr.GetGuildByGuid(query.GuildGuid);
             if (guild)
             {
-                if (guild.IsMember(query.PlayerGuid))
-                {
-                    guild.SendQueryResponse(this, query.PlayerGuid);
-                    return;
-                }
+                guild.SendQueryResponse(this);
+                return;
             }
 
             QueryGuildInfoResponse response = new();
             response.GuildGUID = query.GuildGuid;
-            response.PlayerGuid = query.PlayerGuid;
             SendPacket(response);
         }
 

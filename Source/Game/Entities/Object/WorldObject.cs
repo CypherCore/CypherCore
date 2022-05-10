@@ -281,8 +281,13 @@ namespace Game.Entities
                 bool HasFallDirection = unit.HasUnitMovementFlag(MovementFlag.Falling);
                 bool HasFall = HasFallDirection || unit.m_movementInfo.jump.fallTime != 0;
                 bool HasSpline = unit.IsSplineEnabled();
+                bool HasInertia = unit.m_movementInfo.inertia.HasValue;
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
+
+                data.WriteUInt32((uint)unit.GetUnitMovementFlags());
+                data.WriteUInt32((uint)unit.GetUnitMovementFlags2());
+                data.WriteUInt32((uint)unit.GetExtraUnitMovementFlags2());
 
                 data.WriteUInt32(unit.m_movementInfo.Time);                     // MoveTime
                 data.WriteFloat(unit.GetPositionX());
@@ -299,16 +304,22 @@ namespace Game.Entities
                 //for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
                 //    *data << ObjectGuid(RemoveForcesIDs);
 
-                data.WriteBits((uint)unit.GetUnitMovementFlags(), 30);
-                data.WriteBits((uint)unit.GetUnitMovementFlags2(), 18);
                 data.WriteBit(!unit.m_movementInfo.transport.guid.IsEmpty());  // HasTransport
                 data.WriteBit(HasFall);                                        // HasFall
                 data.WriteBit(HasSpline);                                      // HasSpline - marks that the unit uses spline movement
                 data.WriteBit(false);                                          // HeightChangeFailed
                 data.WriteBit(false);                                          // RemoteTimeValid
+                data.WriteBit(HasInertia);                                     // HasInertia
 
                 if (!unit.m_movementInfo.transport.guid.IsEmpty())
                     MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
+
+                if (HasInertia)
+                {
+                    data.WritePackedGuid(unit.m_movementInfo.inertia.Value.guid);
+                    data.WriteXYZ(unit.m_movementInfo.inertia.Value.force);
+                    data.WriteUInt32(unit.m_movementInfo.inertia.Value.lifetime);
+                }
 
                 if (HasFall)
                 {
@@ -440,6 +451,7 @@ namespace Game.Entities
                 bool hasAreaTriggerBox = shape.IsBox();
                 bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
                 bool hasAreaTriggerCylinder = shape.IsCylinder();
+                bool hasDisk = shape.IsDisk();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
@@ -459,6 +471,7 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerBox);
                 data.WriteBit(hasAreaTriggerPolygon);
                 data.WriteBit(hasAreaTriggerCylinder);
+                data.WriteBit(hasDisk);
                 data.WriteBit(hasAreaTriggerSpline);
                 data.WriteBit(hasOrbit);
                 data.WriteBit(hasMovementScript);
@@ -530,6 +543,18 @@ namespace Game.Entities
                     data.WriteFloat(shape.CylinderDatas.HeightTarget);
                     data.WriteFloat(shape.CylinderDatas.LocationZOffset);
                     data.WriteFloat(shape.CylinderDatas.LocationZOffsetTarget);
+                }
+
+                if (hasDisk)
+                {
+                    data.WriteFloat(shape.DiskDatas.InnerRadius);
+                    data.WriteFloat(shape.DiskDatas.InnerRadiusTarget);
+                    data.WriteFloat(shape.DiskDatas.OuterRadius);
+                    data.WriteFloat(shape.DiskDatas.OuterRadiusTarget);
+                    data.WriteFloat(shape.DiskDatas.Height);
+                    data.WriteFloat(shape.DiskDatas.HeightTarget);
+                    data.WriteFloat(shape.DiskDatas.LocationZOffset);
+                    data.WriteFloat(shape.DiskDatas.LocationZOffsetTarget);
                 }
 
                 //if (hasMovementScript)
@@ -3667,10 +3692,12 @@ namespace Game.Entities
         public ObjectGuid Guid { get; set; }
         MovementFlag flags;
         MovementFlag2 flags2;
+        MovementFlags3 flags3;
         public Position Pos { get; set; }
         public uint Time { get; set; }
         public TransportInfo transport;
         public float Pitch { get; set; }
+        public Inertia? inertia;
         public JumpInfo jump;
         public float SplineElevation { get; set; }
 
@@ -3698,6 +3725,12 @@ namespace Game.Entities
         public void AddMovementFlag2(MovementFlag2 f) { flags2 |= f; }
         public void RemoveMovementFlag2(MovementFlag2 f) { flags2 &= ~f; }
         public bool HasMovementFlag2(MovementFlag2 f) { return (flags2 & f) != 0; }
+
+        public MovementFlags3 GetExtraMovementFlags2() { return flags3; }
+        public void SetExtraMovementFlags2(MovementFlags3 flag) { flags3 = flag; }
+        public void AddExtraMovementFlag2(MovementFlags3 flag) { flags3 |= flag; }
+        public void RemoveExtraMovementFlag2(MovementFlags3 flag) { flags3 &= ~flag; }
+        public bool HasExtraMovementFlag2(MovementFlags3 flag) { return (flags3 & flag) != 0; }
 
         public void SetFallTime(uint time) { jump.fallTime = time; }
 
@@ -3729,6 +3762,12 @@ namespace Game.Entities
             public uint time;
             public uint prevTime;
             public uint vehicleId;
+        }
+        public struct Inertia
+        {
+            public ObjectGuid guid;
+            public Position force;
+            public uint lifetime;
         }
         public struct JumpInfo
         {

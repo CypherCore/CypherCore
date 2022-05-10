@@ -44,6 +44,9 @@ namespace Game.Entities
         [FieldOffset(0)]
         public cylinderdatas CylinderDatas;
 
+        [FieldOffset(0)]
+        public diskDatas DiskDatas;
+
         public struct defaultdatas
         {
             public fixed float Data[SharedConst.MaxAreatriggerEntityData];
@@ -75,6 +78,18 @@ namespace Game.Entities
         {
             public float Radius;
             public float RadiusTarget;
+            public float Height;
+            public float HeightTarget;
+            public float LocationZOffset;
+            public float LocationZOffsetTarget;
+        }
+        // AREATRIGGER_TYPE_DISK
+        public struct diskDatas
+        {
+            public float InnerRadius;
+            public float InnerRadiusTarget;
+            public float OuterRadius;
+            public float OuterRadiusTarget;
             public float Height;
             public float HeightTarget;
             public float LocationZOffset;
@@ -183,7 +198,7 @@ namespace Game.Entities
     }
 
     public class AreaTriggerShapeInfo : AreaTriggerData
-    {  
+    {
         public AreaTriggerTypes TriggerType;
 
         public AreaTriggerShapeInfo()
@@ -200,7 +215,9 @@ namespace Game.Entities
                 case AreaTriggerTypes.Box:
                     return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
                 case AreaTriggerTypes.Cylinder:
-                    return CylinderDatas.Radius;
+                    return Math.Max(CylinderDatas.Radius, CylinderDatas.RadiusTarget);
+                case AreaTriggerTypes.Disk:
+                    return Math.Max(DiskDatas.OuterRadius, DiskDatas.OuterRadiusTarget);
             }
 
             return 0.0f;
@@ -210,6 +227,7 @@ namespace Game.Entities
         public bool IsBox() { return TriggerType == AreaTriggerTypes.Box; }
         public bool IsPolygon() { return TriggerType == AreaTriggerTypes.Polygon; }
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
+        public bool IsDisk() { return TriggerType == AreaTriggerTypes.Disk; }
     }
 
     public class AreaTriggerOrbitInfo

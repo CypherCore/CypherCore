@@ -75,6 +75,9 @@ namespace Game.Networking.Packets
         {
             var movementInfo = new MovementInfo();
             movementInfo.Guid = data.ReadPackedGuid();
+            movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt32());
+            movementInfo.SetMovementFlags2((MovementFlag2)data.ReadUInt32());
+            movementInfo.SetExtraMovementFlags2((MovementFlags3)data.ReadUInt32());
             movementInfo.Time = data.ReadUInt32();
             float x = data.ReadFloat();
             float y = data.ReadFloat();
@@ -96,18 +99,26 @@ namespace Game.Networking.Packets
 
             // ResetBitReader
 
-            movementInfo.SetMovementFlags((MovementFlag)data.ReadBits<uint>(30));
-            movementInfo.SetMovementFlags2((MovementFlag2)data.ReadBits<uint>(18));
-
             bool hasTransport = data.HasBit();
             bool hasFall = data.HasBit();
             bool hasSpline = data.HasBit(); // todo 6.x read this infos
 
             data.ReadBit(); // HeightChangeFailed
             data.ReadBit(); // RemoteTimeValid
+            bool hasInertia = data.HasBit();
 
             if (hasTransport)
                 ReadTransportInfo(data, ref movementInfo.transport);
+
+            if (hasInertia)
+            {
+                MovementInfo.Inertia inertia = new();
+                inertia.guid = data.ReadPackedGuid();
+                inertia.force = data.ReadPosition();
+                inertia.lifetime = data.ReadUInt32();
+
+                movementInfo.inertia = inertia;
+            }
 
             if (hasFall)
             {
@@ -134,8 +145,12 @@ namespace Game.Networking.Packets
             bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
             bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
             bool hasSpline = false; // todo 6.x send this infos
+            bool hasInertia = movementInfo.inertia.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
+            data.WriteUInt32((uint)movementInfo.GetMovementFlags());
+            data.WriteUInt32((uint)movementInfo.GetMovementFlags2());
+            data.WriteUInt32((uint)movementInfo.GetExtraMovementFlags2());
             data.WriteUInt32(movementInfo.Time);
             data.WriteFloat(movementInfo.Pos.GetPositionX());
             data.WriteFloat(movementInfo.Pos.GetPositionY());
@@ -147,26 +162,31 @@ namespace Game.Networking.Packets
             uint removeMovementForcesCount = 0;
             data.WriteUInt32(removeMovementForcesCount);
 
-            uint int168 = 0;
-            data.WriteUInt32(int168);
+            uint moveIndex = 0;
+            data.WriteUInt32(moveIndex);
 
             /*for (public uint i = 0; i < removeMovementForcesCount; ++i)
             {
                 _worldPacket << ObjectGuid;
             }*/
 
-            data.WriteBits((uint)movementInfo.GetMovementFlags(), 30);
-            data.WriteBits((uint)movementInfo.GetMovementFlags2(), 18);
-
             data.WriteBit(hasTransportData);
             data.WriteBit(hasFallData);
             data.WriteBit(hasSpline);
             data.WriteBit(false); // HeightChangeFailed
             data.WriteBit(false); // RemoteTimeValid
+            data.WriteBit(hasInertia);
             data.FlushBits();
 
             if (hasTransportData)
                 WriteTransportInfo(data, movementInfo.transport);
+
+            if (hasInertia)
+            {
+                data.WritePackedGuid(movementInfo.inertia.Value.guid);
+                data.WriteXYZ(movementInfo.inertia.Value.force);
+                data.WriteUInt32(movementInfo.inertia.Value.lifetime);
+            }
 
             if (hasFallData)
             {
@@ -1168,12 +1188,12 @@ namespace Game.Networking.Packets
                 data.WriteBit(CollisionHeight.HasValue);
                 data.WriteBit(@MovementForce != null);
                 data.WriteBit(MovementForceGUID.HasValue);
+                data.WriteBit(MovementInertiaGUID.HasValue);
+                data.WriteBit(MovementInertiaLifetimeMs.HasValue);
                 data.FlushBits();
 
                 if (@MovementForce != null)
                     @MovementForce.Write(data);
-
-
 
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
@@ -1198,6 +1218,12 @@ namespace Game.Networking.Packets
 
                 if (MovementForceGUID.HasValue)
                     data.WritePackedGuid(MovementForceGUID.Value);
+
+                if (MovementInertiaGUID.HasValue)
+                    data.WritePackedGuid(MovementInertiaGUID.Value);
+
+                if (MovementInertiaLifetimeMs.HasValue)
+                    data.WriteUInt32(MovementInertiaLifetimeMs.Value);
             }
 
             public ServerOpcodes MessageID;
@@ -1208,6 +1234,8 @@ namespace Game.Networking.Packets
             public CollisionHeightInfo? CollisionHeight;
             public MovementForce MovementForce;
             public ObjectGuid? MovementForceGUID;
+            public ObjectGuid? MovementInertiaGUID;
+            public uint? MovementInertiaLifetimeMs;
         }
     }
 

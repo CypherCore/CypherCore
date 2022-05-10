@@ -299,8 +299,10 @@ namespace Game.Entities
             {
                 var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petnumber);
 
-                Cypher.Assert(petStable.CurrentPetIndex == 0);
                 Cypher.Assert(activePetIndex != -1);
+
+                // Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying mount)
+                Cypher.Assert(petStable.CurrentPetIndex == 0 || petStable.CurrentPetIndex == activePetIndex);
 
                 petStable.SetCurrentActivePetIndex((uint)activePetIndex);
             }

@@ -33,22 +33,29 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryPlayerName, Processing = PacketProcessing.Inplace)]
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
-            SendNameQuery(queryPlayerName.Player);
-        }
-
-        public void SendNameQuery(ObjectGuid guid)
-        {
-            Player player = Global.ObjAccessor.FindPlayer(guid);
-
             QueryPlayerNameResponse response = new();
-            response.Player = guid;
-
-            if (response.Data.Initialize(guid, player))
-                response.Result = ResponseCodes.Success;
-            else
-                response.Result = ResponseCodes.Failure; // name unknown
+            foreach (ObjectGuid guid in queryPlayerName.Players)
+            {
+                BuildNameQueryData(guid, out NameCacheLookupResult nameCacheLookupResult);
+                response.Players.Add(nameCacheLookupResult);
+            }
 
             SendPacket(response);
+        }
+
+        public void BuildNameQueryData(ObjectGuid guid, out NameCacheLookupResult lookupData)
+        {
+            lookupData = new();
+
+            Player player = Global.ObjAccessor.FindPlayer(guid);
+
+            lookupData.Player = guid;
+
+            lookupData.Data = new();
+            if (lookupData.Data.Initialize(guid, player))
+                lookupData.Result = (byte)ResponseCodes.Success;
+            else
+                lookupData.Result = (byte)ResponseCodes.Failure; // name unknown
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryTime, Processing = PacketProcessing.Inplace)]

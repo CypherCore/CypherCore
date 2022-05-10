@@ -30,18 +30,20 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(MythicPlusSeasonID);
-            _worldPacket.WriteInt32(CurrentSeason);
-            _worldPacket.WriteInt32(PreviousSeason);
+            _worldPacket.WriteInt32(MythicPlusDisplaySeasonID);
+            _worldPacket.WriteInt32(MythicPlusMilestoneSeasonID);
+            _worldPacket.WriteInt32(CurrentArenaSeason);
+            _worldPacket.WriteInt32(PreviousArenaSeason);
             _worldPacket.WriteInt32(ConquestWeeklyProgressCurrencyID);
             _worldPacket.WriteInt32(PvpSeasonID);
             _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
             _worldPacket.FlushBits();
         }
 
-        public int MythicPlusSeasonID;
-        public int PreviousSeason;
-        public int CurrentSeason;
+        public int MythicPlusDisplaySeasonID;
+        public int MythicPlusMilestoneSeasonID;
+        public int PreviousArenaSeason;
+        public int CurrentArenaSeason;
         public int PvpSeasonID;
         public int ConquestWeeklyProgressCurrencyID;
         public bool WeeklyRewardChestsEnabled;
@@ -159,6 +161,7 @@ namespace Game.Networking.Packets
             Hdr.Write(_worldPacket);
             _worldPacket.WriteUInt32(AverageWaitTime);
             _worldPacket.WriteUInt32(WaitTime);
+            _worldPacket.WriteInt32(Unused920);
             _worldPacket.WriteBit(AsGroup);
             _worldPacket.WriteBit(EligibleForMatchmaking);
             _worldPacket.WriteBit(SuspendedQueue);
@@ -171,6 +174,7 @@ namespace Game.Networking.Packets
         public bool SuspendedQueue;
         public bool EligibleForMatchmaking;
         public uint WaitTime;
+        public int Unused920;
     }
 
     public class BattlefieldStatusFailed : ServerPacket
@@ -503,6 +507,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Winner);
             _worldPacket.WriteInt32(Duration);
             _worldPacket.WriteBit(LogData != null);
+            _worldPacket.WriteBits(SoloShuffleStatus, 2);
             _worldPacket.FlushBits();
 
             if (LogData != null)
@@ -512,6 +517,7 @@ namespace Game.Networking.Packets
         public byte Winner;
         public int Duration;
         public PVPMatchStatistics LogData;
+        public uint SoloShuffleStatus;
     }
 
     //Structs
@@ -631,6 +637,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(PlayerClass);
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
+                data.WriteInt32(Role);
 
                 foreach (var pvpStat in Stats)
                     pvpStat.Write(data);
@@ -678,6 +685,7 @@ namespace Game.Networking.Packets
             public int PlayerClass;
             public int CreatureID;
             public int HonorLevel;
+            public int Role;
         }
 
         public void Write(WorldPacket data)

@@ -242,7 +242,7 @@ namespace Game.Entities
             _spellHistory.Update();
         }
 
-        public void HandleEmoteCommand(Emote emoteId, Player target = null, uint[] spellVisualKitIds = null)
+        public void HandleEmoteCommand(Emote emoteId, Player target = null, uint[] spellVisualKitIds = null, int sequenceVariation = 0)
         {
             EmoteMessage packet = new();
             packet.Guid = GetGUID();
@@ -252,6 +252,8 @@ namespace Game.Entities
             if (emotesEntry != null && spellVisualKitIds != null)
                 if (emotesEntry.AnimId == (uint)Anim.MountSpecial || emotesEntry.AnimId == (uint)Anim.MountSelfSpecial)
                     packet.SpellVisualKitIDs.AddRange(spellVisualKitIds);
+
+            packet.SequenceVariation = sequenceVariation;
 
             if (target != null)
                 target.SendPacket(packet);

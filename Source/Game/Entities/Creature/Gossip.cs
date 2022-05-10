@@ -260,6 +260,7 @@ namespace Game.Misc
                 opt.OptionNPC = item.MenuItemIcon;
                 opt.OptionFlags = (byte)(item.IsCoded ? 1 : 0);     // makes pop up box password
                 opt.OptionCost = (int)item.BoxMoney;     // money required to open menu, 2.0.3
+                opt.OptionLanguage = item.Language;
                 opt.Text = item.Message;            // text for gossip item
                 opt.Confirm = item.BoxMessage;      // accept text (related to money) pop up box, 2.0.3
                 opt.Status = GossipOptionStatus.Available;
@@ -701,6 +702,7 @@ namespace Game.Misc
         public uint OptionType;
         public string BoxMessage;
         public uint BoxMoney;
+        public uint Language;
     }
 
     public class GossipMenuItemData
@@ -734,6 +736,7 @@ namespace Game.Misc
         public uint OptionBroadcastTextId;
         public GossipOption OptionType;
         public NPCFlags OptionNpcFlag;
+        public uint Language;
         public uint ActionMenuId;
         public uint ActionPoiId;
         public bool BoxCoded;

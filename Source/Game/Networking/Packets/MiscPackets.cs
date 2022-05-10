@@ -1181,11 +1181,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             SpellVisualKitIDs = new int[_worldPacket.ReadUInt32()];
+            SequenceVariation = _worldPacket.ReadInt32();
             for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
                 SpellVisualKitIDs[i] = _worldPacket.ReadInt32();
         }
 
         public int[] SpellVisualKitIDs;
+        public int SequenceVariation;
     }
 
     class SpecialMountAnim : ServerPacket
@@ -1196,12 +1198,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+            _worldPacket.WriteInt32(SequenceVariation);
             foreach (var id in SpellVisualKitIDs)
                 _worldPacket.WriteInt32(id);
         }
 
         public ObjectGuid UnitGUID;
         public List<int> SpellVisualKitIDs = new();
+        public int SequenceVariation;
     }
 
     class CrossedInebriationThreshold : ServerPacket

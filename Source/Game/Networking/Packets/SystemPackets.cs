@@ -53,6 +53,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(ClubsPresenceUpdateTimer);
             _worldPacket.WriteUInt32(HiddenUIClubsPresenceUpdateTimer);
 
+            _worldPacket.WriteInt32(GameRuleUnknown1);
+            _worldPacket.WriteInt32(GameRuleValues.Count);
+
+            _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+
+            foreach (GameRuleValuePair gameRuleValue in GameRuleValues)
+                gameRuleValue.Write(_worldPacket);
+
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
             _worldPacket.WriteBit(ScrollOfResurrectionEnabled);
@@ -152,6 +160,8 @@ namespace Game.Networking.Packets
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public uint KioskSessionMinutes;
+        public int GameRuleUnknown1;
+        public short MaxPlayerNameQueriesPerPacket = 50;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -184,6 +194,7 @@ namespace Game.Networking.Packets
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
+        public List<GameRuleValuePair> GameRuleValues = new();
 
         public struct SessionAlertConfig
         {
@@ -276,10 +287,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ActiveClassTrialBoostType);
             _worldPacket.WriteInt32(MinimumExpansionLevel);
             _worldPacket.WriteInt32(MaximumExpansionLevel);
+            _worldPacket.WriteInt32(GameRuleUnknown1);
+            _worldPacket.WriteInt32(GameRuleValues.Count);
+            _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
 
+            foreach (GameRuleValuePair gameRuleValue in GameRuleValues)
+                gameRuleValue.Write(_worldPacket);
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -310,6 +326,9 @@ namespace Game.Networking.Packets
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
         public uint KioskSessionMinutes;
+        public int GameRuleUnknown1;
+        public List<GameRuleValuePair> GameRuleValues = new();
+        public short MaxPlayerNameQueriesPerPacket = 50;
     }
 
     public class MOTD : ServerPacket
@@ -381,6 +400,18 @@ namespace Game.Networking.Packets
             data.WriteBit(SuggestionsEnabled);
 
             ThrottleState.Write(data);
+        }
+    }
+
+    public struct GameRuleValuePair
+    {
+        public int Rule;
+        public int Value;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Rule);
+            data.WriteInt32(Value);
         }
     }
 }

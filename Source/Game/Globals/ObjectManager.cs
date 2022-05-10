@@ -596,15 +596,10 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             gossipMenuItemsStorage.Clear();
-
-            //                                          0         1              2             3             4                        5             6
-            SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcFlag, " +
-                //   7                8              9            10           11          12
-                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId " +
-                "FROM gossip_menu_option o " +
-                "LEFT JOIN gossip_menu_option_action oa ON o.MenuId = oa.MenuId AND o.OptionIndex = oa.OptionIndex " +
-                "LEFT JOIN gossip_menu_option_box ob ON o.MenuId = ob.MenuId AND o.OptionIndex = ob.OptionIndex " +
-                "ORDER BY o.MenuId, o.OptionIndex");
+            
+            //                                         0       1         2           3           4                      5           6              7         8             9            10        11        12       13
+            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionIcon, OptionText, OptionBroadcastTextID, OptionType, OptionNpcFlag, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
+                "FROM gossip_menu_option ORDER BY MenuID, OptionID");
 
             if (result.IsEmpty())
             {
@@ -623,12 +618,13 @@ namespace Game
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
                 gMenuItem.OptionType = (GossipOption)result.Read<uint>(5);
                 gMenuItem.OptionNpcFlag = (NPCFlags)result.Read<ulong>(6);
-                gMenuItem.ActionMenuId = result.Read<uint>(7);
-                gMenuItem.ActionPoiId = result.Read<uint>(8);
-                gMenuItem.BoxCoded = result.Read<bool>(9);
-                gMenuItem.BoxMoney = result.Read<uint>(10);
-                gMenuItem.BoxText = result.Read<string>(11);
-                gMenuItem.BoxBroadcastTextId = result.Read<uint>(12);
+                gMenuItem.Language = result.Read<uint>(7);
+                gMenuItem.ActionMenuId = result.Read<uint>(8);
+                gMenuItem.ActionPoiId = result.Read<uint>(9);
+                gMenuItem.BoxCoded = result.Read<bool>(10);
+                gMenuItem.BoxMoney = result.Read<uint>(11);
+                gMenuItem.BoxText = result.Read<string>(12);
+                gMenuItem.BoxBroadcastTextId = result.Read<uint>(13);
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
@@ -647,6 +643,12 @@ namespace Game
 
                 if (gMenuItem.OptionType >= GossipOption.Max)
                     Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has unknown option id {gMenuItem.OptionType}. Option will not be used");
+
+                if (gMenuItem.Language != 0 && !CliDB.LanguagesStorage.ContainsKey(gMenuItem.Language))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing Language {gMenuItem.Language}, ignoring");
+                    gMenuItem.Language = 0;
+                }
 
                 if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
                 {
@@ -9550,7 +9552,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, Question, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -9571,9 +9573,12 @@ namespace Game
                 choice.ChoiceId = choiceResult.Read<int>(0);
                 choice.UiTextureKitId = choiceResult.Read<int>(1);
                 choice.SoundKitId = choiceResult.Read<uint>(2);
-                choice.Question = choiceResult.Read<string>(3);
-                choice.HideWarboardHeader = choiceResult.Read<bool>(4);
-                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(5);
+                choice.CloseSoundKitId = choiceResult.Read<uint>(3);
+                choice.Duration = choiceResult.Read<long>(4);
+                choice.Question = choiceResult.Read<string>(5);
+                choice.PendingChoiceText = choiceResult.Read<string>(6);
+                choice.HideWarboardHeader = choiceResult.Read<bool>(7);
+                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(8);
 
                 _playerChoices[choice.ChoiceId] = choice;
 
@@ -9887,8 +9892,10 @@ namespace Game
 
                     PlayerChoiceResponseMawPower mawPower = new();
                     mawPower.TypeArtFileID = mawPowersResult.Read<int>(2);
-                    mawPower.Rarity = mawPowersResult.Read<int>(3);
-                    mawPower.RarityColor = mawPowersResult.Read<uint>(4);
+                    if (!mawPowersResult.IsNull(3))
+                        mawPower.Rarity = mawPowersResult.Read<int>(3);
+                    if (!mawPowersResult.IsNull(4))
+                        mawPower.RarityColor = mawPowersResult.Read<uint>(4);
                     mawPower.SpellID = mawPowersResult.Read<int>(5);
                     mawPower.MaxStacks = mawPowersResult.Read<int>(6);
                     response.MawPower = mawPower;
@@ -11805,8 +11812,8 @@ namespace Game
     public struct PlayerChoiceResponseMawPower
     {
         public int TypeArtFileID;
-        public int Rarity;
-        public uint RarityColor;
+        public int? Rarity;
+        public uint? RarityColor;
         public int SpellID;
         public int MaxStacks;
     }
@@ -11843,7 +11850,10 @@ namespace Game
         public int ChoiceId;
         public int UiTextureKitId;
         public uint SoundKitId;
+        public uint CloseSoundKitId;
+        public long Duration;
         public string Question;
+        public string PendingChoiceText;
         public List<PlayerChoiceResponse> Responses = new();
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;

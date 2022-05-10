@@ -440,6 +440,7 @@ namespace Game
             SpecialMountAnim specialMountAnim = new();
             specialMountAnim.UnitGUID = _player.GetGUID();
             specialMountAnim.SpellVisualKitIDs.AddRange(mountSpecial.SpellVisualKitIDs);
+            specialMountAnim.SequenceVariation = mountSpecial.SequenceVariation;
             GetPlayer().SendMessageToSet(specialMountAnim, false);
         }
 

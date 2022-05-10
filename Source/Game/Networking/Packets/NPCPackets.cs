@@ -63,6 +63,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt8(options.OptionNPC);
                 _worldPacket.WriteUInt8(options.OptionFlags);
                 _worldPacket.WriteInt32(options.OptionCost);
+                _worldPacket.WriteUInt32(options.OptionLanguage);
 
                 _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
                 _worldPacket.WriteBits(options.Confirm.GetByteCount(), 12);
@@ -113,9 +114,15 @@ namespace Game.Networking.Packets
 
     public class GossipComplete : ServerPacket
     {
+        public bool SuppressSound;
+
         public GossipComplete() : base(ServerOpcodes.GossipComplete) { }
 
-        public override void Write() { }
+        public override void Write()
+        {
+            _worldPacket.WriteBit(SuppressSound);
+            _worldPacket.FlushBits();
+        }
     }
 
     public class VendorInventory : ServerPacket
@@ -341,6 +348,7 @@ namespace Game.Networking.Packets
         public byte OptionNPC;
         public byte OptionFlags;
         public int OptionCost;
+        public uint OptionLanguage;
         public GossipOptionStatus Status;
         public string Text;
         public string Confirm;

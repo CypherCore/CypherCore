@@ -148,7 +148,7 @@ namespace Game.Guilds
         {
             SQLTransaction trans = new();
 
-            m_achievementSys.SaveToDB(trans);
+            GetAchievementMgr().SaveToDB(trans);
 
             DB.Characters.CommitTransaction(trans);
         }
@@ -252,11 +252,10 @@ namespace Game.Guilds
                 session.SendPacket(roster);
         }
 
-        public void SendQueryResponse(WorldSession session, ObjectGuid playerGuid)
+        public void SendQueryResponse(WorldSession session)
         {
             QueryGuildInfoResponse response = new();
             response.GuildGUID = GetGUID();
-            response.PlayerGuid = playerGuid;
             response.HasGuildInfo = true;
 
             response.Info.GuildGuid = GetGUID();
@@ -395,7 +394,7 @@ namespace Game.Guilds
 
                 SendSaveEmblemResult(session, GuildEmblemError.Success); // "Guild Emblem saved."
 
-                SendQueryResponse(session, ObjectGuid.Empty);
+                SendQueryResponse(session);
             }
         }
 
@@ -1145,7 +1144,7 @@ namespace Game.Guilds
             foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
                 player.LearnSpell(entry.SpellID, true);
 
-            m_achievementSys.SendAllData(player);
+            GetAchievementMgr().SendAllData(player);
 
             // tells the client to request bank withdrawal limit
             player.SendPacket(new GuildMemberDailyReset());
@@ -2412,12 +2411,12 @@ namespace Game.Guilds
 
         bool HasAchieved(uint achievementId)
         {
-            return m_achievementSys.HasAchieved(achievementId);
+            return GetAchievementMgr().HasAchieved(achievementId);
         }
 
         public void UpdateCriteria(CriteriaType type, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player player)
         {
-            m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, player);
+            GetAchievementMgr().UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, player);
         }
 
         public void HandleNewsSetSticky(WorldSession session, uint newsId, bool sticky)

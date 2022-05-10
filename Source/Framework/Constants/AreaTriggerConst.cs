@@ -40,7 +40,8 @@ namespace Framework.Constants
         Unk = 2,
         Polygon = 3,
         Cylinder = 4,
-        Max = 5
+        Disk = 5,
+        Max
     }
 
     public enum AreaTriggerActionTypes
