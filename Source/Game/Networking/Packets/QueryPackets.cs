@@ -27,9 +27,9 @@ using System.Numerics;
 
 namespace Game.Networking.Packets
 {
-    public class QueryPlayerName : ClientPacket
+    public class QueryPlayerNames : ClientPacket
     {
-        public QueryPlayerName(WorldPacket packet) : base(packet) { }
+        public QueryPlayerNames(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -41,11 +41,11 @@ namespace Game.Networking.Packets
         public ObjectGuid[] Players;
     }
 
-    public class QueryPlayerNameResponse : ServerPacket
+    public class QueryPlayerNamesResponse : ServerPacket
     {
         public List<NameCacheLookupResult> Players = new();
 
-        public QueryPlayerNameResponse() : base(ServerOpcodes.QueryPlayerNameResponse) { }
+        public QueryPlayerNamesResponse() : base(ServerOpcodes.QueryPlayerNamesResponse) { }
 
         public override void Write()
         {

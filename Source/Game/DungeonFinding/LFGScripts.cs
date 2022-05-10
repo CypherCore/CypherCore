@@ -85,7 +85,7 @@ namespace Game.DungeonFinding
                     return;
                 }
 
-                QueryPlayerNameResponse response = new();
+                QueryPlayerNamesResponse response = new();
                 foreach (MemberSlot memberSlot in group.GetMemberSlots())
                 {
                     player.GetSession().BuildNameQueryData(memberSlot.guid, out NameCacheLookupResult nameCacheLookupResult);

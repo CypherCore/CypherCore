@@ -30,10 +30,10 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.QueryPlayerName, Processing = PacketProcessing.Inplace)]
-        void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
+        [WorldPacketHandler(ClientOpcodes.QueryPlayerNames, Processing = PacketProcessing.Inplace)]
+        void HandleQueryPlayerNames(QueryPlayerNames queryPlayerName)
         {
-            QueryPlayerNameResponse response = new();
+            QueryPlayerNamesResponse response = new();
             foreach (ObjectGuid guid in queryPlayerName.Players)
             {
                 BuildNameQueryData(guid, out NameCacheLookupResult nameCacheLookupResult);
