@@ -5749,6 +5749,12 @@ namespace Game.Entities
             if (HasAura(196055)) //DH DoubleJump
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveEnableDoubleJump, m_movementCounter++));
 
+            if (HasAuraType(AuraType.IgnoreMovementForces))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetIgnoreMovementForces, m_movementCounter++));
+
+            if (HasAuraType(AuraType.DisableInertia))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveDisableInertia, m_movementCounter++));
+
             if (!setCompoundState.StateChanges.Empty())
             {
                 setCompoundState.MoverGUID = GetGUID();

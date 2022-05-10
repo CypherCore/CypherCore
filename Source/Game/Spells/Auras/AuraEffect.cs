@@ -2303,6 +2303,24 @@ namespace Game.Spells
             target.SetIgnoreMovementForces(apply);
         }
 
+        [AuraEffectHandler(AuraType.IgnoreMovementForces)]
+        void HandleDisableInertia(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (!apply)
+            {
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
+                if (target.HasAuraType(GetAuraType()))
+                    return;
+            }
+
+            target.SetDisableInertia(apply);
+        }
+
         /****************************/
         /***        THREAT        ***/
         /****************************/

@@ -395,6 +395,32 @@ namespace Game.Entities
             return true;
         }
 
+        public bool SetDisableInertia(bool disable)
+        {
+            if (disable == HasExtraUnitMovementFlag2(MovementFlags3.DisableInertia))
+                return false;
+
+            if (disable)
+                AddExtraUnitMovementFlag2(MovementFlags3.DisableInertia);
+            else
+                RemoveExtraUnitMovementFlag2(MovementFlags3.DisableInertia);
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableInertia : ServerOpcodes.MoveEnableInertia);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
         public void JumpTo(float speedXY, float speedZ, float angle, Position dest = null)
         {
             if (dest != null)
