@@ -541,6 +541,29 @@ namespace Game.Entities
                     hasPreviousMilestone = false;
             }
         }
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            AzeriteItem Owner;
+            ObjectFieldData ObjectMask = new();
+            ItemData ItemMask = new();
+            AzeriteItemData AzeriteItemMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(AzeriteItem owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), AzeriteItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     public class AzeriteItemSelectedEssencesData

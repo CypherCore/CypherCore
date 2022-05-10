@@ -18,7 +18,9 @@
 using Framework.Constants;
 using Game.Maps;
 using Game.Networking;
+using Game.Networking.Packets;
 using Game.Spells;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -26,7 +28,7 @@ namespace Game.Entities
     {
         SceneObjectData m_sceneObjectData;
 
-        Position _stationaryPosition;
+        Position _stationaryPosition = new();
         ObjectGuid _createdBySpellCast;
 
         public SceneObject() : base(false)
@@ -36,6 +38,9 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
             m_updateFlag.SceneObject = true;
+
+            m_sceneObjectData = new();
+            _stationaryPosition = new();
         }
 
         public override void AddToWorld()
@@ -204,5 +209,27 @@ namespace Game.Entities
         void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
         public void SetCreatedBySpellCast(ObjectGuid castId) { _createdBySpellCast = castId; }
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            SceneObject Owner;
+            ObjectFieldData ObjectMask = new();
+            SceneObjectData SceneObjectMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(SceneObject owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), SceneObjectMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 }

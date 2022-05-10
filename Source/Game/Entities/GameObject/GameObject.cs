@@ -3110,6 +3110,28 @@ namespace Game.Entities
 
         ObjectGuid m_linkedTrap;
         #endregion
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            GameObject Owner;
+            ObjectFieldData ObjectMask = new();
+            GameObjectFieldData GameObjectMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(GameObject owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), GameObjectMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     class GameObjectModelOwnerImpl : GameObjectModelOwnerBase

@@ -281,7 +281,7 @@ namespace Game.Entities
 
             return true;
         }
-        
+
         public override void Update(uint diff)
         {
             base.Update(diff);
@@ -322,7 +322,7 @@ namespace Game.Entities
 
         public void Remove()
         {
-            if (IsInWorld)           
+            if (IsInWorld)
                 AddObjectToRemoveList();
         }
 
@@ -554,7 +554,7 @@ namespace Game.Entities
 
             return 0;
         }
-        
+
         void UpdatePolygonOrientation()
         {
             float newOrientation = GetOrientation();
@@ -660,15 +660,15 @@ namespace Game.Entities
             switch (action.TargetType)
             {
                 case AreaTriggerActionUserTypes.Friend:
-                        return caster.IsValidAssistTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
+                    return caster.IsValidAssistTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
                 case AreaTriggerActionUserTypes.Enemy:
-                        return caster.IsValidAttackTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
+                    return caster.IsValidAttackTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
                 case AreaTriggerActionUserTypes.Raid:
-                        return caster.IsInRaidWith(unit);
+                    return caster.IsInRaidWith(unit);
                 case AreaTriggerActionUserTypes.Party:
-                        return caster.IsInPartyWith(unit);
+                    return caster.IsInPartyWith(unit);
                 case AreaTriggerActionUserTypes.Caster:
-                        return unit.GetGUID() == caster.GetGUID();
+                    return unit.GetGUID() == caster.GetGUID();
                 case AreaTriggerActionUserTypes.Any:
                 default:
                     break;
@@ -996,7 +996,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
+        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
         {
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
@@ -1022,7 +1022,7 @@ namespace Game.Entities
 
             data.AddUpdateBlock(buffer1);
         }
-        
+
         public override void ClearUpdateMask(bool remove)
         {
             m_values.ClearChangesMask(m_areaTriggerData);
@@ -1037,7 +1037,7 @@ namespace Game.Entities
         {
             return base.IsNeverVisibleFor(seer) || IsServerSide();
         }
-        
+
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()
         {
@@ -1112,5 +1112,27 @@ namespace Game.Entities
         List<ObjectGuid> _insideUnits = new();
 
         AreaTriggerAI _ai;
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            AreaTrigger Owner;
+            ObjectFieldData ObjectMask = new();
+            AreaTriggerFieldData AreaTriggerMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(AreaTrigger owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), AreaTriggerMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject updateObject);
+                player.SendPacket(updateObject);
+            }
+        }
     }
 }

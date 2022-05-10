@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
-using Game.Networking;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
+using Game.Networking;
+using Game.Networking.Packets;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Game.Entities
@@ -241,9 +242,33 @@ namespace Game.Entities
         }
 
         public int GetMaxAzeritePowerTier() { return m_maxTier; }
+
         public uint GetSelectedAzeritePower(int tier)
         {
             return (uint)m_azeriteEmpoweredItemData.Selections[tier];
+        }
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            AzeriteEmpoweredItem Owner;
+            ObjectFieldData ObjectMask = new();
+            ItemData ItemMask = new();
+            AzeriteEmpoweredItemData AzeriteEmpoweredItemMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(AzeriteEmpoweredItem owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), AzeriteEmpoweredItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
         }
     }
 }

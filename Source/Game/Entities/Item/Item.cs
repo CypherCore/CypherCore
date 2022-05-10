@@ -2737,6 +2737,28 @@ namespace Game.Entities
         Dictionary<uint, ushort> m_artifactPowerIdToIndex = new();
         Array<uint> m_gemScalingLevels = new(ItemConst.MaxGemSockets);
         #endregion
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Item Owner;
+            ObjectFieldData ObjectMask = new();
+            ItemData ItemMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Item owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     public class ItemPosCount

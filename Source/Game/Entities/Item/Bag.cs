@@ -18,6 +18,8 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Networking;
+using Game.Networking.Packets;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -280,5 +282,28 @@ namespace Game.Entities
 
         ContainerData m_containerData;
         Item[] m_bagslot = new Item[36];
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Bag Owner;
+            ObjectFieldData ObjectMask = new();
+            ItemData ItemMask = new();
+            ContainerData ContainerMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Bag owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), ContainerMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 }

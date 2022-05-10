@@ -16,8 +16,10 @@
  */
 
 using Framework.Constants;
-using Game.Spells;
 using Game.Networking;
+using Game.Networking.Packets;
+using Game.Spells;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -227,7 +229,7 @@ namespace Game.Entities
             Cypher.Assert(_caster != null);
             return _caster.GetFaction();
         }
-        
+
         void BindToCaster()
         {
             Cypher.Assert(_caster == null);
@@ -323,6 +325,28 @@ namespace Game.Entities
         Unit _caster;
         int _duration; // for non-aura dynobjects
         bool _isViewpoint;
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            DynamicObject Owner;
+            ObjectFieldData ObjectMask = new();
+            DynamicObjectData DynamicObjectMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(DynamicObject owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), DynamicObjectMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     public enum DynamicObjectType

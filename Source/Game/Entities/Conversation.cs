@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -326,5 +327,27 @@ namespace Game.Entities
 
         Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
         TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Conversation Owner;
+            ObjectFieldData ObjectMask = new();
+            ConversationData ConversationMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Conversation owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ConversationMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 }

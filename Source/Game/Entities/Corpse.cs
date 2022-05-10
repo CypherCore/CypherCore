@@ -15,15 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Loots;
 using Game.Maps;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Text;
-using Framework.Collections;
-using Game.Networking;
 
 namespace Game.Entities
 {
@@ -168,7 +169,7 @@ namespace Game.Entities
             //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
             // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
 
-                        float posX = field.Read<float>(0);
+            float posX = field.Read<float>(0);
             float posY = field.Read<float>(1);
             float posZ = field.Read<float>(2);
             float o = field.Read<float>(3);
@@ -328,5 +329,27 @@ namespace Game.Entities
         CorpseType m_type;
         long m_time;
         CellCoord _cellCoord;                                    // gride for corpse position for fast search
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Corpse Owner;
+            ObjectFieldData ObjectMask = new();
+            CorpseData CorpseMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Corpse owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), CorpseMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 }

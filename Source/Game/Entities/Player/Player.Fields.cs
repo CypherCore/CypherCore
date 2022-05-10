@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Achievements;
 using Game.BattleGrounds;
 using Game.Chat;
@@ -26,6 +25,7 @@ using Game.Groups;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
+using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections;
 using System.Collections.Generic;
@@ -259,6 +259,30 @@ namespace Game.Entities
         uint m_ingametime;
 
         PlayerCommandStates _activeCheats;
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Player Owner;
+            ObjectFieldData ObjectMask = new();
+            UnitData UnitMask = new();
+            PlayerData PlayerMask = new();
+            ActivePlayerData ActivePlayerMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Player owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), UnitMask.GetUpdateMask(), PlayerMask.GetUpdateMask(), ActivePlayerMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     public class PlayerInfo
