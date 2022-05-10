@@ -153,20 +153,22 @@ namespace Game.Networking.Packets
     {
         public int Season;
         public List<DungeonScoreMapData> Maps = new();
+        public List<DungeonScoreMapData> Maps2 = new();
         public float SeasonScore;
+        public float SeasonScore2 = 0.0f;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Season);
             data.WriteInt32(Maps.Count);
-            data.WriteUInt32(0);
+            data.WriteInt32(Maps2.Count);
             data.WriteFloat(SeasonScore);
-            data.WriteFloat(0);
+            data.WriteFloat(SeasonScore2);
 
             foreach (var map in Maps)
                 map.Write(data);
 
-            foreach (var map in Maps)
+            foreach (var map in Maps2)
                 map.Write(data);
         }
     }
