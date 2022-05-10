@@ -745,7 +745,7 @@ namespace Framework.Constants
         GameEvent = 24,
         SItemQuality = 25,
 
-        Max = 25
+        Max
     }
 
     public enum ProgressType

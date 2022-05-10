@@ -69,7 +69,6 @@ namespace Game.Entities
         public bool m_canDualWield;
         public int BaseSpellCritChance { get; set; }
         public uint RegenTimer { get; set; }
-        uint combatTimer;
         public uint ExtraAttacks { get; set; }
 
         //Charm

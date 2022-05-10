@@ -34,6 +34,9 @@ namespace Game.Guilds
         public Guild()
         {
             m_achievementSys = new GuildAchievementMgr(this);
+
+            for (var i = 0; i < m_bankEventLog.Length; ++i)
+                m_bankEventLog[i] = new LogHolder<BankEventLogEntry>();
         }
 
         public bool Create(Player pLeader, string name)
@@ -2555,9 +2558,9 @@ namespace Game.Guilds
         List<BankTab> m_bankTabs = new();
 
         // These are actually ordered lists. The first element is the oldest entry.
-        LogHolder<EventLogEntry> m_eventLog;
+        LogHolder<EventLogEntry> m_eventLog = new();
         LogHolder<BankEventLogEntry>[] m_bankEventLog = new LogHolder<BankEventLogEntry>[GuildConst.MaxBankTabs + 1];
-        LogHolder<NewsLogEntry> m_newsLog;
+        LogHolder<NewsLogEntry> m_newsLog = new();
         GuildAchievementMgr m_achievementSys;
         #endregion
 

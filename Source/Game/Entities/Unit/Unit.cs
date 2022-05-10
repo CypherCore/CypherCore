@@ -1960,7 +1960,6 @@ namespace Game.Entities
 
         public SheathState GetSheath() { return (SheathState)(byte)m_unitData.SheatheState; }
 
-        public uint GetCombatTimer() { return combatTimer; }
         public UnitPVPStateFlags GetPvpFlags() { return (UnitPVPStateFlags)(byte)m_unitData.PvpFlags; }
         public bool HasPvpFlag(UnitPVPStateFlags flags) { return (m_unitData.PvpFlags & (uint)flags) != 0; }
         public void AddPvpFlag(UnitPVPStateFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PvpFlags), (byte)flags); }

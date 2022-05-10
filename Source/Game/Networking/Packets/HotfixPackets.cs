@@ -91,7 +91,6 @@ namespace Game.Networking.Packets
         }
 
         public uint VirtualRealmAddress;
-        public uint HotfixCount;
         public MultiMap<int, HotfixRecord> Hotfixes;
     }
 
