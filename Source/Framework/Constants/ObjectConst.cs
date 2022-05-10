@@ -107,6 +107,9 @@ namespace Framework.Constants
         Cast = 47,
         ClientConnection = 48,
         ClubFinder = 49,
+        ToolsClient = 50,
+        WorldLayer = 51,
+        ArenaTeam = 52,
 
         Count
     }
