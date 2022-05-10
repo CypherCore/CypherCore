@@ -349,6 +349,8 @@ namespace Game.DataStorage
         public uint DurationInInventory;
         public float QualityModifier;
         public uint BagFamily;
+        public uint StartQuestID;
+        public int LanguageID;
         public float ItemRange;
         public float[] StatPercentageOfSocket = new float[ItemConst.MaxStats];
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
@@ -375,7 +377,6 @@ namespace Game.DataStorage
         public ushort[] ZoneBound = new ushort[2];
         public ushort ItemSet;
         public ushort LockID;
-        public ushort StartQuestID;
         public ushort PageID;
         public ushort ItemDelay;
         public ushort MinFactionID;
@@ -390,7 +391,6 @@ namespace Game.DataStorage
         public byte SheatheType;
         public byte Material;
         public byte PageMaterialID;
-        public byte LanguageID;
         public byte Bonding;
         public byte DamageType;
         public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];

@@ -1798,7 +1798,7 @@ namespace Framework.Constants
         DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
     }
 
-    public enum TaxiNodeFlags : byte
+    public enum TaxiNodeFlags : ushort
     {
         Alliance = 0x1,
         Horde = 0x2,

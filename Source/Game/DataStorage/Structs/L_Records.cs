@@ -31,6 +31,9 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
+        public int Flags;
+        public int UiTextureKitID;
+        public int UiTextureKitElementCount;
     }
 
     public sealed class LFGDungeonsRecord

@@ -421,6 +421,10 @@ namespace Framework.Constants
         PlayerBestWeeklyWinPvpTierInBracketEqualOrGreaterThan = 325, // (Mainline) Player has best weekly win at or above "{@PVP_TIER_ENUM}" for "{@PVP_BRACKET}"
         PlayerHasVanillaCollectorsEdition = 326, // Player has Vanilla Collector's Edition
         PlayerHasItemWithKeystoneLevelModifierEqualOrGreaterThan = 327,
+
+        PlayerMythicPlusRatingInDisplaySeasonEqualOrGreaterThan = 329, /*NYI*/ // Player has Mythic+ Rating of at least "{#DungeonScore}" in {DisplaySeason}
+
+        MythicPlusRatingIsInTop01Percent = 334, // top 0.1% rating
     }
 
     public enum CriteriaFailEvent : byte
@@ -709,6 +713,7 @@ namespace Framework.Constants
         ObtainAnyItemWithCurrencyValue = 229, /*NYI*/ // Obtain Any Item With Currency Value "{CurrencyTypes}"
         MythicPlusRatingAttained = 230, /*NYI*/ // (Player) Mythic+ Rating "{#DungeonScore}" attained
         SpentTalentPoint = 231, /*NYI*/ // (Player) spent talent point
+        MythicPlusDisplaySeasonEnded = 234, /*NYI*/ // {DisplaySeason}
 
         Count
     }

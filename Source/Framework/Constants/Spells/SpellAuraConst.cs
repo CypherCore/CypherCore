@@ -527,6 +527,7 @@ namespace Framework.Constants
         ModVersatilityHealingDoneBenefit = 503, // NYI
         ModHealingTakenFromCaster = 504,
         ModPlayerChoiceRerolls = 505, // NYI
+        DisableInertia = 506, // NYI
         Total
     }
 

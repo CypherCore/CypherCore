@@ -2418,6 +2418,8 @@ namespace Framework.Constants
         ModifyKeystone2 = 285,
         GrantBattlepetExperience = 286,
         SetGarrisonFollowerLevel = 287,
+        Unk288 = 288,
+        Unk289 = 289,
         TotalSpellEffects
     }
 
