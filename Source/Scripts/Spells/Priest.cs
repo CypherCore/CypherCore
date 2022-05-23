@@ -58,6 +58,7 @@ namespace Scripts.Spells.Priest
         public const uint Penance = 47540;
         public const uint PenanceChannelDamage = 47758;
         public const uint PenanceChannelHealing = 47757;
+        public const uint PowerWordShield = 17;
         public const uint PowerWordSolaceEnergize = 129253;
         public const uint PrayerOfMendingAura = 41635;
         public const uint PrayerOfMendingHeal = 33110;
@@ -815,6 +816,36 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 47536 - Rapture
+    class spell_pri_rapture : SpellScript
+    {
+        ObjectGuid _raptureTarget;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerWordShield);
+        }
+
+        void HandleEffectDummy(uint effIndex)
+        {
+            _raptureTarget = GetHitUnit().GetGUID();
+        }
+
+        void HandleAfterCast()
+        {
+            Unit caster = GetCaster();
+            Unit target = Global.ObjAccessor.GetUnit(caster, _raptureTarget);
+            if (target != null)
+                caster.CastSpell(target, SpellIds.PowerWordShield, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            AfterCast.Add(new CastHandler(HandleAfterCast));
+        }
+    }
+    
     [Script] // 20711 - Spirit of Redemption
     class spell_pri_spirit_of_redemption : AuraScript
     {
