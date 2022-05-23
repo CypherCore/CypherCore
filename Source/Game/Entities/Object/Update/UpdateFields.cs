@@ -136,6 +136,12 @@ namespace Game.Entities
                             }
                             break;
                         }
+                        case GameObjectTypes.CapturePoint:
+                            if (!gameObject.CanInteractWithCapturePoint(receiver))
+                                dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+                            else
+                                dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
+                            break;
                         default:
                             break;
                     }

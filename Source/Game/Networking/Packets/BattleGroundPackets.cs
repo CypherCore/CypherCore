@@ -463,7 +463,7 @@ namespace Game.Networking.Packets
 
         BracketInfo[] Bracket = new BracketInfo[6];
     }
-    
+
     class PVPMatchInitialize : ServerPacket
     {
         public PVPMatchInitialize() : base(ServerOpcodes.PvpMatchInitialize, ConnectionType.Instance) { }
@@ -518,6 +518,34 @@ namespace Game.Networking.Packets
         public int Duration;
         public PVPMatchStatistics LogData;
         public uint SoloShuffleStatus;
+    }
+
+    class UpdateCapturePoint : ServerPacket
+    {
+        public BattlegroundCapturePointInfo CapturePointInfo;
+
+        public UpdateCapturePoint() : base(ServerOpcodes.UpdateCapturePoint) { }
+
+        public override void Write()
+        {
+            CapturePointInfo.Write(_worldPacket);
+        }
+    }
+
+    class CapturePointRemoved : ServerPacket
+    {
+        public ObjectGuid CapturePointGUID;
+
+        public CapturePointRemoved() : base(ServerOpcodes.CapturePointRemoved) { }
+        public CapturePointRemoved(ObjectGuid capturePointGUID) : base(ServerOpcodes.CapturePointRemoved)
+        {
+            CapturePointGUID = capturePointGUID;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(CapturePointGUID);
+        }
     }
 
     //Structs
@@ -746,5 +774,27 @@ namespace Game.Networking.Packets
         public Vector2 Pos;
         public sbyte IconID;
         public sbyte ArenaSlot;
+    }
+
+    struct BattlegroundCapturePointInfo
+    {
+        public ObjectGuid Guid;
+        public Vector2 Pos;
+        public BattlegroundCapturePointState State = BattlegroundCapturePointState.Neutral;
+        public long CaptureTime;
+        public TimeSpan CaptureTotalDuration;
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(Guid);
+            data.WriteVector2(Pos);
+            data.WriteInt8((sbyte)State);
+
+            if (State == BattlegroundCapturePointState.ContestedHorde || State == BattlegroundCapturePointState.ContestedAlliance)
+            {
+                data.WriteInt64(CaptureTime);
+                data.WriteUInt32((uint)CaptureTotalDuration.TotalMilliseconds);
+            }
+        }
     }
 }

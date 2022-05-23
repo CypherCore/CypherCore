@@ -367,6 +367,10 @@ namespace Game.Entities
                     break;
                 case GameObjectTypes.CapturePoint:
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
+                    m_goValue.CapturePoint.AssaultTimer = 0;
+                    m_goValue.CapturePoint.LastTeamCapture = TeamId.Neutral;
+                    m_goValue.CapturePoint.State = BattlegroundCapturePointState.Neutral;
+                    UpdateCapturePoint();
                     break;
                 default:
                     SetGoAnimProgress(animProgress);
@@ -685,6 +689,51 @@ namespace Game.Entities
                             if (target)
                                 SetLootState(LootState.Activated, target);
                         }
+                        else if (goInfo.type == GameObjectTypes.CapturePoint)
+                        {
+                            bool hordeCapturing = m_goValue.CapturePoint.State == BattlegroundCapturePointState.ContestedHorde;
+                            bool allianceCapturing = m_goValue.CapturePoint.State == BattlegroundCapturePointState.ContestedAlliance;
+                            if (hordeCapturing || allianceCapturing)
+                            {
+                                if (m_goValue.CapturePoint.AssaultTimer <= diff)
+                                {
+                                    m_goValue.CapturePoint.State = hordeCapturing ? BattlegroundCapturePointState.HordeCaptured : BattlegroundCapturePointState.AllianceCaptured;
+                                    if (hordeCapturing)
+                                    {
+                                        m_goValue.CapturePoint.State = BattlegroundCapturePointState.HordeCaptured;
+                                        BattlegroundMap map = GetMap().ToBattlegroundMap();
+                                        if (map != null)
+                                        {
+                                            Battleground bg = map.GetBG();
+                                            if (bg != null)
+                                            {
+                                                EventInform(GetGoInfo().CapturePoint.CaptureEventHorde);
+                                                bg.SendBroadcastText(GetGoInfo().CapturePoint.CaptureBroadcastHorde, ChatMsg.BgSystemHorde);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        m_goValue.CapturePoint.State = BattlegroundCapturePointState.AllianceCaptured;
+                                        BattlegroundMap map = GetMap().ToBattlegroundMap();
+                                        if (map != null)
+                                        {
+                                            Battleground bg = map.GetBG();
+                                            if (bg != null)
+                                            {
+                                                EventInform(GetGoInfo().CapturePoint.CaptureEventAlliance);
+                                                bg.SendBroadcastText(GetGoInfo().CapturePoint.CaptureBroadcastAlliance, ChatMsg.BgSystemAlliance);
+                                            }
+                                        }
+                                    }
+
+                                    m_goValue.CapturePoint.LastTeamCapture = hordeCapturing ? TeamId.Horde : TeamId.Alliance;
+                                    UpdateCapturePoint();
+                                }
+                                else
+                                    m_goValue.CapturePoint.AssaultTimer -= diff;
+                            }
+                        }
                         else if ((max_charges = goInfo.GetCharges()) != 0)
                         {
                             if (m_usetimes >= max_charges)
@@ -945,6 +994,9 @@ namespace Game.Entities
         {
             SetLootState(LootState.NotReady);
             RemoveFromOwner();
+
+            if (m_goInfo.type == GameObjectTypes.CapturePoint)
+                SendMessageToSet(new CapturePointRemoved(GetGUID()), true);
 
             SendGameObjectDespawn();
 
@@ -2891,6 +2943,169 @@ namespace Game.Entities
             SendMessageToSet(packet, true);
         }
 
+        public void AssaultCapturePoint(Player player)
+        {
+            if (!CanInteractWithCapturePoint(player))
+                return;
+
+            GameObjectAI ai = GetAI();
+            if (ai != null)
+                if (ai.OnCapturePointAssaulted(player))
+                    return;
+
+            // only supported in battlegrounds
+            Battleground battleground = null;
+            BattlegroundMap map = GetMap().ToBattlegroundMap();
+            if (map != null)
+            {
+                Battleground bg = map.GetBG();
+                if (bg != null)
+                    battleground = bg;
+            }
+
+            if (!battleground)
+                return;
+
+            // Cancel current timer
+            m_goValue.CapturePoint.AssaultTimer = 0;
+
+            if (player.GetBGTeam() == Team.Horde)
+            {
+                if (m_goValue.CapturePoint.LastTeamCapture == TeamId.Horde)
+                {
+                    // defended. capture instantly.
+                    m_goValue.CapturePoint.State = BattlegroundCapturePointState.HordeCaptured;
+                    battleground.SendBroadcastText(GetGoInfo().CapturePoint.DefendedBroadcastHorde, ChatMsg.BgSystemHorde, player);
+                    UpdateCapturePoint();
+                    EventInform(GetGoInfo().CapturePoint.DefendedEventHorde, player);
+                    return;
+                }
+
+                switch (m_goValue.CapturePoint.State)
+                {
+                    case BattlegroundCapturePointState.Neutral:
+                    case BattlegroundCapturePointState.AllianceCaptured:
+                    case BattlegroundCapturePointState.ContestedAlliance:
+                        m_goValue.CapturePoint.State = BattlegroundCapturePointState.ContestedHorde;
+                        battleground.SendBroadcastText(GetGoInfo().CapturePoint.AssaultBroadcastHorde, ChatMsg.BgSystemHorde, player);
+                        UpdateCapturePoint();
+                        EventInform(GetGoInfo().CapturePoint.AssaultBroadcastHorde, player);
+                        m_goValue.CapturePoint.AssaultTimer = GetGoInfo().CapturePoint.CaptureTime;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                if (m_goValue.CapturePoint.LastTeamCapture == TeamId.Alliance)
+                {
+                    // defended. capture instantly.
+                    m_goValue.CapturePoint.State = BattlegroundCapturePointState.AllianceCaptured;
+                    battleground.SendBroadcastText(GetGoInfo().CapturePoint.DefendedBroadcastAlliance, ChatMsg.BgSystemAlliance, player);
+                    UpdateCapturePoint();
+                    EventInform(GetGoInfo().CapturePoint.DefendedEventAlliance, player);
+                    return;
+                }
+
+                switch (m_goValue.CapturePoint.State)
+                {
+                    case BattlegroundCapturePointState.Neutral:
+                    case BattlegroundCapturePointState.HordeCaptured:
+                    case BattlegroundCapturePointState.ContestedHorde:
+                        m_goValue.CapturePoint.State = BattlegroundCapturePointState.ContestedAlliance;
+                        battleground.SendBroadcastText(GetGoInfo().CapturePoint.AssaultBroadcastAlliance, ChatMsg.BgSystemAlliance, player);
+                        UpdateCapturePoint();
+                        EventInform(GetGoInfo().CapturePoint.ContestedEventAlliance, player);
+                        m_goValue.CapturePoint.AssaultTimer = GetGoInfo().CapturePoint.CaptureTime;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void UpdateCapturePoint()
+        {
+            if (GetGoType() != GameObjectTypes.CapturePoint)
+                return;
+
+            GameObjectAI ai = GetAI();
+            if (ai != null)
+                if (ai.OnCapturePointUpdated(m_goValue.CapturePoint.State))
+                    return;
+
+            uint spellVisualId = 0;
+            uint customAnim = 0;
+
+            switch (m_goValue.CapturePoint.State)
+            {
+                case BattlegroundCapturePointState.Neutral:
+                    spellVisualId = GetGoInfo().CapturePoint.SpellVisual1;
+                    break;
+                case BattlegroundCapturePointState.ContestedHorde:
+                    customAnim = 1;
+                    spellVisualId = GetGoInfo().CapturePoint.SpellVisual2;
+                    break;
+                case BattlegroundCapturePointState.ContestedAlliance:
+                    customAnim = 2;
+                    spellVisualId = GetGoInfo().CapturePoint.SpellVisual3;
+                    break;
+                case BattlegroundCapturePointState.HordeCaptured:
+                    customAnim = 3;
+                    spellVisualId = GetGoInfo().CapturePoint.SpellVisual4;
+                    break;
+                case BattlegroundCapturePointState.AllianceCaptured:
+                    customAnim = 4;
+                    spellVisualId = GetGoInfo().CapturePoint.SpellVisual5;
+                    break;
+                default:
+                    break;
+            }
+
+            if (customAnim != 0)
+                SendCustomAnim(customAnim);
+
+            SetSpellVisualId(spellVisualId);
+            UpdateDynamicFlagsForNearbyPlayers();
+
+            BattlegroundMap map = GetMap().ToBattlegroundMap();
+            if (map != null)
+            {
+                Battleground bg = map.GetBG();
+                if (bg != null)
+                {
+                    UpdateCapturePoint packet = new();
+                    packet.CapturePointInfo.State = m_goValue.CapturePoint.State;
+                    packet.CapturePointInfo.Pos = GetPosition();
+                    packet.CapturePointInfo.Guid = GetGUID();
+                    packet.CapturePointInfo.CaptureTotalDuration = TimeSpan.FromMilliseconds(GetGoInfo().CapturePoint.CaptureTime);
+                    packet.CapturePointInfo.CaptureTime = m_goValue.CapturePoint.AssaultTimer;
+                    bg.SendPacketToAll(packet);
+                    bg.UpdateWorldState(GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
+                }
+            }
+        }
+
+        public bool CanInteractWithCapturePoint(Player target)
+        {
+            if (m_goInfo.type != GameObjectTypes.CapturePoint)
+                return false;
+
+            if (m_goValue.CapturePoint.State == BattlegroundCapturePointState.Neutral)
+                return true;
+
+            if (target.GetBGTeam() == Team.Horde)
+            {
+                return m_goValue.CapturePoint.State == BattlegroundCapturePointState.ContestedAlliance
+                    || m_goValue.CapturePoint.State == BattlegroundCapturePointState.AllianceCaptured;
+            }
+
+            // For Alliance players
+            return m_goValue.CapturePoint.State == BattlegroundCapturePointState.ContestedHorde
+                || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
+        }
+        
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
@@ -3050,6 +3265,14 @@ namespace Game.Entities
             return IsInRange(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), dist2compare);
         }
 
+        void UpdateDynamicFlagsForNearbyPlayers()
+        {
+            ValuesUpdateForPlayerWithMaskSender sender = new(this);
+            sender.ObjectMask.MarkChanged(m_objectData.DynamicFlags);
+            MessageDistDeliverer<ValuesUpdateForPlayerWithMaskSender> deliverer = new(this, sender, GetVisibilityRange());
+            Cell.VisitWorldObjects(this, deliverer, GetVisibilityRange());
+        }
+
         public void CreateModel()
         {
             m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
@@ -3113,9 +3336,9 @@ namespace Game.Entities
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {
-            GameObject Owner;
-            ObjectFieldData ObjectMask = new();
-            GameObjectFieldData GameObjectMask = new();
+            public GameObject Owner;
+            public ObjectFieldData ObjectMask = new();
+            public GameObjectFieldData GameObjectMask = new();
 
             public ValuesUpdateForPlayerWithMaskSender(GameObject owner)
             {
@@ -3160,6 +3383,8 @@ namespace Game.Entities
 
         public building Building;
 
+        public capturePoint CapturePoint;
+
         //11 GAMEOBJECT_TYPE_TRANSPORT
         public struct transport
         {
@@ -3181,6 +3406,13 @@ namespace Game.Entities
         {
             public uint Health;
             public uint MaxHealth;
+        }
+        //42 GAMEOBJECT_TYPE_CAPTURE_POINT
+        public struct capturePoint
+        {
+            public int LastTeamCapture;
+            public BattlegroundCapturePointState State;
+            public uint AssaultTimer;
         }
     }
 }

@@ -294,6 +294,7 @@ namespace Game.BattleGrounds
                         bg = new BgWarsongGluch(bgTemplate);
                         break;
                     case BattlegroundTypeId.AB:
+                    case BattlegroundTypeId.DomAb:
                         bg = new BgArathiBasin(bgTemplate);
                         break;                        
                     case BattlegroundTypeId.NA:

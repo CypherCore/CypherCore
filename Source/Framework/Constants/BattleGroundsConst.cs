@@ -450,4 +450,13 @@ namespace Framework.Constants
         PersonalRating = 6,
         End = 7
     }
+
+    public enum BattlegroundCapturePointState
+    {
+        Neutral = 1,
+        ContestedHorde = 2,
+        ContestedAlliance = 3,
+        HordeCaptured = 4,
+        AllianceCaptured = 5
+    }
 }

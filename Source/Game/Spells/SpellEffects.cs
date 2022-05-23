@@ -1281,6 +1281,11 @@ namespace Game.Spells
                         return;
                     }
                 }
+                else if (goInfo.type == GameObjectTypes.CapturePoint)
+                {
+                    gameObjTarget.AssaultCapturePoint(player);
+                    return;
+                }
                 else if (goInfo.type == GameObjectTypes.FlagStand)
                 {
                     //CanUseBattlegroundObject() already called in CheckCast()

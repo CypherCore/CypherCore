@@ -532,7 +532,7 @@ namespace Game.BattleGrounds
             return _battlegroundTemplate.MaxStartDistSq;
         }
         
-        void SendPacketToAll(ServerPacket packet)
+        public void SendPacketToAll(ServerPacket packet)
         {
             foreach (var pair in m_Players)
             {

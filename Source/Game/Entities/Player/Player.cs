@@ -3022,7 +3022,7 @@ namespace Game.Entities
                     }
                     break;
                 case 3358:                                          // Arathi Basin
-                    if (bg && bg.GetTypeID(true) == BattlegroundTypeId.AB)
+                    if (bg && (bg.GetTypeID(true) == BattlegroundTypeId.AB || bg.GetTypeID(true) == BattlegroundTypeId.DomAb))
                         bg.FillInitialWorldStates(packet);
                     else
                     {
