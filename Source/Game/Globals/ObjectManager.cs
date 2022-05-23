@@ -11842,11 +11842,6 @@ namespace Game
 
     public class PlayerChoice
     {
-        public PlayerChoiceResponse GetResponse(int responseId)
-        {
-            return Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
-        }
-
         public int ChoiceId;
         public int UiTextureKitId;
         public uint SoundKitId;
@@ -11857,6 +11852,16 @@ namespace Game
         public List<PlayerChoiceResponse> Responses = new();
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
+
+        public PlayerChoiceResponse GetResponse(int responseId)
+        {
+            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
+        }
+
+        public PlayerChoiceResponse GetResponseByIdentifier(int responseIdentifier)
+        {
+            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseIdentifier == responseIdentifier);
+        }
     }
 
     public class ClassAvailability

@@ -787,14 +787,14 @@ namespace Game
             if (playerChoice == null)
                 return;
 
-            PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponse(choiceResponse.ResponseID);
+            PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponseByIdentifier(choiceResponse.ResponseIdentifier);
             if (playerChoiceResponse == null)
             {
-                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseID} (possible packet-hacking detected)");
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseIdentifier} (possible packet-hacking detected)");
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseID);
+            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseIdentifier);
 
             if (playerChoiceResponse.Reward != null)
             {

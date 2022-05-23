@@ -889,12 +889,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             ChoiceID = _worldPacket.ReadInt32();
-            ResponseID = _worldPacket.ReadInt32();
+            ResponseIdentifier = _worldPacket.ReadInt32();
             IsReroll = _worldPacket.HasBit();
         }
 
         public int ChoiceID;
-        public int ResponseID;
+        public int ResponseIdentifier;
         public bool IsReroll;
     }
 
