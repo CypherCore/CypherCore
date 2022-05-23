@@ -1989,7 +1989,7 @@ namespace Game.Spells
             }
 
             // call functions which may have additional effects after changing state of unit
-            if (target.IsInWorld) 
+            if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
@@ -3207,7 +3207,7 @@ namespace Game.Spells
 
             aurApp.GetTarget().HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetAmount(), apply);
         }
-        
+
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
         void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4762,7 +4762,7 @@ namespace Game.Spells
 
             aurApp.GetTarget().CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
         }
-        
+
         [AuraEffectHandler(AuraType.OpenStable)]
         void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5873,7 +5873,7 @@ namespace Game.Spells
 
             aurApp.GetTarget().UpdateMountCapability();
         }
-        
+
         [AuraEffectHandler(AuraType.CosmeticMounted)]
         void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5906,6 +5906,19 @@ namespace Game.Spells
             // Refresh applications
             foreach (Aura aura in suppressedAuras)
                 aura.ApplyForTargets();
+        }
+
+        [AuraEffectHandler(AuraType.ForceBeathBar)]
+        void HandleForceBreathBar(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player playerTarget = aurApp.GetTarget().ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            playerTarget.UpdatePositionData();
         }
         #endregion
     }

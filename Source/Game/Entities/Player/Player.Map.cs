@@ -792,44 +792,33 @@ namespace Game.Entities
             // process liquid auras using generic unit code
             base.ProcessTerrainStatusUpdate(oldLiquidStatus, newLiquidData);
 
+            m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
+
             // player specific logic for mirror timers
             if (GetLiquidStatus() != 0 && newLiquidData != null)
             {
                 // Breath bar state (under water in any liquid type)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.AllLiquids))
-                {
                     if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.UnderWater))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
-                    else
-                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InWater;
-                }
 
                 // Fatigue bar state (if not on flight path or transport)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) && !IsInFlight() && !GetTransport())
                     m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
-                else
-                    m_MirrorTimerFlags &= ~PlayerUnderwaterState.InDarkWater;
 
                 // Lava state (any contact)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Magma))
-                {
                     if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InContact))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InLava;
-                    else
-                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InLava;
-                }
 
                 // Slime state (any contact)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Slime))
-                {
                     if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InContact))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;
-                    else
-                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InSlime;
-                }
             }
-            else
-                m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
+
+            if (HasAuraType(AuraType.ForceBeathBar))
+                m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
         }
     }
 }

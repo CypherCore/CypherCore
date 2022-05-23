@@ -185,7 +185,7 @@ namespace Framework.Constants
         ModHealthRegenInCombat = 161,
         PowerBurn = 162,
         ModCritDamageBonus = 163,
-        ForceBeathBar = 164, //NYI
+        ForceBeathBar = 164,
         MeleeAttackPowerAttackerBonus = 165,
         ModAttackPowerPct = 166,
         ModRangedAttackPowerPct = 167,
