@@ -50,8 +50,6 @@ namespace Scripts.Spells.Druid
         public const uint EclipseSolarAura = 48517;
         public const uint EclipseSolarSpellCnt = 326053;
         public const uint Exhilarate = 28742;
-        public const uint FeralChargeBear = 16979;
-        public const uint FeralChargeCat = 49376;
         public const uint FormAquaticPassive = 276012;
         public const uint FormAquatic = 1066;
         public const uint FormFlight = 33943;
@@ -71,8 +69,6 @@ namespace Scripts.Spells.Druid
         public const uint Languish = 71023;
         public const uint LifebloomEnergize = 64372;
         public const uint LifebloomFinalHeal = 33778;
-        public const uint LivingSeedHeal = 48503;
-        public const uint LivingSeedProc = 48504;
         public const uint Mangle = 33917;
         public const uint MoonfireDamage = 164812;
         public const uint Prowl = 5215;
@@ -81,9 +77,6 @@ namespace Scripts.Spells.Druid
         public const uint SavageRoar = 62071;
         public const uint SkullBashCharge = 221514;
         public const uint SkullBashInterrupt = 93985;
-        public const uint StampedeBearRank1 = 81016;
-        public const uint StampedeCatRank1 = 81021;
-        public const uint StampedeCatState = 109881;
         public const uint SunfireDamage = 164815;
         public const uint SurvivalInstincts = 50322;
         public const uint TravelForm = 783;
@@ -450,24 +443,6 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    [Script] // 33943 - Flight Form
-    class spell_dru_flight_form : SpellScript
-    {
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (caster.IsInDisallowedMountForm())
-                return SpellCastResult.NotShapeshift;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
-    }
-
     [Script] // 37336 - Druid Forms Trinket
     class spell_dru_forms_trinket : AuraScript
     {
@@ -587,30 +562,6 @@ namespace Scripts.Spells.Druid
         {
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // 34246 - Idol of the Emerald Queen
-    [Script] // 60779 - Idol of Lush Moss
-    class spell_dru_idol_lifebloom : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                SpellModifierByClassMask mod = new(GetAura());
-                mod.op = SpellModOp.PeriodicHealingAndDamage;
-                mod.type = SpellModType.Flat;
-                mod.spellId = GetId();
-                mod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
-                spellMod = mod;
-            }
-            (spellMod as SpellModifierByClassMask).value = aurEff.GetAmount() / 7;
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
         }
     }
 
@@ -764,54 +715,6 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    [Script] // 48496 - Living Seed
-    class spell_dru_living_seed : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.LivingSeedProc);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo ==  null || healInfo.GetHeal() == 0)
-                return;
-
-            CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()));
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.LivingSeedProc, args);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 48504 - Living Seed (Proc)
-    class spell_dru_living_seed_proc : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.LivingSeedHeal);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
-            GetTarget().CastSpell(GetTarget(), SpellIds.LivingSeedHeal, args);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] //  8921 - Moonfire
     class spell_dru_moonfire : SpellScript
     {
@@ -849,23 +752,6 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
-    [Script] // 16972 - Predatory Strikes
-    class spell_dru_predatory_strikes : AuraScript
-    {
-        void UpdateAmount(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Player target = GetTarget().ToPlayer();
-            if (target != null)
-                target.UpdateAttackPowerAndDamage();
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(UpdateAmount, SpellConst.EffectAll, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
-            AfterEffectRemove.Add(new EffectApplyHandler(UpdateAmount, SpellConst.EffectAll, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
         }
     }
 
@@ -988,40 +874,6 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 78892 - Stampede
-    class spell_dru_stampede : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.StampedeBearRank1, SpellIds.StampedeCatRank1, SpellIds.StampedeCatState, SpellIds.FeralChargeCat, SpellIds.FeralChargeBear);
-        }
-
-        void HandleEffectCatProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.CatForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeCat)
-                return;
-
-            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeCatRank1, GetSpellInfo().GetRank()), new CastSpellExtraArgs(aurEff));
-            GetTarget().CastSpell(GetTarget(), SpellIds.StampedeCatState, new CastSpellExtraArgs(aurEff));
-        }
-
-        void HandleEffectBearProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.BearForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeBear)
-                return;
-
-            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeBearRank1, GetSpellInfo().GetRank()), new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectCatProc, 0, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectBearProc, 1, AuraType.Dummy));
         }
     }
 
