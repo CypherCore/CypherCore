@@ -2752,7 +2752,11 @@ namespace Game.Entities
                 else if (questGiver.IsQuestGiver())
                     packet.LaunchQuest = true;
                 else if (quest.NextQuestInChain != 0 && !quest.HasFlag(QuestFlags.AutoComplete))
-                    packet.UseQuestReward = true;
+                {
+                    Quest rewardQuest = Global.ObjectMgr.GetQuestTemplate(quest.NextQuestInChain);
+                    if (rewardQuest != null)
+                        packet.UseQuestReward = CanTakeQuest(rewardQuest, false);
+                }
             }
 
             packet.HideChatMessage = hideChatMessage;
