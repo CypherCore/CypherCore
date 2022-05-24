@@ -118,10 +118,6 @@ namespace Scripts.World.NpcSpecial
         public const uint Gnimo = 32639;
         public const uint DrixBlackwrench = 32641;
         public const uint Mojodishu = 32642;
-
-        //Training Dummy
-        public const uint AdvancedTargetDummy = 2674;
-        public const uint TargetDummy = 2673;
     }
 
     struct GameobjectIds
@@ -1317,12 +1313,7 @@ namespace Scripts.World.NpcSpecial
     {
         Dictionary<ObjectGuid, TimeSpan> _combatTimer = new();
 
-        public npc_training_dummy(Creature creature) : base(creature)
-        {
-            uint entry = me.GetEntry();
-            if (entry == CreatureIds.TargetDummy || entry == CreatureIds.AdvancedTargetDummy)
-                me.DespawnOrUnsummon(TimeSpan.FromSeconds(16));
-        }
+        public npc_training_dummy(Creature creature) : base(creature) { }
 
         public override void DamageTaken(Unit attacker, ref uint damage)
         {
