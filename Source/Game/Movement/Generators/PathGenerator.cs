@@ -87,8 +87,7 @@ namespace Game.Movement
                 return 0;
 
             ulong nearestPoly = 0;
-            float minDist2d = float.MaxValue;
-            float minDist3d = 0.0f;
+            float minDist = float.MaxValue;
 
             for (uint i = 0; i < polyPathSize; ++i)
             {
@@ -97,21 +96,20 @@ namespace Game.Movement
                 if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPoly(polyPath[i], point, closestPoint, ref posOverPoly)))
                     continue;
 
-                float d = Detour.dtVdist2DSqr(point, closestPoint);
-                if (d < minDist2d)
+                float d = Detour.dtVdistSqr(point, closestPoint);
+                if (d < minDist)
                 {
-                    minDist2d = d;
+                    minDist = d;
                     nearestPoly = polyPath[i];
-                    minDist3d = Detour.dtVdistSqr(point, closestPoint);
                 }
 
-                if (minDist2d < 1.0f) // shortcut out - close enough for us
+                if (minDist < 1.0f) // shortcut out - close enough for us
                     break;
             }
 
-            distance = (float)Math.Sqrt(minDist3d);
+            distance = (float)Math.Sqrt(minDist);
 
-            return (minDist2d < 3.0f) ? nearestPoly : 0u;
+            return (minDist < 3.0f) ? nearestPoly : 0u;
         }
 
         ulong GetPolyByLocation(float[] point, ref float distance)
