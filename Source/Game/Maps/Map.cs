@@ -2374,48 +2374,45 @@ namespace Game.Maps
                 return false;
             }
 
-            uint poolId = info.spawnId != 0 ? Global.PoolMgr.IsPartOfAPool(info.type, info.spawnId) : 0;
             // Next, check if there's already an instance of this object that would block the respawn
             // Only do this for unpooled spawns
-            if (poolId == 0)
+            bool alreadyExists = false;
+            switch (info.type)
             {
-                bool doDelete = false;
-                switch (info.type)
+                case SpawnObjectType.Creature:
                 {
-                    case SpawnObjectType.Creature:
+                    // escort check for creatures only (if the world config boolean is set)
+                    bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
+
+                    var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
+                    foreach (var creature in range)
                     {
-                        // escort check for creatures only (if the world config boolean is set)
-                        bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
+                        if (!creature.IsAlive())
+                            continue;
 
-                        var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
-                        foreach (var creature in range)
-                        {
-                            if (!creature.IsAlive())
-                                continue;
+                        // escort NPCs are allowed to respawn as long as all other instances are already escorting
+                        if (isEscort && creature.IsEscorted())
+                            continue;
 
-                            // escort NPCs are allowed to respawn as long as all other instances are already escorting
-                            if (isEscort && creature.IsEscorted())
-                                continue;
-
-                            doDelete = true;
-                            break;
-                        }
+                        alreadyExists = true;
                         break;
                     }
-                    case SpawnObjectType.GameObject:
-                        // gameobject check is simpler - they cannot be dead or escorting
-                        if (_gameobjectBySpawnIdStore.ContainsKey(info.spawnId))
-                            doDelete = true;
-                        break;
-                    default:
-                        Cypher.Assert(false, $"Invalid spawn type {info.type} with spawnId {info.spawnId} on map {GetId()}");
-                        return true;
+                    break;
                 }
-                if (doDelete)
-                {
-                    info.respawnTime = 0;
-                    return false;
-                }
+                case SpawnObjectType.GameObject:
+                    // gameobject check is simpler - they cannot be dead or escorting
+                    if (_gameobjectBySpawnIdStore.ContainsKey(info.spawnId))
+                        alreadyExists = true;
+                    break;
+                default:
+                    Cypher.Assert(false, $"Invalid spawn type {info.type} with spawnId {info.spawnId} on map {GetId()}");
+                    return true;
+            }
+
+            if (alreadyExists)
+            {
+                info.respawnTime = 0;
+                return false;
             }
 
             // next, check linked respawn time
@@ -2432,20 +2429,6 @@ namespace Game.Maps
                 else // set us to check again shortly after linked unit
                     respawnTime = Math.Max(now, linkedTime) + RandomHelper.URand(5, 15);
                 info.respawnTime = respawnTime;
-                return false;
-            }
-
-            // now, check if we're part of a pool
-            if (poolId != 0)
-            {
-                // ok, part of a pool - hand off to pool logic to handle this, we're just going to remove the respawn and call it a day
-                if (info.type == SpawnObjectType.GameObject)
-                    Global.PoolMgr.UpdatePool<GameObject>(poolId, info.spawnId);
-                else if (info.type == SpawnObjectType.Creature)
-                    Global.PoolMgr.UpdatePool<Creature>(poolId, info.spawnId);
-                else
-                    Cypher.Assert(false, $"Invalid spawn type {info.type} (spawnid {info.spawnId}) on map {GetId()}");
-                info.respawnTime = 0;
                 return false;
             }
 
@@ -2650,22 +2633,37 @@ namespace Game.Maps
                 if (now < next.respawnTime) // done for this tick
                     break;
 
-                if (CheckRespawn(next)) // see if we're allowed to respawn
-                {
-                    // ok, respawn
+                uint poolId = Global.PoolMgr.IsPartOfAPool(next.type, next.spawnId);
+                if (poolId != 0) // is this part of a pool?
+                { // if yes, respawn will be handled by (external) pooling logic, just delete the respawn time
+                    // step 1: remove entry from maps to avoid it being reachable by outside logic
                     _respawnTimes.Remove(next);
+
+                    // step 2: tell pooling logic to do its thing
+                    Global.PoolMgr.UpdatePool(poolId, next.type, next.spawnId);
+
+                    // step 3: get rid of the actual entry
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
+                }
+                else if (CheckRespawn(next)) // see if we're allowed to respawn
+                { // ok, respawn
+                  // step 1: remove entry from maps to avoid it being reachable by outside logic
+                    _respawnTimes.Remove(next);
+
+                    // step 2: do the respawn, which involves external logic
                     DoRespawn(next.type, next.spawnId, next.gridId);
+
+                    // step 3: get rid of the actual entry
+                    GetRespawnMapForType(next.type).Remove(next.spawnId);
                 }
-                else if (next.respawnTime == 0) // just remove respawn entry without rescheduling
-                {
+                else if (next.respawnTime == 0)
+                { // just remove this respawn entry without rescheduling
                     _respawnTimes.Remove(next);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
                 }
-                else // value changed, update heap position
-                {
+                else
+                { // new respawn time, update heap position
                     Cypher.Assert(now < next.respawnTime); // infinite loop guard
-                                                           //_respawnTimes.decrease(next.handle);
                     SaveRespawnInfoDB(next);
                 }
             }

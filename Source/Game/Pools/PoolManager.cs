@@ -360,6 +360,19 @@ namespace Game
                 SpawnPool<T>(pool_id, db_guid_or_pool_id);
         }
 
+        public void UpdatePool(uint pool_id, SpawnObjectType type, ulong spawnId)
+        {
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    UpdatePool<Creature>(pool_id, spawnId);
+                    break;
+                case SpawnObjectType.GameObject:
+                    UpdatePool<GameObject>(pool_id, spawnId);
+                    break;
+            }
+        }
+
         public uint IsPartOfAPool<T>(ulong db_guid)
         {
             switch (typeof(T).Name)
