@@ -354,6 +354,7 @@ namespace Game.Entities
         public bool Rooted;
         public CreatureChaseMovementType Chase;
         public CreatureRandomMovementType Random;
+        public uint InteractionPauseTimer;
 
         public CreatureMovementData()
         {
@@ -361,6 +362,9 @@ namespace Game.Entities
             Flight = CreatureFlightMovementType.None;
             Swim = true;
             Rooted = false;
+            Chase = CreatureChaseMovementType.Run;
+            Random = CreatureRandomMovementType.Walk;
+            InteractionPauseTimer = WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer);
         }
 
         public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
@@ -371,9 +375,11 @@ namespace Game.Entities
         public CreatureChaseMovementType GetChase() { return Chase; }
         public CreatureRandomMovementType GetRandom() { return Random; }
 
+        public uint GetInteractionPauseTimer() { return InteractionPauseTimer; }
+
         public override string ToString()
         {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}";
+            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
         }
     }
     

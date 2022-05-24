@@ -144,7 +144,9 @@ namespace Game
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
             // Stop the npc if moving
-            unit.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            uint pause = unit.GetMovementTemplate().GetInteractionPauseTimer();
+            if (pause != 0)
+                unit.PauseMovement(pause);
             unit.SetHomePosition(unit.GetPosition());
 
             // If spiritguide, no need for gossip menu, just put player into resurrect queue
@@ -601,7 +603,9 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
-            vendor.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
+            if (pause != 0)
+                vendor.PauseMovement(pause);
             vendor.SetHomePosition(vendor.GetPosition());
 
             VendorItemData vendorItems = vendor.GetVendorItems();

@@ -1841,24 +1841,27 @@ namespace Game
             if (!fields.IsNull(51))
                 creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(51);
 
-            creature.HoverHeight = fields.Read<float>(52);
-            creature.ModHealth = fields.Read<float>(53);
-            creature.ModHealthExtra = fields.Read<float>(54);
-            creature.ModMana = fields.Read<float>(55);
-            creature.ModManaExtra = fields.Read<float>(56);
-            creature.ModArmor = fields.Read<float>(57);
-            creature.ModDamage = fields.Read<float>(58);
-            creature.ModExperience = fields.Read<float>(59);
-            creature.RacialLeader = fields.Read<bool>(60);
-            creature.MovementId = fields.Read<uint>(61);
-            creature.CreatureDifficultyID = fields.Read<int>(62);
-            creature.WidgetSetID = fields.Read<int>(63);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(64);
-            creature.RegenHealth = fields.Read<bool>(65);
-            creature.MechanicImmuneMask = fields.Read<uint>(66);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(67);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(68);
-            creature.ScriptID = GetScriptId(fields.Read<string>(69));
+            if (!fields.IsNull(52))
+                creature.Movement.InteractionPauseTimer = fields.Read<uint>(52);
+
+            creature.HoverHeight = fields.Read<float>(53);
+            creature.ModHealth = fields.Read<float>(54);
+            creature.ModHealthExtra = fields.Read<float>(55);
+            creature.ModMana = fields.Read<float>(56);
+            creature.ModManaExtra = fields.Read<float>(57);
+            creature.ModArmor = fields.Read<float>(58);
+            creature.ModDamage = fields.Read<float>(59);
+            creature.ModExperience = fields.Read<float>(60);
+            creature.RacialLeader = fields.Read<bool>(61);
+            creature.MovementId = fields.Read<uint>(62);
+            creature.CreatureDifficultyID = fields.Read<int>(63);
+            creature.WidgetSetID = fields.Read<int>(64);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(65);
+            creature.RegenHealth = fields.Read<bool>(66);
+            creature.MechanicImmuneMask = fields.Read<uint>(67);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(68);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(69);
+            creature.ScriptID = GetScriptId(fields.Read<string>(70));
 
             creatureTemplateStorage[entry] = creature;
         }
@@ -2346,7 +2349,10 @@ namespace Game
 
             creatureMovementOverrides.Clear();
 
-            SQLResult result = DB.World.Query("SELECT SpawnId, Ground, Swim, Flight, Rooted, Chase, Random from creature_movement_override");
+            // Load the data from creature_movement_override and if NULL fallback to creature_template_movement
+            SQLResult result = DB.World.Query("SELECT cmo.SpawnId,COALESCE(cmo.Ground, ctm.Ground),COALESCE(cmo.Swim, ctm.Swim),COALESCE(cmo.Flight, ctm.Flight),COALESCE(cmo.Rooted, ctm.Rooted),COALESCE(cmo.Chase, ctm.Chase),COALESCE(cmo.Random, ctm.Random)," +
+                "COALESCE(cmo.InteractionPauseTimer, ctm.InteractionPauseTimer) FROM creature_movement_override AS cmo LEFT JOIN creature AS c ON c.guid = cmo.SpawnId LEFT JOIN creature_template_movement AS ctm ON ctm.CreatureId = c.id");
+
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature movement overrides. DB table `creature_movement_override` is empty!");
@@ -2363,12 +2369,20 @@ namespace Game
                 }
 
                 CreatureMovementData movement = new();
-                movement.Ground = (CreatureGroundMovementType)result.Read<byte>(1);
-                movement.Swim = result.Read<bool>(2);
-                movement.Flight = (CreatureFlightMovementType)result.Read<byte>(3);
-                movement.Rooted = result.Read<bool>(4);
-                movement.Chase = (CreatureChaseMovementType)result.Read<byte>(5);
-                movement.Random = (CreatureRandomMovementType)result.Read<byte>(6);
+                if (!result.IsNull(1))
+                    movement.Ground = (CreatureGroundMovementType)result.Read<byte>(1);
+                if (!result.IsNull(2))
+                    movement.Swim = result.Read<bool>(2);
+                if (!result.IsNull(3))
+                    movement.Flight = (CreatureFlightMovementType)result.Read<byte>(3);
+                if (!result.IsNull(4))
+                    movement.Rooted = result.Read<bool>(4);
+                if (!result.IsNull(5))
+                    movement.Chase = (CreatureChaseMovementType)result.Read<byte>(5);
+                if (!result.IsNull(6))
+                    movement.Random = (CreatureRandomMovementType)result.Read<byte>(6);
+                if (!result.IsNull(7))
+                    movement.InteractionPauseTimer = result.Read<uint>(7);
 
                 CheckCreatureMovement("creature_movement_override", spawnId, movement);
 

@@ -73,7 +73,9 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
-            creature.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            uint pause = creature.GetMovementTemplate().GetInteractionPauseTimer();
+            if (pause != 0)
+                creature.PauseMovement(pause);
             creature.SetHomePosition(creature.GetPosition());
 
             _player.PlayerTalkClass.ClearMenus();
