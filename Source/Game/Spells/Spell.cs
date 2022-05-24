@@ -2133,7 +2133,7 @@ namespace Game.Spells
                         createInfo.SetPeriodicReset(resetPeriodicTimer);
                         createInfo.SetOwnerEffectMask(aura_effmask);
 
-                        Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
+                        Aura aura = Aura.TryRefreshStackOrCreate(createInfo, false);
                         if (aura != null)
                         {
                             hitInfo.HitAura = aura.ToUnitAura();
@@ -2146,7 +2146,6 @@ namespace Game.Spells
                                 else
                                     hitInfo.HitAura.ModStackAmount(m_spellValue.AuraStackAmount);
                             }
-
 
                             hitInfo.HitAura.SetDiminishGroup(hitInfo.DRGroup);
 
@@ -2189,6 +2188,9 @@ namespace Game.Spells
                                 hitInfo.HitAura.SetMaxDuration(hitInfo.AuraDuration);
                                 hitInfo.HitAura.SetDuration(hitInfo.AuraDuration);
                             }
+
+                            if (createInfo.IsRefresh)
+                                hitInfo.HitAura.AddStaticApplication(unit, aura_effmask);
                         }
                     }
                     else

@@ -2461,7 +2461,7 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(AuraCreateInfo createInfo)
+        public static Aura TryRefreshStackOrCreate(AuraCreateInfo createInfo, bool updateEffectMask = true)
         {
             Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
 
@@ -2491,9 +2491,13 @@ namespace Game.Spells
                 Unit unit = createInfo.GetOwner().ToUnit();
 
                 // check effmask on owner application (if existing)
-                AuraApplication aurApp = foundAura.GetApplicationOfTarget(unit.GetGUID());
-                if (aurApp != null)
-                    aurApp.UpdateApplyEffectMask(effMask);
+                if (updateEffectMask)
+                {
+                    AuraApplication aurApp = foundAura.GetApplicationOfTarget(unit.GetGUID());
+                    if (aurApp != null)
+                        aurApp.UpdateApplyEffectMask(effMask);
+                }
+
                 return foundAura;
             }
             else
