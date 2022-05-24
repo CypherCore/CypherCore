@@ -5668,8 +5668,8 @@ namespace Game.Maps
 
         public override void InitVisibilityDistance()
         {
-            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInBGArenas();
-            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInBGArenas();
+            m_VisibleDistance = IsBattleArena() ? Global.WorldMgr.GetMaxVisibleDistanceInArenas() : Global.WorldMgr.GetMaxVisibleDistanceInBG();
+            m_VisibilityNotifyPeriod = IsBattleArena() ? Global.WorldMgr.GetVisibilityNotifyPeriodInArenas() : Global.WorldMgr.GetVisibilityNotifyPeriodInBG();
         }
 
         public override EnterState CannotEnter(Player player)

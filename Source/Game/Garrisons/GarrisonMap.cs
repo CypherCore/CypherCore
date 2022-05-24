@@ -54,8 +54,8 @@ namespace Game.Garrisons
         public override void InitVisibilityDistance()
         {
             //init visibility distance for instances
-            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInBGArenas();
-            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInBGArenas();
+            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
+            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
         }
 
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)

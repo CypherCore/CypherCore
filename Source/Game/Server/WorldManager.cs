@@ -1194,22 +1194,36 @@ namespace Game
                 m_MaxVisibleDistanceInInstances = SharedConst.MaxVisibilityDistance;
             }
 
-            //visibility in BG/Arenas
-            m_MaxVisibleDistanceInBGArenas = ConfigMgr.GetDefaultValue("Visibility.Distance.BGArenas", SharedConst.DefaultVisibilityBGAreans);
-            if (m_MaxVisibleDistanceInBGArenas < 45 * rateCreatureAggro)
+            //visibility in BG
+            m_MaxVisibleDistanceInBG = ConfigMgr.GetDefaultValue("Visibility.Distance.BG", SharedConst.DefaultVisibilityBGAreans);
+            if (m_MaxVisibleDistanceInBG < 45 * rateCreatureAggro)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.BGArenas can't be less max aggro radius {0}", 45 * rateCreatureAggro);
-                m_MaxVisibleDistanceInBGArenas = 45 * rateCreatureAggro;
+                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be less max aggro radius {45 * rateCreatureAggro}");
+                m_MaxVisibleDistanceInBG = 45 * rateCreatureAggro;
             }
-            else if (m_MaxVisibleDistanceInBGArenas > SharedConst.MaxVisibilityDistance)
+            else if (m_MaxVisibleDistanceInBG > SharedConst.MaxVisibilityDistance)
             {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.BGArenas can't be greater {0}", SharedConst.MaxVisibilityDistance);
-                m_MaxVisibleDistanceInBGArenas = SharedConst.MaxVisibilityDistance;
+                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be greater {SharedConst.MaxVisibilityDistance}");
+                m_MaxVisibleDistanceInBG = SharedConst.MaxVisibilityDistance;
+            }
+
+            // Visibility in Arenas
+            m_MaxVisibleDistanceInArenas = ConfigMgr.GetDefaultValue("Visibility.Distance.Arenas", SharedConst.DefaultVisibilityBGAreans);
+            if (m_MaxVisibleDistanceInArenas < 45 * rateCreatureAggro)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be less max aggro radius {45 * rateCreatureAggro}");
+                m_MaxVisibleDistanceInArenas = 45 * rateCreatureAggro;
+            }
+            else if (m_MaxVisibleDistanceInArenas > SharedConst.MaxVisibilityDistance)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be greater {SharedConst.MaxVisibilityDistance}");
+                m_MaxVisibleDistanceInArenas = SharedConst.MaxVisibilityDistance;
             }
 
             m_visibility_notify_periodOnContinents = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.OnContinents", SharedConst.DefaultVisibilityNotifyPeriod);
             m_visibility_notify_periodInInstances = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InInstances", SharedConst.DefaultVisibilityNotifyPeriod);
-            m_visibility_notify_periodInBGArenas = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InBGArenas", SharedConst.DefaultVisibilityNotifyPeriod);
+            m_visibility_notify_periodInBG = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InBG", SharedConst.DefaultVisibilityNotifyPeriod);
+            m_visibility_notify_periodInArenas = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InArenas", SharedConst.DefaultVisibilityNotifyPeriod);
 
             _guidWarningMsg = WorldConfig.GetDefaultValue("Respawn.WarningMessage", "There will be an unscheduled server restart at 03:00. The server will be available again shortly after.");
             _alertRestartReason = WorldConfig.GetDefaultValue("Respawn.AlertRestartReason", "Urgent Maintenance");
@@ -2527,11 +2541,13 @@ namespace Game
 
         public float GetMaxVisibleDistanceOnContinents() { return m_MaxVisibleDistanceOnContinents; }
         public float GetMaxVisibleDistanceInInstances() { return m_MaxVisibleDistanceInInstances; }
-        public float GetMaxVisibleDistanceInBGArenas() { return m_MaxVisibleDistanceInBGArenas; }
+        public float GetMaxVisibleDistanceInBG() { return m_MaxVisibleDistanceInBG; }
+        public float GetMaxVisibleDistanceInArenas() { return m_MaxVisibleDistanceInArenas; }
 
         public int GetVisibilityNotifyPeriodOnContinents() { return m_visibility_notify_periodOnContinents; }
         public int GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances; }
-        public int GetVisibilityNotifyPeriodInBGArenas() { return m_visibility_notify_periodInBGArenas; }
+        public int GetVisibilityNotifyPeriodInBG() { return m_visibility_notify_periodInBG; }
+        public int GetVisibilityNotifyPeriodInArenas() { return m_visibility_notify_periodInArenas; }
 
         public Locale GetAvailableDbcLocale(Locale locale)
         {
@@ -2565,11 +2581,13 @@ namespace Game
 
         float m_MaxVisibleDistanceOnContinents = SharedConst.DefaultVisibilityDistance;
         float m_MaxVisibleDistanceInInstances = SharedConst.DefaultVisibilityInstance;
-        float m_MaxVisibleDistanceInBGArenas = SharedConst.DefaultVisibilityBGAreans;
+        float m_MaxVisibleDistanceInBG = SharedConst.DefaultVisibilityBGAreans;
+        float m_MaxVisibleDistanceInArenas = SharedConst.DefaultVisibilityBGAreans;
 
         int m_visibility_notify_periodOnContinents = SharedConst.DefaultVisibilityNotifyPeriod;
         int m_visibility_notify_periodInInstances = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInBGArenas = SharedConst.DefaultVisibilityNotifyPeriod;
+        int m_visibility_notify_periodInBG = SharedConst.DefaultVisibilityNotifyPeriod;
+        int m_visibility_notify_periodInArenas = SharedConst.DefaultVisibilityNotifyPeriod;
 
         bool m_isClosed;
 
