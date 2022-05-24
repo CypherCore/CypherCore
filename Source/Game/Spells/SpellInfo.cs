@@ -3506,7 +3506,6 @@ namespace Game.Spells
                     case AuraType.ModSkill:
                     case AuraType.ModSkill2:
                     case AuraType.ModDodgePercent:
-                    case AuraType.ModHealingPct:
                     case AuraType.ModHealingDone:
                     case AuraType.ModDamageDoneCreature:
                     case AuraType.ObsModHealth:
@@ -3543,6 +3542,7 @@ namespace Game.Spells
                     case AuraType.MeleeSlow:
                     case AuraType.ModAttackPowerPct:
                     case AuraType.ModHealingDonePercent:
+                    case AuraType.ModHealingPct:
                         if (!_isPositiveTarget(effect) || bp < 0)
                             return false;
                         break;
