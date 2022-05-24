@@ -2621,8 +2621,8 @@ namespace Framework.Constants
     {
         UnitCaster = 1,
         UnitNearbyEnemy = 2,
-        UnitNearbyParty = 3,
-        UnitNearbyAlly = 4,
+        UnitNearbyAlly = 3,
+        UnitNearbyParty = 4,
         UnitPet = 5,
         UnitTargetEnemy = 6,
         UnitSrcAreaEntry = 7,
