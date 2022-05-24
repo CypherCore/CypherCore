@@ -492,11 +492,8 @@ namespace Game.AI
         // Called when spell hits a target
         public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo) { }
 
-        // Called when a spell cast gets interrupted
-        public virtual void OnSpellCastInterrupt(SpellInfo spell) { }
-
-        // Called when a spell cast has been successfully finished
-        public virtual void OnSuccessfulSpellCast(SpellInfo spell) { }
+        // Called when a spell either finishes, interrupts or cancels a spell cast
+        public virtual void OnSpellCastFinished(SpellInfo spell, SpellFinishReason reason) { }
 
         // Should return true if the NPC is currently being escorted
         public virtual bool IsEscorted() { return false; }

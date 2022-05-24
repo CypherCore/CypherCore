@@ -98,6 +98,13 @@ namespace Framework.Constants
         Ranged = 2      //hunter range and ranged weapon
     }
 
+    public enum SpellFinishReason
+    {
+        SuccessfulCast = 0, // spell has sucessfully launched
+        Canceled = 1, // spell has been canceled (interrupts)
+        ChannelingComplete = 2  // spell channeling has been finished
+    }
+
     [Flags]
     public enum SpellInterruptFlags
     {

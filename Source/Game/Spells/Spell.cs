@@ -2904,7 +2904,7 @@ namespace Game.Spells
             Creature caster = m_originalCaster.ToCreature();
             if (caster)
                 if (caster.IsAIEnabled())
-                    caster.GetAI().OnSuccessfulSpellCast(GetSpellInfo());
+                    caster.GetAI().OnSpellCastFinished(GetSpellInfo(), SpellFinishReason.SuccessfulCast);
         }
 
         void DoProcessTargetContainer<T>(List<T> targetContainer) where T : TargetInfoBase
@@ -3267,6 +3267,12 @@ namespace Game.Spells
                     {
                         SendChannelUpdate(0);
                         Finish();
+
+                        // We call the hook here instead of in Spell::finish because we only want to call it for completed channeling. Everything else is handled by interrupts
+                        Creature creatureCaster = m_caster.ToCreature();
+                        if (creatureCaster != null)
+                            if (creatureCaster.IsAIEnabled())
+                                creatureCaster.GetAI().OnSpellCastFinished(m_spellInfo, SpellFinishReason.ChannelingComplete);
                     }
                     break;
                 }
