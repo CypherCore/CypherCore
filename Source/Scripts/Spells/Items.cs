@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
@@ -105,6 +106,7 @@ namespace Scripts.Spells.Items
         public const uint Shrink = 8066;
         public const uint PartyTime = 8067;
         public const uint HealthySpirit = 8068;
+        public const uint Rejuvenation = 8070;
 
         //Discerningeyebeastmisc
         public const uint DiscerningEyeBeast = 59914;
@@ -1138,13 +1140,13 @@ namespace Scripts.Spells.Items
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit);
+            return ValidateSpellInfo(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
         }
 
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = RandomHelper.URand(SpellIds.Sleepy, SpellIds.HealthySpirit);
+            uint spellId = RandomHelper.RAND(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
             caster.CastSpell(caster, spellId, true);
         }
 
@@ -1154,6 +1156,49 @@ namespace Scripts.Spells.Items
         }
     }
 
+    class PartyTimeEmoteEvent : BasicEvent
+    {
+        Player _player;
+
+        public PartyTimeEmoteEvent(Player player)
+        { 
+            _player = player;
+        }
+
+        public override bool Execute(ulong time, uint diff)
+        {
+            if (!_player.HasAura(SpellIds.PartyTime))
+                return true;
+
+            if (_player.IsMoving())
+                _player.HandleEmoteCommand(RandomHelper.RAND(Emote.OneshotApplaud, Emote.OneshotLaugh, Emote.OneshotCheer, Emote.OneshotChicken));
+            else
+                _player.HandleEmoteCommand(RandomHelper.RAND(Emote.OneshotApplaud, Emote.OneshotDancespecial, Emote.OneshotLaugh, Emote.OneshotCheer, Emote.OneshotChicken));
+
+            _player.m_Events.AddEventAtOffset(this, TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
+
+            return false; // do not delete re-added event in EventProcessor::Update
+        }
+    }
+
+    [Script]
+    class spell_item_party_time : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Player player = GetOwner().ToPlayer();
+            if (player == null)
+                return;
+
+            player.m_Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 59915 - Discerning Eye of the Beast Dummy
     class spell_item_discerning_eye_beast_dummy : AuraScript
     {
