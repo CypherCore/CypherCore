@@ -375,7 +375,7 @@ namespace Game
             // iter point to first not updated socket, position store new position
             foreach (var iter in m_QueuedPlayer)
             {
-                iter.SendAuthWaitQue(++position);
+                iter.SendAuthWaitQueue(++position);
             }
 
             return found;

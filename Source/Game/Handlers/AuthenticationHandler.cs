@@ -59,7 +59,7 @@ namespace Game
             SendPacket(response);
         }
 
-        public void SendAuthWaitQue(uint position)
+        public void SendAuthWaitQueue(uint position)
         {
             if (position != 0)
             {

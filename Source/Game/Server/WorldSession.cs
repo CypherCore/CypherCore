@@ -802,7 +802,7 @@ namespace Game
             if (!m_inQueue)
                 SendAuthResponse(BattlenetRpcErrorCode.Ok, false);
             else
-                SendAuthWaitQue(0);
+                SendAuthWaitQueue(0);
 
             SetInQueue(false);
             ResetTimeOutTime(false);
