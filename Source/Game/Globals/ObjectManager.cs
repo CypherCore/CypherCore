@@ -5677,6 +5677,12 @@ namespace Game
                 else
                     info.Flags = flags;
 
+                if (flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly) && flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly))
+                {
+                    info.Flags = flags & ~(InstanceSpawnGroupFlags.AllianceOnly | InstanceSpawnGroupFlags.HordeOnly);
+                    Log.outError(LogFilter.Sql, $"Instance spawn group ({instanceMapId},{spawnGroupId}) FLAG_ALLIANCE_ONLY and FLAG_HORDE_ONLY may not be used together in a single entry - truncated to {info.Flags}.");
+                }
+
                 _instanceSpawnGroupStorage.Add(instanceMapId, info);
 
                 ++count;

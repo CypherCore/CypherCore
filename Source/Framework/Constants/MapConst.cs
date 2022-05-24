@@ -239,8 +239,10 @@ namespace Framework.Constants
     {
         ActivateSpawn = 0x01,
         BlockSpawn = 0x02,
+        AllianceOnly = 0x04,
+        HordeOnly = 0x08,
 
-        All = (ActivateSpawn | BlockSpawn)
+        All = ActivateSpawn | BlockSpawn | AllianceOnly | HordeOnly
     }
 
     public enum AreaHeaderFlags : ushort

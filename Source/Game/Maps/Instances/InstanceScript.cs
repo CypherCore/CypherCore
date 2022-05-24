@@ -217,6 +217,7 @@ namespace Game.Maps
         }
 
         enum states { Block, Spawn, ForceBlock };
+
         void UpdateSpawnGroups()
         {
             if (_instanceSpawnGroups.Empty())
@@ -234,8 +235,13 @@ namespace Game.Maps
                 if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
                     continue;
 
+                if (((instance.GetTeamIdInInstance() == TeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly))
+                    || ((instance.GetTeamIdInInstance() == TeamId.Horde) && info.Flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly)))
+                    continue;
+
                 if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.BlockSpawn))
                     newStates[info.SpawnGroupId] = states.ForceBlock;
+
                 else if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.ActivateSpawn))
                     newStates[info.SpawnGroupId] = states.Spawn;
             }
