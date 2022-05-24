@@ -436,7 +436,7 @@ namespace Game.Loots
             // output error for any still listed ids (not referenced from any loot table)
             Reference.ReportUnusedIds(lootIdSet);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded refence loot templates in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded reference loot templates in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
     }
 

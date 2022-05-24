@@ -2445,6 +2445,9 @@ namespace Game.Maps
 
         public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
         {
+            if (info.respawnTime <= GameTime.GetGameTime())
+                return;
+
             info.respawnTime = GameTime.GetGameTime();
             SaveRespawnInfoDB(info, dbTrans);
         }
