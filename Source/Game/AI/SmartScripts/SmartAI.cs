@@ -181,6 +181,17 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, _currentWaypointNode, GetScript().GetPathId());
         }
 
+        public bool CanResumePath()
+        {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                // The whole resume logic doesn't support this case
+                return false;
+            }
+
+            return HasEscortState(SmartEscortState.Paused);
+        }
+
         public void StopPath(uint despawnTime = 0, uint quest = 0, bool fail = false)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
