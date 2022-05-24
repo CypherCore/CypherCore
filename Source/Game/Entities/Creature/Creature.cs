@@ -200,6 +200,10 @@ namespace Game.Entities
             }
             else
             {
+                CreatureAI ai = GetAI();
+                if (ai != null)
+                    ai.CorpseRemoved(m_respawnDelay);
+
                 // In case this is called directly and normal respawn timer not set
                 // Since this timer will be longer than the already present time it
                 // will be ignored if the correct place added a respawn timer
