@@ -2761,6 +2761,7 @@ namespace Game.Entities
         public Item GetMItem(ulong id) { return mMitems.LookupByKey(id); }
         public Mail GetMail(uint id) { return m_mail.Find(p => p.messageID == id); }
         public List<Mail> GetMails() { return m_mail; }
+        public uint GetMailSize() { return (uint)m_mail.Count; }
 
         //Binds
         public bool HasPendingBind() { return _pendingBindId > 0; }

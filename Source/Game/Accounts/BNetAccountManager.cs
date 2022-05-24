@@ -161,6 +161,13 @@ namespace Game
             return 0;
         }
 
+        public QueryCallback GetIdByGameAccountAsync(uint gameAccountId)
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
+            stmt.AddValue(0, gameAccountId);
+            return DB.Login.AsyncQuery(stmt);
+        }
+
         public byte GetMaxIndex(uint accountId)
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX);
