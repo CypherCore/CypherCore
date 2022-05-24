@@ -969,7 +969,7 @@ namespace Game.Chat
             }
 
             handler.SendSysMessage(CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), cell.GetCellY(), obj.GetInstanceId(),
-                zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
+                zoneX, zoneY, groundZ, floorZ, map.GetMinHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY()), haveMap, haveVMap, haveMMap);
 
             LiquidData liquidStatus;
             ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out liquidStatus);
