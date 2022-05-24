@@ -86,6 +86,13 @@ namespace Game.Maps
             return new GridCoord(x_val, y_val);
         }
 
+        public static GridCoord ComputeGridCoordSimple(float x, float y)
+        {
+            int gx = (int)(MapConst.CenterGridId - x / MapConst.SizeofGrids);
+            int gy = (int)(MapConst.CenterGridId - y / MapConst.SizeofGrids);
+            return new GridCoord((uint)((MapConst.MaxGrids - 1) - gx), (uint)((MapConst.MaxGrids - 1) - gy));
+        }
+
         public static CellCoord ComputeCellCoord(float x, float y)
         {
             double x_offset = ((double)x - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;

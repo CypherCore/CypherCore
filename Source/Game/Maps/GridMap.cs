@@ -480,7 +480,7 @@ namespace Game.Maps
             if (_minHeightPlanes == null)
                 return -500.0f;
 
-            GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
+            GridCoord gridCoord = GridDefines.ComputeGridCoordSimple(x, y);
 
             int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
             int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
