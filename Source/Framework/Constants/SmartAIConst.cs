@@ -391,6 +391,8 @@ namespace Framework.Constants
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
         OverrideLight = 138,    // zoneId, overrideLightID, transitionMilliseconds
         OverrideWeather = 139,    // zoneId, weatherId, intensity
+        SetAIAnimKit = 140,    // DEPRECATED, DO REUSE (it was never used in any branch, treat as free action id)
+        SetHover = 141,    // 0/1
         CreateConversation = 143, // conversation_template.id
         SetImmunePC = 144,    // 0/1
         SetImmuneNPC = 145,    // 0/1

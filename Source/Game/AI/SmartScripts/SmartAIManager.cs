@@ -1510,6 +1510,11 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.SetAIAnimKit:
+                {
+                    Log.outError(LogFilter.Sql, $"SmartAIMgr: Deprecated Event:({e}) skipped.");
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
@@ -1599,6 +1604,7 @@ namespace Game.AI
                 case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.DespawnSpawngroup:
+                case SmartActions.SetHover:
                 case SmartActions.AddToStoredTargetList:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
@@ -2655,6 +2661,9 @@ namespace Game.AI
         public OverrideWeather overrideWeather;
 
         [FieldOffset(4)]
+        public SetHover setHover;
+
+        [FieldOffset(4)]
         public Evade evade;
 
         [FieldOffset(4)]
@@ -3200,6 +3209,10 @@ namespace Game.AI
             public uint zoneId;
             public uint weatherId;
             public uint intensity;
+        }
+        public struct SetHover
+        {
+            public uint enable;
         }
         public struct Evade
         {

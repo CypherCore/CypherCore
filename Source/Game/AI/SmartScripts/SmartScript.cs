@@ -2429,6 +2429,13 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.SetHover:
+                {
+                    foreach (WorldObject target in targets)
+                        if (IsUnit(target))
+                            target.ToUnit().SetHover(e.Action.setHover.enable != 0);
+                    break;
+                }
                 case SmartActions.PlaySpellVisualKit:
                 {
                     foreach (var target in targets)
