@@ -46,7 +46,6 @@ namespace Scripts.Spells.Quest
         //Quest11587
         public const uint SummonArcanePrisonerMale = 45446;    // Summon Arcane Prisoner - Male
         public const uint SummonArcanePrisonerFemale = 45448;    // Summon Arcane Prisoner - Female
-        public const uint ArcanePrisonerKillCredit = 45456;     // Arcane Prisoner Kill Credit
 
         //Quest11730
         public const uint SummonScavengebot004a8 = 46063;
@@ -554,22 +553,16 @@ namespace Scripts.Spells.Quest
     {
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale, SpellIds.ArcanePrisonerKillCredit);
+            return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale);
         }
 
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-
-            Unit unitTarget = GetHitUnit();
-            if (unitTarget)
-            {
-                uint spellId = SpellIds.SummonArcanePrisonerMale;
-                if (Convert.ToBoolean(RandomHelper.Rand32() % 2))
-                    spellId = SpellIds.SummonArcanePrisonerFemale;
-                caster.CastSpell(caster, spellId, true);
-                unitTarget.CastSpell(caster, SpellIds.ArcanePrisonerKillCredit, true);
-            }
+            uint spellId = SpellIds.SummonArcanePrisonerMale;
+            if ((RandomHelper.Rand32() % 2) != 0)
+                spellId = SpellIds.SummonArcanePrisonerFemale;
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()

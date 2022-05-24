@@ -4328,6 +4328,14 @@ namespace Game.Entities
                 spellInfo.NegativeEffects[2] = true;
             });
 
+            // Headless Horseman Climax - Return Head (Hallow End)
+            // Headless Horseman Climax - Body Regen (confuse only - removed on death)
+            // Headless Horseman Climax - Head Is Dead
+            ApplySpellFix(new[] { 42401, 43105, 42428 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.UnaffectedByInvulnerability;
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell

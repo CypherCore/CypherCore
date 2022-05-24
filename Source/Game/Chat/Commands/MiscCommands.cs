@@ -187,7 +187,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("additemset", RBACPermissions.CommandAdditemset)]
+        [CommandNonGroup("additem set", RBACPermissions.CommandAdditemset)]
         static bool HandleAddItemSetCommand(CommandHandler handler, StringArguments args)
         {
             if (args.Empty())

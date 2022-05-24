@@ -166,9 +166,6 @@ namespace Scripts.World.NpcSpecial
         //Guardianspells
         public const uint Deathtouch = 5;
 
-        //Tonkmine
-        public const uint TonkMineDetonate = 25099;
-
         //Brewfestreveler
         public const uint BrewfestToast = 41586;
 
@@ -1297,43 +1294,6 @@ namespace Scripts.World.NpcSpecial
             }
             else
                 me.SetReactState(ReactStates.Aggressive);
-        }
-    }
-
-    [Script]
-    class npc_tonk_mine : ScriptedAI
-    {
-        public npc_tonk_mine(Creature creature) : base(creature)
-        {
-            Initialize();
-            me.SetReactState(ReactStates.Passive);
-        }
-
-        void Initialize()
-        {
-            ExplosionTimer = 3000;
-        }
-
-        uint ExplosionTimer;
-
-        public override void Reset()
-        {
-            Initialize();
-        }
-
-        public override void JustEngagedWith(Unit who) { }
-        public override void AttackStart(Unit who) { }
-        public override void MoveInLineOfSight(Unit who) { }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (ExplosionTimer <= diff)
-            {
-                DoCast(me, SpellIds.TonkMineDetonate, new CastSpellExtraArgs(true));
-                me.SetDeathState(DeathState.Dead); // unsummon it
-            }
-            else
-                ExplosionTimer -= diff;
         }
     }
 

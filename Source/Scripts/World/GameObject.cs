@@ -56,9 +56,6 @@ namespace Scripts.World.GameObjects
         public const uint RedPunchCard = 11528;
         public const uint PrismaticPunchCard = 11545;
 
-        //Arcaneprison
-        public const uint ArcanePrisonerKillCredit = 45456;
-
         //Jotunheimcage
         public const uint SummonBladeKnightH = 56207;
         public const uint SummonBladeKnightNe = 56209;
@@ -111,9 +108,6 @@ namespace Scripts.World.GameObjects
         //Southfury
         public const uint Rizzle = 23002;
 
-        //Scourgecage
-        public const uint ScourgePrisoner = 25610;
-
         //Bloodfilledorb
         public const uint Zelemar = 17830;
 
@@ -128,9 +122,6 @@ namespace Scripts.World.GameObjects
 
         //Amberpineouthouse
         public const uint OuthouseBunny = 27326;
-
-        //Hives
-        public const uint HiveAmbusher = 13301;
 
         //Missingfriends
         public const uint CaptiveChild = 22314;
@@ -173,20 +164,11 @@ namespace Scripts.World.GameObjects
         public const uint LearnLeaveReturn = 12790;
         public const uint TeleCrystalFlag = 12845;
 
-        //Arcaneprison
-        public const uint PrisonBreak = 11587;
-
-        //Tabletheka
-        public const uint SpiderGold = 2936;
-
         //Tadpoles
         public const uint OhNoesTheTadpoles = 11560;
 
         //Amberpineouthouse
         public const uint DoingYourDuty = 12227;
-
-        //Hives
-        public const uint HiveInTheTower = 9544;
 
         //Missingfriends
         public const uint MissingFriends = 10852;
@@ -220,9 +202,6 @@ namespace Scripts.World.GameObjects
         public const string GossipBashirCrystalforgeItem1 = "Purchase 1 Unstable Flask Of The Sorcerer For The Cost Of 10 Apexis Shards";
         public const string GossipBashirCrystalforgeItem5 = "Purchase 5 Unstable Flask Of The Sorcerer For The Cost Of 50 Apexis Shards";
         public const string GossipBashirCrystalforgeItemReturn = "Use The Bashir Crystalforge To Make Another Purchase.";
-
-        //Tabletheka
-        public const uint GossipTableTheka = 1653;
 
         //Amberpineouthouse
         public const uint GossipOuthouseInuse = 12775;
@@ -516,42 +495,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_scourge_cage : GameObjectAI
-    {
-        public go_scourge_cage(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            me.UseDoorOrButton();
-            Creature pNearestPrisoner = me.FindNearestCreature(CreatureIds.ScourgePrisoner, 5.0f, true);
-            if (pNearestPrisoner)
-            {
-                player.KilledMonsterCredit(CreatureIds.ScourgePrisoner, pNearestPrisoner.GetGUID());
-                pNearestPrisoner.DisappearAndDie();
-            }
-
-            return true;
-        }
-    }
-
-    [Script]
-    class go_arcane_prison : GameObjectAI
-    {
-        public go_arcane_prison(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            if (player.GetQuestStatus(QuestIds.PrisonBreak) == QuestStatus.Incomplete)
-            {
-                me.SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
-                player.CastSpell(player, SpellIds.ArcanePrisonerKillCredit, true);
-                return true;
-            }
-            return false;
-        }
-    }
-
-    [Script]
     class go_blood_filled_orb : GameObjectAI
     {
         public go_blood_filled_orb(GameObject go) : base(go) { }
@@ -561,21 +504,6 @@ namespace Scripts.World.GameObjects
             if (me.GetGoType() == GameObjectTypes.Goober)
                 player.SummonCreature(CreatureIds.Zelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
 
-            return true;
-        }
-    }
-
-    [Script]
-    class go_table_theka : GameObjectAI
-    {
-        public go_table_theka(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            if (player.GetQuestStatus(QuestIds.SpiderGold) == QuestStatus.Incomplete)
-                player.AreaExploredOrEventHappens(QuestIds.SpiderGold);
-
-            player.SendGossipMenu(GossipConst.GossipTableTheka, me.GetGUID());
             return true;
         }
     }
@@ -637,20 +565,6 @@ namespace Scripts.World.GameObjects
                 player.GetSession().SendNotification(GossipConst.AnderholsSliderCiderNotFound);
                 return false;
             }
-        }
-    }
-
-    [Script]
-    class go_hive_pod : GameObjectAI
-    {
-        public go_hive_pod(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            player.SendLoot(me.GetGUID(), LootType.Corpse);
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMinutes(1));
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMinutes(1));
-            return true;
         }
     }
 

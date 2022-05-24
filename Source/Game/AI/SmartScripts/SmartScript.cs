@@ -1403,8 +1403,8 @@ namespace Game.AI
                         break;
 
                     // Set the timer to 1 ms so the path will be resumed on next update loop
-                    if (((SmartAI)_me.GetAI()).CanResumePath())
-                        ((SmartAI)_me.GetAI()).SetWPPauseTimer(1);
+                    if (_me.GetAI<SmartAI>().CanResumePath())
+                        _me.GetAI<SmartAI>().SetWPPauseTimer(1);
                     break;
                 }
                 case SmartActions.SetOrientation:
