@@ -621,19 +621,24 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(uint id, Position pos)
+        public void MoveLand(uint id, Position pos, float? velocity = null)
         {
             MoveSplineInit init = new(_owner);
             init.MoveTo(pos, false);
             init.SetAnimation(AnimTier.Ground);
+            if (velocity.HasValue)
+                init.SetVelocity(velocity.Value);
+
             Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveTakeoff(uint id, Position pos)
+        public void MoveTakeoff(uint id, Position pos, float? velocity = null)
         {
             MoveSplineInit init = new(_owner);
-            init.MoveTo(pos);
+            init.MoveTo(pos, false);
             init.SetAnimation(AnimTier.Hover);
+            if (velocity.HasValue)
+                init.SetVelocity(velocity.Value);
 
             Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
         }
