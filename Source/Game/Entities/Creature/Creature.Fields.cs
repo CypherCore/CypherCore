@@ -36,6 +36,8 @@ namespace Game.Entities
         bool _regenerateHealth; // Set on creation
         bool _regenerateHealthLock; // Dynamically set
 
+        bool _isMissingSwimmingFlagOutOfCombat;
+
         public ulong m_PlayerDamageReq;
         public float m_SightDistance;
         public float m_CombatDistance;

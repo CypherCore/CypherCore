@@ -1074,6 +1074,8 @@ namespace Game.Entities
             if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.MountedCombatAllowed))
                 Dismount();
 
+            RefreshSwimmingFlag();
+
             if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
             {
                 UpdateSpeed(UnitMoveType.Run);
@@ -2533,7 +2535,7 @@ namespace Game.Entities
             if (!isInAir)
                 SetFall(false);
 
-            SetSwim(GetMovementTemplate().IsSwimAllowed() && IsInWater());
+            SetSwim(CanSwim() && IsInWater());
         }
 
         public CreatureMovementData GetMovementTemplate()
@@ -2543,6 +2545,41 @@ namespace Game.Entities
                 return movementOverride;
 
             return GetCreatureTemplate().Movement;
+        }
+
+        public override bool CanSwim()
+        {
+            if (base.CanSwim())
+                return true;
+
+            if (IsPet())
+                return true;
+
+            return false;
+        }
+
+        bool CanEnterWater()
+        {
+            if (CanSwim())
+                return true;
+
+            return GetMovementTemplate().IsSwimAllowed();
+        }
+
+        public void RefreshSwimmingFlag(bool recheck = false)
+        {
+            if (!_isMissingSwimmingFlagOutOfCombat || recheck)
+                _isMissingSwimmingFlagOutOfCombat = !HasUnitFlag(UnitFlags.CanSwim);
+
+            // Check if the creature has UNIT_FLAG_SWIMMING and add it if it's missing
+            // Creatures must be able to chase a target in water if they can enter water
+            if (_isMissingSwimmingFlagOutOfCombat && CanEnterWater())
+                AddUnitFlag(UnitFlags.CanSwim);
+        }
+
+        public bool HasSwimmingFlagOutOfCombat()
+        {
+            return !_isMissingSwimmingFlagOutOfCombat;
         }
         
         public void AllLootRemovedFromCorpse()
@@ -3082,7 +3119,6 @@ namespace Game.Entities
         }
         
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
-        public override bool CanSwim() { return GetMovementTemplate().IsSwimAllowed() || IsPet();}
         public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
         bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover || IsHovering(); }
 

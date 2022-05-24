@@ -49,6 +49,7 @@ namespace Game.Entities
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.IsFalling();
         }
+        public virtual bool CanEnterWater() { return false; }
         public virtual bool CanSwim()
         {
             // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
@@ -58,7 +59,7 @@ namespace Game.Entities
                 return true;
             if (HasUnitFlag2((UnitFlags2)0x1000000))
                 return false;
-            if (IsPet() && HasUnitFlag(UnitFlags.PetInCombat))
+            if (HasUnitFlag(UnitFlags.PetInCombat))
                 return true;
 
             return HasUnitFlag(UnitFlags.Rename | UnitFlags.CanSwim);
@@ -1133,7 +1134,7 @@ namespace Game.Entities
         public bool IsInAccessiblePlaceFor(Creature c)
         {
             if (IsInWater())
-                return c.CanSwim();
+                return c.CanEnterWater();
             else
                 return c.CanWalk() || c.CanFly();
         }

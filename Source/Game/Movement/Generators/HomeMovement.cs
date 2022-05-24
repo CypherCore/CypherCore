@@ -74,6 +74,9 @@ namespace Game.AI
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
+                if (!owner.HasSwimmingFlagOutOfCombat())
+                    owner.RemoveUnitFlag(UnitFlags.CanSwim);
+
                 owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
                 if (owner.IsVehicle())

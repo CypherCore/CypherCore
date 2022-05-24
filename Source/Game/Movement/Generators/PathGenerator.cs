@@ -868,7 +868,7 @@ namespace Game.Movement
                     includeFlags |= NavTerrainFlag.Ground;
 
                 // creatures don't take environmental damage
-                if (creature.CanSwim())
+                if (creature.CanEnterWater())
                     includeFlags |= (NavTerrainFlag.Water | NavTerrainFlag.MagmaSlime);
             }
             else

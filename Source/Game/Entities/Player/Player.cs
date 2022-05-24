@@ -4679,6 +4679,7 @@ namespace Game.Entities
         }
 
         public override bool CanFly() { return m_movementInfo.HasMovementFlag(MovementFlag.CanFly); }
+        public override CanEnterWater() { return true; }
 
         public Pet GetPet()
         {
