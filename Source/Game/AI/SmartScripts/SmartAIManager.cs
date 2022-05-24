@@ -348,6 +348,8 @@ namespace Game.AI
                 float x = result.Read<float>(2);
                 float y = result.Read<float>(3);
                 float z = result.Read<float>(4);
+                float o = result.Read<float>(5);
+                uint delay = result.Read<uint>(6);
 
                 if (lastEntry != entry)
                 {
@@ -365,7 +367,7 @@ namespace Game.AI
 
                 WaypointPath path = _waypointStore[entry];
                 path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z));
+                path.nodes.Add(new WaypointNode(id, x, y, z, o, delay));
 
                 lastEntry = entry;
                 ++total;
