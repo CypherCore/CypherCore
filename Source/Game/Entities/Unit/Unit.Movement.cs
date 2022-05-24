@@ -1067,7 +1067,7 @@ namespace Game.Entities
                 //! Dying creatures will MoveFall from setDeathState
                 if (hoverHeight != 0 && (!IsDying() || !IsUnit()))
                 {
-                    float newZ = GetPositionZ() - hoverHeight;
+                    float newZ = Math.Max(GetFloorZ(), GetPositionZ() - hoverHeight);
                     UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), ref newZ);
                     UpdateHeight(newZ);
                 }
