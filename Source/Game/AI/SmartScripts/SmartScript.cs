@@ -141,13 +141,17 @@ namespace Game.AI
 
         void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
+            e.RunOnce = true; //used for repeat check
+
             //calc random
-            if (e.GetEventType() != SmartEvents.Link && e.Event.event_chance < 100 && e.Event.event_chance != 0)
+            if (e.GetEventType() != SmartEvents.Link && e.Event.event_chance < 100 && e.Event.event_chance != 0 && !e.Event.event_flags.HasFlag(SmartEventFlags.TempIgnoreChanceRoll))
             {
                 if (RandomHelper.randChance(e.Event.event_chance))
                     return;
             }
-            e.RunOnce = true;//used for repeat check
+
+            // Remove SMART_EVENT_FLAG_TEMP_IGNORE_CHANCE_ROLL flag after processing roll chances as it's not needed anymore
+            e.Event.event_flags &= ~SmartEventFlags.TempIgnoreChanceRoll;
 
             if (unit != null)
                 LastInvoker = unit.GetGUID();
@@ -500,7 +504,11 @@ namespace Game.AI
 
                     // If there is at least 1 failed cast and no successful casts at all, retry again on next loop
                     if (failedSpellCast && !successfulSpellCast)
-                        RaisePriority(e);
+                    {
+                        RetryLater(e, true);
+                        // Don't execute linked events
+                        return;
+                    }
 
                     break;
                 }
@@ -4022,6 +4030,17 @@ namespace Game.AI
                 e.Priority = _currentPriority++;
                 _eventSortingRequired = true;
             }
+        }
+
+        void RetryLater(SmartScriptHolder e, bool ignoreChanceRoll = false)
+        {
+            RaisePriority(e);
+
+            // This allows to retry the action later without rolling again the chance roll (which might fail and end up not executing the action)
+            if (ignoreChanceRoll)
+                e.Event.event_flags |= SmartEventFlags.TempIgnoreChanceRoll;
+
+            e.RunOnce = false;
         }
 
         void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest)

@@ -108,7 +108,10 @@ namespace Framework.Constants
         WhileCharmed = 0x200,           //Event occurs even if AI owner is charmed
 
         DifficultyAll = (Difficulty0 | Difficulty1 | Difficulty2 | Difficulty3),
-        All = (NotRepeatable | DifficultyAll | Reserved5 | Reserved6 | DebugOnly | DontReset | WhileCharmed)
+        All = (NotRepeatable | DifficultyAll | Reserved5 | Reserved6 | DebugOnly | DontReset | WhileCharmed),
+        
+        // Temp flags, used only at runtime, never stored in DB
+        TempIgnoreChanceRoll = 0x40000000,              //Event occurs no matter what roll_chance_i(e.event.event_chance) returns.
     }
 
     public enum SmartRespawnCondition
