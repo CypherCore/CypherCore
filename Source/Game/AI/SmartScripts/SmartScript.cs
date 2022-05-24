@@ -1383,7 +1383,7 @@ namespace Game.AI
                         break;
 
                     uint delay = e.Action.wpPause.delay;
-                    ((SmartAI)_me.GetAI()).PausePath(delay, e.GetEventType() != SmartEvents.WaypointReached);
+                    ((SmartAI)_me.GetAI()).PausePath(delay, true);
                     break;
                 }
                 case SmartActions.WpStop:
@@ -1402,7 +1402,8 @@ namespace Game.AI
                     if (!IsSmart())
                         break;
 
-                    ((SmartAI)_me.GetAI()).SetWPPauseTimer(0);
+                    // Set the timer to 1 ms so the path will be resumed on next update loop
+                    ((SmartAI)_me.GetAI()).SetWPPauseTimer(1);
                     break;
                 }
                 case SmartActions.SetOrientation:

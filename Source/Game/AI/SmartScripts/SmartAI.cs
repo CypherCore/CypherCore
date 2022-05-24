@@ -991,7 +991,8 @@ namespace Game.AI
             // handle pause
             if (HasEscortState(SmartEscortState.Paused) && (_waypointReached || _waypointPauseForced))
             {
-                if (!me.IsInCombat() && !HasEscortState(SmartEscortState.Returning))
+                // Resume only if there was a pause timer set
+                if (_waypointPauseTimer != 0 && !me.IsInCombat() && !HasEscortState(SmartEscortState.Returning))
                 {
                     if (_waypointPauseTimer <= diff)
                         ResumePath();
