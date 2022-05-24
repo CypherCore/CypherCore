@@ -252,6 +252,7 @@ namespace Game
                     auction.BidAmount = result.Read<ulong>(7);
                     auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
                     auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
+                    auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
 
                     if (biddersByAuction.ContainsKey(auction.Id))
                         auction.BidderHistory = biddersByAuction[auction.Id];
@@ -654,6 +655,7 @@ namespace Game
                 stmt.AddValue(7, auction.BidAmount);
                 stmt.AddValue(8, Time.DateTimeToUnixTime(auction.StartTime));
                 stmt.AddValue(9, Time.DateTimeToUnixTime(auction.EndTime));
+                stmt.AddValue(10, (byte)auction.ServerFlags);
                 trans.Append(stmt);
 
                 foreach (Item item in auction.Items)
@@ -1405,18 +1407,16 @@ namespace Game
 
             // data for gm.log
             string bidderName = "";
-            bool logGmTrade;
+            bool logGmTrade= auction.ServerFlags.HasFlag(AuctionPostingServerFlag.GmLogBuyer);
 
             if (bidder)
             {
                 bidderAccId = bidder.GetSession().GetAccountId();
                 bidderName = bidder.GetName();
-                logGmTrade = bidder.GetSession().HasPermission(RBACPermissions.LogGmTrade);
             }
             else
             {
                 bidderAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Bidder);
-                logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Index);
 
                 if (logGmTrade && !Global.CharacterCacheStorage.GetCharacterNameByGuid(auction.Bidder, out bidderName))
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
@@ -1623,12 +1623,13 @@ namespace Game
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccount;
         public ObjectGuid Bidder;
-        public ulong MinBid = 0;
-        public ulong BuyoutOrUnitPrice = 0;
-        public ulong Deposit = 0;
-        public ulong BidAmount = 0;
+        public ulong MinBid;
+        public ulong BuyoutOrUnitPrice;
+        public ulong Deposit;
+        public ulong BidAmount;
         public DateTime StartTime = DateTime.MinValue;
         public DateTime EndTime = DateTime.MinValue;
+        public AuctionPostingServerFlag ServerFlags;
 
         public List<ObjectGuid> BidderHistory = new();
 

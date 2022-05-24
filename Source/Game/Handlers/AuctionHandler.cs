@@ -395,6 +395,10 @@ namespace Game
             player.ModifyMoney(-(long)priceToPay);
             auction.Bidder = player.GetGUID();
             auction.BidAmount = placeBid.BidAmount;
+            if (HasPermission(RBACPermissions.LogGmTrade))
+                auction.ServerFlags |= AuctionPostingServerFlag.GmLogBuyer;
+            else
+                auction.ServerFlags &= ~AuctionPostingServerFlag.GmLogBuyer;
 
             if (canBuyout && placeBid.BidAmount == auction.BuyoutOrUnitPrice)
             {
@@ -410,7 +414,8 @@ namespace Game
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_AUCTION_BID);
                 stmt.AddValue(0, auction.Bidder.GetCounter());
                 stmt.AddValue(1, auction.BidAmount);
-                stmt.AddValue(2, auction.Id);
+                stmt.AddValue(2, (byte)auction.ServerFlags);
+                stmt.AddValue(3, auction.Id);
                 trans.Append(stmt);
 
                 auction.BidderHistory.Add(player.GetGUID());

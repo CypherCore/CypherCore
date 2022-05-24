@@ -98,4 +98,10 @@ namespace Framework.Constants
         Commodities = 1,
         Items = 2
     }
+
+    public enum AuctionPostingServerFlag
+    {
+        None = 0x0,
+        GmLogBuyer = 0x1  // write transaction to gm log file for buyer (optimization flag - avoids querying database for offline player permissions)
+    }
 }
