@@ -405,9 +405,6 @@ namespace Game.Spells
         {
             if (m_owner.GetGUID() == m_casterGuid)
                 return GetUnitOwner();
-            AuraApplication aurApp = GetApplicationOfTarget(m_casterGuid);
-            if (aurApp != null)
-                return aurApp.GetTarget();
 
             return Global.ObjAccessor.GetUnit(m_owner, m_casterGuid);
         }
