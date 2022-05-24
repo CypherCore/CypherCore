@@ -2031,8 +2031,7 @@ namespace Game.Entities
                     }
 
                     //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-                    Log.outDebug(LogFilter.Player, "FALLDAMAGE z={0} sz={1} pZ{2} FallTime={3} mZ={4} damage={5} SF={6}",
-                        movementInfo.Pos.posZ, height, GetPositionZ(), movementInfo.jump.fallTime, height, damage, safe_fall);
+                    Log.outDebug(LogFilter.Player, $"FALLDAMAGE z={movementInfo.Pos.GetPositionZ()} sz={height} pZ={GetPositionZ()} FallTime={movementInfo.jump.fallTime} mZ={height} damage={damage} SF={safe_fall}\nPlayer debug info:\n{GetDebugInfo()}");
                 }
             }
         }
