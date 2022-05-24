@@ -254,9 +254,8 @@ namespace Game.AI
             if (!me.HasReactState(ReactStates.Passive))
             {
                 Unit victim = me.SelectVictim();
-                if (victim != null)
-                    if (!me.HasSpellFocus() && victim != me.GetVictim())
-                        AttackStart(victim);
+                if (victim != null && victim != me.GetVictim())
+                    AttackStart(victim);
 
                 return me.GetVictim() != null;
             }
