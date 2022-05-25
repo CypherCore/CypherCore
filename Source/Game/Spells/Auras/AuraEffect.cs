@@ -1689,7 +1689,7 @@ namespace Game.Spells
                 if (aurApp.HasRemoveMode())
                     return;
 
-                target.AddUnitFlag(UnitFlags.Unk29);
+                target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
                 target.AddUnitFlag2(UnitFlags2.FeignDeath);
                 target.AddDynamicFlag(UnitDynFlags.Dead);
                 target.AddUnitState(UnitState.Died);
@@ -1700,7 +1700,7 @@ namespace Game.Spells
             }
             else
             {
-                target.RemoveUnitFlag(UnitFlags.Unk29);
+                target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
                 target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
                 target.RemoveDynamicFlag(UnitDynFlags.Dead);
                 target.ClearUnitState(UnitState.Died);

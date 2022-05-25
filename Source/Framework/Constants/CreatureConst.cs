@@ -77,7 +77,7 @@ namespace Framework.Constants
         Skinnable = 0x4000000,
         Mount = 0x8000000,
         Unk28 = 0x10000000,
-        Unk29 = 0x20000000,
+        PreventEmotesFromChatText = 0x20000000, // Prevent automatically playing emotes from parsing chat text, for example "lol" in /say, ending message with ? or !, or using /yell
         Sheathe = 0x40000000,
         Immune = 0x80000000
     }
