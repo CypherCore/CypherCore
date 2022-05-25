@@ -1030,6 +1030,12 @@ namespace Game.Entities
             VehicleSeatAddon seatAddon = m_vehicle.GetSeatAddonForSeatOfPassenger(this);
             Vehicle vehicle = m_vehicle.RemovePassenger(this);
 
+            if (vehicle == null)
+            {
+                Log.outError(LogFilter.Vehicle, $"RemovePassenger() couldn't remove current unit from vehicle. Debug info: {GetDebugInfo()}");
+                return;
+            }
+
             Player player = ToPlayer();
 
             // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
