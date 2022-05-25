@@ -759,6 +759,9 @@ namespace Game.AI
             }
 
             GetScript().ProcessEventsFor(SmartEvents.Charmed, null, 0, 0, charmed);
+
+            if (!GetScript().HasAnyEventWithFlag(SmartEventFlags.WhileCharmed)) // we can change AI if there are no events with this flag
+                base.OnCharmed(isNew);
         }
 
         public override void DoAction(int param)

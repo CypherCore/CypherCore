@@ -67,6 +67,7 @@ namespace Game.AI
         uint _currentPriority;
         bool _eventSortingRequired;
         uint _nestedEventsCounter;
+        SmartEventFlags _allEventFlags;
 
         Dictionary<uint, ObjectGuidList> _storedTargets = new();
 
@@ -4075,35 +4076,39 @@ namespace Game.AI
             {
                 if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.DifficultyAll))//if has instance flag add only if in it
                 {
-                    if (obj != null && obj.GetMap().IsDungeon())
+                    if (!(obj != null && obj.GetMap().IsDungeon()))
+                        continue;
+
+                    // TODO: fix it for new maps and difficulties
+                    switch (obj.GetMap().GetDifficultyID())
                     {
-                        // TODO: fix it for new maps and difficulties
-                        switch (obj.GetMap().GetDifficultyID())
-                        {
-                            case Difficulty.Normal:
-                            case Difficulty.Raid10N:
-                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty0))
-                                    _events.Add(holder);
-                                break;
-                            case Difficulty.Heroic:
-                            case Difficulty.Raid25N:
-                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty1))
-                                    _events.Add(holder);
-                                break;
-                            case Difficulty.Raid10HC:
-                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty2))
-                                    _events.Add(holder);
-                                break;
-                            case Difficulty.Raid25HC:
-                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty3))
-                                    _events.Add(holder);
-                                break;
-                            default:
-                                break;
-                        }
+
+
+                        case Difficulty.Normal:
+                        case Difficulty.Raid10N:
+                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty0))
+                                _events.Add(holder);
+                            break;
+                        case Difficulty.Heroic:
+                        case Difficulty.Raid25N:
+                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty1))
+                                _events.Add(holder);
+                            break;
+                        case Difficulty.Raid10HC:
+                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty2))
+                                _events.Add(holder);
+                            break;
+                        case Difficulty.Raid25HC:
+                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty3))
+                                _events.Add(holder);
+                            break;
+                        default:
+                            break;
+
                     }
-                    continue;
                 }
+
+                _allEventFlags |= holder.Event.event_flags;
                 _events.Add(holder);//NOTE: 'world(0)' events still get processed in ANY instance mode
             }
         }
@@ -4353,6 +4358,8 @@ namespace Game.AI
         {
             return _trigger != null ? _atPlayer : GetBaseObject();
         }
+
+        public bool HasAnyEventWithFlag(SmartEventFlags flag) { return _allEventFlags.HasAnyFlag(flag); }
         
         public bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
