@@ -1515,6 +1515,15 @@ namespace Game.AI
                     Log.outError(LogFilter.Sql, $"SmartAIMgr: Deprecated Event:({e}) skipped.");
                     break;
                 }
+                case SmartActions.SetHealthPct:
+                {
+                    if (e.Action.setHealthPct.percent > 100 || e.Action.setHealthPct.percent == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} is trying to set invalid HP percent {e.Action.setHealthPct.percent}, skipped.");
+                        return false;
+                    }
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
@@ -2667,6 +2676,9 @@ namespace Game.AI
         public Evade evade;
 
         [FieldOffset(4)]
+        public SetHealthPct setHealthPct;
+
+        [FieldOffset(4)]
         public Conversation conversation;
 
         [FieldOffset(4)]
@@ -3217,6 +3229,10 @@ namespace Game.AI
         public struct Evade
         {
             public uint toRespawnPosition;
+        }
+        public struct SetHealthPct
+        {
+            public uint percent;
         }
         public struct Conversation
         {

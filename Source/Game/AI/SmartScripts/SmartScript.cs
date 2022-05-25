@@ -2403,6 +2403,17 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.PlayCinematic:
+                {
+                    foreach (var target in targets)
+                    {
+                        if (!IsPlayer(target))
+                            continue;
+
+                        target.ToPlayer().SendCinematicStart(e.Action.cinematic.entry);
+                    }
+                    break;
+                }
                 case SmartActions.SetMovementSpeed:
                 {
                     uint speedInteger = e.Action.movementSpeed.speedInteger;
@@ -2412,6 +2423,21 @@ namespace Game.AI
                     foreach (var target in targets)
                         if (IsCreature(target))
                             target.ToCreature().SetSpeed((UnitMoveType)e.Action.movementSpeed.movementType, speed);
+
+                    break;
+                }
+                case SmartActions.PlaySpellVisualKit:
+                {
+                    foreach (var target in targets)
+                    {
+                        if (IsUnit(target))
+                        {
+                            target.ToUnit().SendPlaySpellVisualKit(e.Action.spellVisualKit.spellVisualKitId, e.Action.spellVisualKit.kitType,
+                                e.Action.spellVisualKit.duration);
+
+                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: target: {target.GetName()} ({target.GetGUID()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
+                        }
+                    }
 
                     break;
                 }
@@ -2444,16 +2470,15 @@ namespace Game.AI
                             target.ToUnit().SetHover(e.Action.setHover.enable != 0);
                     break;
                 }
-                case SmartActions.PlaySpellVisualKit:
+                case SmartActions.SetHealthPct:
                 {
                     foreach (var target in targets)
                     {
-                        if (IsUnit(target))
-                        {
-                            target.ToUnit().SendPlaySpellVisualKit(e.Action.spellVisualKit.spellVisualKitId, e.Action.spellVisualKit.kitType, e.Action.spellVisualKit.duration);
-                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: target: {target.GetName()} ({target.GetGUID()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
-                        }
+                        Unit targetUnit = target.ToUnit();
+                        if (targetUnit != null)
+                            targetUnit.SetHealth(targetUnit.CountPctFromMaxHealth((int)e.Action.setHealthPct.percent));
                     }
+
                     break;
                 }
                 case SmartActions.CreateConversation:
@@ -2472,17 +2497,6 @@ namespace Game.AI
                         }
                     }
 
-                    break;
-                }
-                case SmartActions.PlayCinematic:
-                {
-                    foreach (WorldObject target in targets)
-                    {
-                        if (!IsPlayer(target))
-                            continue;
-
-                        target.ToPlayer().SendCinematicStart(e.Action.cinematic.entry);
-                    }
                     break;
                 }
                 case SmartActions.AddToStoredTargetList:
