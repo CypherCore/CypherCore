@@ -2558,7 +2558,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool CanEnterWater()
+        public override bool CanEnterWater()
         {
             if (CanSwim())
                 return true;
