@@ -2834,7 +2834,7 @@ namespace Game.Spells
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit
-                if (target.HasAuraType(GetAuraType()))
+                if (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.DamageImmunity))
                     return;
 
                 target.RemoveUnitFlag(UnitFlags.Immune);
@@ -2851,7 +2851,17 @@ namespace Game.Spells
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             if (apply)
+            {
+                target.AddUnitFlag(UnitFlags.Immune);
                 target.GetThreatManager().EvaluateSuppressed();
+            }
+            else
+            {
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit
+                if (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.SchoolImmunity))
+                    return;
+                target.RemoveUnitFlag(UnitFlags.Immune);
+            }
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]
