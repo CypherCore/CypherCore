@@ -2705,6 +2705,10 @@ namespace Game.Entities
                 }
             }
 
+            // make player victims stand up automatically
+            if (victim.GetStandState() != 0 && victim.IsPlayer())
+                victim.SetStandState(UnitStandStateType.Stand);
+
             return damage;
         }
 
