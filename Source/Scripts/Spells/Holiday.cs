@@ -159,21 +159,26 @@ namespace Scripts.Spells.Holiday
     {
         public const uint RibbonPole = 181605;
     }
+
     [Script] // 45102 Romantic Picnic
     class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BasketCheck, SpellIds.MealPeriodic, SpellIds.MealEatVisual, SpellIds.DrinkVisual, SpellIds.RomanticPicnicAchiev);
+        }
+
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
             target.SetStandState(UnitStandStateType.Sit);
-            target.CastSpell(target, SpellIds.MealPeriodic, false);
+            target.CastSpell(target, SpellIds.MealPeriodic);
         }
 
         void OnPeriodic(AuraEffect aurEff)
         {
             // Every 5 seconds
             Unit target = GetTarget();
-            Unit caster = GetCaster();
 
             // If our player is no longer sit, Remove all auras
             if (target.GetStandState() != UnitStandStateType.Sit)
@@ -183,8 +188,8 @@ namespace Scripts.Spells.Holiday
                 return;
             }
 
-            target.CastSpell(target, SpellIds.BasketCheck, false); // unknown use, it targets Romantic Basket
-            target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual), false);
+            target.CastSpell(target, SpellIds.BasketCheck); // unknown use, it targets Romantic Basket
+            target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual));
 
             bool foundSomeone = false;
             // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
@@ -193,17 +198,14 @@ namespace Scripts.Spells.Holiday
             AnyPlayerInObjectRangeCheck checker = new(target, SharedConst.InteractionDistance * 2);
             var searcher = new PlayerListSearcher(target, playerList, checker);
             Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
-            foreach (Player player in playerList)
+            foreach (Player playerFound in playerList)
             {
-                if (player != target && player.HasAura(GetId())) // && player.GetStandState() == UNIT_STAND_STATE_SIT)
+                if (target != playerFound && playerFound.HasAura(GetId()))
                 {
-                    if (caster)
-                    {
-                        caster.CastSpell(player, SpellIds.RomanticPicnicAchiev, true);
-                        caster.CastSpell(target, SpellIds.RomanticPicnicAchiev, true);
-                    }
+                    playerFound.CastSpell(playerFound, SpellIds.RomanticPicnicAchiev, true);
+                    target.CastSpell(target, SpellIds.RomanticPicnicAchiev, true);
                     foundSomeone = true;
-                    // break;
+                    break;
                 }
             }
 
