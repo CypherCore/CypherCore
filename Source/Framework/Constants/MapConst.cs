@@ -56,6 +56,7 @@ namespace Framework.Constants
         public const float MaxHeight = 100000.0f;
         public const float MaxFallDistance = 250000.0f;
         public const float GroundHeightTolerance = 0.05f;
+        public const float ZOffsetFindHeight = 0.5f;
         public const float DefaultCollesionHeight = 2.03128f; // Most common value in dbc
 
         public const uint MapMagic = 0x5350414D; //"MAPS";

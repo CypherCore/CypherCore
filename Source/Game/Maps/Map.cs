@@ -1731,7 +1731,7 @@ namespace Game.Maps
             if (GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y) != null)
             {
                 // we need ground level (including grid height version) for proper return water level in point
-                float ground_z = GetHeight(phaseShift, x, y, z + collisionHeight, true, 50.0f);
+                float ground_z = GetHeight(phaseShift, x, y, z + MapConst.ZOffsetFindHeight, true, 50.0f);
                 ground = ground_z;
 
                 LiquidData liquid_status;

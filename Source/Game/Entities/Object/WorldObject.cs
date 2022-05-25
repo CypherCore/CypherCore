@@ -3601,7 +3601,7 @@ namespace Game.Entities
         {
             if (!IsInWorld)
                 return m_staticFloorZ;
-            return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()));
+            return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ() + MapConst.ZOffsetFindHeight));
         }
 
         public float GetMapWaterOrGroundLevel(float x, float y, float z)
@@ -3618,7 +3618,7 @@ namespace Game.Entities
         public float GetMapHeight(float x, float y, float z, bool vmap = true, float distanceToSearch = MapConst.DefaultHeightSearch)
         {
             if (z != MapConst.MaxHeight)
-                z += GetCollisionHeight();
+                z += MapConst.ZOffsetFindHeight;
 
             return GetMap().GetHeight(GetPhaseShift(), x, y, z, vmap, distanceToSearch);
         }
