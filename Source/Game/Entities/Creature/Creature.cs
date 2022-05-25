@@ -2593,7 +2593,9 @@ namespace Game.Entities
             if (m_corpseRemoveTime <= now)
                 return;
 
-            float decayRate = WorldConfig.GetFloatValue(WorldCfg.RateCorpseDecayLooted);
+            // Scripts can choose to ignore RATE_CORPSE_DECAY_LOOTED by calling SetCorpseDelay(timer, true)
+            float decayRate = m_ignoreCorpseDecayRatio ? 1.0f : WorldConfig.GetFloatValue(WorldCfg.RateCorpseDecayLooted);
+
             // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
             if (loot.loot_type == LootType.Skinning)
                 m_corpseRemoveTime = now;
@@ -3102,7 +3104,12 @@ namespace Game.Entities
 
         public ulong GetSpawnId() { return m_spawnId; }
 
-        public void SetCorpseDelay(uint delay) { m_corpseDelay = delay; }
+        public void SetCorpseDelay(uint delay, bool ignoreCorpseDecayRatio = false)
+        {
+            m_corpseDelay = delay;
+            if (ignoreCorpseDecayRatio)
+                m_ignoreCorpseDecayRatio = true;
+        }
         public uint GetCorpseDelay() { return m_corpseDelay; }
         public bool IsRacialLeader() { return GetCreatureTemplate().RacialLeader; }
         public bool IsCivilian()

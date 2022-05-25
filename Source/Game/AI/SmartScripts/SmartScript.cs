@@ -2178,7 +2178,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsCreature(target))
-                            target.ToCreature().SetCorpseDelay(e.Action.corpseDelay.timer);
+                            target.ToCreature().SetCorpseDelay(e.Action.corpseDelay.timer, e.Action.corpseDelay.includeDecayRatio == 0);
                     break;
                 }
                 case SmartActions.SpawnSpawngroup:

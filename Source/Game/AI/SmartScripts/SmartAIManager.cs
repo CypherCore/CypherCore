@@ -3143,6 +3143,7 @@ namespace Game.AI
         public struct CorpseDelay
         {
             public uint timer;
+            public uint includeDecayRatio;
         }
         public struct DisableEvade
         {
