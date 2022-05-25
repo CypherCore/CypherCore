@@ -49,7 +49,6 @@ namespace Scripts.Pets
                     DoCastVictim(SpellIds.AngeredEarth);
                     task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
                 });
-                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
             }
 
             public override void UpdateAI(uint diff)
@@ -86,7 +85,6 @@ namespace Scripts.Pets
                     DoCastVictim(SpellIds.FireBlast);
                     task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
                 });
-                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
             }
 
             public override void UpdateAI(uint diff)
