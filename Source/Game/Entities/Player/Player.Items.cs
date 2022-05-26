@@ -5593,7 +5593,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
@@ -5628,7 +5628,7 @@ namespace Game.Entities
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
-                                    return remcount;
+                                    return count;
                                 }
                             }
                         }
@@ -5662,7 +5662,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
@@ -5690,7 +5690,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
@@ -5725,7 +5725,7 @@ namespace Game.Entities
                                     if (IsInWorld && update)
                                         item.SendUpdateToPlayer(this);
                                     item.SetState(ItemUpdateState.Changed, this);
-                                    return remcount;
+                                    return count;
                                 }
                             }
                         }
@@ -5758,7 +5758,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
@@ -5787,7 +5787,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
@@ -5816,7 +5816,7 @@ namespace Game.Entities
                             if (IsInWorld && update)
                                 item.SendUpdateToPlayer(this);
                             item.SetState(ItemUpdateState.Changed, this);
-                            return remcount;
+                            return count;
                         }
                     }
                 }
