@@ -2264,8 +2264,8 @@ namespace Game.Entities
 
             if (target.HasUnitState(UnitState.Died))
             {
-                // guards can detect fake death
-                if (IsGuard() && target.HasUnitFlag2(UnitFlags2.FeignDeath))
+                // some creatures can detect fake death
+                if (CanIgnoreFeignDeath() && target.HasUnitFlag2(UnitFlags2.FeignDeath))
                     return true;
                 else
                     return false;
@@ -3287,7 +3287,8 @@ namespace Game.Entities
         public void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
-
+        public bool CanIgnoreFeignDeath() { return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreFeighDeath); }
+        
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 

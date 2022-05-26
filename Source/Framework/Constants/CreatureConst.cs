@@ -229,7 +229,7 @@ namespace Framework.Constants
         IgnoreCombat = 0x2000,         // creature is not allowed to enter combat
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
-        Unused16 = 0x00010000,
+        IgnoreFeighDeath = 0x10000, // creature ignores feign death
         NoCrit = 0x20000,       // Creature Can'T Do Critical Strikes
         NoSkillGains = 0x40000,       // creature won't increase weapon skills
         ObeysTauntDiminishingReturns = 0x80000,       // Taunt is subject to diminishing returns on this creature
@@ -247,7 +247,7 @@ namespace Framework.Constants
         Unused31 = 0x80000000,
 
         // Masks
-        AllUnused = (Unused16 | Unused22 | Unused23 | Unused24 | Unused25 | Unused26 | Unused27 | Unused31),
+        AllUnused = (Unused22 | Unused23 | Unused24 | Unused25 | Unused26 | Unused27 | Unused31),
 
         DBAllowed = (0xFFFFFFFF & ~(AllUnused | DungeonBoss))
     }
