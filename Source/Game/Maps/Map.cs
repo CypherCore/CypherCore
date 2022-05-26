@@ -3566,7 +3566,7 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, uint transitionMilliseconds)
+        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, TimeSpan transitionTime)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3581,7 +3581,7 @@ namespace Game.Maps
                 ZoneDynamicInfo.LightOverride lightOverride = new();
                 lightOverride.AreaLightId = areaLightId;
                 lightOverride.OverrideLightId = overrideLightId;
-                lightOverride.TransitionMilliseconds = transitionMilliseconds;
+                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
                 info.LightOverrides.Add(lightOverride);
             }
 
@@ -3592,7 +3592,7 @@ namespace Game.Maps
                 OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = areaLightId;
                 overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = transitionMilliseconds;
+                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
