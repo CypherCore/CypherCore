@@ -514,7 +514,8 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // Update serverside orientation of tracking channeled auras on periodic update ticks
-            if (caster != null && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget) && !caster.m_unitData.ChannelObjects.Empty())
+            // exclude players because can turn during channeling and shouldn't desync orientation client/server
+            if (caster != null && !caster.IsPlayer() && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget) && caster.m_unitData.ChannelObjects.Size())
             {
                 ObjectGuid channelGuid = caster.m_unitData.ChannelObjects[0];
                 if (channelGuid != caster.GetGUID())
