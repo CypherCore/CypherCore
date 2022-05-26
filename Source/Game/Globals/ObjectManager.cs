@@ -8821,7 +8821,7 @@ namespace Game
             _pageTextLocaleStorage.Clear(); // needed for reload case
 
             //                                               0      1     2
-            SQLResult result = DB.World.Query("SELECT ID, locale, Text FROM page_text_locale");
+            SQLResult result = DB.World.Query("SELECT ID, locale, `Text` FROM page_text_locale");
             if (result.IsEmpty())
                 return;
 
@@ -9355,7 +9355,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             //                                         0   1     2           3                 4
-            SQLResult result = DB.World.Query("SELECT ID, text, NextPageID, PlayerConditionID, Flags FROM page_text");
+            SQLResult result = DB.World.Query("SELECT ID, `text`, NextPageID, PlayerConditionID, Flags FROM page_text");
 
             if (result.IsEmpty())
             {
