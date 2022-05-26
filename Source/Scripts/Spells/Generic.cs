@@ -1300,38 +1300,6 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
-    class spell_gen_creature_permanent_feign_death : AuraScript
-    {
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit target = GetTarget();
-            target.AddDynamicFlag(UnitDynFlags.Dead);
-            target.AddUnitFlag2(UnitFlags2.FeignDeath);
-
-            Creature creature = target.ToCreature();
-            if (creature != null)
-                creature.SetReactState(ReactStates.Passive);
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit target = GetTarget();
-            target.RemoveDynamicFlag(UnitDynFlags.Dead);
-            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
-
-            Creature creature = target.ToCreature();
-            if (creature != null)
-                creature.InitializeReactState();
-        }
-
-        public override void Register()
-        {
-            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-        }
-    }
-
     [Script("spell_gen_sunreaver_disguise")]
     [Script("spell_gen_silver_covenant_disguise")]
     class spell_gen_dalaran_disguise : SpellScript
@@ -1699,7 +1667,117 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
+    
+    /*
+     * There are only 3 possible flags Feign Death auras can apply: UNIT_DYNFLAG_DEAD, UnitFlags2.FeignDeath
+     * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some auras can apply only 2 flags
+     * 
+     * spell_gen_feign_death_all_flags applies all 3 flags
+     * spell_gen_feign_death_no_dyn_flag applies no UNIT_DYNFLAG_DEAD (does not make the creature appear dead)
+     * spell_gen_feign_death_no_prevent_emotes applies no UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT
+     * 
+     * REACT_PASSIVE should be handled directly in scripts since not all creatures should be passive. Otherwise
+     * creature will be not able to aggro or execute MoveInLineOfSight events. Removing may cause more issues
+     * than already exists
+     */
+    [Script]
+    class spell_gen_feign_death_all_flags : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.AddDynamicFlag(UnitDynFlags.Dead);
+            target.AddUnitFlag2(UnitFlags2.FeignDeath);
+            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
 
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveDynamicFlag(UnitDynFlags.Dead);
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.InitializeReactState();
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    // 35357 - Spawn Feign Death
+    [Script] // 51329 - Feign Death
+    class spell_gen_feign_death_no_dyn_flag : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.AddUnitFlag2(UnitFlags2.FeignDeath);
+            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.InitializeReactState();
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 58951 - Permanent Feign Death
+    class spell_gen_feign_death_no_prevent_emotes : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.AddDynamicFlag(UnitDynFlags.Dead);
+            target.AddUnitFlag2(UnitFlags2.FeignDeath);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveDynamicFlag(UnitDynFlags.Dead);
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.InitializeReactState();
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
 
     [Script] // 46642 - 5,000 Gold
     class spell_gen_5000_gold : SpellScript
@@ -2276,6 +2354,28 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             AfterEffectRemove.Add(new EffectApplyHandler(HandleStun, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script]
+    class spell_gen_prevent_emotes : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real));
         }
     }
 
@@ -3019,7 +3119,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
     class spell_gen_trigger_exclude_caster_aura_spell : SpellScript
     {
@@ -3869,7 +3969,7 @@ namespace Scripts.Spells.Generic
     {
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.SiegeTankControl); //aurEff->GetAmount()
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SiegeTankControl); //aurEff.GetAmount()
         }
 
         public override void Register()
@@ -3953,7 +4053,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {
@@ -4121,7 +4221,7 @@ namespace Scripts.Spells.Generic
                 DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
         }
     }
-    
+
     [Script]
     class spell_defender_of_azeroth_death_gate_selector : SpellScript
     {
@@ -4231,7 +4331,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
     {
