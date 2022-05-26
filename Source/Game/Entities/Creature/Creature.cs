@@ -1066,7 +1066,7 @@ namespace Game.Entities
                 return ai.IsEngaged();
             return false;
         }
-        
+
         public override void AtEngage(Unit target)
         {
             base.AtEngage(target);
@@ -1085,7 +1085,25 @@ namespace Game.Entities
 
             MovementGeneratorType movetype = GetMotionMaster().GetCurrentMovementGeneratorType();
             if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (IsAIEnabled() && GetAI().IsEscorted()))
+            {
                 SetHomePosition(GetPosition());
+                // if its a vehicle, set the home positon of every creature passenger at engage
+                // so that they are in combat range if hostile
+                Vehicle vehicle = GetVehicleKit();
+                if (vehicle != null)
+                {
+                    foreach (var (_, seat) in vehicle.Seats)
+                    {
+                        Unit passenger = Global.ObjAccessor.GetUnit(this, seat.Passenger.Guid);
+                        if (passenger != null)
+                        {
+                            Creature creature = passenger.ToCreature();
+                            if (creature != null)
+                                creature.SetHomePosition(GetPosition());
+                        }
+                    }
+                }
+            }
 
             CreatureAI ai = GetAI();
             if (ai != null)
