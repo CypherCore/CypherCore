@@ -147,10 +147,15 @@ namespace Game.BattleGrounds.Zones
                         if (!m_IsInformedNearVictory && m_TeamScores[team] > WarningNearVictoryScore)
                         {
                             if (team == TeamId.Alliance)
+                            {
                                 SendBroadcastText(ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
+                                PlaySoundToAll(SoundNearVictoryAlliance);
+                            }
                             else
+                            {
                                 SendBroadcastText(ABBattlegroundBroadcastTexts.HordeNearVictory, ChatMsg.BgSystemNeutral);
-                            PlaySoundToAll(SoundNearVictory);
+                                PlaySoundToAll(SoundNearVictoryHorde);
+                            }
                             m_IsInformedNearVictory = true;
                         }
 
@@ -749,7 +754,8 @@ namespace Game.BattleGrounds.Zones
         public const int SoundCapturedHorde = 8213;
         public const uint SoundAssaultedAlliance = 8212;
         public const uint SoundAssaultedHorde = 8174;
-        public const int SoundNearVictory = 8456;
+        public const int SoundNearVictoryAlliance = 8456;
+        public const int SoundNearVictoryHorde = 8457;
 
         public const int FlagCapturingTime = 60000;
 
