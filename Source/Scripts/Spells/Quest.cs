@@ -94,10 +94,10 @@ namespace Scripts.Spells.Quest
         public const uint SummonNorthSeaBlueShark = 66740;
 
         //Redsnapperverytasty
-        public const uint CastNet = 29866;
+        public const uint FishedUpRedSnapper = 29867;
         public const uint FishedUpMurloc = 29869;
 
-        //Pounddrumspells
+        //BreakfastOfChampions
         public const uint SummonDeepJormungar = 66510;
         public const uint StormforgedMoleMachine = 66492;
 
@@ -120,6 +120,10 @@ namespace Scripts.Spells.Quest
         public const uint FlakCannonTrigger = 40110;
         public const uint ChooseLoc = 40056;
         public const uint AggroCheck = 40112;
+
+        //RecoverTheCargo
+        public const uint SummonLockbox = 42288;
+        public const uint SummonBurrower = 42289;
 
         //Spellzuldrakrat
         public const uint SummonGorgedLurkingBasilisk = 50928;
@@ -296,9 +300,6 @@ namespace Scripts.Spells.Quest
         //HodirsHelm
         public const byte Say1 = 1;
         public const byte Say2 = 2;
-
-        //RedSnapperVeryTasty
-        public const uint ItemIdRedSnapper = 23614;
 
         //Acleansingsong
         public const uint AreaIdBittertidelake = 4385;
@@ -1016,42 +1017,38 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // http://old01.wowhead.com/quest=9452 - Red Snapper - Very Tasty!
-    [Script]
+    [Script] // 29866 - Cast Fishing Net
     class spell_q9452_cast_net : SpellScript
     {
-        public override bool Load()
+        public override bool Validate(SpellInfo spell)
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            return ValidateSpellInfo(SpellIds.FishedUpRedSnapper, SpellIds.FishedUpMurloc);
         }
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
-            if (RandomHelper.randChance(66))
-                caster.AddItem(Misc.ItemIdRedSnapper, 1);
-            else
-                caster.CastSpell(caster, SpellIds.FishedUpMurloc, true);
-        }
+            Unit caster = GetCaster();
 
-        void HandleActiveObject(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            GetHitGObj().SetRespawnTime(RandomHelper.randChance(50) ? 2 * Time.Minute : 3 * Time.Minute);
-            GetHitGObj().Use(GetCaster());
-            GetHitGObj().SetLootState(LootState.JustDeactivated);
+            if (RandomHelper.randChance(66))
+                caster.CastSpell(caster, SpellIds.FishedUpRedSnapper, true);
+            else
+                caster.CastSpell(null, SpellIds.FishedUpMurloc, true);
         }
 
         public override void Register()
         {
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
         }
     }
 
-    [Script]
+    [Script] // 66512 - Pound Drum
     class spell_q14076_14092_pound_drum : SpellScript
     {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.SummonDeepJormungar, SpellIds.StormforgedMoleMachine);
+        }
+
         void HandleSummon()
         {
             Unit caster = GetCaster();
@@ -1062,15 +1059,9 @@ namespace Scripts.Spells.Quest
                 caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
         }
 
-        void HandleActiveObject(uint effIndex)
-        {
-            GetHitGObj().SetLootState(LootState.JustDeactivated);
-        }
-
         public override void Register()
         {
             OnCast.Add(new CastHandler(HandleSummon));
-            OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 0, SpellEffectName.ActivateObject));
         }
     }
 
@@ -1362,6 +1353,30 @@ namespace Scripts.Spells.Quest
         }
     }
 
+    [Script] // 42287 - Salvage Wreckage
+    class spell_q11140salvage_wreckage : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.SummonLockbox, SpellIds.SummonBurrower);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            if (RandomHelper.randChance(50))
+                caster.CastSpell(caster, SpellIds.SummonLockbox, true);
+            else
+                caster.CastSpell(null, SpellIds.SummonBurrower, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script]
     class spell_q12527_zuldrak_rat : SpellScript
     {
