@@ -59,6 +59,12 @@ namespace Game.AI
                 SmartScriptHolder temp = new();
 
                 temp.EntryOrGuid = result.Read<int>(0);
+                if (temp.EntryOrGuid == 0)
+                {
+                    Log.outError(LogFilter.Sql, "SmartAIMgr::LoadFromDB: invalid entryorguid (0), skipped loading.");
+                    continue;
+                }
+
                 SmartScriptType source_type = (SmartScriptType)result.Read<byte>(1);
                 if (source_type >= SmartScriptType.Max)
                 {
@@ -99,7 +105,7 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetSceneTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -108,7 +114,7 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetQuestTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -119,7 +125,7 @@ namespace Game.AI
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, false)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -128,13 +134,13 @@ namespace Game.AI
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, true)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
                         }
                         default:
-                            Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: not yet implemented source_type {0}", source_type);
+                            Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: not yet implemented source_type {0}", source_type);
                             continue;
                     }
                 }
@@ -147,20 +153,20 @@ namespace Game.AI
                             CreatureData creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.EntryOrGuid);
                             if (creature == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.Id);
                             if (creatureInfo == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             if (creatureInfo.AIName != "SmartAI")
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
                                 continue;
                             }
                             break;
@@ -170,26 +176,26 @@ namespace Game.AI
                             GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.EntryOrGuid);
                             if (gameObject == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.Id);
                             if (gameObjectInfo == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             if (gameObjectInfo.AIName != "SmartGameObjectAI")
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
                                 continue;
                             }
                             break;
                         }
                         default:
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GUID-specific scripting not yet implemented for source_type {source_type}");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GUID-specific scripting not yet implemented for source_type {source_type}");
                             continue;
                     }
                 }
@@ -254,7 +260,7 @@ namespace Game.AI
                         if (temp.Event.minMaxRepeat.repeatMin == 0 && temp.Event.minMaxRepeat.repeatMax == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.SourceType != SmartScriptType.TimedActionlist)
                         {
                             temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
                         }
                         break;
                     case SmartEvents.VictimCasting:
@@ -262,14 +268,14 @@ namespace Game.AI
                         if (temp.Event.minMaxRepeat.min == 0 && temp.Event.minMaxRepeat.max == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.SourceType != SmartScriptType.TimedActionlist)
                         {
                             temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
                         }
                         break;
                     case SmartEvents.FriendlyIsCc:
                         if (temp.Event.friendlyCC.repeatMin == 0 && temp.Event.friendlyCC.repeatMax == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.SourceType != SmartScriptType.TimedActionlist)
                         {
                             temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Entry {temp.EntryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.EventId}, Missing Repeat flag.");
                         }
                         break;
                     default:
