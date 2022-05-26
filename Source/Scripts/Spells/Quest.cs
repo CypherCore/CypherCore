@@ -161,6 +161,13 @@ namespace Scripts.Spells.Quest
         //Escapefromsilverbrook
         public const uint SummonWorgen = 48681;
 
+        //BasicOrdersEmote
+        public const uint TestSalute = 73835;
+        public const uint TestRoar = 73836;
+        public const uint TestCheer = 73725;
+        public const uint TestDance = 73837;
+        public const uint TestStopDance = 73886;
+
         //Deathcomesfromonhigh
         public const uint ForgeCredit = 51974;
         public const uint TownHallCredit = 51977;
@@ -1791,6 +1798,41 @@ namespace Scripts.Spells.Quest
         }
     }
 
+    [Script]
+    class spell_q25199_emote : AuraScript
+    {
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit target = GetTarget();
+
+            switch (GetSpellInfo().Id)
+            {
+                case SpellIds.TestSalute:
+                    target.HandleEmoteCommand(Emote.OneshotSalute);
+                    break;
+                case SpellIds.TestRoar:
+                    target.HandleEmoteCommand(Emote.OneshotRoar);
+                    break;
+                case SpellIds.TestCheer:
+                    target.HandleEmoteCommand(Emote.OneshotCheer);
+                    break;
+                case SpellIds.TestDance:
+                    target.SetEmoteState(Emote.StateDance);
+                    break;
+                case SpellIds.TestStopDance:
+                    target.SetEmoteState(Emote.StateNone);
+                    break;
+                default:
+                    return;
+            }
+            Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
     
     [Script] // 51858 - Siphon of Acherus
     class spell_q12641_death_comes_from_on_high : SpellScript
