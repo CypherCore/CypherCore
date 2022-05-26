@@ -999,7 +999,7 @@ namespace Game.Entities
             rideVehicleEffect.ChangeAmount((seatId < 0 ? GetTransSeat() : seatId) + 1);
         }
 
-        public void ExitVehicle(Position exitPosition = null)
+        public virtual void ExitVehicle(Position exitPosition = null)
         {
             //! This function can be called at upper level code to initialize an exit from the passenger's side.
             if (m_vehicle == null)

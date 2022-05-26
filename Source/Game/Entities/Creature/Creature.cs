@@ -1126,6 +1126,15 @@ namespace Game.Entities
             return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPath()} SpawnId: {GetSpawnId()}";
         }
 
+        public override void ExitVehicle(Position exitPosition = null)
+        {
+            base.ExitVehicle();
+
+            // if the creature exits a vehicle, set it's home position to the
+            // exited position so it won't run away (home) and evade if it's hostile
+            SetHomePosition(GetPosition());
+        }
+        
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting

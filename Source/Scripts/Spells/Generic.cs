@@ -3445,6 +3445,34 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script("spell_gen_eject_passenger_1", 0)]
+    [Script("spell_gen_eject_passenger_3", 2)]
+    class spell_gen_eject_passenger_with_seatId : SpellScript
+    {
+        sbyte _seatId;
+
+        public spell_gen_eject_passenger_with_seatId(sbyte seatId)
+        {
+            _seatId = seatId;
+        }
+
+        void EjectPassenger(uint effIndex)
+        {
+            Vehicle vehicle = GetHitUnit().GetVehicleKit();
+            if (vehicle != null)
+            {
+                Unit passenger = vehicle.GetPassenger(_seatId);
+                if (passenger != null)
+                    passenger.ExitVehicle();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script]
     class spell_gen_gm_freeze : AuraScript
     {
