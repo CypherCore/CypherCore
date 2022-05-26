@@ -3644,8 +3644,8 @@ namespace Game.Spells
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
-                schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
-                mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
+                schoolImmunityMask = m_timer != 0 ? unitCaster.GetSchoolImmunityMask() : 0;
+                mechanicImmunityMask = m_timer != 0 ? m_spellInfo.GetMechanicImmunityMask(unitCaster) : 0;
             }
 
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
