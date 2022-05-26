@@ -5508,11 +5508,11 @@ namespace Game.Entities
                 return null;
 
             // Deathstate checks
-            if (!IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.GhostVisible))
+            if (!IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.VisibleToGhosts))
                 return null;
 
             // alive or spirit healer
-            if (!creature.IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.CanInteractWhileDead))
+            if (!creature.IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.InteractWhileDead))
                 return null;
 
             // appropriate npc type

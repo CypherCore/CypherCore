@@ -1643,7 +1643,7 @@ namespace Framework.Constants
         DispelAurasOnImmunity = 0x8000, // 15 Remove Auras On Immunity
         UnaffectedBySchoolImmune = 0x10000, // 16 On Immuniy
         UnautocastableByPet = 0x20000, // 17
-        Unk18 = 0x40000, // 18 Stun, Polymorph, Daze, Hex
+        PreventsAnim = 0x40000, // 18 Prevents Anim DESCRIPTION NYI, auras apply UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT
         CantTargetSelf = 0x80000, // 19
         ReqComboPoints1 = 0x100000, // 20 Req Combo Points On Target
         Unk21 = 0x200000, // 21

@@ -2285,7 +2285,7 @@ namespace Game.Entities
             switch (group)
             {
                 case DiminishingGroup.Taunt:
-                    if (IsTypeId(TypeId.Unit) && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.TauntDiminish))
+                    if (IsTypeId(TypeId.Unit) && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.ObeysTauntDiminishingReturns))
                     {
                         DiminishingLevels diminish = previousLevel;
                         switch (diminish)

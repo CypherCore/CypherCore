@@ -174,11 +174,11 @@ namespace Game.Entities
 
         public SkillType GetRequiredLootSkill()
         {
-            if (TypeFlags.HasAnyFlag(CreatureTypeFlags.HerbSkinningSkill))
+            if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithHerbalism))
                 return SkillType.Herbalism;
-            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.MiningSkinningSkill))
+            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithMining))
                 return SkillType.Mining;
-            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.EngineeringSkinningSkill))
+            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithEngineering))
                 return SkillType.Engineering;
             else
                 return SkillType.Skinning;                          // normal case
@@ -186,11 +186,11 @@ namespace Game.Entities
 
         public bool IsExotic()
         {
-            return (TypeFlags & CreatureTypeFlags.ExoticPet) != 0;
+            return (TypeFlags & CreatureTypeFlags.TameableExotic) != 0;
         }
         public bool IsTameable(bool canTameExotic)
         {
-            if (CreatureType != CreatureType.Beast || Family == CreatureFamily.None || !TypeFlags.HasAnyFlag(CreatureTypeFlags.TameablePet))
+            if (CreatureType != CreatureType.Beast || Family == CreatureFamily.None || !TypeFlags.HasAnyFlag(CreatureTypeFlags.Tameable))
                 return false;
 
             // if can tame exotic then can tame any tameable

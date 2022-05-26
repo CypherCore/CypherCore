@@ -424,7 +424,7 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
             }
 
-            SetIgnoringCombat(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoCombat));
+            SetIgnoringCombat(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreCombat));
 
             LoadTemplateRoot();
             InitializeMovementFlags();
@@ -850,7 +850,7 @@ namespace Game.Entities
             }
 
             // Allow players to see those units while dead, do it here (mayby altered by addon auras)
-            if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.GhostVisible))
+            if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.VisibleToGhosts))
                 m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
 
             if (!CreateFromProto(guidlow, entry, data, vehId))
@@ -1056,7 +1056,7 @@ namespace Game.Entities
             return !IsCritter()
                 && !IsPet()
                 && !IsTotem()
-                && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
+                && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXP);
         }
 
         public override bool IsEngaged()
@@ -1071,7 +1071,7 @@ namespace Game.Entities
         {
             base.AtEngage(target);
 
-            if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.MountedCombatAllowed))
+            if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowMountedCombat))
                 Dismount();
 
             RefreshSwimmingFlag();

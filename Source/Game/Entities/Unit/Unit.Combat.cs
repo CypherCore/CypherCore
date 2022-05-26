@@ -1313,7 +1313,7 @@ namespace Game.Entities
             if (attackerLevel >= victimLevel + 4 &&
                 // can be from by creature (if can) or from controlled player that considered as creature
                 !IsControlledByPlayer() &&
-                !(GetTypeId() == TypeId.Unit && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrush)))
+                !(GetTypeId() == TypeId.Unit && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrushingBlows)))
             {
                 // add 2% chance per level, min. is 15%
                 tmp = (int)(attackerLevel - victimLevel * 1000 - 1500);

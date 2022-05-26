@@ -1295,7 +1295,7 @@ namespace Game.Spells
                     Creature creatureTarget = unitTarget.ToCreature();
                     if (creatureTarget)
                     {
-                        if (!creatureTarget.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanCollideWithMissiles))
+                        if (!creatureTarget.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CollideWithMissiles))
                             continue;
                     }
                 }
