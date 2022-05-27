@@ -862,7 +862,7 @@ namespace Game.Entities
         public override string GetDebugInfo()
         {
             return $"{base.GetDebugInfo()}\nIsAIEnabled: {IsAIEnabled()} DeathState: {GetDeathState()} UnitMovementFlags: {GetUnitMovementFlags()} UnitMovementFlags2: {GetUnitMovementFlags2()} Class: {GetClass()}\n" +
-                    $" {(MoveSpline != null ? MoveSpline.ToString() : "Movespline: <none>")}";
+                    $" {(MoveSpline != null ? MoveSpline.ToString() : "Movespline: <none>\n")} GetCharmedGUID(): {GetCharmedGUID()}\nGetCharmerGUID(): {GetCharmerGUID()}\n{(GetVehicleKit() != null ? GetVehicleKit().GetDebugInfo() : "No vehicle kit")}";
         }
         
         public Guardian GetGuardianPet()

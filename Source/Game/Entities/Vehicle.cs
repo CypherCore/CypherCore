@@ -24,6 +24,7 @@ using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Game.Entities
 {
@@ -557,6 +558,26 @@ namespace Game.Entities
                 return vehicleTemplate.DespawnDelay;
 
             return TimeSpan.FromMilliseconds(1);
+        }
+
+        public string GetDebugInfo()
+        {
+            StringBuilder str = new StringBuilder("Vehicle seats:\n");
+            foreach (var (id, seat) in Seats)
+                str.Append($"seat {id}: {(seat.IsEmpty() ? "empty" : seat.Passenger.Guid)}\n");
+
+            str.Append("Vehicle pending events:");
+
+            if (_pendingJoinEvents.Empty())
+                str.Append(" none");
+            else
+            {
+                str.Append("\n");
+                foreach (var joinEvent in _pendingJoinEvents)
+                    str.Append($"seat {joinEvent.Seat.Key}: {joinEvent.Passenger.GetGUID()}\n");
+            }
+
+            return str.ToString();
         }
 
         public Unit GetBase() { return _me; }

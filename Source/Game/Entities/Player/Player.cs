@@ -990,7 +990,7 @@ namespace Game.Entities
                 Log.outFatal(LogFilter.Player, "Player {0} (GUID: {1} is not able to uncharm unit (GUID: {2} Entry: {3}, Type: {4})", GetName(), GetGUID(), GetCharmedGUID(), charm.GetEntry(), charm.GetTypeId());
                 if (!charm.GetCharmerGUID().IsEmpty())
                 {
-                    Log.outFatal(LogFilter.Player, "Charmed unit has charmer guid {0}", charm.GetCharmerGUID());
+                    Log.outFatal(LogFilter.Player, $"Player::StopCastingCharm: Charmed unit has charmer {charm.GetCharmerGUID()}\nPlayer debug info: {GetDebugInfo()}\nCharm debug info: {charm.GetDebugInfo()}");
                     Cypher.Assert(false);
                 }
 
