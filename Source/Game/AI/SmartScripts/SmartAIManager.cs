@@ -628,6 +628,11 @@ namespace Game.AI
                     case SmartEvents.IcLos:
                         if (!IsMinMaxValid(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax))
                             return false;
+                        if (e.Event.los.hostilityMode >= (uint)LOSHostilityMode.End)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses hostilityMode with invalid value {e.Event.los.hostilityMode} (max allowed value {LOSHostilityMode.End - 1}), skipped.");
+                            return false;
+                        }
                         break;
                     case SmartEvents.Respawn:
                         if (e.Event.respawn.type == (uint)SmartRespawnCondition.Map && CliDB.MapStorage.LookupByKey(e.Event.respawn.map) == null)
@@ -912,7 +917,7 @@ namespace Game.AI
                     case SmartEvents.QuestObjCompletion:
                         if (Global.ObjectMgr.GetQuestObjective(e.Event.questObjective.id) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Event SMART_EVENT_QUEST_OBJ_COPLETETION using invalid objective id {e.Event.questObjective.id}, skipped.");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Event SMART_EVENT_QUEST_OBJ_COMPLETION using invalid objective id {e.Event.questObjective.id}, skipped.");
                             return false;
                         }
                         break;
@@ -2165,7 +2170,7 @@ namespace Game.AI
         }
         public struct Los
         {
-            public uint noHostile;
+            public uint hostilityMode;
             public uint maxDist;
             public uint cooldownMin;
             public uint cooldownMax;

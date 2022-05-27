@@ -3455,8 +3455,9 @@ namespace Game.AI
                     //if range is ok and we are actually in LOS
                     if (_me.IsWithinDistInMap(unit, range) && _me.IsWithinLOSInMap(unit))
                     {
+                        LOSHostilityMode hostilityMode = (LOSHostilityMode)e.Event.los.hostilityMode;
                         //if friendly event&&who is not hostile OR hostile event&&who is hostile
-                        if ((e.Event.los.noHostile != 0 && !_me.IsHostileTo(unit)) || (e.Event.los.noHostile == 0 && _me.IsHostileTo(unit)))
+                        if ((hostilityMode == LOSHostilityMode.Any) || (hostilityMode == LOSHostilityMode.NotHostile && !_me.IsHostileTo(unit)) || (hostilityMode == LOSHostilityMode.Hostile && _me.IsHostileTo(unit)))
                         {
                             if (e.Event.los.playerOnly != 0 && !unit.IsTypeId(TypeId.Player))
                                 return;
@@ -3477,8 +3478,9 @@ namespace Game.AI
                     //if range is ok and we are actually in LOS
                     if (_me.IsWithinDistInMap(unit, range) && _me.IsWithinLOSInMap(unit))
                     {
+                        LOSHostilityMode hostilityMode = (LOSHostilityMode)e.Event.los.hostilityMode;
                         //if friendly event&&who is not hostile OR hostile event&&who is hostile
-                        if ((e.Event.los.noHostile != 0 && !_me.IsHostileTo(unit)) || (e.Event.los.noHostile == 0 && _me.IsHostileTo(unit)))
+                        if ((hostilityMode == LOSHostilityMode.Any) || (hostilityMode == LOSHostilityMode.NotHostile && !_me.IsHostileTo(unit)) || (hostilityMode == LOSHostilityMode.Hostile && _me.IsHostileTo(unit)))
                         {
                             if (e.Event.los.playerOnly != 0 && !unit.IsTypeId(TypeId.Player))
                                 return;

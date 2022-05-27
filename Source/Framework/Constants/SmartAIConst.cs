@@ -175,7 +175,7 @@ namespace Framework.Constants
         Evade = 7,       // None
         SpellHit = 8,       // Spellid, School, Cooldownmin, Cooldownmax
         Range = 9,       // Mindist, Maxdist, Repeatmin, Repeatmax
-        OocLos = 10,      // Nohostile, Maxrnage, Cooldownmin, Cooldownmax
+        OocLos = 10,      // HostilityMode, Maxrnage, Cooldownmin, Cooldownmax
         Respawn = 11,      // Type, Mapid, Zoneid
         TargetHealthPct = 12,      // Hpmin%, Hpmax%, Repeatmin, Repeatmax
         VictimCasting = 13,      // Repeatmin, Repeatmax
@@ -191,7 +191,7 @@ namespace Framework.Constants
         HasAura = 23,      // Param1 = Spellid, Param2 = Stack Amount, Param3/4 Repeatmin, Repeatmax
         TargetBuffed = 24,      // Param1 = Spellid, Param2 = Stack Amount, Param3/4 Repeatmin, Repeatmax
         Reset = 25,      // Called After Combat, When The Creature Respawn And Spawn.
-        IcLos = 26,      // Nohostile, Maxrnage, Cooldownmin, Cooldownmax
+        IcLos = 26,      // HostilityMode, Maxrnage, Cooldownmin, Cooldownmax
         PassengerBoarded = 27,      // Cooldownmin, Cooldownmax
         PassengerRemoved = 28,      // Cooldownmin, Cooldownmax
         Charmed = 29,      // onRemove (0 - on apply, 1 - on remove)
@@ -442,5 +442,13 @@ namespace Framework.Constants
         ClosestUnspawnedGameobject = 30,
 
         End = 31
+    }
+
+    public enum LOSHostilityMode
+    {
+        Hostile = 0,
+        NotHostile = 1,
+        Any = 2,
+        End
     }
 }
