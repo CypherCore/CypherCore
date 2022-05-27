@@ -490,7 +490,7 @@ namespace Scripts.World.EmeraldDragons
         }
     }
 
-    [Script]
+    [Script] // 24778 - Sleep
     class spell_dream_fog_sleep_SpellScript : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
@@ -510,7 +510,7 @@ namespace Scripts.World.EmeraldDragons
         }
     }
 
-    [Script]
+    [Script] // 25042 - Triggerspell - Mark of Nature
     class spell_mark_of_nature_SpellScript : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)

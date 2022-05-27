@@ -293,7 +293,7 @@ namespace Scripts.Spells.Holiday
         }
     }
 
-    [Script]
+    [Script] // 44436 - Tricky Treat
     class spell_hallow_end_tricky_treat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -314,7 +314,7 @@ namespace Scripts.Spells.Holiday
         }
     }
 
-    [Script]
+    [Script] // 24717, 24718, 24719, 24720, 24724, 24733, 24737, 24741
     class spell_hallow_end_wand : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -393,7 +393,7 @@ namespace Scripts.Spells.Holiday
         bool _handled;
     }
 
-    [Script]
+    [Script] // 26218 - Mistletoe
     class spell_winter_veil_mistletoe : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -641,7 +641,7 @@ namespace Scripts.Spells.Holiday
         }
     }
 
-    [Script]
+    [Script] // 43755 - Brewfest - Daily - Relay Race - Player - Increase Mount Duration - DND
     class spell_brewfest_relay_race_turn_in : SpellScript
     {
         void HandleDummy(uint effIndex)

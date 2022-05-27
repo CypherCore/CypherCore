@@ -366,7 +366,7 @@ namespace Scripts.Spells.Quest
         uint _despawnTime;
     }
 
-    [Script]
+    [Script] // 8856 - Bending Shinbone
     class spell_q1846_bending_shinbone : SpellScript
     {
         void HandleScriptEffect(uint effIndex)
@@ -409,8 +409,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=5206 Marauders of Darrowshire
-    // 17271 Test Fetid Skull
-    [Script]
+    [Script] // 17271 - Test Fetid Skull
     class spell_q5206_test_fetid_skull : SpellScript
     {
         public override bool Load()
@@ -438,8 +437,7 @@ namespace Scripts.Spells.Quest
 
     // http://www.wowhead.com/quest=6124 Curing the Sick (A)
     // http://www.wowhead.com/quest=6129 Curing the Sick (H)
-    // 19512 Apply Salve
-    [Script]
+    [Script] // 19512 Apply Salve
     class spell_q6124_6129_apply_salve : SpellScript
     {
         public override bool Load()
@@ -483,8 +481,8 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 43874 Scourge Mur'gul Camp: Force Shield Arcane Purple x3
-    [Script]
+
+    [Script] // 43874 - Scourge Mur'gul Camp: Force Shield Arcane Purple x3
     class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -506,8 +504,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 50133 Scourging Crystal Controller
-    [Script]
+    [Script] // 50133 - Scourging Crystal Controller
     class spell_q11396_11399_scourging_crystal_controller : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -531,8 +528,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 43882 Scourging Crystal Controller Dummy
-    [Script]
+    [Script] // 43882 - Scourging Crystal Controller Dummy
     class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -555,8 +551,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=11587 Prison Break
-    // 45449 Arcane Prisoner Rescue
-    [Script]
+    [Script] // 45449 Arcane Prisoner Rescue
     class spell_q11587_arcane_prisoner_rescue : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -580,8 +575,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=11730 Master and Servant
-    // 46023 The Ultrasonic Screwdriver
-    [Script]
+    [Script] // 46023 The Ultrasonic Screwdriver
     class spell_q11730_ultrasonic_screwdriver : SpellScript
     {
         public override bool Load()
@@ -637,8 +631,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12459 That Which Creates Can Also Destroy
-    // 49587 Seeds of Nature's Wrath
-    [Script]
+    [Script] // 49587 Seeds of Nature's Wrath
     class spell_q12459_seeds_of_natures_wrath : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -671,8 +664,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12634 Some Make Lemonade, Some Make Liquor
-    // 51840 Despawn Fruit Tosser
-    [Script]
+    [Script] // 51840 Despawn Fruit Tosser
     class spell_q12634_despawn_fruit_tosser : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -705,8 +697,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12683 Burning to Help
-    // 52308 Take Sputum Sample
-    [Script]
+    [Script] // 52308 Take Sputum Sample
     class spell_q12683_take_sputum_sample : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -733,8 +724,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12851 Going Bearback
-    // 54798 FLAMING Arrow Triggered Effect
-    [Script]
+    [Script] // 54798 FLAMING Arrow Triggered Effect
     class spell_q12851_going_bearback : AuraScript
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -773,8 +763,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12937 Relief for the Fallen
-    // 55804 Healing Finished
-    [Script]
+    [Script] // 55804 Healing Finished
     class spell_q12937_relief_for_the_fallen : SpellScript
     {
         public override bool Load()
@@ -806,7 +795,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 48917 - Who Are They: Cast from Questgiver
     class spell_q10041_q10040_who_are_they : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -831,8 +820,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 8593 Symbol of life dummy
-    [Script]
+    [Script] // 8593 Symbol of life dummy
     class spell_symbol_of_life_dummy : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -858,8 +846,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12659 Scalps!
-    // 52090 Ahunae's Knife
-    [Script]
+    [Script] // 52090 Ahunae's Knife
     class spell_q12659_ahunaes_knife : SpellScript
     {
         public override bool Load()
@@ -885,7 +872,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 32146 - Liquid Fire
     class spell_q9874_liquid_fire : SpellScript
     {
         public override bool Load()
@@ -914,7 +901,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 54190 - Lifeblood Dummy
     class spell_q12805_lifeblood_dummy : SpellScript
     {
         public override bool Load()
@@ -942,12 +929,11 @@ namespace Scripts.Spells.Quest
     }
 
     /*
- http://www.wowhead.com/quest=13283 King of the Mountain
- http://www.wowhead.com/quest=13280 King of the Mountain
- 59643 Plant Horde Battle Standard
- 4338 Plant Alliance Battle Standard
- */
-    [Script]
+     http://www.wowhead.com/quest=13283 King of the Mountain
+     http://www.wowhead.com/quest=13280 King of the Mountain
+    */
+    // 59643 Plant Horde Battle Standard
+    [Script] // 4338 Plant Alliance Battle Standard
     class spell_q13280_13283_plant_battle_standard : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -977,7 +963,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 4336 - Jump Jets
     class spell_q13280_13283_jump_jets : SpellScript
     {
         void HandleCast()
@@ -997,7 +983,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 66741 - Chum the Water
     class spell_q14112_14145_chum_the_water : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
@@ -1079,7 +1065,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 56278 - Read Pronouncement
     class spell_q12987_read_pronouncement : AuraScript
     {
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1104,7 +1090,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 48742 - Wintergarde Mine Explosion
     class spell_q12277_wintergarde_mine_explosion : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1143,7 +1129,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 50546 - The Focus on the Beach: Ley Line Focus Control Ring Effect
     class spell_q12066_bunny_kill_credit : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1159,7 +1145,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 52941 - Song of Cleansing
     class spell_q12735_song_of_cleansing : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1187,7 +1173,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 49213 - Defending Wyrmrest Temple: Character Script Cast From Gossip
     class spell_q12372_cast_from_gossip_trigger : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1202,8 +1188,7 @@ namespace Scripts.Spells.Quest
     }
 
     // http://www.wowhead.com/quest=12372 Defending Wyrmrest Temple
-    // 49370 - Wyrmrest Defender: Destabilize Azure Dragonshrine Effect
-    [Script]
+    [Script] // 49370 - Wyrmrest Defender: Destabilize Azure Dragonshrine Effect
     class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1234,8 +1219,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // ID - 50287 Azure Dragon: On Death Force Cast Wyrmrest Defender to Whisper to Controller - Random (cast from Azure Dragons and Azure Drakes on death)
-    [Script]
+    [Script] // 50287 - Azure Dragon: On Death Force Cast Wyrmrest Defender to Whisper to Controller - Random (cast from Azure Dragons and Azure Drakes on death)
     class spell_q12372_azure_on_death_force_whisper : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1251,8 +1235,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 40113 Knockdown Fel Cannon: The Aggro Check Aura
-    [Script]
+    [Script] // 40113 Knockdown Fel Cannon: The Aggro Check Aura
     class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript
     {
         void HandleTriggerSpell(AuraEffect aurEff)
@@ -1269,8 +1252,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 40112 Knockdown Fel Cannon: The Aggro Check
-    [Script]
+    [Script] // 40112 Knockdown Fel Cannon: The Aggro Check
     class spell_q11010_q11102_q11023_aggro_check : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1287,9 +1269,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-
-    // 40119 Knockdown Fel Cannon: The Aggro Burst
-    [Script]
+    
+    [Script] // 40119 Knockdown Fel Cannon: The Aggro Burst
     class spell_q11010_q11102_q11023_aggro_burst : AuraScript
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1305,9 +1286,8 @@ namespace Scripts.Spells.Quest
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
-
-    // 40056 Knockdown Fel Cannon: Choose Loc
-    [Script]
+    
+    [Script] // 40056 Knockdown Fel Cannon: Choose Loc
     class spell_q11010_q11102_q11023_choose_loc : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1334,8 +1314,7 @@ namespace Scripts.Spells.Quest
     }
 
     // 39844 - Skyguard Blasting Charge
-    // 40160 - Throw Bomb
-    [Script]
+    [Script] // 40160 - Throw Bomb
     class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript
     {
         SpellCastResult CheckRequirement()
@@ -1377,7 +1356,7 @@ namespace Scripts.Spells.Quest
         }
     }
     
-    [Script]
+    [Script] // 50894 - Zul'Drak Rat
     class spell_q12527_zuldrak_rat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -1401,9 +1380,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }
     }
-
-    // 55368 - Summon Stefan
-    [Script]
+    
+    [Script] // 55368 - Summon Stefan
     class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript
     {
         void SetDest(ref SpellDestination dest)
@@ -1419,7 +1397,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 53350 - Quenching Mist
     class spell_q12730_quenching_mist : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1438,8 +1416,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // 13291 - Borrowed Technology/13292 - The Solution Solution /Daily//13239 - Volatility/13261 - Volatiliy /Daily//
-    [Script]
+    [Script] // 59318 - Grab Fake Soldier
     class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -1461,9 +1438,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-
-    // 59303 - Summon Frost Wyrm
-    [Script]
+ 
+    [Script] // 59303 - Summon Frost Wyrm
     class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript
     {
         void SetDest(ref SpellDestination dest)
@@ -1478,9 +1454,8 @@ namespace Scripts.Spells.Quest
             OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
         }
     }
-
-    // 12601 - Second Chances: Summon Landgren's Soul Moveto Target Bunny
-    [Script]
+    
+    [Script] // 12601 - Second Chances: Summon Landgren's Soul Moveto Target Bunny
     class spell_q12847_summon_soul_moveto_bunny : SpellScript
     {
         void SetDest(ref SpellDestination dest)
@@ -1496,7 +1471,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 56565 - Bear Flank Master
     class spell_q13011_bear_flank_master : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1531,7 +1506,8 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    // 57385 - Argent Cannon    
+    [Script] // 57412 - Reckoning Bomb
     class spell_q13086_cannons_target : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1552,7 +1528,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 59576 - Burst at the Seams
     class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59576 : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1583,7 +1559,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 59579 - Burst at the Seams
     class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59579 : AuraScript
     {
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1626,7 +1602,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 52593 - Bloated Abomination Feign Death
     class spell_q13264_q13276_q13288_q13289_bloated_abom_feign_death : AuraScript
     {
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1655,7 +1631,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 76245 - Area Restrict Abom
     class spell_q13264_q13276_q13288_q13289_area_restrict_abom : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1674,9 +1650,10 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-
-
-    [Script]
+    
+    // 59590 - Assign Ghoul Kill Credit to Master
+    // 60039 - Assign Skeleton Kill Credit to Master
+    [Script] // 60041 - Assign Geist Kill Credit to Master
     class spell_q13264_q13276_q13288_q13289_assign_credit_to_master : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1698,7 +1675,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 52510 - Burst at the Seams
     class spell_q12690_burst_at_the_seams_52510 : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1813,6 +1790,13 @@ namespace Scripts.Spells.Quest
         }
     }
 
+    /*
+    73725 - [DND] Test Cheer
+    73835 - [DND] Test Salute
+    73836 - [DND] Test Roar
+    73837 - [DND] Test Dance
+    73886 - [DND] Test Stop Dance
+    */
     [Script]
     class spell_q25199_emote : AuraScript
     {
@@ -1887,9 +1871,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-
-    // 52694 - Recall Eye of Acherus
-    [Script]
+    
+    [Script] // 52694 - Recall Eye of Acherus
     class spell_q12641_recall_eye_of_acherus : SpellScript
     {
         void HandleDummy(uint effIndex)
@@ -1908,9 +1891,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
         }
     }
-
-    // 51769 - Emblazon Runeblade
-    [Script]
+    
+    [Script] // 51769 - Emblazon Runeblade
     class spell_q12619_emblazon_runeblade_AuraScript : AuraScript
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1926,9 +1908,8 @@ namespace Scripts.Spells.Quest
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
-
-    // 51770 - Emblazon Runeblade
-    [Script]
+    
+    [Script] // 51770 - Emblazon Runeblade
     class spell_q12619_emblazon_runeblade : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1942,7 +1923,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 55516 - Gymer's Grab
     class spell_q12919_gymers_grab : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -1967,7 +1948,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 55421 - Gymer's Throw
     class spell_q12919_gymers_throw : SpellScript
     {
         void HandleScript(uint effIndex)
@@ -1990,7 +1971,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 61752 - Illidan Kill Credit Master
     class spell_q13400_illidan_kill_master : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -2014,9 +1995,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-
-    // 66744 - Make Player Destroy Totems
-    [Script]
+   
+    [Script] // 66744 - Make Player Destroy Totems
     class spell_q14100_q14111_make_player_destroy_totems : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -2036,9 +2016,8 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
-
-    // 39238 - Fumping
-    [Script]
+   
+    [Script] // 39238 - Fumping
     class spell_q10929_fumping : AuraScript
     {
         public override bool Validate(SpellInfo spell)
@@ -2061,9 +2040,8 @@ namespace Scripts.Spells.Quest
             OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-
-    // 93072 - Get Our Boys Back Dummy
-    [Script]
+   
+    [Script] // 93072 - Get Our Boys Back Dummy
     class spell_q28813_get_our_boys_back_dummy : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -2088,7 +2066,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 53034 - Set Health Random
     class spell_q28813_set_health_random : SpellScript
     {
         void HandleDummyEffect()
@@ -2103,7 +2081,7 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script]
+    [Script] // 49285 - Hand Over Reins
     class spell_q12414_hand_over_reins : SpellScript
     {
         void HandleScript(uint effIndex)

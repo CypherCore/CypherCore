@@ -2572,7 +2572,7 @@ namespace Scripts.Spells.Items
         }
     }
 
-    [Script]
+    [Script] // 58886 - Food
     class spell_magic_eater_food : AuraScript
     {
         void HandleTriggerSpell(AuraEffect aurEff)

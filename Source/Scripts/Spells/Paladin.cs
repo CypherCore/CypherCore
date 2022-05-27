@@ -1244,7 +1244,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    [Script] // 64890 Item - Paladin T8 Holy 2P Bonus
+    [Script] // 64890 - Item - Paladin T8 Holy 2P Bonus
     class spell_pal_t8_2p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

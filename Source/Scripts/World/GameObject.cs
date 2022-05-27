@@ -50,12 +50,6 @@ namespace Scripts.World.GameObjects
         public const uint Create1FlaskOfSorcerer = 40968;
         public const uint Create5FlaskOfSorcerer = 40970;
 
-        //Matrixpunchograph
-        public const uint YellowPunchCard = 11512;
-        public const uint BluePunchCard = 11525;
-        public const uint RedPunchCard = 11528;
-        public const uint PrismaticPunchCard = 11545;
-
         //Jotunheimcage
         public const uint SummonBladeKnightH = 56207;
         public const uint SummonBladeKnightNe = 56209;
@@ -140,17 +134,6 @@ namespace Scripts.World.GameObjects
 
     struct ItemIds
     {
-        //Matrixpunchograph
-        public const uint WhitePunchCard = 9279;
-        public const uint YellowPunchCard = 9280;
-        public const uint BluePunchCard = 9282;
-        public const uint RedPunchCard = 9281;
-        public const uint PrismaticPunchCard = 9316;
-        public const uint MatrixPunchograph3005A = 142345;
-        public const uint MatrixPunchograph3005B = 142475;
-        public const uint MatrixPunchograph3005C = 142476;
-        public const uint MatrixPunchograph3005D = 142696;
-
         //Amberpineouthouse
         public const uint AnderholsSliderCider = 37247;
     }
@@ -447,50 +430,6 @@ namespace Scripts.World.GameObjects
                 return false;
 
             return true;
-        }
-    }
-
-    [Script]
-    class go_matrix_punchograph : GameObjectAI
-    {
-        public go_matrix_punchograph(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            switch (me.GetEntry())
-            {
-                case ItemIds.MatrixPunchograph3005A:
-                    if (player.HasItemCount(ItemIds.WhitePunchCard))
-                    {
-                        player.DestroyItemCount(ItemIds.WhitePunchCard, 1, true);
-                        player.CastSpell(player, SpellIds.YellowPunchCard, true);
-                    }
-                    break;
-                case ItemIds.MatrixPunchograph3005B:
-                    if (player.HasItemCount(ItemIds.YellowPunchCard))
-                    {
-                        player.DestroyItemCount(ItemIds.YellowPunchCard, 1, true);
-                        player.CastSpell(player, SpellIds.BluePunchCard, true);
-                    }
-                    break;
-                case ItemIds.MatrixPunchograph3005C:
-                    if (player.HasItemCount(ItemIds.BluePunchCard))
-                    {
-                        player.DestroyItemCount(ItemIds.BluePunchCard, 1, true);
-                        player.CastSpell(player, SpellIds.RedPunchCard, true);
-                    }
-                    break;
-                case ItemIds.MatrixPunchograph3005D:
-                    if (player.HasItemCount(ItemIds.RedPunchCard))
-                    {
-                        player.DestroyItemCount(ItemIds.RedPunchCard, 1, true);
-                        player.CastSpell(player, SpellIds.PrismaticPunchCard, true);
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return false;
         }
     }
 

@@ -778,7 +778,7 @@ namespace Scripts.Spells.Rogue
         public void SetRedirectTarget(ObjectGuid guid) { _redirectTarget = guid; }
     }
 
-    [Script]
+    [Script] // 57934 - Tricks of the Trade
     class spell_rog_tricks_of_the_trade : SpellScript
     {
         void DoAfterHit()
