@@ -1200,6 +1200,7 @@ namespace Game.AI
                     ObjectGuid privateObjectOwner = ObjectGuid.Empty;
                     if (flags.HasAnyFlag(SmartActionSummonCreatureFlags.PersonalSpawn))
                         privateObjectOwner = summoner.IsPrivateObject() ? summoner.GetPrivateObjectOwner() : summoner.GetGUID();
+                    uint spawnsCount = Math.Max(e.Action.summonCreature.count, 1u);
 
                     float x, y, z, o;
                     foreach (var target in targets)
@@ -1209,19 +1210,25 @@ namespace Game.AI
                         y += e.Target.y;
                         z += e.Target.z;
                         o += e.Target.o;
-                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
-                        if (summon != null)
-                            if (e.Action.summonCreature.attackInvoker != 0)
-                                summon.GetAI().AttackStart(target.ToUnit());
+                        for (uint counter = 0; counter < spawnsCount; counter++)
+                        {
+                            Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
+                            if (summon != null)
+                                if (e.Action.summonCreature.attackInvoker != 0)
+                                    summon.GetAI().AttackStart(target.ToUnit());
+                        }
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
-                    Creature summon1 = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
-                    if (summon1 != null)
-                        if (unit != null && e.Action.summonCreature.attackInvoker != 0)
-                            summon1.GetAI().AttackStart(unit);
+                    for (uint counter = 0; counter < spawnsCount; counter++)
+                    {
+                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
+                        if (summon != null)
+                            if (unit != null && e.Action.summonCreature.attackInvoker != 0)
+                                summon.GetAI().AttackStart(unit);
+                    }
                     break;
                 }
                 case SmartActions.SummonGo:
