@@ -60,15 +60,9 @@ namespace Game.Loots
             if (pProto.HasFlag(ItemFlags2.FactionAlliance) && player.GetTeam() != Team.Alliance)
                 return false;
 
-            // Master looter can see certain items even if the character can't loot them
+            // Master looter can see all items even if the character can't loot them
             if (!isGivenByMasterLooter && player.GetGroup() && player.GetGroup().GetMasterLooterGuid() == player.GetGUID())
-            {
-                // check quest requirements
-                if (!pProto.FlagsCu.HasFlag(ItemFlagsCustom.IgnoreQuestStatus) && (needs_quest || pProto.GetStartQuest() != 0))
-                    return false;
-
                 return true;
-            }
 
             // Don't allow loot for players without profession or those who already know the recipe
             if (pProto.HasFlag(ItemFlags.HideUnusableRecipe))
