@@ -97,6 +97,7 @@ namespace Framework.Constants
         Deactivated = 0x040,
         InformEnabled = 0x080,
         Finalized = 0x100,
+        PersistOnDeath = 0x200,
 
         Transitory = SpeedUpdatePending | Interrupted
     }

@@ -1397,18 +1397,8 @@ namespace Game.Entities
                 // Don't clear the movement if the Unit was on a vehicle as we are exiting now
                 if (!isOnVehicle)
                 {
-                    if (IsInWorld)
-                    {
-                        // Only clear MotionMaster for entities that exists in world
-                        // Avoids crashes in the following conditions :
-                        //  * Using 'call pet' on dead pets
-                        //  * Using 'call stabled pet'
-                        //  * Logging in with dead pets
-                        GetMotionMaster().Clear();
-                        GetMotionMaster().MoveIdle();
-                    }
-                    StopMoving();
-                    DisableSpline();
+                    if (GetMotionMaster().StopOnDeath())
+                        DisableSpline();
                 }
 
                 // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp

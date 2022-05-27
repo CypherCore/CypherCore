@@ -513,6 +513,29 @@ namespace Game.Movement
             return true;
         }
 
+        public bool StopOnDeath()
+        {
+            MovementGenerator movementGenerator = GetCurrentMovementGenerator();
+            if (movementGenerator != null)
+                if (movementGenerator.HasFlag(MovementGeneratorFlags.PersistOnDeath))
+                    return false;
+
+            if (_owner.IsInWorld)
+            {
+                // Only clear MotionMaster for entities that exists in world
+                // Avoids crashes in the following conditions :
+                //  * Using 'call pet' on dead pets
+                //  * Using 'call stabled pet'
+                //  * Logging in with dead pets
+                Clear();
+                MoveIdle();
+            }
+
+            _owner.StopMoving();
+
+            return true;
+        }
+
         public void MoveIdle()
         {
             Add(GetIdleMovementGenerator(), MovementSlot.Default);
@@ -710,6 +733,7 @@ namespace Game.Movement
 
             GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, 0);
             movement.Priority = MovementGeneratorPriority.Highest;
+            movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
         }
 
@@ -793,6 +817,7 @@ namespace Game.Movement
             GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
+            movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
         }
 
