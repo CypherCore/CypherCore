@@ -61,12 +61,6 @@ namespace Game.Movement
             return false;
         }
 
-        public void NotifyAIOnFinalize(Unit obj)
-        {
-            UnitAI ai = obj.GetAI();
-            ai?.OnMovementGeneratorFinalized(GetMovementGeneratorType());
-        }
-
         public void AddFlag(MovementGeneratorFlags flag) { Flags |= flag; }
         public bool HasFlag(MovementGeneratorFlags flag) { return (Flags & flag) != 0; }
         public void RemoveFlag(MovementGeneratorFlags flag) { Flags &= ~flag; }

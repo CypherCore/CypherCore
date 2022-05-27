@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using System;
 
@@ -208,9 +209,9 @@ namespace Game.Movement
         TimeTracker _timer;
     }
 
-    public class TimedFleeingGenerator : FleeingMovementGenerator<Creature>
+    public class TimedFleeingMovementGenerator : FleeingMovementGenerator<Creature>
     {
-        public TimedFleeingGenerator(ObjectGuid fright, uint time) : base(fright)
+        public TimedFleeingMovementGenerator(ObjectGuid fright, uint time) : base(fright)
         {
             _totalFleeTime = new TimeTracker(time);
         }
@@ -242,6 +243,14 @@ namespace Game.Movement
                     owner.AttackStop();
                     owner.ToCreature().GetAI().AttackStart(victim);
                 }
+            }
+
+            if (movementInform)
+            {
+                Creature ownerCreature = owner.ToCreature();
+                CreatureAI ai = ownerCreature != null ? ownerCreature.GetAI() : null;
+                if (ai != null)
+                    ai.MovementInform(MovementGeneratorType.TimedFleeing, 0);
             }
         }
 

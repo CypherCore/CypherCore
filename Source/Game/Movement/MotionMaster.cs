@@ -580,7 +580,7 @@ namespace Game.Movement
             if (_owner.IsCreature())
             {
                 if (time != 0)
-                    Add(new TimedFleeingGenerator(enemy.GetGUID(), time));
+                    Add(new TimedFleeingMovementGenerator(enemy.GetGUID(), time));
                 else
                     Add(new FleeingMovementGenerator<Creature>(enemy.GetGUID()));
             }
@@ -1119,10 +1119,7 @@ namespace Game.Movement
             {
                 case MovementSlot.Default:
                     if (_defaultGenerator != null)
-                    {
                         _defaultGenerator.Finalize(_owner, _generators.Empty(), false);
-                        _defaultGenerator.NotifyAIOnFinalize(_owner);
-                    }
 
                     _defaultGenerator = movement;
                     if (IsStatic(movement))
@@ -1160,14 +1157,12 @@ namespace Game.Movement
         void Delete(MovementGenerator movement, bool active, bool movementInform)
         {
             movement.Finalize(_owner, active, movementInform);
-            movement.NotifyAIOnFinalize(_owner);
             ClearBaseUnitState(movement);
         }
 
         void DeleteDefault(bool active, bool movementInform)
         {
             _defaultGenerator.Finalize(_owner, active, movementInform);
-            _defaultGenerator.NotifyAIOnFinalize(_owner);
             _defaultGenerator = GetIdleMovementGenerator();
             AddFlag(MotionMasterFlags.StaticInitializationPending);
         }

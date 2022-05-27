@@ -498,8 +498,6 @@ namespace Game.AI
         /// </summary>
         public virtual void OnGameEvent(bool start, ushort eventId) { }
 
-        public virtual void OnMovementGeneratorFinalized(MovementGeneratorType type) { }
-
         public virtual string GetDebugInfo()
         {
             return $"Me: {(me != null ? me.GetDebugInfo() : "NULL")}";
