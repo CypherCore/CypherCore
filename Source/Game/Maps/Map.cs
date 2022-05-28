@@ -2646,6 +2646,7 @@ namespace Game.Maps
                     Global.PoolMgr.UpdatePool(poolId, next.type, next.spawnId);
 
                     // step 3: get rid of the actual entry
+                    RemoveRespawnTime(next.type, next.spawnId, null, true);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
                 }
                 else if (CheckRespawn(next)) // see if we're allowed to respawn
@@ -2657,12 +2658,14 @@ namespace Game.Maps
                     DoRespawn(next.type, next.spawnId, next.gridId);
 
                     // step 3: get rid of the actual entry
+                    RemoveRespawnTime(next.type, next.spawnId, null, true);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
                 }
                 else if (next.respawnTime == 0)
                 { // just remove this respawn entry without rescheduling
                     _respawnTimes.Remove(next);
                     GetRespawnMapForType(next.type).Remove(next.spawnId);
+                    RemoveRespawnTime(next.type, next.spawnId, null, true);
                 }
                 else
                 { // new respawn time, update heap position

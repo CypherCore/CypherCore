@@ -490,7 +490,7 @@ namespace Game
             }
         }
 
-        void Despawn1Object(ulong guid, bool alwaysDeleteRespawnTime = false)
+        void Despawn1Object(ulong guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
         {
             switch (typeof(T).Name)
             {
@@ -507,7 +507,7 @@ namespace Game
                                 foreach (var creature in creatureBounds)
                                 {
                                     // For dynamic spawns, save respawn time here
-                                    if (!creature.GetRespawnCompatibilityMode())
+                                    if (saveRespawnTime && !creature.GetRespawnCompatibilityMode())
                                         creature.SaveRespawnTime();
 
                                     creature.AddObjectToRemoveList();
@@ -532,7 +532,7 @@ namespace Game
                                 foreach (var go in gameobjectBounds)
                                 {
                                     // For dynamic spawns, save respawn time here
-                                    if (!go.GetRespawnCompatibilityMode())
+                                    if (saveRespawnTime && !go.GetRespawnCompatibilityMode())
                                         go.SaveRespawnTime();
 
                                     go.AddObjectToRemoveList();
@@ -598,7 +598,7 @@ namespace Game
                         roll -= obj.chance;
                         // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
                         // so this need explicit check for this case
-                        if (roll < 0 && (/*obj.guid == triggerFrom ||*/ !spawns.IsActiveObject<T>(obj.guid)))
+                        if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)))
                         {
                             rolledObjects.Add(obj);
                             break;
@@ -608,7 +608,7 @@ namespace Game
                 
                 if (!EqualChanced.Empty() && rolledObjects.Empty())
                 {
-                    rolledObjects.AddRange(EqualChanced.Where(obj => /*obj.guid == triggerFrom ||*/ !spawns.IsActiveObject<T>(obj.guid)));
+                    rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)));
                     rolledObjects.RandomResize((uint)count);
                 }
 
@@ -682,7 +682,14 @@ namespace Game
 
         void ReSpawn1Object(PoolObject obj)
         {
-            // GameObject/Creature is still on map, nothing to do
+            switch (typeof(T).Name)
+            {
+                case "Creature":
+                case "GameObject":
+                    Despawn1Object(obj.guid, false, false);
+                    Spawn1Object(obj);
+                    break;
+            }
         }
 
         void RemoveRespawnTimeFromDB(ulong guid)

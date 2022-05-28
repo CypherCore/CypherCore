@@ -3277,9 +3277,12 @@ namespace Game.Entities
                         return false;
                     }
                 }
+                else
+                {
+                    // compatibility mode creatures will be respawned in ::Update()
+                    m_deathState = DeathState.Dead;
+                }
 
-                // compatibility mode creatures will be respawned in ::Update()
-                m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
                     float tz = map.GetHeight(GetPhaseShift(), data.SpawnPoint, true, MapConst.MaxFallDistance);
