@@ -861,8 +861,18 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nIsAIEnabled: {IsAIEnabled()} DeathState: {GetDeathState()} UnitMovementFlags: {GetUnitMovementFlags()} UnitMovementFlags2: {GetUnitMovementFlags2()} Class: {GetClass()}\n" +
-                    $" {(MoveSpline != null ? MoveSpline.ToString() : "Movespline: <none>\n")} GetCharmedGUID(): {GetCharmedGUID()}\nGetCharmerGUID(): {GetCharmerGUID()}\n{(GetVehicleKit() != null ? GetVehicleKit().GetDebugInfo() : "No vehicle kit")}";
+            string str = $"{base.GetDebugInfo()}\nIsAIEnabled: {IsAIEnabled()} DeathState: {GetDeathState()} UnitMovementFlags: {GetUnitMovementFlags()} UnitMovementFlags2: {GetUnitMovementFlags2()} Class: {GetClass()}\n" +
+                    $" {(MoveSpline != null ? MoveSpline.ToString() : "Movespline: <none>\n")} GetCharmedGUID(): {GetCharmedGUID()}\nGetCharmerGUID(): {GetCharmerGUID()}\n{(GetVehicleKit() != null ? GetVehicleKit().GetDebugInfo() : "No vehicle kit")}\n" +
+                    $"m_Controlled size: {m_Controlled.Count}";
+
+            int controlledCount = 0;
+            foreach (Unit controlled in m_Controlled)
+            {
+                ++controlledCount;
+                str += $"\nm_Controlled {controlledCount} : {controlled.GetGUID()}";
+            }
+
+            return str;
         }
         
         public Guardian GetGuardianPet()
