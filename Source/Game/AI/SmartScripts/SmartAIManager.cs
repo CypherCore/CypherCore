@@ -23,6 +23,7 @@ using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Game.AI
@@ -503,24 +504,37 @@ namespace Game.AI
                         return false;
                     }
                     break;
-                case SmartTargets.PlayerRange:
-                case SmartTargets.Self:
-                case SmartTargets.Victim:
                 case SmartTargets.HostileSecondAggro:
                 case SmartTargets.HostileLastAggro:
                 case SmartTargets.HostileRandom:
                 case SmartTargets.HostileRandomNotTop:
-                case SmartTargets.Position:
-                case SmartTargets.None:
-                case SmartTargets.OwnerOrSummoner:
-                case SmartTargets.ThreatList:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.hostilRandom.playerOnly);
+                    break;
+                case SmartTargets.Farthest:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.farthest.playerOnly);
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.farthest.isInLos);
+                    break;
                 case SmartTargets.ClosestGameobject:
                 case SmartTargets.ClosestCreature:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.closest.dead);
+                    break;
                 case SmartTargets.ClosestEnemy:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.closestAttackable.playerOnly);
+                    break;
                 case SmartTargets.ClosestFriendly:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.closestFriendly.playerOnly);
+                    break;
+                case SmartTargets.OwnerOrSummoner:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.owner.useCharmerOrOwner);
+                    break;
+                case SmartTargets.PlayerRange:
+                case SmartTargets.Self:
+                case SmartTargets.Victim:
+                case SmartTargets.Position:
+                case SmartTargets.None:
+                case SmartTargets.ThreatList:
                 case SmartTargets.Stored:
                 case SmartTargets.LootRecipients:
-                case SmartTargets.Farthest:
                 case SmartTargets.VehiclePassenger:
                 case SmartTargets.ClosestUnspawnedGameobject:
                     break;
@@ -633,6 +647,7 @@ namespace Game.AI
                             Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses hostilityMode with invalid value {e.Event.los.hostilityMode} (max allowed value {LOSHostilityMode.End - 1}), skipped.");
                             return false;
                         }
+                        TC_SAI_IS_BOOLEAN_VALID(e, e.Event.los.playerOnly);
                         break;
                     case SmartEvents.Respawn:
                         if (e.Event.respawn.type == (uint)SmartRespawnCondition.Map && CliDB.MapStorage.LookupByKey(e.Event.respawn.map) == null)
@@ -675,6 +690,8 @@ namespace Game.AI
 
                         if (e.Event.kill.creature != 0 && !IsCreatureValid(e, e.Event.kill.creature))
                             return false;
+
+                        TC_SAI_IS_BOOLEAN_VALID(e, e.Event.kill.playerOnly);
                         break;
                     case SmartEvents.VictimCasting:
                         if (e.Event.targetCasting.spellId > 0 && !Global.SpellMgr.HasSpellInfo(e.Event.targetCasting.spellId, Difficulty.None))
@@ -914,6 +931,9 @@ namespace Game.AI
                             return false;
                         }
                         break;
+                    case SmartEvents.Charmed:
+                        TC_SAI_IS_BOOLEAN_VALID(e, e.Event.charm.onRemove);
+                        break;
                     case SmartEvents.QuestObjCompletion:
                         if (Global.ObjectMgr.GetQuestObjective(e.Event.questObjective.id) == null)
                         {
@@ -932,7 +952,6 @@ namespace Game.AI
                     case SmartEvents.TimedEventTriggered:
                     case SmartEvents.InstancePlayerEnter:
                     case SmartEvents.TransportRelocate:
-                    case SmartEvents.Charmed:
                     case SmartEvents.CharmedTarget:
                     case SmartEvents.CorpseRemoved:
                     case SmartEvents.AiInit:
@@ -968,6 +987,8 @@ namespace Game.AI
             switch (e.GetActionType())
             {
                 case SmartActions.Talk:
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.talk.useTalkTarget);
+                    goto case SmartActions.SimpleTalk;
                 case SmartActions.SimpleTalk:
                 {
                     if (!IsTextValid(e, e.Action.talk.textGroupId))
@@ -1009,6 +1030,8 @@ namespace Game.AI
                 case SmartActions.Sound:
                     if (!IsSoundValid(e, e.Action.sound.soundId))
                         return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.sound.onlySelf);
                     break;
                 case SmartActions.SetEmoteState:
                 case SmartActions.PlayEmote:
@@ -1029,9 +1052,14 @@ namespace Game.AI
                     if (e.Action.spellVisualKit.spellVisualKitId != 0 && !IsSpellVisualKitValid(e, e.Action.spellVisualKit.spellVisualKitId))
                         return false;
                     break;
-                case SmartActions.FailQuest:
                 case SmartActions.OfferQuest:
-                    if (e.Action.quest.questId == 0 || !IsQuestValid(e, e.Action.quest.questId))
+                    if (!IsQuestValid(e, e.Action.questOffer.questId))
+                        return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.questOffer.directAdd);
+                    break;
+                case SmartActions.FailQuest:
+                    if (!IsQuestValid(e, e.Action.quest.questId))
                         return false;
                     break;
                 case SmartActions.ActivateTaxi:
@@ -1066,6 +1094,8 @@ namespace Game.AI
                         return false;
                     if (e.Action.randomSound.sound4 != 0 && !IsSoundValid(e, e.Action.randomSound.sound4))
                         return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.randomSound.onlySelf);
                     break;
                 case SmartActions.Cast:
                 {
@@ -1141,6 +1171,8 @@ namespace Game.AI
                 case SmartActions.RemoveAurasFromSpell:
                     if (e.Action.removeAura.spell != 0 && !IsSpellValid(e, e.Action.removeAura.spell))
                         return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.removeAura.onlyOwnedAuras);
                     break;
                 case SmartActions.RandomPhase:
                 {
@@ -1178,6 +1210,8 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses incorrect TempSummonType {e.Action.summonCreature.type}, skipped.");
                         return false;
                     }
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.summonCreature.attackInvoker);
                     break;
                 case SmartActions.CallKilledmonster:
                     if (!IsCreatureValid(e, e.Action.killedMonster.creature))
@@ -1192,6 +1226,8 @@ namespace Game.AI
                 case SmartActions.UpdateTemplate:
                     if (e.Action.updateTemplate.creature != 0 && !IsCreatureValid(e, e.Action.updateTemplate.creature))
                         return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.updateTemplate.updateLevel);
                     break;
                 case SmartActions.SetSheath:
                     if (e.Action.setSheath.sheath != 0 && e.Action.setSheath.sheath >= (uint)SheathState.Max)
@@ -1244,6 +1280,8 @@ namespace Game.AI
                 case SmartActions.WpStop:
                     if (e.Action.wpStop.quest != 0 && !IsQuestValid(e, e.Action.wpStop.quest))
                         return false;
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.wpStop.fail);
                     break;
                 case SmartActions.WpStart:
                 {
@@ -1262,6 +1300,9 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid React State {e.Action.wpStart.reactState}, skipped.");
                         return false;
                     }
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.wpStart.run);
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.wpStart.repeat);
                     break;
                 }
                 case SmartActions.CreateTimedEvent:
@@ -1457,6 +1498,8 @@ namespace Game.AI
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} does not specify pause duration");
                         return false;
                     }
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.pauseMovement.force);
                     break;
                 }
                 case SmartActions.SetMovementSpeed:
@@ -1535,6 +1578,103 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.AutoAttack:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.autoAttack.attack);
+                    break;
+                }
+                case SmartActions.AllowCombatMovement:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.combatMove.move);
+                    break;
+                }
+                case SmartActions.CallForHelp:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.callHelp.withEmote);
+                    break;
+                }
+                case SmartActions.SetVisibility:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.visibility.state);
+                    break;
+                }
+                case SmartActions.SetActive:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.active.state);
+                    break;
+                }
+                case SmartActions.SetRun:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setRun.run);
+                    break;
+                }
+                case SmartActions.SetDisableGravity:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setDisableGravity.disable);
+                    break;
+                }
+                case SmartActions.SetCanFly:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setFly.fly);
+                    break;
+                }
+                case SmartActions.SetSwim:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setSwim.swim);
+                    break;
+                }
+                case SmartActions.SetCounter:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setCounter.reset);
+                    break;
+                }
+                case SmartActions.CallTimedActionlist:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.timedActionList.allowOverride);
+                    break;
+                }
+                case SmartActions.InterruptSpell:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.interruptSpellCasting.withDelayed);
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.interruptSpellCasting.withInstant);
+                    break;
+                }
+                case SmartActions.FleeForAssist:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.fleeAssist.withEmote);
+                    break;
+                }
+                case SmartActions.MoveToPos:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.moveToPos.transport);
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.moveToPos.disablePathfinding);
+                    break;
+                }
+                case SmartActions.SetRoot:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setRoot.root);
+                    break;
+                }
+                case SmartActions.DisableEvade:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.disableEvade.disable);
+                    break;
+                }
+                case SmartActions.LoadEquipment:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.loadEquipment.force);
+                    break;
+                }
+                case SmartActions.SetHover:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setHover.enable);
+                    break;
+                }
+                case SmartActions.Evade:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.evade.toRespawnPosition);
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
@@ -1549,12 +1689,9 @@ namespace Game.AI
                 case SmartActions.Follow:
                 case SmartActions.SetOrientation:
                 case SmartActions.StoreTargetList:
-                case SmartActions.Evade:
-                case SmartActions.FleeForAssist:
                 case SmartActions.CombatStop:
                 case SmartActions.Die:
                 case SmartActions.SetInCombatWithZone:
-                case SmartActions.SetActive:
                 case SmartActions.WpResume:
                 case SmartActions.KillUnit:
                 case SmartActions.SetInvincibilityHpLevel:
@@ -1563,22 +1700,13 @@ namespace Game.AI
                 case SmartActions.ThreatAllPct:
                 case SmartActions.ThreatSinglePct:
                 case SmartActions.SetInstData64:
-                case SmartActions.AutoAttack:
-                case SmartActions.AllowCombatMovement:
-                case SmartActions.CallForHelp:
                 case SmartActions.SetData:
-                case SmartActions.SetVisibility:
                 case SmartActions.AttackStop:
                 case SmartActions.WpPause:
-                case SmartActions.SetDisableGravity:
-                case SmartActions.SetCanFly:
-                case SmartActions.SetRun:
-                case SmartActions.SetSwim:
                 case SmartActions.ForceDespawn:
                 case SmartActions.SetUnitFlag:
                 case SmartActions.RemoveUnitFlag:
                 case SmartActions.Playmovie:
-                case SmartActions.MoveToPos:
                 case SmartActions.CloseGossip:
                 case SmartActions.TriggerTimedEvent:
                 case SmartActions.RemoveTimedEvent:
@@ -1587,7 +1715,6 @@ namespace Game.AI
                 case SmartActions.ActivateGobject:
                 case SmartActions.CallScriptReset:
                 case SmartActions.SetRangedMovement:
-                case SmartActions.CallTimedActionlist:
                 case SmartActions.SetNpcFlag:
                 case SmartActions.AddNpcFlag:
                 case SmartActions.RemoveNpcFlag:
@@ -1595,7 +1722,6 @@ namespace Game.AI
                 case SmartActions.RandomMove:
                 case SmartActions.SetUnitFieldBytes1:
                 case SmartActions.RemoveUnitFieldBytes1:
-                case SmartActions.InterruptSpell:
                 case SmartActions.SendGoCustomAnim:
                 case SmartActions.SetDynamicFlag:
                 case SmartActions.AddDynamicFlag:
@@ -1607,24 +1733,18 @@ namespace Game.AI
                 case SmartActions.SendTargetToTarget:
                 case SmartActions.SetHomePos:
                 case SmartActions.SetHealthRegen:
-                case SmartActions.SetRoot:
                 case SmartActions.SetGoFlag:
                 case SmartActions.AddGoFlag:
                 case SmartActions.RemoveGoFlag:
                 case SmartActions.SummonCreatureGroup:
                 case SmartActions.MoveOffset:
                 case SmartActions.SetCorpseDelay:
-                case SmartActions.DisableEvade:
                 case SmartActions.SetSightDist:
                 case SmartActions.Flee:
                 case SmartActions.AddThreat:
-                case SmartActions.LoadEquipment:
                 case SmartActions.TriggerRandomTimedEvent:
-                case SmartActions.SetCounter:
                 case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
-                case SmartActions.DespawnSpawngroup:
-                case SmartActions.SetHover:
                 case SmartActions.AddToStoredTargetList:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
@@ -1944,6 +2064,12 @@ namespace Game.AI
                 SmartEvents.SummonedUnitDies => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
                 _ => 0,
             };
+
+        public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, uint value, [CallerArgumentExpression("value")] string valueName = null)
+        {
+            if (value > 1)
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of type Boolean with value {value}, valid values are 0 or 1, skipped.");
+        }
     }
 
     public class SmartScriptHolder : IComparer<SmartScriptHolder>
@@ -3419,10 +3545,12 @@ namespace Game.AI
         public struct ClosestAttackable
         {
             public uint maxDist;
+            public uint playerOnly;
         }
         public struct ClosestFriendly
         {
             public uint maxDist;
+            public uint playerOnly;
         }
         public struct Owner
         {
