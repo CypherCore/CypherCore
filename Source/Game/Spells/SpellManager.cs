@@ -1434,7 +1434,7 @@ namespace Game.Entities
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
             else
-                Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
 
             // This generates default procs to retain compatibility with previous proc system
             Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");

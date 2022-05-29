@@ -1100,6 +1100,21 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 28471 - ClearAll
+    class spell_clear_all : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            caster.RemoveAllAurasOnDeath();
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script]
     class spell_gen_clone : SpellScript
     {
