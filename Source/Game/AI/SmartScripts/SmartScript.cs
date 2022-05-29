@@ -1384,13 +1384,15 @@ namespace Game.AI
                         }
                     }
 
-                    _me.SetReactState((ReactStates)e.Action.wpStart.reactState);
-                    ((SmartAI)_me.GetAI()).StartPath(run, entry, repeat, unit);
+                    // Extra validation to ignore invalid values stored in the db, see comment at TEMPORARY_EXTRA_VALUE_FOR_DB_CLEANUP definition
+                    if ((ReactStates)e.Action.wpStart.reactState <= ReactStates.Aggressive)
+                        _me.SetReactState((ReactStates)e.Action.wpStart.reactState);
+                    _me.GetAI<SmartAI>().StartPath(run, entry, repeat, unit);
 
                     uint quest = e.Action.wpStart.quest;
                     uint DespawnTime = e.Action.wpStart.despawnTime;
-                    ((SmartAI)_me.GetAI()).EscortQuestID = quest;
-                    ((SmartAI)_me.GetAI()).SetDespawnTime(DespawnTime);
+                    _me.GetAI<SmartAI>().EscortQuestID = quest;
+                    _me.GetAI<SmartAI>().SetDespawnTime(DespawnTime);
                     break;
                 }
                 case SmartActions.WpPause:
