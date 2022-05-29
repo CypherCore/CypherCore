@@ -348,7 +348,7 @@ namespace Framework.Constants
         RemoveUnitFieldBytes1 = 91,     // Bytes, Target
         InterruptSpell = 92,
         SendGoCustomAnim = 93,     // Anim Id
-        SetDynamicFlag = 94,     // Flags
+        //Unused94 = 94,     // do not reuse
         AddDynamicFlag = 95,     // Flags
         RemoveDynamicFlag = 96,     // Flags
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz

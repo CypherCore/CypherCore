@@ -1914,13 +1914,6 @@ namespace Game.AI
                             target.ToGameObject().SendCustomAnim(e.Action.sendGoCustomAnim.anim);
                     break;
                 }
-                case SmartActions.SetDynamicFlag:
-                {
-                    foreach (var target in targets)
-                        if (IsUnit(target))
-                            target.ToUnit().SetDynamicFlags((UnitDynFlags)e.Action.flag.flag);
-                    break;
-                }
                 case SmartActions.AddDynamicFlag:
                 {
                     foreach (var target in targets)

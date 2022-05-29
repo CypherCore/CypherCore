@@ -783,7 +783,6 @@ namespace Game.AI
                 SmartActions.RemoveUnitFieldBytes1 => Marshal.SizeOf(typeof(SmartAction.DelunitByte)),
                 SmartActions.InterruptSpell => Marshal.SizeOf(typeof(SmartAction.InterruptSpellCasting)),
                 SmartActions.SendGoCustomAnim => Marshal.SizeOf(typeof(SmartAction.SendGoCustomAnim)),
-                SmartActions.SetDynamicFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.AddDynamicFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.RemoveDynamicFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.JumpToPos => Marshal.SizeOf(typeof(SmartAction.Jump)),
@@ -2140,7 +2139,6 @@ namespace Game.AI
                 case SmartActions.SetUnitFieldBytes1:
                 case SmartActions.RemoveUnitFieldBytes1:
                 case SmartActions.SendGoCustomAnim:
-                case SmartActions.SetDynamicFlag:
                 case SmartActions.AddDynamicFlag:
                 case SmartActions.RemoveDynamicFlag:
                 case SmartActions.JumpToPos:
