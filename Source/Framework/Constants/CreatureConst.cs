@@ -226,7 +226,7 @@ namespace Framework.Constants
         GhostVisibility = 0x400,       // creature will only be visible to dead players
         UseOffhandAttack = 0x800, // creature will use offhand attacks
         NoSellVendor = 0x1000,       // players can't sell items to this vendor
-        IgnoreCombat = 0x2000,         // creature is not allowed to enter combat
+        CannotEnterCombat = 0x2000,         // creature is not allowed to enter combat
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
         IgnoreFeighDeath = 0x10000, // creature ignores feign death

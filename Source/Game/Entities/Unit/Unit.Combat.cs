@@ -1530,13 +1530,13 @@ namespace Game.Entities
         }
 
         /// <summary>
-        /// returns if the unit is ignoring any combat interaction
+        /// returns if the unit can't enter combat
         /// </summary>
-        public bool IsIgnoringCombat() { return _isIgnoringCombat; }
+        public bool IsCombatDisallowed() { return _isCombatDisallowed; }
 
         /// <summary>
-        /// enables/disables combat interaction of this unit.
+        /// enables / disables combat interaction of this unit
         /// </summary>
-        public void SetIgnoringCombat(bool apply) { _isIgnoringCombat = apply; }
+        public void SetIsCombatDisallowed(bool apply) { _isCombatDisallowed = apply; }
     }
 }

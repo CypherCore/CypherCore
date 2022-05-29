@@ -424,7 +424,7 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
             }
 
-            SetIgnoringCombat(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreCombat));
+            SetIsCombatDisallowed(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.CannotEnterCombat));
 
             LoadTemplateRoot();
             InitializeMovementFlags();
