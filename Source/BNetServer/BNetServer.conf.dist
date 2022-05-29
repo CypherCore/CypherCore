@@ -68,6 +68,30 @@ WrongPass.BanTime = 600
 WrongPass.BanType = 0
 
 #
+#    WrongPass.Logging
+#        Description: Additionally log attempted wrong password logging
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+WrongPass.Logging = 0
+
+#
+#    BanExpiryCheckInterval
+#        Description: Time (in seconds) between checks for expired bans
+#        Default:     60
+
+BanExpiryCheckInterval = 60
+
+#
+#    AllowLoggingIPAddressesInDatabase
+#        Description: Specifies if IP addresses can be logged to the database
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+
+AllowLoggingIPAddressesInDatabase = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

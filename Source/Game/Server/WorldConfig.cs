@@ -1008,6 +1008,9 @@ namespace Game
             Values[WorldCfg.CallToArms10Pct] = GetDefaultValue("Pvp.FactionBalance.Pct10", 0.7f);
             Values[WorldCfg.CallToArms20Pct] = GetDefaultValue("Pvp.FactionBalance.Pct20", 0.8f);
 
+            // Specifies if IP addresses can be logged to the database
+            Values[WorldCfg.AllowLogginIpAddressesInDatabase] = GetDefaultValue("AllowLoggingIPAddressesInDatabase", true);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);

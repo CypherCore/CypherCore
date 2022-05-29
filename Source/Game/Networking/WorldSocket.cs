@@ -543,13 +543,17 @@ namespace Game.Networking
             // only first 16 bytes of the hmac are used
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
-            // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
-            stmt.AddValue(0, address.Address.ToString());
-            stmt.AddValue(1, authSession.RealmJoinTicket);
+            PreparedStatement stmt = null;
 
-            DB.Login.Execute(stmt);
-            // This also allows to check for possible "hack" attempts on account
+            if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
+            {
+                // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
+                stmt.AddValue(0, address.Address.ToString());
+                stmt.AddValue(1, authSession.RealmJoinTicket);
+                DB.Login.Execute(stmt);
+                // This also allows to check for possible "hack" attempts on account
+            }
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION);
             stmt.AddValue(0, _sessionKey);
@@ -638,11 +642,14 @@ namespace Game.Networking
 
             Log.outDebug(LogFilter.Network, "WorldSocket:HandleAuthSession: Client '{0}' authenticated successfully from {1}.", authSession.RealmJoinTicket, address);
 
-            // Update the last_ip in the database
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
-            stmt.AddValue(0, address.Address.ToString());
-            stmt.AddValue(1, authSession.RealmJoinTicket);
-            DB.Login.Execute(stmt);
+            if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
+            {
+                // Update the last_ip in the database
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
+                stmt.AddValue(0, address.Address.ToString());
+                stmt.AddValue(1, authSession.RealmJoinTicket);
+                DB.Login.Execute(stmt);
+            }
 
             _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
                 mutetime, account.game.OS, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
