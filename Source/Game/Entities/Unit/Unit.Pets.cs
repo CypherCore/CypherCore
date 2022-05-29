@@ -107,6 +107,12 @@ namespace Game.Entities
                     return;
                 }
 
+                if (!IsInWorld)
+                {
+                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion being added to owner not in world. Minion: {minion.GetGUID()}, Owner: {GetDebugInfo()}");
+                    return;
+                }
+
                 minion.SetOwnerGUID(GetGUID());
 
                 if (!m_Controlled.Contains(minion))
