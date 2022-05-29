@@ -212,14 +212,14 @@ namespace Game.AI
                     foreach (var target in targets)
                     {
                         if (IsCreature(target))
-                            Global.CreatureTextMgr.SendChat(target.ToCreature(), (byte)e.Action.talk.textGroupId, IsPlayer(GetLastInvoker()) ? GetLastInvoker() : null);
+                            Global.CreatureTextMgr.SendChat(target.ToCreature(), (byte)e.Action.simpleTalk.textGroupId, IsPlayer(GetLastInvoker()) ? GetLastInvoker() : null);
                         else if (IsPlayer(target) && _me != null)
                         {
                             Unit templastInvoker = GetLastInvoker();
-                            Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.talk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target.ToPlayer());
+                            Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.simpleTalk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target.ToPlayer());
                         }
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SIMPLE_TALK: talker: {0} (GuidLow: {1}), textGroupId: {2}",
-                            target.GetName(), target.GetGUID().ToString(), e.Action.talk.textGroupId);
+                            target.GetName(), target.GetGUID().ToString(), e.Action.simpleTalk.textGroupId);
                     }
                     break;
                 }
@@ -259,11 +259,11 @@ namespace Game.AI
                     {
                         if (IsCreature(target))
                         {
-                            if (e.Action.faction.factionID != 0)
+                            if (e.Action.faction.factionId != 0)
                             {
-                                target.ToCreature().SetFaction(e.Action.faction.factionID);
+                                target.ToCreature().SetFaction(e.Action.faction.factionId);
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_FACTION: Creature entry {0}, GuidLow {1} set faction to {2}",
-                                    target.GetEntry(), target.GetGUID().ToString(), e.Action.faction.factionID);
+                                    target.GetEntry(), target.GetGUID().ToString(), e.Action.faction.factionId);
                             }
                             else
                             {
@@ -1681,21 +1681,21 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().SetNpcFlags((NPCFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().SetNpcFlags((NPCFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.AddNpcFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().AddNpcFlag((NPCFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().AddNpcFlag((NPCFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.RemoveNpcFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().RemoveNpcFlag((NPCFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().RemoveNpcFlag((NPCFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.CrossCast:
@@ -1780,7 +1780,7 @@ namespace Game.AI
                 }
                 case SmartActions.CallRandomRangeTimedActionlist:
                 {
-                    uint id = 0;// RandomHelper.URand(e.Action.randTimedActionList.actionLists[0], e.Action.randTimedActionList.actionLists[1]);
+                    uint id = RandomHelper.URand(e.Action.randRangeTimedActionList.idMin, e.Action.randRangeTimedActionList.idMax);
                     if (e.GetTargetType() == SmartTargets.None)
                     {
                         Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
@@ -1916,21 +1916,21 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().SetDynamicFlags((UnitDynFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().SetDynamicFlags((UnitDynFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.AddDynamicFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().AddDynamicFlag((UnitDynFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().AddDynamicFlag((UnitDynFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.RemoveDynamicFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().RemoveDynamicFlag((UnitDynFlags)e.Action.unitFlag.flag);
+                            target.ToUnit().RemoveDynamicFlag((UnitDynFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.JumpToPos:
@@ -2313,7 +2313,7 @@ namespace Game.AI
 
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            _me.GetThreatManager().AddThreat(target.ToUnit(), (float)(e.Action.threatPCT.threatINC - (float)e.Action.threatPCT.threatDEC), null, true, true);
+                            _me.GetThreatManager().AddThreat(target.ToUnit(), (float)(e.Action.threat.threatINC - (float)e.Action.threat.threatDEC), null, true, true);
 
                     break;
                 }
@@ -3000,7 +3000,7 @@ namespace Game.AI
                         break;
                     }
 
-                    Creature target = refObj.FindNearestCreature(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100, e.Target.closest.dead == 0);
+                    Creature target = refObj.FindNearestCreature(e.Target.unitClosest.entry, e.Target.unitClosest.dist != 0 ? e.Target.unitClosest.dist : 100, e.Target.unitClosest.dead == 0);
                     if (target)
                         targets.Add(target);
                     break;
@@ -3017,7 +3017,7 @@ namespace Game.AI
                         break;
                     }
 
-                    GameObject target = refObj.FindNearestGameObject(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100);
+                    GameObject target = refObj.FindNearestGameObject(e.Target.goClosest.entry, e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100);
                     if (target)
                         targets.Add(target);
                     break;
@@ -3086,7 +3086,7 @@ namespace Game.AI
                     if (_me != null && _me.CanHaveThreatList())
                     {
                         foreach (var refe in _me.GetThreatManager().GetSortedThreatList())
-                            if (e.Target.hostilRandom.maxDist == 0 || _me.IsWithinCombatRange(refe.GetVictim(), e.Target.hostilRandom.maxDist))
+                            if (e.Target.threatList.maxDist == 0 || _me.IsWithinCombatRange(refe.GetVictim(), e.Target.threatList.maxDist))
                                 targets.Add(refe.GetVictim());
                     }
                     break;
@@ -3154,7 +3154,7 @@ namespace Game.AI
                 }
                 case SmartTargets.ClosestUnspawnedGameobject:
                 {
-                    GameObject target = baseObject.FindNearestUnspawnedGameObject(e.Target.closest.entry, (float)(e.Target.closest.dist != 0 ? e.Target.closest.dist : 100));
+                    GameObject target = baseObject.FindNearestUnspawnedGameObject(e.Target.goClosest.entry, (float)(e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100));
                     if (target != null)
                         targets.Add(target);
                     break;
