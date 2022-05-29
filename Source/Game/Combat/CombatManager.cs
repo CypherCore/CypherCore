@@ -179,14 +179,11 @@ namespace Game.Combat
             }
             foreach (var refe in mgr._pvpRefs)
             {
-                if (!IsInCombatWith(refe.Key))
-                {
-                    Unit target = refe.Value.GetOther(who);
-                    if ((_owner.IsImmuneToPC() && target.HasUnitFlag(UnitFlags.PlayerControlled)) ||
-                        (_owner.IsImmuneToNPC() && !target.HasUnitFlag(UnitFlags.PlayerControlled)))
-                        continue;
-                    SetInCombatWith(target);
-                }
+                Unit target = refe.Value.GetOther(who);
+                if ((_owner.IsImmuneToPC() && target.HasUnitFlag(UnitFlags.PlayerControlled)) ||
+                    (_owner.IsImmuneToNPC() && !target.HasUnitFlag(UnitFlags.PlayerControlled)))
+                    continue;
+                SetInCombatWith(target);
             }
         }
 
