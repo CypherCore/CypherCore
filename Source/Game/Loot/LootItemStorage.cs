@@ -109,20 +109,21 @@ namespace Game.Loots
             LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
             if (lt != null)
             {
-                foreach (var storedItemPair in container.GetLootItems())
+                foreach (var (id, storedItem) in container.GetLootItems())
                 {
                     LootItem li = new();
-                    li.itemid = storedItemPair.Key;
-                    li.count = (byte)storedItemPair.Value.Count;
-                    li.follow_loot_rules = storedItemPair.Value.FollowRules;
-                    li.freeforall = storedItemPair.Value.FFA;
-                    li.is_blocked = storedItemPair.Value.Blocked;
-                    li.is_counted = storedItemPair.Value.Counted;
-                    li.is_underthreshold = storedItemPair.Value.UnderThreshold;
-                    li.needs_quest = storedItemPair.Value.NeedsQuest;
-                    li.randomBonusListId = storedItemPair.Value.RandomBonusListId;
-                    li.context = storedItemPair.Value.Context;
-                    li.BonusListIDs = storedItemPair.Value.BonusListIDs;
+                    li.itemid = id;
+                    li.count = (byte)storedItem.Count;
+                    li.itemIndex = storedItem.ItemIndex;
+                    li.follow_loot_rules = storedItem.FollowRules;
+                    li.freeforall = storedItem.FFA;
+                    li.is_blocked = storedItem.Blocked;
+                    li.is_counted = storedItem.Counted;
+                    li.is_underthreshold = storedItem.UnderThreshold;
+                    li.needs_quest = storedItem.NeedsQuest;
+                    li.randomBonusListId = storedItem.RandomBonusListId;
+                    li.context = storedItem.Context;
+                    li.BonusListIDs = storedItem.BonusListIDs;
 
                     // Copy the extra loot conditions from the item in the loot template
                     lt.CopyConditions(li);
@@ -324,6 +325,7 @@ namespace Game.Loots
         {
             ItemId = lootItem.itemid;
             Count = lootItem.count;
+            ItemIndex = lootItem.itemIndex;
             FollowRules = lootItem.follow_loot_rules;
             FFA = lootItem.freeforall;
             Blocked = lootItem.is_blocked;
@@ -337,6 +339,7 @@ namespace Game.Loots
 
         public uint ItemId;
         public uint Count;
+        public uint ItemIndex;
         public bool FollowRules;
         public bool FFA;
         public bool Blocked;
