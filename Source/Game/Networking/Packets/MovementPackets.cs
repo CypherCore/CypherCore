@@ -604,7 +604,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8(Arg);
             _worldPacket.WriteUInt32(MapDifficultyXConditionID);
-            _worldPacket.WriteBits(TransfertAbort, 5);
+            _worldPacket.WriteBits(TransfertAbort, 6);
             _worldPacket.FlushBits();
         }
 
