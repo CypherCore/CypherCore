@@ -1243,13 +1243,23 @@ namespace Game.Entities
         {
             WorldObject seer = this;
 
+            // If a unit is possessing another one, it uses the detection of the latter
             // Pets don't have detection, they use the detection of their masters
             Unit thisUnit = ToUnit();
             if (thisUnit != null)
             {
-                Unit controller = thisUnit.GetCharmerOrOwner();
-                if (controller != null)
-                    seer = controller;
+                if (thisUnit.IsPossessing())
+                {
+                    Unit charmed = thisUnit.GetCharmed();
+                    if (charmed != null)
+                        seer = charmed;
+                }
+                else
+                {
+                    Unit controller = thisUnit.GetCharmerOrOwner();
+                    if (controller != null)
+                        seer = controller;
+                }
             }
 
             if (obj.IsAlwaysDetectableFor(seer))
