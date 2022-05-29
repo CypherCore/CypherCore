@@ -2794,6 +2794,10 @@ namespace Game.Maps
 
             foreach (SpawnData data in toSpawn)
             {
+                // don't spawn if the current map difficulty is not used by the spawn
+                if (!data.SpawnDifficulties.Contains(GetDifficultyID()))
+                    continue;
+
                 // don't spawn if the grid isn't loaded (will be handled in grid loader)
                 if (!IsGridLoaded(data.SpawnPoint))
                     continue;
