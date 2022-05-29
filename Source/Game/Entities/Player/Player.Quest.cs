@@ -2277,12 +2277,7 @@ namespace Game.Entities
                 if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
-                int curItemCount = GetQuestSlotObjectiveData(logSlot, objective);
-                if (curItemCount >= objective.Amount) // we may have more than what the status shows
-                    curItemCount = (int)GetItemCount(entry, false);
-
-                int newItemCount = (int)((count > curItemCount) ? 0 : curItemCount - count);
-
+                int newItemCount = (int)GetItemCount(entry, false);  // we may have more than what the status shows, so we have to iterate inventory
                 if (newItemCount < objective.Amount)
                 {
                     SetQuestObjectiveData(objective, newItemCount);
