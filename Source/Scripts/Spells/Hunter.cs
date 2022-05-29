@@ -449,6 +449,12 @@ namespace Scripts.Spells.Hunter
 
                 if (!caster.GetCharmedGUID().IsEmpty())
                     return SpellCastResult.AlreadyHaveCharm;
+
+                if (!target.GetOwnerGUID().IsEmpty())
+                {
+                    caster.SendTameFailure(PetTameResult.CreatureAlreadyOwned);
+                    return SpellCastResult.DontReport;
+                }
             }
             else
                 return SpellCastResult.BadImplicitTargets;
