@@ -6018,7 +6018,7 @@ namespace Game.Entities
 
                 // LootItem is being removed (looted) from the container, delete it from the DB.
                 if (!loot.containerID.IsEmpty())
-                    Global.LootItemStorage.RemoveStoredLootItemForContainer(loot.containerID.GetCounter(), item.itemid, item.count);
+                    Global.LootItemStorage.RemoveStoredLootItemForContainer(loot.containerID.GetCounter(), item.itemid, item.count, item.itemIndex);
 
             }
             else

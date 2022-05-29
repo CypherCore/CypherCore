@@ -50,15 +50,16 @@ namespace Game.Loots
                     LootItem lootItem = new();
                     lootItem.itemid = result.Read<uint>(1);
                     lootItem.count = result.Read<byte>(2);
-                    lootItem.follow_loot_rules = result.Read<bool>(3);
-                    lootItem.freeforall = result.Read<bool>(4);
-                    lootItem.is_blocked = result.Read<bool>(5);
-                    lootItem.is_counted = result.Read<bool>(6);
-                    lootItem.is_underthreshold = result.Read<bool>(7);
-                    lootItem.needs_quest = result.Read<bool>(8);
-                    lootItem.randomBonusListId = result.Read<uint>(9);
-                    lootItem.context = (ItemContext)result.Read<byte>(10);
-                    StringArray bonusLists = new(result.Read<string>(11), ' ');
+                    lootItem.itemIndex = result.Read<uint>(3);
+                    lootItem.follow_loot_rules = result.Read<bool>(4);
+                    lootItem.freeforall = result.Read<bool>(5);
+                    lootItem.is_blocked = result.Read<bool>(6);
+                    lootItem.is_counted = result.Read<bool>(7);
+                    lootItem.is_underthreshold = result.Read<bool>(8);
+                    lootItem.needs_quest = result.Read<bool>(9);
+                    lootItem.randomBonusListId = result.Read<uint>(10);
+                    lootItem.context = (ItemContext)result.Read<byte>(11);
+                    StringArray bonusLists = new(result.Read<string>(12), ' ');
 
                     foreach (string str in bonusLists)
                         lootItem.BonusListIDs.Add(uint.Parse(str));
@@ -167,12 +168,12 @@ namespace Game.Loots
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void RemoveStoredLootItemForContainer(ulong containerId, uint itemId, uint count)
+        public void RemoveStoredLootItemForContainer(ulong containerId, uint itemId, uint count, uint itemIndex)
         {
             if (!_lootItemStorage.ContainsKey(containerId))
                 return;
 
-            _lootItemStorage[containerId].RemoveItem(itemId, count);
+            _lootItemStorage[containerId].RemoveItem(itemId, count, itemIndex);
         }
 
         public void AddNewStoredLoot(Loot loot, Player player)
@@ -242,20 +243,21 @@ namespace Game.Loots
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, lootItem.itemid);
             stmt.AddValue(2, lootItem.count);
-            stmt.AddValue(3, lootItem.follow_loot_rules);
-            stmt.AddValue(4, lootItem.freeforall);
-            stmt.AddValue(5, lootItem.is_blocked);
-            stmt.AddValue(6, lootItem.is_counted);
-            stmt.AddValue(7, lootItem.is_underthreshold);
-            stmt.AddValue(8, lootItem.needs_quest);
-            stmt.AddValue(9, lootItem.randomBonusListId);
-            stmt.AddValue(10, (uint)lootItem.context);
+            stmt.AddValue(3, lootItem.itemIndex);
+            stmt.AddValue(4, lootItem.follow_loot_rules);
+            stmt.AddValue(5, lootItem.freeforall);
+            stmt.AddValue(6, lootItem.is_blocked);
+            stmt.AddValue(7, lootItem.is_counted);
+            stmt.AddValue(8, lootItem.is_underthreshold);
+            stmt.AddValue(9, lootItem.needs_quest);
+            stmt.AddValue(10, lootItem.randomBonusListId);
+            stmt.AddValue(11, (uint)lootItem.context);
 
             StringBuilder bonusListIDs = new();
             foreach (int bonusListID in lootItem.BonusListIDs)
                 bonusListIDs.Append(bonusListID + ' ');
 
-            stmt.AddValue(11, bonusListIDs.ToString());
+            stmt.AddValue(12, bonusListIDs.ToString());
             trans.Append(stmt);
         }
 
@@ -284,7 +286,7 @@ namespace Game.Loots
             DB.Characters.Execute(stmt);
         }
 
-        public void RemoveItem(uint itemId, uint count)
+        public void RemoveItem(uint itemId, uint count, uint itemIndex)
         {
             var bounds = _lootItems.LookupByKey(itemId);
             foreach (var itr in bounds)
@@ -301,6 +303,7 @@ namespace Game.Loots
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, itemId);
             stmt.AddValue(2, count);
+            stmt.AddValue(3, itemIndex);
             DB.Characters.Execute(stmt);
         }
 
