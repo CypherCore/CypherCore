@@ -949,13 +949,13 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
+            Player playerTarget = target.ToPlayer();
             InvisibilityType type = (InvisibilityType)GetMiscValue();
 
             if (apply)
             {
                 // apply glow vision
-                Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
+                if (playerTarget != null && type == InvisibilityType.General)
                     playerTarget.AddAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
                 target.m_invisibility.AddFlag(type);
@@ -966,8 +966,7 @@ namespace Game.Spells
                 if (!target.HasAuraType(AuraType.ModInvisibility))
                 {
                     // if not have different invisibility auras.
-                    // remove glow vision
-                    Player playerTarget = target.ToPlayer();
+                    // always remove glow vision
                     if (playerTarget != null)
                         playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
@@ -986,7 +985,14 @@ namespace Game.Spells
                         }
                     }
                     if (!found)
+                    {
+                        // if not have invisibility auras of type INVISIBILITY_GENERAL
+                        // remove glow vision
+                        if (playerTarget != null && type == InvisibilityType.General)
+                            playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
+
                         target.m_invisibility.DelFlag(type);
+                    }
                 }
 
                 target.m_invisibility.AddValue(type, -GetAmount());
