@@ -1909,15 +1909,9 @@ namespace Scripts.Spells.Generic
                 return;
 
             if (owner.IsMounted())
-            {
-                target.SetAnimTier(AnimTier.Fly);
                 target.SetDisableGravity(true);
-            }
             else
-            {
-                target.SetAnimTier(AnimTier.Ground);
                 target.SetDisableGravity(false);
-            }
         }
 
         public override void Register()
