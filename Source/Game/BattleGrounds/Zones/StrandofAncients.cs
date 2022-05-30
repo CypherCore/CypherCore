@@ -488,7 +488,8 @@ namespace Game.BattleGrounds.Zones
 
             SendTransportInit(player);
 
-            TeleportToEntrancePosition(player);
+            if (!isInBattleground)
+                TeleportToEntrancePosition(player);
         }
 
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team) { }
