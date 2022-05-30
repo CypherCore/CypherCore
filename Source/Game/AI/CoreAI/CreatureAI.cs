@@ -383,10 +383,10 @@ namespace Game.AI
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
-                        point.AddUnitFlag(UnitFlags.Stunned);
+                        point.SetUnitFlag(UnitFlags.Stunned);
                         point.SetImmuneToAll(true);
                         if (!hasOutOfBoundsNeighbor)
-                            point.AddUnitFlag(UnitFlags.Uninteractible);
+                            point.SetUnitFlag(UnitFlags.Uninteractible);
                     }
                     Q.Remove(front);
                 }

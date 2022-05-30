@@ -1261,7 +1261,7 @@ namespace Game.Entities
             Item item = Item.CreateItem(itemId, count, context, this);
             if (item != null)
             {
-                item.AddItemFlag(ItemFieldFlags.NewItem);
+                item.SetItemFlag(ItemFieldFlags.NewItem);
 
                 item.SetBonuses(bonusListIDs);
 
@@ -1306,7 +1306,7 @@ namespace Game.Entities
                         if (childItem)
                         {
                             childItem.SetCreator(item.GetGUID());
-                            childItem.AddItemFlag(ItemFieldFlags.Child);
+                            childItem.SetItemFlag(ItemFieldFlags.Child);
                             item.SetChildItem(childItem.GetGUID());
                         }
                     }
@@ -1586,7 +1586,7 @@ namespace Game.Entities
                     }
                 }
 
-                pItem.AddItemFlag2(ItemFieldFlags2.Equipped);
+                pItem.SetItemFlag2(ItemFieldFlags2.Equipped);
 
                 if (IsInWorld && update)
                 {
@@ -1759,7 +1759,7 @@ namespace Game.Entities
                 byte slot = (byte)(pos & 255);
                 VisualizeItem(slot, pItem);
 
-                pItem.AddItemFlag2(ItemFieldFlags2.Equipped);
+                pItem.SetItemFlag2(ItemFieldFlags2.Equipped);
 
                 if (IsInWorld)
                 {
@@ -2485,7 +2485,7 @@ namespace Game.Entities
 
                 if (pProto.HasFlag(ItemFlags.ItemPurchaseRecord) && crItem.ExtendedCost != 0 && pProto.GetMaxStackSize() == 1)
                 {
-                    it.AddItemFlag(ItemFieldFlags.Refundable);
+                    it.SetItemFlag(ItemFieldFlags.Refundable);
                     it.SetRefundRecipient(GetGUID());
                     it.SetPaidMoney((uint)price);
                     it.SetPaidExtendedCost(crItem.ExtendedCost);
@@ -6079,7 +6079,7 @@ namespace Game.Entities
                 return;
 
             // Now we must make bones lootable, and send player loot
-            bones.AddCorpseDynamicFlag(CorpseDynFlags.Lootable);
+            bones.SetCorpseDynamicFlag(CorpseDynFlags.Lootable);
 
             // We store the level of our player in the gold field
             // We retrieve this information at Player.SendLoot()
@@ -6508,7 +6508,7 @@ namespace Game.Entities
                 m_AELootView[loot.GetGUID()] = guid;
 
                 if (loot_type == LootType.Corpse && !guid.IsItem())
-                    AddUnitFlag(UnitFlags.Looting);
+                    SetUnitFlag(UnitFlags.Looting);
             }
             else
                 SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
@@ -6607,7 +6607,7 @@ namespace Game.Entities
 
         //Void Storage
         public bool IsVoidStorageUnlocked() { return HasPlayerFlag(PlayerFlags.VoidUnlocked); }
-        public void UnlockVoidStorage() { AddPlayerFlag(PlayerFlags.VoidUnlocked); }
+        public void UnlockVoidStorage() { SetPlayerFlag(PlayerFlags.VoidUnlocked); }
         public void LockVoidStorage() { RemovePlayerFlag(PlayerFlags.VoidUnlocked); }
 
         public byte GetNextVoidStorageFreeSlot()

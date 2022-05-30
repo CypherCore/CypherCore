@@ -299,7 +299,7 @@ namespace Game.Combat
 
             if (combatState)
             {
-                _owner.AddUnitFlag(UnitFlags.InCombat);
+                _owner.SetUnitFlag(UnitFlags.InCombat);
                 _owner.AtEnterCombat();
                 if (!_owner.IsCreature())
                     _owner.AtEngage(GetAnyTarget());

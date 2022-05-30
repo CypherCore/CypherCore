@@ -453,7 +453,7 @@ namespace Scripts.World.EmeraldDragons
                 _shades += (byte)SpellIds.TaerarShadeSpells.Length;
 
                 DoCast(SpellIds.Shade);
-                me.AddUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+                me.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
                 me.SetReactState(ReactStates.Passive);
 
                 ++_stage;

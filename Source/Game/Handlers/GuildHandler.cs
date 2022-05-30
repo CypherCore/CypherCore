@@ -606,7 +606,7 @@ namespace Game
         void HandleDeclineGuildInvites(DeclineGuildInvites packet)
         {
             if (packet.Allow)
-                GetPlayer().AddPlayerFlag(PlayerFlags.AutoDeclineGuild);
+                GetPlayer().SetPlayerFlag(PlayerFlags.AutoDeclineGuild);
             else
                 GetPlayer().RemovePlayerFlag(PlayerFlags.AutoDeclineGuild);
         }

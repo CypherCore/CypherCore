@@ -108,7 +108,7 @@ namespace Game.Groups
             m_guid = ObjectGuid.Create(HighGuid.Party, Global.GroupMgr.GenerateGroupId());
             m_leaderGuid = leaderGuid;
             m_leaderName = leader.GetName();
-            leader.AddPlayerFlag(PlayerFlags.GroupLeader);
+            leader.SetPlayerFlag(PlayerFlags.GroupLeader);
 
             if (IsBGGroup() || IsBFGroup())
             { 
@@ -729,7 +729,7 @@ namespace Game.Groups
             if (oldLeader)
                 oldLeader.RemovePlayerFlag(PlayerFlags.GroupLeader);
 
-            newLeader.AddPlayerFlag(PlayerFlags.GroupLeader);
+            newLeader.SetPlayerFlag(PlayerFlags.GroupLeader);
             m_leaderGuid = newLeader.GetGUID();
             m_leaderName = newLeader.GetName();
             ToggleGroupMemberFlag(slot, GroupMemberFlags.Assistant, false);

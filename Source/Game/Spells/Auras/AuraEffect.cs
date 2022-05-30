@@ -1057,7 +1057,7 @@ namespace Game.Spells
             {
                 target.m_stealth.AddFlag(type);
                 target.m_stealth.AddValue(type, GetAmount());
-                target.AddVisFlags(UnitVisFlags.Creep);
+                target.SetVisFlag(UnitVisFlags.Creep);
                 Player playerTarget = target.ToPlayer();
                 if (playerTarget != null)
                     playerTarget.AddAuraVision(PlayerFieldByte2Flags.Stealth);
@@ -1070,7 +1070,7 @@ namespace Game.Spells
                 {
                     target.m_stealth.DelFlag(type);
 
-                    target.RemoveVisFlags(UnitVisFlags.Creep);
+                    target.RemoveVisFlag(UnitVisFlags.Creep);
                     Player playerTarget = target.ToPlayer();
                     if (playerTarget != null)
                         playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.Stealth);
@@ -1183,7 +1183,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.AddPlayerFlag(PlayerFlags.Ghost);
+                target.SetPlayerFlag(PlayerFlags.Ghost);
                 target.m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
                 target.m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
             }
@@ -1640,7 +1640,7 @@ namespace Game.Spells
                 // What must be cloned? at least display and scale
                 target.SetDisplayId(caster.GetDisplayId());
                 //target.SetObjectScale(caster.GetFloatValue(OBJECT_FIELD_SCALE_X)); // we need retail info about how scaling is handled (aura maybe?)
-                target.AddUnitFlag2(UnitFlags2.MirrorImage);
+                target.SetUnitFlag2(UnitFlags2.MirrorImage);
             }
             else
             {
@@ -1704,9 +1704,9 @@ namespace Game.Spells
                 if (aurApp.HasRemoveMode())
                     return;
 
-                target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
-                target.AddUnitFlag2(UnitFlags2.FeignDeath);
-                target.AddDynamicFlag(UnitDynFlags.Dead);
+                target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
+                target.SetUnitFlag2(UnitFlags2.FeignDeath);
+                target.SetDynamicFlag(UnitDynFlags.Dead);
                 target.AddUnitState(UnitState.Died);
 
                 Creature creature = target.ToCreature();
@@ -1739,7 +1739,7 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddUnitFlag(UnitFlags.NonAttackable2);
+                target.SetUnitFlag(UnitFlags.NonAttackable2);
             else
                 target.RemoveUnitFlag(UnitFlags.NonAttackable2);
 
@@ -1779,7 +1779,7 @@ namespace Game.Spells
             {
                 case AuraType.ModDisarm:
                     if (apply)
-                        flagChangeFunc = unit => { unit.AddUnitFlag(UnitFlags.Disarmed); };
+                        flagChangeFunc = unit => { unit.SetUnitFlag(UnitFlags.Disarmed); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag(UnitFlags.Disarmed); };
                     slot = EquipmentSlot.MainHand;
@@ -1787,7 +1787,7 @@ namespace Game.Spells
                     break;
                 case AuraType.ModDisarmOffhand:
                     if (apply)
-                        flagChangeFunc = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmOffhand); };
+                        flagChangeFunc = unit => { unit.SetUnitFlag2(UnitFlags2.DisarmOffhand); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmOffhand); };
                     slot = EquipmentSlot.OffHand;
@@ -1795,7 +1795,7 @@ namespace Game.Spells
                     break;
                 case AuraType.ModDisarmRanged:
                     if (apply)
-                        flagChangeFunc = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmRanged); };
+                        flagChangeFunc = unit => { unit.SetUnitFlag2(UnitFlags2.DisarmRanged); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmRanged); };
                     slot = EquipmentSlot.MainHand;
@@ -1842,7 +1842,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.AddUnitFlag(UnitFlags.Silenced);
+                target.SetUnitFlag(UnitFlags.Silenced);
 
                 // call functions which may have additional effects after changing state of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
@@ -1874,7 +1874,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                target.AddUnitFlag(UnitFlags.Pacified);
+                target.SetUnitFlag(UnitFlags.Pacified);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -1897,7 +1897,7 @@ namespace Game.Spells
             if (m_spellInfo.Id == 45839)
             {
                 if (apply)
-                    target.AddUnitFlag(UnitFlags.NonAttackable);
+                    target.SetUnitFlag(UnitFlags.NonAttackable);
                 else
                     target.RemoveUnitFlag(UnitFlags.NonAttackable);
             }
@@ -1921,7 +1921,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.AddUnitFlag2(UnitFlags2.NoActions);
+                target.SetUnitFlag2(UnitFlags2.NoActions);
 
                 // call functions which may have additional effects after changing state of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
@@ -1958,7 +1958,7 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddTrackCreatureFlag(1u << (GetMiscValue() - 1));
+                target.SetTrackCreatureFlag(1u << (GetMiscValue() - 1));
             else
                 target.RemoveTrackCreatureFlag(1u << (GetMiscValue() - 1));
         }
@@ -1980,7 +1980,7 @@ namespace Game.Spells
                     return;
             }
             if (apply)
-                target.AddPlayerLocalFlag(PlayerLocalFlags.TrackStealthed);
+                target.SetPlayerLocalFlag(PlayerLocalFlags.TrackStealthed);
             else
                 target.RemovePlayerLocalFlag(PlayerLocalFlags.TrackStealthed);
         }
@@ -1995,7 +1995,7 @@ namespace Game.Spells
 
             // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
             if (apply)
-                target.AddDynamicFlag(UnitDynFlags.TrackUnit);
+                target.SetDynamicFlag(UnitDynFlags.TrackUnit);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -2019,13 +2019,13 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddVisFlags(UnitVisFlags.Untrackable);
+                target.SetVisFlag(UnitVisFlags.Untrackable);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-                target.RemoveVisFlags(UnitVisFlags.Untrackable);
+                target.RemoveVisFlag(UnitVisFlags.Untrackable);
             }
         }
 
@@ -2063,7 +2063,7 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddUnitFlag2(UnitFlags2.AllowChangingTalents);
+                target.SetUnitFlag2(UnitFlags2.AllowChangingTalents);
             else if (!target.HasAuraType(GetAuraType()))
                 target.RemoveUnitFlag2(UnitFlags2.AllowChangingTalents);
         }
@@ -2273,7 +2273,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                target.AddUnitFlag2(UnitFlags2.ForceMovement);
+                target.SetUnitFlag2(UnitFlags2.ForceMovement);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -2843,7 +2843,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.AddUnitFlag(UnitFlags.Immune);
+                target.SetUnitFlag(UnitFlags.Immune);
                 target.GetThreatManager().EvaluateSuppressed();
             }
             else
@@ -2867,7 +2867,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.AddUnitFlag(UnitFlags.Immune);
+                target.SetUnitFlag(UnitFlags.Immune);
                 target.GetThreatManager().EvaluateSuppressed();
             }
             else
@@ -4128,7 +4128,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                target.AddUnitFlag(UnitFlags.Preparation);
+                target.SetUnitFlag(UnitFlags.Preparation);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -4553,7 +4553,7 @@ namespace Game.Spells
             if (target.GetCreatureType() == CreatureType.Beast)
             {
                 if (apply)
-                    target.AddDynamicFlag(UnitDynFlags.SpecialInfo);
+                    target.SetDynamicFlag(UnitDynFlags.SpecialInfo);
                 else
                     target.RemoveDynamicFlag(UnitDynFlags.SpecialInfo);
             }
@@ -4577,7 +4577,7 @@ namespace Game.Spells
             {
                 target.RestoreFaction();
                 if (target.IsTypeId(TypeId.Player))
-                    target.AddUnitFlag(UnitFlags.PlayerControlled);
+                    target.SetUnitFlag(UnitFlags.PlayerControlled);
             }
         }
 
@@ -4606,7 +4606,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                target.AddUnitFlag2(UnitFlags2.ComprehendLang);
+                target.SetUnitFlag2(UnitFlags2.ComprehendLang);
             else
             {
                 if (target.HasAuraType(GetAuraType()))
@@ -4865,7 +4865,7 @@ namespace Game.Spells
             if (apply)
                 target.RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
             else if (!target.GetMap().Instanceable())
-                target.AddPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
+                target.SetPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
         }
 
         [AuraEffectHandler(AuraType.Mastery)]
@@ -5616,7 +5616,7 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddPlayerLocalFlag(PlayerLocalFlags.CanUseObjectsMounted);
+                target.SetPlayerLocalFlag(PlayerLocalFlags.CanUseObjectsMounted);
             else if (!target.HasAuraType(AuraType.AllowUsingGameobjectsWhileMounted))
                 target.RemovePlayerLocalFlag(PlayerLocalFlags.CanUseObjectsMounted);
         }

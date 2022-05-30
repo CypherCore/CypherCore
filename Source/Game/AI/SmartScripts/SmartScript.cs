@@ -1589,7 +1589,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().AddNpcFlag((NPCFlags)e.Action.flag.flag);
+                            target.ToUnit().SetNpcFlag((NPCFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.RemoveNpcFlag:
@@ -1764,7 +1764,7 @@ namespace Game.AI
                                     // pet talent points
                                     break;
                                 case 2:
-                                    target.ToUnit().AddVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
+                                    target.ToUnit().SetVisFlag((UnitVisFlags)e.Action.setunitByte.byte1);
                                     break;
                                 case 3:
                                     target.ToUnit().SetAnimTier((AnimTier)e.Action.setunitByte.byte1);
@@ -1789,7 +1789,7 @@ namespace Game.AI
                                     // pet talent points
                                     break;
                                 case 2:
-                                    target.ToUnit().RemoveVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
+                                    target.ToUnit().RemoveVisFlag((UnitVisFlags)e.Action.setunitByte.byte1);
                                     break;
                                 case 3:
                                     target.ToUnit().SetAnimTier(AnimTier.Ground);
@@ -1810,7 +1810,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().AddDynamicFlag((UnitDynFlags)e.Action.flag.flag);
+                            target.ToUnit().SetDynamicFlag((UnitDynFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.RemoveDynamicFlag:
@@ -2368,7 +2368,7 @@ namespace Game.AI
                         if (IsUnit(target))
                         {
                             if (e.Action.setImmunePC.immunePC != 0)
-                                target.ToUnit().AddUnitFlag(UnitFlags.ImmuneToPc);
+                                target.ToUnit().SetUnitFlag(UnitFlags.ImmuneToPc);
                             else
                                 target.ToUnit().RemoveUnitFlag(UnitFlags.ImmuneToPc);
                         }
@@ -2382,7 +2382,7 @@ namespace Game.AI
                         if (IsUnit(target))
                         {
                             if (e.Action.setImmuneNPC.immuneNPC != 0)
-                                target.ToUnit().AddUnitFlag(UnitFlags.ImmuneToNpc);
+                                target.ToUnit().SetUnitFlag(UnitFlags.ImmuneToNpc);
                             else
                                 target.ToUnit().RemoveUnitFlag(UnitFlags.ImmuneToNpc);
                         }
@@ -2396,7 +2396,7 @@ namespace Game.AI
                         if (IsUnit(target))
                         {
                             if (e.Action.setUninteractible.uninteractible != 0)
-                                target.ToUnit().AddUnitFlag(UnitFlags.Uninteractible);
+                                target.ToUnit().SetUnitFlag(UnitFlags.Uninteractible);
                             else
                                 target.ToUnit().RemoveUnitFlag(UnitFlags.Uninteractible);
                         }

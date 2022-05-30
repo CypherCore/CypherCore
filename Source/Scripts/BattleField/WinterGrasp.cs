@@ -189,7 +189,7 @@ namespace Game.BattleFields
                 // Update faction of relic, only attacker can click on
                 relic.SetFaction(WGConst.WintergraspFaction[GetAttackerTeam()]);
                 // Set in use (not allow to click on before last door is broken)
-                relic.AddFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
+                relic.SetFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
                 m_titansRelicGUID = relic.GetGUID();
             }
             else
@@ -576,7 +576,7 @@ namespace Game.BattleFields
             {
                 HandlePromotion(killer, victim);
                 // Allow to Skin non-released corpse
-                victim.AddUnitFlag(UnitFlags.Skinnable);
+                victim.SetUnitFlag(UnitFlags.Skinnable);
             }
 
             // @todo Recent PvP activity worldstate

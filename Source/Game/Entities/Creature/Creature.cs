@@ -414,7 +414,7 @@ namespace Game.Entities
 
             // trigger creature is always not selectable and can not be attacked
             if (IsTrigger())
-                AddUnitFlag(UnitFlags.Uninteractible);
+                SetUnitFlag(UnitFlags.Uninteractible);
 
             InitializeReactState();
 
@@ -1228,7 +1228,7 @@ namespace Game.Entities
             else
                 m_lootRecipientGroup = ObjectGuid.Empty;
 
-            AddDynamicFlag(UnitDynFlags.Tapped);
+            SetDynamicFlag(UnitDynFlags.Tapped);
         }
 
         public bool IsTappedBy(Player player)
@@ -2601,7 +2601,7 @@ namespace Game.Entities
             // Check if the creature has UNIT_FLAG_CAN_SWIM and add it if it's missing
             // Creatures must be able to chase a target in water if they can enter water
             if (_isMissingCanSwimFlagOutOfCombat && CanEnterWater())
-                AddUnitFlag(UnitFlags.CanSwim);
+                SetUnitFlag(UnitFlags.CanSwim);
         }
 
         public bool HasCanSwimFlagOutOfCombat()
@@ -2613,7 +2613,7 @@ namespace Game.Entities
         {
             if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
                 if (LootStorage.Skinning.HaveLootFor(GetCreatureTemplate().SkinLootId))
-                    AddUnitFlag(UnitFlags.Skinnable);
+                    SetUnitFlag(UnitFlags.Skinnable);
 
             long now = GameTime.GetGameTime();
             // Do not reset corpse remove time if corpse is already removed

@@ -184,7 +184,7 @@ namespace Game
             if (item == null || !item.IsAzeriteEmpoweredItem())
                 return;
 
-            item.AddItemFlag(ItemFieldFlags.AzeriteEmpoweredItemViewed);
+            item.SetItemFlag(ItemFieldFlags.AzeriteEmpoweredItemViewed);
             item.SetState(ItemUpdateState.Changed, _player);
         }
 

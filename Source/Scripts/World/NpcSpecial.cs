@@ -577,7 +577,7 @@ namespace Scripts.World.NpcSpecial
                 case TextEmotes.Chicken:
                     if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.None && RandomHelper.Rand32() % 30 == 1)
                     {
-                        me.AddNpcFlag(NPCFlags.QuestGiver);
+                        me.SetNpcFlag(NPCFlags.QuestGiver);
                         me.SetFaction(Misc.FactionFriendly);
                         Talk(player.GetTeam() == Team.Horde ? TextIds.EmoteHelloH : TextIds.EmoteHelloA);
                     }
@@ -585,7 +585,7 @@ namespace Scripts.World.NpcSpecial
                 case TextEmotes.Cheer:
                     if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.Complete)
                     {
-                        me.AddNpcFlag(NPCFlags.QuestGiver);
+                        me.SetNpcFlag(NPCFlags.QuestGiver);
                         me.SetFaction(Misc.FactionFriendly);
                         Talk(TextIds.EmoteCluck);
                     }
@@ -835,7 +835,7 @@ namespace Scripts.World.NpcSpecial
             }
 
             Event = true;
-            me.AddUnitFlag(UnitFlags.Uninteractible);
+            me.SetUnitFlag(UnitFlags.Uninteractible);
         }
 
         public void PatientDied(Position point)
@@ -932,7 +932,7 @@ namespace Scripts.World.NpcSpecial
                     if (Patient)
                     {
                         //303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
-                        Patient.AddUnitFlag(UnitFlags.PlayerControlled);
+                        Patient.SetUnitFlag(UnitFlags.PlayerControlled);
 
                         Patients.Add(Patient.GetGUID());
                         ((npc_injured_patient)Patient.GetAI()).DoctorGUID = me.GetGUID();
@@ -995,7 +995,7 @@ namespace Scripts.World.NpcSpecial
             me.RemoveUnitFlag(UnitFlags.Uninteractible);
 
             //no regen health
-            me.AddUnitFlag(UnitFlags.InCombat);
+            me.SetUnitFlag(UnitFlags.InCombat);
 
             //to make them lay with face down
             me.SetStandState(UnitStandStateType.Dead);
@@ -1038,7 +1038,7 @@ namespace Scripts.World.NpcSpecial
             }
 
             //make not selectable
-            me.AddUnitFlag(UnitFlags.Uninteractible);
+            me.SetUnitFlag(UnitFlags.Uninteractible);
 
             //regen health
             me.RemoveUnitFlag(UnitFlags.InCombat);
@@ -1075,9 +1075,9 @@ namespace Scripts.World.NpcSpecial
             if (me.IsAlive() && me.GetHealth() <= 6)
             {
                 me.RemoveUnitFlag(UnitFlags.InCombat);
-                me.AddUnitFlag(UnitFlags.Uninteractible);
+                me.SetUnitFlag(UnitFlags.Uninteractible);
                 me.SetDeathState(DeathState.JustDied);
-                me.AddDynamicFlag(UnitDynFlags.Dead);
+                me.SetDynamicFlag(UnitDynFlags.Dead);
 
                 if (!DoctorGUID.IsEmpty())
                 {
@@ -1232,7 +1232,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void Reset()
         {
-            me.AddUnitFlag(UnitFlags.NonAttackable);
+            me.SetUnitFlag(UnitFlags.NonAttackable);
         }
 
         public override void JustEngagedWith(Unit who) { }
@@ -1439,7 +1439,7 @@ namespace Scripts.World.NpcSpecial
                     player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
                     break;
                 case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
-                    player.AddPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
+                    player.SetPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
                     break;
             }
 
@@ -1936,7 +1936,7 @@ namespace Scripts.World.NpcSpecial
             {
                 case GossipMenus.OptionIdBank:
                     {
-                        me.AddNpcFlag(NPCFlags.Banker);
+                        me.SetNpcFlag(NPCFlags.Banker);
                         uint _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
                         if (!me.HasAura(_bankAura))
                             DoCastSelf(_bankAura);
@@ -1947,7 +1947,7 @@ namespace Scripts.World.NpcSpecial
                     }
                 case GossipMenus.OptionIdShop:
                     {
-                        me.AddNpcFlag(NPCFlags.Vendor);
+                        me.SetNpcFlag(NPCFlags.Vendor);
                         uint _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
                         if (!me.HasAura(_shopAura))
                             DoCastSelf(_shopAura);
@@ -1958,7 +1958,7 @@ namespace Scripts.World.NpcSpecial
                     }
                 case GossipMenus.OptionIdMail:
                     {
-                        me.AddNpcFlag(NPCFlags.Mailbox);
+                        me.SetNpcFlag(NPCFlags.Mailbox);
                         player.GetSession().SendShowMailBox(me.GetGUID());
 
                         uint _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;

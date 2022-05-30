@@ -691,7 +691,7 @@ namespace Game.BattleGrounds.Zones
                 if (dem)
                 {
                     if (start)
-                        dem.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
+                        dem.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
                     else
                         dem.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
                 }
@@ -772,7 +772,7 @@ namespace Game.BattleGrounds.Zones
                 if (CanInteractWithObject(objectId))
                     go.RemoveFlag(GameObjectFlags.NotSelectable);
                 else
-                    go.AddFlag(GameObjectFlags.NotSelectable);
+                    go.SetFlag(GameObjectFlags.NotSelectable);
             }
         }
 

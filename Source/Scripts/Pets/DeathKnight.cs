@@ -82,7 +82,7 @@ namespace Scripts.Pets
                     return;
 
                 // Stop Fighting
-                me.AddUnitFlag(UnitFlags.NonAttackable);
+                me.SetUnitFlag(UnitFlags.NonAttackable);
 
                 // Sanctuary
                 me.CastSpell(me, SpellIds.Sanctuary, true);

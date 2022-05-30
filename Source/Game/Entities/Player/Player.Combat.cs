@@ -584,7 +584,7 @@ namespace Game.Entities
             if (!HasUnitState(UnitState.AttackPlayer))
             {
                 AddUnitState(UnitState.AttackPlayer);
-                AddPlayerFlag(PlayerFlags.ContestedPVP);
+                SetPlayerFlag(PlayerFlags.ContestedPVP);
                 // call MoveInLineOfSight for nearby contested guards
                 AIRelocationNotifier notifier = new(this);
                 Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
@@ -658,9 +658,9 @@ namespace Game.Entities
             {
                 if (!IsFFAPvP())
                 {
-                    AddPvpFlag(UnitPVPStateFlags.FFAPvp);
+                    SetPvpFlag(UnitPVPStateFlags.FFAPvp);
                     foreach (var unit in m_Controlled)
-                        unit.AddPvpFlag(UnitPVPStateFlags.FFAPvp);
+                        unit.SetPvpFlag(UnitPVPStateFlags.FFAPvp);
                 }
             }
             else if (IsFFAPvP())

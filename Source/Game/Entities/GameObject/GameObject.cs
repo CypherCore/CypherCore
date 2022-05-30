@@ -363,7 +363,7 @@ namespace Game.Entities
                     break;
                 case GameObjectTypes.PhaseableMo:
                     RemoveFlag((GameObjectFlags)0xF00);
-                    AddFlag((GameObjectFlags)((m_goInfo.PhaseableMO.AreaNameSet & 0xF) << 8));
+                    SetFlag((GameObjectFlags)((m_goInfo.PhaseableMO.AreaNameSet & 0xF) << 8));
                     break;
                 case GameObjectTypes.CapturePoint:
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
@@ -1161,7 +1161,7 @@ namespace Game.Entities
 
                 if (!GetGoInfo().GetDespawnPossibility() && !GetGoInfo().IsDespawnAtAction())
                 {
-                    AddFlag(GameObjectFlags.NoDespawn);
+                    SetFlag(GameObjectFlags.NoDespawn);
                     m_respawnDelayTime = 0;
                     m_respawnTime = 0;
                 }
@@ -1507,7 +1507,7 @@ namespace Game.Entities
                     RemoveFlag(GameObjectFlags.Locked);
                     break;
                 case GameObjectActions.Lock:
-                    AddFlag(GameObjectFlags.Locked);
+                    SetFlag(GameObjectFlags.Locked);
                     break;
                 case GameObjectActions.Open:
                     if (unitCaster)
@@ -1538,14 +1538,14 @@ namespace Game.Entities
                     DespawnOrUnsummon();
                     break;
                 case GameObjectActions.MakeInert:
-                    AddFlag(GameObjectFlags.NotSelectable);
+                    SetFlag(GameObjectFlags.NotSelectable);
                     break;
                 case GameObjectActions.MakeActive:
                     RemoveFlag(GameObjectFlags.NotSelectable);
                     break;
                 case GameObjectActions.CloseAndLock:
                     ResetDoorOrButton();
-                    AddFlag(GameObjectFlags.Locked);
+                    SetFlag(GameObjectFlags.Locked);
                     break;
                 case GameObjectActions.UseArtKit0:
                 case GameObjectActions.UseArtKit1:
@@ -1648,7 +1648,7 @@ namespace Game.Entities
         void SwitchDoorOrButton(bool activate, bool alternative = false)
         {
             if (activate)
-                AddFlag(GameObjectFlags.InUse);
+                SetFlag(GameObjectFlags.InUse);
             else
                 RemoveFlag(GameObjectFlags.InUse);
 
@@ -1861,7 +1861,7 @@ namespace Game.Entities
                     if (trapEntry != 0)
                         TriggeringLinkedGameObject(trapEntry, user);
 
-                    AddFlag(GameObjectFlags.InUse);
+                    SetFlag(GameObjectFlags.InUse);
                     SetLootState(LootState.Activated, user);
 
                     // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
@@ -2648,7 +2648,7 @@ namespace Game.Entities
                     GetAI().Damaged(attackerOrHealer, m_goInfo.DestructibleBuilding.DamagedEvent);
 
                     RemoveFlag(GameObjectFlags.Destroyed);
-                    AddFlag(GameObjectFlags.Damaged);
+                    SetFlag(GameObjectFlags.Damaged);
 
                     uint modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
@@ -2682,7 +2682,7 @@ namespace Game.Entities
                     }
 
                     RemoveFlag(GameObjectFlags.Damaged);
-                    AddFlag(GameObjectFlags.Destroyed);
+                    SetFlag(GameObjectFlags.Destroyed);
 
                     uint modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
@@ -3307,7 +3307,7 @@ namespace Game.Entities
         public uint GetRespawnDelay() { return m_respawnDelayTime; }
 
         public bool HasFlag(GameObjectFlags flags) { return (m_gameObjectData.Flags & (uint)flags) != 0; }
-        public void AddFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
+        public void SetFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
@@ -3415,7 +3415,7 @@ namespace Game.Entities
         {
             m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
             if (m_model != null && m_model.IsMapObject())
-                AddFlag(GameObjectFlags.MapObject);
+                SetFlag(GameObjectFlags.MapObject);
         }
 
         // There's many places not ready for dynamic spawns. This allows them to live on for now.

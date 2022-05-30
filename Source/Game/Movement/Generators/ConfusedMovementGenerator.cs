@@ -43,7 +43,7 @@ namespace Game.Movement
                 return;
 
             // TODO: UNIT_FIELD_FLAGS should not be handled by generators
-            owner.AddUnitFlag(UnitFlags.Confused);
+            owner.SetUnitFlag(UnitFlags.Confused);
             owner.StopMoving();
 
             _timer.Reset(0);

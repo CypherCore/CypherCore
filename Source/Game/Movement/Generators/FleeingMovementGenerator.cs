@@ -47,7 +47,7 @@ namespace Game.Movement
                 return;
 
             // TODO: UNIT_FIELD_FLAGS should not be handled by generators
-            owner.AddUnitFlag(UnitFlags.Fleeing);
+            owner.SetUnitFlag(UnitFlags.Fleeing);
             _path = null;
             SetTargetLocation(owner);
         }

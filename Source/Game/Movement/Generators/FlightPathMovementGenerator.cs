@@ -50,7 +50,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.Deactivated);
 
             owner.CombatStopWithPets();
-            owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
+            owner.SetUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
 
             uint end = GetPathAtMapEnd();
             uint currentNodeId = GetCurrentNode();

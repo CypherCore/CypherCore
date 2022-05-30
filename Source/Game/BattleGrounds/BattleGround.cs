@@ -1718,7 +1718,7 @@ namespace Game.BattleGrounds
             if (!IsArena())
             {
                 // To be able to remove insignia -- ONLY IN Battlegrounds
-                victim.AddUnitFlag(UnitFlags.Skinnable);
+                victim.SetUnitFlag(UnitFlags.Skinnable);
                 RewardXPAtKill(killer, victim);
             }
         }

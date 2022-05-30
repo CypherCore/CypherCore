@@ -1051,7 +1051,7 @@ namespace Game.Entities
                 {
                     _corpseLocation = new WorldLocation(result.Read<ushort>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
                     if (!CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable())
-                        AddPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
+                        SetPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
                     else
                         RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
                 }
@@ -1394,7 +1394,7 @@ namespace Game.Entities
                 if (group)
                 {
                     if (group.IsLeader(GetGUID()))
-                        AddPlayerFlag(PlayerFlags.GroupLeader);
+                        SetPlayerFlag(PlayerFlags.GroupLeader);
 
                     byte subgroup = group.GetMemberGroup(GetGUID());
                     SetGroup(group, subgroup);
@@ -3310,7 +3310,7 @@ namespace Game.Entities
 
             // RaF stuff.
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
-                AddDynamicFlag(UnitDynFlags.ReferAFriend);
+                SetDynamicFlag(UnitDynFlags.ReferAFriend);
 
             _LoadDeclinedNames(holder.GetResult(PlayerLoginQueryLoad.DeclinedNames));
 

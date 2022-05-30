@@ -1342,7 +1342,7 @@ namespace Game.Spells
                 SendLoot(guid, LootType.Skinning);
             else if (itemTarget != null)
             {
-                itemTarget.AddItemFlag(ItemFieldFlags.Unlocked);
+                itemTarget.SetItemFlag(ItemFieldFlags.Unlocked);
                 itemTarget.SetState(ItemUpdateState.Changed, itemTarget.GetOwner());
             }
 
@@ -3534,7 +3534,7 @@ namespace Game.Spells
             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
             creature.RemoveUnitFlag(UnitFlags.Skinnable);
-            creature.AddDynamicFlag(UnitDynFlags.Lootable);
+            creature.SetDynamicFlag(UnitDynFlags.Lootable);
             player.SendLoot(creature.GetGUID(), LootType.Skinning);
 
             if (skill == SkillType.Skinning)
@@ -4680,7 +4680,7 @@ namespace Game.Spells
                 !unitTarget.IsPet() || unitTarget.ToPet().GetPetType() != PetType.Hunter)
                 return;
 
-            unitTarget.AddPetFlag(UnitPetFlags.CanBeRenamed);
+            unitTarget.SetPetFlag(UnitPetFlags.CanBeRenamed);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMusic)]
@@ -5220,7 +5220,7 @@ namespace Game.Spells
                 return;
 
             Player player = unitTarget.ToPlayer();
-            player.AddPlayerFlag(PlayerFlags.PetBattlesUnlocked);
+            player.SetPlayerFlag(PlayerFlags.PetBattlesUnlocked);
             player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot0);
         }
 

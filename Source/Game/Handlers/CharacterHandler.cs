@@ -937,7 +937,7 @@ namespace Game
 
             // Set FFA PvP for non GM in non-rest mode
             if (Global.WorldMgr.IsFFAPvPRealm() && !pCurrChar.IsGameMaster() && !pCurrChar.HasPlayerFlag(PlayerFlags.Resting))
-                pCurrChar.AddPvpFlag(UnitPVPStateFlags.FFAPvp);
+                pCurrChar.SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 
             if (pCurrChar.HasPlayerFlag(PlayerFlags.ContestedPVP))
                 pCurrChar.SetContestedPvP();

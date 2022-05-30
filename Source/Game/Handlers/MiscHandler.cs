@@ -509,7 +509,7 @@ namespace Game
         {
             if (!GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
             {
-                GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().SetPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
                     GetPlayer().UpdatePvP(true, true);
@@ -517,7 +517,7 @@ namespace Game
             else if (!GetPlayer().IsWarModeLocalActive())
             {
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
-                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
                     GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
             }
@@ -528,7 +528,7 @@ namespace Game
         {
             if (packet.EnablePVP)
             {
-                GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().SetPlayerFlag(PlayerFlags.InPVP);
                 GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
                     GetPlayer().UpdatePvP(true, true);
@@ -536,7 +536,7 @@ namespace Game
             else if (!GetPlayer().IsWarModeLocalActive())
             {
                 GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
-                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
                 if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
                     GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
             }
@@ -759,7 +759,7 @@ namespace Game
         void HandleSetTaxiBenchmark(SetTaxiBenchmarkMode packet)
         {
             if (packet.Enable)
-                _player.AddPlayerFlag(PlayerFlags.TaxiBenchmark);
+                _player.SetPlayerFlag(PlayerFlags.TaxiBenchmark);
             else
                 _player.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
         }

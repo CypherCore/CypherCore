@@ -621,7 +621,7 @@ namespace Game
             if (m.messageType == MailMessageType.Normal)
                 bodyItem.SetCreator(ObjectGuid.Create(HighGuid.Player, m.sender));
 
-            bodyItem.AddItemFlag(ItemFieldFlags.Readable);
+            bodyItem.SetItemFlag(ItemFieldFlags.Readable);
 
             Log.outInfo(LogFilter.Network, "HandleMailCreateTextItem mailid={0}", createTextItem.MailID);
 

@@ -1705,9 +1705,9 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.AddDynamicFlag(UnitDynFlags.Dead);
-            target.AddUnitFlag2(UnitFlags2.FeignDeath);
-            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetDynamicFlag(UnitDynFlags.Dead);
+            target.SetUnitFlag2(UnitFlags2.FeignDeath);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
 
             Creature creature = target.ToCreature();
             if (creature != null)
@@ -1740,8 +1740,8 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.AddUnitFlag2(UnitFlags2.FeignDeath);
-            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetUnitFlag2(UnitFlags2.FeignDeath);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
 
             Creature creature = target.ToCreature();
             if (creature != null)
@@ -1772,8 +1772,8 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.AddDynamicFlag(UnitDynFlags.Dead);
-            target.AddUnitFlag2(UnitFlags2.FeignDeath);
+            target.SetDynamicFlag(UnitDynFlags.Dead);
+            target.SetUnitFlag2(UnitFlags2.FeignDeath);
 
             Creature creature = target.ToCreature();
             if (creature != null)
@@ -2382,7 +2382,7 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.AddUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
         }
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -3514,7 +3514,7 @@ namespace Scripts.Spells.Generic
                 player.CombatStop();
                 if (player.IsNonMeleeSpellCast(true))
                     player.InterruptNonMeleeSpells(true);
-                player.AddUnitFlag(UnitFlags.NonAttackable);
+                player.SetUnitFlag(UnitFlags.NonAttackable);
 
                 // if player class = hunter || warlock Remove pet if alive
                 if ((player.GetClass() == Class.Hunter) || (player.GetClass() == Class.Warlock))

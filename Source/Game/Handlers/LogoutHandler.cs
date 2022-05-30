@@ -68,7 +68,7 @@ namespace Game
                 if (pl.GetStandState() == UnitStandStateType.Stand)
                     pl.SetStandState(UnitStandStateType.Sit);
                 pl.SetRooted(true);
-                pl.AddUnitFlag(UnitFlags.Stunned);
+                pl.SetUnitFlag(UnitFlags.Stunned);
             }
 
             SetLogoutStartTime(GameTime.GetGameTime());

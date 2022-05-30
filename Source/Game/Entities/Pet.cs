@@ -1378,7 +1378,7 @@ namespace Game.Entities
                 return false;
 
             // Force regen flag for player pets, just like we do for players themselves
-            AddUnitFlag2(UnitFlags2.RegeneratePower);
+            SetUnitFlag2(UnitFlags2.RegeneratePower);
             SetSheath(SheathState.Melee);
 
             GetThreatManager().Initialize();

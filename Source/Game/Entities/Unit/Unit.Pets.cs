@@ -121,7 +121,7 @@ namespace Game.Entities
                 if (IsTypeId(TypeId.Player))
                 {
                     minion.m_ControlledByPlayer = true;
-                    minion.AddUnitFlag(UnitFlags.PlayerControlled);
+                    minion.SetUnitFlag(UnitFlags.PlayerControlled);
                 }
 
                 // Can only have one pet. If a new one is summoned, dismiss the old one.
@@ -391,13 +391,13 @@ namespace Game.Entities
                 switch (type)
                 {
                     case CharmType.Vehicle:
-                        AddUnitFlag(UnitFlags.Possessed);
+                        SetUnitFlag(UnitFlags.Possessed);
                         playerCharmer.SetClientControl(this, true);
                         playerCharmer.VehicleSpellInitialize();
                         break;
                     case CharmType.Possess:
-                        AddUnitFlag(UnitFlags.Possessed);
-                        charmer.AddUnitFlag(UnitFlags.RemoveClientControl);
+                        SetUnitFlag(UnitFlags.Possessed);
+                        charmer.SetUnitFlag(UnitFlags.RemoveClientControl);
                         playerCharmer.SetClientControl(this, true);
                         playerCharmer.PossessSpellInitialize();
                         AddUnitState(UnitState.Possessed);
@@ -583,7 +583,7 @@ namespace Game.Entities
 
                     charm.m_ControlledByPlayer = true;
                     // @todo maybe we can use this flag to check if controlled by player
-                    charm.AddUnitFlag(UnitFlags.PlayerControlled);
+                    charm.SetUnitFlag(UnitFlags.PlayerControlled);
                 }
                 else
                     charm.m_ControlledByPlayer = false;
@@ -621,13 +621,13 @@ namespace Game.Entities
                 if (charm.IsTypeId(TypeId.Player))
                 {
                     charm.m_ControlledByPlayer = true;
-                    charm.AddUnitFlag(UnitFlags.PlayerControlled);
+                    charm.SetUnitFlag(UnitFlags.PlayerControlled);
                     charm.ToPlayer().UpdatePvPState();
                 }
                 else if (player)
                 {
                     charm.m_ControlledByPlayer = true;
-                    charm.AddUnitFlag(UnitFlags.PlayerControlled);
+                    charm.SetUnitFlag(UnitFlags.PlayerControlled);
                     charm.ReplaceAllPvpFlags(player.GetPvpFlags());
                 }
                 else
@@ -788,7 +788,7 @@ namespace Game.Entities
             pet.SetCreatedBySpell(spell_id);
 
             if (IsTypeId(TypeId.Player))
-                pet.AddUnitFlag(UnitFlags.PlayerControlled);
+                pet.SetUnitFlag(UnitFlags.PlayerControlled);
 
             if (!pet.InitStatsForLevel(level))
             {
@@ -826,7 +826,7 @@ namespace Game.Entities
             }
 
             if (state)
-                AddUnitFlag(UnitFlags.PetInCombat);
+                SetUnitFlag(UnitFlags.PetInCombat);
             else
                 RemoveUnitFlag(UnitFlags.PetInCombat);
         }

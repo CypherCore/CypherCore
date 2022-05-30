@@ -1466,7 +1466,7 @@ namespace Game.Entities
 
         public void SetSoulboundTradeable(List<ObjectGuid> allowedLooters)
         {
-            AddItemFlag(ItemFieldFlags.BopTradeable);
+            SetItemFlag(ItemFieldFlags.BopTradeable);
             allowedGUIDs = allowedLooters;
         }
 
@@ -2562,7 +2562,7 @@ namespace Game.Entities
         public void SetBinding(bool val)
         {
             if (val)
-                AddItemFlag(ItemFieldFlags.Soulbound);
+                SetItemFlag(ItemFieldFlags.Soulbound);
             else
                 RemoveItemFlag(ItemFieldFlags.Soulbound);
         }
@@ -2572,11 +2572,11 @@ namespace Game.Entities
         public bool IsBattlenetAccountBound() { return GetTemplate().HasFlag(ItemFlags2.BnetAccountTradeOk); }
 
         public bool HasItemFlag(ItemFieldFlags flag) { return (m_itemData.DynamicFlags & (uint)flag) != 0; }
-        public void AddItemFlag(ItemFieldFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
+        public void SetItemFlag(ItemFieldFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void RemoveItemFlag(ItemFieldFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void ReplaceAllItemFlags(ItemFieldFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public bool HasItemFlag2(ItemFieldFlags2 flag) { return (m_itemData.DynamicFlags2 & (uint)flag) != 0; }
-        public void AddItemFlag2(ItemFieldFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
+        public void SetItemFlag2(ItemFieldFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
         public void RemoveItemFlag2(ItemFieldFlags2 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
         public void ReplaceAllItemFlags2(ItemFieldFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
 

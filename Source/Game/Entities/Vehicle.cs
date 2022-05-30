@@ -55,7 +55,7 @@ namespace Game.Entities
 
             // Set or remove correct flags based on available seats. Will overwrite db data (if wrong).
             if (UsableSeatNum != 0)
-                _me.AddNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
+                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
             else
                 _me.RemoveNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
@@ -367,7 +367,7 @@ namespace Game.Entities
                 unit.GetName(), _me.GetEntry(), _vehicleInfo.Id, _me.GetGUID().ToString(), seat.Key);
 
             if (seat.Value.SeatInfo.CanEnterOrExit() && ++UsableSeatNum != 0)
-                _me.AddNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
+                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             // Enable gravity for passenger when he did not have it active before entering the vehicle
             if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)

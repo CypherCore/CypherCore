@@ -1271,7 +1271,7 @@ namespace Game.Entities
             if (apply)
             {
                 SetTarget(ObjectGuid.Empty);
-                AddUnitFlag(UnitFlags.Stunned);
+                SetUnitFlag(UnitFlags.Stunned);
 
                 StopMoving();
 
@@ -1405,7 +1405,7 @@ namespace Game.Entities
             if (mount != 0)
                 SetMountDisplayId(mount);
 
-            AddUnitFlag(UnitFlags.Mount);
+            SetUnitFlag(UnitFlags.Mount);
 
             Player player = ToPlayer();
             if (player != null)
@@ -1429,7 +1429,7 @@ namespace Game.Entities
                     Battleground bg = ToPlayer().GetBattleground();
                     // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
                     if (bg && bg.IsArena())
-                        pet.AddUnitFlag(UnitFlags.Stunned);
+                        pet.SetUnitFlag(UnitFlags.Stunned);
                     else
                         player.UnsummonPetTemporaryIfAny();
                 }
@@ -1438,7 +1438,7 @@ namespace Game.Entities
                 Unit charm = player.GetCharmed();
                 if (charm)
                     if (charm.GetTypeId() == TypeId.Unit)
-                        charm.AddUnitFlag(UnitFlags.Stunned);
+                        charm.SetUnitFlag(UnitFlags.Stunned);
 
                 player.SendMovementSetCollisionHeight(player.GetCollisionHeight(), UpdateCollisionHeightReason.Mount);
             }

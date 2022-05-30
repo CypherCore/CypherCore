@@ -516,7 +516,7 @@ namespace Game.BattleFields
         {
             creature.CombatStop();
             creature.SetReactState(ReactStates.Passive);
-            creature.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
+            creature.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
             creature.DisappearAndDie();
             creature.SetVisible(false);
         }
@@ -531,7 +531,7 @@ namespace Game.BattleFields
                 creature.SetReactState(ReactStates.Aggressive);
             else
             {
-                creature.AddUnitFlag(UnitFlags.NonAttackable);
+                creature.SetUnitFlag(UnitFlags.NonAttackable);
                 creature.SetReactState(ReactStates.Passive);
             }
         }

@@ -914,7 +914,7 @@ namespace Game.Entities
                 {
                     // must be after setDeathState which resets dynamic flags
                     if (!creature.loot.IsLooted())
-                        creature.AddDynamicFlag(UnitDynFlags.Lootable);
+                        creature.SetDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();
                 }

@@ -237,11 +237,11 @@ namespace Game.Entities
             InitDisplayIds();
             if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
             {
-                AddPvpFlag(UnitPVPStateFlags.PvP);
-                AddUnitFlag(UnitFlags.PlayerControlled);
+                SetPvpFlag(UnitPVPStateFlags.PvP);
+                SetUnitFlag(UnitFlags.PlayerControlled);
             }
 
-            AddUnitFlag2(UnitFlags2.RegeneratePower);
+            SetUnitFlag2(UnitFlags2.RegeneratePower);
             SetHoverHeight(1.0f);            // default for players in 3.0.3
 
             SetWatchedFactionIndex(0xFFFFFFFF);
@@ -2151,7 +2151,7 @@ namespace Game.Entities
         public void SetDeveloper(bool on)
         {
             if (on)
-                AddPlayerFlag(PlayerFlags.Developer);
+                SetPlayerFlag(PlayerFlags.Developer);
             else
                 RemovePlayerFlag(PlayerFlags.Developer);
         }
@@ -2172,8 +2172,8 @@ namespace Game.Entities
             {
                 m_ExtraFlags |= PlayerExtraFlags.GMOn;
                 SetFaction(35);
-                AddPlayerFlag(PlayerFlags.GM);
-                AddUnitFlag2(UnitFlags2.AllowCheatSpells);
+                SetPlayerFlag(PlayerFlags.GM);
+                SetUnitFlag2(UnitFlags2.AllowCheatSpells);
 
                 Pet pet = GetPet();
                 if (pet != null)
@@ -2202,7 +2202,7 @@ namespace Game.Entities
 
                 // restore FFA PvP Server state
                 if (Global.WorldMgr.IsFFAPvPRealm())
-                    AddPvpFlag(UnitPVPStateFlags.FFAPvp);
+                    SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 
                 // restore FFA PvP area state, remove not allowed for GM mounts
                 UpdateArea(m_areaUpdateId);
@@ -4376,7 +4376,7 @@ namespace Game.Entities
             RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
 
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
-                AddDynamicFlag(UnitDynFlags.ReferAFriend);
+                SetDynamicFlag(UnitDynFlags.ReferAFriend);
 
             SetDeathState(DeathState.Alive);
 
@@ -4458,7 +4458,7 @@ namespace Game.Entities
 
             ReplaceAllDynamicFlags(UnitDynFlags.None);
             if (!CliDB.MapStorage.LookupByKey(GetMapId()).Instanceable() && !HasAuraType(AuraType.PreventResurrection))
-                AddPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
+                SetPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
             else
                 RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
 
@@ -5116,7 +5116,7 @@ namespace Game.Entities
 
             if (enabled)
             {
-                AddPlayerFlag(PlayerFlags.WarModeDesired);
+                SetPlayerFlag(PlayerFlags.WarModeDesired);
                 TogglePvpTalents(true);
                 SetPvP(true);
             }
@@ -5133,7 +5133,7 @@ namespace Game.Entities
         void SetWarModeLocal(bool enabled)
         {
             if (enabled)
-                AddPlayerLocalFlag(PlayerLocalFlags.WarMode);
+                SetPlayerLocalFlag(PlayerLocalFlags.WarMode);
             else
                 RemovePlayerLocalFlag(PlayerLocalFlags.WarMode);
         }
@@ -5174,12 +5174,12 @@ namespace Game.Entities
                 }
                 else
                 {
-                    AddPlayerFlag(PlayerFlags.WarModeActive);
+                    SetPlayerFlag(PlayerFlags.WarModeActive);
                     RemoveAurasDueToSpell(auraInside);
                     CastSpell(this, auraOutside, true);
                 }
                 SetWarModeLocal(true);
-                AddPvpFlag(UnitPVPStateFlags.PvP);
+                SetPvpFlag(UnitPVPStateFlags.PvP);
             }
             else
             {
@@ -5312,7 +5312,7 @@ namespace Game.Entities
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.GuildGUID), ObjectGuid.Create(HighGuid.Guild, guildId));
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GuildClubMemberID), GetGUID().GetCounter());
-                AddPlayerFlag(PlayerFlags.GuildLevelEnabled);
+                SetPlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
             else
             {
@@ -5450,7 +5450,7 @@ namespace Game.Entities
             if (IsAFK())
                 RemovePlayerFlag(PlayerFlags.AFK);
             else
-                AddPlayerFlag(PlayerFlags.AFK);
+                SetPlayerFlag(PlayerFlags.AFK);
 
             // afk player not allowed in Battleground
             if (!IsGameMaster() && IsAFK() && InBattleground() && !InArena())
@@ -5461,7 +5461,7 @@ namespace Game.Entities
             if (IsDND())
                 RemovePlayerFlag(PlayerFlags.DND);
             else
-                AddPlayerFlag(PlayerFlags.DND);
+                SetPlayerFlag(PlayerFlags.DND);
         }
         public bool IsAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
         public bool IsDND() { return HasPlayerFlag(PlayerFlags.DND); }
@@ -5994,14 +5994,14 @@ namespace Game.Entities
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
             UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.Uninteractible |
             UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.OnTaxi);
-            AddUnitFlag(UnitFlags.PlayerControlled);   // must be set
+            SetUnitFlag(UnitFlags.PlayerControlled);   // must be set
 
-            AddUnitFlag2(UnitFlags2.RegeneratePower);// must be set
+            SetUnitFlag2(UnitFlags2.RegeneratePower);// must be set
 
             // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
             RemovePlayerFlag(PlayerFlags.AFK | PlayerFlags.DND | PlayerFlags.GM | PlayerFlags.Ghost);
 
-            RemoveVisFlags(UnitVisFlags.All);                 // one form stealth modified bytes
+            RemoveVisFlag(UnitVisFlags.All);                 // one form stealth modified bytes
             RemovePvpFlag(UnitPVPStateFlags.FFAPvp | UnitPVPStateFlags.Sanctuary);
 
             // restore if need some important flags
@@ -7261,7 +7261,7 @@ namespace Game.Entities
         public void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
 
         public bool IsReagentBankUnlocked() { return HasPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
-        public void UnlockReagentBank() { AddPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
+        public void UnlockReagentBank() { SetPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
 
         //new
         public uint DoRandomRoll(uint minimum, uint maximum)
@@ -7596,12 +7596,12 @@ namespace Game.Entities
         }
 
         public bool HasPlayerFlag(PlayerFlags flags) { return (m_playerData.PlayerFlags & (uint)flags) != 0; }
-        public void AddPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
+        public void SetPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
         public void RemovePlayerFlag(PlayerFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
         public void ReplaceAllPlayerFlags(PlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
 
         public bool HasPlayerFlagEx(PlayerFlagsEx flags) { return (m_playerData.PlayerFlagsEx & (uint)flags) != 0; }
-        public void AddPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
+        public void SetPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
         public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
         public void ReplaceAllPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
 
@@ -7680,7 +7680,7 @@ namespace Game.Entities
         public ObjectGuid GetSummonedBattlePetGUID() { return m_activePlayerData.SummonedBattlePetGUID; }
         public void SetSummonedBattlePetGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SummonedBattlePetGUID), guid); }
 
-        public void AddTrackCreatureFlag(uint flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }
+        public void SetTrackCreatureFlag(uint flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }
         public void RemoveTrackCreatureFlag(uint flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }
 
         public void SetVersatilityBonus(float value) { SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.VersatilityBonus), value); }
@@ -7690,7 +7690,7 @@ namespace Game.Entities
         public void ApplyModOverrideAPBySpellPowerPercent(float mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideAPBySpellPowerPercent), mod, apply); }
 
         public bool HasPlayerLocalFlag(PlayerLocalFlags flags) { return (m_activePlayerData.LocalFlags & (int)flags) != 0; }
-        public void AddPlayerLocalFlag(PlayerLocalFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
+        public void SetPlayerLocalFlag(PlayerLocalFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
         public void RemovePlayerLocalFlag(PlayerLocalFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
         public void ReplaceAllPlayerLocalFlags(PlayerLocalFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
 
