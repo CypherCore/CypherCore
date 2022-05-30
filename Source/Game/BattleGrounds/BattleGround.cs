@@ -993,10 +993,12 @@ namespace Game.BattleGrounds
             bp.Team = team;
             bp.ActiveSpec = (int)player.GetPrimarySpecialization();
 
+            bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
             // Add to list/maps
             m_Players[guid] = bp;
 
-            UpdatePlayersCountByTeam(team, false);                  // +1 player
+            if (!isInBattleground)
+                UpdatePlayersCountByTeam(team, false);                  // +1 player
 
             BattlegroundPlayerJoined playerJoined = new();
             playerJoined.Guid = player.GetGUID();
