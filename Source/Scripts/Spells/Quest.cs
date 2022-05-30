@@ -70,28 +70,14 @@ namespace Scripts.Spells.Quest
         //Quest12937
         public const uint TriggerAidOfTheEarthen = 55809;
 
-        //Whoarethey
-        public const uint MaleDisguise = 38080;
-        public const uint FemaleDisguise = 38081;
-        public const uint GenericDisguise = 32756;
-
         //Symboloflife
         public const uint PermanentFeignDeath = 29266;
-
-        //Stoppingthespread
-        public const uint Flames = 39199;
 
         //BattleStandard
         public const uint PlantHordeBattleStandard = 59643;
         public const uint HordeBattleStandardState = 59642;
         public const uint AllianceBattleStandardState = 4339;
         public const uint JumpRocketBlast = 4340;
-
-        //Chumthewatersummons
-        public const uint SummonAngryKvaldir = 66737;
-        public const uint SummonNorthSeaMako = 66738;
-        public const uint SummonNorthSeaThresher = 66739;
-        public const uint SummonNorthSeaBlueShark = 66740;
 
         //Redsnapperverytasty
         public const uint FishedUpRedSnapper = 29867;
@@ -107,11 +93,6 @@ namespace Scripts.Spells.Quest
 
         //Focusonthebeach
         public const uint BunnyCreditBeam = 47390;
-
-        //Acleansingsong
-        public const uint SummonSpiritAtah = 52954;
-        public const uint SummonSpiritHakhalan = 52958;
-        public const uint SummonSpiritKoosu = 52959;
 
         //Defendingwyrmresttemple
         public const uint SummonWyrmrestDefender = 49207;
@@ -277,9 +258,6 @@ namespace Scripts.Spells.Quest
 
         //Quest12659
         public const uint ScalpsKcBunny = 28622;
-
-        //Stoppingthespread
-        public const uint VillagerKillCredit = 18240;
 
         //Salvaginglifesstength
         public const uint ShardKillCredit = 29303;
@@ -727,33 +705,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // http://www.wowhead.com/quest=12683 Burning to Help
-    [Script] // 52308 Take Sputum Sample
-    class spell_q12683_take_sputum_sample : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return spellInfo.GetEffects().Count > 1;
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            uint reqAuraId = (uint)GetEffectInfo(1).CalcValue();
-
-            Unit caster = GetCaster();
-            if (caster.HasAuraEffect(reqAuraId, 0))
-            {
-                uint spellId = (uint)GetEffectInfo(0).CalcValue();
-                caster.CastSpell(caster, spellId, true);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
     // http://www.wowhead.com/quest=12851 Going Bearback
     [Script] // 54798 FLAMING Arrow Triggered Effect
     class spell_q12851_going_bearback : AuraScript
@@ -793,31 +744,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script] // 48917 - Who Are They: Cast from Questgiver
-    class spell_q10041_q10040_who_are_they : SpellScript
-    {
-        public override bool Validate(SpellInfo spellEntry)
-        {
-            return ValidateSpellInfo(SpellIds.MaleDisguise, SpellIds.FemaleDisguise, SpellIds.GenericDisguise);
-        }
-
-        void HandleScript(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            Player target = GetHitPlayer();
-            if (target)
-            {
-                target.CastSpell(target, target.GetNativeGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
-                target.CastSpell(target, SpellIds.GenericDisguise, true);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
     // http://www.wowhead.com/quest=12659 Scalps!
     [Script] // 52090 Ahunae's Knife
     class spell_q12659_ahunaes_knife : SpellScript
@@ -836,35 +762,6 @@ namespace Scripts.Spells.Quest
             {
                 target.DespawnOrUnsummon();
                 caster.KilledMonsterCredit(CreatureIds.ScalpsKcBunny);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 32146 - Liquid Fire
-    class spell_q9874_liquid_fire : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Player caster = GetCaster().ToPlayer();
-            Creature target = GetHitCreature();
-            if (target != null)
-            {
-                if (!target.HasAura(SpellIds.Flames))
-                {
-                    caster.KilledMonsterCredit(CreatureIds.VillagerKillCredit);
-                    target.CastSpell(target, SpellIds.Flames, true);
-                    target.DespawnOrUnsummon(TimeSpan.FromSeconds(60));
-                }
             }
         }
 
@@ -956,26 +853,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script] // 66741 - Chum the Water
-    class spell_q14112_14145_chum_the_water : SpellScript
-    {
-        public override bool Validate(SpellInfo spellEntry)
-        {
-            return ValidateSpellInfo(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark);
-        }
-
-        void HandleScriptEffect(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            caster.CastSpell(caster, RandomHelper.RAND(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark));
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
     [Script] // 29866 - Cast Fishing Net
     class spell_q9452_cast_net : SpellScript
     {
@@ -1000,30 +877,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script] // 66512 - Pound Drum
-    class spell_q14076_14092_pound_drum : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.SummonDeepJormungar, SpellIds.StormforgedMoleMachine);
-        }
-
-        void HandleSummon()
-        {
-            Unit caster = GetCaster();
-
-            if (RandomHelper.randChance(50))
-                caster.CastSpell(caster, SpellIds.SummonDeepJormungar, true);
-            else
-                caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleSummon));
-        }
-    }
-
     [Script]
     class spell_q12279_cast_net : SpellScript
     {
@@ -1035,70 +888,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
-        }
-    }
-
-    [Script] // 56278 - Read Pronouncement
-    class spell_q12987_read_pronouncement : AuraScript
-    {
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // player must cast kill credit and do emote text, according to sniff
-            Player target = GetTarget().ToPlayer();
-            if (target)
-            {
-                Creature trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
-                if (trigger)
-                {
-                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target);
-                    target.KilledMonsterCredit(CreatureIds.Killcredit);
-                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say2, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target);
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.None, AuraEffectHandleModes.Real));
-        }
-    }
-
-    [Script] // 48742 - Wintergarde Mine Explosion
-    class spell_q12277_wintergarde_mine_explosion : SpellScript
-    {
-        void HandleDummy(uint effIndex)
-        {
-            Creature unitTarget = GetHitCreature();
-            if (unitTarget)
-            {
-                Unit caster = GetCaster();
-                if (caster)
-                {
-                    if (caster.IsTypeId(TypeId.Unit))
-                    {
-                        Unit owner = caster.GetOwner();
-                        if (owner)
-                        {
-                            switch (unitTarget.GetEntry())
-                            {
-                                case CreatureIds.UpperMineShaft:
-                                    caster.CastSpell(owner, SpellIds.UpperMineShaftCredit, true);
-                                    break;
-                                case CreatureIds.LowerMineShaft:
-                                    caster.CastSpell(owner, SpellIds.LowerMineShaftCredit, true);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -1115,34 +904,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 52941 - Song of Cleansing
-    class spell_q12735_song_of_cleansing : SpellScript
-    {
-        void HandleScript(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            switch (caster.GetAreaId())
-            {
-                case Misc.AreaIdBittertidelake:
-                    caster.CastSpell(caster, SpellIds.SummonSpiritAtah);
-                    break;
-                case Misc.AreaIdRiversheart:
-                    caster.CastSpell(caster, SpellIds.SummonSpiritHakhalan);
-                    break;
-                case Misc.AreaIdWintergraspriver:
-                    caster.CastSpell(caster, SpellIds.SummonSpiritKoosu);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -1441,41 +1202,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
-        }
-    }
-
-    [Script] // 56565 - Bear Flank Master
-    class spell_q13011_bear_flank_master : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BearFlankMaster, SpellIds.CreateBearFlank);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Unit);
-        }
-
-        void HandleScript(uint effIndex)
-        {
-            Player player = GetHitPlayer();
-            if (player)
-            {
-                if (RandomHelper.randChance(50))
-                {
-                    Creature creature = GetCaster().ToCreature();
-                    player.CastSpell(creature, SpellIds.BearFlankFail);
-                    creature.GetAI().Talk(0, player);
-                }
-                else
-                    player.CastSpell(player, SpellIds.CreateBearFlank);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 

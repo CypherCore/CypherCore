@@ -2634,35 +2634,6 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_crystal_prison_dummy_dnd : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            if (Global.ObjectMgr.GetGameObjectTemplate(ObjectIds.ImprisonedDoomguard) == null)
-                return false;
-            return true;
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Creature target = GetHitCreature();
-            if (target)
-            {
-                if (target.IsDead() && !target.IsPet())
-                {
-                    GetCaster().SummonGameObject(ObjectIds.ImprisonedDoomguard, target, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(target.GetRespawnTime() - GameTime.GetGameTime()));
-                    target.DespawnOrUnsummon();
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
     class spell_item_reindeer_transformation : SpellScript
     {
         public override bool Validate(SpellInfo spell)

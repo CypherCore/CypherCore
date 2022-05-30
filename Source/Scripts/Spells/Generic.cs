@@ -1240,8 +1240,8 @@ namespace Scripts.Spells.Generic
     {
         void HandleDamageCalc(uint effIndex)
         {
-            Unit caster = GetCaster();
-            if (caster == null || !caster.IsCreature())
+            Creature caster = GetCaster().ToCreature();
+            if (caster == null)
                 return;
 
             int damage = 0;
@@ -1449,6 +1449,25 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_despawn_target : SpellScript
+    {
+        void HandleDespawn(uint effIndex)
+        {
+            if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
+            {
+                Creature target = GetHitCreature();
+                if (target != null)
+                    target.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any));
+        }
+    }
+    
     [Script] // 70769 Divine Storm!
     class spell_gen_divine_storm_cd_reset : SpellScript
     {
@@ -2379,6 +2398,28 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_player_say : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            // Note: target here is always player; caster here is gameobject, creature or player (self cast)
+            Unit target = GetHitUnit();
+            if (target != null)
+                target.Say((uint)GetEffectValue(), target);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script("spell_item_soul_harvesters_charm")]
     [Script("spell_item_commendation_of_kaelthas")]
     [Script("spell_item_corpse_tongue_coin")]
@@ -2952,50 +2993,6 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script("spell_gen_summon_fire_elemental", SpellIds.SummonFireElemental)]
-    [Script("spell_gen_summon_earth_elemental", SpellIds.SummonEarthElemental)]
-    class spell_gen_summon_elemental : AuraScript
-    {
-        readonly uint _spellId;
-
-        public spell_gen_summon_elemental(uint spellId)
-        {
-            _spellId = spellId;
-        }
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(_spellId);
-        }
-
-        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetCaster())
-            {
-                Unit owner = GetCaster().GetOwner();
-                if (owner)
-                    owner.CastSpell(owner, _spellId, true);
-            }
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetCaster())
-            {
-                Unit owner = GetCaster().GetOwner();
-                if (owner)
-                    if (owner.IsTypeId(TypeId.Player)) // @todo this check is maybe wrong
-                        owner.ToPlayer().RemovePet(null, PetSaveMode.NotInSlot, true);
-            }
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-        }
-    }
-
     [Script]
     class spell_gen_summon_tournament_mount : SpellScript
     {
@@ -3408,16 +3405,12 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
-            if (caster != null)
+            TempSummon casterSummon = GetCaster().ToTempSummon();
+            if (casterSummon != null)
             {
-                TempSummon casterSummon = caster.ToTempSummon();
-                if (casterSummon != null)
-                {
-                    Player target = casterSummon.GetSummonerUnit().ToPlayer();
-                    if (target != null)
-                        casterSummon.Whisper((uint)GetEffectValue(), target, false);
-                }
+                Player target = casterSummon.GetSummonerUnit().ToPlayer();
+                if (target != null)
+                    casterSummon.Whisper((uint)GetEffectValue(), target, false);
             }
         }
 
