@@ -1315,11 +1315,16 @@ namespace Scripts.World.NpcSpecial
 
         public npc_training_dummy(Creature creature) : base(creature) { }
 
+        public override void JustEnteredCombat(Unit who)
+        {
+            _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
+        }
+        
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             damage = 0;
 
-            if (!attacker)
+            if (!attacker || damageType == DamageEffectType.DOT)
                 return;
 
             _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(5);
