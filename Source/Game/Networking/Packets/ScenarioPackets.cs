@@ -37,6 +37,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(BonusObjectives.Count);
             _worldPacket.WriteInt32(PickedSteps.Count);
             _worldPacket.WriteInt32(Spells.Count);
+            _worldPacket.WritePackedGuid(PlayerGUID);
 
             for (int i = 0; i < PickedSteps.Count; ++i)
                 _worldPacket.WriteUInt32(PickedSteps[i]);
@@ -64,6 +65,7 @@ namespace Game.Networking.Packets
         public List<BonusObjectiveData> BonusObjectives = new();
         public List<uint> PickedSteps = new();
         public List<ScenarioSpellUpdate> Spells = new();
+        public ObjectGuid PlayerGUID;
         public bool ScenarioComplete = false;
     }
 
