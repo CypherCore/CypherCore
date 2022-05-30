@@ -127,29 +127,11 @@ namespace Game
 
         public static void ChooseCreatureFlags(CreatureTemplate cInfo, out ulong npcFlag, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, out uint dynamicFlags, CreatureData data = null)
         {
-            npcFlag = (ulong)cInfo.Npcflag;
-            unitFlags = (uint)cInfo.UnitFlags;
-            unitFlags2 = cInfo.UnitFlags2;
-            unitFlags3 = cInfo.UnitFlags3;
-            dynamicFlags = cInfo.DynamicFlags;
-
-            if (data != null)
-            {
-                if (data.npcflag != 0)
-                    npcFlag = data.npcflag;
-
-                if (data.unit_flags != 0)
-                    unitFlags = data.unit_flags;
-
-                if (data.unit_flags2 != 0)
-                    unitFlags2 = data.unit_flags2;
-
-                if (data.unit_flags3 != 0)
-                    unitFlags3 = data.unit_flags3;
-
-                if (data.dynamicflags != 0)
-                    dynamicFlags = data.dynamicflags;
-            }
+            npcFlag = data?.npcflag != 0 ? data.npcflag : cInfo.Npcflag;
+            unitFlags = data?.unit_flags != 0 ? data.unit_flags : (uint)cInfo.UnitFlags;
+            unitFlags2 = data?.unit_flags2 != 0 ? data.unit_flags2 : cInfo.UnitFlags2;
+            unitFlags3 = data?.unit_flags3 != 0 ? data.unit_flags3 : cInfo.UnitFlags3;
+            dynamicFlags = data?.dynamicflags != 0 ? data.dynamicflags : cInfo.DynamicFlags;
         }
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)
