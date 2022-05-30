@@ -755,7 +755,6 @@ namespace Game.AI
                 SmartActions.SetUnitFieldBytes1 => Marshal.SizeOf(typeof(SmartAction.SetunitByte)),
                 SmartActions.RemoveUnitFieldBytes1 => Marshal.SizeOf(typeof(SmartAction.DelunitByte)),
                 SmartActions.InterruptSpell => Marshal.SizeOf(typeof(SmartAction.InterruptSpellCasting)),
-                SmartActions.SendGoCustomAnim => Marshal.SizeOf(typeof(SmartAction.SendGoCustomAnim)),
                 SmartActions.AddDynamicFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.RemoveDynamicFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.JumpToPos => Marshal.SizeOf(typeof(SmartAction.Jump)),
@@ -2060,7 +2059,6 @@ namespace Game.AI
                 case SmartActions.RandomMove:
                 case SmartActions.SetUnitFieldBytes1:
                 case SmartActions.RemoveUnitFieldBytes1:
-                case SmartActions.SendGoCustomAnim:
                 case SmartActions.JumpToPos:
                 case SmartActions.SendGossipMenu:
                 case SmartActions.GoSetLootState:
@@ -2094,6 +2092,7 @@ namespace Game.AI
                 case SmartActions.SetSwim:
                 case SmartActions.OverrideScriptBaseObject:
                 case SmartActions.ResetScriptBaseObject:
+                case SmartActions.SendGoCustomAnim:
                 case SmartActions.SetDynamicFlag:
                 case SmartActions.AddDynamicFlag:
                 case SmartActions.RemoveDynamicFlag:
@@ -2113,7 +2112,8 @@ namespace Game.AI
             switch (e.GetActionType())
             {
                 // Deprecated
-                case SmartActions.SendGoCustomAnim:
+                case SmartActions.AddAura:
+                case SmartActions.SetGoFlag:
                     Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
                     break;
                 default:
@@ -3006,9 +3006,6 @@ namespace Game.AI
         public InterruptSpellCasting interruptSpellCasting;
 
         [FieldOffset(4)]
-        public SendGoCustomAnim sendGoCustomAnim;
-
-        [FieldOffset(4)]
         public Jump jump;
 
         [FieldOffset(4)]
@@ -3467,10 +3464,6 @@ namespace Game.AI
             public uint withDelayed;
             public uint spell_id;
             public uint withInstant;
-        }
-        public struct SendGoCustomAnim
-        {
-            public uint anim;
         }
         public struct Jump
         {

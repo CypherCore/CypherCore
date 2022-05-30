@@ -1806,13 +1806,6 @@ namespace Game.AI
                             target.ToUnit().InterruptNonMeleeSpells(e.Action.interruptSpellCasting.withDelayed != 0, e.Action.interruptSpellCasting.spell_id, e.Action.interruptSpellCasting.withInstant != 0);
                     break;
                 }
-                case SmartActions.SendGoCustomAnim:
-                {
-                    foreach (var target in targets)
-                        if (IsGameObject(target))
-                            target.ToGameObject().SendCustomAnim(e.Action.sendGoCustomAnim.anim);
-                    break;
-                }
                 case SmartActions.AddDynamicFlag:
                 {
                     foreach (var target in targets)

@@ -336,7 +336,7 @@ namespace Framework.Constants
         SetUnitFieldBytes1 = 90,     // Bytes, Target
         RemoveUnitFieldBytes1 = 91,     // Bytes, Target
         InterruptSpell = 92,
-        SendGoCustomAnim = 93,     // Anim Id
+        SendGoCustomAnim = 93,   // UNUSED, DO NOT REUSE
         SetDynamicFlag = 94,     // UNUSED, DO NOT REUSE
         AddDynamicFlag = 95,     // UNUSED, DO NOT REUSE
         RemoveDynamicFlag = 96,     // UNUSED, DO NOT REUSE
