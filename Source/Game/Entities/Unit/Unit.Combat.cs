@@ -229,13 +229,28 @@ namespace Game.Entities
                 minion.StopAttackFaction(factionId);
         }
 
-        public void HandleProcExtraAttackFor(Unit victim)
+        public void HandleProcExtraAttackFor(Unit victim, uint count)
         {
-            while (ExtraAttacks != 0)
+            while (count != 0)
             {
+                --count;
                 AttackerStateUpdate(victim, WeaponAttackType.BaseAttack, true);
-                --ExtraAttacks;
             }
+        }
+
+        public void AddExtraAttacks(uint count)
+        {
+            ObjectGuid targetGUID = _lastDamagedTargetGuid;
+            if (!targetGUID.IsEmpty())
+            {
+                ObjectGuid selection = GetTarget();
+                if (!selection.IsEmpty())
+                    targetGUID = selection; // Spell was cast directly (not triggered by aura)
+                else
+                    return;
+            }
+
+            extraAttacksTargets[targetGUID] += count;
         }
 
         public bool Attack(Unit victim, bool meleeAttack)
@@ -408,6 +423,14 @@ namespace Game.Entities
             attackerList.Remove(pAttacker);
         }
 
+        public void SetLastExtraAttackSpell(uint spellId) { _lastExtraAttackSpell = spellId; }
+
+        public uint GetLastExtraAttackSpell() { return _lastExtraAttackSpell; }
+
+        public void SetLastDamagedTargetGuid(ObjectGuid guid) { _lastDamagedTargetGuid = guid; }
+
+        ObjectGuid GetLastDamagedTargetGuid() { return _lastDamagedTargetGuid; }
+
         public Unit GetVictim()
         {
             return attacking;
@@ -481,7 +504,10 @@ namespace Game.Entities
 
         public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
         {
-            if (HasUnitState(UnitState.CannotAutoattack) || HasUnitFlag(UnitFlags.Pacified))
+            if (HasUnitFlag(UnitFlags.Pacified))
+                return;
+
+            if (HasUnitState(UnitState.CannotAutoattack) && !extra)
                 return;
 
             if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
@@ -499,6 +525,9 @@ namespace Game.Entities
             // ignore ranged case
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;
+
+            if (!extra && _lastExtraAttackSpell != 0)
+                _lastExtraAttackSpell = 0;
 
             if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.Possessed) && !HasUnitFlag2(UnitFlags2.CannotTurn))
                 SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
@@ -543,6 +572,8 @@ namespace Game.Entities
                     // Send log damage message to client
                     DealDamageMods(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
                     SendAttackStateUpdate(damageInfo);
+
+                    _lastDamagedTargetGuid = victim.GetGUID();
 
                     DealMeleeDamage(damageInfo, true);
 
@@ -810,7 +841,7 @@ namespace Game.Entities
                     }
                 }
             }
-            
+
             // Proc auras on death - must be before aura/combat remove
             ProcSkillsAndAuras(victim, victim, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.Death), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 

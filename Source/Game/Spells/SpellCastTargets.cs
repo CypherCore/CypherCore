@@ -114,28 +114,6 @@ namespace Game.Spells
                 data.Name = m_strTarget;
         }
 
-        public ObjectGuid GetOrigUnitTargetGUID()
-        {
-            switch (m_origObjectTargetGUID.GetHigh())
-            {
-                case HighGuid.Player:
-                case HighGuid.Vehicle:
-                case HighGuid.Creature:
-                case HighGuid.Pet:
-                    return m_origObjectTargetGUID;
-                default:
-                    return ObjectGuid.Empty;
-            }
-        }
-
-        public void SetOrigUnitTarget(Unit target)
-        {
-            if (!target)
-                return;
-
-            m_origObjectTargetGUID = target.GetGUID();
-        }
-
         public ObjectGuid GetUnitTargetGUID()
         {
             if (m_objectTargetGUID.IsUnit())
@@ -420,7 +398,6 @@ namespace Game.Spells
         Item m_itemTarget;
 
         // object GUID/etc, can be used always
-        ObjectGuid m_origObjectTargetGUID;
         ObjectGuid m_objectTargetGUID;
         ObjectGuid m_itemTargetGUID;
         uint m_itemTargetEntry;

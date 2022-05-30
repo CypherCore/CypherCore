@@ -69,7 +69,10 @@ namespace Game.Entities
         public bool m_canDualWield;
         public int BaseSpellCritChance { get; set; }
         public uint RegenTimer { get; set; }
-        public uint ExtraAttacks { get; set; }
+
+        uint _lastExtraAttackSpell;
+        Dictionary<ObjectGuid, uint> extraAttacksTargets = new();
+        ObjectGuid _lastDamagedTargetGuid;
 
         //Charm
         public List<Unit> m_Controlled = new();

@@ -3487,10 +3487,7 @@ namespace Game.Spells
             if (!unitTarget || !unitTarget.IsAlive())
                 return;
 
-            if (unitTarget.ExtraAttacks != 0)
-                return;
-
-            unitTarget.ExtraAttacks = (uint)damage;
+            unitTarget.AddExtraAttacks((uint)damage);
 
             ExecuteLogEffectExtraAttacks(effectInfo.Effect, unitTarget, (uint)damage);
         }

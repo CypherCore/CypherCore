@@ -147,6 +147,21 @@ namespace Game.Entities
 
             m_combatManager.Update(diff);
 
+            _lastDamagedTargetGuid = ObjectGuid.Empty;
+            if (_lastExtraAttackSpell != 0)
+            {
+                while (!extraAttacksTargets.Empty())
+                {
+                    var (targetGuid, count) = extraAttacksTargets.FirstOrDefault();
+                    extraAttacksTargets.Remove(targetGuid);
+
+                    Unit victim = Global.ObjAccessor.GetUnit(this, targetGuid);
+                    if (victim != null)
+                        HandleProcExtraAttackFor(victim, count);
+                }
+                _lastExtraAttackSpell = 0;
+            }
+
             uint att;
             // not implemented before 3.0.2
             if ((att = GetAttackTimer(WeaponAttackType.BaseAttack)) != 0)

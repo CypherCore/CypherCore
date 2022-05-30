@@ -140,7 +140,7 @@ namespace Game.Spells
         void InitExplicitTargets(SpellCastTargets targets)
         {
             m_targets = targets;
-            m_targets.SetOrigUnitTarget(m_targets.GetUnitTarget());
+
             // this function tries to correct spell explicit targets for spell
             // client doesn't send explicit targets correctly sometimes - we need to fix such spells serverside
             // this also makes sure that we correctly send explicit targets to client (removes redundant data)
@@ -3132,14 +3132,8 @@ namespace Game.Spells
                 if (m_comboPointGain != 0)
                     unitCaster.AddComboPoints(m_comboPointGain);
 
-                if (unitCaster.ExtraAttacks != 0 && m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                {
-                    Unit victim = Global.ObjAccessor.GetUnit(unitCaster, m_targets.GetOrigUnitTargetGUID());
-                    if (victim)
-                        unitCaster.HandleProcExtraAttackFor(victim);
-                    else
-                        unitCaster.ExtraAttacks = 0;
-                }
+                if (m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                    unitCaster.SetLastExtraAttackSpell(m_spellInfo.Id);
             }
 
             // Handle procs on finish
@@ -8337,6 +8331,8 @@ namespace Game.Spells
                     }
                     else
                     {
+                        caster.SetLastDamagedTargetGuid(spell.unitTarget.GetGUID());
+
                         // Add bonuses and fill damageInfo struct
                         caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit);
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);

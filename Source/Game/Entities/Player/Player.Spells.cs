@@ -3304,10 +3304,6 @@ namespace Game.Entities
                             continue;
                         }
 
-                        // not allow proc extra attack spell at extra attack
-                        if (ExtraAttacks != 0 && spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                            return;
-
                         float chance = spellInfo.ProcChance;
 
                         if (proto.SpellPPMRate != 0)

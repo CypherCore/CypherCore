@@ -645,8 +645,16 @@ namespace Game.Spells
                     uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
                     SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
                     if (triggeredSpellInfo != null)
-                        if (aurApp.GetTarget().ExtraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                            return false;
+                    {
+                        if (triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                        {
+                            uint lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
+
+                            // Patch 1.12.0(?) extra attack abilities can no longer chain proc themselves
+                            if (lastExtraAttackSpell == triggerSpellId)
+                                return false;
+                        }
+                    }
                     break;
                 }
                 case AuraType.ModSpellCritChance:
