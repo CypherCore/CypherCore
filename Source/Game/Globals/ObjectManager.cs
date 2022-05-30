@@ -2825,6 +2825,33 @@ namespace Game
                 cInfo.FlagsExtra &= CreatureFlagsExtra.DBAllowed;
             }
 
+            uint disallowedUnitFlags = (uint)(cInfo.UnitFlags & ~UnitFlags.Allowed);
+            if (disallowedUnitFlags != 0)
+            {
+                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
+                cInfo.UnitFlags &= UnitFlags.Allowed;
+            }
+
+            uint disallowedUnitFlags2 = (cInfo.UnitFlags2 & ~(uint)UnitFlags2.Allowed);
+            if (disallowedUnitFlags2 != 0)
+            {
+                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
+                cInfo.UnitFlags2 &= (uint)UnitFlags2.Allowed;
+            }
+
+            uint disallowedUnitFlags3 = (cInfo.UnitFlags3 & ~(uint)UnitFlags3.Allowed);
+            if (disallowedUnitFlags3 != 0)
+            {
+                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
+            }
+
+            if (cInfo.DynamicFlags != 0)
+            {
+                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
+                cInfo.DynamicFlags = 0;
+            }
+
             var levels = cInfo.GetMinMaxLevel();
             if (levels[0] < 1 || levels[0] > SharedConst.StrongMaxLevel)
             {
@@ -3570,6 +3597,33 @@ namespace Game
                         Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.Id, data.terrainSwapMap);
                         data.terrainSwapMap = -1;
                     }
+                }
+
+                uint disallowedUnitFlags = (uint)(cInfo.UnitFlags & ~UnitFlags.Allowed);
+                if (disallowedUnitFlags != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
+                    cInfo.UnitFlags &= UnitFlags.Allowed;
+                }
+
+                uint disallowedUnitFlags2 = (cInfo.UnitFlags2 & ~(uint)UnitFlags2.Allowed);
+                if (disallowedUnitFlags2 != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
+                    cInfo.UnitFlags2 &= (uint)UnitFlags2.Allowed;
+                }
+
+                uint disallowedUnitFlags3 = (cInfo.UnitFlags3 & ~(uint)UnitFlags3.Allowed);
+                if (disallowedUnitFlags3 != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                    cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
+                }
+
+                if (cInfo.DynamicFlags != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
+                    cInfo.DynamicFlags = 0;
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))

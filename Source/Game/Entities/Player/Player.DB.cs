@@ -3094,7 +3094,7 @@ namespace Game.Entities
             if (m_deathExpireTime > now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep)
                 m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - 1;
 
-            RemoveUnitFlag2(UnitFlags2.ForceMove);
+            RemoveUnitFlag2(UnitFlags2.ForceMovement);
 
             // make sure the unit is considered out of combat for proper loading
             ClearInCombat();

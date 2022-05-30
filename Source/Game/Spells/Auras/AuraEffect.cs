@@ -2273,13 +2273,13 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                target.AddUnitFlag2(UnitFlags2.ForceMove);
+                target.AddUnitFlag2(UnitFlags2.ForceMovement);
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-                target.RemoveUnitFlag2(UnitFlags2.ForceMove);
+                target.RemoveUnitFlag2(UnitFlags2.ForceMovement);
             }
         }
 

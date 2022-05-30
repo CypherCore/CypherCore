@@ -79,7 +79,17 @@ namespace Framework.Constants
         Unk28 = 0x10000000,
         PreventEmotesFromChatText = 0x20000000, // Prevent automatically playing emotes from parsing chat text, for example "lol" in /say, ending message with ? or !, or using /yell
         Sheathe = 0x40000000,
-        Immune = 0x80000000
+        Immune = 0x80000000,
+
+        Disallowed = (ServerControlled | NonAttackable | RemoveClientControl |
+                                   PlayerControlled | Rename | Preparation | /* UNIT_FLAG_UNK_6 | */
+                                   NotAttackable1 | Looting | PetInCombat | PvpEnabling |
+                                   Silenced | NonAttackable2 | Pacified | Stunned |
+                                   InCombat | OnTaxi | Disarmed | Confused | Fleeing |
+                                   Possessed | Skinnable | Mount | Unk28 |
+                                   PreventEmotesFromChatText | Sheathe | Immune),
+
+        Allowed = (0xFFFFFFFF & ~Disallowed)
     }
 
     public enum UnitFlags2 : uint
@@ -90,7 +100,7 @@ namespace Framework.Constants
         ComprehendLang = 0x08,
         MirrorImage = 0x10,
         DontFadeIn = 0x20,
-        ForceMove = 0x40,
+        ForceMovement = 0x40,
         DisarmOffhand = 0x80,
         DisablePredStats = 0x100,
         AllowChangingTalents = 0x200,
@@ -103,6 +113,7 @@ namespace Framework.Constants
         Unk2 = 0x10000,
         PlayDeathAnim = 0x20000,
         AllowCheatSpells = 0x40000,
+        SuppressHighlightWhenTargetedOrMousedOver = 0x00080000,
         TreatAsRaidUnitForHelpfulSpells = 0x100000,
         LargeAoi = 0x00200000,
         GiganticAoi = 0x400000,
@@ -112,12 +123,29 @@ namespace Framework.Constants
         UntargetableByClient = 0x4000000,
         AttackerIgnoresMinimumRanges = 0x8000000,
         UninteractibleIfHostile = 0x10000000,
+        Unsued11 = 0x20000000,
         InfiniteAoi = 0x40000000,
+        Unused13 = 0x80000000,
+
+        Disallowed = (FeignDeath | IgnoreReputation | ComprehendLang |
+            MirrorImage | ForceMovement | DisarmOffhand |
+            DisablePredStats | AllowChangingTalents | DisarmRanged |
+            /* UNIT_FLAG2_REGENERATE_POWER | */ RestrictPartyInteraction |
+            PreventSpellClick | InteractWhileHostile | /* UNIT_FLAG2_CANNOT_TURN | */
+            /* UNIT_FLAG2_PLAY_DEATH_ANIM | */ AllowCheatSpells | SuppressHighlightWhenTargetedOrMousedOver |
+            TreatAsRaidUnitForHelpfulSpells | LargeAoi | GiganticAoi | NoActions |
+            AiWillOnlySwimIfTargetSwims | DontGenerateCombatLogWhenEngagedWithNpcs | UntargetableByClient | AttackerIgnoresMinimumRanges |
+            UninteractibleIfHostile | Unsued11 | InfiniteAoi | Unused13),
+
+        Allowed = (0xFFFFFFFF & ~Disallowed)
     }
 
     public enum UnitFlags3 : uint
     {
         Unk1 = 0x01,
+
+        Disallowed = 0xFFFFFFFF,
+        Allowed = (0xFFFFFFFF & ~Disallowed)
     }
 
     public enum NPCFlags : uint
