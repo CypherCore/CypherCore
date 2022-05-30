@@ -2503,7 +2503,7 @@ namespace Game.Spells
                     TriggerGlobalCooldown();
 
                 // Call CreatureAI hook OnSpellStart
-                Creature caster = m_originalCaster.ToCreature();
+                Creature caster = m_caster.ToCreature();
                 if (caster != null)
                     if (caster.IsAIEnabled())
                         caster.GetAI().OnSpellStart(GetSpellInfo());
