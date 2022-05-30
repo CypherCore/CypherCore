@@ -1342,6 +1342,17 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                         return false;
                 }
+
+                // Additional check for deprecated
+                switch (e.GetEventType())
+                {
+                    // Deprecated
+                    case SmartEvents.PhaseChange:
+                        Log.outWarn(LogFilter.Sql, "SmartAIMgr: Deprecated event_type: {e}, it might be removed in the future, loaded for now.");
+                        break;
+                    default:
+                        break;
+                }
             }
 
             if (!CheckUnusedEventParams(e))
