@@ -739,7 +739,6 @@ namespace Game.AI
                 SmartActions.CloseGossip => 0,
                 SmartActions.TriggerTimedEvent => Marshal.SizeOf(typeof(SmartAction.TimeEvent)),
                 SmartActions.RemoveTimedEvent => Marshal.SizeOf(typeof(SmartAction.TimeEvent)),
-                SmartActions.AddAura => Marshal.SizeOf(typeof(SmartAction.AddAura)),
                 SmartActions.CallScriptReset => 0,
                 SmartActions.SetRangedMovement => Marshal.SizeOf(typeof(SmartAction.SetRangedMovement)),
                 SmartActions.CallTimedActionlist => Marshal.SizeOf(typeof(SmartAction.TimedActionList)),
@@ -764,9 +763,6 @@ namespace Game.AI
                 SmartActions.SetHomePos => 0,
                 SmartActions.SetHealthRegen => Marshal.SizeOf(typeof(SmartAction.SetHealthRegen)),
                 SmartActions.SetRoot => Marshal.SizeOf(typeof(SmartAction.SetRoot)),
-                SmartActions.SetGoFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
-                SmartActions.AddGoFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
-                SmartActions.RemoveGoFlag => Marshal.SizeOf(typeof(SmartAction.Flag)),
                 SmartActions.SummonCreatureGroup => Marshal.SizeOf(typeof(SmartAction.CreatureGroup)),
                 SmartActions.SetPower => Marshal.SizeOf(typeof(SmartAction.Power)),
                 SmartActions.AddPower => Marshal.SizeOf(typeof(SmartAction.Power)),
@@ -1468,10 +1464,6 @@ namespace Game.AI
                     if (!IsSpellValid(e, e.Action.cast.spell))
                         return false;
                     break;
-                case SmartActions.AddAura:
-                    if (!IsSpellValid(e, e.Action.addAura.spell))
-                        return false;
-                    break;
                 case SmartActions.CallAreaexploredoreventhappens:
                 case SmartActions.CallGroupeventhappens:
                     Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
@@ -2065,9 +2057,6 @@ namespace Game.AI
                 case SmartActions.GoSetGoState:
                 case SmartActions.SendTargetToTarget:
                 case SmartActions.SetHomePos:
-                case SmartActions.SetGoFlag:
-                case SmartActions.AddGoFlag:
-                case SmartActions.RemoveGoFlag:
                 case SmartActions.SummonCreatureGroup:
                 case SmartActions.MoveOffset:
                 case SmartActions.SetCorpseDelay:
@@ -2090,12 +2079,16 @@ namespace Game.AI
                 case SmartActions.RemoveUnitFlag:
                 case SmartActions.InstallAITemplate:
                 case SmartActions.SetSwim:
+                case SmartActions.AddAura:
                 case SmartActions.OverrideScriptBaseObject:
                 case SmartActions.ResetScriptBaseObject:
                 case SmartActions.SendGoCustomAnim:
                 case SmartActions.SetDynamicFlag:
                 case SmartActions.AddDynamicFlag:
                 case SmartActions.RemoveDynamicFlag:
+                case SmartActions.SetGoFlag:
+                case SmartActions.AddGoFlag:
+                case SmartActions.RemoveGoFlag:
                 case SmartActions.SetCanFly:
                 case SmartActions.RemoveAurasByType:
                 case SmartActions.SetSightDist:
@@ -2106,18 +2099,6 @@ namespace Game.AI
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
                     return false;
-            }
-
-            // Additional check for deprecated
-            switch (e.GetActionType())
-            {
-                // Deprecated
-                case SmartActions.AddAura:
-                case SmartActions.SetGoFlag:
-                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
-                    break;
-                default:
-                    break;
             }
 
             if (!CheckUnusedActionParams(e))
@@ -2883,9 +2864,6 @@ namespace Game.AI
         public IncEventPhase incEventPhase;
 
         [FieldOffset(4)]
-        public AddAura addAura;
-
-        [FieldOffset(4)]
         public CastedCreatureOrGO castedCreatureOrGO;
 
         [FieldOffset(4)]
@@ -3245,10 +3223,6 @@ namespace Game.AI
         {
             public uint inc;
             public uint dec;
-        }
-        public struct AddAura
-        {
-            public uint spell;
         }
         public struct CastedCreatureOrGO
         {
