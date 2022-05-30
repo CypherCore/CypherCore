@@ -1084,9 +1084,6 @@ namespace Game.Entities
                 pos = vehicle.GetBase().GetPosition();
                 pos.SetOrientation(GetOrientation());
 
-                // To-do: snap this hook out of existance
-                Global.ScriptMgr.ModifyVehiclePassengerExitPos(this, vehicle, pos);
-
                 // Change exit position based on seat entry addon data
                 if (seatAddon != null)
                 {

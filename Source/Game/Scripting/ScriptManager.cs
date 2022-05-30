@@ -1118,11 +1118,6 @@ namespace Game.Scripting
             ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             damage = dmg;
         }
-        public void ModifyVehiclePassengerExitPos(Unit passenger, Vehicle vehicle, Position pos)
-        {
-            ForEach<UnitScript>(p => p.ModifyVehiclePassengerExitPos(passenger, vehicle, pos));
-            ForEach<CreatureScript>(p => p.ModifyVehiclePassengerExitPos(passenger, vehicle, pos));
-        }
 
         // AreaTriggerEntityScript
         public AreaTriggerAI GetAreaTriggerAI(AreaTrigger areaTrigger)
