@@ -649,7 +649,6 @@ namespace Game.AI
             int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
             int paramsCount = paramsStructSize / sizeof(uint);
 
-            bool valid = true;
             for (int index = paramsCount; index < rawCount; index++)
             {
                 uint value = 0;
@@ -673,13 +672,10 @@ namespace Game.AI
                 }
 
                 if (value != 0)
-                {
-                    Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has unused event_param{index + 1} with value {value}, it must be 0, skipped.");
-                    valid = false;
-                }
+                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused event_param{index + 1} with value {value}, it should be 0.");
             }
 
-            return valid;
+            return true;
         }
 
         static bool CheckUnusedActionParams(SmartScriptHolder e)
@@ -840,7 +836,6 @@ namespace Game.AI
             int rawCount = Marshal.SizeOf(typeof(SmartAction.Raw)) / sizeof(uint);
             int paramsCount = paramsStructSize / sizeof(uint);
 
-            bool valid = true;
             for (int index = paramsCount; index < rawCount; index++)
             {
                 uint value = 0;
@@ -867,13 +862,10 @@ namespace Game.AI
                 }
 
                 if (value != 0)
-                {
-                    Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has unused action_param{index + 1} with value {value}, it must be 0, skipped.");
-                    valid = false;
-                }
+                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused action_param{index + 1} with value {value}, it should be 0.");
             }
 
-            return valid;
+            return true;
         }
 
         static bool CheckUnusedTargetParams(SmartScriptHolder e)
@@ -917,7 +909,6 @@ namespace Game.AI
             int rawCount = Marshal.SizeOf(typeof(SmartTarget.Raw)) / sizeof(uint);
             int paramsCount = paramsStructSize / sizeof(uint);
 
-            bool valid = true;
             for (int index = paramsCount; index < rawCount; index++)
             {
                 uint value = 0;
@@ -936,11 +927,9 @@ namespace Game.AI
                         value = e.Target.raw.param4;
                         break;
                 }
+
                 if (value != 0)
-                {
-                    Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has unused target_param{index + 1} with value {value}, it must be 0, skipped.");
-                    valid = false;
-                }
+                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused target_param{index + 1} with value {value}, it must be 0, skipped.");
             }
 
             return valid;
