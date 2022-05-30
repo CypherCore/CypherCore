@@ -4097,6 +4097,22 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 37751 - Submerged
+    class spell_gen_submerged : SpellScript
+    {
+        void HandleScript(uint eff)
+        {
+            Creature target = GetHitCreature();
+            if (target != null)
+                target.SetStandState(UnitStandStateType.Submerged);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {

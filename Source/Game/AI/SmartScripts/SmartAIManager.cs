@@ -932,7 +932,7 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused target_param{index + 1} with value {value}, it must be 0, skipped.");
             }
 
-            return valid;
+            return true;
         }
         
         bool IsEventValid(SmartScriptHolder e)

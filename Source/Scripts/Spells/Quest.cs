@@ -762,39 +762,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    // http://www.wowhead.com/quest=12937 Relief for the Fallen
-    [Script] // 55804 Healing Finished
-    class spell_q12937_relief_for_the_fallen : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        public override bool Validate(SpellInfo spellEntry)
-        {
-            return ValidateSpellInfo(SpellIds.TriggerAidOfTheEarthen);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Player caster = GetCaster().ToPlayer();
-
-            Creature target = GetHitCreature();
-            if (target)
-            {
-                caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true);
-                caster.KilledMonsterCredit(CreatureIds.FallenEarthenDefender);
-                target.DespawnOrUnsummon();
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
     [Script] // 48917 - Who Are They: Cast from Questgiver
     class spell_q10041_q10040_who_are_they : SpellScript
     {
@@ -817,31 +784,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // 8593 Symbol of life dummy
-    class spell_symbol_of_life_dummy : SpellScript
-    {
-        void HandleDummy(uint effIndex)
-        {
-            Creature target = GetHitCreature();
-            if (target)
-            {
-                if (target.HasAura(SpellIds.PermanentFeignDeath))
-                {
-                    target.RemoveAurasDueToSpell(SpellIds.PermanentFeignDeath);
-                    target.SetDynamicFlags(0);
-                    target.SetUnitFlags2(0);
-                    target.SetHealth(target.GetMaxHealth() / 2);
-                    target.SetPower(PowerType.Mana, (int)(target.GetMaxPower(PowerType.Mana) * 0.75f));
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 

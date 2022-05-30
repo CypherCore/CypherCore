@@ -693,7 +693,7 @@ namespace Game.Chat.Commands
                     uint delay = result.Read<uint>(2);
                     uint flag = result.Read<uint>(3);
                     uint ev_id = result.Read<uint>(4);
-                    uint ev_chance = result.Read<uint>(5);
+                    uint ev_chance = result.Read<ushort>(5);
 
                     handler.SendSysMessage("|cff00ff00Show info: for current point: |r|cff00ffff{0}|r|cff00ff00, Path ID: |r|cff00ffff{1}|r", point, pathid);
                     handler.SendSysMessage("|cff00ff00Show info: delay: |r|cff00ffff{0}|r", delay);
