@@ -1490,6 +1490,9 @@ namespace Game.Entities
 
             switch (action)
             {
+                case GameObjectActions.None:
+                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action type NONE in effect {effectIndex}");
+                    break;
                 case GameObjectActions.AnimateCustom0:
                 case GameObjectActions.AnimateCustom1:
                 case GameObjectActions.AnimateCustom2:
@@ -1497,6 +1500,15 @@ namespace Game.Entities
                     SendCustomAnim((uint)(action - GameObjectActions.AnimateCustom0));
                     break;
                 case GameObjectActions.Disturb: // What's the difference with Open?
+                    if (unitCaster)
+                        Use(unitCaster);
+                    break;
+                case GameObjectActions.Unlock:
+                    RemoveFlag(GameObjectFlags.Locked);
+                    break;
+                case GameObjectActions.Lock:
+                    AddFlag(GameObjectFlags.Locked);
+                    break;
                 case GameObjectActions.Open:
                     if (unitCaster)
                         Use(unitCaster);
@@ -1504,16 +1516,23 @@ namespace Game.Entities
                 case GameObjectActions.OpenAndUnlock:
                     if (unitCaster)
                         UseDoorOrButton(0, false, unitCaster);
-                    goto case GameObjectActions.Unlock;
-                case GameObjectActions.Unlock:
                     RemoveFlag(GameObjectFlags.Locked);
                     break;
-                case GameObjectActions.Lock:
-                    AddFlag(GameObjectFlags.Locked);
-                    break;
                 case GameObjectActions.Close:
+                    ResetDoorOrButton();
+                    break;
+                case GameObjectActions.ToggleOpen:
+                    // No use cases, implementation unknown
+                    break;
+                case GameObjectActions.Destroy:
+                    if (unitCaster)
+                        UseDoorOrButton(0, true, unitCaster);
+                    break;
                 case GameObjectActions.Rebuild:
                     ResetDoorOrButton();
+                    break;
+                case GameObjectActions.Creation:
+                    // No use cases, implementation unknown
                     break;
                 case GameObjectActions.Despawn:
                     DespawnOrUnsummon();
@@ -1527,10 +1546,6 @@ namespace Game.Entities
                 case GameObjectActions.CloseAndLock:
                     ResetDoorOrButton();
                     AddFlag(GameObjectFlags.Locked);
-                    break;
-                case GameObjectActions.Destroy:
-                    if (unitCaster)
-                        UseDoorOrButton(0, true, unitCaster);
                     break;
                 case GameObjectActions.UseArtKit0:
                 case GameObjectActions.UseArtKit1:
@@ -1600,9 +1615,6 @@ namespace Game.Entities
                     break;
                 case GameObjectActions.StopSpellVisual:
                     SetSpellVisualId(0);
-                    break;
-                case GameObjectActions.None:
-                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action type NONE in effect {effectIndex}");
                     break;
                 default:
                     Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");

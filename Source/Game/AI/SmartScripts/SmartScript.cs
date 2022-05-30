@@ -2409,7 +2409,7 @@ namespace Game.AI
                     {
                         GameObject targetGo = target.ToGameObject();
                         if (targetGo != null)
-                            targetGo.ActivateObject((GameObjectActions)e.Action.activateGameObject.gameObjectAction, (int)e.Action.activateGameObject.param);
+                            targetGo.ActivateObject((GameObjectActions)e.Action.activateGameObject.gameObjectAction, (int)e.Action.activateGameObject.param, GetBaseObject());
                     }
                     break;
                 }
