@@ -36,7 +36,6 @@ namespace Game.Entities
             _vehicleInfo = vehInfo;
             _creatureEntry = creatureEntry;
             _status = Status.None;
-            _lastShootPos = new Position();
 
             for (uint i = 0; i < SharedConst.MaxVehicleSeats; ++i)
             {
@@ -584,15 +583,11 @@ namespace Game.Entities
         public VehicleRecord GetVehicleInfo() { return _vehicleInfo; }
         public uint GetCreatureEntry() { return _creatureEntry; }
 
-        public void SetLastShootPos(Position pos) { _lastShootPos.Relocate(pos); }
-        Position GetLastShootPos() { return _lastShootPos; }
-
         Unit _me;
         VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
 
         uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
         Status _status;                                     //< Internal variable for sanity checks
-        Position _lastShootPos;
 
         List<VehicleJoinEvent> _pendingJoinEvents = new();
         public Dictionary<sbyte, VehicleSeat> Seats = new();
