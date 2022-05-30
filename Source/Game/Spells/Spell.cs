@@ -9013,8 +9013,11 @@ namespace Game.Spells
                         Targets = new();
                         Targets.SetGOTarget(goTarget);
                     }
+                    // error when targeting anything other than units and gameobjects
                 }
             }
+            else
+                Targets = new(); // nullptr is allowed
         }
 
         public CastSpellTargetArg(Item itemTarget)
