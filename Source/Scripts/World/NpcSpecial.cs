@@ -143,9 +143,9 @@ namespace Scripts.World.NpcSpecial
         public const uint GuardsMark = 38067;
 
         //Dancingflames
-        public const uint Brazier = 45423;
-        public const uint Seduction = 47057;
-        public const uint FieryAura = 45427;
+        public const uint SummonBrazier = 45423;
+        public const uint BrazierDance = 45427;
+        public const uint FierySeduction = 47057;
 
         //RibbonPole
         public const uint RibbonDanceCosmetic = 29726;
@@ -609,73 +609,53 @@ namespace Scripts.World.NpcSpecial
     [Script]
     class npc_dancing_flames : ScriptedAI
     {
-        public npc_dancing_flames(Creature creature) : base(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            Active = true;
-            CanIteract = 3500;
-        }
-
-        bool Active;
-        uint CanIteract;
+        public npc_dancing_flames(Creature creature) : base(creature) { }
 
         public override void Reset()
         {
-            Initialize();
-            DoCast(me, SpellIds.Brazier, new CastSpellExtraArgs(true));
-            DoCast(me, SpellIds.FieryAura, new CastSpellExtraArgs(false));
+            DoCastSelf(SpellIds.SummonBrazier, new CastSpellExtraArgs(true));
+            DoCastSelf(SpellIds.BrazierDance, new CastSpellExtraArgs(false));
+            me.SetEmoteState(Emote.StateDance);
             float x, y, z;
             me.GetPosition(out x, out y, out z);
-            me.Relocate(x, y, z + 0.94f);
-            me.SetDisableGravity(true);
-            me.HandleEmoteCommand(Emote.OneshotDance);
+            me.Relocate(x, y, z + 1.05f);
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (!Active)
-            {
-                if (CanIteract <= diff)
-                {
-                    Active = true;
-                    CanIteract = 3500;
-                    me.HandleEmoteCommand(Emote.OneshotDance);
-                }
-                else
-                    CanIteract -= diff;
-            }
+            _scheduler.Update(diff);
         }
-
-        public override void JustEngagedWith(Unit who) { }
 
         public override void ReceiveEmote(Player player, TextEmotes emote)
         {
             if (me.IsWithinLOS(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()) && me.IsWithinDistInMap(player, 30.0f))
             {
-                me.SetFacingToObject(player);
-                Active = false;
+                // She responds to emotes not instantly but ~1500ms later
+                // If you first /bow, then /wave before dancing flames bow back, it doesnt bow at all and only does wave
+                // If you're performing emotes too fast, she will not respond to them
+                // Means she just replaces currently scheduled event with new after receiving new emote
+                _scheduler.CancelAll();
 
                 switch (emote)
                 {
                     case TextEmotes.Kiss:
-                        me.HandleEmoteCommand(Emote.OneshotShy);
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotShy));
                         break;
                     case TextEmotes.Wave:
-                        me.HandleEmoteCommand(Emote.OneshotWave);
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotWave));
                         break;
                     case TextEmotes.Bow:
-                        me.HandleEmoteCommand(Emote.OneshotBow);
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotBow));
                         break;
                     case TextEmotes.Joke:
-                        me.HandleEmoteCommand(Emote.OneshotLaugh);
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1500), context => me.HandleEmoteCommand(Emote.OneshotLaugh));
                         break;
                     case TextEmotes.Dance:
-                        if (!player.HasAura(SpellIds.Seduction))
-                            DoCast(player, SpellIds.Seduction, new CastSpellExtraArgs(true));
+                        if (!player.HasAura(SpellIds.FierySeduction))
+                        {
+                            DoCast(player, SpellIds.FierySeduction, new CastSpellExtraArgs(true));
+                            me.SetFacingTo(me.GetAbsoluteAngle(player));
+                        }
                         break;
                 }
             }
@@ -1797,7 +1777,6 @@ namespace Scripts.World.NpcSpecial
 
     struct TrainWrecker
     {
-        public const int ActionWrecked = 1;
         public const int EventDoJump = 1;
         public const int EventDoFacing = 2;
         public const int EventDoWreck = 3;
@@ -1885,7 +1864,6 @@ namespace Scripts.World.NpcSpecial
                             if (target)
                             {
                                 me.CastSpell(target, SpellIds.WreckTrain, false);
-                                target.GetAI().DoAction(TrainWrecker.ActionWrecked);
                                 _timer = 2 * Time.InMilliseconds;
                                 _nextAction = TrainWrecker.EventDoDance;
                             }
