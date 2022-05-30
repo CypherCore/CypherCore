@@ -1353,14 +1353,14 @@ namespace Scripts.World.NpcSpecial
             {
                 if (player == me.ToTempSummon().GetSummoner())
                 {
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
 
                     if (_showUnderground)
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+                        player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
 
                     player.SendGossipMenu(TextIds.Wormhole, me.GetGUID());
                 }
@@ -1417,12 +1417,12 @@ namespace Scripts.World.NpcSpecial
         {
             if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
             {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
                 player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
             }
             else // currently gaining XP
             {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                player.AddGossipItem(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                 player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
             }
             return true;

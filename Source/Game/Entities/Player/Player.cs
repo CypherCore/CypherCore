@@ -7875,7 +7875,7 @@ namespace Game.Entities
 
         //Helpers
         public void AddGossipItem(GossipOptionIcon icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
-        public void ADD_GOSSIP_ITEM_DB(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
+        public void AddGossipItem(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
         public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionIcon icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)

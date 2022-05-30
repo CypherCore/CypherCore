@@ -30,20 +30,8 @@ namespace Scripts.World.NpcInnkeeper
 
     struct Gossip
     {
-        public const string LocaleTrickOrTreat0 = "Trick or Treat!";
-        public const string LocaleTrickOrTreat2 = "Des bonbons ou des blagues!";
-        public const string LocaleTrickOrTreat3 = "Süßes oder Saures!";
-        public const string LocaleTrickOrTreat6 = "¡Truco o trato!";
-
-        public const string LocaleInnkeeper0 = "Make this inn my home.";
-        public const string LocaleInnkeeper2 = "Faites de cette auberge votre foyer.";
-        public const string LocaleInnkeeper3 = "Ich möchte dieses Gasthaus zu meinem Heimatort machen.";
-        public const string LocaleInnkeeper6 = "Fija tu hogar en esta taberna.";
-
-        public const string LocaleVendor0 = "I want to browse your goods.";
-        public const string LocaleVendor2 = "Je voudrais regarder vos articles.";
-        public const string LocaleVendor3 = "Ich sehe mich nur mal um.";
-        public const string LocaleVendor6 = "Quiero ver tus mercancías.";
+        public const uint MenuId = 9733;
+        public const uint MenuEventId = 342;
     }
 
     [Script]
@@ -54,70 +42,16 @@ namespace Scripts.World.NpcInnkeeper
         public override bool OnGossipHello(Player player)
         {
             if (Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) && !player.HasAura(SpellIds.TrickOrTreated))
-            {
-                string localizedEntry;
-                switch (player.GetSession().GetSessionDbcLocale())
-                {
-                    case Locale.frFR:
-                        localizedEntry = Gossip.LocaleTrickOrTreat2;
-                        break;
-                    case Locale.deDE:
-                        localizedEntry = Gossip.LocaleTrickOrTreat3;
-                        break;
-                    case Locale.esES:
-                        localizedEntry = Gossip.LocaleTrickOrTreat6;
-                        break;
-                    case Locale.enUS:
-                    default: 
-                        localizedEntry = Gossip.LocaleTrickOrTreat0;
-                        break;
-                }
-                player.AddGossipItem(GossipOptionIcon.None, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-            }
+                player.AddGossipItem(Gossip.MenuEventId, 0, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
             if (me.IsQuestGiver())
+                player.PrepareQuestMenu(me.GetGUID());
 
-                if (me.IsVendor())
-                {
-                    string localizedEntry;
-                    switch (player.GetSession().GetSessionDbcLocale())
-                    {
-                        case Locale.frFR: 
-                            localizedEntry = Gossip.LocaleVendor2;
-                            break;
-                        case Locale.deDE: 
-                            localizedEntry = Gossip.LocaleVendor3;
-                            break;
-                        case Locale.esES: 
-                            localizedEntry = Gossip.LocaleVendor6;
-                            break;
-                        case Locale.enUS:
-                        default: localizedEntry = Gossip.LocaleVendor0;
-                            break;
-                    }
-                    player.AddGossipItem(GossipOptionIcon.Vendor, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrade);
-                }
+            if (me.IsVendor())
+                player.AddGossipItem(Gossip.MenuId, 2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrade);
 
             if (me.IsInnkeeper())
-            {
-                string localizedEntry;
-                switch (player.GetSession().GetSessionDbcLocale())
-                {
-                    case Locale.frFR: 
-                        localizedEntry = Gossip.LocaleInnkeeper2;
-                        break;
-                    case Locale.deDE: 
-                        localizedEntry = Gossip.LocaleInnkeeper3;
-                        break;
-                    case Locale.esES:
-                        localizedEntry = Gossip.LocaleInnkeeper6;
-                        break;
-                    case Locale.enUS:
-                    default: localizedEntry = Gossip.LocaleInnkeeper0;
-                        break;
-                }
-                player.AddGossipItem(GossipOptionIcon.Binder, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInn);
-            }
+                player.AddGossipItem(Gossip.MenuId, 1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInn);
 
             player.TalkedToCreature(me.GetEntry(), me.GetGUID());
             player.SendGossipMenu(player.GetGossipTextId(me), me.GetGUID());
