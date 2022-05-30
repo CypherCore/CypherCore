@@ -296,7 +296,7 @@ namespace Framework.Constants
         SummonGo = 50,     // Gameobjectid, Despawntime In Ms,
         KillUnit = 51,     //
         ActivateTaxi = 52,     // Taxiid
-        WpStart = 53,     // Run/Walk, Pathid, Canrepeat, Quest, Despawntime, Reactstate
+        WpStart = 53,     // Run/Walk, Pathid, Canrepeat, Quest, Despawntime
         WpPause = 54,     // Time
         WpStop = 55,     // Despawntime, Quest, Fail?
         AddItem = 56,     // Itemid, Count

@@ -1332,9 +1332,6 @@ namespace Game.AI
                         }
                     }
 
-                    // Extra validation to ignore invalid values stored in the db, see comment at TEMPORARY_EXTRA_VALUE_FOR_DB_CLEANUP definition
-                    if ((ReactStates)e.Action.wpStart.reactState <= ReactStates.Aggressive)
-                        _me.SetReactState((ReactStates)e.Action.wpStart.reactState);
                     _me.GetAI<SmartAI>().StartPath(run, entry, repeat, unit);
 
                     uint quest = e.Action.wpStart.quest;

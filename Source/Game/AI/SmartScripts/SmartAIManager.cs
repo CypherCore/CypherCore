@@ -1673,16 +1673,6 @@ namespace Game.AI
                     if (e.Action.wpStart.quest != 0 && !IsQuestValid(e, e.Action.wpStart.quest))
                         return false;
 
-                    // Allow "invalid" value 3 for a while to allow cleanup the values stored in the db for SMART_ACTION_WP_START.
-                    // Remember to remove this once the clean is complete.
-                    int TEMPORARY_EXTRA_VALUE_FOR_DB_CLEANUP = 1;
-
-                    if (e.Action.wpStart.reactState > (uint)(ReactStates.Aggressive + TEMPORARY_EXTRA_VALUE_FOR_DB_CLEANUP))
-                    {
-                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid React State {e.Action.wpStart.reactState}, skipped.");
-                        return false;
-                    }
-
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.wpStart.run);
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.wpStart.repeat);
                     break;
@@ -3464,7 +3454,7 @@ namespace Game.AI
             public uint repeat;
             public uint quest;
             public uint despawnTime;
-            public uint reactState;
+            //public uint reactState; DO NOT REUSE
         }
         public struct WpPause
         {
