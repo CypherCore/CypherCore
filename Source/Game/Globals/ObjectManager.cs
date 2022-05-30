@@ -7771,6 +7771,8 @@ namespace Game
                         Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {prevQuestId}, but no such quest");
                     else if (prevQuestItr.BreadcrumbForQuestId != 0)
                         Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {prevQuestId}");
+                    else if (qinfo.PrevQuestId > 0)
+                        qinfo.DependentPreviousQuests.Add(prevQuestId);
                 }
 
                 if (qinfo.NextQuestId != 0)
