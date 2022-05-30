@@ -1362,6 +1362,19 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                         return false;
                 }
+
+                // Additional check for deprecated
+                switch (e.GetEventType())
+                {
+                    // Deprecated
+                    case SmartEvents.FriendlyHealth:
+                    case SmartEvents.TargetHealthPct:
+                    case SmartEvents.IsBehindTarget:
+                        Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated event_type({e.GetEventType()}), {e}, it might be removed in the future, loaded for now.");
+                        break;
+                    default:
+                        break;
+                }
             }
 
             if (!CheckUnusedEventParams(e))
@@ -2148,6 +2161,11 @@ namespace Game.AI
                     }
                     break;
                 }
+                // No longer supported
+                case SmartActions.InstallAITemplate:
+                case SmartActions.SetDynamicFlag:
+                    Log.outError(LogFilter.Sql, $"SmartAIMgr: No longer supported action_type: {e} Skipped.");
+                    return false;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
                     return false;

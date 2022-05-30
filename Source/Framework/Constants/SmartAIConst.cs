@@ -301,7 +301,7 @@ namespace Framework.Constants
         WpStop = 55,     // Despawntime, Quest, Fail?
         AddItem = 56,     // Itemid, Count
         RemoveItem = 57,     // Itemid, Count
-        //Unused58 = 58,     // do not reuse
+        InstallAITemplate = 58,     // do not use
         SetRun = 59,     // 0/1
         SetDisableGravity = 60,     // 0/1
         SetSwim = 61,     // 0/1
@@ -337,7 +337,7 @@ namespace Framework.Constants
         RemoveUnitFieldBytes1 = 91,     // Bytes, Target
         InterruptSpell = 92,
         SendGoCustomAnim = 93,     // Anim Id
-        //Unused94 = 94,     // do not reuse
+        SetDynamicFlag = 94,     // do not use
         AddDynamicFlag = 95,     // Flags
         RemoveDynamicFlag = 96,     // Flags
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
