@@ -274,6 +274,12 @@ namespace Game
             if (!GetPlayer().IsAlive() || !packet.Unit.IsCreatureOrVehicle())
                 return;
 
+            // interrupt cast
+            if (GetPlayer().IsNonMeleeSpellCast(false))
+                GetPlayer().InterruptNonMeleeSpells(false);
+
+            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
+
             List<Creature> corpses = new();
             AELootCreatureCheck check = new(_player, packet.Unit);
             CreatureListSearcher searcher = new(_player, corpses, check);
@@ -295,12 +301,6 @@ namespace Game
                     SendPacket(new AELootTargetsAck());
                 }
             }
-
-            // interrupt cast
-            if (GetPlayer().IsNonMeleeSpellCast(false))
-                GetPlayer().InterruptNonMeleeSpells(false);
-
-            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
         }
 
         [WorldPacketHandler(ClientOpcodes.LootRelease)]
