@@ -850,6 +850,45 @@ namespace Game.Entities
             }
         }
 
+        public ulong CalculateDurabilityRepairCost(float discount)
+        {
+            uint maxDurability = m_itemData.MaxDurability;
+            if (maxDurability == 0)
+                return 0;
+
+            uint curDurability = m_itemData.Durability;
+            Cypher.Assert(maxDurability >= curDurability);
+
+            uint lostDurability = maxDurability - curDurability;
+            if (lostDurability == 0)
+                return 0;
+
+            ItemTemplate itemTemplate = GetTemplate();
+
+            var durabilityCost = CliDB.DurabilityCostsStorage.LookupByKey(GetItemLevel(GetOwner()));
+            if (durabilityCost == null)
+                return 0;
+
+            uint durabilityQualityEntryId = ((uint)GetQuality() + 1) * 2;
+            var durabilityQualityEntry = CliDB.DurabilityQualityStorage.LookupByKey(durabilityQualityEntryId);
+            if (durabilityQualityEntry == null)
+                return 0;
+
+            uint dmultiplier = 0;
+            if (itemTemplate.GetClass() == ItemClass.Weapon)
+                dmultiplier = durabilityCost.WeaponSubClassCost[itemTemplate.GetSubClass()];
+            else if (itemTemplate.GetClass() == ItemClass.Armor)
+                dmultiplier = durabilityCost.ArmorSubClassCost[itemTemplate.GetSubClass()];
+
+            ulong cost = (ulong)Math.Round(lostDurability * dmultiplier * durabilityQualityEntry.Data * GetRepairCostMultiplier());
+            cost = (ulong)(cost * discount * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
+
+            if (cost == 0) // Fix for ITEM_QUALITY_ARTIFACT
+                cost = 1;
+
+            return cost;
+        }
+        
         bool HasEnchantRequiredSkill(Player player)
         {
             // Check all enchants for required skill

@@ -1758,6 +1758,15 @@ namespace Game.Guilds
             return m_members.ContainsKey(guid);
         }
 
+        public ulong GetMemberAvailableMoneyForRepairItems(ObjectGuid guid)
+        {
+            Member member = GetMember(guid);
+            if (member == null)
+                return 0;
+
+            return Math.Min(m_bankMoney, (ulong)_GetMemberRemainingMoney(member));
+        }
+        
         public void SwapItems(Player player, byte tabId, byte slotId, byte destTabId, byte destSlotId, uint splitedAmount)
         {
             if (tabId >= _GetPurchasedTabsSize() || slotId >= GuildConst.MaxBankSlots ||

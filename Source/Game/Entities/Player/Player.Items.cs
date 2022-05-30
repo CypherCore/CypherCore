@@ -385,102 +385,126 @@ namespace Game.Entities
             if (pItem != null)
                 DurabilityPointsLoss(pItem, 1);
         }
-        public uint DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
+        public void DurabilityRepairAll(bool takeCost, float discountMod, bool guildBank)
         {
-            uint TotalCost = 0;
+            // Collecting all items that can be repaired and repair costs
+            List<(Item item, ulong cost)> itemRepairCostStore = new();
+
             // equipped, backpack, bags itself
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
-                TotalCost += DurabilityRepair((ushort)((InventorySlots.Bag0 << 8) | i), cost, discountMod, guildBank);
-
-            // items in inventory bags
-            for (byte j = InventorySlots.BagStart; j < InventorySlots.BagEnd; j++)
-                for (byte i = 0; i < ItemConst.MaxBagSize; i++)
-                    TotalCost += DurabilityRepair((ushort)((j << 8) | i), cost, discountMod, guildBank);
-            return TotalCost;
-        }
-        public uint DurabilityRepair(ushort pos, bool cost, float discountMod, bool guildBank)
-        {
-            Item item = GetItemByPos(pos);
-
-            uint TotalCost = 0;
-            if (item == null)
-                return TotalCost;
-
-            uint maxDurability = item.m_itemData.MaxDurability;
-            if (maxDurability == 0)
-                return TotalCost;
-
-            uint curDurability = item.m_itemData.Durability;
-
-            if (cost)
             {
-                uint LostDurability = maxDurability - curDurability;
-                if (LostDurability > 0)
+                Item item = GetItemByPos((ushort)((InventorySlots.Bag0 << 8) | i));
+                if (item != null)
                 {
-                    ItemTemplate ditemProto = item.GetTemplate();
-
-                    DurabilityCostsRecord dcost = CliDB.DurabilityCostsStorage.LookupByKey(ditemProto.GetBaseItemLevel());
-                    if (dcost == null)
-                    {
-                        Log.outError(LogFilter.Player, "RepairDurability: Wrong item lvl {0}", ditemProto.GetBaseItemLevel());
-                        return TotalCost;
-                    }
-
-                    uint dQualitymodEntryId = (uint)(ditemProto.GetQuality() + 1) * 2;
-                    DurabilityQualityRecord dQualitymodEntry = CliDB.DurabilityQualityStorage.LookupByKey(dQualitymodEntryId);
-                    if (dQualitymodEntry == null)
-                    {
-                        Log.outError(LogFilter.Player, "RepairDurability: Wrong dQualityModEntry {0}", dQualitymodEntryId);
-                        return TotalCost;
-                    }
-
-                    uint dmultiplier = 0;
-                    if (ditemProto.GetClass() == ItemClass.Weapon)
-                        dmultiplier = dcost.WeaponSubClassCost[ditemProto.GetSubClass()];
-                    else if (ditemProto.GetClass() == ItemClass.Armor)
-                        dmultiplier = dcost.ArmorSubClassCost[ditemProto.GetSubClass()];
-
-                    uint costs = (uint)(LostDurability * dmultiplier * (double)dQualitymodEntry.Data * item.GetRepairCostMultiplier());
-                    costs = (uint)(costs * discountMod * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
-
-                    if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
-                        costs = 1;
-
-                    if (guildBank)
-                    {
-                        if (GetGuildId() == 0)
-                        {
-                            Log.outDebug(LogFilter.Player, "You are not member of a guild");
-                            return TotalCost;
-                        }
-
-                        var guild = Global.GuildMgr.GetGuildById(GetGuildId());
-                        if (guild == null)
-                            return TotalCost;
-
-                        if (!guild.HandleMemberWithdrawMoney(GetSession(), costs, true))
-                            return TotalCost;
-
-                        TotalCost = costs;
-                    }
-                    else if (!HasEnoughMoney(costs))
-                    {
-                        Log.outDebug(LogFilter.Player, "You do not have enough money");
-                        return TotalCost;
-                    }
-                    else
-                        ModifyMoney(-costs);
+                    ulong cost = item.CalculateDurabilityRepairCost(discountMod);
+                    if (cost != 0)
+                        itemRepairCostStore.Add((item, cost));
                 }
             }
 
-            item.SetDurability(maxDurability);
+            // items in inventory bags
+            for (byte j = InventorySlots.BagStart; j < InventorySlots.BagEnd; j++)
+            {
+                for (byte i = 0; i < ItemConst.MaxBagSize; i++)
+                {
+                    Item item = GetItemByPos((ushort)((j << 8) | i));
+                    if (item != null)
+                    {
+                        ulong cost = item.CalculateDurabilityRepairCost(discountMod);
+                        if (cost != 0)
+                            itemRepairCostStore.Add((item, cost));
+                    }
+                }
+            }
+
+            // Handling a free repair case - just repair every item without taking cost.
+            if (!takeCost)
+            {
+                foreach (var (item, _) in itemRepairCostStore)
+                    DurabilityRepair(item.GetPos(), false, 0.0f);
+                return;
+            }
+
+            if (guildBank)
+            {
+                // Handling a repair for guild money case.
+                // We have to repair items one by one until the guild bank has enough money available for withdrawal or until all items are repaired.
+
+                Guild guild = GetGuild();
+                if (guild == null)
+                    return; // silent return, client shouldn't display this button for players without guild.
+
+                ulong availableGuildMoney = guild.GetMemberAvailableMoneyForRepairItems(GetGUID());
+                if (availableGuildMoney == 0)
+                    return;
+
+                // Sort the items by repair cost from lowest to highest
+                itemRepairCostStore.OrderByDescending(a => a.cost);
+
+                // We must calculate total repair cost and take money once to avoid spam in the guild bank log and reduce number of transactions in the database
+                ulong totalCost = 0;
+
+                foreach (var (item, cost) in itemRepairCostStore)
+                {
+                    ulong newTotalCost = totalCost + cost;
+                    if (newTotalCost > availableGuildMoney || newTotalCost > PlayerConst.MaxMoneyAmount)
+                        break;
+
+                    totalCost = newTotalCost;
+                    // Repair item without taking cost. We'll do it later.
+                    DurabilityRepair(item.GetPos(), false, 0.0f);
+                }
+                // Take money for repairs from the guild bank
+                guild.HandleMemberWithdrawMoney(GetSession(), totalCost, true);
+            }
+            else
+            {
+                // Handling a repair for player's money case.
+                // Unlike repairing for guild money, in this case we must first check if player has enough money to repair all the items at once.
+
+                ulong totalCost = 0;
+                foreach (var (_, cost) in itemRepairCostStore)
+                    totalCost += cost;
+
+                if (!HasEnoughMoney(totalCost))
+                    return; // silent return, client should display error by itself and not send opcode.
+
+                ModifyMoney(-(int)totalCost);
+
+                // Payment for repair has already been taken, so just repair every item without taking cost.
+                foreach (var (item, cost) in itemRepairCostStore)
+                    DurabilityRepair(item.GetPos(), false, 0.0f);
+            }
+        }
+        
+        public void DurabilityRepair(ushort pos, bool takeCost, float discountMod)
+        {
+            Item item = GetItemByPos(pos);
+            if (item == null)
+                return;
+
+
+            if (takeCost)
+            {
+                ulong cost = item.CalculateDurabilityRepairCost(discountMod);
+                if (!HasEnoughMoney(cost))
+                {
+                    Log.outDebug(LogFilter.PlayerItems, $"Player::DurabilityRepair: Player '{GetName()}' ({GetGUID()}) has not enough money to repair item");
+                    return;
+                }
+
+                ModifyMoney(-(int)cost);
+            }
+
+            bool isBroken = item.IsBroken();
+
+            item.SetDurability(item.m_itemData.MaxDurability);
             item.SetState(ItemUpdateState.Changed, this);
 
             // reapply mods for total broken and repaired item if equipped
-            if (IsEquipmentPos(pos) && curDurability == 0)
+            if (IsEquipmentPos(pos) && isBroken)
                 _ApplyItemMods(item, (byte)(pos & 255), true);
-            return TotalCost;
         }
 
         //Store Item

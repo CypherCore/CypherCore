@@ -570,7 +570,7 @@ namespace Game
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
                 if (item)
-                    GetPlayer().DurabilityRepair(item.GetPos(), true, discountMod, packet.UseGuildBank);
+                    GetPlayer().DurabilityRepair(item.GetPos(), true, discountMod);
             }
             else
             {
