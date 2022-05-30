@@ -1345,7 +1345,6 @@ namespace Game.Spells
                                 if (removeMode != AuraRemoveMode.Expire)
                                     break;
                                 target.CastSpell(target, 32612, new CastSpellExtraArgs(GetEffect(1)));
-                                target.CombatStop();
                                 break;
                             default:
                                 break;
