@@ -198,8 +198,10 @@ namespace Game.BattleGrounds.Zones
 
         public override void AddPlayer(Player player)
         {
+            bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
             base.AddPlayer(player);
-            PlayerScores[player.GetGUID()] = new BattlegroundWGScore(player.GetGUID(), player.GetBGTeam());
+            if (!isInBattleground)
+                PlayerScores[player.GetGUID()] = new BattlegroundWGScore(player.GetGUID(), player.GetBGTeam());
         }
 
         void RespawnFlag(Team Team, bool captured)
