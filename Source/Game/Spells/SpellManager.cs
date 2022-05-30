@@ -3233,7 +3233,8 @@ namespace Game.Entities
                 21855, // Challenge Flag
                 38762, // Force of Neltharaku
                 51122, // Fierce Lightning Stike
-                71848  // Toxic Wasteling Find Target
+                71848, // Toxic Wasteling Find Target
+                36146  // Chains of Naberius
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;

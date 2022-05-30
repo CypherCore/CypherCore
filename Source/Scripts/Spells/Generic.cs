@@ -586,27 +586,6 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
-    class spell_gen_arcane_charge : SpellScript
-    {
-        SpellCastResult CheckRequirement()
-        {
-            Unit target = GetExplTargetUnit();
-            if (target != null)
-            {
-                if ((target.GetCreatureTypeMask() & (uint)CreatureType.MaskDemonOrUndead) == 0)
-                    return SpellCastResult.DontReport;
-            }
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
-        }
-    }
-
     // 430 Drink
     // 431 Drink
     // 432 Drink
@@ -704,23 +683,6 @@ namespace Scripts.Spells.Generic
             DoEffectCalcPeriodic.Add(new EffectCalcPeriodicHandler(CalcPeriodic, 1, AuraType.PeriodicDummy));
             DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcAmount, 1, AuraType.PeriodicDummy));
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
-        }
-    }
-
-    [Script] // 41337 Aura of Anger
-    class spell_gen_aura_of_anger : AuraScript
-    {
-        void HandleEffectPeriodicUpdate(AuraEffect aurEff)
-        {
-            AuraEffect aurEff1 = aurEff.GetBase().GetEffect(1);
-            if (aurEff1 != null)
-                aurEff1.ChangeAmount(aurEff1.GetAmount() + 5);
-            aurEff.SetAmount(100 * (int)aurEff.GetTickNumber());
-        }
-
-        public override void Register()
-        {
-            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(HandleEffectPeriodicUpdate, 0, AuraType.PeriodicDamage));
         }
     }
 
@@ -973,21 +935,6 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // 46394 Brutallus Burn
-    class spell_gen_burn_brutallus : AuraScript
-    {
-        void HandleEffectPeriodicUpdate(AuraEffect aurEff)
-        {
-            if (aurEff.GetTickNumber() % 11 == 0)
-                aurEff.SetAmount(aurEff.GetAmount() * 2);
-        }
-
-        public override void Register()
-        {
-            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(HandleEffectPeriodicUpdate, 0, AuraType.PeriodicDamage));
         }
     }
 
@@ -1287,6 +1234,31 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 28865 - Consumption
+    [Script] // 64208 - Consumption
+    class spell_gen_consumption : SpellScript
+    {
+        void HandleDamageCalc(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster == null || !caster.IsCreature())
+                return;
+
+            int damage = 0;
+            SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(caster.m_unitData.CreatedBySpell, GetCastDifficulty());
+            if (createdBySpell != null)
+                damage = createdBySpell.GetEffect(2).CalcValue();
+
+            if (damage != 0)
+                SetEffectValue(damage);
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 63845 - Create Lance
     class spell_gen_create_lance : SpellScript
     {
@@ -2157,29 +2129,6 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 46284 - Negative Energy Periodic
-    class spell_gen_negative_energy_periodic : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
-        }
-
-        void PeriodicTick(AuraEffect aurEff)
-        {
-            PreventDefaultAction();
-
-            CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.MaxTargets, (int)aurEff.GetTickNumber() / 10 + 1);
-            GetTarget().CastSpell((Unit)null, aurEff.GetSpellEffectInfo().TriggerSpell, args);
-        }
-
-        public override void Register()
-        {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 

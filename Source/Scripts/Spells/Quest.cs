@@ -1775,6 +1775,36 @@ namespace Scripts.Spells.Quest
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
+
+    [Script] // 53099, 57896, 58418, 58420, 59064, 59065, 59439, 60900, 60940
+    class spell_quest_portal_with_condition : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1
+                && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue())
+                && Global.ObjectMgr.GetQuestTemplate((uint)spellInfo.GetEffect(1).CalcValue()) != null;
+        }
+
+        void HandleScriptEffect(uint effIndex)
+        {
+            Player target = GetHitPlayer();
+            if (target == null)
+                return;
+
+            uint spellId = (uint)GetEffectInfo().CalcValue();
+            uint questId = (uint)GetEffectInfo(1).CalcValue();
+
+            // This probably should be a way to throw error in SpellCastResult
+            if (target.IsActiveQuest(questId))
+                target.CastSpell(target, spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
     
     [Script] // 48682 - Escape from Silverbrook - Periodic Dummy
     class spell_q12308_escape_from_silverbrook : SpellScript

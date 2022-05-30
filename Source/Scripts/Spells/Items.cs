@@ -2609,22 +2609,6 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_shimmering_vessel : SpellScript
-    {
-        void HandleDummy(uint effIndex)
-        {
-            Creature target = GetHitCreature();
-            if (target)
-                target.SetDeathState(DeathState.JustRespawned);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
     class spell_item_purify_helboar_meat : SpellScript
     {
         public override bool Load()
