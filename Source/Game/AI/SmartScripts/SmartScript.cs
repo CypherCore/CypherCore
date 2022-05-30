@@ -71,8 +71,6 @@ namespace Game.AI
 
         Dictionary<uint, ObjectGuidList> _storedTargets = new();
 
-        SmartAITemplate _template;
-
         public SmartScript()
         {
             _go = null;
@@ -85,7 +83,6 @@ namespace Game.AI
             _textGUID = ObjectGuid.Empty;
             _useTextTimer = false;
             _talkerEntry = 0;
-            _template = SmartAITemplate.Basic;
             _meOrigGUID = ObjectGuid.Empty;
             _goOrigGUID = ObjectGuid.Empty;
             LastInvoker = ObjectGuid.Empty;
@@ -1260,11 +1257,6 @@ namespace Game.AI
 
                         target.ToUnit().KillSelf();
                     }
-                    break;
-                }
-                case SmartActions.InstallAiTemplate:
-                {
-                    InstallTemplate(e);
                     break;
                 }
                 case SmartActions.AddItem:
@@ -2571,88 +2563,6 @@ namespace Game.AI
             }
             else
                 RecalcTimer(e, Math.Min(min, 5000), Math.Min(min, 5000));
-        }
-
-        void InstallTemplate(SmartScriptHolder e)
-        {
-            if (GetBaseObject() == null)
-                return;
-
-            if (_template != SmartAITemplate.Basic)
-            {
-                Log.outError(LogFilter.Sql, "SmartScript.InstallTemplate: Entry {0} SourceType {1} AI Template can not be set more then once, skipped.", e.EntryOrGuid, e.GetScriptType());
-                return;
-            }
-
-            _template = (SmartAITemplate)e.Action.installTtemplate.id;
-            switch ((SmartAITemplate)e.Action.installTtemplate.id)
-            {
-                case SmartAITemplate.Caster:
-                {
-                    AddEvent(SmartEvents.UpdateIc, 0, 0, 0, e.Action.installTtemplate.param2, e.Action.installTtemplate.param3, 0, SmartActions.Cast, e.Action.installTtemplate.param1, e.Target.raw.param1, 0, 0, 0, 0, SmartTargets.Victim, 0, 0, 0, 0, 1);
-                    AddEvent(SmartEvents.Range, 0, e.Action.installTtemplate.param4, 300, 0, 0, 0, SmartActions.AllowCombatMovement, 1, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 1);
-                    AddEvent(SmartEvents.Range, 0, 0, e.Action.installTtemplate.param4 > 10 ? e.Action.installTtemplate.param4 - 10 : 0, 0, 0, 0, SmartActions.AllowCombatMovement, 0, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 1);
-                    AddEvent(SmartEvents.ManaPct, 0, e.Action.installTtemplate.param5 - 15 > 100 ? 100 : e.Action.installTtemplate.param5 + 15, 100, 1000, 1000, 0, SmartActions.SetEventPhase, 1, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    AddEvent(SmartEvents.ManaPct, 0, 0, e.Action.installTtemplate.param5, 1000, 1000, 0, SmartActions.SetEventPhase, 0, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    AddEvent(SmartEvents.ManaPct, 0, 0, e.Action.installTtemplate.param5, 1000, 1000, 0, SmartActions.AllowCombatMovement, 1, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    break;
-                }
-                case SmartAITemplate.Turret:
-                {
-                    AddEvent(SmartEvents.UpdateIc, 0, 0, 0, e.Action.installTtemplate.param2, e.Action.installTtemplate.param3, 0, SmartActions.Cast, e.Action.installTtemplate.param1, e.Target.raw.param1, 0, 0, 0, 0, SmartTargets.Victim, 0, 0, 0, 0, 0);
-                    AddEvent(SmartEvents.JustCreated, 0, 0, 0, 0, 0, 0, SmartActions.AllowCombatMovement, 0, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    break;
-                }
-                case SmartAITemplate.CagedNPCPart:
-                {
-                    if (_me == null)
-                        return;
-                    //store cage as id1
-                    AddEvent(SmartEvents.DataSet, 0, 0, 0, 0, 0, 0, SmartActions.StoreTargetList, 1, 0, 0, 0, 0, 0, SmartTargets.ClosestGameobject, e.Action.installTtemplate.param1, 10, 0, 0, 0);
-
-                    //reset(close) cage on hostage(me) respawn
-                    AddEvent(SmartEvents.Update, SmartEventFlags.NotRepeatable, 0, 0, 0, 0, 0, SmartActions.ResetGobject, 0, 0, 0, 0, 0, 0, SmartTargets.GameobjectDistance, e.Action.installTtemplate.param1, 5, 0, 0, 0);
-
-                    AddEvent(SmartEvents.DataSet, 0, 0, 0, 0, 0, 0, SmartActions.SetRun, e.Action.installTtemplate.param3, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    AddEvent(SmartEvents.DataSet, 0, 0, 0, 0, 0, 0, SmartActions.SetEventPhase, 1, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-
-                    AddEvent(SmartEvents.Update, SmartEventFlags.NotRepeatable, 1000, 1000, 0, 0, 0, SmartActions.MoveOffset, 0, 0, 0, 0, 0, 0, SmartTargets.Self, 0, e.Action.installTtemplate.param4, 0, 0, 1);
-                    //phase 1: give quest credit on movepoint reached
-                    AddEvent(SmartEvents.Movementinform, 0, (uint)MovementGeneratorType.Point, EventId.SmartRandomPoint, 0, 0, 0, SmartActions.SetData, 0, 0, 0, 0, 0, 0, SmartTargets.Stored, 1, 0, 0, 0, 1);
-                    //phase 1: despawn after time on movepoint reached
-                    AddEvent(SmartEvents.Movementinform, 0, (uint)MovementGeneratorType.Point, EventId.SmartRandomPoint, 0, 0, 0, SmartActions.ForceDespawn, e.Action.installTtemplate.param2, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 1);
-
-                    if (Global.CreatureTextMgr.TextExist(_me.GetEntry(), (byte)e.Action.installTtemplate.param5))
-                        AddEvent(SmartEvents.Movementinform, 0, (uint)MovementGeneratorType.Point, EventId.SmartRandomPoint, 0, 0, 0, SmartActions.Talk, e.Action.installTtemplate.param5, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 1);
-                    break;
-                }
-                case SmartAITemplate.CagedGOPart:
-                {
-                    if (_go == null)
-                        return;
-                    //store hostage as id1
-                    AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 1, 0, 0, 0, 0, 0, SmartTargets.ClosestCreature, e.Action.installTtemplate.param1, 10, 0, 0, 0);
-                    //store invoker as id2
-                    AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 2, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0, 0);
-                    //signal hostage
-                    AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.SetData, 0, 0, 0, 0, 0, 0, SmartTargets.Stored, 1, 0, 0, 0, 0);
-                    //when hostage raeched end point, give credit to invoker
-                    if (e.Action.installTtemplate.param2 != 0)
-                        AddEvent(SmartEvents.DataSet, 0, 0, 0, 0, 0, 0, SmartActions.CallKilledmonster, e.Action.installTtemplate.param1, 0, 0, 0, 0, 0, SmartTargets.Stored, 2, 0, 0, 0, 0);
-                    else
-                        AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.CallKilledmonster, e.Action.installTtemplate.param1, 0, 0, 0, 0, 0, SmartTargets.Stored, 2, 0, 0, 0, 0);
-                    break;
-                }
-                default:
-                    return;
-            }
-        }
-
-        void AddEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
-            SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6,
-            SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint target_param4, uint phaseMask)
-        {
-            _installEvents.Add(CreateSmartEvent(e, event_flags, event_param1, event_param2, event_param3, event_param4, event_param5, action, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, t, target_param1, target_param2, target_param3, target_param4, phaseMask));
         }
 
         SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,

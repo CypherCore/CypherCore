@@ -131,17 +131,6 @@ namespace Framework.Constants
         NosaveRespawn = 0x04,
     }
 
-    public enum SmartAITemplate
-    {
-        Basic = 0, //nothing is preset
-        Caster = 1, //spellid, repeatMin, repeatMax, range, manaPCT +JOIN: target_param1 as castFlag
-        Turret = 2, //spellid, repeatMin, repeatMax +JOIN: target_param1 as castFlag
-        Passive = 3,
-        CagedGOPart = 4, //creatureID, give credit at point end?,
-        CagedNPCPart = 5, //gameObjectID, despawntime, run?, dist, TextGroupID
-        End = 6
-    }
-
     [Flags]
     public enum SmartCastFlags
     {
@@ -312,7 +301,7 @@ namespace Framework.Constants
         WpStop = 55,     // Despawntime, Quest, Fail?
         AddItem = 56,     // Itemid, Count
         RemoveItem = 57,     // Itemid, Count
-        InstallAiTemplate = 58,     // Aitemplateid
+        //Unused58 = 58,     // do not reuse
         SetRun = 59,     // 0/1
         SetDisableGravity = 60,     // 0/1
         SetSwim = 61,     // 0/1

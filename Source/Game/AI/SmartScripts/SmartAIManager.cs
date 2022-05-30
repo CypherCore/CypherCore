@@ -448,9 +448,6 @@ namespace Game.AI
             if (Math.Abs(e.Target.o) > 2 * MathFunctions.PI)
                 Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has abs(`target.o` = {e.Target.o}) > 2*PI (orientation is expressed in radians)");
 
-            if (e.GetActionType() == SmartActions.InstallAiTemplate)
-                return true; // AI template has special handling
-
             switch (e.GetTargetType())
             {
                 case SmartTargets.CreatureDistance:
@@ -747,7 +744,6 @@ namespace Game.AI
                 SmartActions.WpStop => Marshal.SizeOf(typeof(SmartAction.WpStop)),
                 SmartActions.AddItem => Marshal.SizeOf(typeof(SmartAction.Item)),
                 SmartActions.RemoveItem => Marshal.SizeOf(typeof(SmartAction.Item)),
-                SmartActions.InstallAiTemplate => Marshal.SizeOf(typeof(SmartAction.InstallTtemplate)),
                 SmartActions.SetRun => Marshal.SizeOf(typeof(SmartAction.SetRun)),
                 SmartActions.SetDisableGravity => Marshal.SizeOf(typeof(SmartAction.SetDisableGravity)),
                 SmartActions.SetSwim => Marshal.SizeOf(typeof(SmartAction.SetSwim)),
@@ -1674,13 +1670,6 @@ namespace Game.AI
                     if (!CliDB.MapStorage.ContainsKey(e.Action.teleport.mapID))
                     {
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Map entry {e.Action.teleport.mapID}, skipped.");
-                        return false;
-                    }
-                    break;
-                case SmartActions.InstallAiTemplate:
-                    if (e.Action.installTtemplate.id >= (uint)SmartAITemplate.End)
-                    {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Creature {0} Event {1} Action {2} uses non-existent AI template id {3}, skipped.", e.EntryOrGuid, e.EventId, e.GetActionType(), e.Action.installTtemplate.id);
                         return false;
                     }
                     break;
@@ -3041,9 +3030,6 @@ namespace Game.AI
         public Item item;
 
         [FieldOffset(4)]
-        public InstallTtemplate installTtemplate;
-
-        [FieldOffset(4)]
         public SetRun setRun;
 
         [FieldOffset(4)]
@@ -3470,15 +3456,6 @@ namespace Game.AI
         {
             public uint entry;
             public uint count;
-        }
-        public struct InstallTtemplate
-        {
-            public uint id;
-            public uint param1;
-            public uint param2;
-            public uint param3;
-            public uint param4;
-            public uint param5;
         }
         public struct SetRun
         {
