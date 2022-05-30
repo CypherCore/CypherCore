@@ -633,7 +633,7 @@ namespace Game.AI
 
         public override void OnCharmed(bool isNew)
         {
-            if (me.IsCharmed())
+            if (!me.IsPossessedByPlayer() && me.IsCharmed())
                 me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
 
             base.OnCharmed(isNew);

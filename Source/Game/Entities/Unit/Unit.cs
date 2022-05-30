@@ -1239,6 +1239,11 @@ namespace Game.Entities
                     return;
         }
 
+        public bool IsPossessedByPlayer()
+        {
+            return HasUnitState(UnitState.Possessed) && GetCharmerGUID().IsPlayer();
+        }
+        
         public bool IsPossessing()
         {
             Unit u = GetCharmed();
