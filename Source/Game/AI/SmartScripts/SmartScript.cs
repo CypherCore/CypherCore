@@ -2458,6 +2458,48 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.SetImmunePC:
+                {
+                    foreach (var target in targets)
+                    {
+                        if (IsUnit(target))
+                        {
+                            if (e.Action.setImmunePC.immunePC != 0)
+                                target.ToUnit().AddUnitFlag(UnitFlags.ImmuneToPc);
+                            else
+                                target.ToUnit().RemoveUnitFlag(UnitFlags.ImmuneToPc);
+                        }
+                    }
+                    break;
+                }
+                case SmartActions.SetImmuneNPC:
+                {
+                    foreach (var target in targets)
+                    {
+                        if (IsUnit(target))
+                        {
+                            if (e.Action.setImmuneNPC.immuneNPC != 0)
+                                target.ToUnit().AddUnitFlag(UnitFlags.ImmuneToNpc);
+                            else
+                                target.ToUnit().RemoveUnitFlag(UnitFlags.ImmuneToNpc);
+                        }
+                    }
+                    break;
+                }
+                case SmartActions.SetUninteractible:
+                {
+                    foreach (var target in targets)
+                    {
+                        if (IsUnit(target))
+                        {
+                            if (e.Action.setUninteractible.uninteractible != 0)
+                                target.ToUnit().AddUnitFlag(UnitFlags.Uninteractible);
+                            else
+                                target.ToUnit().RemoveUnitFlag(UnitFlags.Uninteractible);
+                        }
+                    }
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     WorldObject baseObject = GetBaseObject();

@@ -824,9 +824,9 @@ namespace Game.AI
                 SmartActions.SetHover => Marshal.SizeOf(typeof(SmartAction.SetHover)),
                 SmartActions.SetHealthPct => Marshal.SizeOf(typeof(SmartAction.SetHealthPct)),
                 SmartActions.CreateConversation => Marshal.SizeOf(typeof(SmartAction.Conversation)),
-                //SmartActions.SetImmunePc => Marshal.SizeOf(typeof(SmartAction.Raw)),
-                //SmartActions.SetImmuneNpc => Marshal.SizeOf(typeof(SmartAction.Raw)),
-                //SmartActions.SetUninteractible => Marshal.SizeOf(typeof(SmartAction.Raw)),
+                SmartActions.SetImmunePC => Marshal.SizeOf(typeof(SmartAction.SetImmunePC)),
+                SmartActions.SetImmuneNPC => Marshal.SizeOf(typeof(SmartAction.SetImmuneNPC)),
+                SmartActions.SetUninteractible => Marshal.SizeOf(typeof(SmartAction.SetUninteractible)),
                 //SmartActions.ActivateGameobject => Marshal.SizeOf(typeof(SmartAction.Raw)),
                 SmartActions.AddToStoredTargetList => Marshal.SizeOf(typeof(SmartAction.AddToStoredTargets)),
                 SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(SmartAction.BecomePersonalClone)),
@@ -1370,6 +1370,7 @@ namespace Game.AI
                     case SmartEvents.FriendlyHealth:
                     case SmartEvents.TargetHealthPct:
                     case SmartEvents.IsBehindTarget:
+                    case SmartEvents.TargetManaPct:
                         Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated event_type({e.GetEventType()}), {e}, it might be removed in the future, loaded for now.");
                         break;
                     default:
@@ -2082,6 +2083,21 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setHealthRegen.regenHealth);
                     break;
                 }
+                case SmartActions.SetImmunePC:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setImmunePC.immunePC);
+                    break;
+                }
+                case SmartActions.SetImmuneNPC:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setImmuneNPC.immuneNPC);
+                    break;
+                }
+                case SmartActions.SetUninteractible:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setUninteractible.uninteractible);
+                    break;
+                }
                 case SmartActions.CreateConversation:
                 {
                     if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
@@ -2169,6 +2185,21 @@ namespace Game.AI
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
                     return false;
+            }
+
+            // Additional check for deprecated
+            switch (e.GetActionType())
+            {
+                // Deprecated
+                case SmartActions.SetUnitFlag:
+                case SmartActions.RemoveUnitFlag:
+                case SmartActions.AddItem:
+                case SmartActions.AddDynamicFlag:
+                case SmartActions.RemoveDynamicFlag:
+                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
+                    break;
+                default:
+                    break;
             }
 
             if (!CheckUnusedActionParams(e))
@@ -3205,6 +3236,15 @@ namespace Game.AI
         public SetHealthPct setHealthPct;
 
         [FieldOffset(4)]
+        public SetImmunePC setImmunePC;
+
+        [FieldOffset(4)]
+        public SetImmuneNPC setImmuneNPC;
+
+        [FieldOffset(4)]
+        public SetUninteractible setUninteractible;
+
+        [FieldOffset(4)]
         public Conversation conversation;
 
         [FieldOffset(4)]
@@ -3747,6 +3787,18 @@ namespace Game.AI
         public struct SetHealthPct
         {
             public uint percent;
+        }
+        public struct SetImmunePC
+        {
+            public uint immunePC;
+        }
+        public struct SetImmuneNPC
+        {
+            public uint immuneNPC;
+        }
+        public struct SetUninteractible
+        {
+            public uint uninteractible;
         }
         public struct Conversation
         {
