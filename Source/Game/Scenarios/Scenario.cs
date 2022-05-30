@@ -192,37 +192,40 @@ namespace Game.Scenarios
         public override bool CanCompleteCriteriaTree(CriteriaTree tree)
         {
             ScenarioStepRecord step = tree.ScenarioStep;
-            if (step == null)
+            ScenarioStepState state = GetStepState(step);
+            if (state == ScenarioStepState.Done)
                 return false;
 
-            if (step.ScenarioID != _data.Entry.Id)
+            ScenarioStepRecord currentStep = GetStep();
+            if (currentStep == null)
                 return false;
 
             if (step.IsBonusObjective())
-                return !IsComplete();
+                if (step != currentStep)
+                    return false;
 
-            if (step != GetStep())
-                return false;
-
-            return true;
+            return base.CanCompleteCriteriaTree(tree);
         }
 
         public override void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer)
         {
             ScenarioStepRecord step = tree.ScenarioStep;
-            if (step == null)
-                return;
-
-            if (!step.IsBonusObjective() && step != GetStep())
-                return;
-
-            if (GetStepState(step) == ScenarioStepState.Done)
+            if (!IsCompletedStep(step))
                 return;
 
             SetStepState(step, ScenarioStepState.Done);
             CompleteStep(step);
         }
 
+        bool IsCompletedStep(ScenarioStepRecord step)
+        {
+            CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId);
+            if (tree == null)
+                return false;
+
+            return IsCompletedCriteriaTree(tree);
+        }
+        
         public override void SendPacket(ServerPacket data)
         {
             foreach (ObjectGuid guid in _players)
