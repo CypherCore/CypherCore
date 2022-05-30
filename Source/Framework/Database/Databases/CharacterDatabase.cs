@@ -35,7 +35,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_EXPIRED_BANS, "UPDATE character_banned SET active = 0 WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate");
             PrepareStatement(CharStatements.SEL_CHECK_NAME, "SELECT 1 FROM characters WHERE name = ?");
             PrepareStatement(CharStatements.SEL_CHECK_GUID, "SELECT 1 FROM characters WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_SUM_CHARS, "SELECT COUNT(guid) FROM characters WHERE account = ?");
+            PrepareStatement(CharStatements.SEL_SUM_CHARS, "SELECT COUNT(guid) FROM characters WHERE account = ? AND deleteDate IS NULL");
             PrepareStatement(CharStatements.SEL_CHAR_CREATE_INFO, "SELECT level, race, class FROM characters WHERE account = ? LIMIT 0, ?");
             PrepareStatement(CharStatements.INS_CHARACTER_BAN, "INSERT INTO character_banned (guid, bandate, unbandate, bannedby, banreason, active) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)");
             PrepareStatement(CharStatements.UPD_CHARACTER_BAN, "UPDATE character_banned SET active = 0 WHERE guid = ? AND active != 0");

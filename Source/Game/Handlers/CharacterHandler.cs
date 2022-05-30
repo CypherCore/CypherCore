@@ -120,7 +120,7 @@ namespace Game
 
                     charResult.Characters.Add(charInfo);
                 }
-                while (result.NextRow());
+                while (result.NextRow() && charResult.Characters.Count < 200);
             }
 
             charResult.IsAlliedRacesCreationAllowed = CanAccessAlliedRaces();
