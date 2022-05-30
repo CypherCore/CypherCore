@@ -980,7 +980,19 @@ namespace Game.Entities
                 if (charm.ToCreature().HasUnitTypeMask(UnitTypeMask.Puppet))
                     ((Puppet)charm).UnSummon();
                 else if (charm.IsVehicle())
+                {
                     ExitVehicle();
+
+                    // Temporary for issue https://github.com/TrinityCore/TrinityCore/issues/24876
+                    if (!GetCharmedGUID().IsEmpty() && !charm.HasAuraTypeWithCaster(AuraType.ControlVehicle, GetGUID()))
+                    {
+                        Log.outFatal(LogFilter.Player, $"Player::StopCastingCharm Player '{GetName()}' ({GetGUID()}) is not able to uncharm vehicle ({GetCharmedGUID()}) because of missing SPELL_AURA_CONTROL_VEHICLE");
+
+                        // attempt to recover from missing HandleAuraControlVehicle unapply handling
+                        // THIS IS A HACK, NEED TO FIND HOW IS IT EVEN POSSBLE TO NOT HAVE THE AURA
+                        _ExitVehicle();
+                    }
+                }
             }
             if (!GetCharmedGUID().IsEmpty())
                 charm.RemoveCharmAuras();

@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.Entities;
 using Game.Scenarios;
 using System.Collections.Generic;
 
