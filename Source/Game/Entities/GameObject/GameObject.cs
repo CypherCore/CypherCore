@@ -1484,6 +1484,132 @@ namespace Game.Entities
             m_cooldownTime = time_to_restore != 0 ? GameTime.GetGameTimeMS() + time_to_restore : 0;
         }
 
+        public void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, uint spellId = 0, int effectIndex = -1)
+        {
+            Unit unitCaster = spellCaster ? spellCaster.ToUnit() : null;
+
+            switch (action)
+            {
+                case GameObjectActions.AnimateCustom0:
+                case GameObjectActions.AnimateCustom1:
+                case GameObjectActions.AnimateCustom2:
+                case GameObjectActions.AnimateCustom3:
+                    SendCustomAnim((uint)(action - GameObjectActions.AnimateCustom0));
+                    break;
+                case GameObjectActions.Disturb: // What's the difference with Open?
+                case GameObjectActions.Open:
+                    if (unitCaster)
+                        Use(unitCaster);
+                    break;
+                case GameObjectActions.OpenAndUnlock:
+                    if (unitCaster)
+                        UseDoorOrButton(0, false, unitCaster);
+                    goto case GameObjectActions.Unlock;
+                case GameObjectActions.Unlock:
+                    RemoveFlag(GameObjectFlags.Locked);
+                    break;
+                case GameObjectActions.Lock:
+                    AddFlag(GameObjectFlags.Locked);
+                    break;
+                case GameObjectActions.Close:
+                case GameObjectActions.Rebuild:
+                    ResetDoorOrButton();
+                    break;
+                case GameObjectActions.Despawn:
+                    DespawnOrUnsummon();
+                    break;
+                case GameObjectActions.MakeInert:
+                    AddFlag(GameObjectFlags.NotSelectable);
+                    break;
+                case GameObjectActions.MakeActive:
+                    RemoveFlag(GameObjectFlags.NotSelectable);
+                    break;
+                case GameObjectActions.CloseAndLock:
+                    ResetDoorOrButton();
+                    AddFlag(GameObjectFlags.Locked);
+                    break;
+                case GameObjectActions.Destroy:
+                    if (unitCaster)
+                        UseDoorOrButton(0, true, unitCaster);
+                    break;
+                case GameObjectActions.UseArtKit0:
+                case GameObjectActions.UseArtKit1:
+                case GameObjectActions.UseArtKit2:
+                case GameObjectActions.UseArtKit3:
+                case GameObjectActions.UseArtKit4:
+                {
+                    GameObjectTemplateAddon templateAddon = GetTemplateAddon();
+
+                    uint artKitIndex = action != GameObjectActions.UseArtKit4 ? (uint)(action - GameObjectActions.UseArtKit0) : 4;
+
+                    uint artKitValue = 0;
+                    if (templateAddon != null)
+                        artKitValue = templateAddon.ArtKits[artKitIndex];
+
+                    if (artKitValue == 0)
+                        Log.outError(LogFilter.Sql, $"GameObject {GetEntry()} hit by spell {spellId} needs `artkit{artKitIndex}` in `gameobject_template_addon`");
+                    else
+                        SetGoArtKit((byte)artKitValue);
+
+                    break;
+                }
+                case GameObjectActions.GoTo1stFloor:
+                case GameObjectActions.GoTo2ndFloor:
+                case GameObjectActions.GoTo3rdFloor:
+                case GameObjectActions.GoTo4thFloor:
+                case GameObjectActions.GoTo5thFloor:
+                case GameObjectActions.GoTo6thFloor:
+                case GameObjectActions.GoTo7thFloor:
+                case GameObjectActions.GoTo8thFloor:
+                case GameObjectActions.GoTo9thFloor:
+                case GameObjectActions.GoTo10thFloor:
+                    if (GetGoType() == GameObjectTypes.Transport)
+                        SetTransportState(GameObjectState.TransportStopped, (uint)(action - GameObjectActions.GoTo1stFloor));
+                    else
+                        Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only action \"Go to Floor\" {action} in effect {effectIndex}");
+                    break;
+                case GameObjectActions.PlayAnimKit:
+                    SetAnimKitId((ushort)param, false);
+                    break;
+                case GameObjectActions.OpenAndPlayAnimKit:
+                    if (unitCaster)
+                        UseDoorOrButton(0, false, unitCaster);
+                    SetAnimKitId((ushort)param, false);
+                    break;
+                case GameObjectActions.CloseAndPlayAnimKit:
+                    ResetDoorOrButton();
+                    SetAnimKitId((ushort)param, false);
+                    break;
+                case GameObjectActions.PlayOneShotAnimKit:
+                    SetAnimKitId((ushort)param, true);
+                    break;
+                case GameObjectActions.StopAnimKit:
+                    SetAnimKitId(0, false);
+                    break;
+                case GameObjectActions.OpenAndStopAnimKit:
+                    if (unitCaster)
+                        UseDoorOrButton(0, false, unitCaster);
+                    SetAnimKitId(0, false);
+                    break;
+                case GameObjectActions.CloseAndStopAnimKit:
+                    ResetDoorOrButton();
+                    SetAnimKitId(0, false);
+                    break;
+                case GameObjectActions.PlaySpellVisual:
+                    SetSpellVisualId((uint)param, spellCaster.GetGUID());
+                    break;
+                case GameObjectActions.StopSpellVisual:
+                    SetSpellVisualId(0);
+                    break;
+                case GameObjectActions.None:
+                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action type NONE in effect {effectIndex}");
+                    break;
+                default:
+                    Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");
+                    break;
+            }
+        }
+
         public void SetGoArtKit(byte kit)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ArtKit), kit);

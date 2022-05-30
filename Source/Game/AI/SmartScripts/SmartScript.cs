@@ -2432,6 +2432,24 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.CreateConversation:
+                {
+                    WorldObject baseObject = GetBaseObject();
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Player playerTarget = target.ToPlayer();
+                        if (playerTarget != null)
+                        {
+                            Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
+                                playerTarget, playerTarget.GetGUID(), null);
+                            if (!conversation)
+                                Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
+                        }
+                    }
+
+                    break;
+                }
                 case SmartActions.SetImmunePC:
                 {
                     foreach (var target in targets)
@@ -2474,22 +2492,14 @@ namespace Game.AI
                     }
                     break;
                 }
-                case SmartActions.CreateConversation:
+                case SmartActions.ActivateGameobject:
                 {
-                    WorldObject baseObject = GetBaseObject();
-
                     foreach (WorldObject target in targets)
                     {
-                        Player playerTarget = target.ToPlayer();
-                        if (playerTarget != null)
-                        {
-                            Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
-                                playerTarget, playerTarget.GetGUID(), null);
-                            if (!conversation)
-                                Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
-                        }
+                        GameObject targetGo = target.ToGameObject();
+                        if (targetGo != null)
+                            targetGo.ActivateObject((GameObjectActions)e.Action.activateGameObject.gameObjectAction, (int)e.Action.activateGameObject.param);
                     }
-
                     break;
                 }
                 case SmartActions.AddToStoredTargetList:

@@ -814,7 +814,7 @@ namespace Game.AI
                 SmartActions.SetImmunePC => Marshal.SizeOf(typeof(SmartAction.SetImmunePC)),
                 SmartActions.SetImmuneNPC => Marshal.SizeOf(typeof(SmartAction.SetImmuneNPC)),
                 SmartActions.SetUninteractible => Marshal.SizeOf(typeof(SmartAction.SetUninteractible)),
-                //SmartActions.ActivateGameobject => Marshal.SizeOf(typeof(SmartAction.Raw)),
+                SmartActions.ActivateGameobject => Marshal.SizeOf(typeof(SmartAction.ActivateGameObject)),
                 SmartActions.AddToStoredTargetList => Marshal.SizeOf(typeof(SmartAction.AddToStoredTargets)),
                 SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(SmartAction.BecomePersonalClone)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
@@ -2062,6 +2062,16 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setHealthRegen.regenHealth);
                     break;
                 }
+                case SmartActions.CreateConversation:
+                {
+                    if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: SMART_ACTION_CREATE_CONVERSATION Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} uses invalid entry {e.Action.conversation.id}, skipped.");
+                        return false;
+                    }
+
+                    break;
+                }
                 case SmartActions.SetImmunePC:
                 {
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setImmunePC.immunePC);
@@ -2077,11 +2087,14 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setUninteractible.uninteractible);
                     break;
                 }
-                case SmartActions.CreateConversation:
+                case SmartActions.ActivateGameobject:
                 {
-                    if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
+                    if (!NotNULL(e, e.Action.activateGameObject.gameObjectAction))
+                        return false;
+
+                    if (e.Action.activateGameObject.gameObjectAction >= (uint)GameObjectActions.Max)
                     {
-                        Log.outError(LogFilter.Sql, $"SmartAIMgr: SMART_ACTION_CREATE_CONVERSATION Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} uses invalid entry {e.Action.conversation.id}, skipped.");
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has gameObjectAction parameter out of range (max allowed {(uint)GameObjectActions.Max}, current value {e.Action.activateGameObject.gameObjectAction}), skipped.");
                         return false;
                     }
 
@@ -3197,6 +3210,9 @@ namespace Game.AI
         public SetHealthPct setHealthPct;
 
         [FieldOffset(4)]
+        public Conversation conversation;
+
+        [FieldOffset(4)]
         public SetImmunePC setImmunePC;
 
         [FieldOffset(4)]
@@ -3206,7 +3222,7 @@ namespace Game.AI
         public SetUninteractible setUninteractible;
 
         [FieldOffset(4)]
-        public Conversation conversation;
+        public ActivateGameObject activateGameObject;
 
         [FieldOffset(4)]
         public AddToStoredTargets addToStoredTargets;
@@ -3745,6 +3761,10 @@ namespace Game.AI
         {
             public uint percent;
         }
+        public struct Conversation
+        {
+            public uint id;
+        }
         public struct SetImmunePC
         {
             public uint immunePC;
@@ -3757,9 +3777,10 @@ namespace Game.AI
         {
             public uint uninteractible;
         }
-        public struct Conversation
+        public struct ActivateGameObject
         {
-            public uint id;
+            public uint gameObjectAction;
+            public uint param;
         }
         public struct AddToStoredTargets
         {

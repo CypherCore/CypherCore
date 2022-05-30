@@ -198,5 +198,6 @@ namespace Framework.Constants
         PlaySpellVisual = 42,   // Play Spell Visual "{SpellVisual}"
         StopSpellVisual = 43,   // Stop Spell Visual
         SetTappedToChallengePlayers = 44,   // Set Tapped to Challenge Players
+        Max
     }
 }
