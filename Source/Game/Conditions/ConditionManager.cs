@@ -1045,6 +1045,23 @@ namespace Game
                                 break;
                         }
 
+                        switch (spellEffectInfo.Effect)
+                        {
+                            case SpellEffectName.PersistentAreaAura:
+                            case SpellEffectName.ApplyAreaAuraParty:
+                            case SpellEffectName.ApplyAreaAuraRaid:
+                            case SpellEffectName.ApplyAreaAuraFriend:
+                            case SpellEffectName.ApplyAreaAuraEnemy:
+                            case SpellEffectName.ApplyAreaAuraPet:
+                            case SpellEffectName.ApplyAreaAuraOwner:
+                            case SpellEffectName.ApplyAuraOnPet:
+                            case SpellEffectName.ApplyAreaAuraSummons:
+                            case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                                continue;
+                            default:
+                                break;
+                        }
+
                         Log.outError(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, spellEffectInfo.EffectIndex);
                         cond.SourceGroup &= ~(1u << (int)spellEffectInfo.EffectIndex);
                     }
