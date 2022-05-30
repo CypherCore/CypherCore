@@ -50,7 +50,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.Deactivated);
 
             owner.CombatStopWithPets();
-            owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
+            owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
 
             uint end = GetPathAtMapEnd();
             uint currentNodeId = GetCurrentNode();
@@ -139,7 +139,7 @@ namespace Game.Movement
             uint taxiNodeId = owner.m_taxi.GetTaxiDestination();
             owner.m_taxi.ClearTaxiDestinations();
             owner.Dismount();
-            owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
+            owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
 
             if (owner.m_taxi.Empty())
             {

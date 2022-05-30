@@ -5981,7 +5981,7 @@ namespace Game.Entities
             UnitFlags.PetInCombat | UnitFlags.Silenced | UnitFlags.Pacified |
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
             UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.Uninteractible |
-            UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.TaxiFlight);
+            UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.OnTaxi);
             AddUnitFlag(UnitFlags.PlayerControlled);   // must be set
 
             AddUnitFlag2(UnitFlags2.RegeneratePower);// must be set
@@ -7133,7 +7133,7 @@ namespace Game.Entities
         {
             m_taxi.ClearTaxiDestinations(); // not destinations, clear source node
             Dismount();
-            RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
+            RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
         }
 
         public void ContinueTaxiFlight()

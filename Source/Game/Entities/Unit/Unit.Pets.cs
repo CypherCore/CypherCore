@@ -425,7 +425,7 @@ namespace Game.Entities
 
             Creature creature = ToCreature();
             if (creature != null)
-                creature.RefreshSwimmingFlag();
+                creature.RefreshCanSwimFlag();
 
             if (!IsPlayer() || !charmer.IsPlayer())
             {

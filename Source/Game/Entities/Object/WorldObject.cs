@@ -2525,7 +2525,7 @@ namespace Game.Entities
             }
 
             // check flags
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
                 return false;
 
             Unit unitOrOwner = unit;
@@ -2676,7 +2676,7 @@ namespace Game.Entities
                 return false;
 
             // check flags for negative spells
-            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
+            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
                 return false;
 
             if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))

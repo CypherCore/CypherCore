@@ -1074,7 +1074,7 @@ namespace Game.Entities
             if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowMountedCombat))
                 Dismount();
 
-            RefreshSwimmingFlag();
+            RefreshCanSwimFlag();
 
             if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
             {
@@ -2593,20 +2593,20 @@ namespace Game.Entities
             return GetMovementTemplate().IsSwimAllowed();
         }
 
-        public void RefreshSwimmingFlag(bool recheck = false)
+        public void RefreshCanSwimFlag(bool recheck = false)
         {
-            if (!_isMissingSwimmingFlagOutOfCombat || recheck)
-                _isMissingSwimmingFlagOutOfCombat = !HasUnitFlag(UnitFlags.CanSwim);
+            if (!_isMissingCanSwimFlagOutOfCombat || recheck)
+                _isMissingCanSwimFlagOutOfCombat = !HasUnitFlag(UnitFlags.CanSwim);
 
-            // Check if the creature has UNIT_FLAG_SWIMMING and add it if it's missing
+            // Check if the creature has UNIT_FLAG_CAN_SWIM and add it if it's missing
             // Creatures must be able to chase a target in water if they can enter water
-            if (_isMissingSwimmingFlagOutOfCombat && CanEnterWater())
+            if (_isMissingCanSwimFlagOutOfCombat && CanEnterWater())
                 AddUnitFlag(UnitFlags.CanSwim);
         }
 
-        public bool HasSwimmingFlagOutOfCombat()
+        public bool HasCanSwimFlagOutOfCombat()
         {
-            return !_isMissingSwimmingFlagOutOfCombat;
+            return !_isMissingCanSwimFlagOutOfCombat;
         }
         
         public void AllLootRemovedFromCorpse()

@@ -74,7 +74,7 @@ namespace Game.AI
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
-                if (!owner.HasSwimmingFlagOutOfCombat())
+                if (!owner.HasCanSwimFlagOutOfCombat())
                     owner.RemoveUnitFlag(UnitFlags.CanSwim);
 
                 owner.SetSpawnHealth();
