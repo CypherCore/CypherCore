@@ -1333,24 +1333,24 @@ namespace Game.Entities
                     return true;
             }
 
-            if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+            AuraType aura = spellEffectInfo.ApplyAuraName;
+            if (aura != 0)
             {
-                uint aura = (uint)spellEffectInfo.ApplyAuraName;
-                if (aura != 0)
+                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 {
                     var list = m_spellImmune[(int)SpellImmunity.State];
                     if (list.ContainsKey(aura))
                         return true;
+                }
 
-                    if (!spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
-                    {
-                        // Check for immune to application of harmful magical effects
-                        var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
-                        foreach (var auraEffect in immuneAuraApply)
-                            if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
-                                ((caster && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))                       // Harmful
-                                return true;
-                    }
+                if (!spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                {
+                    // Check for immune to application of harmful magical effects
+                    var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
+                    foreach (var auraEffect in immuneAuraApply)
+                        if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
+                            ((caster && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))                       // Harmful
+                            return true;
                 }
             }
 
