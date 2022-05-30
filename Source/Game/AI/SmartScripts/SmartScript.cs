@@ -632,18 +632,9 @@ namespace Game.AI
                     {
                         if (IsUnit(target))
                         {
-                            if (e.Action.unitFlag.type == 0)
-                            {
-                                target.ToUnit().AddUnitFlag((UnitFlags)e.Action.unitFlag.flag);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS",
-                                target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                            }
-                            else
-                            {
-                                target.ToUnit().AddUnitFlag2((UnitFlags2)e.Action.unitFlag.flag);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS_2",
-                                target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                            }
+                            target.ToUnit().AddUnitFlag((UnitFlags)e.Action.unitFlag.flag);
+                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS",
+                            target.GetGUID().ToString(), e.Action.unitFlag.flag);
                         }
                     }
                     break;
@@ -654,18 +645,9 @@ namespace Game.AI
                     {
                         if (IsUnit(target))
                         {
-                            if (e.Action.unitFlag.type == 0)
-                            {
-                                target.ToUnit().RemoveUnitFlag((UnitFlags)e.Action.unitFlag.flag);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS",
-                                target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                            }
-                            else
-                            {
-                                target.ToUnit().RemoveUnitFlag2((UnitFlags2)e.Action.unitFlag.flag);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS_2",
-                                target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                            }
+                            target.ToUnit().RemoveUnitFlag((UnitFlags)e.Action.unitFlag.flag);
+                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS",
+                            target.GetGUID().ToString(), e.Action.unitFlag.flag);
                         }
                     }
                     break;

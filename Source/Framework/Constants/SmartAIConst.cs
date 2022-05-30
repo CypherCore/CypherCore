@@ -261,8 +261,8 @@ namespace Framework.Constants
         CallAreaexploredoreventhappens = 15,     // Questid
         SetIngamePhaseGroup = 16,     // phaseGroupId, apply
         SetEmoteState = 17,     // Emoteid
-        SetUnitFlag = 18,     // Flags (May Be More Than One Field Or'D Together), Target
-        RemoveUnitFlag = 19,     // Flags (May Be More Than One Field Or'D Together), Target
+        SetUnitFlag = 18,     // Flags
+        RemoveUnitFlag = 19,     // Flags
         AutoAttack = 20,     // Allowattackstate (0 = Stop Attack, Anything Else Means Continue Attacking)
         AllowCombatMovement = 21,     // Allowcombatmovement (0 = Stop Combat Based Movement, Anything Else Continue Attacking)
         SetEventPhase = 22,     // Phase

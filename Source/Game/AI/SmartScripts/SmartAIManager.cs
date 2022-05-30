@@ -3518,7 +3518,6 @@ namespace Game.AI
         public struct UnitFlag
         {
             public uint flag;
-            public uint type;
         }
         public struct Flag
         {
