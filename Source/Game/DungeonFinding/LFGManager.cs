@@ -357,12 +357,13 @@ namespace Game.DungeonFinding
             if (!player || player.GetSession() == null || dungeons.Empty())
                 return;
 
+            // Sanitize input roles
+            roles &= LfgRoles.Any;
+            roles = FilterClassRoles(player, roles);
+
             // At least 1 role must be selected
             if ((roles & (LfgRoles.Tank | LfgRoles.Healer | LfgRoles.Damage)) == 0)
                 return;
-
-            // Sanitize input roles
-            roles &= LfgRoles.Any;
 
             Group grp = player.GetGroup();
             ObjectGuid guid = player.GetGUID();
@@ -678,6 +679,15 @@ namespace Game.DungeonFinding
 
             // Sanitize input roles
             roles &= LfgRoles.Any;
+
+            if (!guid.IsEmpty())
+            {
+                Player player = Global.ObjAccessor.FindPlayer(guid);
+                if (player != null)
+                    roles = FilterClassRoles(player, roles);
+                else
+                    return;
+            }
 
             bool sendRoleChosen = roleCheck.state != LfgRoleCheckState.Default && !guid.IsEmpty();
 
@@ -1777,6 +1787,19 @@ namespace Game.DungeonFinding
         Team GetTeam(ObjectGuid guid)
         {
             return PlayersStore[guid].GetTeam();
+        }
+
+        LfgRoles FilterClassRoles(Player player, LfgRoles roles)
+        {
+            uint allowedRoles = (uint)LfgRoles.Leader;
+            for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
+            {
+                var specialization = Global.DB2Mgr.GetChrSpecializationByIndex(player.GetClass(), i);
+                if (specialization != null)
+                    allowedRoles |= (1u << (specialization.Role + 1));
+            }
+
+            return roles & (LfgRoles)allowedRoles;
         }
 
         public byte RemovePlayerFromGroup(ObjectGuid gguid, ObjectGuid guid)
