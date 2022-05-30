@@ -428,7 +428,7 @@ namespace Game.Entities
 
             m_achievementSys.UpdateTimedCriteria(diff);
 
-            if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting))
+            if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting | UnitState.Charging))
             {
                 Unit victim = GetVictim();
                 if (victim != null)
