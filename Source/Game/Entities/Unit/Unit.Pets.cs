@@ -481,6 +481,7 @@ namespace Game.Entities
             Cypher.Assert(type != CharmType.Vehicle || (IsTypeId(TypeId.Unit) && IsVehicle()));
 
             charmer.SetCharm(this, false);
+            m_combatManager.RevalidateCombat();
 
             Player playerCharmer = charmer.ToPlayer();
             if (playerCharmer)

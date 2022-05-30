@@ -235,6 +235,27 @@ namespace Game.Combat
                 _pveRefs.First().Value.EndCombat();
         }
 
+        public void RevalidateCombat()
+        {
+            foreach(var (guid, refe) in _pveRefs.ToList())
+            {
+                if (!CanBeginCombat(_owner, refe.GetOther(_owner)))
+                {
+                    _pveRefs.Remove(guid); // erase manually here to avoid iterator invalidation
+                    refe.EndCombat();
+                }
+            }
+
+            foreach (var (guid, refe) in _pvpRefs.ToList())
+            {
+                if (!CanBeginCombat(_owner, refe.GetOther(_owner)))
+                {
+                    _pvpRefs.Remove(guid); // erase manually here to avoid iterator invalidation
+                    refe.EndCombat();
+                }
+            }
+        }
+
         void EndAllPvPCombat()
         {
             while (!_pvpRefs.Empty())
