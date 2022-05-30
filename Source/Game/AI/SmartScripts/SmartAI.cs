@@ -401,11 +401,6 @@ namespace Game.AI
             return true;
         }
 
-        public override void WaypointStarted(uint nodeId, uint pathId)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, nodeId, pathId);
-        }
-
         public override void WaypointReached(uint nodeId, uint pathId)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
@@ -799,16 +794,6 @@ namespace Game.AI
         public void SetDisableGravity(bool disable = true)
         {
             me.SetDisableGravity(disable);
-        }
-
-        public void SetCanFly(bool fly = true)
-        {
-            me.SetCanFly(fly);
-        }
-
-        public void SetSwim(bool swim)
-        {
-            me.SetSwim(swim);
         }
 
         public void SetEvadeDisabled(bool disable)

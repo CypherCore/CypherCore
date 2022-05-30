@@ -580,7 +580,6 @@ namespace Game.AI
                 SmartEvents.PassengerBoarded => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
                 SmartEvents.PassengerRemoved => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
                 SmartEvents.Charmed => Marshal.SizeOf(typeof(SmartEvent.Charm)),
-                SmartEvents.CharmedTarget => 0,
                 SmartEvents.SpellHitTarget => Marshal.SizeOf(typeof(SmartEvent.SpellHit)),
                 SmartEvents.Damaged => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
                 SmartEvents.DamagedTarget => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
@@ -589,7 +588,6 @@ namespace Game.AI
                 SmartEvents.CorpseRemoved => 0,
                 SmartEvents.AiInit => 0,
                 SmartEvents.DataSet => Marshal.SizeOf(typeof(SmartEvent.DataSet)),
-                SmartEvents.WaypointStart => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
                 SmartEvents.WaypointReached => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
                 SmartEvents.TransportAddplayer => 0,
                 SmartEvents.TransportAddcreature => Marshal.SizeOf(typeof(SmartEvent.TransportAddCreature)),
@@ -616,7 +614,6 @@ namespace Game.AI
                 SmartEvents.JustCreated => 0,
                 SmartEvents.GossipHello => Marshal.SizeOf(typeof(SmartEvent.GossipHello)),
                 SmartEvents.FollowCompleted => 0,
-                SmartEvents.PhaseChange => Marshal.SizeOf(typeof(SmartEvent.EventPhaseChange)),
                 SmartEvents.GameEventStart => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
                 SmartEvents.GameEventEnd => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
                 SmartEvents.GoLootStateChanged => Marshal.SizeOf(typeof(SmartEvent.GoLootStateChanged)),
@@ -729,7 +726,6 @@ namespace Game.AI
                 SmartActions.RemoveItem => Marshal.SizeOf(typeof(SmartAction.Item)),
                 SmartActions.SetRun => Marshal.SizeOf(typeof(SmartAction.SetRun)),
                 SmartActions.SetDisableGravity => Marshal.SizeOf(typeof(SmartAction.SetDisableGravity)),
-                SmartActions.SetSwim => Marshal.SizeOf(typeof(SmartAction.SetSwim)),
                 SmartActions.Teleport => Marshal.SizeOf(typeof(SmartAction.Teleport)),
                 SmartActions.SetCounter => Marshal.SizeOf(typeof(SmartAction.SetCounter)),
                 SmartActions.StoreTargetList => Marshal.SizeOf(typeof(SmartAction.StoreTargets)),
@@ -744,8 +740,6 @@ namespace Game.AI
                 SmartActions.TriggerTimedEvent => Marshal.SizeOf(typeof(SmartAction.TimeEvent)),
                 SmartActions.RemoveTimedEvent => Marshal.SizeOf(typeof(SmartAction.TimeEvent)),
                 SmartActions.AddAura => Marshal.SizeOf(typeof(SmartAction.AddAura)),
-                SmartActions.OverrideScriptBaseObject => 0,
-                SmartActions.ResetScriptBaseObject => 0,
                 SmartActions.CallScriptReset => 0,
                 SmartActions.SetRangedMovement => Marshal.SizeOf(typeof(SmartAction.SetRangedMovement)),
                 SmartActions.CallTimedActionlist => Marshal.SizeOf(typeof(SmartAction.TimedActionList)),
@@ -786,14 +780,9 @@ namespace Game.AI
                 SmartActions.SetCorpseDelay => Marshal.SizeOf(typeof(SmartAction.CorpseDelay)),
                 SmartActions.DisableEvade => Marshal.SizeOf(typeof(SmartAction.DisableEvade)),
                 SmartActions.GoSetGoState => Marshal.SizeOf(typeof(SmartAction.GoState)),
-                SmartActions.SetCanFly => Marshal.SizeOf(typeof(SmartAction.SetFly)),
-                SmartActions.RemoveAurasByType => Marshal.SizeOf(typeof(SmartAction.AuraType)),
-                SmartActions.SetSightDist => Marshal.SizeOf(typeof(SmartAction.SightDistance)),
-                SmartActions.Flee => Marshal.SizeOf(typeof(SmartAction.Flee)),
                 SmartActions.AddThreat => Marshal.SizeOf(typeof(SmartAction.Threat)),
                 SmartActions.LoadEquipment => Marshal.SizeOf(typeof(SmartAction.LoadEquipment)),
                 SmartActions.TriggerRandomTimedEvent => Marshal.SizeOf(typeof(SmartAction.RandomTimedEvent)),
-                SmartActions.RemoveAllGameobjects => 0,
                 SmartActions.PauseMovement => Marshal.SizeOf(typeof(SmartAction.PauseMovement)),
                 SmartActions.PlayAnimkit => Marshal.SizeOf(typeof(SmartAction.AnimKit)),
                 SmartActions.ScenePlay => Marshal.SizeOf(typeof(SmartAction.Scene)),
@@ -1141,27 +1130,6 @@ namespace Game.AI
                             return false;
                         break;
                     }
-                    case SmartEvents.PhaseChange:
-                    {
-                        if (e.Event.eventPhaseChange.phasemask == 0)
-                        {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has no param set, event won't be executed!.");
-                            return false;
-                        }
-
-                        if (e.Event.eventPhaseChange.phasemask > (uint)SmartEventPhaseBits.All)
-                        {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid phasemask {e.Event.eventPhaseChange.phasemask}, skipped.");
-                            return false;
-                        }
-
-                        if (e.Event.event_phase_mask != 0 && (e.Event.event_phase_mask & e.Event.eventPhaseChange.phasemask) == 0)
-                        {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event phasemask {e.Event.event_phase_mask} and incompatible event_param1 {e.Event.eventPhaseChange.phasemask}, skipped.");
-                            return false;
-                        }
-                        break;
-                    }
                     case SmartEvents.GameEventStart:
                     case SmartEvents.GameEventEnd:
                     {
@@ -1304,7 +1272,6 @@ namespace Game.AI
                     case SmartEvents.TimedEventTriggered:
                     case SmartEvents.InstancePlayerEnter:
                     case SmartEvents.TransportRelocate:
-                    case SmartEvents.CharmedTarget:
                     case SmartEvents.CorpseRemoved:
                     case SmartEvents.AiInit:
                     case SmartEvents.TransportAddplayer:
@@ -1314,7 +1281,6 @@ namespace Game.AI
                     case SmartEvents.Evade:
                     case SmartEvents.ReachedHome:
                     case SmartEvents.JustSummoned:
-                    case SmartEvents.WaypointStart:
                     case SmartEvents.WaypointReached:
                     case SmartEvents.WaypointPaused:
                     case SmartEvents.WaypointResumed:
@@ -1335,25 +1301,15 @@ namespace Game.AI
                     case SmartEvents.TargetHealthPct:
                     case SmartEvents.FriendlyHealth:
                     case SmartEvents.TargetManaPct:
+                    case SmartEvents.CharmedTarget:
+                    case SmartEvents.WaypointStart:
+                    case SmartEvents.PhaseChange:
                     case SmartEvents.IsBehindTarget:
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: Unused event_type {e} skipped.");
                         return false;
                     default:
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                         return false;
-                }
-
-                // Additional check for deprecated
-                switch (e.GetEventType())
-                {
-                    // Deprecated
-                    case SmartEvents.PhaseChange:
-                    case SmartEvents.WaypointStart:
-                    case SmartEvents.CharmedTarget:
-                        Log.outWarn(LogFilter.Sql, "SmartAIMgr: Deprecated event_type: {e}, it might be removed in the future, loaded for now.");
-                        break;
-                    default:
-                        break;
                 }
             }
 
@@ -1826,15 +1782,6 @@ namespace Game.AI
 
                     break;
                 }
-                case SmartActions.RemoveAurasByType:
-                {
-                    if (e.Action.auraType.type >= (uint)AuraType.Total)
-                    {
-                        Log.outError(LogFilter.Sql, $"Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} uses invalid data type {e.Action.auraType.type} (value range 0-TOTAL_AURAS), skipped.");
-                        return false;
-                    }
-                    break;
-                }
                 case SmartActions.RespawnBySpawnId:
                 {
                     if (Global.ObjectMgr.GetSpawnData((SpawnObjectType)e.Action.respawnData.spawnType, e.Action.respawnData.spawnId) == null)
@@ -1985,16 +1932,6 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setDisableGravity.disable);
                     break;
                 }
-                case SmartActions.SetCanFly:
-                {
-                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setFly.fly);
-                    break;
-                }
-                case SmartActions.SetSwim:
-                {
-                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setSwim.swim);
-                    break;
-                }
                 case SmartActions.SetCounter:
                 {
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.setCounter.reset);
@@ -2113,8 +2050,6 @@ namespace Game.AI
                 case SmartActions.CloseGossip:
                 case SmartActions.TriggerTimedEvent:
                 case SmartActions.RemoveTimedEvent:
-                case SmartActions.OverrideScriptBaseObject:
-                case SmartActions.ResetScriptBaseObject:
                 case SmartActions.ActivateGobject:
                 case SmartActions.CallScriptReset:
                 case SmartActions.SetRangedMovement:
@@ -2138,11 +2073,8 @@ namespace Game.AI
                 case SmartActions.SummonCreatureGroup:
                 case SmartActions.MoveOffset:
                 case SmartActions.SetCorpseDelay:
-                case SmartActions.SetSightDist:
-                case SmartActions.Flee:
                 case SmartActions.AddThreat:
                 case SmartActions.TriggerRandomTimedEvent:
-                case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.AddToStoredTargetList:
                     break;
@@ -2159,32 +2091,22 @@ namespace Game.AI
                 case SmartActions.SetUnitFlag:
                 case SmartActions.RemoveUnitFlag:
                 case SmartActions.InstallAITemplate:
-                case SmartActions.SetDynamicFlag:
-                case SmartActions.AddDynamicFlag:
-                case SmartActions.RemoveDynamicFlag:
-                    Log.outError(LogFilter.Sql, $"SmartAIMgr: Unused action_type: {e} Skipped.");
-                    return false;
-                default:
-                    Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
-                    return false;
-            }
-
-            // Additional check for deprecated
-            switch (e.GetActionType())
-            {
-                // Deprecated
                 case SmartActions.SetSwim:
                 case SmartActions.OverrideScriptBaseObject:
                 case SmartActions.ResetScriptBaseObject:
+                case SmartActions.SetDynamicFlag:
+                case SmartActions.AddDynamicFlag:
+                case SmartActions.RemoveDynamicFlag:
                 case SmartActions.SetCanFly:
                 case SmartActions.RemoveAurasByType:
                 case SmartActions.SetSightDist:
                 case SmartActions.Flee:
                 case SmartActions.RemoveAllGameobjects:
-                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
-                    break;
+                    Log.outError(LogFilter.Sql, $"SmartAIMgr: Unused action_type: {e} Skipped.");
+                    return false;
                 default:
-                    break;
+                    Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
+                    return false;
             }
 
             if (!CheckUnusedActionParams(e))
@@ -2655,9 +2577,6 @@ namespace Game.AI
         public Gossip gossip;
 
         [FieldOffset(16)]
-        public EventPhaseChange eventPhaseChange;
-
-        [FieldOffset(16)]
         public GameEvent gameEvent;
 
         [FieldOffset(16)]
@@ -2832,10 +2751,6 @@ namespace Game.AI
         {
             public uint sender;
             public uint action;
-        }
-        public struct EventPhaseChange
-        {
-            public uint phasemask;
         }
         public struct GameEvent
         {
@@ -3041,12 +2956,6 @@ namespace Game.AI
         public SetDisableGravity setDisableGravity;
 
         [FieldOffset(4)]
-        public SetFly setFly;
-
-        [FieldOffset(4)]
-        public SetSwim setSwim;
-
-        [FieldOffset(4)]
         public Teleport teleport;
 
         [FieldOffset(4)]
@@ -3093,9 +3002,6 @@ namespace Game.AI
 
         [FieldOffset(4)]
         public FleeAssist fleeAssist;
-
-        [FieldOffset(4)]
-        public Flee flee;
 
         [FieldOffset(4)]
         public EnableTempGO enableTempGO;
@@ -3153,9 +3059,6 @@ namespace Game.AI
 
         [FieldOffset(4)]
         public AuraType auraType;
-
-        [FieldOffset(4)]
-        public SightDistance sightDistance;
 
         [FieldOffset(4)]
         public LoadEquipment loadEquipment;
@@ -3479,14 +3382,6 @@ namespace Game.AI
         {
             public uint disable;
         }
-        public struct SetFly
-        {
-            public uint fly;
-        }
-        public struct SetSwim
-        {
-            public uint swim;
-        }
         public struct Teleport
         {
             public uint mapID;
@@ -3574,10 +3469,6 @@ namespace Game.AI
         public struct FleeAssist
         {
             public uint withEmote;
-        }
-        public struct Flee
-        {
-            public uint fleeTime;
         }
         public struct EnableTempGO
         {
@@ -3671,14 +3562,6 @@ namespace Game.AI
             public uint minDelay;
             public uint maxDelay;
             public uint spawnflags;
-        }
-        public struct AuraType
-        {
-            public uint type;
-        }
-        public struct SightDistance
-        {
-            public uint dist;
         }
         public struct LoadEquipment
         {

@@ -166,13 +166,13 @@ namespace Framework.Constants
         Range = 9,       // Mindist, Maxdist, Repeatmin, Repeatmax
         OocLos = 10,      // HostilityMode, Maxrnage, Cooldownmin, Cooldownmax
         Respawn = 11,      // Type, Mapid, Zoneid
-        TargetHealthPct = 12,      // UNUSED, do not reuse
+        TargetHealthPct = 12,      // UNUSED, DO NOT REUSE
         VictimCasting = 13,      // Repeatmin, Repeatmax
-        FriendlyHealth = 14,      // UNUSED, do not reuse
+        FriendlyHealth = 14,      // UNUSED, DO NOT REUSE
         FriendlyIsCc = 15,      // Radius, Repeatmin, Repeatmax
         FriendlyMissingBuff = 16,      // Spellid, Radius, Repeatmin, Repeatmax
         SummonedUnit = 17,      // Creatureid(0 All), Cooldownmin, Cooldownmax
-        TargetManaPct = 18,      // UNUSED, do not reuse
+        TargetManaPct = 18,      // UNUSED, DO NOT REUSE
         AcceptedQuest = 19,      // QuestID (0 = any), CooldownMin, CooldownMax
         RewardQuest = 20,      // QuestID (0 = any), CooldownMin, CooldownMax
         ReachedHome = 21,      // None
@@ -184,7 +184,7 @@ namespace Framework.Constants
         PassengerBoarded = 27,      // Cooldownmin, Cooldownmax
         PassengerRemoved = 28,      // Cooldownmin, Cooldownmax
         Charmed = 29,      // onRemove (0 - on apply, 1 - on remove)
-        CharmedTarget = 30,      // None
+        CharmedTarget = 30,      // UNUSED, DO NOT REUSE
         SpellHitTarget = 31,      // Spellid, School, Cooldownmin, Cooldownmax
         Damaged = 32,      // Mindmg, Maxdmg, Cooldownmin, Cooldownmax
         DamagedTarget = 33,      // Mindmg, Maxdmg, Cooldownmin, Cooldownmax
@@ -193,7 +193,7 @@ namespace Framework.Constants
         CorpseRemoved = 36,      // None
         AiInit = 37,      // None
         DataSet = 38,      // Id, Value, Cooldownmin, Cooldownmax
-        WaypointStart = 39,      // Pointid(0any), Pathid(0any)
+        WaypointStart = 39,      // UNUSED, DO NOT REUSE
         WaypointReached = 40,      // Pointid(0any), Pathid(0any)
         TransportAddplayer = 41,      // None
         TransportAddcreature = 42,      // Entry (0 Any)
@@ -220,8 +220,8 @@ namespace Framework.Constants
         JustCreated = 63,      // None
         GossipHello = 64,      // noReportUse (for GOs)
         FollowCompleted = 65,      // None
-        PhaseChange = 66,
-        IsBehindTarget = 67,      // UNUSED, do not reuse
+        PhaseChange = 66, //UNUSED, DO NOT REUSE
+        IsBehindTarget = 67,      // UNUSED, DO NOT REUSE
         GameEventStart = 68,      // GameEvent.Entry
         GameEventEnd = 69,      // GameEvent.Entry
         GoLootStateChanged = 70,      // Go State
@@ -261,8 +261,8 @@ namespace Framework.Constants
         CallAreaexploredoreventhappens = 15,     // Questid
         SetIngamePhaseGroup = 16,     // phaseGroupId, apply
         SetEmoteState = 17,     // Emoteid
-        SetUnitFlag = 18,     // UNUSED, do not reuse
-        RemoveUnitFlag = 19,     // UNUSED, do not reuse
+        SetUnitFlag = 18,     // UNUSED, DO NOT REUSE
+        RemoveUnitFlag = 19,     // UNUSED, DO NOT REUSE
         AutoAttack = 20,     // Allowattackstate (0 = Stop Attack, Anything Else Means Continue Attacking)
         AllowCombatMovement = 21,     // Allowcombatmovement (0 = Stop Combat Based Movement, Anything Else Continue Attacking)
         SetEventPhase = 22,     // Phase
@@ -301,10 +301,10 @@ namespace Framework.Constants
         WpStop = 55,     // Despawntime, Quest, Fail?
         AddItem = 56,     // Itemid, Count
         RemoveItem = 57,     // Itemid, Count
-        InstallAITemplate = 58,     // UNUSED, do not reuse
+        InstallAITemplate = 58,     // UNUSED, DO NOT REUSE
         SetRun = 59,     // 0/1
         SetDisableGravity = 60,     // 0/1
-        SetSwim = 61,     // 0/1
+        SetSwim = 61,     // UNUSED, DO NOT REUSE
         Teleport = 62,     // Mapid,
         SetCounter = 63,   // id, value, reset (0/1)
         StoreTargetList = 64,     // Varid,
@@ -319,8 +319,8 @@ namespace Framework.Constants
         TriggerTimedEvent = 73,     // Id(>1)
         RemoveTimedEvent = 74,     // Id(>1)
         AddAura = 75,     // UNUSED, DO NOT REUSE
-        OverrideScriptBaseObject = 76,     // Warning: Can Crash Core, Do Not Use If You Dont Know What You Are Doing
-        ResetScriptBaseObject = 77,     // None
+        OverrideScriptBaseObject = 76,     // UNUSED, DO NOT REUSE
+        ResetScriptBaseObject = 77,     // UNUSED, DO NOT REUSE
         CallScriptReset = 78,     // None
         SetRangedMovement = 79,     // Distance, Angle
         CallTimedActionlist = 80,     // Id (Overwrites Already Running Actionlist), Stop After Combat?(0/1), Timer Update Type(0-Ooc, 1-Ic, 2-Always)
@@ -337,9 +337,9 @@ namespace Framework.Constants
         RemoveUnitFieldBytes1 = 91,     // Bytes, Target
         InterruptSpell = 92,
         SendGoCustomAnim = 93,     // Anim Id
-        SetDynamicFlag = 94,     // UNUSED, do not reuse
-        AddDynamicFlag = 95,     // UNUSED, do not reuse
-        RemoveDynamicFlag = 96,     // UNUSED, do not reuse
+        SetDynamicFlag = 94,     // UNUSED, DO NOT REUSE
+        AddDynamicFlag = 95,     // UNUSED, DO NOT REUSE
+        RemoveDynamicFlag = 96,     // UNUSED, DO NOT REUSE
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
         SendGossipMenu = 98,     // Menuid, optionIndex
         GoSetLootState = 99,     // State
@@ -362,14 +362,14 @@ namespace Framework.Constants
         SetCorpseDelay = 116,    // timer
         DisableEvade = 117,    // 0/1 (1 = disabled, 0 = enabled)
         GoSetGoState = 118,
-        SetCanFly = 119,    // 0/1
-        RemoveAurasByType = 120,    // type
-        SetSightDist = 121,    // sightDistance
-        Flee = 122,    // fleeTime
+        SetCanFly = 119,    // UNUSED, DO NOT REUSE
+        RemoveAurasByType = 120,    // UNUSED, DO NOT REUSE
+        SetSightDist = 121,    // UNUSED, DO NOT REUSE
+        Flee = 122,    // UNUSED, DO NOT REUSE
         AddThreat = 123,    // +threat, -threat
         LoadEquipment = 124,    // id
         TriggerRandomTimedEvent = 125,    // id min range, id max range
-        RemoveAllGameobjects = 126,
+        RemoveAllGameobjects = 126,    // UNUSED, DO NOT REUSE
         PauseMovement = 127,	  // MovementSlot (default = 0, active = 1, controlled = 2), PauseTime (ms), Force
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId

@@ -1261,28 +1261,12 @@ namespace Game.AI
                     ((SmartAI)_me.GetAI()).SetDisableGravity(e.Action.setDisableGravity.disable != 0);
                     break;
                 }
-                case SmartActions.SetCanFly:
-                {
-                    if (!IsSmart())
-                        break;
-
-                    ((SmartAI)_me.GetAI()).SetCanFly(e.Action.setFly.fly != 0);
-                    break;
-                }
                 case SmartActions.SetRun:
                 {
                     if (!IsSmart())
                         break;
 
                     ((SmartAI)_me.GetAI()).SetRun(e.Action.setRun.run != 0);
-                    break;
-                }
-                case SmartActions.SetSwim:
-                {
-                    if (!IsSmart())
-                        break;
-
-                    ((SmartAI)_me.GetAI()).SetSwim(e.Action.setSwim.swim != 0);
                     break;
                 }
                 case SmartActions.SetCounter:
@@ -1533,36 +1517,6 @@ namespace Game.AI
                     break;
                 case SmartActions.RemoveTimedEvent:
                     _remIDs.Add(e.Action.timeEvent.id);
-                    break;
-                case SmartActions.OverrideScriptBaseObject:
-                {
-                    foreach (var target in targets)
-                    {
-                        if (IsCreature(target))
-                        {
-                            if (_meOrigGUID.IsEmpty() && _me)
-                                _meOrigGUID = _me.GetGUID();
-                            if (_goOrigGUID.IsEmpty() && _go)
-                                _goOrigGUID = _go.GetGUID();
-                            _go = null;
-                            _me = target.ToCreature();
-                            break;
-                        }
-                        else if (IsGameObject(target))
-                        {
-                            if (_meOrigGUID.IsEmpty() && _me)
-                                _meOrigGUID = _me.GetGUID();
-                            if (_goOrigGUID.IsEmpty() && _go)
-                                _goOrigGUID = _go.GetGUID();
-                            _go = target.ToGameObject();
-                            _me = null;
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case SmartActions.ResetScriptBaseObject:
-                    ResetBaseObject();
                     break;
                 case SmartActions.CallScriptReset:
                     SetPhase(0);
@@ -2222,30 +2176,6 @@ namespace Game.AI
                     ((SmartAI)_me.GetAI()).SetEvadeDisabled(e.Action.disableEvade.disable != 0);
                     break;
                 }
-                case SmartActions.RemoveAurasByType: // can be used to exit vehicle for example
-                {
-                    foreach (var target in targets)
-                        if (IsUnit(target))
-                            target.ToUnit().RemoveAurasByType((AuraType)e.Action.auraType.type);
-
-                    break;
-                }
-                case SmartActions.SetSightDist:
-                {
-                    foreach (var target in targets)
-                        if (IsCreature(target))
-                            target.ToCreature().m_SightDistance = e.Action.sightDistance.dist;
-
-                    break;
-                }
-                case SmartActions.Flee:
-                {
-                    foreach (var target in targets)
-                        if (IsCreature(target))
-                            target.ToCreature().GetMotionMaster().MoveFleeing(_me, e.Action.flee.fleeTime);
-
-                    break;
-                }
                 case SmartActions.AddThreat:
                 {
                     if (!_me.CanHaveThreatList())
@@ -2269,15 +2199,6 @@ namespace Game.AI
                 {
                     uint eventId = RandomHelper.URand(e.Action.randomTimedEvent.minId, e.Action.randomTimedEvent.maxId);
                     ProcessEventsFor(SmartEvents.TimedEventTriggered, null, eventId);
-                    break;
-                }
-
-                case SmartActions.RemoveAllGameobjects:
-                {
-                    foreach (var target in targets)
-                        if (IsUnit(target))
-                            target.ToUnit().RemoveAllGameObjects();
-
                     break;
                 }
                 case SmartActions.PauseMovement:
@@ -3244,7 +3165,6 @@ namespace Game.AI
                 case SmartEvents.Death:
                 case SmartEvents.Evade:
                 case SmartEvents.ReachedHome:
-                case SmartEvents.CharmedTarget:
                 case SmartEvents.CorpseRemoved:
                 case SmartEvents.AiInit:
                 case SmartEvents.TransportAddplayer:
@@ -3405,7 +3325,6 @@ namespace Game.AI
                     ProcessAction(e, unit, var0);
                     break;
                 }
-                case SmartEvents.WaypointStart:
                 case SmartEvents.WaypointReached:
                 case SmartEvents.WaypointResumed:
                 case SmartEvents.WaypointPaused:
@@ -3492,14 +3411,6 @@ namespace Game.AI
                     if (e.Event.gossip.sender != var0 || e.Event.gossip.action != var1)
                         return;
                     ProcessAction(e, unit, var0, var1);
-                    break;
-                }
-                case SmartEvents.PhaseChange:
-                {
-                    if (!IsInPhase(e.Event.eventPhaseChange.phasemask))
-                        return;
-
-                    ProcessAction(e, GetLastInvoker());
                     break;
                 }
                 case SmartEvents.GameEventStart:
@@ -4399,12 +4310,7 @@ namespace Game.AI
         }
         void SetPhase(uint p)
         {
-            uint oldPhase = _eventPhase;
-
             _eventPhase = p;
-
-            if (oldPhase != _eventPhase)
-                ProcessEventsFor(SmartEvents.PhaseChange);
         }
         bool IsInPhase(uint p)
         {
