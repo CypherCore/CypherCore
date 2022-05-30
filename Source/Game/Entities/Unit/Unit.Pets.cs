@@ -460,7 +460,7 @@ namespace Game.Entities
                 type = CharmType.Charm;
 
             CastStop();
-            CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
+            AttackStop();
 
             if (_oldFactionId != 0)
             {
