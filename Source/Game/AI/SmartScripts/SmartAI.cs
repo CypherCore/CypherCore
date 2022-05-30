@@ -676,7 +676,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, target.ToUnit(), 0, 0, false, spellInfo, target.ToGameObject());
         }
         
-        public override void DamageTaken(Unit attacker, ref uint damage)
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);
 

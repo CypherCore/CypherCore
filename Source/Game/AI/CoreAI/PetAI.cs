@@ -655,7 +655,7 @@ namespace Game.AI
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage)
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             AttackStart(attacker);
         }

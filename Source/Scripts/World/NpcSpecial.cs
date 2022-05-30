@@ -1315,7 +1315,7 @@ namespace Scripts.World.NpcSpecial
 
         public npc_training_dummy(Creature creature) : base(creature) { }
 
-        public override void DamageTaken(Unit attacker, ref uint damage)
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             damage = 0;
 

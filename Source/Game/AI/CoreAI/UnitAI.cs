@@ -488,7 +488,7 @@ namespace Game.AI
 
         // Called at any Damage to any victim (before damage apply)
         public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType) { }
-        public virtual void DamageTaken(Unit attacker, ref uint damage) { }
+        public virtual void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
         public virtual void HealReceived(Unit by, uint addhealth) { }
         public virtual void HealDone(Unit to, uint addhealth) { }
         public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }

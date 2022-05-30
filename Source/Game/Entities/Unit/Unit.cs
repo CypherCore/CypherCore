@@ -2363,7 +2363,7 @@ namespace Game.Entities
         {
             UnitAI victimAI = victim.GetAI();
             if (victimAI != null)
-                victimAI.DamageTaken(attacker, ref damage);
+                victimAI.DamageTaken(attacker, ref damage, damagetype, spellProto);
 
             UnitAI attackerAI = attacker ? attacker.GetAI() : null;
             if (attackerAI != null)
