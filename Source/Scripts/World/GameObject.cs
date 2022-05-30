@@ -595,34 +595,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_toy_train_set : GameObjectAI
-    {
-        uint _pulseTimer;
-
-        public go_toy_train_set(GameObject go) : base(go)
-        {
-            _pulseTimer = 3 * Time.InMilliseconds;
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (diff < _pulseTimer)
-                _pulseTimer -= diff;
-            else
-            {
-                me.CastSpell(null, SpellIds.ToyTrainPulse, true);
-                _pulseTimer = 6 * Time.InMilliseconds;
-            }
-        }
-
-        // triggered on wrecker'd
-        public override void DoAction(int action)
-        {
-            me.Delete();
-        }
-    }
-
-    [Script]
     class go_brewfest_music : GameObjectAI
     {
         uint rnd = 0;

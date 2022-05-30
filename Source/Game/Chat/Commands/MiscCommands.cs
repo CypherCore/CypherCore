@@ -111,8 +111,6 @@ namespace Game.Chat
             if (!playerTarget)
                 playerTarget = player;
 
-            Log.outDebug(LogFilter.Server, Global.ObjectMgr.GetCypherString(CypherStrings.Additem), itemId, count);
-
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
             {

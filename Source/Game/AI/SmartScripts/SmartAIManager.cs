@@ -2021,7 +2021,7 @@ namespace Game.AI
 
                     if (e.Action.activateGameObject.gameObjectAction >= (uint)GameObjectActions.Max)
                     {
-                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has gameObjectAction parameter out of range (max allowed {(uint)GameObjectActions.Max}, current value {e.Action.activateGameObject.gameObjectAction}), skipped.");
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has gameObjectAction parameter out of range (max allowed {(uint)GameObjectActions.Max - 1}, current value {e.Action.activateGameObject.gameObjectAction}), skipped.");
                         return false;
                     }
 

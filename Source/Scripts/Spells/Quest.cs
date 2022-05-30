@@ -203,13 +203,6 @@ namespace Scripts.Spells.Quest
         //Escapefromsilverbrook
         public const uint SummonWorgen = 48681;
 
-        //BasicOrdersEmote
-        public const uint TestSalute = 73835;
-        public const uint TestRoar = 73836;
-        public const uint TestCheer = 73725;
-        public const uint TestDance = 73837;
-        public const uint TestStopDance = 73886;
-
         //Deathcomesfromonhigh
         public const uint ForgeCredit = 51974;
         public const uint TownHallCredit = 51977;
@@ -1818,49 +1811,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(ModDest, 0, Targets.DestCasterSummon));
-        }
-    }
-
-    /*
-    73725 - [DND] Test Cheer
-    73835 - [DND] Test Salute
-    73836 - [DND] Test Roar
-    73837 - [DND] Test Dance
-    73886 - [DND] Test Stop Dance
-    */
-    [Script]
-    class spell_q25199_emote : AuraScript
-    {
-        void HandlePeriodic(AuraEffect aurEff)
-        {
-            Unit target = GetTarget();
-
-            switch (GetSpellInfo().Id)
-            {
-                case SpellIds.TestSalute:
-                    target.HandleEmoteCommand(Emote.OneshotSalute);
-                    break;
-                case SpellIds.TestRoar:
-                    target.HandleEmoteCommand(Emote.OneshotRoar);
-                    break;
-                case SpellIds.TestCheer:
-                    target.HandleEmoteCommand(Emote.OneshotCheer);
-                    break;
-                case SpellIds.TestDance:
-                    target.SetEmoteState(Emote.StateDance);
-                    break;
-                case SpellIds.TestStopDance:
-                    target.SetEmoteState(Emote.StateNone);
-                    break;
-                default:
-                    return;
-            }
-            Remove();
-        }
-
-        public override void Register()
-        {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
     

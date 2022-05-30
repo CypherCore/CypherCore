@@ -1444,6 +1444,19 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    class spell_gen_despawn_aura : AuraScript
+    {
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().ToCreature()?.DespawnOrUnsummon();
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script]
     class spell_gen_despawn_self : SpellScript
     {

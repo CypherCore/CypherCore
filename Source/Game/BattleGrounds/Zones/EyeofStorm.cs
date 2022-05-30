@@ -1148,8 +1148,8 @@ namespace Game.BattleGrounds.Zones
         public const uint AllianceLostBloodElfTower = 17831;
         public const uint HordeLostBloodElfTower = 17832;
 
-        public const uint AllianceTakenDraeneiRuins = 17826;
-        public const uint HordeTakenDraeneiRuins = 17827;
+        public const uint AllianceTakenDraeneiRuins = 17827;
+        public const uint HordeTakenDraeneiRuins = 17826;
         public const uint AllianceLostDraeneiRuins = 17833;
         public const uint HordeLostDraeneiRuins = 17834;
 
