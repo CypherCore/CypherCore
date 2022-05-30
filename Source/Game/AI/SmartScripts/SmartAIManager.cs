@@ -2166,6 +2166,24 @@ namespace Game.AI
                     return false;
             }
 
+            // Additional check for deprecated
+            switch (e.GetActionType())
+            {
+                // Deprecated
+                case SmartActions.SetSwim:
+                case SmartActions.OverrideScriptBaseObject:
+                case SmartActions.ResetScriptBaseObject:
+                case SmartActions.SetCanFly:
+                case SmartActions.RemoveAurasByType:
+                case SmartActions.SetSightDist:
+                case SmartActions.Flee:
+                case SmartActions.RemoveAllGameobjects:
+                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
+                    break;
+                default:
+                    break;
+            }
+
             if (!CheckUnusedActionParams(e))
                 return false;
 
