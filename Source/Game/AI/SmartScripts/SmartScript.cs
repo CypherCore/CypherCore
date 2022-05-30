@@ -626,32 +626,6 @@ namespace Game.AI
                     }
                     break;
                 }
-                case SmartActions.SetUnitFlag:
-                {
-                    foreach (var target in targets)
-                    {
-                        if (IsUnit(target))
-                        {
-                            target.ToUnit().AddUnitFlag((UnitFlags)e.Action.unitFlag.flag);
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS",
-                            target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                        }
-                    }
-                    break;
-                }
-                case SmartActions.RemoveUnitFlag:
-                {
-                    foreach (var target in targets)
-                    {
-                        if (IsUnit(target))
-                        {
-                            target.ToUnit().RemoveUnitFlag((UnitFlags)e.Action.unitFlag.flag);
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS",
-                            target.GetGUID().ToString(), e.Action.unitFlag.flag);
-                        }
-                    }
-                    break;
-                }
                 case SmartActions.AutoAttack:
                 {
                     if (!IsSmart())
@@ -3149,16 +3123,6 @@ namespace Game.AI
                     ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
                     break;
                 }
-                case SmartEvents.TargetHealthPct:
-                {
-                    if (_me == null || !_me.IsEngaged() || _me.GetVictim() == null || _me.GetVictim().GetMaxHealth() == 0)
-                        return;
-                    uint perc = (uint)_me.GetVictim().GetHealthPct();
-                    if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
-                        return;
-                    ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax, _me.GetVictim());
-                    break;
-                }
                 case SmartEvents.ManaPct:
                 {
                     if (_me == null || !_me.IsEngaged() || _me.GetMaxPower(PowerType.Mana) == 0)
@@ -3167,16 +3131,6 @@ namespace Game.AI
                     if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
                         return;
                     ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
-                    break;
-                }
-                case SmartEvents.TargetManaPct:
-                {
-                    if (_me == null || !_me.IsEngaged() || _me.GetVictim() == null || _me.GetVictim().GetMaxPower(PowerType.Mana) == 0)
-                        return;
-                    uint perc = (uint)_me.GetVictim().GetPowerPct(PowerType.Mana);
-                    if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
-                        return;
-                    ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax, _me.GetVictim());
                     break;
                 }
                 case SmartEvents.Range:
@@ -3209,22 +3163,6 @@ namespace Game.AI
                     }
 
                     ProcessTimedAction(e, e.Event.targetCasting.repeatMin, e.Event.targetCasting.repeatMax, _me.GetVictim());
-                    break;
-                }
-                case SmartEvents.FriendlyHealth:
-                {
-                    if (_me == null || !_me.IsEngaged())
-                        return;
-
-                    Unit target = DoSelectLowestHpFriendly(e.Event.friendlyHealth.radius, e.Event.friendlyHealth.hpDeficit);
-                    if (target == null || !target.IsInCombat())
-                    {
-                        // if there are at least two same npcs, they will perform the same action immediately even if this is useless...
-                        RecalcTimer(e, 1000, 3000);
-                        return;
-                    }
-
-                    ProcessTimedAction(e, e.Event.friendlyHealth.repeatMin, e.Event.friendlyHealth.repeatMax, target);
                     break;
                 }
                 case SmartEvents.FriendlyIsCc:
@@ -3334,19 +3272,6 @@ namespace Game.AI
                     }
 
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
-                    break;
-                }
-                case SmartEvents.IsBehindTarget:
-                {
-                    if (_me == null)
-                        return;
-
-                    Unit victim = _me.GetVictim();
-                    if (victim != null)
-                    {
-                        if (!victim.HasInArc(MathFunctions.PI, _me))
-                            ProcessTimedAction(e, e.Event.behindTarget.cooldownMin, e.Event.behindTarget.cooldownMax, victim);
-                    }
                     break;
                 }
                 case SmartEvents.ReceiveEmote:
@@ -3810,17 +3735,13 @@ namespace Game.AI
                     case SmartEvents.UpdateIc:
                     case SmartEvents.UpdateOoc:
                     case SmartEvents.HealthPct:
-                    case SmartEvents.TargetHealthPct:
                     case SmartEvents.ManaPct:
-                    case SmartEvents.TargetManaPct:
                     case SmartEvents.Range:
                     case SmartEvents.VictimCasting:
-                    case SmartEvents.FriendlyHealth:
                     case SmartEvents.FriendlyIsCc:
                     case SmartEvents.FriendlyMissingBuff:
                     case SmartEvents.HasAura:
                     case SmartEvents.TargetBuffed:
-                    case SmartEvents.IsBehindTarget:
                     case SmartEvents.FriendlyHealthPCT:
                     case SmartEvents.DistanceCreature:
                     case SmartEvents.DistanceGameobject:

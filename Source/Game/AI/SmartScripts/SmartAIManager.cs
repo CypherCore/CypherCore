@@ -249,11 +249,8 @@ namespace Game.AI
                     case SmartEvents.UpdateOoc:
                     case SmartEvents.UpdateIc:
                     case SmartEvents.HealthPct:
-                    case SmartEvents.TargetHealthPct:
                     case SmartEvents.ManaPct:
-                    case SmartEvents.TargetManaPct:
                     case SmartEvents.Range:
-                    case SmartEvents.FriendlyHealth:
                     case SmartEvents.FriendlyHealthPCT:
                     case SmartEvents.FriendlyMissingBuff:
                     case SmartEvents.HasAura:
@@ -414,17 +411,13 @@ namespace Game.AI
                 case SmartEvents.IcLos:
                 case SmartEvents.OocLos:
                 case SmartEvents.DistanceCreature:
-                case SmartEvents.FriendlyHealth:
                 case SmartEvents.FriendlyHealthPCT:
                 case SmartEvents.FriendlyIsCc:
                 case SmartEvents.FriendlyMissingBuff:
                 case SmartEvents.ActionDone:
-                case SmartEvents.TargetHealthPct:
-                case SmartEvents.TargetManaPct:
                 case SmartEvents.Range:
                 case SmartEvents.VictimCasting:
                 case SmartEvents.TargetBuffed:
-                case SmartEvents.IsBehindTarget:
                 case SmartEvents.InstancePlayerEnter:
                 case SmartEvents.TransportAddcreature:
                 case SmartEvents.DataSet:
@@ -572,13 +565,10 @@ namespace Game.AI
                 SmartEvents.Range => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
                 SmartEvents.OocLos => Marshal.SizeOf(typeof(SmartEvent.Los)),
                 SmartEvents.Respawn => Marshal.SizeOf(typeof(SmartEvent.Respawn)),
-                SmartEvents.TargetHealthPct => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
                 SmartEvents.VictimCasting => Marshal.SizeOf(typeof(SmartEvent.TargetCasting)),
-                SmartEvents.FriendlyHealth => Marshal.SizeOf(typeof(SmartEvent.FriendlyHealth)),
                 SmartEvents.FriendlyIsCc => Marshal.SizeOf(typeof(SmartEvent.FriendlyCC)),
                 SmartEvents.FriendlyMissingBuff => Marshal.SizeOf(typeof(SmartEvent.MissingBuff)),
                 SmartEvents.SummonedUnit => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
-                SmartEvents.TargetManaPct => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
                 SmartEvents.AcceptedQuest => Marshal.SizeOf(typeof(SmartEvent.Quest)),
                 SmartEvents.RewardQuest => Marshal.SizeOf(typeof(SmartEvent.Quest)),
                 SmartEvents.ReachedHome => 0,
@@ -627,7 +617,6 @@ namespace Game.AI
                 SmartEvents.GossipHello => Marshal.SizeOf(typeof(SmartEvent.GossipHello)),
                 SmartEvents.FollowCompleted => 0,
                 SmartEvents.PhaseChange => Marshal.SizeOf(typeof(SmartEvent.EventPhaseChange)),
-                SmartEvents.IsBehindTarget => Marshal.SizeOf(typeof(SmartEvent.BehindTarget)),
                 SmartEvents.GameEventStart => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
                 SmartEvents.GameEventEnd => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
                 SmartEvents.GoLootStateChanged => Marshal.SizeOf(typeof(SmartEvent.GoLootStateChanged)),
@@ -700,8 +689,6 @@ namespace Game.AI
                 SmartActions.CallAreaexploredoreventhappens => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 SmartActions.SetIngamePhaseGroup => Marshal.SizeOf(typeof(SmartAction.IngamePhaseGroup)),
                 SmartActions.SetEmoteState => Marshal.SizeOf(typeof(SmartAction.Emote)),
-                SmartActions.SetUnitFlag => Marshal.SizeOf(typeof(SmartAction.UnitFlag)),
-                SmartActions.RemoveUnitFlag => Marshal.SizeOf(typeof(SmartAction.UnitFlag)),
                 SmartActions.AutoAttack => Marshal.SizeOf(typeof(SmartAction.AutoAttack)),
                 SmartActions.AllowCombatMovement => Marshal.SizeOf(typeof(SmartAction.CombatMove)),
                 SmartActions.SetEventPhase => Marshal.SizeOf(typeof(SmartAction.SetEventPhase)),
@@ -987,8 +974,6 @@ namespace Game.AI
                     case SmartEvents.UpdateOoc:
                     case SmartEvents.HealthPct:
                     case SmartEvents.ManaPct:
-                    case SmartEvents.TargetHealthPct:
-                    case SmartEvents.TargetManaPct:
                     case SmartEvents.Range:
                     case SmartEvents.Damaged:
                     case SmartEvents.DamagedTarget:
@@ -1040,13 +1025,6 @@ namespace Game.AI
                             Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Area entry {e.Event.respawn.area}, skipped.");
                             return false;
                         }
-                        break;
-                    case SmartEvents.FriendlyHealth:
-                        if (!NotNULL(e, e.Event.friendlyHealth.radius))
-                            return false;
-
-                        if (!IsMinMaxValid(e, e.Event.friendlyHealth.repeatMin, e.Event.friendlyHealth.repeatMax))
-                            return false;
                         break;
                     case SmartEvents.FriendlyIsCc:
                         if (!IsMinMaxValid(e, e.Event.friendlyCC.repeatMin, e.Event.friendlyCC.repeatMax))
@@ -1182,12 +1160,6 @@ namespace Game.AI
                             Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event phasemask {e.Event.event_phase_mask} and incompatible event_param1 {e.Event.eventPhaseChange.phasemask}, skipped.");
                             return false;
                         }
-                        break;
-                    }
-                    case SmartEvents.IsBehindTarget:
-                    {
-                        if (!IsMinMaxValid(e, e.Event.behindTarget.cooldownMin, e.Event.behindTarget.cooldownMax))
-                            return false;
                         break;
                     }
                     case SmartEvents.GameEventStart:
@@ -1358,23 +1330,17 @@ namespace Game.AI
                     case SmartEvents.SceneComplete:
                     case SmartEvents.SceneTrigger:
                         break;
+
+                    //Unused
+                    case SmartEvents.TargetHealthPct:
+                    case SmartEvents.FriendlyHealth:
+                    case SmartEvents.TargetManaPct:
+                    case SmartEvents.IsBehindTarget:
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: Unused event_type {e} skipped.");
+                        return false;
                     default:
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                         return false;
-                }
-
-                // Additional check for deprecated
-                switch (e.GetEventType())
-                {
-                    // Deprecated
-                    case SmartEvents.FriendlyHealth:
-                    case SmartEvents.TargetHealthPct:
-                    case SmartEvents.IsBehindTarget:
-                    case SmartEvents.TargetManaPct:
-                        Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated event_type({e.GetEventType()}), {e}, it might be removed in the future, loaded for now.");
-                        break;
-                    default:
-                        break;
                 }
             }
 
@@ -2127,8 +2093,6 @@ namespace Game.AI
                 case SmartActions.AttackStop:
                 case SmartActions.WpPause:
                 case SmartActions.ForceDespawn:
-                case SmartActions.SetUnitFlag:
-                case SmartActions.RemoveUnitFlag:
                 case SmartActions.Playmovie:
                 case SmartActions.CloseGossip:
                 case SmartActions.TriggerTimedEvent:
@@ -2146,8 +2110,6 @@ namespace Game.AI
                 case SmartActions.SetUnitFieldBytes1:
                 case SmartActions.RemoveUnitFieldBytes1:
                 case SmartActions.SendGoCustomAnim:
-                case SmartActions.AddDynamicFlag:
-                case SmartActions.RemoveDynamicFlag:
                 case SmartActions.JumpToPos:
                 case SmartActions.SendGossipMenu:
                 case SmartActions.GoSetLootState:
@@ -2178,28 +2140,17 @@ namespace Game.AI
                     break;
                 }
                 // No longer supported
+                case SmartActions.SetUnitFlag:
+                case SmartActions.RemoveUnitFlag:
                 case SmartActions.InstallAITemplate:
                 case SmartActions.SetDynamicFlag:
-                    Log.outError(LogFilter.Sql, $"SmartAIMgr: No longer supported action_type: {e} Skipped.");
+                case SmartActions.AddDynamicFlag:
+                case SmartActions.RemoveDynamicFlag:
+                    Log.outError(LogFilter.Sql, $"SmartAIMgr: Unused action_type: {e} Skipped.");
                     return false;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
                     return false;
-            }
-
-            // Additional check for deprecated
-            switch (e.GetActionType())
-            {
-                // Deprecated
-                case SmartActions.SetUnitFlag:
-                case SmartActions.RemoveUnitFlag:
-                case SmartActions.AddItem:
-                case SmartActions.AddDynamicFlag:
-                case SmartActions.RemoveDynamicFlag:
-                    Log.outWarn(LogFilter.Sql, $"SmartAIMgr: Deprecated action_type: {e}, it might be removed in the future, loaded for now.");
-                    break;
-                default:
-                    break;
             }
 
             if (!CheckUnusedActionParams(e))
@@ -2613,9 +2564,6 @@ namespace Game.AI
         public TargetCasting targetCasting;
 
         [FieldOffset(16)]
-        public FriendlyHealth friendlyHealth;
-
-        [FieldOffset(16)]
         public FriendlyCC friendlyCC;
 
         [FieldOffset(16)]
@@ -2674,9 +2622,6 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public EventPhaseChange eventPhaseChange;
-
-        [FieldOffset(16)]
-        public BehindTarget behindTarget;
 
         [FieldOffset(16)]
         public GameEvent gameEvent;
@@ -2754,13 +2699,6 @@ namespace Game.AI
             public uint repeatMin;
             public uint repeatMax;
             public uint spellId;
-        }
-        public struct FriendlyHealth
-        {
-            public uint hpDeficit;
-            public uint radius;
-            public uint repeatMin;
-            public uint repeatMax;
         }
         public struct FriendlyCC
         {
@@ -2864,11 +2802,6 @@ namespace Game.AI
         public struct EventPhaseChange
         {
             public uint phasemask;
-        }
-        public struct BehindTarget
-        {
-            public uint cooldownMin;
-            public uint cooldownMax;
         }
         public struct GameEvent
         {
@@ -3096,9 +3029,6 @@ namespace Game.AI
 
         [FieldOffset(4)]
         public Equip equip;
-
-        [FieldOffset(4)]
-        public UnitFlag unitFlag;
 
         [FieldOffset(4)]
         public Flag flag;
@@ -3554,10 +3484,6 @@ namespace Game.AI
             public uint slot1;
             public uint slot2;
             public uint slot3;
-        }
-        public struct UnitFlag
-        {
-            public uint flag;
         }
         public struct Flag
         {

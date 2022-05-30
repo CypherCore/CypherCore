@@ -166,13 +166,13 @@ namespace Framework.Constants
         Range = 9,       // Mindist, Maxdist, Repeatmin, Repeatmax
         OocLos = 10,      // HostilityMode, Maxrnage, Cooldownmin, Cooldownmax
         Respawn = 11,      // Type, Mapid, Zoneid
-        TargetHealthPct = 12,      // Hpmin%, Hpmax%, Repeatmin, Repeatmax
+        TargetHealthPct = 12,      // UNUSED, do not reuse
         VictimCasting = 13,      // Repeatmin, Repeatmax
-        FriendlyHealth = 14,      // Hpdeficit, Radius, Repeatmin, Repeatmax
+        FriendlyHealth = 14,      // UNUSED, do not reuse
         FriendlyIsCc = 15,      // Radius, Repeatmin, Repeatmax
         FriendlyMissingBuff = 16,      // Spellid, Radius, Repeatmin, Repeatmax
         SummonedUnit = 17,      // Creatureid(0 All), Cooldownmin, Cooldownmax
-        TargetManaPct = 18,      // Manamin%, Manamax%, Repeatmin, Repeatmax
+        TargetManaPct = 18,      // UNUSED, do not reuse
         AcceptedQuest = 19,      // QuestID (0 = any), CooldownMin, CooldownMax
         RewardQuest = 20,      // QuestID (0 = any), CooldownMin, CooldownMax
         ReachedHome = 21,      // None
@@ -221,7 +221,7 @@ namespace Framework.Constants
         GossipHello = 64,      // noReportUse (for GOs)
         FollowCompleted = 65,      // None
         PhaseChange = 66,
-        IsBehindTarget = 67,      // Cooldownmin, Cooldownmax
+        IsBehindTarget = 67,      // UNUSED, do not reuse
         GameEventStart = 68,      // GameEvent.Entry
         GameEventEnd = 69,      // GameEvent.Entry
         GoLootStateChanged = 70,      // Go State
@@ -261,8 +261,8 @@ namespace Framework.Constants
         CallAreaexploredoreventhappens = 15,     // Questid
         SetIngamePhaseGroup = 16,     // phaseGroupId, apply
         SetEmoteState = 17,     // Emoteid
-        SetUnitFlag = 18,     // Flags
-        RemoveUnitFlag = 19,     // Flags
+        SetUnitFlag = 18,     // UNUSED, do not reuse
+        RemoveUnitFlag = 19,     // UNUSED, do not reuse
         AutoAttack = 20,     // Allowattackstate (0 = Stop Attack, Anything Else Means Continue Attacking)
         AllowCombatMovement = 21,     // Allowcombatmovement (0 = Stop Combat Based Movement, Anything Else Continue Attacking)
         SetEventPhase = 22,     // Phase
@@ -301,7 +301,7 @@ namespace Framework.Constants
         WpStop = 55,     // Despawntime, Quest, Fail?
         AddItem = 56,     // Itemid, Count
         RemoveItem = 57,     // Itemid, Count
-        InstallAITemplate = 58,     // do not use
+        InstallAITemplate = 58,     // UNUSED, do not reuse
         SetRun = 59,     // 0/1
         SetDisableGravity = 60,     // 0/1
         SetSwim = 61,     // 0/1
@@ -337,9 +337,9 @@ namespace Framework.Constants
         RemoveUnitFieldBytes1 = 91,     // Bytes, Target
         InterruptSpell = 92,
         SendGoCustomAnim = 93,     // Anim Id
-        SetDynamicFlag = 94,     // do not use
-        AddDynamicFlag = 95,     // Flags
-        RemoveDynamicFlag = 96,     // Flags
+        SetDynamicFlag = 94,     // UNUSED, do not reuse
+        AddDynamicFlag = 95,     // UNUSED, do not reuse
+        RemoveDynamicFlag = 96,     // UNUSED, do not reuse
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
         SendGossipMenu = 98,     // Menuid, optionIndex
         GoSetLootState = 99,     // State
