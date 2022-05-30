@@ -191,7 +191,7 @@ namespace Game.Groups
                 //                                                 0       1       2            3            4             5            6
                 SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, " +
                     //           7
-                    "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN groups g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
+                    "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN `groups` g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
                     "FROM group_instance gi LEFT JOIN instance i ON gi.instance = i.id ORDER BY guid");
 
                 if (result.IsEmpty())

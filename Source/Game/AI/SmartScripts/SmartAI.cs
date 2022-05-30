@@ -113,8 +113,8 @@ namespace Game.AI
 
             if (invoker && invoker.IsPlayer())
             {
-                _escortNPCFlags = me.m_unitData.NpcFlags[0];
-                me.ReplaceAllNpcFlags(0);
+                _escortNPCFlags = me.GetNpcFlags();
+                me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
             me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
