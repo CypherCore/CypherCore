@@ -2798,10 +2798,10 @@ namespace Game.Entities
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
         }
 
-        public List<Unit> GetPlayerListInGrid(float maxSearchRange)
+        public List<Unit> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
         {
             List<Unit> playerList = new();
-            var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange);
+            var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange, alive);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
             Cell.VisitWorldObjects(this, searcher, maxSearchRange);
