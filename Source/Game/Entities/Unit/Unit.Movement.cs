@@ -685,7 +685,7 @@ namespace Game.Entities
             return IsInDist(obj, objBoundaryRadius);
         }
 
-        public bool SetDisableGravity(bool disable, bool updateAnimationTier = true)
+        public bool SetDisableGravity(bool disable, bool updateAnimTier = true)
         {
             if (disable == IsGravityDisabled())
                 return false;
@@ -718,7 +718,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimationTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
@@ -1047,7 +1047,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool SetHover(bool enable, bool updateAnimationTier = true)
+        public bool SetHover(bool enable, bool updateAnimTier = true)
         {
             if (enable == HasUnitMovementFlag(MovementFlag.Hover))
                 return false;
@@ -1093,7 +1093,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimationTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);

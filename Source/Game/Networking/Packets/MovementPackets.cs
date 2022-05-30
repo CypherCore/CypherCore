@@ -229,7 +229,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(false);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
                 bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
-                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimationTierTransition
+                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
                 data.WriteBit(false);                                                   // HasUnknown901
                 data.FlushBits();
 

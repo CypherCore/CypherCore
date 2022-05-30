@@ -545,26 +545,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_frostblade_shrine : GameObjectAI
-    {
-        public go_frostblade_shrine(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            me.UseDoorOrButton(10);
-            if (!player.HasAura(SpellIds.RecentMeditation))
-            {
-                if (player.GetQuestStatus(QuestIds.TheCleansingHorde) == QuestStatus.Incomplete || player.GetQuestStatus(QuestIds.TheCleansingAlliance) == QuestStatus.Incomplete)
-                {
-                    player.CastSpell(player, SpellIds.CleansingSoul);
-                    player.SetStandState(UnitStandStateType.Sit);
-                }
-            }
-            return true;
-        }
-    }
-
-    [Script]
     class go_midsummer_bonfire : GameObjectAI
     {
         public go_midsummer_bonfire(GameObject go) : base(go) { }

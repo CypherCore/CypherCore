@@ -3279,7 +3279,8 @@ namespace Game.Entities
                 46008, // Negative Energy
                 45641, // Fire Bloom
                 55665, // Life Drain - Sapphiron (H)
-                28796  // Poison Bolt Volly - Faerlina
+                28796, // Poison Bolt Volly - Faerlina
+                37135  // Domination
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 5;

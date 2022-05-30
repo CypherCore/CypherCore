@@ -3399,6 +3399,35 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
+    class spell_gen_whisper_to_controller : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                TempSummon casterSummon = caster.ToTempSummon();
+                if (casterSummon != null)
+                {
+                    Player target = casterSummon.GetSummonerUnit().ToPlayer();
+                    if (target != null)
+                        casterSummon.Whisper((uint)GetEffectValue(), target, false);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
+    [Script]
     class spell_gen_eject_all_passengers : SpellScript
     {
         void RemoveVehicleAuras()
