@@ -309,7 +309,7 @@ namespace Game.Entities
             }
 
             CastStop();
-            CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
+            AttackStop();
 
             Player playerCharmer = charmer.ToPlayer();
 
