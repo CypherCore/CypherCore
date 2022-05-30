@@ -196,7 +196,7 @@ namespace Game.Entities
             // All position info based actions have been executed, reset info
             _positionUpdateInfo.Reset();
 
-            if (GetAI() == null && (!IsPlayer() || (IsCharmed() && GetCharmerGUID().IsCreature())))
+            if (HasScheduledAIChange() && (!IsPlayer() || (IsCharmed() && GetCharmerGUID().IsCreature())))
                 UpdateCharmAI();
 
             RefreshAI();
@@ -1223,11 +1223,11 @@ namespace Game.Entities
             bool charmed = IsCharmed();
 
             if (charmed)
-                PushAI(null);
+                PushAI(GetScheduledChangeAI());
             else
             {
                 RestoreDisabledAI();
-                PushAI(null); //This could actually be PopAI() to get the previous AI but it's required atm to trigger UpdateCharmAI()
+                PushAI(GetScheduledChangeAI()); //This could actually be PopAI() to get the previous AI but it's required atm to trigger UpdateCharmAI()
             }
         }
 
@@ -1235,10 +1235,28 @@ namespace Game.Entities
         {
             // Keep popping the stack until we either reach the bottom or find a valid AI
             while (PopAI())
-                if (GetTopAI() != null)
+                if (GetTopAI() != null && GetTopAI() is not ScheduledChangeAI)
                     return;
         }
 
+        UnitAI GetScheduledChangeAI()
+        {
+            Creature creature = ToCreature();
+            if (creature != null)
+                return new ScheduledChangeAI(creature);
+            else
+                return null;
+        }
+
+        bool HasScheduledAIChange()
+        {
+            UnitAI ai = GetAI();
+            if (ai != null)
+                return ai is ScheduledChangeAI;
+            else
+                return true;
+        }
+        
         public bool IsPossessedByPlayer()
         {
             return HasUnitState(UnitState.Possessed) && GetCharmerGUID().IsPlayer();
