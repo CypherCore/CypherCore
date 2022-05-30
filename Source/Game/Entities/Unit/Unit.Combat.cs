@@ -1280,7 +1280,7 @@ namespace Game.Entities
             bool canDodge = !victim.IsTypeId(TypeId.Player) || canParryOrBlock;
 
             // if victim is casting or cc'd it can't avoid attacks
-            if (victim.IsNonMeleeSpellCast(false) || victim.HasUnitState(UnitState.Controlled))
+            if (victim.IsNonMeleeSpellCast(false, false, true) || victim.HasUnitState(UnitState.Controlled))
             {
                 canDodge = false;
                 canParryOrBlock = false;
