@@ -3588,7 +3588,7 @@ namespace Game.Entities
                 {
                     Creature creature = GetMap().GetCreature(guid);
                     // Update fields of triggers, transformed units or unselectable units (values dependent on GM state)
-                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.HasUnitFlag(UnitFlags.NotSelectable)))
+                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.HasUnitFlag(UnitFlags.Uninteractible)))
                         continue;
 
                     creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID);
@@ -5980,7 +5980,7 @@ namespace Game.Entities
             UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Looting |
             UnitFlags.PetInCombat | UnitFlags.Silenced | UnitFlags.Pacified |
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
-            UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.NotSelectable |
+            UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.Uninteractible |
             UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.TaxiFlight);
             AddUnitFlag(UnitFlags.PlayerControlled);   // must be set
 

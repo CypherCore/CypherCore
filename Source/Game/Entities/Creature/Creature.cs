@@ -414,7 +414,7 @@ namespace Game.Entities
 
             // trigger creature is always not selectable and can not be attacked
             if (IsTrigger())
-                AddUnitFlag(UnitFlags.NotSelectable);
+                AddUnitFlag(UnitFlags.Uninteractible);
 
             InitializeReactState();
 
@@ -2252,7 +2252,7 @@ namespace Game.Entities
             if (IsCivilian())
                 return false;
 
-            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable) || IsImmuneToNPC())
+            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible) || IsImmuneToNPC())
                 return false;
 
             // skip fighting creature

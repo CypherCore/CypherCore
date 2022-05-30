@@ -688,9 +688,9 @@ namespace Game.BattleGrounds.Zones
                 if (dem)
                 {
                     if (start)
-                        dem.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        dem.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
                     else
-                        dem.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        dem.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
                 }
             }
         }

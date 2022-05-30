@@ -73,7 +73,7 @@ namespace Framework.Constants
         Confused = 0x400000,
         Fleeing = 0x800000,
         Possessed = 0x1000000, // under direct client control by a player (possess or vehicle)
-        NotSelectable = 0x2000000,
+        Uninteractible = 0x2000000,
         Skinnable = 0x4000000,
         Mount = 0x8000000,
         Unk28 = 0x10000000,

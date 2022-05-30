@@ -516,7 +516,7 @@ namespace Game.BattleFields
         {
             creature.CombatStop();
             creature.SetReactState(ReactStates.Passive);
-            creature.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            creature.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
             creature.DisappearAndDie();
             creature.SetVisible(false);
         }
@@ -524,7 +524,7 @@ namespace Game.BattleFields
         public void ShowNpc(Creature creature, bool aggressive)
         {
             creature.SetVisible(true);
-            creature.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            creature.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
             if (!creature.IsAlive())
                 creature.Respawn(true);
             if (aggressive)

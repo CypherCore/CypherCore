@@ -374,8 +374,8 @@ namespace Game.Entities
                 unit.SetDisableGravity(false);
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
-            if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUnselectable)
-                unit.RemoveUnitFlag(UnitFlags.NotSelectable);
+            if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUninteractible)
+                unit.RemoveUnitFlag(UnitFlags.Uninteractible);
 
             seat.Value.Passenger.Reset();
 
@@ -644,7 +644,7 @@ namespace Game.Entities
 
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
-            Seat.Value.Passenger.IsUnselectable = Passenger.HasUnitFlag(UnitFlags.NotSelectable);
+            Seat.Value.Passenger.IsUninteractible = Passenger.HasUnitFlag(UnitFlags.Uninteractible);
             Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {
@@ -767,13 +767,13 @@ namespace Game.Entities
     public struct PassengerInfo
     {
         public ObjectGuid Guid;
-        public bool IsUnselectable;
+        public bool IsUninteractible;
         public bool IsGravityDisabled;
 
         public void Reset()
         {
             Guid = ObjectGuid.Empty;
-            IsUnselectable = false;
+            IsUninteractible = false;
             IsGravityDisabled = false;
         }
     }

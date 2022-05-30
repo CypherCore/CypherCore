@@ -2272,9 +2272,9 @@ namespace Game.Entities
         uint GetViewerDependentFlags(UnitData unitData, Unit unit, Player receiver)
         {
             uint flags = unitData.Flags;
-            // Gamemasters should be always able to select units - remove not selectable flag
+            // Update fields of triggers, transformed units or uninteractible units (values dependent on GM state)
             if (receiver.IsGameMaster())
-                flags &= ~(uint)UnitFlags.NotSelectable;
+                flags &= ~(uint)UnitFlags.Uninteractible;
 
             return flags;
         }

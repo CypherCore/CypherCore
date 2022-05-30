@@ -160,7 +160,7 @@ namespace Game.Entities
             if (!IsAlive())
                 return false;
 
-            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable))
+            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible))
                 return false;
 
             if (IsTypeId(TypeId.Player) && ToPlayer().IsGameMaster())

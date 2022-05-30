@@ -810,7 +810,7 @@ namespace Scripts.World.NpcSpecial
         public override void Reset()
         {
             Initialize();
-            me.RemoveUnitFlag(UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.Uninteractible);
         }
 
         public void BeginEvent(Player player)
@@ -835,7 +835,7 @@ namespace Scripts.World.NpcSpecial
             }
 
             Event = true;
-            me.AddUnitFlag(UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.Uninteractible);
         }
 
         public void PatientDied(Position point)
@@ -992,7 +992,7 @@ namespace Scripts.World.NpcSpecial
             Initialize();
 
             //no select
-            me.RemoveUnitFlag(UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.Uninteractible);
 
             //no regen health
             me.AddUnitFlag(UnitFlags.InCombat);
@@ -1038,7 +1038,7 @@ namespace Scripts.World.NpcSpecial
             }
 
             //make not selectable
-            me.AddUnitFlag(UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.Uninteractible);
 
             //regen health
             me.RemoveUnitFlag(UnitFlags.InCombat);
@@ -1075,7 +1075,7 @@ namespace Scripts.World.NpcSpecial
             if (me.IsAlive() && me.GetHealth() <= 6)
             {
                 me.RemoveUnitFlag(UnitFlags.InCombat);
-                me.AddUnitFlag(UnitFlags.NotSelectable);
+                me.AddUnitFlag(UnitFlags.Uninteractible);
                 me.SetDeathState(DeathState.JustDied);
                 me.AddDynamicFlag(UnitDynFlags.Dead);
 
