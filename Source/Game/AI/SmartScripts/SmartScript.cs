@@ -3226,6 +3226,20 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartEvents.OnSpellCast:
+                case SmartEvents.OnSpellFailed:
+                case SmartEvents.OnSpellStart:
+                {
+                    if (spell == null)
+                        return;
+
+                    if (spell.Id != e.Event.spellCast.spell)
+                        return;
+
+                    RecalcTimer(e, e.Event.spellCast.cooldownMin, e.Event.spellCast.cooldownMax);
+                    ProcessAction(e, null, 0, 0, bvar, spell);
+                    break;
+                }
                 case SmartEvents.OocLos:
                 {
                     if (_me == null || _me.IsEngaged())

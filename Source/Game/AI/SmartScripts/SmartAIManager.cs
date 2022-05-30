@@ -629,6 +629,9 @@ namespace Game.AI
                 SmartEvents.SceneCancel => 0,
                 SmartEvents.SceneComplete => 0,
                 SmartEvents.SummonedUnitDies => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
+                SmartEvents.OnSpellCast => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
@@ -987,6 +990,17 @@ namespace Game.AI
                         if (!IsMinMaxValid(e, e.Event.spellHit.cooldownMin, e.Event.spellHit.cooldownMax))
                             return false;
                         break;
+                    case SmartEvents.OnSpellCast:
+                    case SmartEvents.OnSpellFailed:
+                    case SmartEvents.OnSpellStart:
+                    {
+                        if (!IsSpellValid(e, e.Event.spellCast.spell))
+                            return false;
+
+                        if (!IsMinMaxValid(e, e.Event.spellCast.cooldownMin, e.Event.spellCast.cooldownMax))
+                            return false;
+                        break;
+                    }
                     case SmartEvents.OocLos:
                     case SmartEvents.IcLos:
                         if (!IsMinMaxValid(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax))
@@ -2406,6 +2420,9 @@ namespace Game.AI
                 SmartEvents.SceneCancel => SmartScriptTypeMaskId.Scene,
                 SmartEvents.SceneComplete => SmartScriptTypeMaskId.Scene,
                 SmartEvents.SummonedUnitDies => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.OnSpellCast => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
                 _ => 0,
             };
 
@@ -2588,6 +2605,9 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public Counter counter;
+
+        [FieldOffset(16)]
+        public SpellCast spellCast;
 
         [FieldOffset(16)]
         public Spell spell;
@@ -2779,6 +2799,12 @@ namespace Game.AI
         {
             public uint id;
             public uint value;
+            public uint cooldownMin;
+            public uint cooldownMax;
+        }
+        public struct SpellCast
+        {
+            public uint spell;
             public uint cooldownMin;
             public uint cooldownMax;
         }

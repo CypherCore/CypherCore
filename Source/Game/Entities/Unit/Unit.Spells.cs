@@ -2422,7 +2422,7 @@ namespace Game.Entities
                 }
 
                 if (IsCreature() && IsAIEnabled())
-                    ToCreature().GetAI().OnSpellCastFinished(spell.GetSpellInfo(), SpellFinishReason.Canceled);
+                    ToCreature().GetAI().OnSpellFailed(spell.GetSpellInfo());
             }
         }
         public void UpdateInterruptMask()

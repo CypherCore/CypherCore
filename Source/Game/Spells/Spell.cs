@@ -2502,6 +2502,12 @@ namespace Game.Spells
                 if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreGCD))
                     TriggerGlobalCooldown();
 
+                // Call CreatureAI hook OnSpellStart
+                Creature caster = m_originalCaster.ToCreature();
+                if (caster != null)
+                    if (caster.IsAIEnabled())
+                        caster.GetAI().OnSpellStart(GetSpellInfo());
+
                 if (willCastDirectly)
                     Cast(true);
             }
@@ -2902,11 +2908,11 @@ namespace Game.Spells
 
             Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
-            // Call CreatureAI hook OnSuccessfulSpellCast
+            // Call CreatureAI hook OnSpellCast
             Creature caster = m_originalCaster.ToCreature();
             if (caster)
                 if (caster.IsAIEnabled())
-                    caster.GetAI().OnSpellCastFinished(GetSpellInfo(), SpellFinishReason.SuccessfulCast);
+                    caster.GetAI().OnSpellCast(GetSpellInfo());
         }
 
         void DoProcessTargetContainer<T>(List<T> targetContainer) where T : TargetInfoBase
@@ -3268,7 +3274,7 @@ namespace Game.Spells
                         Creature creatureCaster = m_caster.ToCreature();
                         if (creatureCaster != null)
                             if (creatureCaster.IsAIEnabled())
-                                creatureCaster.GetAI().OnSpellCastFinished(m_spellInfo, SpellFinishReason.ChannelingComplete);
+                                creatureCaster.GetAI().OnChannelFinished(m_spellInfo);
                     }
                     break;
                 }

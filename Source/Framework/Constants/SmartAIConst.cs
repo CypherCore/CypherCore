@@ -237,8 +237,11 @@ namespace Framework.Constants
         SceneCancel = 80,      // none
         SceneComplete = 81,      // none
         SummonedUnitDies = 82, // CreatureId(0 all), CooldownMin, CooldownMax
+        OnSpellCast = 83,      // SpellID, CooldownMin, CooldownMax
+        OnSpellFailed = 84,      // SpellID, CooldownMin, CooldownMax
+        OnSpellStart = 85,      // SpellID, CooldownMin, CooldownMax
 
-        End = 83
+        End = 86
     }
 
     public enum SmartActions
