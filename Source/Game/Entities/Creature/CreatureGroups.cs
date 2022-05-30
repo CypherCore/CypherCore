@@ -261,17 +261,10 @@ namespace Game.Entities
             foreach (var creature in _members.Keys)
             {
                 if (creature != _leader && creature.IsAlive())
-                {
-                    if (dismiss)
-                        creature.GetMotionMaster().Initialize();
-                    else
-                        creature.GetMotionMaster().MoveIdle();
-
-                    Log.outDebug(LogFilter.Unit, $"CreatureGroup::FormationReset: Set {(dismiss ? "default" : "idle")} movement for member {creature.GetGUID()}");
-                }
+                    creature.GetMotionMaster().MoveIdle();
             }
 
-            _formed = !dismiss;
+            //_formed = !dismiss;
         }
 
         public void LeaderStartedMoving()
