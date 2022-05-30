@@ -334,14 +334,6 @@ namespace Game.Spells
             return HasEffect(SpellEffectName.CreateRandomItem) || HasEffect(SpellEffectName.CreateLoot);
         }
 
-        public bool IsQuestTame()
-        {
-            if (GetEffects().Count < 2)
-                return false;
-
-            return GetEffect(0).Effect == SpellEffectName.Threat && GetEffect(1).Effect == SpellEffectName.ApplyAura && GetEffect(1).ApplyAuraName == AuraType.Dummy;
-        }
-
         public bool IsProfession()
         {
             foreach (var effectInfo in _effects)

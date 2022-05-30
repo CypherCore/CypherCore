@@ -162,6 +162,44 @@ namespace Scripts.Spells.Quest
         public const uint SummonDrakkariChieftain = 52616;
         public const uint DrakkariChieftainkKillCredit = 52620;
 
+        // Tamingthebeast
+        public const uint TameIceClawBear = 19548;
+        public const uint TameLargeCragBoar = 19674;
+        public const uint TameSnowLeopard = 19687;
+        public const uint TameAdultPlainstrider = 19688;
+        public const uint TamePrairieStalker = 19689;
+        public const uint TameSwoop = 19692;
+        public const uint TameWebwoodLurker = 19693;
+        public const uint TameDireMottledBoar = 19694;
+        public const uint TameSurfCrawler = 19696;
+        public const uint TameArmoredScorpid = 19697;
+        public const uint TameNightsaberStalker = 19699;
+        public const uint TameStrigidScreecher = 19700;
+        public const uint TameBarbedCrawler = 30646;
+        public const uint TameGreaterTimberstrider = 30653;
+        public const uint TameNightstalker = 30654;
+        public const uint TameCrazedDragonhawk = 30099;
+        public const uint TameElderSpringpaw = 30102;
+        public const uint TameMistbat = 30105;
+        public const uint TameIceClawBear1 = 19597;
+        public const uint TameLargeCragBoar1 = 19677;
+        public const uint TameSnowLeopard1 = 19676;
+        public const uint TameAdultPlainstrider1 = 19678;
+        public const uint TamePrairieStalker1 = 19679;
+        public const uint TameSwoop1 = 19680;
+        public const uint TameWebwoodLurker1 = 19684;
+        public const uint TameDireMottledBoar1 = 19681;
+        public const uint TameSurfCrawler1 = 19682;
+        public const uint TameArmoredScorpid1 = 19683;
+        public const uint TameNightsaberStalker1 = 19685;
+        public const uint TameStrigidScreecher1 = 19686;
+        public const uint TameBarbedCrawler1 = 30647;
+        public const uint TameGreaterTimberstrider1 = 30648;
+        public const uint TameNightstalker1 = 30652;
+        public const uint TameCrazedDragonhawk1 = 30100;
+        public const uint TameElderSpringpaw1 = 30103;
+        public const uint TameMistbat1 = 30104;
+
         //Escapefromsilverbrook
         public const uint SummonWorgen = 48681;
 
@@ -1691,6 +1729,57 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script]
+    class spell_quest_taming_the_beast : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TameIceClawBear, SpellIds.TameLargeCragBoar, SpellIds.TameSnowLeopard, SpellIds.TameAdultPlainstrider, SpellIds.TamePrairieStalker, SpellIds.TameSwoop,
+                SpellIds.TameWebwoodLurker, SpellIds.TameDireMottledBoar, SpellIds.TameSurfCrawler, SpellIds.TameArmoredScorpid, SpellIds.TameNightsaberStalker, SpellIds.TameStrigidScreecher,
+                SpellIds.TameBarbedCrawler, SpellIds.TameGreaterTimberstrider, SpellIds.TameNightstalker, SpellIds.TameCrazedDragonhawk, SpellIds.TameElderSpringpaw, SpellIds.TameMistbat);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (!GetCaster() || !GetCaster().IsAlive() || !GetTarget().IsAlive())
+                return;
+
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            uint finalSpellId = GetId() switch
+            {
+                SpellIds.TameIceClawBear => SpellIds.TameIceClawBear1,
+                SpellIds.TameLargeCragBoar => SpellIds.TameLargeCragBoar1,
+                SpellIds.TameSnowLeopard => SpellIds.TameSnowLeopard1,
+                SpellIds.TameAdultPlainstrider => SpellIds.TameAdultPlainstrider1,
+                SpellIds.TamePrairieStalker => SpellIds.TamePrairieStalker1,
+                SpellIds.TameSwoop => SpellIds.TameSwoop1,
+                SpellIds.TameWebwoodLurker => SpellIds.TameWebwoodLurker1,
+                SpellIds.TameDireMottledBoar => SpellIds.TameDireMottledBoar1,
+                SpellIds.TameSurfCrawler => SpellIds.TameSurfCrawler1,
+                SpellIds.TameArmoredScorpid => SpellIds.TameArmoredScorpid1,
+                SpellIds.TameNightsaberStalker => SpellIds.TameNightsaberStalker1,
+                SpellIds.TameStrigidScreecher => SpellIds.TameStrigidScreecher1,
+                SpellIds.TameBarbedCrawler => SpellIds.TameBarbedCrawler1,
+                SpellIds.TameGreaterTimberstrider => SpellIds.TameGreaterTimberstrider1,
+                SpellIds.TameNightstalker => SpellIds.TameNightstalker1,
+                SpellIds.TameCrazedDragonhawk => SpellIds.TameCrazedDragonhawk1,
+                SpellIds.TameElderSpringpaw => SpellIds.TameElderSpringpaw1,
+                SpellIds.TameMistbat => SpellIds.TameMistbat1,
+                _ => 0
+            };
+
+            if (finalSpellId != 0)
+                GetCaster().CastSpell(GetTarget(), finalSpellId, true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
     
