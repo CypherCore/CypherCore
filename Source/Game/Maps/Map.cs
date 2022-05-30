@@ -3392,7 +3392,7 @@ namespace Game.Maps
                 bones = new Corpse();
                 bones.Create(corpse.GetGUID().GetCounter(), this);
 
-                bones.SetCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.m_corpseData.DynamicFlags);
+                bones.ReplaceAllCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.m_corpseData.DynamicFlags);
                 bones.SetOwnerGUID(corpse.m_corpseData.Owner);
                 bones.SetPartyGUID(corpse.m_corpseData.PartyGUID);
                 bones.SetGuildGUID(corpse.m_corpseData.GuildGUID);
@@ -3401,7 +3401,7 @@ namespace Game.Maps
                 bones.SetSex(corpse.m_corpseData.Sex);
                 bones.SetClass(corpse.m_corpseData.Class);
                 bones.SetCustomizations(corpse.m_corpseData.Customizations);
-                bones.SetFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
+                bones.ReplaceAllFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
                 bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);
                 for (int i = 0; i < EquipmentSlot.End; ++i)
                     bones.SetItem((uint)i, corpse.m_corpseData.Items[i]);

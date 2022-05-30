@@ -1131,8 +1131,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.SetNpcFlags(npcFlags);
-                creature.SetNpcFlags2(npcFlags2);
+                creature.ReplaceAllNpcFlags(npcFlags);
+                creature.ReplaceAllNpcFlags2(npcFlags2);
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
                 stmt.AddValue(0, (ulong)npcFlags | ((ulong)npcFlags2 << 32));

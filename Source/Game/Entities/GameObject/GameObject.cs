@@ -265,7 +265,7 @@ namespace Game.Entities
             if (goOverride != null)
             {
                 SetFaction(goOverride.Faction);
-                SetFlags(goOverride.Flags);
+                ReplaceAllFlags(goOverride.Flags);
             }
 
             if (m_goTemplateAddon != null)
@@ -529,7 +529,7 @@ namespace Game.Entities
                                 if (caster != null && caster.IsTypeId(TypeId.Player))
                                 {
                                     SetGoState(GameObjectState.Active);
-                                    SetFlags(GameObjectFlags.NoDespawn);
+                                    ReplaceAllFlags(GameObjectFlags.NoDespawn);
 
                                     UpdateData udata = new(caster.GetMapId());
                                     UpdateObject packet;
@@ -903,7 +903,7 @@ namespace Game.Entities
                         //reset flags
                         GameObjectOverride goOverride = GetGameObjectOverride();
                         if (goOverride != null)
-                            SetFlags(goOverride.Flags);
+                            ReplaceAllFlags(goOverride.Flags);
                     }
 
                     if (m_respawnDelayTime == 0)
@@ -1003,7 +1003,7 @@ namespace Game.Entities
             SetGoState(GameObjectState.Ready);
             GameObjectOverride goOverride = GetGameObjectOverride();
             if (goOverride != null)
-                SetFlags(goOverride.Flags);
+                ReplaceAllFlags(goOverride.Flags);
 
             uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
             if (poolid != 0)
@@ -3309,7 +3309,7 @@ namespace Game.Entities
         public bool HasFlag(GameObjectFlags flags) { return (m_gameObjectData.Flags & (uint)flags) != 0; }
         public void AddFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
-        public void SetFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
+        public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
 
         public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }

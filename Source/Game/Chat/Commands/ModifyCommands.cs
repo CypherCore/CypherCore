@@ -147,10 +147,10 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.YouChangeFaction, target.GetGUID().ToString(), factionid, flag, npcflag, dyflag);
 
             target.SetFaction(factionid);
-            target.SetUnitFlags((UnitFlags)flag);
-            target.SetNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
-            target.SetNpcFlags2((NPCFlags2)(npcflag >> 32));
-            target.SetDynamicFlags((UnitDynFlags)dyflag);
+            target.ReplaceAllUnitFlags((UnitFlags)flag);
+            target.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
+            target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
+            target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
 
             return true;
         }

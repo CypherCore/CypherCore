@@ -186,8 +186,8 @@ namespace Game.Entities
             SetRace(field.Read<byte>(7));
             SetClass(field.Read<byte>(8));
             SetSex(field.Read<byte>(9));
-            SetFlags((CorpseFlags)field.Read<byte>(10));
-            SetCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(11));
+            ReplaceAllFlags((CorpseFlags)field.Read<byte>(10));
+            ReplaceAllCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(11));
             SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(15)));
             SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(m_corpseData.RaceID).FactionID);
 
@@ -285,9 +285,10 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        public CorpseDynFlags GetCorpseDynamicFlags() { return (CorpseDynFlags)(uint)m_corpseData.DynamicFlags; }
         public void AddCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
         public void RemoveCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
-        public void SetCorpseDynamicFlags(CorpseDynFlags dynamicFlags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
+        public void ReplaceAllCorpseDynamicFlags(CorpseDynFlags dynamicFlags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
         public override ObjectGuid GetOwnerGUID() { return m_corpseData.Owner; }
         public void SetOwnerGUID(ObjectGuid owner) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Owner), owner); }
         public void SetPartyGUID(ObjectGuid partyGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.PartyGUID), partyGuid); }
@@ -296,7 +297,7 @@ namespace Game.Entities
         public void SetRace(byte race) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.RaceID), race); }
         public void SetClass(byte classId) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Class), classId); }
         public void SetSex(byte sex) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Sex), sex); }
-        public void SetFlags(CorpseFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Flags), (uint)flags); }
+        public void ReplaceAllFlags(CorpseFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Flags), (uint)flags); }
         public void SetFactionTemplate(int factionTemplate) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FactionTemplate), factionTemplate); }
         public override uint GetFaction() { return (uint)(int)m_corpseData.FactionTemplate; }
         public override void SetFaction(uint faction) { SetFactionTemplate((int)faction); }

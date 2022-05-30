@@ -349,19 +349,19 @@ namespace Game.Entities
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                 npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
 
-            SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
-            SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
+            ReplaceAllNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
+            ReplaceAllNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
             // if unit is in combat, keep this flag
             unitFlags &= ~(uint)UnitFlags.InCombat;
             if (IsInCombat())
                 unitFlags |= (uint)UnitFlags.InCombat;
 
-            SetUnitFlags((UnitFlags)unitFlags);
-            SetUnitFlags2((UnitFlags2)unitFlags2);
-            SetUnitFlags3((UnitFlags3)unitFlags3);
+            ReplaceAllUnitFlags((UnitFlags)unitFlags);
+            ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
+            ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
 
-            SetDynamicFlags((UnitDynFlags)dynamicFlags);
+            ReplaceAllDynamicFlags((UnitDynFlags)dynamicFlags);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
@@ -1120,7 +1120,7 @@ namespace Game.Entities
 
             ClearUnitState(UnitState.AttackPlayer);
             if (IsAlive() && HasDynamicFlag(UnitDynFlags.Tapped))
-                SetDynamicFlags((UnitDynFlags)GetCreatureTemplate().DynamicFlags);
+                ReplaceAllDynamicFlags((UnitDynFlags)GetCreatureTemplate().DynamicFlags);
 
             if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
             {
@@ -1863,8 +1863,8 @@ namespace Game.Entities
                 DoNotReacquireSpellFocusTarget();  // cancel delayed re-target
                 SetTarget(ObjectGuid.Empty);      // drop target - dead mobs shouldn't ever target things
 
-                SetNpcFlags(NPCFlags.None);
-                SetNpcFlags2(NPCFlags2.None);
+                ReplaceAllNpcFlags(NPCFlags.None);
+                ReplaceAllNpcFlags2(NPCFlags2.None);
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
@@ -1911,13 +1911,13 @@ namespace Game.Entities
                     if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                         npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
 
-                    SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
-                    SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
+                    ReplaceAllNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
+                    ReplaceAllNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
-                    SetUnitFlags((UnitFlags)unitFlags);
-                    SetUnitFlags2((UnitFlags2)unitFlags2);
-                    SetUnitFlags3((UnitFlags3)unitFlags3);
-                    SetDynamicFlags((UnitDynFlags)dynamicFlags);
+                    ReplaceAllUnitFlags((UnitFlags)unitFlags);
+                    ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
+                    ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
+                    ReplaceAllDynamicFlags((UnitDynFlags)dynamicFlags);
 
                     RemoveUnitFlag(UnitFlags.InCombat);
 
@@ -2408,7 +2408,7 @@ namespace Game.Entities
                 // 3 StandMiscFlags
 
                 SetStandState((UnitStandStateType)(cainfo.bytes1 & 0xFF));
-                SetVisFlags((UnitVisFlags)((cainfo.bytes1 >> 16) & 0xFF));
+                ReplaceAllVisFlags((UnitVisFlags)((cainfo.bytes1 >> 16) & 0xFF));
                 SetAnimTier((AnimTier)((cainfo.bytes1 >> 24) & 0xFF), false);
 
                 //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
@@ -2428,8 +2428,8 @@ namespace Game.Entities
                 // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
                 SetSheath((SheathState)(cainfo.bytes2 & 0xFF));
-                SetPvpFlags(UnitPVPStateFlags.None);
-                SetPetFlags(UnitPetFlags.None);
+                ReplaceAllPvpFlags(UnitPVPStateFlags.None);
+                ReplaceAllPetFlags(UnitPetFlags.None);
                 SetShapeshiftForm(ShapeShiftForm.None);
             }
 

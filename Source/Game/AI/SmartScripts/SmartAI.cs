@@ -114,7 +114,7 @@ namespace Game.AI
             if (invoker && invoker.IsPlayer())
             {
                 _escortNPCFlags = me.m_unitData.NpcFlags[0];
-                me.SetNpcFlags(0);
+                me.ReplaceAllNpcFlags(0);
             }
 
             me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
@@ -239,7 +239,7 @@ namespace Game.AI
 
             if (_escortNPCFlags != 0)
             {
-                me.SetNpcFlags((NPCFlags)_escortNPCFlags);
+                me.ReplaceAllNpcFlags((NPCFlags)_escortNPCFlags);
                 _escortNPCFlags = 0;
             }
 

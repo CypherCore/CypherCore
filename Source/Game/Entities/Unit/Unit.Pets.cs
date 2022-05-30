@@ -181,7 +181,7 @@ namespace Game.Entities
                 }
 
                 // PvP, FFAPvP
-                minion.SetPvpFlags(GetPvpFlags());
+                minion.ReplaceAllPvpFlags(GetPvpFlags());
 
                 // FIXME: hack, speed must be set only at follow
                 if (IsTypeId(TypeId.Player) && minion.IsPet())
@@ -589,7 +589,7 @@ namespace Game.Entities
                     charm.m_ControlledByPlayer = false;
 
                 // PvP, FFAPvP
-                charm.SetPvpFlags(GetPvpFlags());
+                charm.ReplaceAllPvpFlags(GetPvpFlags());
 
                 Cypher.Assert(charm.GetCharmerGUID().IsEmpty(), $"Unit {charm.GetEntry()} is being charmed, but it already has a charmer {charm.GetCharmerGUID()}");
                 charm.SetUpdateFieldValue(charm.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), GetGUID());
@@ -628,13 +628,13 @@ namespace Game.Entities
                 {
                     charm.m_ControlledByPlayer = true;
                     charm.AddUnitFlag(UnitFlags.PlayerControlled);
-                    charm.SetPvpFlags(player.GetPvpFlags());
+                    charm.ReplaceAllPvpFlags(player.GetPvpFlags());
                 }
                 else
                 {
                     charm.m_ControlledByPlayer = false;
                     charm.RemoveUnitFlag(UnitFlags.PlayerControlled);
-                    charm.SetPvpFlags(UnitPVPStateFlags.None);
+                    charm.ReplaceAllPvpFlags(UnitPVPStateFlags.None);
                 }
 
                 if (charm.IsWalking() != _isWalkingBeforeCharm)

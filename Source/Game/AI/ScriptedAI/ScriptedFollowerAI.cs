@@ -210,8 +210,8 @@ namespace Game.AI
             me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
             me.PauseMovement();
 
-            me.SetNpcFlags(NPCFlags.None);
-            me.SetNpcFlags2(NPCFlags2.None);
+            me.ReplaceAllNpcFlags(NPCFlags.None);
+            me.ReplaceAllNpcFlags2(NPCFlags2.None);
 
             AddFollowState(FollowState.Inprogress);
 

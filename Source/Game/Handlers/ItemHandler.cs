@@ -757,7 +757,7 @@ namespace Game
             }
 
             item.SetGiftCreator(GetPlayer().GetGUID());
-            item.SetItemFlags(ItemFieldFlags.Wrapped);
+            item.ReplaceAllItemFlags(ItemFieldFlags.Wrapped);
             item.SetState(ItemUpdateState.Changed, GetPlayer());
 
             if (item.GetState() == ItemUpdateState.New) // save new item, to have alway for `character_gifts` record in `item_instance`

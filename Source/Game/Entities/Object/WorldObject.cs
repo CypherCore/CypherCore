@@ -1456,8 +1456,9 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                if (map.IsDungeon())
-                    m_zoneScript = ((InstanceMap)map).GetInstanceScript();
+                InstanceMap instanceMap = map.ToInstanceMap();
+                if (instanceMap != null)
+                    m_zoneScript = (ZoneScript)instanceMap.GetInstanceScript();
                 else if (!map.IsBattlegroundOrArena())
                 {
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
@@ -2938,7 +2939,7 @@ namespace Game.Entities
         public bool HasDynamicFlag(UnitDynFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
         public void AddDynamicFlag(UnitDynFlags flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
         public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
-        public void SetDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
         public TypeId GetTypeId() { return ObjectTypeId; }
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }

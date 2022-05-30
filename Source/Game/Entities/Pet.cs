@@ -220,8 +220,8 @@ namespace Game.Entities
             SetDisplayId(petInfo.DisplayId);
             SetNativeDisplayId(petInfo.DisplayId);
             uint petlevel = petInfo.Level;
-            SetNpcFlags(NPCFlags.None);
-            SetNpcFlags2(NPCFlags2.None);
+            ReplaceAllNpcFlags(NPCFlags.None);
+            ReplaceAllNpcFlags2(NPCFlags2.None);
             SetName(petInfo.Name);
 
             switch (GetPetType())
@@ -230,14 +230,14 @@ namespace Game.Entities
                     petlevel = owner.GetLevel();
 
                     SetClass(Class.Mage);
-                    SetUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet dismiss, cancel)
+                    ReplaceAllUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet dismiss, cancel)
                     break;
                 case PetType.Hunter:
                     SetClass(Class.Warrior);
                     SetGender(Gender.None);
                     SetSheath(SheathState.Melee);
-                    SetPetFlags(petInfo.WasRenamed ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
-                    SetUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet abandon, cancel)
+                    ReplaceAllPetFlags(petInfo.WasRenamed ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+                    ReplaceAllUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet abandon, cancel)
                     break;
                 default:
                     if (!IsPetGhoul())
@@ -565,7 +565,7 @@ namespace Game.Entities
                 if (GetPetType() == PetType.Hunter)
                 {
                     // pet corpse non lootable and non skinnable
-                    SetDynamicFlags(UnitDynFlags.None);
+                    ReplaceAllDynamicFlags(UnitDynFlags.None);
                     RemoveUnitFlag(UnitFlags.Skinnable);
                 }
             }
@@ -771,8 +771,8 @@ namespace Game.Entities
             SetPetNameTimestamp(0);
             SetPetExperience(0);
             SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
-            SetNpcFlags(NPCFlags.None);
-            SetNpcFlags2(NPCFlags2.None);
+            ReplaceAllNpcFlags(NPCFlags.None);
+            ReplaceAllNpcFlags2(NPCFlags2.None);
 
             if (cinfo.CreatureType == CreatureType.Beast)
             {
@@ -780,7 +780,7 @@ namespace Game.Entities
                 SetGender(Gender.None);
                 SetPowerType(PowerType.Focus);
                 SetSheath(SheathState.Melee);
-                SetPetFlags(UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+                ReplaceAllPetFlags(UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
             }
 
             return true;

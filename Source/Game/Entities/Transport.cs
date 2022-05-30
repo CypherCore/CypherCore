@@ -119,7 +119,7 @@ namespace Game.Entities
             if (goOverride != null)
             {
                 SetFaction(goOverride.Faction);
-                SetFlags(goOverride.Flags);
+                ReplaceAllFlags(goOverride.Flags);
             }
 
             m_goValue.Transport.PathProgress = 0;

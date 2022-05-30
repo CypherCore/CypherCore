@@ -1582,7 +1582,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().SetNpcFlags((NPCFlags)e.Action.flag.flag);
+                            target.ToUnit().ReplaceAllNpcFlags((NPCFlags)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.AddNpcFlag:

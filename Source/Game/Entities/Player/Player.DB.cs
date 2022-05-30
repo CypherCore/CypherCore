@@ -2733,8 +2733,8 @@ namespace Game.Entities
             SetBankBagSlotCount(bankSlots);
             SetNativeGender(gender);
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), drunk);
-            SetPlayerFlags(playerFlags);
-            SetPlayerFlagsEx(playerFlagsEx);
+            ReplaceAllPlayerFlags(playerFlags);
+            ReplaceAllPlayerFlagsEx(playerFlagsEx);
             SetWatchedFactionIndex(watchedFaction);
 
             atLoginFlags = (AtLoginFlags)at_login;

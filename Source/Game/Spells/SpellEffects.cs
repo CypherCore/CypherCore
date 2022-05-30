@@ -3954,7 +3954,7 @@ namespace Game.Spells
                 pet.Relocate(x, y, z, player.GetOrientation()); // This is needed so SaveStayPosition() will get the proper coords.
             }
 
-            pet.SetDynamicFlags(UnitDynFlags.None);
+            pet.ReplaceAllDynamicFlags(UnitDynFlags.None);
             pet.RemoveUnitFlag(UnitFlags.Skinnable);
             pet.SetDeathState(DeathState.Alive);
             pet.ClearUnitState(UnitState.AllErasable);

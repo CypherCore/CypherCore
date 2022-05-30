@@ -420,8 +420,8 @@ namespace Game.AI
             me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
             //disable npcflags
-            me.SetNpcFlags(NPCFlags.None);
-            me.SetNpcFlags2(NPCFlags2.None);
+            me.ReplaceAllNpcFlags(NPCFlags.None);
+            me.ReplaceAllNpcFlags2(NPCFlags2.None);
             if (me.IsImmuneToNPC())
             {
                 _hasImmuneToNPCFlags = true;

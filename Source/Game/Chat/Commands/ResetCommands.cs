@@ -79,9 +79,9 @@ namespace Game.Chat
             if (player.GetShapeshiftForm() == ShapeShiftForm.None)
                 player.InitDisplayIds();
 
-            player.SetPvpFlags(UnitPVPStateFlags.PvP);
+            player.ReplaceAllPvpFlags(UnitPVPStateFlags.PvP);
 
-            player.SetUnitFlags(UnitFlags.PlayerControlled);
+            player.ReplaceAllUnitFlags(UnitFlags.PlayerControlled);
 
             //-1 is default value
             player.SetWatchedFactionIndex(0xFFFFFFFF);
