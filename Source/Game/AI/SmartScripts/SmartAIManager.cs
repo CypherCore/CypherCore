@@ -1348,6 +1348,8 @@ namespace Game.AI
                 {
                     // Deprecated
                     case SmartEvents.PhaseChange:
+                    case SmartEvents.WaypointStart:
+                    case SmartEvents.CharmedTarget:
                         Log.outWarn(LogFilter.Sql, "SmartAIMgr: Deprecated event_type: {e}, it might be removed in the future, loaded for now.");
                         break;
                     default:
