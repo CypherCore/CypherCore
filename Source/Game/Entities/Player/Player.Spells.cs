@@ -1561,7 +1561,7 @@ namespace Game.Entities
         public uint GetLastPotionId() { return m_lastPotionId; }
         public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
 
-        void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
+        public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
         {
             long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = GetClassMask();
