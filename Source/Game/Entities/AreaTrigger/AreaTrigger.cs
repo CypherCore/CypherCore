@@ -168,6 +168,9 @@ namespace Game.Entities
                 m_movementInfo.transport.guid = target.GetGUID();
             }
 
+            UpdatePositionData();
+            SetZoneScript();
+
             UpdateShape();
 
             uint timeToTarget = GetCreateProperties().TimeToTarget != 0 ? GetCreateProperties().TimeToTarget : m_areaTriggerData.Duration;

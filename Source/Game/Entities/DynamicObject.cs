@@ -91,6 +91,9 @@ namespace Game.Entities
             _Create(ObjectGuid.Create(HighGuid.DynamicObject, GetMapId(), spell.Id, guidlow));
             PhasingHandler.InheritPhaseShift(this, caster);
 
+            UpdatePositionData();
+            SetZoneScript();
+
             SetEntry(spell.Id);
             SetObjectScale(1f);
 
