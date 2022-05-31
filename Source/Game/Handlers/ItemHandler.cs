@@ -1062,7 +1062,7 @@ namespace Game
 
             foreach (var itemEffect in item.GetEffects())
             {
-                if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                     continue;
 
                 var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);

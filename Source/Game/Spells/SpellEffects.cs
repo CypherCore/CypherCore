@@ -1746,7 +1746,7 @@ namespace Game.Spells
             {
                 foreach (var itemEffect in m_CastItem.GetEffects())
                 {
-                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                         continue;
 
                     bool dependent = false;

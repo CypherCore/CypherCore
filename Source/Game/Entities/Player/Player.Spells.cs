@@ -1496,7 +1496,7 @@ namespace Game.Entities
                 foreach (ItemEffectRecord effectData in item.GetEffects())
                 {
                     // wrong triggering type
-                    if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
+                    if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
                         continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
@@ -1783,7 +1783,7 @@ namespace Game.Entities
 
             foreach (ItemEffectRecord effect in item.GetEffects())
             {
-                if (effect.TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
+                if (effect.TriggerType != ItemSpelltriggerType.OnPickup) // On obtain trigger
                     continue;
 
                 int spellId = effect.SpellID;
@@ -3295,7 +3295,7 @@ namespace Game.Entities
                     foreach (ItemEffectRecord effectData in item.GetEffects())
                     {
                         // wrong triggering type
-                        if (effectData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
+                        if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
                             continue;
 
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);

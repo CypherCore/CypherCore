@@ -262,17 +262,13 @@ namespace Framework.Constants
     {
         OnUse = 0,                  // use after equip cooldown
         OnEquip = 1,
-        ChanceOnHit = 2,
-        Soulstone = 4,
-        /*
-         * ItemSpelltriggerType 5 might have changed on 2.4.3/3.0.3: Such auras
-         * will be applied on item pickup and removed on item loss - maybe on the
-         * other hand the item is destroyed if the aura is removed ("removed on
-         * death" of spell 57348 makes me think so)
-         */
-        OnObtain = 5,
-        LearnSpellId = 6,                   // used in itemtemplate.spell2 with spellid with SPELLGENERICLEARN in spell1
-        Max = 7
+        OnProc = 2,
+        SummonedBySpell = 3,
+        OnDeath = 4,
+        OnPickup = 5,
+        OnLearn = 6,                   // used in itemtemplate.spell2 with spellid with SPELLGENERICLEARN in spell1
+        OnLooted = 7,
+        Max
     }
 
     public enum BuyBankSlotResult

@@ -3947,6 +3947,21 @@ namespace Game.Entities
             }
         }
 
+        void ApplyItemLootedSpell(Item item, bool apply)
+        {
+            if (item.GetTemplate().HasFlag(ItemFlags.Legacy))
+                return;
+
+            var lootedEffect = item.GetEffects().FirstOrDefault(effectData => effectData.TriggerType == ItemSpelltriggerType.OnLooted);
+            if (lootedEffect != null)
+            {
+                if (apply)
+                    CastSpell(this, (uint)lootedEffect.SpellID, item);
+                else
+                    RemoveAurasDueToItemSpell((uint)lootedEffect.SpellID, item.GetGUID());
+            }
+        }
+
         void _RemoveAllItemMods()
         {
             Log.outDebug(LogFilter.Player, "_RemoveAllItemMods start.");
@@ -5515,6 +5530,7 @@ namespace Game.Entities
                 RemoveTradeableItem(pItem);
 
                 ApplyItemObtainSpells(pItem, false);
+                ApplyItemLootedSpell(pItem, false);
 
                 Global.ScriptMgr.OnItemRemove(this, pItem);
 
@@ -5896,6 +5912,7 @@ namespace Game.Entities
 
                 Item pItem = StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
                 SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
+                ApplyItemLootedSpell(pItem, true);
             }
 
             Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.Looted), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
@@ -6044,6 +6061,7 @@ namespace Game.Entities
                 if (!loot.containerID.IsEmpty())
                     Global.LootItemStorage.RemoveStoredLootItemForContainer(loot.containerID.GetCounter(), item.itemid, item.count, item.itemIndex);
 
+                ApplyItemLootedSpell(newitem, true);
             }
             else
                 SendEquipError(msg, null, null, item.itemid);

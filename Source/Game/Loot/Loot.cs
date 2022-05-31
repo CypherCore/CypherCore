@@ -72,7 +72,7 @@ namespace Game.Loots
 
                 foreach (var itemEffect in pProto.Effects)
                 {
-                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                         continue;
 
                     if (player.HasSpell((uint)itemEffect.SpellID))
@@ -85,7 +85,7 @@ namespace Game.Loots
             {
                 foreach (var itemEffect in pProto.Effects)
                 {
-                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                         continue;
 
                     if (player.HasSpell((uint)itemEffect.SpellID))
