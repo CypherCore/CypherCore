@@ -326,10 +326,9 @@ namespace Game.Collision
             float intervalMax = -1.0f;
             Vector3 org = r.Origin;
             Vector3 dir = r.Direction;
-            Vector3 invDir = new();
+            Vector3 invDir = r.invDirection();
             for (int i = 0; i < 3; ++i)
             {
-                invDir.SetAt(1.0f / dir.GetAt(i), i);
                 if (MathFunctions.fuzzyNe(dir.GetAt(i), 0.0f))
                 {
                     float t1 = (bounds.Lo.GetAt(i) - org.GetAt(i)) * invDir.GetAt(i);
