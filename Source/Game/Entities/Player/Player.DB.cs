@@ -346,6 +346,7 @@ namespace Game.Entities
         }
         void _LoadSkills(SQLResult result)
         {
+            Race race = GetRace();
             uint count = 0;
             Dictionary<uint, uint> loadedSkillValues = new();
             if (!result.IsEmpty())
@@ -362,11 +363,11 @@ namespace Game.Entities
                     var value = result.Read<ushort>(1);
                     var max = result.Read<ushort>(2);
 
-                    SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, GetRace(), GetClass());
+                    SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, race, GetClass());
                     if (rcEntry == null)
                     {
                         Log.outError(LogFilter.Player, "Character: {0}(GUID: {1} Race: {2} Class: {3}) has skill {4} not allowed for his race/class combination",
-                            GetName(), GetGUID().ToString(), GetRace(), GetClass(), skill);
+                            GetName(), GetGUID().ToString(), race, GetClass(), skill);
                         mSkillStatus.Add(skill, new SkillStatusData(0, SkillState.Deleted));
                         continue;
                     }
@@ -428,7 +429,7 @@ namespace Game.Entities
             // Learn skill rewarded spells after all skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
             foreach (var skill in loadedSkillValues)
             {
-                LearnSkillRewardedSpells(skill.Key, skill.Value);
+                LearnSkillRewardedSpells(skill.Key, skill.Value, race);
                 List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill.Key);
                 if (childSkillLines != null)
                 {

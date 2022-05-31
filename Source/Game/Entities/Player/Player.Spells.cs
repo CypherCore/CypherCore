@@ -30,6 +30,7 @@ namespace Game.Entities
     {
         void UpdateSkillsForLevel()
         {
+            Race race = GetRace();
             ushort maxSkill = GetMaxSkillValueForLevel();
             SkillInfo skillInfoField = m_activePlayerData.Skill;
 
@@ -54,7 +55,7 @@ namespace Game.Entities
                 }
 
                 // Update level dependent skillline spells
-                LearnSkillRewardedSpells(rcEntry.SkillID, skillInfoField.SkillRank[pair.Value.Pos]);
+                LearnSkillRewardedSpells(rcEntry.SkillID, skillInfoField.SkillRank[pair.Value.Pos], race);
             }
         }
 
@@ -429,7 +430,7 @@ namespace Game.Entities
             {
                 if (value < bsl && new_value >= bsl)
                 {
-                    LearnSkillRewardedSpells(skillId, new_value);
+                    LearnSkillRewardedSpells(skillId, new_value, GetRace());
                     break;
                 }
             }
@@ -1082,7 +1083,7 @@ namespace Game.Entities
                     SetSkillRank(skillStatusData.Pos, (ushort)newVal);
                     SetSkillMaxRank(skillStatusData.Pos, (ushort)maxVal);
 
-                    LearnSkillRewardedSpells(id, newVal);
+                    LearnSkillRewardedSpells(id, newVal, GetRace());
                     // if skill value is going up, update enchantments after setting the new value
                     if (newVal > currVal)
                     {
@@ -1237,7 +1238,7 @@ namespace Game.Entities
                             auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
                     // Learn all spells for skill
-                    LearnSkillRewardedSpells(id, newVal);
+                    LearnSkillRewardedSpells(id, newVal, GetRace());
                     UpdateCriteria(CriteriaType.SkillRaised, id);
                     UpdateCriteria(CriteriaType.AchieveSkillStep, id);
                 }
@@ -1560,9 +1561,9 @@ namespace Game.Entities
         public uint GetLastPotionId() { return m_lastPotionId; }
         public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
 
-        void LearnSkillRewardedSpells(uint skillId, uint skillValue)
+        void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
         {
-            long raceMask = SharedConst.GetMaskForRace(GetRace());
+            long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = GetClassMask();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
