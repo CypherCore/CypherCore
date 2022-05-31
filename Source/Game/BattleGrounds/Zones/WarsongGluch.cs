@@ -193,7 +193,7 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(WSGObjectTypes.DoorH4, BattlegroundConst.RespawnOneDay);
 
             // players joining later are not eligibles
-            StartCriteriaTimer(CriteriaStartEvent.SendEvent, 8563);
+            TriggerGameEvent( 8563);
         }
 
         public override void AddPlayer(Player player)

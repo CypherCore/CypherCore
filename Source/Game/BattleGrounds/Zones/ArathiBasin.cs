@@ -216,7 +216,7 @@ namespace Game.BattleGrounds.Zones
             DoorOpen(ABObjectTypes.GateH);
 
             // Achievement: Let's Get This Done
-            StartCriteriaTimer(CriteriaStartEvent.SendEvent, EventStartBattle);
+            TriggerGameEvent(EventStartBattle);
         }
 
         public override void AddPlayer(Player player)

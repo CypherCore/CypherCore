@@ -1846,13 +1846,14 @@ namespace Game.BattleGrounds
             return Global.ObjectMgr.GetClosestGraveYard(player, GetPlayerTeam(player.GetGUID()), player);
         }
 
-        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
+        public void TriggerGameEvent(uint gameEventId)
         {
+            GameEvents.TriggerForMap(gameEventId, GetBgMap());
             foreach (var guid in GetPlayers().Keys)
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
                 if (player)
-                    player.StartCriteriaTimer(startEvent, entry);
+                    GameEvents.TriggerForPlayer(gameEventId, player);
             }
         }
 

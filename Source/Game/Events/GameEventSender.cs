@@ -38,23 +38,34 @@ namespace Game
                 zoneScript.ProcessEvent(target, gameEventId, source);
 
             Map map = refForMapAndZoneScript.GetMap();
-            if (target)
+            GameObject goTarget = target?.ToGameObject();
+            if (goTarget != null)
             {
-                GameObject goTarget = target.ToGameObject();
-                if (goTarget != null)
-                {
-                    GameObjectAI goAI = goTarget.GetAI();
-                    if (goAI != null)
-                        goAI.EventInform(gameEventId);
-                }
-
-                BattlegroundMap bgMap = map.ToBattlegroundMap();
-                if (bgMap != null)
-                    bgMap.GetBG().ProcessEvent(target, gameEventId, source);
+                GameObjectAI goAI = goTarget.GetAI();
+                if (goAI != null)
+                    goAI.EventInform(gameEventId);
             }
 
-            map.ScriptsStart(ScriptsType.Event, gameEventId, source, target);
+            Player sourcePlayer = source?.ToPlayer();
+            if (sourcePlayer != null)
+                TriggerForPlayer(gameEventId, sourcePlayer);
+
+            TriggerForMap(gameEventId, map, source, target);
         }
 
+        public static void TriggerForPlayer(uint gameEventId, Player source)
+        {
+            Map map = source.GetMap();
+            if (map.Instanceable())
+                source.StartCriteriaTimer(CriteriaStartEvent.SendEvent, gameEventId);
+        }
+
+        public static void TriggerForMap(uint gameEventId, Map map, WorldObject source = null, WorldObject target = null)
+        {
+            BattlegroundMap bgMap = map.ToBattlegroundMap();
+            if (bgMap != null)
+                bgMap.GetBG().ProcessEvent(target, gameEventId, source);
+            map.ScriptsStart(ScriptsType.Event, gameEventId, source, target);
+        }
     }
 }
