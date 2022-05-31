@@ -16,13 +16,14 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Dynamic;
 
 namespace Scripts.Spells.Druid
 {
@@ -65,6 +66,8 @@ namespace Scripts.Spells.Druid
         public const uint IdolOfFeralShadows = 34241;
         public const uint IdolOfWorship = 60774;
         public const uint IncarnationKingOfTheJungle = 102543;
+        public const uint Innervate = 29166;
+        public const uint InnervateRank2 = 326228;
         public const uint Infusion = 37238;
         public const uint Languish = 71023;
         public const uint LifebloomEnergize = 64372;
@@ -587,26 +590,39 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    class spell_dru_innervate : AuraScript
+    class spell_dru_innervate : SpellScript
     {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        SpellCastResult CheckCast()
         {
-            if (aurEff.GetTotalTicks() == 0)
-            {
-                amount = 0;
-                return;
-            }
+            Player target = GetExplTargetUnit()?.ToPlayer();
+            if (target == null)
+                return SpellCastResult.BadTargets;
 
+            ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(target.GetPrimarySpecialization());
+            if (spec == null || spec.Role != 1)
+                return SpellCastResult.BadTargets;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleRank2()
+        {
             Unit caster = GetCaster();
-            if (caster)
-                amount = MathFunctions.CalculatePct(caster.GetCreatePowerValue(PowerType.Mana), amount) / (int)aurEff.GetTotalTicks();
-            else
-                amount = 0;
+            if (caster != GetHitUnit())
+            {
+                AuraEffect innervateR2 = caster.GetAuraEffect(SpellIds.InnervateRank2, 0);
+                if (innervateR2 != null)
+                caster.CastSpell(caster, SpellIds.Innervate,
+                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnoreCastInProgress)
+                    .SetTriggeringSpell(GetSpell())
+                    .AddSpellMod(SpellValueMod.BasePoint0, -innervateR2.GetAmount()));
+            }
         }
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicEnergize));
+            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnHit.Add(new HitHandler(HandleRank2));
         }
     }
 
