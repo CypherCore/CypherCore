@@ -530,7 +530,7 @@ namespace Game.BattleGrounds.Zones
 
         void TeleportToEntrancePosition(Player player)
         {
-            if (player.GetTeamId() == Attackers)
+            if (GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID())) == Attackers)
             {
                 if (!ShipsStarted)
                 {
@@ -706,7 +706,8 @@ namespace Game.BattleGrounds.Zones
         {
             uint safeloc;
 
-            if (player.GetTeamId() == Attackers)
+            int teamId = GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()));
+            if (teamId == Attackers)
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.BeachGy];
             else
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.DefenderLastGy];
@@ -716,7 +717,7 @@ namespace Game.BattleGrounds.Zones
 
             for (byte i = SAGraveyards.RightCapturableGy; i < SAGraveyards.Max; i++)
             {
-                if (GraveyardStatus[i] != player.GetTeamId())
+                if (GraveyardStatus[i] != teamId)
                     continue;
 
                 WorldSafeLocsEntry ret = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
@@ -807,13 +808,14 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void CaptureGraveyard(int i, Player Source)
+        void CaptureGraveyard(int i, Player source)
         {
             if (GraveyardStatus[i] == Attackers)
                 return;
 
             DelCreature(SACreatureTypes.Max + i);
-            GraveyardStatus[i] = Source.GetTeamId();
+            int teamId = GetTeamIndexByTeamId(GetPlayerTeam(source.GetGUID()));
+            GraveyardStatus[i] = teamId;
             WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
             if (sg == null)
             {
@@ -831,7 +833,7 @@ namespace Game.BattleGrounds.Zones
                     {
                         flag = SAObjectTypes.LeftFlag;
                         DelObject(flag);
-                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (Source.GetTeamId() == TeamId.Alliance ? 0 : 1u)),
+                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
                             SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                         npc = SACreatureTypes.Rigspark;
@@ -850,16 +852,16 @@ namespace Game.BattleGrounds.Zones
                         UpdateWorldState(SAWorldStateIds.LeftGyAlliance, GraveyardStatus[i] == TeamId.Alliance);
                         UpdateWorldState(SAWorldStateIds.LeftGyHorde, GraveyardStatus[i] == TeamId.Horde);
 
-                        Creature c = Source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
+                        Creature c = source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
                         if (c)
-                            SendChatMessage(c, Source.GetTeamId() == TeamId.Alliance ? SATextIds.WestGraveyardCapturedA : SATextIds.WestGraveyardCapturedH, Source);
+                            SendChatMessage(c, teamId == TeamId.Alliance ? SATextIds.WestGraveyardCapturedA : SATextIds.WestGraveyardCapturedH, source);
                     }
                     break;
                 case SAGraveyards.RightCapturableGy:
                     {
                         flag = SAObjectTypes.RightFlag;
                         DelObject(flag);
-                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (Source.GetTeamId() == TeamId.Alliance ? 0 : 1u)),
+                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
                             SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                         npc = SACreatureTypes.Sparklight;
@@ -879,24 +881,24 @@ namespace Game.BattleGrounds.Zones
                         UpdateWorldState(SAWorldStateIds.RightGyAlliance, GraveyardStatus[i] == TeamId.Alliance);
                         UpdateWorldState(SAWorldStateIds.RightGyHorde, GraveyardStatus[i] == TeamId.Horde);
 
-                        Creature c = Source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
+                        Creature c = source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
                         if (c)
-                            SendChatMessage(c, Source.GetTeamId() == TeamId.Alliance ? SATextIds.EastGraveyardCapturedA : SATextIds.EastGraveyardCapturedH, Source);
+                            SendChatMessage(c, teamId == TeamId.Alliance ? SATextIds.EastGraveyardCapturedA : SATextIds.EastGraveyardCapturedH, source);
                     }
                     break;
                 case SAGraveyards.CentralCapturableGy:
                     {
                         flag = SAObjectTypes.CentralFlag;
                         DelObject(flag);
-                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (Source.GetTeamId() == TeamId.Alliance ? 0 : 1u)),
+                        AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
                           SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                         UpdateWorldState(SAWorldStateIds.CenterGyAlliance, GraveyardStatus[i] == TeamId.Alliance);
                         UpdateWorldState(SAWorldStateIds.CenterGyHorde, GraveyardStatus[i] == TeamId.Horde);
 
-                        Creature c = Source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
+                        Creature c = source.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
                         if (c)
-                            SendChatMessage(c, Source.GetTeamId() == TeamId.Alliance ? SATextIds.SouthGraveyardCapturedA : SATextIds.SouthGraveyardCapturedH, Source);
+                            SendChatMessage(c, teamId == TeamId.Alliance ? SATextIds.SouthGraveyardCapturedA : SATextIds.SouthGraveyardCapturedH, source);
                     }
                     break;
                 default:
@@ -912,9 +914,10 @@ namespace Game.BattleGrounds.Zones
 
             if (CanInteractWithObject(SAObjectTypes.TitanRelic))
             {
-                if (clicker.GetTeamId() == Attackers)
+                int clickerTeamId = GetTeamIndexByTeamId(GetPlayerTeam(clicker.GetGUID()));
+                if (clickerTeamId == Attackers)
                 {
-                    if (clicker.GetTeamId() == TeamId.Alliance)
+                    if (clickerTeamId == TeamId.Alliance)
                         SendBroadcastText(SABroadcastTexts.AllianceCapturedTitanPortal, ChatMsg.BgSystemNeutral);
                     else
                         SendBroadcastText(SABroadcastTexts.HordeCapturedTitanPortal, ChatMsg.BgSystemNeutral);
@@ -928,7 +931,7 @@ namespace Game.BattleGrounds.Zones
                         {
                             Player player = Global.ObjAccessor.FindPlayer(pair.Key);
                             if (player)
-                                if (player.GetTeamId() == Attackers)
+                                if (GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID())) == Attackers)
                                     player.UpdateCriteria(CriteriaType.BeSpellTarget, 65246);
                         }
 
@@ -960,7 +963,7 @@ namespace Game.BattleGrounds.Zones
                         {
                             Player player = Global.ObjAccessor.FindPlayer(pair.Key);
                             if (player)
-                                if (player.GetTeamId() == Attackers && RoundScores[1].winner == Attackers)
+                                if (GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID())) == Attackers && RoundScores[1].winner == Attackers)
                                     player.UpdateCriteria(CriteriaType.BeSpellTarget, 65246);
                         }
 
@@ -1065,9 +1068,9 @@ namespace Game.BattleGrounds.Zones
             switch ((BattlegroundCriteriaId)criteriaId)
             {
                 case BattlegroundCriteriaId.NotEvenAScratch:
-                    return _allVehiclesAlive[GetTeamIndexByTeamId(source.GetTeam())];
+                    return _allVehiclesAlive[GetTeamIndexByTeamId(GetPlayerTeam(source.GetGUID()))];
                 case BattlegroundCriteriaId.DefenseOfTheAncients:
-                    return source.GetTeamId() != Attackers && !_gateDestroyed;
+                    return GetTeamIndexByTeamId(GetPlayerTeam(source.GetGUID())) != Attackers && !_gateDestroyed;
             }
 
             return base.CheckAchievementCriteriaMeet(criteriaId, source, target, miscValue);

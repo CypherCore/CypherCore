@@ -2678,7 +2678,7 @@ namespace Game.Spells
                 {
                     Battleground bg = player.GetBattleground();
                     if (bg)
-                        bg.SetDroppedFlagGUID(go.GetGUID(), (player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
+                        bg.SetDroppedFlagGUID(go.GetGUID(), bg.GetPlayerTeam(player.GetGUID()) == Team.Alliance ? TeamId.Horde : TeamId.Alliance);
                 }
             }
 

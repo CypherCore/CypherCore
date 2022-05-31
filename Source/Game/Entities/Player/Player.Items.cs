@@ -6158,7 +6158,7 @@ namespace Game.Entities
                     Battleground bg = GetBattleground();
                     if (bg)
                     {
-                        if (!bg.CanActivateGO((int)go.GetEntry(), (uint)GetTeam()))
+                        if (!bg.CanActivateGO((int)go.GetEntry(), (uint)bg.GetPlayerTeam(GetGUID())))
                         {
                             SendLootRelease(guid);
                             return;

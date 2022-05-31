@@ -327,7 +327,7 @@ namespace Game
                         uint areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if (pl.GetAreaId() == areaId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if (pl.GetAreaId() == areaId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 pl.SendPacket(data);
                         return;
                     }
@@ -336,7 +336,7 @@ namespace Game
                         uint zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 pl.SendPacket(data);
                         return;
                     }
@@ -344,7 +344,7 @@ namespace Game
                     {
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if ((team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if ((team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 pl.SendPacket(data);
                         return;
                     }
@@ -479,7 +479,7 @@ namespace Game
                         uint areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if (pl.GetAreaId() == areaId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if (pl.GetAreaId() == areaId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 localizer.Invoke(pl);
                         return;
                     }
@@ -488,7 +488,7 @@ namespace Game
                         uint zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 localizer.Invoke(pl);
                         return;
                     }
@@ -496,7 +496,7 @@ namespace Game
                     {
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
-                            if ((team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
+                            if ((team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
                                 localizer.Invoke(pl);
                         return;
                     }

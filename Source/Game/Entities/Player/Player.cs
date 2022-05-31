@@ -3515,14 +3515,6 @@ namespace Game.Entities
 
         uint GetChampioningFaction() { return m_ChampioningFaction; }
         public void SetChampioningFaction(uint faction) { m_ChampioningFaction = faction; }
-
-        public void SwitchToOppositeTeam(bool apply)
-        {
-            m_team = TeamForRace(GetRace());
-
-            if (apply)
-                m_team = (m_team == Team.Alliance) ? Team.Horde : Team.Alliance;
-        }
         
         public void SetFactionForRace(Race race)
         {
@@ -5250,6 +5242,9 @@ namespace Game.Entities
         }
         public Team GetTeam() { return m_team; }
         public int GetTeamId() { return m_team == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
+
+        public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? (GetTeam() == Team.Alliance ? Team.Horde : Team.Alliance) : GetTeam(); }
+        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
 
         //Money
         public ulong GetMoney() { return m_activePlayerData.Coinage; }

@@ -1213,7 +1213,7 @@ namespace Game.Entities
                     Player objPlayer = obj.ToPlayer();
                     if (objPlayer != null)
                     {
-                        if (thisPlayer.GetTeam() != objPlayer.GetTeam() || !thisPlayer.IsGroupVisibleFor(objPlayer))
+                        if (!thisPlayer.IsGroupVisibleFor(objPlayer))
                             return false;
                     }
                     else

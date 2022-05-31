@@ -2589,7 +2589,7 @@ namespace Scripts.Spells.Generic
         {
             Player caster = GetCaster().ToPlayer();
 
-            switch (caster.GetTeam())
+            switch (caster.GetEffectiveTeam())
             {
                 case Team.Alliance:
                     caster.CastSpell(caster, SpellIds.PvpTrinketAlliance, new CastSpellExtraArgs(TriggerCastFlags.FullMask));

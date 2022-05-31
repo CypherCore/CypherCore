@@ -508,7 +508,7 @@ namespace Game.BattleGrounds
             {
                 Team team = pair.Value.Team;
                 if (team == 0)
-                    team = player.GetTeam();
+                    team = player.GetEffectiveTeam();
                 if (team != teamId)
                     player = null;
             }
@@ -1728,16 +1728,18 @@ namespace Game.BattleGrounds
                 if (killer == victim)
                     return;
 
+                Team killerTeam = GetPlayerTeam(killer.GetGUID());
+
                 UpdatePlayerScore(killer, ScoreType.HonorableKills, 1);
                 UpdatePlayerScore(killer, ScoreType.KillingBlows, 1);
 
-                foreach (var guid in m_Players.Keys)
+                foreach (var (guid, player) in m_Players)
                 {
                     Player creditedPlayer = Global.ObjAccessor.FindPlayer(guid);
                     if (!creditedPlayer || creditedPlayer == killer)
                         continue;
 
-                    if (creditedPlayer.GetTeam() == killer.GetTeam() && creditedPlayer.IsAtGroupRewardDistance(victim))
+                    if (player.Team == killerTeam && creditedPlayer.IsAtGroupRewardDistance(victim))
                         UpdatePlayerScore(creditedPlayer, ScoreType.HonorableKills, 1);
                 }
             }
@@ -1753,7 +1755,7 @@ namespace Game.BattleGrounds
 
         // Return the player's team based on Battlegroundplayer info
         // Used in same faction arena matches mainly
-        Team GetPlayerTeam(ObjectGuid guid)
+        public Team GetPlayerTeam(ObjectGuid guid)
         {
             var player = m_Players.LookupByKey(guid);
             if (player != null)
@@ -1841,7 +1843,7 @@ namespace Game.BattleGrounds
 
         public virtual WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
-            return Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
+            return Global.ObjectMgr.GetClosestGraveYard(player, GetPlayerTeam(player.GetGUID()), player);
         }
 
         public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)

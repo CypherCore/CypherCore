@@ -1001,7 +1001,7 @@ namespace Game.Entities
                 if (attacker.IsCreature())
                     victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByCreature, attacker.GetEntry());
                 else if (attacker.IsPlayer() && victim != attacker)
-                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetTeam());
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetEffectiveTeam());
             }
 
             // Hook for OnPVPKill Event

@@ -100,7 +100,7 @@ namespace Game.Entities
                 Player plrVictim = victim.ToPlayer();
                 if (plrVictim)
                 {
-                    if (GetTeam() == plrVictim.GetTeam() && !Global.WorldMgr.IsFFAPvPRealm())
+                    if (GetEffectiveTeam() == plrVictim.GetEffectiveTeam() && !Global.WorldMgr.IsFFAPvPRealm())
                         return false;
 
                     byte k_level = (byte)GetLevel();
@@ -662,7 +662,7 @@ namespace Game.Entities
             reportAfkResult.Offender = GetGUID();
             Battleground bg = GetBattleground();
             // Battleground also must be in progress!
-            if (!bg || bg != reporter.GetBattleground() || GetTeam() != reporter.GetTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
+            if (!bg || bg != reporter.GetBattleground() || GetEffectiveTeam() != reporter.GetEffectiveTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
             {
                 reporter.SendPacket(reportAfkResult);
                 return;

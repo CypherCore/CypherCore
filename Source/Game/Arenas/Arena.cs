@@ -52,14 +52,14 @@ namespace Game.Arenas
 
             if (player.GetBGTeam() == Team.Alliance)        // gold
             {
-                if (player.GetTeam() == Team.Horde)
+                if (player.GetEffectiveTeam() == Team.Horde)
                     player.CastSpell(player, ArenaSpellIds.HordeGoldFlag, true);
                 else
                     player.CastSpell(player, ArenaSpellIds.AllianceGoldFlag, true);
             }
             else                                        // green
             {
-                if (player.GetTeam() == Team.Horde)
+                if (player.GetEffectiveTeam() == Team.Horde)
                     player.CastSpell(player, ArenaSpellIds.HordeGreenFlag, true);
                 else
                     player.CastSpell(player, ArenaSpellIds.AllianceGreenFlag, true);

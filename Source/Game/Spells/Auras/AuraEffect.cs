@@ -5742,9 +5742,9 @@ namespace Game.Spells
             if (!mode.HasFlag(AuraEffectHandleModes.Real))
                 return;
 
-            Player player = aurApp.GetTarget().ToPlayer();
-            if (player != null)
-                player.SwitchToOppositeTeam(apply);
+            //Player player = aurApp.GetTarget().ToPlayer();
+            //if (player != null)
+                //player.SwitchToOppositeTeam(apply);
         }
         
         [AuraEffectHandler(AuraType.SetFFAPvp)]
@@ -5808,9 +5808,9 @@ namespace Game.Spells
                 playerPosition.Pos = target.GetPosition();
 
                 if (GetAuraType() == AuraType.BattleGroundPlayerPositionFactional)
-                    playerPosition.IconID = target.GetTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconHordeFlag : BattlegroundConst.PlayerPositionIconAllianceFlag;
+                    playerPosition.IconID = target.GetEffectiveTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconHordeFlag : BattlegroundConst.PlayerPositionIconAllianceFlag;
                 else if (GetAuraType() == AuraType.BattleGroundPlayerPosition)
-                    playerPosition.IconID = target.GetTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconAllianceFlag : BattlegroundConst.PlayerPositionIconHordeFlag;
+                    playerPosition.IconID = target.GetEffectiveTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconAllianceFlag : BattlegroundConst.PlayerPositionIconHordeFlag;
                 else
                     Log.outWarn(LogFilter.Spells, $"Unknown aura effect {GetAuraType()} handled by HandleBattlegroundPlayerPosition.");
 

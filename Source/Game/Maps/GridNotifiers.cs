@@ -402,7 +402,7 @@ namespace Game.Maps
         WorldObject i_source;
         T i_packetSender;
         float i_distSq;
-        uint team;
+        Team team;
         Player skipped_receiver;
 
         public MessageDistDeliverer(WorldObject src, T packetSender, float dist, bool own_team_only = false, Player skipped = null)
@@ -410,7 +410,9 @@ namespace Game.Maps
             i_source = src;
             i_packetSender = packetSender;
             i_distSq = dist * dist;
-            team = (uint)((own_team_only && src.IsTypeId(TypeId.Player)) ? ((Player)src).GetTeam() : 0);
+            if (own_team_only && src.IsPlayer())
+                team = src.ToPlayer().GetEffectiveTeam();
+
             skipped_receiver = skipped;
         }
 
@@ -484,7 +486,7 @@ namespace Game.Maps
         void SendPacket(Player player)
         {
             // never send packet to self
-            if (i_source == player || (team != 0 && (uint)player.GetTeam() != team) || skipped_receiver == player)
+            if (i_source == player || (team != 0 && player.GetEffectiveTeam() != team) || skipped_receiver == player)
                 return;
 
             if (!player.HaveAtClient(i_source))

@@ -1411,7 +1411,7 @@ namespace Game.Entities
                     {
                         Battleground bg = target.GetBattleground();
                         if (bg)
-                            return bg.CanActivateGO((int)GetEntry(), (uint)target.GetTeam());
+                            return bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(target.GetGUID()));
                         return true;
                     }
                     break;

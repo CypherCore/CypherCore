@@ -2384,7 +2384,7 @@ namespace Game.Entities
                         if (objectiveType == QuestObjectiveType.PlayerKills && objective.Flags.HasAnyFlag(QuestObjectiveFlags.KillPlayersSameFaction))
                         {
                             Player victim = Global.ObjAccessor.GetPlayer(GetMap(), victimGuid);
-                            if (victim?.GetTeam() != GetTeam())
+                            if (victim?.GetEffectiveTeam() != GetEffectiveTeam())
                                 continue;
                         }
 

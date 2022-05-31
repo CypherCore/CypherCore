@@ -427,7 +427,7 @@ namespace Game.BattleGrounds.Zones
                 return;
             }
 
-            int teamIndex = GetTeamIndexByTeamId(source.GetTeam());
+            int teamIndex = GetTeamIndexByTeamId(GetPlayerTeam(source.GetGUID()));
 
             // Check if player really could use this banner, not cheated
             if (!(m_Nodes[node] == 0 || teamIndex == (int)m_Nodes[node] % 2))
@@ -639,7 +639,7 @@ namespace Game.BattleGrounds.Zones
 
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
-            int teamIndex = GetTeamIndexByTeamId(player.GetTeam());
+            int teamIndex = GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()));
 
             // Is there any occupied node for this team?
             List<byte> nodes = new();
@@ -716,7 +716,7 @@ namespace Game.BattleGrounds.Zones
             switch ((BattlegroundCriteriaId)criteriaId)
             {
                 case BattlegroundCriteriaId.ResilientVictory:
-                    return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(player.GetTeam())];
+                    return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()))];
             }
 
             return base.CheckAchievementCriteriaMeet(criteriaId, player, target, miscvalue);

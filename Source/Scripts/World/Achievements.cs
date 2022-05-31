@@ -73,7 +73,7 @@ namespace Scripts.World.Achievements
         {
             Battleground bg = source.GetBattleground();
             if (bg)
-                return bg.IsAllNodesControlledByTeam(source.GetTeam());
+                return bg.IsAllNodesControlledByTeam(bg.GetPlayerTeam(source.GetGUID()));
 
             return false;
         }

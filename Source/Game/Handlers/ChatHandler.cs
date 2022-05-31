@@ -243,7 +243,7 @@ namespace Game
                             return;
                         }
 
-                        if (GetPlayer().GetTeam() != receiver.GetTeam() && !HasPermission(RBACPermissions.TwoSideInteractionChat) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
+                        if (GetPlayer().GetEffectiveTeam() != receiver.GetEffectiveTeam() && !HasPermission(RBACPermissions.TwoSideInteractionChat) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
                         {
                             SendChatPlayerNotfoundNotice(target);
                             return;
