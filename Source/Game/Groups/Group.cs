@@ -1822,7 +1822,7 @@ namespace Game.Groups
 
             uint arenaTeamId = reference.GetArenaTeamId((byte)arenaSlot);
             Team team = reference.GetTeam();
-            bool isMercenary = reference.HasAura(PlayerConst.SpellMercenaryContractHorde) || reference.HasAura(PlayerConst.SpellMercenaryContractAlliance);
+            bool isMercenary = reference.HasAura(BattlegroundConst.SpellMercenaryContractHorde) || reference.HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
 
             // check every member of the group to be able to join
             memberscount = 0;
@@ -1871,7 +1871,7 @@ namespace Game.Groups
                 // check Freeze debuff
                 if (member.HasAura(9454))
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
-                if (isMercenary != (member.HasAura(PlayerConst.SpellMercenaryContractHorde) || member.HasAura(PlayerConst.SpellMercenaryContractAlliance)))
+                if (isMercenary != (member.HasAura(BattlegroundConst.SpellMercenaryContractHorde) || member.HasAura(BattlegroundConst.SpellMercenaryContractAlliance)))
                     return GroupJoinBattlegroundResult.BattlegroundJoinMercenary;
             }
 

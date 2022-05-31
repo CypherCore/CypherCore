@@ -448,7 +448,7 @@ namespace Game.Entities
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     m_bgBattlegroundQueueID[i].joinTime = (uint)GameTime.GetGameTime();
-                    m_bgBattlegroundQueueID[i].mercenary = HasAura(PlayerConst.SpellMercenaryContractHorde) || HasAura(PlayerConst.SpellMercenaryContractAlliance);
+                    m_bgBattlegroundQueueID[i].mercenary = HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
                     return i;
                 }
             }

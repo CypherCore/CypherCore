@@ -106,10 +106,10 @@ namespace Game
                 // mercenary applies only to unrated battlegrounds
                 if (!bg.IsRated() && !bg.IsArena())
                 {
-                    if (_player.HasAura(PlayerConst.SpellMercenaryContractHorde))
+                    if (_player.HasAura(BattlegroundConst.SpellMercenaryContractHorde))
                         return Team.Horde;
 
-                    if (_player.HasAura(PlayerConst.SpellMercenaryContractAlliance))
+                    if (_player.HasAura(BattlegroundConst.SpellMercenaryContractAlliance))
                         return Team.Alliance;
                 }
 
