@@ -32,7 +32,6 @@ namespace Scripts.World
 
         public override void OnConversationCreate(Conversation conversation, Unit creator)
         {
-            conversation.AddActor(ObjectGuid.Create(HighGuid.Player, 0xFFFFFFFFFFFFFFFF), 1);
             Player player = creator.ToPlayer();
             if (player != null)
                 player.KilledMonsterCredit(NpcTalkToYourCommanderCredit);

@@ -124,38 +124,8 @@ namespace Game.Entities
 
             _textureKitId = conversationTemplate.TextureKitId;
 
-            if (conversationTemplate.Actors != null)
-            {
-                foreach (var actor in conversationTemplate.Actors)
-                {
-                    if (actor != null)
-                    {
-                        ConversationActorField actorField = new();
-                        actorField.CreatureID = actor.CreatureId;
-                        actorField.CreatureDisplayInfoID = actor.CreatureDisplayInfoId;
-                        actorField.Id = (int)actor.ActorId;
-                        actorField.Type = ConversationActorType.CreatureActor;
-
-                        AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
-                    }
-                }
-            }
-
-            if (conversationTemplate.ActorGuids != null)
-            {
-                for (ushort actorIndex = 0; actorIndex < conversationTemplate.ActorGuids.Count; ++actorIndex)
-                {
-                    ulong actorGuid = conversationTemplate.ActorGuids[actorIndex];
-                    if (actorGuid == 0)
-                        continue;
-
-                    foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(actorGuid))
-                    {
-                        // we just need the last one, overriding is legit
-                        AddActor(creature.GetGUID(), actorIndex);
-                    }
-                }
-            }
+            foreach (var actor in conversationTemplate.Actors)
+                new ConversationActorFillVisitor(this, creator, map, actor).Invoke(actor);
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
@@ -221,11 +191,26 @@ namespace Game.Entities
             return true;
         }
 
-        public void AddActor(ObjectGuid actorGuid, ushort actorIdx)
+        public void AddActor(int actorId, uint actorIdx, ObjectGuid actorGuid)
         {
-            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
+            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, (int)actorIdx);
+            SetUpdateFieldValue(ref actorField.CreatureID, 0u);
+            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0u);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
-            SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
+            SetUpdateFieldValue(ref actorField.Id, actorId);
+            SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObject);
+            SetUpdateFieldValue(ref actorField.NoActorObject, 0u);
+        }
+
+        public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
+        {
+            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, (int)actorIdx);
+            SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
+            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, creatureDisplayInfoId);
+            SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);
+            SetUpdateFieldValue(ref actorField.Id, actorId);
+            SetUpdateFieldValue(ref actorField.Type, type);
+            SetUpdateFieldValue(ref actorField.NoActorObject, type == ConversationActorType.WorldObject ? 1 : 0u);
         }
 
         public TimeSpan GetLineStartTime(Locale locale, int lineId)
@@ -348,6 +333,70 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+        }
+    }
+
+    class ConversationActorFillVisitor
+    {
+        Conversation _conversation;
+        Unit _creator;
+        Map _map;
+        ConversationActorTemplate _actor;
+
+        public ConversationActorFillVisitor(Conversation conversation, Unit creator, Map map, ConversationActorTemplate actor)
+        {
+            _conversation = conversation;
+            _creator = creator;
+            _map = map;
+            _actor = actor;
+
+        }
+
+        public void Invoke(ConversationActorTemplate template)
+        {
+            if (template.WorldObjectTemplate == null)
+                Invoke(template.WorldObjectTemplate);
+
+            if (template.NoObjectTemplate == null)
+                Invoke(template.NoObjectTemplate);
+
+            if (template.ActivePlayerTemplate == null)
+                Invoke(template.ActivePlayerTemplate);
+
+            if (template.TalkingHeadTemplate == null)
+                Invoke(template.TalkingHeadTemplate);
+        }
+
+        public void Invoke(ConversationActorWorldObjectTemplate worldObject)
+        {
+            Creature bestFit = null;
+
+            foreach (var creature in _map.GetCreatureBySpawnIdStore().LookupByKey(worldObject.SpawnId))
+            {
+                bestFit = creature;
+
+                // If creature is in a personal phase then we pick that one specifically
+                if (creature.GetPhaseShift().GetPersonalGuid() == _creator.GetGUID())
+                    break;
+            }
+
+            if (bestFit)
+                _conversation.AddActor(_actor.Id, _actor.Index, bestFit.GetGUID());
+        }
+
+        public void Invoke(ConversationActorNoObjectTemplate noObject)
+        {
+            _conversation.AddActor(_actor.Id, _actor.Index, ConversationActorType.WorldObject, noObject.CreatureId, noObject.CreatureDisplayInfoId);
+        }
+
+        public void Invoke(ConversationActorActivePlayerTemplate activePlayer)
+        {
+            _conversation.AddActor(_actor.Id, _actor.Index, ObjectGuid.Create(HighGuid.Player, 0xFFFFFFFFFFFFFFFF));
+        }
+
+        public void Invoke(ConversationActorTalkingHeadTemplate talkingHead)
+        {
+            _conversation.AddActor(_actor.Id, _actor.Index, ConversationActorType.TalkingHead, talkingHead.CreatureId, talkingHead.CreatureDisplayInfoId);
         }
     }
 }

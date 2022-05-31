@@ -2875,8 +2875,8 @@ namespace Framework.Constants
 
     public enum ConversationActorType
     {
-        WorldObjectActor = 0,
-        CreatureActor = 1
+        WorldObject = 0,
+        TalkingHead = 1
     }
 
     public enum CorpseDynFlags
