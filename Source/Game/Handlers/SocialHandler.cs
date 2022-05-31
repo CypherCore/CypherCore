@@ -343,7 +343,7 @@ namespace Game
                 }
             }
 
-            Global.SocialMgr.SendFriendStatus(GetPlayer(), ignoreResult, ObjectGuid.Empty);
+            Global.SocialMgr.SendFriendStatus(GetPlayer(), ignoreResult, ignoreGuid);
         }
 
         [WorldPacketHandler(ClientOpcodes.DelIgnore)]
