@@ -2107,6 +2107,12 @@ namespace Game.Entities
 
         public void RestoreFaction()
         {
+            if (HasAuraType(AuraType.ModFaction))
+            {
+                SetFaction((uint)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
+                return;
+            }
+
             if (IsTypeId(TypeId.Player))
                 ToPlayer().SetFactionForRace(GetRace());
             else

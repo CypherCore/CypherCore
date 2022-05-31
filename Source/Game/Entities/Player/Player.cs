@@ -2192,7 +2192,7 @@ namespace Game.Entities
                 PhasingHandler.SetAlwaysVisible(this, HasAuraType(AuraType.PhaseAlwaysVisible), false);
 
                 m_ExtraFlags &= ~PlayerExtraFlags.GMOn;
-                SetFactionForRace(GetRace());
+                RestoreFaction();
                 RemovePlayerFlag(PlayerFlags.GM);
                 RemoveUnitFlag2(UnitFlags2.AllowCheatSpells);
 
