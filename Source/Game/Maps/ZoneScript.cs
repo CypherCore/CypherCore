@@ -22,6 +22,14 @@ namespace Game.Maps
 {
     public class ZoneScript
     {
+        public virtual void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
+        {
+            if (source != null)
+                GameEvents.Trigger(gameEventId, source, target);
+            else
+                ProcessEvent(null, gameEventId, null);
+        }
+
         public virtual uint GetCreatureEntry(ulong guidlow, CreatureData data) { return data.Id; }
         public virtual uint GetGameObjectEntry(ulong spawnId, uint entry) { return entry; }
 

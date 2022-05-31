@@ -320,6 +320,22 @@ namespace Game.Maps
                 minionInfo.bossInfo.minion.Remove(minion.GetGUID());
         }
 
+        // Triggers a GameEvent
+        // * If source is null then event is triggered for each player in the instance as "source"
+        public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
+        {
+            if (source != null)
+            {
+                base.TriggerGameEvent(gameEventId, source, target);
+                return;
+            }
+
+            ProcessEvent(target, gameEventId, source);
+            instance.DoOnPlayers(player => GameEvents.TriggerForPlayer(gameEventId, player));
+
+            GameEvents.TriggerForMap(gameEventId, instance);
+        }
+
         public Creature GetCreature(uint type)
         {
             return instance.GetCreature(GetObjectGuid(type));
@@ -598,12 +614,6 @@ namespace Game.Maps
         public void DoUpdateCriteria(CriteriaType type, uint miscValue1 = 0, uint miscValue2 = 0, Unit unit = null)
         {
             instance.DoOnPlayers(player => player.UpdateCriteria(type, miscValue1, miscValue2, 0, unit));
-        }
-
-        // Start timed achievement for all players in instance
-        public void DoStartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
-        {
-            instance.DoOnPlayers(player => player.StartCriteriaTimer(startEvent, entry));
         }
 
         // Remove Auras due to Spell on all players in instance
