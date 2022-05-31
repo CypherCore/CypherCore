@@ -3518,14 +3518,11 @@ namespace Game.Entities
 
         public void SwitchToOppositeTeam(bool apply)
         {
-            m_team = GetNativeTeam();
+            m_team = TeamForRace(GetRace());
 
             if (apply)
                 m_team = (m_team == Team.Alliance) ? Team.Horde : Team.Alliance;
         }
-
-        public Team GetNativeTeam() { return TeamForRace(GetRace()); }
-        public uint GetNativeTeamId() { return TeamIdForRace(GetRace()); }
         
         public void SetFactionForRace(Race race)
         {

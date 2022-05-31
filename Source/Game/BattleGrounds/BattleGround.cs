@@ -625,7 +625,7 @@ namespace Game.BattleGrounds
                 if (!player)
                     continue;
 
-                if (player.GetNativeTeam() != team)
+                if (player.HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode))
                     continue;
 
                 uint repGain = Reputation;
@@ -853,8 +853,12 @@ namespace Game.BattleGrounds
                     player.RemoveAurasByType(AuraType.ModShapeshift);
 
                 player.RemoveAurasByType(AuraType.Mounted);
-                player.RemoveAurasByType(AuraType.SwitchTeam);
-                player.RemoveAurasByType(AuraType.ModFaction);
+                player.RemoveAura(BattlegroundConst.SpellMercenaryHorde1);
+                player.RemoveAura(BattlegroundConst.SpellMercenaryHordeReactions);
+                player.RemoveAura(BattlegroundConst.SpellMercenaryAlliance1);
+                player.RemoveAura(BattlegroundConst.SpellMercenaryAllianceReactions);
+                player.RemoveAura(BattlegroundConst.SpellMercenaryShapeshift);
+                player.RemovePlayerFlagEx(PlayerFlagsEx.MercenaryMode);
 
                 if (!player.IsAlive())                              // resurrect on exit
                 {
@@ -1084,6 +1088,9 @@ namespace Game.BattleGrounds
                         player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance1, true);
                         player.CastSpell(player, BattlegroundConst.SpellMercenaryAllianceReactions, true);
                     }
+
+                    player.CastSpell(player, BattlegroundConst.SpellMercenaryShapeshift);
+                    player.SetPlayerFlagEx(PlayerFlagsEx.MercenaryMode);
                 }
             }
 
