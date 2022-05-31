@@ -1800,6 +1800,8 @@ namespace Game.Entities
                             ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
                             player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
                             player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
+                            if (info.Chair.triggeredEvent != 0)
+                                GameEvents.Trigger(info.Chair.triggeredEvent, player, this);
                             return;
                         }
                     }
@@ -2217,6 +2219,9 @@ namespace Game.Entities
                                         bg.EventPlayerClickedOnFlag(player, this);
                                     break;
                             }
+
+                            if (info.FlagDrop.eventID != 0)
+                                GameEvents.Trigger(info.FlagDrop.eventID, player, this);
                         }
                         //this cause to call return, all flags must be deleted here!!
                         spellId = 0;
@@ -2590,6 +2595,9 @@ namespace Game.Entities
                 packet.SpellID = spellId;
                 player.SendPacket(packet);
             }
+
+            if (change < 0 && GetGoInfo().DestructibleBuilding.DamageEvent != 0)
+                GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DamageEvent, attackerOrHealer, this);
 
             GameObjectDestructibleState newState = GetDestructibleState();
 

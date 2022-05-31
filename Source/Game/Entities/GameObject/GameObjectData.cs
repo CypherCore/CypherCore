@@ -481,6 +481,8 @@ namespace Game.Entities
                     return Goober.eventID;
                 case GameObjectTypes.Chest:
                     return Chest.triggeredEvent;
+                case GameObjectTypes.Chair:
+                    return Chest.triggeredEvent;
                 case GameObjectTypes.Camera:
                     return Camera.eventID;
                 case GameObjectTypes.GatheringNode:
