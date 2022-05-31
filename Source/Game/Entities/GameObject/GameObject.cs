@@ -707,7 +707,8 @@ namespace Game.Entities
                                             Battleground bg = map.GetBG();
                                             if (bg != null)
                                             {
-                                                EventInform(GetGoInfo().CapturePoint.CaptureEventHorde);
+                                                if (goInfo.CapturePoint.CaptureEventHorde != 0)
+                                                    GameEvents.Trigger(goInfo.CapturePoint.CaptureEventHorde, this, this);
                                                 bg.SendBroadcastText(GetGoInfo().CapturePoint.CaptureBroadcastHorde, ChatMsg.BgSystemHorde);
                                             }
                                         }
@@ -721,7 +722,8 @@ namespace Game.Entities
                                             Battleground bg = map.GetBG();
                                             if (bg != null)
                                             {
-                                                EventInform(GetGoInfo().CapturePoint.CaptureEventAlliance);
+                                                if (goInfo.CapturePoint.CaptureEventAlliance != 0)
+                                                    GameEvents.Trigger(goInfo.CapturePoint.CaptureEventAlliance, this, this);
                                                 bg.SendBroadcastText(GetGoInfo().CapturePoint.CaptureBroadcastAlliance, ChatMsg.BgSystemAlliance);
                                             }
                                         }
@@ -1830,8 +1832,7 @@ namespace Game.Entities
                         if (info.Goober.eventID != 0)
                         {
                             Log.outDebug(LogFilter.Scripts, "Goober ScriptStart id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
-                            GetMap().ScriptsStart(ScriptsType.Event, info.Goober.eventID, player, this);
-                            EventInform(info.Goober.eventID, user);
+                            GameEvents.Trigger(info.Goober.eventID, player, this);
                         }
 
                         // possible quest objective for active quests
@@ -1893,10 +1894,7 @@ namespace Game.Entities
                         player.SendCinematicStart(info.Camera._camera);
 
                     if (info.Camera.eventID != 0)
-                    {
-                        GetMap().ScriptsStart(ScriptsType.Event, info.Camera.eventID, player, this);
-                        EventInform(info.Camera.eventID, user);
-                    }
+                        GameEvents.Trigger(info.Camera.eventID, player, this);
 
                     return;
                 }
@@ -2382,23 +2380,6 @@ namespace Game.Entities
                 && dz < info.GeoBoxMax.Z + radius && dz > info.GeoBoxMin.Z - radius;
         }
 
-        public void EventInform(uint eventId, WorldObject invoker = null)
-        {
-            if (eventId == 0)
-                return;
-
-            if (GetAI() != null)
-                GetAI().EventInform(eventId);
-
-            if (m_zoneScript != null)
-                m_zoneScript.ProcessEvent(this, eventId, invoker);
-
-            BattlegroundMap bgMap = GetMap().ToBattlegroundMap();
-            if (bgMap)
-                if (bgMap.GetBG())
-                    bgMap.GetBG().ProcessEvent(this, eventId, invoker);
-        }
-
         public uint GetScriptId()
         {
             GameObjectData gameObjectData = GetGameObjectData();
@@ -2644,7 +2625,8 @@ namespace Game.Entities
                     break;
                 case GameObjectDestructibleState.Damaged:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, attackerOrHealer);
+                    if (GetGoInfo().DestructibleBuilding.DamagedEvent != 0)
+                        GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DamagedEvent, attackerOrHealer, this);
                     GetAI().Damaged(attackerOrHealer, m_goInfo.DestructibleBuilding.DamagedEvent);
 
                     RemoveFlag(GameObjectFlags.Destroyed);
@@ -2670,7 +2652,8 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Destroyed:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, attackerOrHealer);
+                    if (GetGoInfo().DestructibleBuilding.DestroyedEvent != 0)
+                        GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DestroyedEvent, attackerOrHealer, this);
                     GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
 
                     Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
@@ -2701,7 +2684,8 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Rebuilding:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, attackerOrHealer);
+                    if (GetGoInfo().DestructibleBuilding.RebuildingEvent != 0)
+                        GameEvents.Trigger(GetGoInfo().DestructibleBuilding.RebuildingEvent, attackerOrHealer, this);
                     RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
 
                     uint modelId = m_goInfo.displayId;
@@ -3115,7 +3099,8 @@ namespace Game.Entities
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.HordeCaptured;
                     battleground.SendBroadcastText(GetGoInfo().CapturePoint.DefendedBroadcastHorde, ChatMsg.BgSystemHorde, player);
                     UpdateCapturePoint();
-                    EventInform(GetGoInfo().CapturePoint.DefendedEventHorde, player);
+                    if (GetGoInfo().CapturePoint.DefendedEventHorde != 0)
+                        GameEvents.Trigger(GetGoInfo().CapturePoint.DefendedEventHorde, player, this);
                     return;
                 }
 
@@ -3127,7 +3112,8 @@ namespace Game.Entities
                         m_goValue.CapturePoint.State = BattlegroundCapturePointState.ContestedHorde;
                         battleground.SendBroadcastText(GetGoInfo().CapturePoint.AssaultBroadcastHorde, ChatMsg.BgSystemHorde, player);
                         UpdateCapturePoint();
-                        EventInform(GetGoInfo().CapturePoint.AssaultBroadcastHorde, player);
+                        if (GetGoInfo().CapturePoint.ContestedEventHorde != 0)
+                            GameEvents.Trigger(GetGoInfo().CapturePoint.ContestedEventHorde, player, this);
                         m_goValue.CapturePoint.AssaultTimer = GetGoInfo().CapturePoint.CaptureTime;
                         break;
                     default:
@@ -3142,7 +3128,8 @@ namespace Game.Entities
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.AllianceCaptured;
                     battleground.SendBroadcastText(GetGoInfo().CapturePoint.DefendedBroadcastAlliance, ChatMsg.BgSystemAlliance, player);
                     UpdateCapturePoint();
-                    EventInform(GetGoInfo().CapturePoint.DefendedEventAlliance, player);
+                    if (GetGoInfo().CapturePoint.DefendedEventAlliance != 0)
+                        GameEvents.Trigger(GetGoInfo().CapturePoint.DefendedEventAlliance, player, this);
                     return;
                 }
 
@@ -3154,7 +3141,8 @@ namespace Game.Entities
                         m_goValue.CapturePoint.State = BattlegroundCapturePointState.ContestedAlliance;
                         battleground.SendBroadcastText(GetGoInfo().CapturePoint.AssaultBroadcastAlliance, ChatMsg.BgSystemAlliance, player);
                         UpdateCapturePoint();
-                        EventInform(GetGoInfo().CapturePoint.ContestedEventAlliance, player);
+                        if (GetGoInfo().CapturePoint.ContestedEventAlliance != 0)
+                            GameEvents.Trigger(GetGoInfo().CapturePoint.ContestedEventAlliance, player, this);
                         m_goValue.CapturePoint.AssaultTimer = GetGoInfo().CapturePoint.CaptureTime;
                         break;
                     default:

@@ -248,7 +248,7 @@ namespace Game.Movement
             if (eventid != 0)
             {
                 Log.outDebug(LogFilter.MapsScript, $"FlightPathMovementGenerator::DoEventIfAny: taxi {(departure ? "departure" : "arrival")} event {eventid} of node {node.NodeIndex} of path {node.PathID} for player {owner.GetName()}");
-                owner.GetMap().ScriptsStart(ScriptsType.Event, eventid, owner, owner);
+                GameEvents.Trigger(eventid, owner, owner);
             }
         }
 

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -23,7 +24,6 @@ using Game.Maps;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using Framework.Collections;
 using System.Linq;
 
 namespace Game

@@ -734,14 +734,7 @@ namespace Game.Spells
 
             Log.outDebug(LogFilter.Spells, "Spell ScriptStart {0} for spellid {1} in EffectSendEvent ", effectInfo.MiscValue, m_spellInfo.Id);
 
-            ZoneScript zoneScript = m_caster.GetZoneScript();
-            InstanceScript instanceScript = m_caster.GetInstanceScript();
-            if (zoneScript != null)
-                zoneScript.ProcessEvent(target, (uint)effectInfo.MiscValue, m_caster);
-            else if (instanceScript != null)    // needed in case Player is the caster
-                instanceScript.ProcessEvent(target, (uint)effectInfo.MiscValue, m_caster);
-
-            m_caster.GetMap().ScriptsStart(ScriptsType.Event, (uint)effectInfo.MiscValue, m_caster, target);
+            GameEvents.Trigger((uint)effectInfo.MiscValue, m_caster, target);
         }
 
         [SpellEffectHandler(SpellEffectName.PowerBurn)]

@@ -772,8 +772,7 @@ namespace Game.Entities
             if (eventid != 0)
             {
                 Log.outDebug(LogFilter.Scripts, "Taxi {0} event {1} of node {2} of {3} path", departure ? "departure" : "arrival", eventid, node.Node.NodeIndex, GetName());
-                GetMap().ScriptsStart(ScriptsType.Event, eventid, this, this);
-                EventInform(eventid);
+                GameEvents.Trigger(eventid, this, this);
             }
         }
 

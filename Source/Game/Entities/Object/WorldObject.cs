@@ -1451,23 +1451,30 @@ namespace Game.Entities
             map.AddObjectToRemoveList(this);
         }
 
-        public void SetZoneScript()
+        public ZoneScript FindZoneScript()
         {
             Map map = GetMap();
             if (map != null)
             {
                 InstanceMap instanceMap = map.ToInstanceMap();
                 if (instanceMap != null)
-                    m_zoneScript = (ZoneScript)instanceMap.GetInstanceScript();
+                    return (ZoneScript)instanceMap.GetInstanceScript();
                 else if (!map.IsBattlegroundOrArena())
                 {
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
                     if (bf != null)
-                        m_zoneScript = bf;
+                        return bf;
                     else
-                        m_zoneScript = Global.OutdoorPvPMgr.GetZoneScript(GetZoneId());
+                        return Global.OutdoorPvPMgr.GetZoneScript(GetZoneId());
                 }
             }
+
+            return null;
+        }
+
+        public void SetZoneScript()
+        {
+            m_zoneScript = FindZoneScript();
         }
 
         public Scenario GetScenario()
