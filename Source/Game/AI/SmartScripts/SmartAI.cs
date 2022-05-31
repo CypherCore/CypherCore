@@ -113,7 +113,7 @@ namespace Game.AI
 
             if (invoker && invoker.IsPlayer())
             {
-                _escortNPCFlags = me.GetNpcFlags();
+                _escortNPCFlags = (uint)me.GetNpcFlags();
                 me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
