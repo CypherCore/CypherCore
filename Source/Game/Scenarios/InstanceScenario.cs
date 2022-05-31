@@ -178,6 +178,5 @@ namespace Game.Scenarios
         }
 
         Map _map;
-        Dictionary<byte, Dictionary<uint, CriteriaProgress>> _stepCriteriaProgress = new();
     }
 }
