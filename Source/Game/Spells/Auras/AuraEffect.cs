@@ -5736,6 +5736,17 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.SwitchTeam)]
+        void HandleSwitchTeam(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (player != null)
+                player.SwitchToOppositeTeam(apply);
+        }
+        
         [AuraEffectHandler(AuraType.SetFFAPvp)]
         void HandleSetFFAPvP(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

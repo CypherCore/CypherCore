@@ -88,6 +88,10 @@ namespace Framework.Constants
         public const uint SpellAuraPlayerInactive = 43681;                // Inactive
         public const uint SpellHonorableDefender25y = 68652;                // +50% Honor When Standing At A Capture Point That You Control, 25yards Radius (Added In 3.2)
         public const uint SpellHonorableDefender60y = 66157;              // +50% Honor When Standing At A Capture Point That You Control, 60yards Radius (Added In 3.2), Probably For 40+ Player Battlegrounds
+        public const uint SpellMercenaryHorde1 = 193864;
+        public const uint SpellMercenaryHorde2 = 195838;
+        public const uint SpellMercenaryAlliance1 = 193863;
+        public const uint SpellMercenaryAlliance2 = 195843;
     }
 
     public enum BattlegroundEventFlags

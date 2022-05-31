@@ -510,8 +510,8 @@ namespace Framework.Constants
         Unk486 = 486,
         CosmeticMounted = 487,
         Unk488 = 488,
-        Unk489 = 489,
-        Unk490 = 490,
+        ModAlternativeDefaultLanguage = 489, // NYI
+        SwitchTeam = 490,
         Unk491 = 491,
         Unk492 = 492,
         Unk493 = 493,

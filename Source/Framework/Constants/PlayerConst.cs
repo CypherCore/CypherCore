@@ -77,6 +77,10 @@ namespace Framework.Constants
 
         //Warmode
         public const uint WarmodeEnlistedSpellOutside = 269083;
+
+        //Mercenary System
+        public const uint  SpellMercenaryContractHorde = 193472;
+        public const uint SpellMercenaryContractAlliance = 193475;
     }
 
     public struct MoneyConstants

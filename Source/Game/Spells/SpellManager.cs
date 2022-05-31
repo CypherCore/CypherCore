@@ -4338,6 +4338,23 @@ namespace Game.Entities
                 spellInfo.Attributes |= SpellAttr0.UnaffectedByInvulnerability;
             });
 
+            // Horde / Alliance switch (BG mercenary system)
+            ApplySpellFix(new[] { 195838, 195843 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell

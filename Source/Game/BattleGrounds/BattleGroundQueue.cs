@@ -67,7 +67,7 @@ namespace Game.BattleGrounds
             ginfo.IsInvitedToBGInstanceGUID = 0;
             ginfo.JoinTime = GameTime.GetGameTimeMS();
             ginfo.RemoveInviteTime = 0;
-            ginfo.Team = leader.GetTeam();
+            ginfo.Team = leader.GetBgQueueTeam();
             ginfo.ArenaTeamRating = ArenaRating;
             ginfo.ArenaMatchmakerRating = MatchmakerRating;
             ginfo.OpponentsTeamRating = 0;
@@ -109,6 +109,14 @@ namespace Game.BattleGrounds
                     m_QueuedPlayers[member.GetGUID()] = pl_info;
                     // add the pinfo to ginfo's list
                     ginfo.Players[member.GetGUID()] = pl_info;
+
+                    if (ginfo.Team != member.GetTeam())
+                    {
+                        if (member.GetTeam() == Team.Alliance)
+                            member.CastSpell(member, PlayerConst.SpellMercenaryContractHorde);
+                        else
+                            member.CastSpell(member, PlayerConst.SpellMercenaryContractAlliance);
+                    }
                 }
             }
             else

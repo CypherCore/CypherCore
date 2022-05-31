@@ -625,6 +625,9 @@ namespace Game.BattleGrounds
                 if (!player)
                     continue;
 
+                if (player.GetNativeTeam() != team)
+                    continue;
+
                 uint repGain = Reputation;
                 MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifier(AuraType.ModReputationGain));
                 MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, (int)faction_id));
@@ -850,6 +853,8 @@ namespace Game.BattleGrounds
                     player.RemoveAurasByType(AuraType.ModShapeshift);
 
                 player.RemoveAurasByType(AuraType.Mounted);
+                player.RemoveAurasByType(AuraType.SwitchTeam);
+                player.RemoveAurasByType(AuraType.ModFaction);
 
                 if (!player.IsAlive())                              // resurrect on exit
                 {
@@ -1064,6 +1069,17 @@ namespace Game.BattleGrounds
                     timer.TotalTime = countdownMaxForBGType;
 
                     player.SendPacket(timer);
+                }
+
+                if (player.HasAura(PlayerConst.SpellMercenaryContractHorde))
+                {
+                    player.CastSpell(player, BattlegroundConst.SpellMercenaryHorde1, true);
+                    player.CastSpell(player, BattlegroundConst.SpellMercenaryHorde2, true);
+                }
+                else if (player.HasAura(PlayerConst.SpellMercenaryContractAlliance))
+                {
+                    player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance1, true);
+                    player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance2, true);
                 }
             }
 
