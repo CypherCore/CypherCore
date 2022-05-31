@@ -241,17 +241,7 @@ namespace Game.BattleGrounds.Zones
                         TeleportPlayerToExploitLocation(player);
                     break;
                 case 3948:                                          // Arathi Basin Alliance Exit.
-                    if (player.GetTeam() != Team.Alliance)
-                        player.GetSession().SendNotification("Only The Alliance can use that portal");
-                    else
-                        player.LeaveBattleground();
-                    break;
                 case 3949:                                          // Arathi Basin Horde Exit.
-                    if (player.GetTeam() != Team.Horde)
-                        player.GetSession().SendNotification("Only The Horde can use that portal");
-                    else
-                        player.LeaveBattleground();
-                    break;
                 case 3866:                                          // Stables
                 case 3869:                                          // Gold Mine
                 case 3867:                                          // Farm
@@ -260,7 +250,6 @@ namespace Game.BattleGrounds.Zones
                 case 4020:                                          // Unk1
                 case 4021:                                          // Unk2
                 case 4674:                                          // Unk3
-                                                                    //break;
                 default:
                     base.HandleAreaTrigger(player, trigger, entered);
                     break;
