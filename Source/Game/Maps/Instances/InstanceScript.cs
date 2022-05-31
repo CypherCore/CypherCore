@@ -606,12 +606,6 @@ namespace Game.Maps
             instance.DoOnPlayers(player => player.StartCriteriaTimer(startEvent, entry));
         }
 
-        // Stop timed achievement for all players in instance
-        public void DoStopCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
-        {
-            instance.DoOnPlayers(player => player.RemoveCriteriaTimer(startEvent, entry));
-        }
-
         // Remove Auras due to Spell on all players in instance
         public void DoRemoveAurasDueToSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
         {

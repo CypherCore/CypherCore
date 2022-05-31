@@ -496,6 +496,8 @@ namespace Game.DataStorage
         public byte Flags;
         public ushort EligibilityWorldStateID;
         public byte EligibilityWorldStateValue;
+
+        public CriteriaFlags GetFlags() => (CriteriaFlags)Flags;
     }
 
     public sealed class CriteriaTreeRecord

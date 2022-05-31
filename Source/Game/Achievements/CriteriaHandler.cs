@@ -493,7 +493,7 @@ namespace Game.Achievements
                 bool canStart = false;
                 foreach (CriteriaTree tree in trees)
                 {
-                    if (!_timeCriteriaTrees.ContainsKey(tree.Id) && !IsCompletedCriteriaTree(tree))
+                    if ((!_timeCriteriaTrees.ContainsKey(tree.Id) || criteria.Entry.GetFlags().HasFlag(CriteriaFlags.ResetOnStart)) && !IsCompletedCriteriaTree(tree))
                     {
                         // Start the timer
                         if (criteria.Entry.StartTimer * Time.InMilliseconds > timeLost)
