@@ -554,6 +554,7 @@ namespace Game.Entities
         public BattlegroundQueueTypeId bgQueueTypeId;
         public uint invitedToInstance;
         public uint joinTime;
+        public bool mercenary;
     }
 
     // Holder for Battlegrounddata

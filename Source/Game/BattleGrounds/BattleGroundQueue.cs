@@ -57,7 +57,7 @@ namespace Game.BattleGrounds
         }
 
         // add group or player (grp == null) to bg queue with the given leader and bg specifications
-        public GroupQueueInfo AddGroup(Player leader, Group grp, PvpDifficultyRecord bracketEntry, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
+        public GroupQueueInfo AddGroup(Player leader, Group group, Team team, PvpDifficultyRecord bracketEntry, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
         {
             BattlegroundBracketId bracketId = bracketEntry.GetBracketId();
 
@@ -67,7 +67,7 @@ namespace Game.BattleGrounds
             ginfo.IsInvitedToBGInstanceGUID = 0;
             ginfo.JoinTime = GameTime.GetGameTimeMS();
             ginfo.RemoveInviteTime = 0;
-            ginfo.Team = leader.GetBgQueueTeam();
+            ginfo.Team = team;
             ginfo.ArenaTeamRating = ArenaRating;
             ginfo.ArenaMatchmakerRating = MatchmakerRating;
             ginfo.OpponentsTeamRating = 0;
@@ -88,15 +88,15 @@ namespace Game.BattleGrounds
             //announce world (this don't need mutex)
             if (m_queueId.Rated && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
             {
-                ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(arenateamid);
-                if (team != null)
-                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldJoin, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
+                ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenateamid);
+                if (arenaTeam != null)
+                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldJoin, arenaTeam.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
             }
 
             //add players from group to ginfo
-            if (grp)
+            if (group)
             {
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
                     if (!member)
@@ -109,14 +109,6 @@ namespace Game.BattleGrounds
                     m_QueuedPlayers[member.GetGUID()] = pl_info;
                     // add the pinfo to ginfo's list
                     ginfo.Players[member.GetGUID()] = pl_info;
-
-                    if (ginfo.Team != member.GetTeam())
-                    {
-                        if (member.GetTeam() == Team.Alliance)
-                            member.CastSpell(member, PlayerConst.SpellMercenaryContractHorde);
-                        else
-                            member.CastSpell(member, PlayerConst.SpellMercenaryContractAlliance);
-                    }
                 }
             }
             else

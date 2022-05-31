@@ -997,6 +997,7 @@ namespace Game.BattleGrounds
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
             bp.ActiveSpec = (int)player.GetPrimarySpecialization();
+            bp.Mercenary = player.IsMercenaryForBattlegroundQueueType(GetQueueId());
 
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
             // Add to list/maps
@@ -1071,15 +1072,18 @@ namespace Game.BattleGrounds
                     player.SendPacket(timer);
                 }
 
-                if (player.HasAura(PlayerConst.SpellMercenaryContractHorde))
+                if (bp.Mercenary)
                 {
-                    player.CastSpell(player, BattlegroundConst.SpellMercenaryHorde1, true);
-                    player.CastSpell(player, BattlegroundConst.SpellMercenaryHorde2, true);
-                }
-                else if (player.HasAura(PlayerConst.SpellMercenaryContractAlliance))
-                {
-                    player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance1, true);
-                    player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance2, true);
+                    if (bp.Team == Team.Horde)
+                    {
+                        player.CastSpell(player, BattlegroundConst.SpellMercenaryHorde1, true);
+                        player.CastSpell(player, BattlegroundConst.SpellMercenaryHordeReactions, true);
+                    }
+                    else if (bp.Team == Team.Alliance)
+                    {
+                        player.CastSpell(player, BattlegroundConst.SpellMercenaryAlliance1, true);
+                        player.CastSpell(player, BattlegroundConst.SpellMercenaryAllianceReactions, true);
+                    }
                 }
             }
 
@@ -1768,6 +1772,15 @@ namespace Game.BattleGrounds
             return m_Players.ContainsKey(guid);
         }
 
+        public bool IsPlayerMercenaryInBattleground(ObjectGuid guid)
+        {
+            var player = m_Players.LookupByKey(guid);
+            if (player != null)
+                return player.Mercenary;
+
+            return false;
+        }
+        
         void PlayerAddedToBGCheckIfBGIsRunning(Player player)
         {
             if (GetStatus() != BattlegroundStatus.WaitLeave)
@@ -2154,8 +2167,9 @@ namespace Game.BattleGrounds
 
     public class BattlegroundPlayer
     {
-        public long OfflineRemoveTime;                              // for tracking and removing offline players from queue after 5 Time.Minutes
-        public Team Team;                                           // Player's team
-        public int ActiveSpec;
+        public long OfflineRemoveTime;  // for tracking and removing offline players from queue after 5 Time.Minutes
+        public Team Team;               // Player's team
+        public int ActiveSpec;          // Player's active spec
+        public bool Mercenary;
     }
 }

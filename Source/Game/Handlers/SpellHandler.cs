@@ -403,10 +403,6 @@ namespace Game
             if (!spellInfo.IsPositive() || spellInfo.IsPassive())
                 return;
 
-            if (spellInfo.Id == PlayerConst.SpellMercenaryContractHorde || spellInfo.Id == PlayerConst.SpellMercenaryContractAlliance)
-                if (_player.InBattlegroundQueue())
-                    return;
-
             GetPlayer().RemoveOwnedAura(cancelAura.SpellID, cancelAura.CasterGUID, 0, AuraRemoveMode.Cancel);
         }
 

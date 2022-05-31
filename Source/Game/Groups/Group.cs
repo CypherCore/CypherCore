@@ -1802,7 +1802,7 @@ namespace Game.Groups
 
             BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.GetTypeID());
             if (bgEntry == null)
-                return GroupJoinBattlegroundResult.JoinFailed;            // shouldn't happen
+                return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // shouldn't happen
 
             // check for min / max count
             uint memberscount = GetMembersCount();
@@ -1814,14 +1814,15 @@ namespace Game.Groups
             Player reference = GetFirstMember().GetSource();
             // no reference found, can't join this way
             if (!reference)
-                return GroupJoinBattlegroundResult.JoinFailed;
+                return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
             PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.GetLevel());
             if (bracketEntry == null)
-                return GroupJoinBattlegroundResult.JoinFailed;
+                return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
             uint arenaTeamId = reference.GetArenaTeamId((byte)arenaSlot);
             Team team = reference.GetTeam();
+            bool isMercenary = reference.HasAura(PlayerConst.SpellMercenaryContractHorde) || reference.HasAura(PlayerConst.SpellMercenaryContractAlliance);
 
             // check every member of the group to be able to join
             memberscount = 0;
@@ -1830,7 +1831,7 @@ namespace Game.Groups
                 Player member = refe.GetSource();
                 // offline member? don't let join
                 if (!member)
-                    return GroupJoinBattlegroundResult.JoinFailed;
+                    return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
                 // rbac permissions
                 if (!member.CanJoinToBattleground(bgOrTemplate))
                     return GroupJoinBattlegroundResult.JoinTimedOut;
@@ -1846,10 +1847,10 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match
                 if (isRated && member.GetArenaTeamId((byte)arenaSlot) != arenaTeamId)
-                    return GroupJoinBattlegroundResult.JoinFailed;
+                    return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
                 // don't let join if someone from the group is already in that bg queue
                 if (member.InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
-                    return GroupJoinBattlegroundResult.JoinFailed;            // not blizz-like
+                    return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // not blizz-like
                 // don't let join if someone from the group is in bg queue random
                 bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
                     || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
@@ -1869,7 +1870,9 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.LfgCantUseBattleground;
                 // check Freeze debuff
                 if (member.HasAura(9454))
-                    return GroupJoinBattlegroundResult.JoinFailed;
+                    return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
+                if (isMercenary != (member.HasAura(PlayerConst.SpellMercenaryContractHorde) || member.HasAura(PlayerConst.SpellMercenaryContractAlliance)))
+                    return GroupJoinBattlegroundResult.BattlegroundJoinMercenary;
             }
 
             // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...

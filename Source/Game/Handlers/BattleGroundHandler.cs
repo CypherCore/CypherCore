@@ -101,6 +101,21 @@ namespace Game
 
             Group grp = _player.GetGroup();
 
+            Team getQueueTeam()
+            {
+                // mercenary applies only to unrated battlegrounds
+                if (!bg.IsRated() && !bg.IsArena())
+                {
+                    if (_player.HasAura(PlayerConst.SpellMercenaryContractHorde))
+                        return Team.Horde;
+
+                    if (_player.HasAura(PlayerConst.SpellMercenaryContractAlliance))
+                        return Team.Alliance;
+                }
+
+                return _player.GetTeam();
+            }
+
             BattlefieldStatusFailed battlefieldStatusFailed;
             // check queue conditions
             if (grp == null)
@@ -163,7 +178,7 @@ namespace Game
                     return;
 
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
-                GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, bracketEntry, isPremade, 0, 0);
+                GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, getQueueTeam(), bracketEntry, isPremade, 0, 0);
 
                 uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
                 uint queueSlot = GetPlayer().AddBattlegroundQueueId(bgQueueTypeId);
@@ -189,7 +204,7 @@ namespace Game
                 if (err == 0)
                 {
                     Log.outDebug(LogFilter.Battleground, "Battleground: the following players are joining as group:");
-                    ginfo = bgQueue.AddGroup(GetPlayer(), grp, bracketEntry, isPremade, 0, 0);
+                    ginfo = bgQueue.AddGroup(GetPlayer(), grp, getQueueTeam(), bracketEntry, isPremade, 0, 0);
                     avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
                 }
 
@@ -539,7 +554,7 @@ namespace Game
             {
                 Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
 
-                ginfo = bgQueue.AddGroup(GetPlayer(), grp, bracketEntry, false, arenaRating, matchmakerRating, ateamId);
+                ginfo = bgQueue.AddGroup(GetPlayer(), grp, _player.GetTeam(), bracketEntry, false, arenaRating, matchmakerRating, ateamId);
                 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
             }
 
@@ -560,7 +575,7 @@ namespace Game
                 if (!GetPlayer().CanJoinToBattleground(bg))
                 {
                     BattlefieldStatusFailed battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.JoinFailed, errorGuid);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.BattlegroundJoinFailed, errorGuid);
                     member.SendPacket(battlefieldStatus);
                     return;
                 }

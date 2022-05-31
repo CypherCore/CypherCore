@@ -3524,17 +3524,6 @@ namespace Game.Entities
                 m_team = (m_team == Team.Alliance) ? Team.Horde : Team.Alliance;
         }
 
-        public Team GetBgQueueTeam()
-        {
-            if (HasAura(PlayerConst.SpellMercenaryContractHorde))
-                return Team.Horde;
-
-            if (HasAura(PlayerConst.SpellMercenaryContractAlliance))
-                return Team.Alliance;
-
-            return GetTeam();
-        }
-
         public Team GetNativeTeam() { return TeamForRace(GetRace()); }
         public uint GetNativeTeamId() { return TeamIdForRace(GetRace()); }
         

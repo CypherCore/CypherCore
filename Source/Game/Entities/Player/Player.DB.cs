@@ -2828,6 +2828,7 @@ namespace Game.Entities
                     currentBg.EventPlayerLoggedIn(this);
 
                     SetInviteForBattlegroundQueueType(bgQueueTypeId, currentBg.GetInstanceID());
+                    SetMercenaryForBattlegroundQueueType(bgQueueTypeId, currentBg.IsPlayerMercenaryInBattleground(GetGUID()));
                 }
                 // Bg was not found - go to Entry Point
                 else

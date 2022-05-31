@@ -448,6 +448,7 @@ namespace Game.Entities
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     m_bgBattlegroundQueueID[i].joinTime = (uint)GameTime.GetGameTime();
+                    m_bgBattlegroundQueueID[i].mercenary = HasAura(PlayerConst.SpellMercenaryContractHorde) || HasAura(PlayerConst.SpellMercenaryContractAlliance);
                     return i;
                 }
             }
@@ -471,6 +472,7 @@ namespace Game.Entities
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = default;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     m_bgBattlegroundQueueID[i].joinTime = 0;
+                    m_bgBattlegroundQueueID[i].mercenary = false;
                     return;
                 }
             }
@@ -491,6 +493,21 @@ namespace Game.Entities
             return false;
         }
 
+        void SetMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, bool mercenary)
+        {
+            for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                    m_bgBattlegroundQueueID[i].mercenary = mercenary;
+        }
+
+        public bool IsMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
+        {
+            for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                    return m_bgBattlegroundQueueID[i].mercenary;
+            return false;
+        }
+        
         public WorldLocation GetBattlegroundEntryPoint() { return m_bgData.joinPos; }
 
         public bool InBattleground() { return m_bgData.bgInstanceID != 0; }
