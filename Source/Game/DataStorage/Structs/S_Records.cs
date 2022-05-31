@@ -97,6 +97,8 @@ namespace Game.DataStorage
         public int ParentTierIndex;
         public ushort Flags;
         public int SpellBookSpellID;
+
+        public SkillLineFlags GetFlags() => (SkillLineFlags)Flags;
     }
 
     public sealed class SkillLineAbilityRecord
