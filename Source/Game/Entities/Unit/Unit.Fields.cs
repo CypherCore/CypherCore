@@ -92,7 +92,6 @@ namespace Game.Entities
         SpellAuraInterruptFlags m_interruptMask;
         SpellAuraInterruptFlags2 m_interruptMask2;
         protected int m_procDeep;
-        bool m_AutoRepeatFirstCast;
         SpellHistory _spellHistory;
 
         //Auras

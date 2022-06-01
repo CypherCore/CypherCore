@@ -215,6 +215,8 @@ namespace Game.Entities
 
         void _UpdateSpells(uint diff)
         {
+            _spellHistory.Update();
+
             if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                 _UpdateAutoRepeatSpell();
 
@@ -264,8 +266,6 @@ namespace Game.Entities
                     }
                 }
             }
-
-            _spellHistory.Update();
         }
 
         public void HandleEmoteCommand(Emote emoteId, Player target = null, uint[] spellVisualKitIds = null, int sequenceVariation = 0)
@@ -1568,17 +1568,11 @@ namespace Game.Entities
                 // cancel wand shoot
                 if (autoRepeatSpellInfo.Id != 75)
                     InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                m_AutoRepeatFirstCast = true;
                 return;
             }
 
-            // apply delay (Auto Shot (spellID 75) not affected)
-            if (m_AutoRepeatFirstCast && GetAttackTimer(WeaponAttackType.RangedAttack) < 500 && autoRepeatSpellInfo.Id != 75)
-                SetAttackTimer(WeaponAttackType.RangedAttack, 500);
-            m_AutoRepeatFirstCast = false;
-
             // castroutine
-            if (IsAttackReady(WeaponAttackType.RangedAttack))
+            if (IsAttackReady(WeaponAttackType.RangedAttack) && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).GetState() != SpellState.Preparing)
             {
                 // Check if able to cast
                 SpellCastResult result = m_currentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
@@ -1593,11 +1587,8 @@ namespace Game.Entities
                 }
 
                 // we want to shoot
-                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
+                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
-
-                // all went good, reset attack
-                ResetAttackTimer(WeaponAttackType.RangedAttack);
             }
         }
 

@@ -365,11 +365,6 @@ namespace Game.Spells
             {
                 if (!forcedCooldown.HasValue)
                 {
-                    // shoot spells used equipped item cooldown values already assigned in SetBaseAttackTime(RANGED_ATTACK)
-                    // prevent 0 cooldowns set by another way
-                    if (cooldown <= TimeSpan.Zero && categoryCooldown <= TimeSpan.Zero && (categoryId == 76 || (spellInfo.IsAutoRepeatRangedSpell() && spellInfo.Id != 75)))
-                        cooldown = TimeSpan.FromMilliseconds(_owner.m_unitData.RangedAttackRoundBaseTime);
-
                     // Now we have cooldown data (if found any), time to apply mods
                     Player modOwner = _owner.GetSpellModOwner();
                     if (modOwner)

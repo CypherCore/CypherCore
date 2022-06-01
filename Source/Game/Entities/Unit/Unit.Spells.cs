@@ -1627,14 +1627,13 @@ namespace Game.Entities
             if (pSpell == GetCurrentSpell(CSpellType))             // avoid breaking self
                 return;
 
-            // break same type spell if it is not delayed
-            InterruptSpell(CSpellType, false);
-
             // special breakage effects:
             switch (CSpellType)
             {
                 case CurrentSpellTypes.Generic:
                 {
+                    InterruptSpell(CurrentSpellTypes.Generic, false);
+
                     // generic spells always break channeled not delayed spells
                     if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
                         InterruptSpell(CurrentSpellTypes.Channeled, false);
@@ -1645,7 +1644,6 @@ namespace Game.Entities
                         // break autorepeat if not Auto Shot
                         if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                        m_AutoRepeatFirstCast = true;
                     }
                     if (pSpell.m_spellInfo.CalcCastTime() > 0)
                         AddUnitState(UnitState.Casting);
@@ -1668,6 +1666,9 @@ namespace Game.Entities
                 }
                 case CurrentSpellTypes.AutoRepeat:
                 {
+                    if (GetCurrentSpell(CSpellType) && GetCurrentSpell(CSpellType).GetState() == SpellState.Idle)
+                        GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
+
                     // only Auto Shoot does not break anything
                     if (pSpell.m_spellInfo.Id != 75)
                     {
@@ -1675,9 +1676,6 @@ namespace Game.Entities
                         InterruptSpell(CurrentSpellTypes.Generic, false);
                         InterruptSpell(CurrentSpellTypes.Channeled, false);
                     }
-                    // special action: set first cast flag
-                    m_AutoRepeatFirstCast = true;
-
                     break;
                 }
                 default:

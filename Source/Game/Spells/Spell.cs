@@ -2474,7 +2474,7 @@ namespace Game.Spells
             // handle just the general SPELL_FAILED_BAD_TARGETS result which is the default result for most DBC target checks
             if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreTargetCheck) && result == SpellCastResult.BadTargets)
                 result = SpellCastResult.SpellCastOk;
-            if (result != SpellCastResult.SpellCastOk && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
+            if (result != SpellCastResult.SpellCastOk)
             {
                 // Periodic auras should be interrupted when aura triggers a spell which can't be cast
                 // for example bladestorm aura should be removed on disarm as of patch 3.3.5
@@ -2490,6 +2490,10 @@ namespace Game.Spells
                     SendCastResult(result, param1, param2);
                 else
                     SendCastResult(result);
+
+                // queue autorepeat spells for future repeating
+                if (GetCurrentContainer() == CurrentSpellTypes.AutoRepeat && m_caster.IsUnit())
+                    m_caster.ToUnit().SetCurrentCastSpell(this);
 
                 Finish(false);
                 return result;
@@ -3259,6 +3263,9 @@ namespace Game.Spells
                 m_caster.ToUnit().GetSpellHistory().HandleCooldowns(m_spellInfo, m_CastItem, this);
             else
                 m_caster.ToUnit().GetSpellHistory().HandleCooldowns(m_spellInfo, m_castItemEntry, this);
+
+            if (IsAutoRepeat())
+                m_caster.ToUnit().ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
 
         public void Update(uint difftime)
@@ -3300,7 +3307,7 @@ namespace Game.Spells
                             m_timer -= (int)difftime;
                     }
 
-                    if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat())
+                    if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell())
                         // don't CheckCast for instant spells - done in spell.prepare, skip duplicate checks, needed for range checks for example
                         Cast(m_casttime == 0);
                     break;
@@ -3364,6 +3371,10 @@ namespace Game.Spells
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
                 return;
+
+            // successful cast of the initial autorepeat spell is moved to idle state so that it is not deleted as long as autorepeat is active
+            if (IsAutoRepeat() && unitCaster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat) == this)
+                m_spellState = SpellState.Idle;
 
             if (m_spellInfo.IsChanneled())
                 unitCaster.UpdateInterruptMask();
@@ -4651,12 +4662,18 @@ namespace Game.Spells
                         return SpellCastResult.NotReady;
                 }
 
-                if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null && !m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
+                if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null)
                 {
-                    if (m_triggeredByAuraSpell != null)
+                    if (!m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
+                    {
+                        if (m_triggeredByAuraSpell != null)
+                            return SpellCastResult.DontReport;
+                        else
+                            return SpellCastResult.NotReady;
+                    }
+
+                    if ((IsAutoRepeat() || m_spellInfo.CategoryId == 76) && !m_caster.ToUnit().IsAttackReady(WeaponAttackType.RangedAttack))
                         return SpellCastResult.DontReport;
-                    else
-                        return SpellCastResult.NotReady;
                 }
             }
 
