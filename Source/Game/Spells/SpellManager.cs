@@ -3156,7 +3156,7 @@ namespace Game.Entities
                 60864  // Jaws of Death
            }, spellInfo =>
            {
-               spellInfo.AttributesEx4 |= SpellAttr4.FixedDamage;
+               spellInfo.AttributesEx4 |= SpellAttr4.IgnoreDamageTakenModifiers;
            });
 
             // Howl of Azgalor
@@ -3822,12 +3822,6 @@ namespace Game.Entities
                 {
                     spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                 });
-            });
-
-            // Coldflame (Lord Marrowgar)
-            ApplySpellFix(new[] { 69146 }, spellInfo =>
-            {
-                spellInfo.AttributesEx4 &= ~SpellAttr4.IgnoreResistances;
             });
 
             // Shadow's Fate

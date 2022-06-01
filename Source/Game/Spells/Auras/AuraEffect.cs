@@ -5023,14 +5023,14 @@ namespace Game.Spells
                 damage = damageReducedArmor;
             }
 
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
             int dmg = (int)damage;
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage) && caster != null && caster.CanApplyResilience())
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
             damage = (uint)dmg;
 
@@ -5105,14 +5105,14 @@ namespace Game.Spells
                 damage = damageReducedArmor;
             }
 
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
             int dmg = (int)damage;
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage) && caster != null && caster.CanApplyResilience())
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
 
             damage = (uint)dmg;
@@ -5284,7 +5284,8 @@ namespace Game.Spells
             {
                 gainedAmount = caster.ModifyPower(powerType, gainAmount);
                 // energize is not modified by threat modifiers
-                target.GetThreatManager().AddThreat(caster, gainedAmount * 0.5f, GetSpellInfo(), true);
+                if (!GetSpellInfo().HasAttribute(SpellAttr4.NoHelpfulThreat))
+                    target.GetThreatManager().AddThreat(caster, gainedAmount * 0.5f, GetSpellInfo(), true);
             }
 
             // Drain Mana

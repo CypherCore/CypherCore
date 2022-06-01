@@ -590,7 +590,7 @@ namespace Game.Combat
 
         public void ForwardThreatForAssistingMe(Unit assistant, float baseAmount, SpellInfo spell = null, bool ignoreModifiers = false)
         {
-            if (spell != null && spell.HasAttribute(SpellAttr1.NoThreat)) // shortcut, none of the calls would do anything
+            if (spell != null && (spell.HasAttribute(SpellAttr1.NoThreat) || spell.HasAttribute(SpellAttr4.NoHelpfulThreat))) // shortcut, none of the calls would do anything
                 return;
 
             if (_threatenedByMe.Empty())

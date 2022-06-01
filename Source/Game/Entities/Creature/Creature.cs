@@ -2088,30 +2088,6 @@ namespace Game.Entities
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }
 
-        public override bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster)
-        {
-            if (spellInfo == null)
-                return false;
-
-            bool immunedToAllEffects = true;
-            foreach (var spellEffectInfo in spellInfo.GetEffects())
-            {
-                if (!spellEffectInfo.IsEffect())
-                    continue;
-
-                if (!IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster))
-                {
-                    immunedToAllEffects = false;
-                    break;
-                }
-            }
-
-            if (immunedToAllEffects)
-                return true;
-
-            return base.IsImmunedToSpell(spellInfo, caster);
-        }
-
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
             if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && spellEffectInfo.IsEffect(SpellEffectName.Heal))

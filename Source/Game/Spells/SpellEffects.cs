@@ -4347,7 +4347,7 @@ namespace Game.Spells
                 if (Convert.ToBoolean(aura.GetSpellInfo().GetDispelMask() & dispelMask))
                 {
                     // Need check for passive? this
-                    if (!aurApp.IsPositive() || aura.IsPassive() || aura.GetSpellInfo().HasAttribute(SpellAttr4.NotStealable))
+                    if (!aurApp.IsPositive() || aura.IsPassive() || aura.GetSpellInfo().HasAttribute(SpellAttr4.CannotBeStolen))
                         continue;
 
                     // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."

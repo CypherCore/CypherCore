@@ -273,8 +273,8 @@ namespace Game.Entities
                 if (cheatDeath.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
                     MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
 
-            // Spells with SPELL_ATTR4_FIXED_DAMAGE should only benefit from mechanic damage mod auras.
-            if (!spellProto.HasAttribute(SpellAttr4.FixedDamage))
+            // Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS should only benefit from mechanic damage mod auras.
+            if (!spellProto.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 // Versatility
                 Player modOwner = GetSpellModOwner();
@@ -1216,7 +1216,7 @@ namespace Game.Entities
                 }
             }
         }
-        public virtual bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster)
+        public bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1259,6 +1259,9 @@ namespace Game.Entities
                     immuneToAllEffects = false;
                     break;
                 }
+
+                if (spellInfo.HasAttribute(SpellAttr4.NoPartialImmunity))
+                    return true;
             }
 
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
@@ -1939,8 +1942,8 @@ namespace Game.Entities
 
             SpellSchoolMask damageSchoolMask = damageInfo.schoolMask;
 
-            // Spells with SPELL_ATTR4_FIXED_DAMAGE ignore resilience because their damage is based off another spell's damage.
-            if (!spellInfo.HasAttribute(SpellAttr4.FixedDamage))
+            // Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS ignore resilience because their damage is based off another spell's damage.
+            if (!spellInfo.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
                     damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
@@ -3433,7 +3436,7 @@ namespace Game.Entities
             RemoveAppliedAuras(aurApp =>
             {
                 Aura aura = aurApp.GetBase();
-                return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.DontRemoveInArena)                          // don't remove stances, shadowform, pally/hunter auras
+                return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.AllowEnteringArena)                          // don't remove stances, shadowform, pally/hunter auras
                     && !aura.IsPassive()                                                                              // don't remove passive auras
                     && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.AllowAuraWhileDead))) || // not negative death persistent auras
                     aura.GetSpellInfo().HasAttribute(SpellAttr5.RemoveEnteringArena);                             // special marker, always remove

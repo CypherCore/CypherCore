@@ -1723,38 +1723,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr4 : uint
     {
-        IgnoreResistances = 0x01, //  0 Spells With This Attribute Will Completely Ignore The Target'S Resistance (These Spells Can'T Be Resisted)
-        ProcOnlyOnCaster = 0x02, //  1 Proc Only On Effects With TargetUnitCaster?
-        AuraExpiresOffline = 0x04, //  2 duration is removed from aura while player is logged out
-        Unk3 = 0x08, //  3
-        Unk4 = 0x10, //  4 This Will No Longer Cause Guards To Attack On Use??
-        Unk5 = 0x20, //  5
-        NotStealable = 0x40, //  6 Although Such Auras Might Be Dispellable, They Cannot Be Stolen
-        CanCastWhileCasting = 0x80, //  7 Can be cast while another cast is in progress - see CanCastWhileCasting(SpellRec const*,CGUnit_C *,int &)
-        FixedDamage = 0x100, //  8 Ignores Taken Percent Damage Mods?
-        TriggerActivate = 0x200, //  9 Initially Disabled / Trigger Activate From Event (Execute, Riposte, Deep Freeze End Other)
-        SpellVsExtendCost = 0x400, // 10 Rogue Shiv Have This Flag
-        Unk11 = 0x800, // 11
-        Unk12 = 0x1000, // 12
-        CombatLogNoCaster = 0x2000, // 13 No caster object is sent to client combat log
-        DamageDoesntBreakAuras = 0x4000, // 14 Doesn'T Break Auras By Damage From These Spells
-        HiddenInSpellbook = 0x8000, // 15
-        NotUsableInArenaOrRatedBg = 0x10000, // 16 Cannot Be Used In Both Arenas Or Rated Battlegrounds
-        UsableInArena = 0x20000, // 17
-        AreaTargetChain = 0x40000, // 18 (Nyi)Hits Area Targets One After Another Instead Of All At Once
-        Unk19 = 0x80000, // 19 Proc Dalayed, After Damage Or Don'T Proc On Absorb?
-        NotCheckSelfcastPower = 0x100000, // 20 Supersedes Message "More Powerful Spell Applied" For Self Casts.
-        DontRemoveInArena = 0x200000, // 21 Pally Aura, Dk Presence, Dudu Form, Warrior Stance, Shadowform, Hunter Track
-        Unk22 = 0x400000, // 22 Seal Of Command (42058,57770) And Gymer'S Smash 55426
-        SuppressWeaponProcs = 0x800000, // 23 spells with this flag should not trigger item spells / enchants (mostly in conjunction with SPELL_ATTR0_STOP_ATTACK_TARGET)
-        Unk24 = 0x1000000, // 24 Some Shoot Spell
-        IsPetScaling = 0x2000000, // 25 Pet Scaling Auras
-        CastOnlyInOutland = 0x4000000, // 26 Can Only Be Used In Outland.
-        Unk27 = 0x8000000, // 27
-        Unk28 = 0x10000000, // 28 Aimed Shot
-        Unk29 = 0x20000000, // 29
-        Unk30 = 0x40000000, // 30
-        Unk31 = 0x80000000  // 31 Polymorph (Chicken) 228 And Sonic Boom (38052,38488)
+        NoCastLog = 0x01, // No Cast Log
+        ClassTriggerOnlyOnTarget = 0x02, // Class Trigger Only On Target
+        AuraExpiresOffline = 0x04, // Aura Expires Offline Description Debuffs (Except Resurrection Sickness) Will Automatically Do This
+        NoHelpfulThreat = 0x08, // No Helpful Threat
+        NoHarmfulThreat = 0x10, // No Harmful Threat
+        AllowClientTargeting = 0x20, // Allow Client Targeting Description Allows Client To Send Spell Targets For This Spell. Applies Only To Pet Spells, Without This Attribute CmsgPetAction Is Sent Instead Of CmsgPetCastSpell
+        CannotBeStolen = 0x40, // Cannot Be Stolen
+        AllowCastWhileCasting = 0x80, // Allow Cast While Casting Description Ignores Already In-Progress Cast And Still Casts
+        IgnoreDamageTakenModifiers = 0x100, // Ignore Damage Taken Modifiers
+        CombatFeedbackWhenUsable = 0x200, // Combat Feedback When Usable (Client Only)
+        WeaponSpeedCostScaling = 0x400, // Weapon Speed Cost Scaling Description Adds 10 To Power Cost For Each 1s Of Weapon Speed
+        NoPartialImmunity = 0x800, // No Partial Immunity
+        AuraIsBuff = 0x1000, // Aura Is Buff
+        DoNotLogCaster = 0x2000, // Do Not Log Caster
+        ReactiveDamageProc = 0x4000, // Reactive Damage Proc Description Damage From Spells With This Attribute Doesn'T Break Auras That Normally Break On Damage Taken
+        NotInSpellbook = 0x8000, // Not In Spellbook
+        NotInArenaOrRatedBattleground = 0x10000, // Not In Arena Or Rated Battleground Description Makes Spell Unusable Despite Cd <= 10min
+        IgnoreDefaultArenaRestrictions = 0x20000, // Ignore Default Arena Restrictions Description Makes Spell Usable Despite Cd > 10min
+        BouncyChainMissiles = 0x40000, // Bouncy Chain Missiles Description Hits Area Targets Over Time Instead Of All At Once
+        AllowProcWhileSitting = 0x80000, // Allow Proc While Sitting
+        AuraNeverBounces = 0x100000, // Aura Never Bounces
+        AllowEnteringArena = 0x200000, // Allow Entering Arena
+        ProcSuppressSwingAnim = 0x400000, // Proc Suppress Swing Anim
+        SuppressWeaponProcs = 0x800000, // Suppress Weapon Procs
+        AutoRangedCombat = 0x1000000, // Auto Ranged Combat
+        OwnerPowerScaling = 0x2000000, // Owner Power Scaling
+        OnlyFlyingAreas = 0x4000000, // Only Flying Areas
+        ForceDisplayCastbar = 0x8000000, // Force Display Castbar
+        IgnoreCombatTimer = 0x10000000, // Ignore Combat Timer
+        AuraBounceFailsSpell = 0x20000000, // Aura Bounce Fails Spell
+        Obsolete = 0x40000000, // Obsolete
+        UseFacingFromSpell = 0x80000000  // Use Facing From Spell
     }
     public enum SpellAttr5 : uint
     {
@@ -1770,7 +1770,7 @@ namespace Framework.Constants
         StartPeriodicAtApply = 0x200, //  9 Begin Periodic Tick At Aura Apply
         HideDuration = 0x400, // 10 Do Not Send Duration To Client
         AllowTargetOfTargetAsTarget = 0x800, // 11 (Nyi) Uses Target'S Target As Target If Original Target Not Valid (Intervene For Example)
-        Unk12 = 0x1000, // 12 Cleave Related?
+        MeleeChainTargeting = 0x1000, // 12 Cleave Related?
         HasteAffectDuration = 0x2000, // 13 Haste Effects Decrease Duration Of This
         NotUsableWhileCharmed = 0x4000, // 14 Charmed units cannot cast this spell
         Unk15 = 0x8000, // 15 Inflits On Multiple Targets?

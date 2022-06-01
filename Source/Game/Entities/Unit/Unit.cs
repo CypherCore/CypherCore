@@ -2440,7 +2440,7 @@ namespace Game.Entities
                 // interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that type of auras)
                 if (spellProto != null)
                 {
-                    if (!spellProto.HasAttribute(SpellAttr4.DamageDoesntBreakAuras))
+                    if (!spellProto.HasAttribute(SpellAttr4.ReactiveDamageProc))
                         victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, spellProto);
                 }
                 else
@@ -2657,7 +2657,7 @@ namespace Game.Entities
                     if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
                         victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);
 
-                    if (attacker != null)
+                    if (attacker != null && (spellProto == null || !spellProto.HasAttribute(SpellAttr4.NoHarmfulThreat)))
                         victim.GetThreatManager().AddThreat(attacker, damage, spellProto);
                 }
                 else                                                // victim is a player
@@ -3244,13 +3244,6 @@ namespace Game.Entities
             // Npcs can have holy resistance
             if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy) && victim.GetTypeId() != TypeId.Unit)
                 return 0;
-
-            // Ignore spells that can't be resisted
-            if (spellInfo != null)
-            {
-                if (spellInfo.HasAttribute(SpellAttr4.IgnoreResistances))
-                    return 0;
-            }
 
             float averageResist = CalculateAverageResistReduction(attacker, schoolMask, victim, spellInfo);
 

@@ -1828,6 +1828,10 @@ namespace Game.Spells
                 if (target.GetGUID() != GetCasterGUID())
                     return 0;
 
+            if (!m_spellInfo.HasAttribute(SpellAttr4.AllowProcWhileSitting))
+                if (!target.IsStandState())
+                    return 0;
+
             bool success = RandomHelper.randChance(CalcProcChance(procEntry, eventInfo));
 
             SetLastProcAttemptTime(now);

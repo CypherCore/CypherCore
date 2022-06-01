@@ -580,7 +580,7 @@ namespace Game.Spells
 
         public bool HasInitialAggro()
         {
-            return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr2.NoInitialThreat));
+            return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr2.NoInitialThreat) || HasAttribute(SpellAttr4.NoHarmfulThreat));
         }
 
         public bool HasHitDelay()
@@ -858,7 +858,7 @@ namespace Game.Spells
             }
 
             // continent limitation (virtual continent)
-            if (HasAttribute(SpellAttr4.CastOnlyInOutland))
+            if (HasAttribute(SpellAttr4.OnlyFlyingAreas))
             {
                 uint mountFlags = 0;
                 if (player && player.HasAuraType(AuraType.MountRestrictions))
@@ -2859,7 +2859,7 @@ namespace Game.Spells
             bool initiallyNegative = powerCost < 0;
 
             // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-            if (HasAttribute(SpellAttr4.SpellVsExtendCost))
+            if (HasAttribute(SpellAttr4.WeaponSpeedCostScaling))
             {
                 uint speed = 0;
                 SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(unitCaster.GetShapeshiftForm());
@@ -3322,6 +3322,9 @@ namespace Game.Spells
             // not found a single positive spell with this attribute
             if (spellInfo.HasAttribute(SpellAttr0.AuraIsDebuff))
                 return false;
+
+            if (spellInfo.HasAttribute(SpellAttr4.AuraIsBuff))
+                return true;
 
             visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
 
