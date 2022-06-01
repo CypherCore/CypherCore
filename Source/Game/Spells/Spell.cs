@@ -7243,7 +7243,7 @@ namespace Game.Spells
 
             if (m_originalCaster != null && m_damage > 0)
             {
-                if (spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura))
+                if (spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura) || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
                 {
                     m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_originalCaster.GetGUID());
 
