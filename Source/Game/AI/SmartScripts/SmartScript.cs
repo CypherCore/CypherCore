@@ -2231,14 +2231,24 @@ namespace Game.AI
                                 target.ToCreature().SetMeleeAnimKitId((ushort)e.Action.animKit.animKit);
                             else if (e.Action.animKit.type == 3)
                                 target.ToCreature().SetMovementAnimKitId((ushort)e.Action.animKit.animKit);
-                            else
+
+                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {target.GetName()} ({target.GetGUID()}), AnimKit: {e.Action.animKit.animKit}, Type: {e.Action.animKit.type}");
+                        }
+                        else if(IsGameObject(target))
+                        {
+                            switch (e.Action.animKit.type)
                             {
-                                Log.outError(LogFilter.Sql, "SmartScript: Invalid type for SMART_ACTION_PLAY_ANIMKIT, skipping");
-                                break;
+                                case 0:
+                                    target.ToGameObject().SetAnimKitId((ushort)e.Action.animKit.animKit, true);
+                                    break;
+                                case 1:
+                                    target.ToGameObject().SetAnimKitId((ushort)e.Action.animKit.animKit, false);
+                                    break;
+                                default:
+                                    break;
                             }
 
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {0} ({1}), AnimKit: {2}, Type: {3}",
-                                target.GetName(), target.GetGUID().ToString(), e.Action.animKit.animKit, e.Action.animKit.type);
+                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {0} ({1}), AnimKit: {2}, Type: {3}", target.GetName(), target.GetGUID().ToString(), e.Action.animKit.animKit, e.Action.animKit.type);
                         }
                     }
                     break;
