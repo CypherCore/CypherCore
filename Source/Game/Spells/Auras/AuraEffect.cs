@@ -515,7 +515,7 @@ namespace Game.Spells
 
             // Update serverside orientation of tracking channeled auras on periodic update ticks
             // exclude players because can turn during channeling and shouldn't desync orientation client/server
-            if (caster != null && !caster.IsPlayer() && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget) && caster.m_unitData.ChannelObjects.Size() != 0)
+            if (caster != null && !caster.IsPlayer() && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel) && caster.m_unitData.ChannelObjects.Size() != 0)
             {
                 ObjectGuid channelGuid = caster.m_unitData.ChannelObjects[0];
                 if (channelGuid != caster.GetGUID())
@@ -2836,7 +2836,7 @@ namespace Game.Spells
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
 
                 // remove all flag auras (they are positive, but they must be removed when you are immune)
-                if (GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity)
+                if (GetSpellInfo().HasAttribute(SpellAttr1.ImmunityPurgesEffect)
                     && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }

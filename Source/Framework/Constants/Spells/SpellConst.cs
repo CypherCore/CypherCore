@@ -1618,38 +1618,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr1 : uint
     {
-        DismissPet = 0x01, //  0 For Spells Without This Flag Client Doesn'T Allow To Summon Pet If Caster Has A Pet
-        DrainAllPower = 0x02, //  1 Use All Power (Only Paladin Lay Of Hands And Bunyanize)
-        Channeled1 = 0x04, //  2 Clientside Checked? Cancelable?
-        CantBeRedirected = 0x08, //  3
-        Unk4 = 0x10, //  4 Stealth And Whirlwind
-        NotBreakStealth = 0x20, //  5 Not Break Stealth
-        Channeled2 = 0x40, //  6
-        CantBeReflected = 0x80, //  7
-        CantTargetInCombat = 0x100, //  8 Can Target Only Out Of Combat Units
-        MeleeCombatStart = 0x200, //  9 Player Starts Melee Combat After This Spell Is Cast
-        NoThreat = 0x400, // 10 No Generates Threat On Cast 100% (Old NoInitialAggro)
-        DontRefreshDurationOnRecast = 0x800, // 11 aura will not refresh its duration when recast
-        IsPickpocket = 0x1000, // 12 Pickpocket
-        Farsight = 0x2000, // 13 Client Removes Farsight On Aura Loss
-        ChannelTrackTarget = 0x4000, // 14 Client Automatically Forces Player To Face Target When Channeling
-        DispelAurasOnImmunity = 0x8000, // 15 Remove Auras On Immunity
-        UnaffectedBySchoolImmune = 0x10000, // 16 On Immuniy
-        UnautocastableByPet = 0x20000, // 17
-        PreventsAnim = 0x40000, // 18 Prevents Anim DESCRIPTION NYI, auras apply UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT
-        CantTargetSelf = 0x80000, // 19
-        ReqComboPoints1 = 0x100000, // 20 Req Combo Points On Target
-        Unk21 = 0x200000, // 21
-        ReqComboPoints2 = 0x400000, // 22 Req Combo Points On Target
-        Unk23 = 0x800000, // 23
-        IsFishing = 0x1000000, // 24 Only Fishing Spells
-        Unk25 = 0x2000000, // 25
-        Unk26 = 0x4000000, // 26 Works Correctly With [Target=Focus] And [Target=Mouseover] Macros?
-        Unk27 = 0x8000000, // 27 Melee Spell?
-        DontDisplayInAuraBar = 0x10000000, // 28 Client Doesn'T Display These Spells In Aura Bar
-        ChannelDisplaySpellName = 0x20000000, // 29 Spell Name Is Displayed In Cast Bar Instead Of 'Channeling' Text
-        EnableAtDodge = 0x40000000, // 30 Overpower
-        CastWhenLearned = 0x80000000  // 31
+        DismissPetFirst = 0x01, // Dismiss Pet First Description Without This Attribute, Summoning Spells Will Fail If Caster Already Has A Pet
+        UseAllMana = 0x02, // Use All Mana Description Ignores Listed Power Cost And Drains Entire Pool Instead
+        IsChannelled = 0x04, // Is Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
+        NoRedirection = 0x08, // No Redirection Description Spell Will Not Be Attracted By SpellMagnet Auras (Grounding Totem)
+        NoSkillIncrease = 0x10, // No Skill Increase
+        AllowWhileStealthed = 0x20, // Allow While Stealthed
+        IsSelfChannelled = 0x40, // Is Self Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
+        NoReflection = 0x80, // No Reflection Description Spell Will Pierce Through Spell Reflection And Similar
+        OnlyPeacefulTargets = 0x100, // Only Peaceful Targets Description Target Cannot Be In Combat
+        InitiatesCombatEnablesAutoAttack = 0x200, // Initiates Combat (Enables Auto-Attack) (Client Only) Description Caster Will Begin Auto-Attacking The Target On Cast
+        NoThreat = 0x400, // Does Not Generate Threat Description Also Does Not Cause Target To Engage
+        AuraUnique = 0x800, // Aura Unique Description Aura Will Not Refresh Its Duration When Recast
+        FailureBreaksStealth = 0x1000, // Failure Breaks Stealth
+        ToggleFarSight = 0x2000, // Toggle Far Sight (Client Only)
+        TrackTargetInChannel = 0x4000, // Track Target In Channel Description While Channeling, Adjust Facing To Face Target
+        ImmunityPurgesEffect = 0x8000, // Immunity Purges Effect Description For Immunity Spells, Cancel All Auras That This Spell Would Make You Immune To When The Spell Is Applied
+        ImmunityToHostileAndFriendlyEffects = 0x10000, /*Wrong Impl*/ // Immunity To Hostile & Friendly Effects Description Will Not Pierce Divine Shield, Ice Block And Other Full Invulnerabilities
+        NoAutocastAi = 0x20000, // No Autocast (Ai)
+        PreventsAnim = 0x40000, /*Nyi*/ // Prevents Anim Description Auras Apply UnitFlagPreventEmotesFromChatText
+        ExcludeCaster = 0x80000, // Exclude Caster
+        FinishingMoveDamage = 0x100000, // Finishing Move - Damage
+        ThreatOnlyOnMiss = 0x200000, /*Nyi*/ // Threat Only On Miss
+        FinishingMoveDuration = 0x400000, // Finishing Move - Duration
+        IgnoreOwnersDeath = 0x800000, /*Nyi*/ // Ignore Owner'S Death
+        SpecialSkillup = 0x1000000, // Special Skillup
+        AuraStaysAfterCombat = 0x2000000, // Aura Stays After Combat
+        RequireAllTargets = 0x4000000, /*Nyi, Unk*/ // Require All Targets
+        DiscountPowerOnMiss = 0x8000000, // Discount Power On Miss
+        NoAuraIcon = 0x10000000, // No Aura Icon (Client Only)
+        NameInChannelBar = 0x20000000, // Name In Channel Bar (Client Only)
+        DispelAllStacks = 0x40000000, // Dispel All Stacks
+        CastWhenLearned = 0x80000000  // Cast When Learned
     }
     public enum SpellAttr2 : uint
     {

@@ -1245,11 +1245,14 @@ namespace Game.Entities
             }
         }
 
-        public bool UpdateCraftSkill(uint spellid)
+        public bool UpdateCraftSkill(SpellInfo spellInfo)
         {
-            Log.outDebug(LogFilter.Player, "UpdateCraftSkill spellid {0}", spellid);
+            if (spellInfo.HasAttribute(SpellAttr1.NoSkillIncrease))
+                return false;
 
-            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellid);
+            Log.outDebug(LogFilter.Player, "UpdateCraftSkill spellid {0}", spellInfo.Id);
+
+            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellInfo.Id);
 
             foreach (var _spell_idx in bounds)
             {
@@ -1258,10 +1261,9 @@ namespace Game.Entities
                     uint SkillValue = GetPureSkillValue((SkillType)_spell_idx.SkillupSkillLineID);
 
                     // Alchemy Discoveries here
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellid, Difficulty.None);
-                    if (spellEntry != null && spellEntry.Mechanic == Mechanics.Discovery)
+                    if (spellInfo != null && spellInfo.Mechanic == Mechanics.Discovery)
                     {
-                        uint discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillupSkillLineID, spellid, this);
+                        uint discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillupSkillLineID, spellInfo.Id, this);
                         if (discoveredSpell != 0)
                             LearnSpell(discoveredSpell, false);
                     }

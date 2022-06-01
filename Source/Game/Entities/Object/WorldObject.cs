@@ -2750,7 +2750,7 @@ namespace Game.Entities
         public Unit GetMagicHitRedirectTarget(Unit victim, SpellInfo spellInfo)
         {
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-            if (spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr1.CantBeRedirected) || spellInfo.HasAttribute(SpellAttr0.NoImmunities))
+            if (spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr1.NoRedirection) || spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return victim;
 
             var magnetAuras = victim.GetAuraEffectsByType(AuraType.SpellMagnet);

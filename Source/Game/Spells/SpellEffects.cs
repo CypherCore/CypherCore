@@ -992,7 +992,7 @@ namespace Game.Spells
                 }
 
                 // we succeeded in creating at least one item, so a levelup is possible
-                player.UpdateCraftSkill(m_spellInfo.Id);
+                player.UpdateCraftSkill(m_spellInfo);
             }
         }
 
@@ -1023,7 +1023,7 @@ namespace Game.Spells
             if (m_spellInfo.IsLootCrafting())
             {
                 player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context, false, true);
-                player.UpdateCraftSkill(m_spellInfo.Id);
+                player.UpdateCraftSkill(m_spellInfo);
             }
             else // If there's no random loot entries for this spell, pick the item associated with this spell
             {
@@ -1807,12 +1807,16 @@ namespace Game.Spells
                         return false;
                     });
 
+                    byte dispelledCharges = 1;
+                    if (dispelableAura.GetAura().GetSpellInfo().HasAttribute(SpellAttr1.DispelAllStacks))
+                        dispelledCharges = dispelableAura.GetDispelCharges();
+
                     if (successAura == null)
-                        successList.Add(new DispelableAura(dispelableAura.GetAura(), 0, 1));
+                        successList.Add(new DispelableAura(dispelableAura.GetAura(), 0, dispelledCharges));
                     else
                         successAura.IncrementCharges();
 
-                    if (!dispelableAura.DecrementCharge())
+                    if (!dispelableAura.DecrementCharge(dispelledCharges))
                     {
                         --remaining;
                         dispelList[remaining] = dispelableAura;
@@ -2037,7 +2041,7 @@ namespace Game.Spells
             {
                 // do not increase skill if vellum used
                 if (!(m_CastItem && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
-                    player.UpdateCraftSkill(m_spellInfo.Id);
+                    player.UpdateCraftSkill(m_spellInfo);
 
                 uint enchant_id = (uint)effectInfo.MiscValue;
                 if (enchant_id == 0)
@@ -3154,7 +3158,7 @@ namespace Game.Spells
             Player caster = m_caster.ToPlayer();
             if (caster != null)
             {
-                caster.UpdateCraftSkill(m_spellInfo.Id);
+                caster.UpdateCraftSkill(m_spellInfo);
                 caster.SendLoot(itemTarget.GetGUID(), LootType.Disenchanting);
             }
 
@@ -4359,7 +4363,7 @@ namespace Game.Spells
             int remaining = stealList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
-            List<Tuple<uint, ObjectGuid>> successList = new();
+            List<Tuple<uint, ObjectGuid, int>> successList = new();
 
             DispelFailed dispelFailed = new();
             dispelFailed.CasterGUID = m_caster.GetGUID();
@@ -4374,8 +4378,12 @@ namespace Game.Spells
 
                 if (dispelableAura.RollDispel())
                 {
-                    successList.Add(Tuple.Create(dispelableAura.GetAura().GetId(), dispelableAura.GetAura().GetCasterGUID()));
-                    if (!dispelableAura.DecrementCharge())
+                    byte stolenCharges = 1;
+                    if (dispelableAura.GetAura().GetSpellInfo().HasAttribute(SpellAttr1.DispelAllStacks))
+                        stolenCharges = dispelableAura.GetDispelCharges();
+
+                    successList.Add(Tuple.Create(dispelableAura.GetAura().GetId(), dispelableAura.GetAura().GetCasterGUID(), (int)stolenCharges));
+                    if (!dispelableAura.DecrementCharge(stolenCharges))
                     {
                         --remaining;
                         stealList[remaining] = dispelableAura;
@@ -4402,13 +4410,13 @@ namespace Game.Spells
             spellDispellLog.CasterGUID = m_caster.GetGUID();
             spellDispellLog.DispelledBySpellID = m_spellInfo.Id;
 
-            foreach (var dispell in successList)
+            foreach (var (spellId, auraCaster, stolenCharges) in successList)
             {
                 var dispellData = new SpellDispellData();
-                dispellData.SpellID = dispell.Item1;
+                dispellData.SpellID = spellId;
                 dispellData.Harmful = false;      // TODO: use me
 
-                unitTarget.RemoveAurasDueToSpellBySteal(dispell.Item1, dispell.Item2, m_caster);
+                unitTarget.RemoveAurasDueToSpellBySteal(spellId, auraCaster, m_caster, stolenCharges);
 
                 spellDispellLog.DispellData.Add(dispellData);
             }
@@ -5670,12 +5678,12 @@ namespace Game.Spells
             ++_charges;
         }
 
-        public bool DecrementCharge()
+        public bool DecrementCharge(byte charges)
         {
             if (_charges == 0)
                 return false;
 
-            --_charges;
+            _charges -= charges;
             return _charges > 0;
         }
 

@@ -106,7 +106,7 @@ namespace Game.Spells
             // Determine if spell can be reflected back to the caster
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
             m_canReflect = caster.IsUnit() && m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)
-                && !m_spellInfo.HasAttribute(SpellAttr1.CantBeReflected) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
+                && !m_spellInfo.HasAttribute(SpellAttr1.NoReflection) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
                 && !m_spellInfo.IsPassive();
 
             CleanupTargetList();
@@ -2753,7 +2753,7 @@ namespace Game.Spells
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
-                if (m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
+                if (m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst))
                 {
                     Creature pet = ObjectAccessor.GetCreature(m_caster, unitCaster.GetPetGUID());
                     if (pet != null)
@@ -4134,37 +4134,46 @@ namespace Game.Spells
 
             m_timer = (int)duration;
 
-            uint channelAuraMask = 0;
-            uint explicitTargetEffectMask = 0xFFFFFFFF;
-            // if there is an explicit target, only add channel objects from effects that also hit ut
-            if (!m_targets.GetUnitTargetGUID().IsEmpty())
+            if (!m_targets.HasDst())
             {
-                var explicitTarget = m_UniqueTargetInfo.Find(target => target.TargetGUID == m_targets.GetUnitTargetGUID());
-                if (explicitTarget != null)
-                    explicitTargetEffectMask = explicitTarget.EffectMask;
-            }
-
-            foreach (var spellEffectInfo in m_spellInfo.GetEffects())
-                if (spellEffectInfo.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0)
-                    channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
-
-            foreach (TargetInfo target in m_UniqueTargetInfo)
-            {
-                if ((target.EffectMask & channelAuraMask) != 0)
-                    unitCaster.AddChannelObject(target.TargetGUID);
-
-                if (m_UniqueTargetInfo.Count == 1 && m_UniqueGOTargetInfo.Empty())
+                uint channelAuraMask = 0;
+                uint explicitTargetEffectMask = 0xFFFFFFFF;
+                // if there is an explicit target, only add channel objects from effects that also hit ut
+                if (!m_targets.GetUnitTargetGUID().IsEmpty())
                 {
-                    Creature creatureCaster = unitCaster.ToCreature();
-                    if (creatureCaster != null)
-                        if (!creatureCaster.HasSpellFocus(this))
-                            creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.TargetGUID));
+                    var explicitTarget = m_UniqueTargetInfo.Find(target => target.TargetGUID == m_targets.GetUnitTargetGUID());
+                    if (explicitTarget != null)
+                        explicitTargetEffectMask = explicitTarget.EffectMask;
                 }
-            }
 
-            foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
-                if ((target.EffectMask & channelAuraMask) != 0)
+                foreach (var spellEffectInfo in m_spellInfo.GetEffects())
+                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0)
+                        channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
+
+                foreach (TargetInfo target in m_UniqueTargetInfo)
+                {
+                    if ((target.EffectMask & channelAuraMask) == 0)
+                        continue;
+
+                    SpellAttr1 requiredAttribute = target.TargetGUID != unitCaster.GetGUID() ? SpellAttr1.IsChannelled : SpellAttr1.IsSelfChannelled;
+                    if (!m_spellInfo.HasAttribute(requiredAttribute))
+                        continue;
+
                     unitCaster.AddChannelObject(target.TargetGUID);
+                }
+
+                foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
+                    if ((target.EffectMask & channelAuraMask) != 0)
+                        unitCaster.AddChannelObject(target.TargetGUID);
+            }
+            else if (m_spellInfo.HasAttribute(SpellAttr1.IsSelfChannelled))
+                unitCaster.AddChannelObject(unitCaster.GetGUID());
+
+            Creature creatureCaster = unitCaster.ToCreature();
+            if (creatureCaster != null)
+                if (unitCaster.m_unitData.ChannelObjects.Size() == 1 && unitCaster.m_unitData.ChannelObjects[0].IsUnit())
+                    if (!creatureCaster.HasSpellFocus(this))
+                        creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, unitCaster.m_unitData.ChannelObjects[0]));
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
             unitCaster.SetChannelVisual(m_SpellVisual);
@@ -4287,7 +4296,7 @@ namespace Game.Spells
                 bool hit = true;
                 if (unitCaster.IsTypeId(TypeId.Player))
                 {
-                    if (cost.Power == PowerType.Rage || cost.Power == PowerType.Energy || cost.Power == PowerType.Runes)
+                    if (m_spellInfo.HasAttribute(SpellAttr1.DiscountPowerOnMiss))
                     {
                         ObjectGuid targetGUID = m_targets.GetUnitTargetGUID();
                         if (!targetGUID.IsEmpty())
@@ -4556,7 +4565,7 @@ namespace Game.Spells
                             {
                                 if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                                     || m_spellInfo.IsNextMeleeSwingSpell()
-                                    || m_spellInfo.HasAttribute(SpellAttr1.MeleeCombatStart)
+                                    || m_spellInfo.HasAttribute(SpellAttr1.InitiatesCombatEnablesAutoAttack)
                                     || m_spellInfo.HasAttribute(SpellAttr2.Unk20)
                                     || m_spellInfo.HasEffect(SpellEffectName.Attack)
                                     || m_spellInfo.HasEffect(SpellEffectName.NormalizedWeaponDmg)
@@ -5205,7 +5214,7 @@ namespace Game.Spells
                         switch (SummonProperties.Control)
                         {
                             case SummonCategory.Pet:
-                                if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !unitCaster.GetPetGUID().IsEmpty())
+                                if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst) && !unitCaster.GetPetGUID().IsEmpty())
                                     return SpellCastResult.AlreadyHaveSummon;
                                 goto case SummonCategory.Puppet;
                             case SummonCategory.Puppet:
@@ -5221,7 +5230,7 @@ namespace Game.Spells
                         {
                             if (!m_targets.GetUnitTarget().IsTypeId(TypeId.Player))
                                 return SpellCastResult.BadTargets;
-                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_targets.GetUnitTarget().GetPetGUID().IsEmpty())
+                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst) && !m_targets.GetUnitTarget().GetPetGUID().IsEmpty())
                                 return SpellCastResult.AlreadyHaveSummon;
                         }
                         break;
@@ -5246,7 +5255,7 @@ namespace Game.Spells
                                     }
                                 }
                             }
-                            else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
+                            else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst))
                                 return SpellCastResult.AlreadyHaveSummon;
                         }
 
@@ -5581,7 +5590,7 @@ namespace Game.Spells
 
                         if (spellEffectInfo.ApplyAuraName == AuraType.ModCharm || spellEffectInfo.ApplyAuraName == AuraType.ModPossess)
                         {
-                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !unitCaster1.GetPetGUID().IsEmpty())
+                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst) && !unitCaster1.GetPetGUID().IsEmpty())
                                 return SpellCastResult.AlreadyHaveSummon;
 
                             if (!unitCaster1.GetCharmedGUID().IsEmpty())
@@ -7751,7 +7760,7 @@ namespace Game.Spells
         public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
         public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
-        public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget)); }
+        public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel)); }
         public bool IsProcDisabled() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents); }
         public bool IsChannelActive() { return m_caster.IsUnit() && m_caster.ToUnit().GetChannelSpellId() != 0; }
 

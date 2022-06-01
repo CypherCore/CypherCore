@@ -431,7 +431,7 @@ namespace Game.Spells
         {
             if (IsPassive())
                 return false;
-            if (HasAttribute(SpellAttr1.UnautocastableByPet))
+            if (HasAttribute(SpellAttr1.NoAutocastAi))
                 return false;
             return true;
         }
@@ -548,7 +548,7 @@ namespace Game.Spells
 
         public bool IsChanneled()
         {
-            return HasAttribute(SpellAttr1.Channeled1 | SpellAttr1.Channeled2);
+            return HasAttribute(SpellAttr1.IsChannelled | SpellAttr1.IsSelfChannelled);
         }
 
         public bool IsMoveAllowedChannel()
@@ -558,7 +558,7 @@ namespace Game.Spells
 
         public bool NeedsComboPoints()
         {
-            return HasAttribute(SpellAttr1.ReqComboPoints1 | SpellAttr1.ReqComboPoints2);
+            return HasAttribute(SpellAttr1.FinishingMoveDamage | SpellAttr1.FinishingMoveDuration);
         }
 
         public bool IsNextMeleeSwingSpell()
@@ -568,7 +568,7 @@ namespace Game.Spells
 
         public bool IsBreakingStealth()
         {
-            return !HasAttribute(SpellAttr1.NotBreakStealth);
+            return !HasAttribute(SpellAttr1.AllowWhileStealthed);
         }
 
         public bool IsRangedWeaponSpell()
@@ -689,7 +689,7 @@ namespace Game.Spells
                 return true;
 
             // these spells (Cyclone for example) can pierce all...
-            if (HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            if (HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
             {
                 // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
                 if (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
@@ -699,7 +699,7 @@ namespace Game.Spells
             }
 
             // Dispels other auras on immunity, check if this spell makes the unit immune to aura
-            if (HasAttribute(SpellAttr1.DispelAurasOnImmunity) && CanSpellProvideImmunityAgainstAura(auraSpellInfo))
+            if (HasAttribute(SpellAttr1.ImmunityPurgesEffect) && CanSpellProvideImmunityAgainstAura(auraSpellInfo))
                 return true;
 
             return false;
@@ -716,7 +716,7 @@ namespace Game.Spells
                 return true;
 
             // These auras (Cyclone for example) are not dispelable
-            if ((auraSpellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) && auraSpellInfo.Mechanic != Mechanics.None)
+            if ((auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && auraSpellInfo.Mechanic != Mechanics.None)
                 || auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
                 return false;
 
@@ -1013,7 +1013,7 @@ namespace Game.Spells
 
         public SpellCastResult CheckTarget(WorldObject caster, WorldObject target, bool Implicit = true)
         {
-            if (HasAttribute(SpellAttr1.CantTargetSelf) && caster == target)
+            if (HasAttribute(SpellAttr1.ExcludeCaster) && caster == target)
                 return SpellCastResult.BadTargets;
 
             // check visibility - ignore stealth for implicit (area) targets
@@ -1026,7 +1026,7 @@ namespace Game.Spells
             if (unitTarget != null)
             {
                 // spells cannot be cast if target has a pet in combat either
-                if (HasAttribute(SpellAttr1.CantTargetInCombat) && (unitTarget.IsInCombat() || unitTarget.HasUnitFlag(UnitFlags.PetInCombat)))
+                if (HasAttribute(SpellAttr1.OnlyPeacefulTargets) && (unitTarget.IsInCombat() || unitTarget.HasUnitFlag(UnitFlags.PetInCombat)))
                     return SpellCastResult.TargetAffectingCombat;
 
                 // only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts
@@ -2425,7 +2425,7 @@ namespace Game.Spells
             {
                 target.ApplySpellImmune(Id, SpellImmunity.School, schoolImmunity, apply);
 
-                if (apply && HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+                if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 {
                     target.RemoveAppliedAuras(aurApp =>
                     {
@@ -2449,7 +2449,7 @@ namespace Game.Spells
                     if (Convert.ToBoolean(mechanicImmunity & (1 << (int)i)))
                         target.ApplySpellImmune(Id, SpellImmunity.Mechanic, i, apply);
 
-                if (apply && HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+                if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 {
                     // exception for purely snare mechanic (eg. hands of freedom)!
                     if (mechanicImmunity == (1 << (int)Mechanics.Snare))
@@ -2464,7 +2464,7 @@ namespace Game.Spells
             {
                 target.ApplySpellImmune(Id, SpellImmunity.Dispel, dispelImmunity, apply);
 
-                if (apply && HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+                if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 {
                     target.RemoveAppliedAuras(aurApp =>
                     {
@@ -2489,7 +2489,7 @@ namespace Game.Spells
             foreach (AuraType auraType in immuneInfo.AuraTypeImmune)
             {
                 target.ApplySpellImmune(Id, SpellImmunity.State, auraType, apply);
-                if (apply && HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+                if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                     target.RemoveAurasByType(auraType);
             }
 
@@ -2509,7 +2509,7 @@ namespace Game.Spells
 
                 ImmunityInfo immuneInfo = effectInfo.GetImmunityInfo();
 
-                if (!auraSpellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) && !auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                if (!auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && !auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
                 {
                     uint schoolImmunity = immuneInfo.SchoolImmuneMask;
                     if (schoolImmunity != 0)
@@ -2584,7 +2584,7 @@ namespace Game.Spells
 
         public bool SpellCancelsAuraEffect(AuraEffect aurEff)
         {
-            if (!HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+            if (!HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 return false;
 
             if (aurEff.GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities))
@@ -2793,7 +2793,7 @@ namespace Game.Spells
             SpellPowerCost cost = new();
 
             // Spell drain all exist power on cast (Only paladin lay of Hands)
-            if (HasAttribute(SpellAttr1.DrainAllPower))
+            if (HasAttribute(SpellAttr1.UseAllMana))
             {
                 // If power type - health drain all
                 if (power.PowerType == PowerType.Health)
@@ -3389,7 +3389,7 @@ namespace Game.Spells
             }
 
             // Special case: effects which determine positivity of whole spell
-            if (spellInfo.HasAttribute(SpellAttr1.DontRefreshDurationOnRecast))
+            if (spellInfo.HasAttribute(SpellAttr1.AuraUnique))
             {
                 // check for targets, there seems to be an assortment of dummy triggering spells that should be negative
                 foreach (var otherEffect in spellInfo.GetEffects())

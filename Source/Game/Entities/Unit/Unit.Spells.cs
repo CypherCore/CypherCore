@@ -1382,7 +1382,7 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return false;
 
-            if (spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
                 return false;
 
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
@@ -2156,7 +2156,27 @@ namespace Game.Entities
 
             // don't remove vehicle auras, passengers aren't supposed to drop off the vehicle
             // don't remove clone caster on evade (to be verified)
-            RemoveAllAurasExceptType(AuraType.ControlVehicle, AuraType.CloneCaster);
+            bool evadeAuraCheck(Aura aura)
+            {
+                if (aura.HasEffectType(AuraType.ControlVehicle))
+                    return false;
+
+                if (aura.HasEffectType(AuraType.CloneCaster))
+                    return false;
+
+                if (aura.GetSpellInfo().HasAttribute(SpellAttr1.AuraStaysAfterCombat))
+                    return false;
+
+                return true;
+            }
+
+            bool evadeAuraApplicationCheck(AuraApplication aurApp)
+            {
+                return evadeAuraCheck(aurApp.GetBase());
+            }
+
+            RemoveAppliedAuras(evadeAuraApplicationCheck);
+            RemoveOwnedAuras(evadeAuraCheck);
         }
 
         public void RemoveAllAurasOnDeath()
@@ -2895,7 +2915,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer)
+        public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -2935,9 +2955,9 @@ namespace Game.Entities
                         if (oldAura != null)
                         {
                             if (stealCharge)
-                                oldAura.ModCharges(1);
+                                oldAura.ModCharges(stolenCharges);
                             else
-                                oldAura.ModStackAmount(1);
+                                oldAura.ModStackAmount(stolenCharges);
                             oldAura.SetDuration((int)dur);
                         }
                         else
@@ -2962,16 +2982,16 @@ namespace Game.Entities
                                     caster.GetSingleCastAuras().Add(aura);
                                 }
                                 // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
-                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? 1 : aura.GetCharges(), 1, recalculateMask, damage);
+                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), (byte)stolenCharges, recalculateMask, damage);
                                 newAura.ApplyForTargets();
                             }
                         }
                     }
 
                     if (stealCharge)
-                        aura.ModCharges(-1, AuraRemoveMode.EnemySpell);
+                        aura.ModCharges(-stolenCharges, AuraRemoveMode.EnemySpell);
                     else
-                        aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                        aura.ModStackAmount(-stolenCharges, AuraRemoveMode.EnemySpell);
 
                     return;
                 }

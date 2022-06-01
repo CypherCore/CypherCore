@@ -3713,7 +3713,7 @@ namespace Game.Entities
                 // spell should dispel area aura, but doesn't have the attribute
                 // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
                 // that will be clear if we get more spells with problem like this
-                spellInfo.AttributesEx |= SpellAttr1.DispelAurasOnImmunity;
+                spellInfo.AttributesEx |= SpellAttr1.ImmunityPurgesEffect;
             });
 
             // Blizzard (Thorim)
@@ -4104,7 +4104,7 @@ namespace Game.Entities
             // Awaken Flames
             ApplySpellFix(new[] { 75888 }, spellInfo =>
             {
-                spellInfo.AttributesEx |= SpellAttr1.CantTargetSelf;
+                spellInfo.AttributesEx |= SpellAttr1.ExcludeCaster;
             });
             // ENDOF RUBY SANCTUM SPELLS
 
@@ -4203,7 +4203,7 @@ namespace Game.Entities
             // Gaze of Occu'thar
             ApplySpellFix(new[] { 96942 }, spellInfo =>
             {
-                spellInfo.AttributesEx &= ~SpellAttr1.Channeled1;
+                spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
             });
 
             // Evolution
