@@ -1080,8 +1080,16 @@ namespace Game.Spells
                 return SpellCastResult.SpellCastOk;
 
             // corpseOwner and unit specific target checks
-            if (HasAttribute(SpellAttr3.OnlyOnPlayer) && !unitTarget.IsTypeId(TypeId.Player))
-                return SpellCastResult.TargetNotPlayer;
+            if (!unitTarget.IsPlayer())
+            {
+                if (HasAttribute(SpellAttr3.OnlyOnPlayer))
+                    return SpellCastResult.TargetNotPlayer;
+
+                if (HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && unitTarget.IsControlledByPlayer())
+                    return SpellCastResult.TargetIsPlayerControlled;
+            }
+            else if (HasAttribute(SpellAttr5.NotOnPlayer))
+                return SpellCastResult.TargetIsPlayer;
 
             if (!IsAllowingDeadTarget() && !unitTarget.IsAlive())
                 return SpellCastResult.TargetsDead;

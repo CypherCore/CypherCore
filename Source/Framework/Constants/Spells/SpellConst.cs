@@ -1764,8 +1764,8 @@ namespace Framework.Constants
         TriggersChanneling = 0x10, // Triggers Channeling
         LimitN = 0x20, // Limit N Description Remove Previous Application To Another Unit If Applied
         IgnoreAreaEffectPvpCheck = 0x40, // Ignore Area Effect Pvp Check
-        NotOnPlayer = 0x80, /*Nyi*/ // Not On Player
-        NotOnPlayerControlledNpc = 0x100, /*Nyi*/ // Not On Player Controlled Npc
+        NotOnPlayer = 0x80, // Not On Player
+        NotOnPlayerControlledNpc = 0x100, // Not On Player Controlled Npc
         ExtraInitialPeriod = 0x200, // Extra Initial Period Description Immediately Do Periodic Tick On Apply
         DoNotDisplayDuration = 0x400, // Do Not Display Duration
         ImpliedTargeting = 0x800, // Implied Targeting (Client Only)

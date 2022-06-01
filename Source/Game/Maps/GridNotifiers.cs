@@ -2173,8 +2173,19 @@ namespace Game.Maps
             if (u.IsTypeId(TypeId.Unit) && u.IsTotem())
                 return false;
 
-            if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer) && !u.IsPlayer())
-                return false;
+            if (_spellInfo != null)
+            {
+                if (!u.IsPlayer())
+                {
+                    if (_spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                        return false;
+
+                    if (_spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && u.IsControlledByPlayer())
+                        return false;
+                }
+                else if (_spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                    return false;
+            }
 
             if (!i_funit.IsValidAttackTarget(u, _spellInfo))
                 return false;

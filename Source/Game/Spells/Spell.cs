@@ -1594,6 +1594,8 @@ namespace Game.Spells
                 retMask &= GridMapTypeMask.Corpse | GridMapTypeMask.Player;
             if (m_spellInfo.HasAttribute(SpellAttr3.OnlyOnGhosts))
                 retMask &= GridMapTypeMask.Player;
+            if (m_spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                retMask &= ~GridMapTypeMask.Player;
 
             if (condList != null)
                 retMask &= Global.ConditionMgr.GetSearcherTypeMaskForConditionList(condList);

@@ -124,11 +124,17 @@ namespace Game.AI
             return SelectTarget(targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
 
+        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
+        {
+            return SelectTarget(targetType, offset, selector.Invoke);
+        }
+
         /// <summary>
         /// Select the best target (in <targetType> order) satisfying <predicate> from the threat list.
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
+        public delegate bool SelectTargetDelegate(Unit unit);
+        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
         {
             ThreatManager mgr = GetThreatManager();
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
@@ -162,14 +168,14 @@ namespace Game.AI
         /// </summary>
         public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
-            return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
+            return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura).Invoke);
         }
 
         /// <summary>
         /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
+        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
         {
             var targetList = new List<Unit>();
 
@@ -228,7 +234,7 @@ namespace Game.AI
             }
 
             // then finally filter by predicate
-            targetList.RemoveAll(unit => !selector.Invoke(unit));
+            targetList.RemoveAll(unit => !selector(unit));
 
             if (targetList.Count <= num)
                 return targetList;
@@ -264,8 +270,23 @@ namespace Game.AI
                     var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
-                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer);
-                        target = SelectTarget(SelectTargetMethod.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
+                        DefaultTargetSelector targetSelectorInner = new(me, spellInfo.GetMaxRange(false), false, true, 0);
+                        bool targetSelector(Unit candidate)
+                        {
+                            if (!candidate.IsPlayer())
+                            {
+                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                    return false;
+
+                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                    return false;
+                            }
+                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                                return false;
+
+                            return targetSelectorInner.Invoke(candidate);
+                        };
+                        target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
                     break;
                 }
@@ -278,12 +299,25 @@ namespace Game.AI
                     var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
-                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer);
                         float range = spellInfo.GetMaxRange(false);
 
-                        DefaultTargetSelector targetSelector = new(me, range, playerOnly, true, -(int)spellId);
-                        if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
-                        && targetSelector.Invoke(me.GetVictim()))
+                        DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
+                        bool targetSelector(Unit candidate)
+                        {
+                            if (!candidate.IsPlayer())
+                            {
+                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                    return false;
+
+                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                    return false;
+                            }
+                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                                return false;
+
+                            return targetSelectorInner.Invoke(candidate);
+                        };
+                        if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
                             target = me.GetVictim();
                         else
                             target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
