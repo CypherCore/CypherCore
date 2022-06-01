@@ -4871,8 +4871,7 @@ namespace Game.Spells
                                 losTarget = dynObj;
                         }
 
-                        if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
-                            && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                        if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS) && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return SpellCastResult.LineOfSight;
                     }
                 }
@@ -4884,8 +4883,7 @@ namespace Game.Spells
                 float x, y, z;
                 m_targets.GetDstPos().GetPosition(out x, out y, out z);
 
-                if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
-                    && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS) && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                     return SpellCastResult.LineOfSight;
             }
 
@@ -7068,7 +7066,7 @@ namespace Game.Spells
                     return true;
 
             // if spell is triggered, need to check for LOS disable on the aura triggering it and inherit that behaviour
-            if (IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
+            if (!m_spellInfo.HasAttribute(SpellAttr5.AlwaysLineOfSight) && IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
                 return true;
 
             // @todo shit below shouldn't be here, but it's temporary
@@ -7102,9 +7100,7 @@ namespace Game.Spells
                 }
                 default:
                 {
-                    if (losPosition != null)
-                        return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2);
-                    else
+                    if (losPosition == null || m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight))
                     {
                         // Get GO cast coordinates if original caster . GO
                         WorldObject caster = null;
@@ -7115,6 +7111,10 @@ namespace Game.Spells
                         if (target != m_caster && !target.IsWithinLOSInMap(caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return false;
                     }
+
+                    if (losPosition != null)
+                        if (!target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            return false;
 
                     break;
                 }
