@@ -1917,7 +1917,7 @@ namespace Game.Entities
             if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster.m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
+            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
                 castTime = (int)(castTime * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
             else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && unitCaster.HasAura(67556)) // cooking with Chef Hat.
                 castTime = 500;
@@ -1943,7 +1943,7 @@ namespace Game.Entities
             if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 duration = (int)(duration * unitCaster.m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
+            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
                 duration = (int)(duration * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
         }
 
@@ -2368,6 +2368,18 @@ namespace Game.Entities
             spell.m_CastItem = args.CastItem;
             if (args.OriginalCastItemLevel.HasValue)
                 spell.m_castItemLevel = args.OriginalCastItemLevel.Value;
+
+            if (spell.m_CastItem == null && info.HasAttribute(SpellAttr2.RetainItemCast))
+            {
+                if (args.TriggeringSpell)
+                    spell.m_CastItem = args.TriggeringSpell.m_CastItem;
+                else if (args.TriggeringAura != null && !args.TriggeringAura.GetBase().GetCastItemGUID().IsEmpty())
+                {
+                    Player triggeringAuraCaster = args.TriggeringAura.GetCaster()?.ToPlayer();
+                    if (triggeringAuraCaster != null)
+                        spell.m_CastItem = triggeringAuraCaster.GetItemByGuid(args.TriggeringAura.GetBase().GetCastItemGUID());
+                }
+            }
 
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }

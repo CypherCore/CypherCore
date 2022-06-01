@@ -1261,7 +1261,7 @@ namespace Game.Entities
                     uint SkillValue = GetPureSkillValue((SkillType)_spell_idx.SkillupSkillLineID);
 
                     // Alchemy Discoveries here
-                    if (spellInfo != null && spellInfo.Mechanic == Mechanics.Discovery)
+                    if (spellInfo.Mechanic == Mechanics.Discovery)
                     {
                         uint discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillupSkillLineID, spellInfo.Id, this);
                         if (discoveredSpell != 0)
@@ -2277,7 +2277,7 @@ namespace Game.Entities
             // talent dependent passives activated at form apply have proper stance data
             ShapeShiftForm form = GetShapeshiftForm();
             bool need_cast = (spellInfo.Stances == 0 || (form != 0 && Convert.ToBoolean(spellInfo.Stances & (1ul << ((int)form - 1)))) ||
-            (form == 0 && spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)));
+            (form == 0 && spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)));
 
             // Check EquippedItemClass
             // passive spells which apply aura and have an item requirement are to be added manually, instead of casted

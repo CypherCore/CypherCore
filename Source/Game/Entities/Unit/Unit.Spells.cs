@@ -1343,7 +1343,7 @@ namespace Game.Entities
                         return true;
                 }
 
-                if (!spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                if (!spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
                     // Check for immune to application of harmful magical effects
                     var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
@@ -1382,7 +1382,7 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return false;
 
-            if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 return false;
 
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
@@ -1422,7 +1422,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
@@ -1482,32 +1482,49 @@ namespace Game.Entities
         {
             DateTime now = GameTime.Now();
 
+            void processAuraApplication(AuraApplication aurApp)
+            {
+                uint procEffectMask = aurApp.GetBase().GetProcEffectMask(aurApp, eventInfo, now);
+                if (procEffectMask != 0)
+                {
+                    aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
+                    aurasTriggeringProc.Add(Tuple.Create(procEffectMask, aurApp));
+                }
+                else
+                {
+                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr0.ProcFailureBurnsCharge))
+                    {
+                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
+                        if (procEntry != null)
+                        {
+                            aurApp.GetBase().PrepareProcChargeDrop(procEntry, eventInfo);
+                            aurApp.GetBase().ConsumeProcCharges(procEntry);
+                        }
+                    }
+
+                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr2.ProcCooldownOnFailure))
+                    {
+                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
+                        if (procEntry != null)
+                            aurApp.GetBase().AddProcCooldown(procEntry, now);
+                    }
+                }
+            }
+
             // use provided list of auras which can proc
             if (procAuras != null)
             {
                 foreach (AuraApplication aurApp in procAuras)
                 {
                     Cypher.Assert(aurApp.GetTarget() == this);
-                    uint procEffectMask = aurApp.GetBase().GetProcEffectMask(aurApp, eventInfo, now);
-                    if (procEffectMask != 0)
-                    {
-                        aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
-                        aurasTriggeringProc.Add(Tuple.Create(procEffectMask, aurApp));
-                    }
+                    processAuraApplication(aurApp);
                 }
             }
             // or generate one on our own
             else
             {
                 foreach (var pair in GetAppliedAuras())
-                {
-                    uint procEffectMask = pair.Value.GetBase().GetProcEffectMask(pair.Value, eventInfo, now);
-                    if (procEffectMask != 0)
-                    {
-                        pair.Value.GetBase().PrepareProcToTrigger(pair.Value, eventInfo, now);
-                        aurasTriggeringProc.Add(Tuple.Create(procEffectMask, pair.Value));
-                    }
-                }
+                    processAuraApplication(pair.Value);
             }
         }
 
@@ -1556,11 +1573,8 @@ namespace Game.Entities
             if (disableProcs)
                 SetCantProc(true);
 
-            foreach (var aurAppProc in aurasTriggeringProc)
+            foreach (var (procEffectMask, aurApp) in aurasTriggeringProc)
             {
-                AuraApplication aurApp = aurAppProc.Item2;
-                uint procEffectMask = aurAppProc.Item1;
-
                 if (aurApp.GetRemoveMode() != 0)
                     continue;
 
@@ -1694,7 +1708,7 @@ namespace Game.Entities
             {
                 if (!skipInstant || currentSpell.GetCastTime() != 0)
                 {
-                    if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
+                    if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                         return true;
                 }
             }
@@ -1703,7 +1717,7 @@ namespace Game.Entities
             if (!skipChanneled && currentSpell &&
                 (currentSpell.GetState() != SpellState.Finished))
             {
-                if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
+                if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                     return true;
             }
             currentSpell = GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
@@ -2494,7 +2508,7 @@ namespace Game.Entities
             if (spellInfo == null)
                 return null;
 
-            if (!target.IsAlive() && !spellInfo.IsPassive() && !spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
+            if (!target.IsAlive() && !spellInfo.IsPassive() && !spellInfo.HasAttribute(SpellAttr2.AllowDeadTarget))
                 return null;
 
             if (target.IsImmunedToSpell(spellInfo, this))
@@ -2823,16 +2837,35 @@ namespace Game.Entities
             return dispelList;
         }
 
-        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo spellInfo)
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
         {
-            return flag == SpellAuraInterruptFlags.Moving && unit.CanCastSpellWhileMoving(spellInfo);
+            switch (flag)
+            {
+                case SpellAuraInterruptFlags.Moving:
+                    return unit.CanCastSpellWhileMoving(auraSpellInfo);
+                case SpellAuraInterruptFlags.Action:
+                case SpellAuraInterruptFlags.ActionDelayed:
+                    if (interruptSource != null)
+                    {
+                        if (interruptSource.HasAttribute(SpellAttr1.AllowWhileStealthed) && auraSpellInfo.HasAura(AuraType.ModStealth))
+                            return true;
+
+                        if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) && auraSpellInfo.HasAura(AuraType.ModInvisibility))
+                            return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return false;
         }
-        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo spellInfo)
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
         {
             return false;
         }
         
-        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, uint except = 0)
+        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, SpellInfo source = null)
         {
             if (!HasInterruptFlag(flag))
                 return;
@@ -2842,7 +2875,7 @@ namespace Game.Entities
             {
                 Aura aura = m_interruptableAuras[i].GetBase();
 
-                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (except == 0 || aura.GetId() != except) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo()))
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), source))
                 {
                     uint removedAuras = m_removedAurasCount;
                     RemoveAura(aura, AuraRemoveMode.Interrupt);
@@ -2857,15 +2890,15 @@ namespace Game.Entities
             {
                 if (spell.GetState() == SpellState.Casting
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
-                    && spell.GetSpellInfo().Id != except
-                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo()))
+                    && (source == null || spell.GetSpellInfo().Id != source.Id)
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
                     InterruptNonMeleeSpells(false);
             }
 
             UpdateInterruptMask();
         }
 
-        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2 flag, uint except = 0)
+        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2 flag, SpellInfo source = null)
         {
             if (!HasInterruptFlag(flag))
                 return;
@@ -2875,7 +2908,7 @@ namespace Game.Entities
             {
                 Aura aura = m_interruptableAuras[i].GetBase();
 
-                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (except == 0 || aura.GetId() != except) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo()))
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), source))
                 {
                     uint removedAuras = m_removedAurasCount;
                     RemoveAura(aura, AuraRemoveMode.Interrupt);
@@ -2890,8 +2923,8 @@ namespace Game.Entities
             {
                 if (spell.GetState() == SpellState.Casting
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
-                    && spell.GetSpellInfo().Id != except
-                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo()))
+                    && (source == null || spell.GetSpellInfo().Id != source.Id)
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
                     InterruptNonMeleeSpells(false);
             }
 

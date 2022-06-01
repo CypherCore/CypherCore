@@ -3921,7 +3921,7 @@ namespace Game.Entities
 
                     Aura itemAura = GetAura((uint)effectData.SpellID, GetGUID(), pItem.GetGUID());
                     if (itemAura != null)
-                        itemAura.AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
+                        itemAura.AddProcCooldown(procEntry, now);
                     continue;
                 }
 

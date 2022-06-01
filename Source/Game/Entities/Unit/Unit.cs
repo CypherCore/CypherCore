@@ -2441,10 +2441,10 @@ namespace Game.Entities
                 if (spellProto != null)
                 {
                     if (!spellProto.HasAttribute(SpellAttr4.DamageDoesntBreakAuras))
-                        victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, spellProto.Id);
+                        victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, spellProto);
                 }
                 else
-                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, 0);
+                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage);
 
                 if (damage == 0 && damagetype != DamageEffectType.DOT && cleanDamage != null && cleanDamage.absorbed_damage != 0)
                 {
@@ -2649,7 +2649,7 @@ namespace Game.Entities
                 victim.ModifyHealth(-(int)damage);
 
                 if (damagetype == DamageEffectType.Direct || damagetype == DamageEffectType.SpellDirect)
-                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NonPeriodicDamage, spellProto != null ? spellProto.Id : 0);
+                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NonPeriodicDamage, spellProto);
 
                 if (!victim.IsTypeId(TypeId.Player))
                 {

@@ -4098,7 +4098,7 @@ namespace Game.Entities
             ApplySpellFix(new[] { 75509 }, spellInfo =>
             {
                 spellInfo.AttributesEx6 |= SpellAttr6.CanTargetInvisible;
-                spellInfo.AttributesEx2 |= SpellAttr2.CanTargetNotInLos;
+                spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
             });
 
             // Awaken Flames
@@ -4122,7 +4122,7 @@ namespace Game.Entities
             {
                 // All spells work even without these changes. The LOS attribute is due to problem
                 // from collision between maps & gos with active destroyed state.
-                spellInfo.AttributesEx2 |= SpellAttr2.CanTargetNotInLos;
+                spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
             });
 
             // Arcane Barrage (cast by players and NONMELEEDAMAGELOG with caster Scion of Eternity (original caster)).
@@ -4261,7 +4261,7 @@ namespace Game.Entities
             ApplySpellFix(new[] { 42525 }, spellInfo =>
             {
                 spellInfo.AttributesEx3 |= SpellAttr3.DeathPersistent;
-                spellInfo.AttributesEx2 |= SpellAttr2.CanTargetDead;
+                spellInfo.AttributesEx2 |= SpellAttr2.AllowDeadTarget;
             });
 
             // Soul Sickness (Forge of Souls)

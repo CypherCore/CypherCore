@@ -1308,7 +1308,7 @@ namespace Game.Spells
                 }
 
                 if (!shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
-                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Shapeshifting, GetId());
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Shapeshifting, GetSpellInfo());
             }
             else
             {
@@ -2837,7 +2837,7 @@ namespace Game.Spells
 
                 // remove all flag auras (they are positive, but they must be removed when you are immune)
                 if (GetSpellInfo().HasAttribute(SpellAttr1.ImmunityPurgesEffect)
-                    && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
+                    && GetSpellInfo().HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
 
@@ -5205,10 +5205,6 @@ namespace Game.Spells
                 SendTickImmune(target, caster);
                 return;
             }
-
-            // heal for caster damage (must be alive)
-            if (target != caster && GetSpellInfo().HasAttribute(SpellAttr2.HealthFunnel) && (caster == null || !caster.IsAlive()))
-                return;
 
             // don't regen when permanent aura target has full power
             if (GetBase().IsPermanent() && target.IsFullHealth())

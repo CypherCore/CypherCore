@@ -95,6 +95,10 @@ namespace Game.Spells
 
             m_spellState = SpellState.None;
             _triggeredCastFlags = triggerFlags;
+
+            if (info.HasAttribute(SpellAttr2.DoNotReportSpellFailure))
+                _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.DontReportCastError;
+
             if (m_spellInfo.HasAttribute(SpellAttr4.CanCastWhileCasting))
                 _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.IgnoreCastInProgress;
 
@@ -273,6 +277,35 @@ namespace Game.Spells
 
                 if (m_targets.HasDst())
                     AddDestTarget(m_targets.GetDst(), spellEffectInfo.EffectIndex);
+
+                if (spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.Unit
+                    || spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.UnitAndDest
+                    || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.Unit
+                    || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.UnitAndDest)
+                {
+                    if (m_spellInfo.HasAttribute(SpellAttr1.RequireAllTargets))
+                    {
+                        bool noTargetFound = !m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0);
+
+                        if (noTargetFound)
+                        {
+                            SendCastResult(m_spellInfo.Id == 51690 ? SpellCastResult.OutOfRange : SpellCastResult.BadTargets);
+                            Finish(false);
+                            return;
+                        }
+                    }
+                    if (m_spellInfo.HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
+                    {
+                        bool anyNonImmuneTargetFound = m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0 && target.MissCondition != SpellMissInfo.Immune && target.MissCondition != SpellMissInfo.Immune2);
+
+                        if (!anyNonImmuneTargetFound)
+                        {
+                            SendCastResult(SpellCastResult.Immune);
+                            Finish(false);
+                            return;
+                        }
+                    }
+                }
 
                 if (m_spellInfo.IsChanneled())
                 {
@@ -1621,8 +1654,9 @@ namespace Game.Spells
             if (isBouncingFar)
                 searchRadius *= chainTargets;
 
+            WorldObject chainSource = m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) ? m_caster : target;
             List<WorldObject> tempTargets = new();
-            SearchAreaTargets(tempTargets, searchRadius, target.GetPosition(), m_caster, objectType, selectType, condList);
+            SearchAreaTargets(tempTargets, searchRadius, chainSource, m_caster, objectType, selectType, condList);
             tempTargets.Remove(target);
 
             // remove targets which are always invalid for chain spells
@@ -1651,7 +1685,7 @@ namespace Game.Spells
                         if (unitTarget != null)
                         {
                             uint deficit = (uint)(unitTarget.GetMaxHealth() - unitTarget.GetHealth());
-                            if ((deficit > maxHPDeficit || found == null) && target.IsWithinDist(unitTarget, jumpRadius) && target.IsWithinLOSInMap(unitTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            if ((deficit > maxHPDeficit || found == null) && chainSource.IsWithinDist(unitTarget, jumpRadius) && chainSource.IsWithinLOSInMap(unitTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             {
                                 found = obj;
                                 maxHPDeficit = deficit;
@@ -1666,19 +1700,22 @@ namespace Game.Spells
                     {
                         if (found == null)
                         {
-                            if ((!isBouncingFar || target.IsWithinDist(obj, jumpRadius)) && target.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            if ((!isBouncingFar || chainSource.IsWithinDist(obj, jumpRadius)) && chainSource.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                                 found = obj;
                         }
-                        else if (target.GetDistanceOrder(obj, found) && target.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                        else if (chainSource.GetDistanceOrder(obj, found) && chainSource.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             found = obj;
                     }
                 }
                 // not found any valid target - chain ends
                 if (found == null)
                     break;
-                target = found;
+
+                if (!m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster))
+                    chainSource = found;
+
+                targets.Add(found);
                 tempTargets.Remove(found);
-                targets.Add(target);
                 --chainTargets;
             }
         }
@@ -1712,7 +1749,7 @@ namespace Game.Spells
                     break;
                 case SpellDmgClass.Ranged:
                     // Auto attack
-                    if (m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
+                    if (m_spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
                     {
                         m_procAttacker = new ProcFlagsInit(ProcFlags.DealRangedAttack);
                         m_procVictim = new ProcFlagsInit(ProcFlags.TakeRangedAttack);
@@ -1726,7 +1763,7 @@ namespace Game.Spells
                 default:
                     if (m_spellInfo.EquippedItemClass == ItemClass.Weapon &&
                         Convert.ToBoolean(m_spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassWeapon.Wand))
-                        && m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag)) // Wands auto attack
+                        && m_spellInfo.HasAttribute(SpellAttr2.AutoRepeat)) // Wands auto attack
                     {
                         m_procAttacker = new ProcFlagsInit(ProcFlags.DealRangedAttack);
                         m_procVictim = new ProcFlagsInit(ProcFlags.TakeRangedAttack);
@@ -2488,8 +2525,8 @@ namespace Game.Spells
                 {
                     // stealth must be removed at cast starting (at show channel bar)
                     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth() && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
-                        unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action);
+                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
+                        unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action, m_spellInfo);
 
                     // Do not register as current spell when requested to ignore cast in progress
                     // We don't want to interrupt that other spell with cast time
@@ -2903,8 +2940,8 @@ namespace Game.Spells
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
                 hitMask |= ProcFlagsHit.Normal;
 
-            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
-                m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
+                m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
 
             Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
@@ -3340,7 +3377,7 @@ namespace Game.Spells
 
             if (IsAutoActionResetSpell())
             {
-                if (!m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
+                if (!m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                 {
                     unitCaster.ResetAttackTimer(WeaponAttackType.BaseAttack);
                     if (unitCaster.HaveOffhandWeapon())
@@ -4566,7 +4603,7 @@ namespace Game.Spells
                                 if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                                     || m_spellInfo.IsNextMeleeSwingSpell()
                                     || m_spellInfo.HasAttribute(SpellAttr1.InitiatesCombatEnablesAutoAttack)
-                                    || m_spellInfo.HasAttribute(SpellAttr2.Unk20)
+                                    || m_spellInfo.HasAttribute(SpellAttr2.InitiateCombatPostCastEnablesAutoAttack)
                                     || m_spellInfo.HasEffect(SpellEffectName.Attack)
                                     || m_spellInfo.HasEffect(SpellEffectName.NormalizedWeaponDmg)
                                     || m_spellInfo.HasEffect(SpellEffectName.WeaponDamageNoSchool)
@@ -4787,7 +4824,7 @@ namespace Game.Spells
                                 losTarget = dynObj;
                         }
 
-                        if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
+                        if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
                             && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return SpellCastResult.LineOfSight;
                     }
@@ -4800,7 +4837,7 @@ namespace Game.Spells
                 float x, y, z;
                 m_targets.GetDstPos().GetPosition(out x, out y, out z);
 
-                if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
+                if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS)
                     && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                     return SpellCastResult.LineOfSight;
             }
@@ -4808,6 +4845,10 @@ namespace Game.Spells
             // check pet presence
             if (unitCaster != null)
             {
+                if (m_spellInfo.HasAttribute(SpellAttr2.NoActivePets))
+                    if (!unitCaster.GetPetGUID().IsEmpty())
+                        return SpellCastResult.AlreadyHavePet;
+
                 foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 {
                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitPet)
@@ -5695,6 +5736,9 @@ namespace Game.Spells
             if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.TradeItem))
             {
                 if (m_CastItem != null)
+                    return SpellCastResult.ItemEnchantTradeWindow;
+
+                if (m_spellInfo.HasAttribute(SpellAttr2.EnchantOwnItemOnly))
                     return SpellCastResult.ItemEnchantTradeWindow;
 
                 if (!m_caster.IsTypeId(TypeId.Player))
@@ -6964,7 +7008,7 @@ namespace Game.Spells
             }
 
             // check for ignore LOS on the effect itself
-            if (m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS))
+            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS))
                 return true;
 
             // check if gameobject ignores LOS
@@ -6974,7 +7018,7 @@ namespace Game.Spells
                     return true;
 
             // if spell is triggered, need to check for LOS disable on the aura triggering it and inherit that behaviour
-            if (IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.CanTargetNotInLos) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
+            if (IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
                 return true;
 
             // @todo shit below shouldn't be here, but it's temporary
@@ -9052,6 +9096,7 @@ namespace Game.Spells
     {
         public TriggerCastFlags TriggerFlags;
         public Item CastItem;
+        public Spell TriggeringSpell;
         public AuraEffect TriggeringAura;
         public ObjectGuid OriginalCaster = ObjectGuid.Empty;
         public Difficulty CastDifficulty;
@@ -9113,6 +9158,7 @@ namespace Game.Spells
 
         public CastSpellExtraArgs SetTriggeringSpell(Spell triggeringSpell)
         {
+            TriggeringSpell = triggeringSpell;
             if (triggeringSpell != null)
             {
                 OriginalCastItemLevel = triggeringSpell.m_castItemLevel;

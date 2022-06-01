@@ -1175,11 +1175,9 @@ namespace Scripts.Spells.Shaman
 
             caster.m_Events.AddEventAtOffset(() =>
             {
-                var targets = new CastSpellTargetArg(procInfo.GetProcTarget());
-                var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);
-                var args = new CastSpellExtraArgs(procInfo.GetProcSpell());
-
-                caster.CastSpell(targets, overloadSpellId, args);
+                CastSpellExtraArgs args = new();
+                args.OriginalCastId = procInfo.GetProcSpell().m_castId;
+                caster.CastSpell(new CastSpellTargetArg(procInfo.GetProcTarget()), GetTriggeredSpellId(procInfo.GetSpellInfo().Id), args);
             }, TimeSpan.FromMilliseconds(400));
         }
 

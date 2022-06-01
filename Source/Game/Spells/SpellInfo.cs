@@ -499,7 +499,7 @@ namespace Game.Spells
 
         public bool IsAllowingDeadTarget()
         {
-            if (HasAttribute(SpellAttr2.CanTargetDead) || Targets.HasAnyFlag(SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead))
+            if (HasAttribute(SpellAttr2.AllowDeadTarget) || Targets.HasAnyFlag(SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead))
                 return true;
 
             foreach (var effectInfo in _effects)
@@ -566,11 +566,6 @@ namespace Game.Spells
             return HasAttribute(SpellAttr0.OnNextSwingNoDamage | SpellAttr0.OnNextSwing);
         }
 
-        public bool IsBreakingStealth()
-        {
-            return !HasAttribute(SpellAttr1.AllowWhileStealthed);
-        }
-
         public bool IsRangedWeaponSpell()
         {
             return (SpellFamilyName == SpellFamilyNames.Hunter && !SpellFamilyFlags[1].HasAnyFlag(0x10000000u)) // for 53352, cannot find better way
@@ -580,12 +575,12 @@ namespace Game.Spells
 
         public bool IsAutoRepeatRangedSpell()
         {
-            return HasAttribute(SpellAttr2.AutorepeatFlag);
+            return HasAttribute(SpellAttr2.AutoRepeat);
         }
 
         public bool HasInitialAggro()
         {
-            return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr3.NoInitialAggro));
+            return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr2.NoInitialThreat));
         }
 
         public bool HasHitDelay()
@@ -689,7 +684,7 @@ namespace Game.Spells
                 return true;
 
             // these spells (Cyclone for example) can pierce all...
-            if (HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            if (HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || HasAttribute(SpellAttr2.NoSchoolImmunities))
             {
                 // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
                 if (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
@@ -717,7 +712,7 @@ namespace Game.Spells
 
             // These auras (Cyclone for example) are not dispelable
             if ((auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && auraSpellInfo.Mechanic != Mechanics.None)
-                || auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                || auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 return false;
 
             return true;
@@ -835,7 +830,7 @@ namespace Game.Spells
             else
             {
                 // needs shapeshift
-                if (!HasAttribute(SpellAttr2.NotNeedShapeshift) && Stances != 0)
+                if (!HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm) && Stances != 0)
                     return SpellCastResult.OnlyShapeshift;
             }
 
@@ -1043,7 +1038,7 @@ namespace Game.Spells
                     if (caster.IsTypeId(TypeId.Player))
                     {
                         // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                        if (HasAttribute(SpellAttr2.CantTargetTapped))
+                        if (HasAttribute(SpellAttr2.CannotCastOnTapped))
                         {
                             Creature targetCreature = unitTarget.ToCreature();
                             if (targetCreature != null)
@@ -2509,7 +2504,7 @@ namespace Game.Spells
 
                 ImmunityInfo immuneInfo = effectInfo.GetImmunityInfo();
 
-                if (!auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && !auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                if (!auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
                     uint schoolImmunity = immuneInfo.SchoolImmuneMask;
                     if (schoolImmunity != 0)
@@ -2558,7 +2553,7 @@ namespace Game.Spells
                             if (!immuneInfo.AuraTypeImmune.Contains(auraName))
                                 isImmuneToAuraEffectApply = true;
 
-                            if (!isImmuneToAuraEffectApply && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex) && !auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                            if (!isImmuneToAuraEffectApply && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex) && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                             {
                                 uint applyHarmfulAuraImmunityMask = immuneInfo.ApplyHarmfulAuraImmuneMask;
                                 if (applyHarmfulAuraImmunityMask != 0)
@@ -2604,7 +2599,7 @@ namespace Game.Spells
                         break;
                     case AuraType.SchoolImmunity:
                     case AuraType.ModImmuneAuraApplySchool:
-                        if (aurEff.GetSpellInfo().HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune) || !Convert.ToBoolean((uint)aurEff.GetSpellInfo().SchoolMask & miscValue))
+                        if (aurEff.GetSpellInfo().HasAttribute(SpellAttr2.NoSchoolImmunities) || !Convert.ToBoolean((uint)aurEff.GetSpellInfo().SchoolMask & miscValue))
                             continue;
                         break;
                     case AuraType.DispelImmunity:
@@ -3180,7 +3175,7 @@ namespace Game.Spells
                 return this;
 
             // Client ignores spell with these attributes (sub_53D9D0)
-            if (HasAttribute(SpellAttr0.AuraIsDebuff) || HasAttribute(SpellAttr2.Unk3) || HasAttribute(SpellAttr3.DrainSoul))
+            if (HasAttribute(SpellAttr0.AuraIsDebuff) || HasAttribute(SpellAttr2.AllowLowLevelBuff) || HasAttribute(SpellAttr3.DrainSoul))
                 return this;
 
             bool needRankSelection = false;

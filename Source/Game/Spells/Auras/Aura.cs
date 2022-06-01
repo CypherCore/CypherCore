@@ -698,7 +698,7 @@ namespace Game.Spells
                 {
                     if (m_timeCla > diff)
                         m_timeCla -= (int)diff;
-                    else if (caster != null)
+                    else if (caster != null && (caster == GetOwner() || !GetSpellInfo().HasAttribute(SpellAttr2.NoTargetPerSecondCosts)))
                     {
                         if (!m_periodicCosts.Empty())
                         {
@@ -1008,7 +1008,7 @@ namespace Game.Spells
         {
             return GetCasterGUID() == target.GetGUID()
                 && m_spellInfo.Stances != 0
-                && !m_spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)
+                && !m_spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)
                 && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshifted);
         }
         
@@ -1644,9 +1644,19 @@ namespace Game.Spells
             return m_procCooldown > now;
         }
 
-        public void AddProcCooldown(DateTime cooldownEnd)
+        public void AddProcCooldown(SpellProcEntry procEntry, DateTime now)
         {
-            m_procCooldown = cooldownEnd;
+            // cooldowns should be added to the whole aura (see 51698 area aura)
+            int procCooldown = (int)procEntry.Cooldown;
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCooldown, ref procCooldown);
+            }
+
+            m_procCooldown = now + TimeSpan.FromMilliseconds(procCooldown);
         }
 
         public void ResetProcCooldown()
@@ -1663,26 +1673,36 @@ namespace Game.Spells
             SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
             Cypher.Assert(procEntry != null);
 
+            PrepareProcChargeDrop(procEntry, eventInfo);
+
+            // cooldowns should be added to the whole aura (see 51698 area aura)
+            AddProcCooldown(procEntry, now);
+
+            SetLastProcSuccessTime(now);
+        }
+
+        public void PrepareProcChargeDrop(SpellProcEntry procEntry, ProcEventInfo eventInfo)
+        {
             // take one charge, aura expiration will be handled in Aura.TriggerProcOnEvent (if needed)
             if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges) && IsUsingCharges() && (eventInfo.GetSpellInfo() == null || !eventInfo.GetSpellInfo().HasAttribute(SpellAttr6.DoNotConsumeResources)))
             {
                 --m_procCharges;
                 SetNeedClientUpdateForTargets();
             }
+        }
 
-            // cooldowns should be added to the whole aura (see 51698 area aura)
-            int procCooldown = (int)procEntry.Cooldown;
-            Unit caster = GetCaster();
-            if (caster != null)
+        public void ConsumeProcCharges(SpellProcEntry procEntry)
+        {
+            // Remove aura if we've used last charge to proc
+            if (procEntry.AttributesMask.HasFlag(ProcAttributes.UseStacksForCharges))
             {
-                Player modOwner = caster.GetSpellModOwner();
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCooldown, ref procCooldown);
+                ModStackAmount(-1);
             }
-
-            AddProcCooldown(now + TimeSpan.FromMilliseconds(procCooldown));
-
-            SetLastProcSuccessTime(now);
+            else if (IsUsingCharges())
+            {
+                if (GetCharges() == 0)
+                    Remove();
+            }
         }
 
         public uint GetProcEffectMask(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
@@ -1859,16 +1879,7 @@ namespace Game.Spells
                 CallScriptAfterProcHandlers(aurApp, eventInfo);
             }
 
-            // Remove aura if we've used last charge to proc
-            if (Global.SpellMgr.GetSpellProcEntry(m_spellInfo).AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges))
-            {
-                ModStackAmount(-1);
-            }
-            else if (IsUsingCharges())
-            {
-                if (GetCharges() == 0)
-                    Remove();
-            }
+            ConsumeProcCharges(Global.SpellMgr.GetSpellProcEntry(GetSpellInfo()));
         }
 
         public float CalcPPMProcChance(Unit actor)
