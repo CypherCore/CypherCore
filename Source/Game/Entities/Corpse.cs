@@ -89,9 +89,6 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(this, owner);
 
-            UpdatePositionData();
-            SetZoneScript();
-
             return true;
         }
 
