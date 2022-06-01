@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Scenarios;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -399,6 +400,17 @@ namespace Game.Conditions
                         condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, player.GetSession().GetBattlePetMgr().GetPetCount(CliDB.BattlePetSpeciesStorage.LookupByKey(ConditionValue1), player.GetGUID()), ConditionValue2);
                     break;
                 }
+                case ConditionTypes.ScenarioStep:
+                {
+                    Scenario scenario = obj.GetScenario();
+                    if (scenario != null)
+                    {
+                        ScenarioStepRecord step = scenario.GetStep();
+                        if (step != null)
+                            condMeets = step.Id == ConditionValue1;
+                    }
+                    break;
+                }
                 default:
                     condMeets = false;
                     break;
@@ -511,6 +523,9 @@ namespace Game.Conditions
                 case ConditionTypes.ObjectiveProgress:
                 case ConditionTypes.BattlePetCount:
                     mask |= GridMapTypeMask.Player;
+                    break;
+                case ConditionTypes.ScenarioStep:
+                    mask |= GridMapTypeMask.All;
                     break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");

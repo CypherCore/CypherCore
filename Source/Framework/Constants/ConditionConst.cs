@@ -73,6 +73,7 @@ namespace Framework.Constants
         ObjectEntryGuid = 51,        // TypeID           entry          guid               true if object is type TypeID and the entry is 0 or matches entry of the object or matches guid of the object
         TypeMask = 52,               // TypeMask         0              0                  true if object is type object's TypeMask matches provided TypeMask
         BattlePetCount = 53,         // SpecieId         count          ComparisonType     true if player has `count` of battle pet species
+        ScenarioStep = 54,           // ScenarioStepId   0              0                  true if player is at scenario with current step equal to ScenarioStepID
         Max
     }
 

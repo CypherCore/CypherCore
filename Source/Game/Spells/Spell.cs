@@ -8537,9 +8537,18 @@ namespace Game.Spells
                 {
                     Unit unitCaster = spell.GetCaster().ToUnit();
                     if (unitCaster != null)
+                    {
                         unitCaster.AtTargetAttacked(unit, spell.m_spellInfo.HasInitialAggro());
+                        if (spell.m_spellInfo.HasAttribute(SpellAttr6.TapsImmediately))
+                        {
+                            Creature targetCreature = unit.ToCreature();
+                            if (targetCreature != null)
+                                if (!targetCreature.HasLootRecipient() && unitCaster.IsPlayer())
+                                    targetCreature.SetLootRecipient(unitCaster);
+                        }
+                    }
 
-                    if (!spell.m_spellInfo.HasAttribute(SpellAttr3.DoNotTriggerTargetStand) && !unit.IsStandState())
+                if (!spell.m_spellInfo.HasAttribute(SpellAttr3.DoNotTriggerTargetStand) && !unit.IsStandState())
                         unit.SetStandState(UnitStandStateType.Stand);
                 }
 

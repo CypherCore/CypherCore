@@ -1758,6 +1758,15 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionTypes.ScenarioStep:
+                {
+                    if (!CliDB.ScenarioStepStorage.ContainsKey(cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing ScenarioStep in value1 ({cond.ConditionValue1}), skipped.");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionType in `condition` table, ignoring.");
                     return false;
@@ -2976,6 +2985,8 @@ namespace Game
             new ConditionTypeInfo("Is Gamemaster",        true, false, false),
             new ConditionTypeInfo("Object Entry or Guid", true, true,  true),
             new ConditionTypeInfo("Object TypeMask",      true, false, false),
+            new ConditionTypeInfo("BattlePet Species Learned", true, true,  true),
+            new ConditionTypeInfo("On Scenario Step",          true, false, false)
         };
 
         public struct ConditionTypeInfo
