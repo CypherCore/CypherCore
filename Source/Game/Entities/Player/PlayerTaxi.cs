@@ -27,7 +27,7 @@ namespace Game.Entities
 {
     public class PlayerTaxi
     {
-        public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
+        public byte[] m_taximask;
         List<uint> m_TaxiDestinations = new();
         uint m_flightMasterFactionId;
 
@@ -37,7 +37,8 @@ namespace Game.Entities
             if (chrClass == Class.Deathknight)
             {
                 var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
-                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                m_taximask = new byte[factionMask.Length];
+                for (int i = 0; i < factionMask.Length; ++i)
                     m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
             }
 
@@ -107,7 +108,7 @@ namespace Game.Entities
             var split = new StringArray(data, ' ');
 
             int index = 0;
-            for (var i = 0; index < PlayerConst.TaxiMaskSize && i != split.Length; ++i, ++index)
+            for (var i = 0; index < m_taximask.Length && i != split.Length; ++i, ++index)
             {
                 // load and set bits only for existing taxi nodes
                 if (uint.TryParse(split[i], out uint id))
@@ -117,18 +118,18 @@ namespace Game.Entities
 
         public void AppendTaximaskTo(ShowTaxiNodes data, bool all)
         {
-            data.CanLandNodes = new byte[PlayerConst.TaxiMaskSize];
-            data.CanUseNodes = new byte[PlayerConst.TaxiMaskSize];
+            data.CanLandNodes = new byte[CliDB.TaxiNodesMask.Length];
+            data.CanUseNodes = new byte[CliDB.TaxiNodesMask.Length];
 
             if (all)
             {
-                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize);  // all existed nodes
-                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize);
+                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, data.CanLandNodes.Length);  // all existed nodes
+                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanUseNodes, 0, data.CanUseNodes.Length);
             }
             else
             {
-                Buffer.BlockCopy(m_taximask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize); // known nodes
-                Buffer.BlockCopy(m_taximask, 0, data.CanUseNodes, 0, PlayerConst.TaxiMaskSize);
+                Buffer.BlockCopy(m_taximask, 0, data.CanLandNodes, 0, data.CanLandNodes.Length); // known nodes
+                Buffer.BlockCopy(m_taximask, 0, data.CanUseNodes, 0, data.CanUseNodes.Length);
             }
         }
 

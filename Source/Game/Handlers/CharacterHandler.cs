@@ -1924,7 +1924,7 @@ namespace Game
 
 
                         var factionMask = newTeamId == TeamId.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
-                        for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                        for (int i = 0; i < factionMask.Length; ++i)
                         {
                             // i = (315 - 1) / 8 = 39
                             // m = 1 << ((315 - 1) % 8) = 4

@@ -3434,7 +3434,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new();
-                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < m_taxi.m_taximask.Length; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3575,7 +3575,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new();
-                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < m_taxi.m_taximask.Length; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
