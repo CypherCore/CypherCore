@@ -79,7 +79,7 @@ namespace Game
             }
 
             auctionHouse.BuildListBuckets(listBucketsResult, _player, browseQuery.Name, browseQuery.MinLevel, browseQuery.MaxLevel, browseQuery.Filters, classFilters,
-                browseQuery.KnownPets, browseQuery.KnownPets.Count, (byte)browseQuery.MaxPetLevel, browseQuery.Offset, browseQuery.Sorts, browseQuery.Sorts.Count);
+                browseQuery.KnownPets, browseQuery.KnownPets.Length, (byte)browseQuery.MaxPetLevel, browseQuery.Offset, browseQuery.Sorts, browseQuery.Sorts.Count);
 
             listBucketsResult.BrowseMode = AuctionHouseBrowseMode.Search;
             listBucketsResult.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;

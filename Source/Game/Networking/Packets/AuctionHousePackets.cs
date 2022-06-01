@@ -16,9 +16,9 @@
  */
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.Entities;
 using System.Collections.Generic;
-using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
@@ -29,7 +29,7 @@ namespace Game.Networking.Packets
         public byte MinLevel = 1;
         public byte MaxLevel = SharedConst.MaxLevel;
         public AuctionHouseFilterMask Filters;
-        public Array<byte> KnownPets = new(SharedConst.MaxBattlePetSpeciesId / 8 + 1);
+        public byte[] KnownPets;
         public sbyte MaxPetLevel;
         public AddOnInfo? TaintedBy;
         public string Name;
@@ -47,6 +47,12 @@ namespace Game.Networking.Packets
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
+
+            int sizeLimit = CliDB.BattlePetSpeciesStorage.Count / 8 +1;
+            if (knownPetSize >= sizeLimit)
+                throw new System.Exception($"Attempted to read more array elements from packet {knownPetSize} than allowed {sizeLimit}");
+
+            KnownPets = new byte[knownPetSize];
             for (var i = 0; i < knownPetSize; ++i)
                 KnownPets[i] = _worldPacket.ReadUInt8();
 
