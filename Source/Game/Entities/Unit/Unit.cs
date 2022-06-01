@@ -162,14 +162,25 @@ namespace Game.Entities
                 _lastExtraAttackSpell = 0;
             }
 
-            uint att;
-            // not implemented before 3.0.2
-            if ((att = GetAttackTimer(WeaponAttackType.BaseAttack)) != 0)
-                SetAttackTimer(WeaponAttackType.BaseAttack, (diff >= att ? 0 : att - diff));
-            if ((att = GetAttackTimer(WeaponAttackType.RangedAttack)) != 0)
-                SetAttackTimer(WeaponAttackType.RangedAttack, (diff >= att ? 0 : att - diff));
-            if ((att = GetAttackTimer(WeaponAttackType.OffAttack)) != 0)
-                SetAttackTimer(WeaponAttackType.OffAttack, (diff >= att ? 0 : att - diff));
+            bool spellPausesCombatTimer(CurrentSpellTypes type)
+            {
+                return GetCurrentSpell(type) != null && GetCurrentSpell(type).GetSpellInfo().HasAttribute(SpellAttr6.DelayCombatTimerDuringCast);
+            }
+
+            if (!spellPausesCombatTimer(CurrentSpellTypes.Generic) && !spellPausesCombatTimer(CurrentSpellTypes.Channeled))
+            {
+                uint base_att = GetAttackTimer(WeaponAttackType.BaseAttack);
+                if (base_att != 0)
+                    SetAttackTimer(WeaponAttackType.BaseAttack, (diff >= base_att ? 0 : base_att - diff));
+
+                uint ranged_att = GetAttackTimer(WeaponAttackType.RangedAttack);
+                if (ranged_att != 0)
+                    SetAttackTimer(WeaponAttackType.RangedAttack, (diff >= ranged_att ? 0 : ranged_att - diff));
+
+                uint off_att = GetAttackTimer(WeaponAttackType.OffAttack);
+                if (off_att != 0)
+                    SetAttackTimer(WeaponAttackType.OffAttack, (diff >= off_att ? 0 : off_att - diff));
+            }
 
             // update abilities available only for fraction of time
             UpdateReactives(diff);

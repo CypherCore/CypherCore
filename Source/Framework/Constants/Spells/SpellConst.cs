@@ -1811,7 +1811,7 @@ namespace Framework.Constants
         NoJumpPathing = 0x10000, /*Nyi*/ // No Jump Pathing
         AllowEquipWhileCasting = 0x20000, // Allow Equip While Casting
         OriginateFromController = 0x40000, // Originate From Controller Description Client Will Prevent Casting If Not Possessed, Charmer Will Be Caster For All Intents And Purposes
-        DelayCombatTimerDuringCast = 0x80000, /*Nyi*/ // Delay Combat Timer During Cast
+        DelayCombatTimerDuringCast = 0x80000, // Delay Combat Timer During Cast
         AuraIconOnlyForCasterLimit10 = 0x100000, // Aura Icon Only For Caster (Limit 10) (Client Only)
         ShowMechanicAsCombatText = 0x200000, // Show Mechanic As Combat Text (Client Only)
         AbsorbCannotBeIgnore = 0x400000, /*Nyi*/ // Absorb Cannot Be Ignore
