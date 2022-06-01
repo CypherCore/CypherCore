@@ -2600,6 +2600,7 @@ namespace Game.Entities
                         if (currentAbsorb < 0)
                             currentAbsorb = 0;
 
+
                         uint tempAbsorb = (uint)currentAbsorb;
 
                         // This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
@@ -3364,7 +3365,6 @@ namespace Game.Entities
                 spell.CallScriptOnResistAbsorbCalculateHandlers(damageInfo, ref resistedDamage, ref absorbIgnoringDamage);
 
             damageInfo.ResistDamage(resistedDamage);
-            damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
@@ -3391,6 +3391,9 @@ namespace Game.Entities
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
 
+                if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
+                    damageInfo.ModifyDamage(-absorbIgnoringDamage);
+
                 uint tempAbsorb = (uint)currentAbsorb;
 
                 bool defaultPrevented = false;
@@ -3400,7 +3403,6 @@ namespace Game.Entities
 
                 if (!defaultPrevented)
                 {
-
                     // absorb must be smaller than the damage itself
                     currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
 
@@ -3419,6 +3421,9 @@ namespace Game.Entities
                             absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
                     }
                 }
+
+                if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
+                    damageInfo.ModifyDamage(absorbIgnoringDamage);
 
                 if (currentAbsorb != 0)
                 {
@@ -3455,6 +3460,9 @@ namespace Game.Entities
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
+
+                if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
+                    damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
                 uint tempAbsorb = (uint)currentAbsorb;
 
@@ -3494,6 +3502,9 @@ namespace Game.Entities
                     }
                 }
 
+                if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
+                    damageInfo.ModifyDamage(absorbIgnoringDamage);
+
                 if (currentAbsorb != 0)
                 {
                     SpellAbsorbLog absorbLog = new();
@@ -3508,8 +3519,6 @@ namespace Game.Entities
                     damageInfo.GetVictim().SendCombatLogMessage(absorbLog);
                 }
             }
-
-            damageInfo.ModifyDamage(absorbIgnoringDamage);
 
             // split damage auras - only when not damaging self
             if (damageInfo.GetVictim() != damageInfo.GetAttacker())
