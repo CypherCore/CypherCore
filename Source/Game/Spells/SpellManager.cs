@@ -4379,7 +4379,7 @@ namespace Game.Entities
                 if (spellInfo.ActiveIconFileDataId == 135754)  // flight
                     spellInfo.Attributes |= SpellAttr0.Passive;
 
-                if (spellInfo.IsSingleTarget())
+                if (spellInfo.IsSingleTarget() && spellInfo.MaxAffectedTargets == 0)
                     spellInfo.MaxAffectedTargets = 1;
             }
 

@@ -1762,7 +1762,7 @@ namespace Framework.Constants
         RemoveEnteringArena = 0x04, // Remove Entering Arena Description Force This Aura To Be Removed On Entering Arena, Regardless Of Other Properties
         AllowWhileStunned = 0x08, // Allow While Stunned
         TriggersChanneling = 0x10, // Triggers Channeling
-        LimitN = 0x20, /*Incomplete Impl*/ // Limit N Description Remove Previous Application To Another Unit If Applied
+        LimitN = 0x20, // Limit N Description Remove Previous Application To Another Unit If Applied
         IgnoreAreaEffectPvpCheck = 0x40, /*Nyi*/ // Ignore Area Effect Pvp Check
         NotOnPlayer = 0x80, /*Nyi*/ // Not On Player
         NotOnPlayerControlledNpc = 0x100, /*Nyi*/ // Not On Player Controlled Npc

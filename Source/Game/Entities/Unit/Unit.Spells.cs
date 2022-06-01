@@ -3934,14 +3934,18 @@ namespace Game.Entities
 
                 // register single target aura
                 caster.m_scAuras.Add(aura);
-                // remove other single target auras
-                var scAuras = caster.GetSingleCastAuras();
-                for (var i = 0; i < scAuras.Count; ++i)
-                {
-                    var aur = scAuras[i];
-                    if (aur != aura && aur.IsSingleTargetWith(aura))
-                        aur.Remove();
 
+                Queue<Aura> aurasSharingLimit = new();
+                // remove other single target auras
+                foreach (Aura scAura in caster.GetSingleCastAuras())
+                    if (scAura != aura && scAura.IsSingleTargetWith(aura))
+                        aurasSharingLimit.Enqueue(scAura);
+
+                uint maxOtherAuras = aura.GetSpellInfo().MaxAffectedTargets - 1;
+                while (aurasSharingLimit.Count > maxOtherAuras)
+                {
+                    aurasSharingLimit.Peek().Remove();
+                    aurasSharingLimit.Dequeue();
                 }
             }
         }
