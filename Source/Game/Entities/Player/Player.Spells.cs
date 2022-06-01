@@ -3214,7 +3214,7 @@ namespace Game.Entities
         public bool CanNoReagentCast(SpellInfo spellInfo)
         {
             // don't take reagents for spells with SPELL_ATTR5_NO_REAGENT_WHILE_PREP
-            if (spellInfo.HasAttribute(SpellAttr5.NoReagentWhilePrep) &&
+            if (spellInfo.HasAttribute(SpellAttr5.NoReagentCostWithAura) &&
                 HasUnitFlag(UnitFlags.Preparation))
                 return true;
 

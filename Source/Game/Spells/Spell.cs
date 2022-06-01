@@ -2236,7 +2236,7 @@ namespace Game.Spells
                                     // Haste modifies duration of channeled spells
                                     if (m_spellInfo.IsChanneled())
                                         caster.ModSpellDurationTime(m_spellInfo, ref hitInfo.AuraDuration, this);
-                                    else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                                    else if (m_spellInfo.HasAttribute(SpellAttr8.HasteAffectsDuration))
                                     {
                                         int origDuration = hitInfo.AuraDuration;
                                         hitInfo.AuraDuration = 0;
@@ -2510,7 +2510,7 @@ namespace Game.Spells
                 m_casttime = m_spellInfo.CalcCastTime(this);
 
             // don't allow channeled spells / spells with cast time to be casted while moving
-            // exception are only channeled spells that have no casttime and SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
+            // exception are only channeled spells that have no casttime and dont have movement interrupt flag
             // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
             if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsPlayer() && !(m_caster.ToUnit().IsCharmed() && m_caster.ToUnit().GetCharmerGUID().IsCreature()) && m_caster.ToUnit().IsMoving() &&
@@ -5866,13 +5866,13 @@ namespace Game.Spells
             // still they need to be checked against certain mechanics
 
             // SPELL_ATTR5_USABLE_WHILE_STUNNED by default only MECHANIC_STUN (ie no sleep, knockout, freeze, etc.)
-            bool usableWhileStunned = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileStunned);
+            bool usableWhileStunned = m_spellInfo.HasAttribute(SpellAttr5.AllowWhileStunned);
 
             // SPELL_ATTR5_USABLE_WHILE_FEARED by default only fear (ie no horror)
-            bool usableWhileFeared = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared);
+            bool usableWhileFeared = m_spellInfo.HasAttribute(SpellAttr5.AllowWhileFleeing);
 
             // SPELL_ATTR5_USABLE_WHILE_CONFUSED by default only disorient (ie no polymorph)
-            bool usableWhileConfused = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused);
+            bool usableWhileConfused = m_spellInfo.HasAttribute(SpellAttr5.AllowWhileConfused);
 
             // Check whether the cast should be prevented by any state you might have.
             SpellCastResult result = SpellCastResult.SpellCastOk;

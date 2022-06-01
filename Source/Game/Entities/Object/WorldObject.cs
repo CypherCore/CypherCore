@@ -1928,7 +1928,7 @@ namespace Game.Entities
             if (spellInfo == null || duration < 0)
                 return;
 
-            if (spellInfo.IsChanneled() && !spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+            if (spellInfo.IsChanneled() && !spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
                 return;
 
             // called from caster

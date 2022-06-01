@@ -553,7 +553,7 @@ namespace Game.Spells
 
         public bool IsMoveAllowedChannel()
         {
-            return IsChanneled() && (HasAttribute(SpellAttr5.CanChannelWhenMoving) || !ChannelInterruptFlags.HasAnyFlag(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning));
+            return IsChanneled() && !ChannelInterruptFlags.HasFlag(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning);
         }
 
         public bool NeedsComboPoints()
@@ -721,7 +721,7 @@ namespace Game.Spells
         public bool IsSingleTarget()
         {
             // all other single target spells have if it has AttributesEx5
-            if (HasAttribute(SpellAttr5.SingleTargetSpell))
+            if (HasAttribute(SpellAttr5.LimitN))
                 return true;
 
             switch (GetSpellSpecific())
@@ -2373,7 +2373,7 @@ namespace Game.Spells
                 _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
             }
 
-            if (HasAttribute(SpellAttr5.UsableWhileStunned))
+            if (HasAttribute(SpellAttr5.AllowWhileStunned))
             {
                 switch (Id)
                 {
@@ -2393,10 +2393,10 @@ namespace Game.Spells
                 }
             }
 
-            if (HasAttribute(SpellAttr5.UsableWhileConfused))
+            if (HasAttribute(SpellAttr5.AllowWhileConfused))
                 _allowedMechanicMask |= (1 << (int)Mechanics.Disoriented);
 
-            if (HasAttribute(SpellAttr5.UsableWhileFeared))
+            if (HasAttribute(SpellAttr5.AllowWhileFleeing))
             {
                 switch (Id)
                 {
@@ -2746,7 +2746,7 @@ namespace Game.Spells
                         if (effectInfo.ApplyAuraPeriod > 0 && DotDuration > 0)
                         {
                             totalTicks = (uint)DotDuration / effectInfo.ApplyAuraPeriod;
-                            if (HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                            if (HasAttribute(SpellAttr5.ExtraInitialPeriod))
                                 ++totalTicks;
                         }
                         break;

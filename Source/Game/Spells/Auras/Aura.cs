@@ -246,7 +246,7 @@ namespace Game.Spells
             auraData.SpellID = (int)aura.GetId();
             auraData.Visual = aura.GetSpellVisual();
             auraData.Flags = GetFlags();
-            if (aura.GetAuraType() != AuraObjectType.DynObj && aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.HideDuration))
+            if (aura.GetAuraType() != AuraObjectType.DynObj && aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.DoNotDisplayDuration))
                 auraData.Flags |= AuraFlags.Duration;
 
             auraData.ActiveFlags = GetEffectMask();
@@ -788,7 +788,7 @@ namespace Game.Spells
             {
                 int duration = m_spellInfo.GetMaxDuration();
                 // Calculate duration of periodics affected by haste.
-                if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                if (m_spellInfo.HasAttribute(SpellAttr8.HasteAffectsDuration))
                     duration = (int)(duration * caster.m_unitData.ModCastingSpeed);
 
                 SetMaxDuration(duration);

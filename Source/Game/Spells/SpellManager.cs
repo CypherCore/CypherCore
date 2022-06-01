@@ -3394,7 +3394,7 @@ namespace Game.Entities
             // Earthbind Totem (instant pulse)
             ApplySpellFix(new[] { 6474 }, spellInfo =>
             {
-                spellInfo.AttributesEx5 |= SpellAttr5.StartPeriodicAtApply;
+                spellInfo.AttributesEx5 |= SpellAttr5.ExtraInitialPeriod;
             });
 
             ApplySpellFix(new[] {
@@ -4374,7 +4374,7 @@ namespace Game.Entities
 
                 // due to the way spell system works, unit would change orientation in Spell::_cast
                 if (spellInfo.HasAura(AuraType.ControlVehicle))
-                    spellInfo.AttributesEx5 |= SpellAttr5.DontTurnDuringCast;
+                    spellInfo.AttributesEx5 |= SpellAttr5.AiDoesntFaceTarget;
 
                 if (spellInfo.ActiveIconFileDataId == 135754)  // flight
                     spellInfo.Attributes |= SpellAttr0.Passive;

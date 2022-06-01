@@ -1758,38 +1758,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr5 : uint
     {
-        CanChannelWhenMoving = 0x01, //  0 available casting channel spell when moving
-        NoReagentWhilePrep = 0x02, //  1 Not Need Reagents If UnitFlagPreparation
-        RemoveEnteringArena = 0x04, //  2 remove this aura on arena enter
-        UsableWhileStunned = 0x08, //  3 Usable While Stunned
-        Unk4 = 0x10, //  4
-        SingleTargetSpell = 0x20, //  5 Only One Target Can Be Apply At A Time
-        Unk6 = 0x40, //  6
-        Unk7 = 0x80, //  7
-        CantTargetPlayerControlled = 0x100, //  8 cannot target player controlled units but can target players
-        StartPeriodicAtApply = 0x200, //  9 Begin Periodic Tick At Aura Apply
-        HideDuration = 0x400, // 10 Do Not Send Duration To Client
-        AllowTargetOfTargetAsTarget = 0x800, // 11 (Nyi) Uses Target'S Target As Target If Original Target Not Valid (Intervene For Example)
-        MeleeChainTargeting = 0x1000, // 12 Cleave Related?
-        HasteAffectDuration = 0x2000, // 13 Haste Effects Decrease Duration Of This
-        NotUsableWhileCharmed = 0x4000, // 14 Charmed units cannot cast this spell
-        Unk15 = 0x8000, // 15 Inflits On Multiple Targets?
-        Unk16 = 0x10000, // 16
-        UsableWhileFeared = 0x20000, // 17 Usable While Feared
-        UsableWhileConfused = 0x40000, // 18 Usable While Confused
-        DontTurnDuringCast = 0x80000, // 19 Blocks Caster'S Turning When Casting (Client Does Not Automatically Turn Caster'S Model To Face UnitFieldTarget)
-        Unk20 = 0x100000, // 20
-        Unk21 = 0x200000, // 21
-        Unk22 = 0x400000, // 22
-        Unk23 = 0x800000, // 23
-        Unk24 = 0x1000000, // 24
-        Unk25 = 0x2000000, // 25
-        AlwaysAoeLineOfSight = 0x4000000, // 26 Aoe Related - Boulder, Cannon, Corpse Explosion, Fire Nova, Flames, Frost Bomb, Living Bomb, Seed Of Corruption, Starfall, Thunder Clap, Volley
-        DontShowAuraIfSelfCast = 0x8000000, // 27
-        DontShowAuraIfNotSelfCast = 0x10000000, // 28
-        Unk29 = 0x20000000, // 29
-        Unk30 = 0x40000000, // 30
-        Unk31 = 0x80000000  // 31 Forces All Nearby Enemies To Focus Attacks Caster
+        AllowActionsDuringChannel = 0x01, // Allow Actions During Channel
+        NoReagentCostWithAura = 0x02, // No Reagent Cost With Aura
+        RemoveEnteringArena = 0x04, // Remove Entering Arena Description Force This Aura To Be Removed On Entering Arena, Regardless Of Other Properties
+        AllowWhileStunned = 0x08, // Allow While Stunned
+        TriggersChanneling = 0x10, // Triggers Channeling
+        LimitN = 0x20, /*Incomplete Impl*/ // Limit N Description Remove Previous Application To Another Unit If Applied
+        IgnoreAreaEffectPvpCheck = 0x40, /*Nyi*/ // Ignore Area Effect Pvp Check
+        NotOnPlayer = 0x80, /*Nyi*/ // Not On Player
+        NotOnPlayerControlledNpc = 0x100, /*Nyi*/ // Not On Player Controlled Npc
+        ExtraInitialPeriod = 0x200, // Extra Initial Period Description Immediately Do Periodic Tick On Apply
+        DoNotDisplayDuration = 0x400, // Do Not Display Duration
+        ImpliedTargeting = 0x800, // Implied Targeting (Client Only)
+        MeleeChainTargeting = 0x1000, // Melee Chain Targeting
+        SpellHasteAffectsPeriodic = 0x2000, // Spell Haste Affects Periodic
+        NotAvailableWhileCharmed = 0x4000, /*Nyi*/ // Not Available While Charmed
+        TreatAsAreaEffect = 0x8000, /*Nyi*/ // Treat As Area Effect
+        AuraAffectsNotJustReqEquippedItem = 0x10000, // Aura Affects Not Just Req. Equipped Item
+        AllowWhileFleeing = 0x20000, // Allow While Fleeing
+        AllowWhileConfused = 0x40000, // Allow While Confused
+        AiDoesntFaceTarget = 0x80000, // Ai Doesn'T Face Target
+        DoNotAttemptAPetResummonWhenDismounting = 0x100000, /*Nyi*/ // Do Not Attempt A Pet Resummon When Dismounting
+        IgnoreTargetRequirements = 0x200000, /*Nyi*/ // Ignore Target Requirements
+        NotOnTrivial = 0x400000, /*Nyi*/ // Not On Trivial
+        NoPartialResists = 0x800000, /*Nyi*/ // No Partial Resists
+        IgnoreCasterRequirements = 0x1000000, /*Nyi*/ // Ignore Caster Requirements
+        AlwaysLineOfSight = 0x2000000, /*Nyi*/ // Always Line Of Sight
+        AlwaysAoeLineOfSight = 0x4000000, /*Wrong Impl*/ // Always Aoe Line Of Sight Description Requires Line Of Sight Between Caster And Target In Addition To Between Dest And Target
+        NoCasterAuraIcon = 0x8000000, // No Caster Aura Icon (Client Only)
+        NoTargetAuraIcon = 0x10000000, // No Target Aura Icon (Client Only)
+        AuraUniquePerCaster = 0x20000000, /*Nyi*/ // Aura Unique Per Caster
+        AlwaysShowGroundTexture = 0x40000000, // Always Show Ground Texture
+        AddMeleeHitRating = 0x80000000  /*Nyi*/ // Add Melee Hit Rating
     }
     public enum SpellAttr6 : uint
     {
@@ -1880,7 +1880,7 @@ namespace Framework.Constants
         Unk14 = 0x4000, // 14
         WaterMount = 0x8000, // 15
         Unk16 = 0x10000, // 16
-        Unk17 = 0x20000, // 17
+        HasteAffectsDuration = 0x20000, // 17 Haste Affects Duration
         RememberSpells = 0x40000, // 18
         UseComboPointsOnAnyTarget = 0x80000, // 19
         ArmorSpecialization = 0x100000, // 20

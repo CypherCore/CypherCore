@@ -158,7 +158,7 @@ namespace Game.Spells
             if (_period != 0 && !GetBase().IsPermanent())
             {
                 totalTicks = (uint)(GetBase().GetMaxDuration() / _period);
-                if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     ++totalTicks;
             }
 
@@ -172,7 +172,7 @@ namespace Game.Spells
             {
                 _periodicTimer = 0;
                 // Start periodic on next tick or at aura apply
-                if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     _periodicTimer = _period;
             }
         }
@@ -222,7 +222,7 @@ namespace Game.Spells
                     // Haste modifies periodic time of channeled spells
                     if (m_spellInfo.IsChanneled())
                         caster.ModSpellDurationTime(m_spellInfo, ref _period);
-                    else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                    else if (m_spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
                         _period = (int)(_period * caster.m_unitData.ModCastingSpeed);
                 }
             }
@@ -238,7 +238,7 @@ namespace Game.Spells
                     _periodicTimer = (int)(elapsedTime % _period);
                 }
 
-                if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     ++_ticksDone;
             }
             else // aura just created or reapplied
