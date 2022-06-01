@@ -2525,7 +2525,7 @@ namespace Game.Entities
             if (unit != null)
             {
                 // can't attack invisible
-                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible))
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift))
                 {
                     if (!unit.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
                         return false;
@@ -2557,7 +2557,7 @@ namespace Game.Entities
                     unitOrOwner = go.GetOwner();
 
             // ignore immunity flags when assisting
-            if (unitOrOwner != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
+            if (unitOrOwner != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc)))
             {
                 if (!unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToNPC())
                     return false;
@@ -2687,7 +2687,7 @@ namespace Game.Entities
             }
 
             // can't assist invisible
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
                 return false;
 
             // can't assist dead
@@ -2702,7 +2702,7 @@ namespace Game.Entities
             if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
                 return false;
 
-            if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+            if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc))
             {
                 if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
@@ -2748,7 +2748,7 @@ namespace Game.Entities
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
             else if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
             {
-                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc))
                 {
                     if (unitTarget != null && !unitTarget.IsPvP())
                     {

@@ -118,7 +118,7 @@ namespace Scripts.World.DuelReset
                 if (cooldownMod != 0)
                     totalCooldown += TimeSpan.FromMilliseconds(cooldownMod);
 
-                if (!spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
+                if (!spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
                     applySpellMod(ref categoryCooldown);
 
                 return remainingCooldown > TimeSpan.Zero

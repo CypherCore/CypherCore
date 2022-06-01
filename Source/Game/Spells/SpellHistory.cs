@@ -384,7 +384,7 @@ namespace Game.Spells
                         if (cooldown >= TimeSpan.Zero)
                             applySpellMod(ref cooldown);
 
-                        if (categoryCooldown >= TimeSpan.Zero && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
+                        if (categoryCooldown >= TimeSpan.Zero && !spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
                             applySpellMod(ref categoryCooldown);
                     }
 

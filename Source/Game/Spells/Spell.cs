@@ -40,7 +40,7 @@ namespace Game.Spells
         public Spell(WorldObject caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default, ObjectGuid originalCastId = default)
         {
             m_spellInfo = info;
-            m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
+            m_caster = (info.HasAttribute(SpellAttr6.OriginateFromController) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
             m_spellValue = new SpellValue(m_spellInfo, caster);
             m_castItemLevel = -1;
 
@@ -5861,10 +5861,6 @@ namespace Game.Spells
             if (unitCaster == null)
                 return SpellCastResult.SpellCastOk;
 
-            // spells totally immuned to caster auras (wsg flag drop, give marks etc)
-            if (m_spellInfo.HasAttribute(SpellAttr6.IgnoreCasterAuras))
-                return SpellCastResult.SpellCastOk;
-
             // these attributes only show the spell as usable on the client when it has related aura applied
             // still they need to be checked against certain mechanics
 
@@ -7156,7 +7152,7 @@ namespace Game.Spells
             if (IsTriggered())
                 return false;
 
-            if (m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr6.NotResetSwingIfInstant))
+            if (m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr6.DoesntResetSwingTimerIfInstant))
                 return false;
 
             return true;

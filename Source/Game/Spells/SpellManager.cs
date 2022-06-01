@@ -3328,7 +3328,7 @@ namespace Game.Entities
                 41487  // Envenom - Black Temple
             }, spellInfo =>
             {
-                spellInfo.AttributesEx6 |= SpellAttr6.CanTargetInvisible;
+                spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift;
             });
 
             // Oscillation Field
@@ -4073,7 +4073,7 @@ namespace Game.Entities
             // Twilight Mending
             ApplySpellFix(new[] { 75509 }, spellInfo =>
             {
-                spellInfo.AttributesEx6 |= SpellAttr6.CanTargetInvisible;
+                spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift;
                 spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
             });
 

@@ -884,7 +884,7 @@ namespace Game.Spells
             var mapEntry = CliDB.MapStorage.LookupByKey(map_id);
 
             // raid instance limitation
-            if (HasAttribute(SpellAttr6.NotInRaidInstance))
+            if (HasAttribute(SpellAttr6.NotInRaidInstances))
             {
                 if (mapEntry == null || mapEntry.IsRaid())
                     return SpellCastResult.NotInRaidInstance;
@@ -1003,7 +1003,7 @@ namespace Game.Spells
                 return SpellCastResult.BadTargets;
 
             // check visibility - ignore stealth for implicit (area) targets
-            if (!HasAttribute(SpellAttr6.CanTargetInvisible) && !caster.CanSeeOrDetect(target, Implicit))
+            if (!HasAttribute(SpellAttr6.IgnorePhaseShift) && !caster.CanSeeOrDetect(target, Implicit))
                 return SpellCastResult.BadTargets;
 
             Unit unitTarget = target.ToUnit();
@@ -1095,7 +1095,7 @@ namespace Game.Spells
                 return SpellCastResult.TargetsDead;
 
             // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
-            if (Implicit && HasAttribute(SpellAttr6.CantTargetCrowdControlled) && !unitTarget.CanFreeMove())
+            if (Implicit && HasAttribute(SpellAttr6.DoNotChainToCrowdControlledTargets) && !unitTarget.CanFreeMove())
                 return SpellCastResult.BadTargets;
 
             if (!CheckTargetCreatureType(unitTarget))
@@ -1237,7 +1237,7 @@ namespace Game.Spells
                     checkMask = VehicleSeatFlags.CanAttack;
 
                 var vehicleSeat = vehicle.GetSeatForPassenger(caster);
-                if (!HasAttribute(SpellAttr6.CastableWhileOnVehicle) && !HasAttribute(SpellAttr0.AllowWhileMounted)
+                if (!HasAttribute(SpellAttr6.AllowWhileRidingVehicle) && !HasAttribute(SpellAttr0.AllowWhileMounted)
                     && (vehicleSeat.Flags & (int)checkMask) != (int)checkMask)
                     return SpellCastResult.CantDoThatRightNow;
 
