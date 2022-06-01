@@ -1096,6 +1096,9 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
+                if (spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed))
+                    continue;
+
                 if (!Global.ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
                 {
                     Log.outDebug(LogFilter.Condition, "VehicleSpellInitialize: conditions not met for Vehicle entry {0} spell {1}", vehicle.ToCreature().GetEntry(), spellId);

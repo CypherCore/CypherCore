@@ -4703,6 +4703,9 @@ namespace Game.Spells
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
+                if (m_spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed) && unitCaster.IsCharmed())
+                    return SpellCastResult.Charmed;
+
                 // only check at first call, Stealth auras are already removed at second call
                 // for now, ignore triggered spells
                 if (strict && !_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreShapeshift))
@@ -5659,7 +5662,7 @@ namespace Game.Spells
                             return SpellCastResult.NoPet;
 
                         if (!pet.GetCharmerGUID().IsEmpty())
-                            return SpellCastResult.Charmed;
+                            return SpellCastResult.AlreadyHaveCharm;
                         break;
                     }
                     case AuraType.ModPossess:
@@ -5671,7 +5674,7 @@ namespace Game.Spells
                             return SpellCastResult.BadTargets;
 
                         if (!unitCaster1.GetCharmerGUID().IsEmpty())
-                            return SpellCastResult.Charmed;
+                            return SpellCastResult.AlreadyHaveCharm;
 
                         if (spellEffectInfo.ApplyAuraName == AuraType.ModCharm || spellEffectInfo.ApplyAuraName == AuraType.ModPossess)
                         {

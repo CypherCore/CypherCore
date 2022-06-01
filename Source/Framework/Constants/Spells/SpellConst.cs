@@ -1771,7 +1771,7 @@ namespace Framework.Constants
         ImpliedTargeting = 0x800, // Implied Targeting (Client Only)
         MeleeChainTargeting = 0x1000, // Melee Chain Targeting
         SpellHasteAffectsPeriodic = 0x2000, // Spell Haste Affects Periodic
-        NotAvailableWhileCharmed = 0x4000, /*Nyi*/ // Not Available While Charmed
+        NotAvailableWhileCharmed = 0x4000, // Not Available While Charmed
         TreatAsAreaEffect = 0x8000, /*Nyi*/ // Treat As Area Effect
         AuraAffectsNotJustReqEquippedItem = 0x10000, // Aura Affects Not Just Req. Equipped Item
         AllowWhileFleeing = 0x20000, // Allow While Fleeing

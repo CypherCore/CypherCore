@@ -110,6 +110,9 @@ namespace Game.Entities
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
+                        if (spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed))
+                            continue;
+
                         if (spellInfo.IsPassive())
                             _unit.CastSpell(_unit, spellInfo.Id, new CastSpellExtraArgs(true));
                         else
@@ -141,6 +144,9 @@ namespace Game.Entities
                     _charmspells[x].SetActionAndType(spellId, ActiveStates.Disabled);
                     continue;
                 }
+
+                if (spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed))
+                    continue;
 
                 if (spellInfo.IsPassive())
                 {
