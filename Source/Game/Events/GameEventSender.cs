@@ -57,7 +57,15 @@ namespace Game
         {
             Map map = source.GetMap();
             if (map.Instanceable())
+            {
                 source.StartCriteriaTimer(CriteriaStartEvent.SendEvent, gameEventId);
+                source.ResetCriteria(CriteriaFailEvent.SendEvent, gameEventId);
+            }
+
+            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, gameEventId, 0, 0, source);
+
+            if (map.IsScenario())
+                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, gameEventId, 0, 0, source);
         }
 
         public static void TriggerForMap(uint gameEventId, Map map, WorldObject source = null, WorldObject target = null)

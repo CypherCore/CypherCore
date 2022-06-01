@@ -66,6 +66,7 @@ namespace Game.DataStorage
         public bool IsBattleground() { return InstanceType == MapTypes.Battleground; }
         public bool IsBattleArena() { return InstanceType == MapTypes.Arena; }
         public bool IsBattlegroundOrArena() { return InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena; }
+        public bool IsScenario() { return InstanceType == MapTypes.Scenario; }
         public bool IsWorldMap() { return InstanceType == MapTypes.Common; }
 
         public bool GetEntrancePos(out uint mapid, out float x, out float y)

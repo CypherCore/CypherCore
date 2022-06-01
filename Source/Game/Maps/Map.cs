@@ -3778,6 +3778,11 @@ namespace Game.Maps
             return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena();
         }
 
+        public bool IsScenario()
+        {
+            return i_mapRecord != null && i_mapRecord.IsScenario();
+        }
+        
         public bool IsGarrison()
         {
             return i_mapRecord != null && i_mapRecord.IsGarrison();

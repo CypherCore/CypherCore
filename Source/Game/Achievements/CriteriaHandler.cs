@@ -136,7 +136,9 @@ namespace Game.Achievements
                     case CriteriaType.DeliveredKillingBlow:
                     case CriteriaType.PVPKillInArea:
                     case CriteriaType.WinArena: // This also behaves like CriteriaType.WinAnyRankedArena
+                    case CriteriaType.PlayerTriggerGameEvent:
                     case CriteriaType.Login:
+                    case CriteriaType.AnyoneTriggerGameEventScenario:
                     case CriteriaType.BattlePetReachLevel:
                     case CriteriaType.ActivelyEarnPetLevel:
                     case CriteriaType.PlaceGarrisonBuilding:
@@ -414,10 +416,8 @@ namespace Game.Achievements
                     case CriteriaType.CompleteAnyChallengeMode:
                     case CriteriaType.KilledAllUnitsInSpawnRegion:
                     case CriteriaType.CompleteChallengeMode:
-                    case CriteriaType.PlayerTriggerGameEvent:
                     case CriteriaType.CreatedItemsByCastingSpellWithLimit:
                     case CriteriaType.BattlePetAchievementPointsEarned:
-                    case CriteriaType.AnyoneTriggerGameEventScenario:
                     case CriteriaType.ReleasedSpirit:
                     case CriteriaType.AccountKnownPet:
                     case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
