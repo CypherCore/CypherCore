@@ -1726,6 +1726,9 @@ namespace Game.Spells
 
                 if (spell.m_CastItem != null && procEntry.AttributesMask.HasFlag(ProcAttributes.CantProcFromItemCast))
                     return 0;
+
+                if (spell.GetSpellInfo().HasAttribute(SpellAttr4.SuppressWeaponProcs) && GetSpellInfo().HasAttribute(SpellAttr6.AuraIsWeaponProc))
+                    return 0;
             }
 
             // check don't break stealth attr present

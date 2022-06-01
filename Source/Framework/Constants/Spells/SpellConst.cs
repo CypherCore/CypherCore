@@ -1799,7 +1799,7 @@ namespace Framework.Constants
         IgnoreForModTimeRate = 0x10, /*Nyi, Time Rate Not Implemented*/ // Ignore For Mod Time Rate
         DoNotConsumeResources = 0x20, // Do Not Consume Resources
         FloatingCombatTextOnCast = 0x40, // Floating Combat Text On Cast (Client Only)
-        AuraIsWeaponProc = 0x80, /*Nyi*/ // Aura Is Weapon Proc
+        AuraIsWeaponProc = 0x80, // Aura Is Weapon Proc
         DoNotChainToCrowdControlledTargets = 0x100, // Do Not Chain To Crowd-Controlled Targets Description Implicit Targeting (Chaining And Area Targeting) Will Not Impact Crowd Controlled Targets
         AllowOnCharmedTargets = 0x200, /*Nyi*/ // Allow On Charmed Targets
         NoAuraLog = 0x400, // No Aura Log
