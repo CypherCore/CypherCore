@@ -2473,9 +2473,9 @@ namespace Game.AI
                     foreach (WorldObject target in targets)
                     {
                         if (e.Action.triggerGameEvent.useSaiTargetAsGameEventSource != 0)
-                            GameEvents.Trigger(e.Action.triggerGameEvent.eventId, sourceObject, target);
-                        else
                             GameEvents.Trigger(e.Action.triggerGameEvent.eventId, target, sourceObject);
+                        else
+                            GameEvents.Trigger(e.Action.triggerGameEvent.eventId, sourceObject, target);
                     }
 
                     break;
