@@ -396,6 +396,7 @@ namespace Framework.Constants
         ActivateGameobject = 147,    // GameObjectActions
         AddToStoredTargetList = 148, // varID
         BecomePersonalCloneForPlayer = 149, // summonType 1-8, duration in ms
+        TriggerGameEvent = 150, // eventId, useSaiTargetAsGameEventSource
         End
     }
 

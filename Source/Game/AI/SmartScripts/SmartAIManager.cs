@@ -804,6 +804,7 @@ namespace Game.AI
                 SmartActions.ActivateGameobject => Marshal.SizeOf(typeof(SmartAction.ActivateGameObject)),
                 SmartActions.AddToStoredTargetList => Marshal.SizeOf(typeof(SmartAction.AddToStoredTargets)),
                 SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(SmartAction.BecomePersonalClone)),
+                SmartActions.TriggerGameEvent => Marshal.SizeOf(typeof(SmartAction.TriggerGameEvent)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -2088,6 +2089,11 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.TriggerGameEvent:
+                {
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.triggerGameEvent.useSaiTargetAsGameEventSource);
+                    break;
+                }
                 // No longer supported
                 case SmartActions.SetUnitFlag:
                 case SmartActions.RemoveUnitFlag:
@@ -3136,6 +3142,9 @@ namespace Game.AI
         public BecomePersonalClone becomePersonalClone;
 
         [FieldOffset(4)]
+        public TriggerGameEvent triggerGameEvent;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -3667,6 +3676,11 @@ namespace Game.AI
         {
             public uint type;
             public uint duration;
+        }
+        public struct TriggerGameEvent
+        {
+            public uint eventId;
+            public uint useSaiTargetAsGameEventSource;
         }
         public struct Raw
         {

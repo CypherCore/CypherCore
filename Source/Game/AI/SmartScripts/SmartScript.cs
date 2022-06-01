@@ -2467,6 +2467,19 @@ namespace Game.AI
                     _timedActionList.RemoveAll(script => { return script.EventId > e.EventId; });
                     break;
                 }
+                case SmartActions.TriggerGameEvent:
+                {
+                    WorldObject sourceObject = GetBaseObjectOrUnit(unit);
+                    foreach (WorldObject target in targets)
+                    {
+                        if (e.Action.triggerGameEvent.useSaiTargetAsGameEventSource != 0)
+                            GameEvents.Trigger(e.Action.triggerGameEvent.eventId, sourceObject, target);
+                        else
+                            GameEvents.Trigger(e.Action.triggerGameEvent.eventId, target, sourceObject);
+                    }
+
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;
