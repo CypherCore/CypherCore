@@ -1564,7 +1564,7 @@ namespace Game.Spells
                 if (existingAura.GetSpellInfo().IsChanneled())
                     return true;
 
-                if (m_spellInfo.HasAttribute(SpellAttr3.StackForDiffCasters))
+                if (m_spellInfo.HasAttribute(SpellAttr3.DotStackingRule))
                     return true;
 
                 // check same periodic auras
@@ -1819,6 +1819,14 @@ namespace Game.Spells
                         return 0;
                 }
             }
+
+            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyProcOutdoors))
+                if (!target.IsOutdoors())
+                    return 0;
+
+            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyProcOnCaster))
+                if (target.GetGUID() != GetCasterGUID())
+                    return 0;
 
             bool success = RandomHelper.randChance(CalcProcChance(procEntry, eventInfo));
 

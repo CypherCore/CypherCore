@@ -1914,7 +1914,7 @@ namespace Game.Entities
             if (!unitCaster)
                 return;
 
-            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
+            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster.m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
@@ -1940,7 +1940,7 @@ namespace Game.Entities
             if (!unitCaster)
                 return;
 
-            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
+            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 duration = (int)(duration * unitCaster.m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
@@ -1961,6 +1961,9 @@ namespace Game.Entities
         {
             // Can`t miss on dead target (on skinning for example)
             if (!victim.IsAlive() && !victim.IsPlayer())
+                return SpellMissInfo.None;
+
+            if (spellInfo.HasAttribute(SpellAttr3.NoAvoidance))
                 return SpellMissInfo.None;
 
             float missChance;
@@ -2005,7 +2008,7 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
 
                 // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
-                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
                     modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
@@ -2087,7 +2090,7 @@ namespace Game.Entities
                     return SpellMissInfo.Reflect;
             }
 
-            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+            if (spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 return SpellMissInfo.None;
 
             switch (spellInfo.DmgClass)

@@ -77,7 +77,7 @@ namespace Game.Entities
                 return pdamage;
 
             // Some spells don't benefit from done mods
-            if (spellProto.HasAttribute(SpellAttr3.NoDoneBonus))
+            if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
                 return pdamage;
 
             // For totems get damage bonus from owner
@@ -117,7 +117,7 @@ namespace Game.Entities
                 if ((spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee))
                     attType = WeaponAttackType.RangedAttack;
 
-                if (spellProto.HasAttribute(SpellAttr3.ReqOffhand) && !spellProto.HasAttribute(SpellAttr3.MainHand))
+                if (spellProto.HasAttribute(SpellAttr3.RequiresOffHandWeapon) && !spellProto.HasAttribute(SpellAttr3.RequiresMainHandWeapon))
                     attType = WeaponAttackType.OffAttack;
 
                 float APbonus = (float)(victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus));
@@ -160,7 +160,7 @@ namespace Game.Entities
                 return 1.0f;
 
             // Some spells don't benefit from done mods
-            if (spellProto.HasAttribute(SpellAttr3.NoDoneBonus))
+            if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
                 return 1.0f;
 
             // Some spells don't benefit from pct done mods
@@ -498,7 +498,7 @@ namespace Game.Entities
             }
 
             // Some spells don't benefit from done mods
-            if (spellProto.HasAttribute(SpellAttr3.NoDoneBonus))
+            if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
                 return 1.0f;
 
             // Some spells don't benefit from done mods
@@ -736,6 +736,9 @@ namespace Game.Entities
         // Melee based spells hit result calculations
         public override SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
         {
+            if (spellInfo.HasAttribute(SpellAttr3.NoAvoidance))
+                return SpellMissInfo.None;
+
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
             // Check damage class instead of attack type to correctly handle judgements
@@ -763,7 +766,7 @@ namespace Game.Entities
 
             bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
             bool canParry = !spellInfo.HasAttribute(SpellAttr7.NoAttackParry);
-            bool canBlock = spellInfo.HasAttribute(SpellAttr3.BlockableSpell);
+            bool canBlock = spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked);
 
             // if victim is casting or cc'd it can't avoid attacks
             if (victim.IsNonMeleeSpellCast(false, false, true) || victim.HasUnitState(UnitState.Controlled))
@@ -1336,7 +1339,7 @@ namespace Game.Entities
             AuraType aura = spellEffectInfo.ApplyAuraName;
             if (aura != 0)
             {
-                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     var list = m_spellImmune[(int)SpellImmunity.State];
                     if (list.ContainsKey(aura))
@@ -1379,7 +1382,7 @@ namespace Game.Entities
                 return false;
 
             // for example 40175
-            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 return false;
 
             if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
@@ -1578,14 +1581,7 @@ namespace Game.Entities
                 if (aurApp.GetRemoveMode() != 0)
                     continue;
 
-                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
-                if (spellInfo.HasAttribute(SpellAttr3.DisableProc))
-                    SetCantProc(true);
-
                 aurApp.GetBase().TriggerProcOnEvent(procEffectMask, aurApp, eventInfo);
-
-                if (spellInfo.HasAttribute(SpellAttr3.DisableProc))
-                    SetCantProc(false);
             }
 
             if (disableProcs)
@@ -1762,7 +1758,7 @@ namespace Game.Entities
         bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             // These spells can't be blocked
-            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.NoActiveDefense) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
+            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.NoActiveDefense) || spellProto.HasAttribute(SpellAttr3.AlwaysHit)))
                 return false;
 
             // Can't block when casting/controlled
@@ -1961,7 +1957,7 @@ namespace Game.Entities
                         if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
                         {
                             // Spells with this attribute were already calculated in MeleeSpellHitResult
-                            if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
+                            if (!spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked))
                             {
                                 // Get blocked status
                                 blocked = IsSpellBlocked(victim, spellInfo, attackType);
@@ -3439,7 +3435,7 @@ namespace Game.Entities
                 Aura aura = aurApp.GetBase();
                 return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.DontRemoveInArena)                          // don't remove stances, shadowform, pally/hunter auras
                     && !aura.IsPassive()                                                                              // don't remove passive auras
-                    && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.DeathPersistent))) || // not negative death persistent auras
+                    && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.AllowAuraWhileDead))) || // not negative death persistent auras
                     aura.GetSpellInfo().HasAttribute(SpellAttr5.RemoveEnteringArena);                             // special marker, always remove
             });
         }

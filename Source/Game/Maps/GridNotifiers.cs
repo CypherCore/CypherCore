@@ -2173,7 +2173,7 @@ namespace Game.Maps
             if (u.IsTypeId(TypeId.Unit) && u.IsTotem())
                 return false;
 
-            if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers) && !u.IsPlayer())
+            if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer) && !u.IsPlayer())
                 return false;
 
             if (!i_funit.IsValidAttackTarget(u, _spellInfo))

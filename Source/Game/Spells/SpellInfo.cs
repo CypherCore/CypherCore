@@ -475,7 +475,7 @@ namespace Game.Spells
         public bool IsStackableOnOneSlotWithDifferentCasters()
         {
             // TODO: Re-verify meaning of SPELL_ATTR3_STACK_FOR_DIFF_CASTERS and update conditions here
-            return StackAmount > 1 && !IsChanneled() && !HasAttribute(SpellAttr3.StackForDiffCasters);
+            return StackAmount > 1 && !IsChanneled() && !HasAttribute(SpellAttr3.DotStackingRule);
         }
 
         public bool IsCooldownStartedOnEvent()
@@ -489,12 +489,12 @@ namespace Game.Spells
 
         public bool IsDeathPersistent()
         {
-            return HasAttribute(SpellAttr3.DeathPersistent);
+            return HasAttribute(SpellAttr3.AllowAuraWhileDead);
         }
 
         public bool IsRequiringDeadTarget()
         {
-            return HasAttribute(SpellAttr3.OnlyTargetGhosts);
+            return HasAttribute(SpellAttr3.OnlyOnGhosts);
         }
 
         public bool IsAllowingDeadTarget()
@@ -594,7 +594,7 @@ namespace Game.Spells
             switch (DmgClass)
             {
                 case SpellDmgClass.Melee:
-                    if (HasAttribute(SpellAttr3.ReqOffhand))
+                    if (HasAttribute(SpellAttr3.RequiresOffHandWeapon))
                         result = WeaponAttackType.OffAttack;
                     else
                         result = WeaponAttackType.BaseAttack;
@@ -643,7 +643,7 @@ namespace Game.Spells
 
         bool IsAffectedBySpellMods()
         {
-            return !HasAttribute(SpellAttr3.NoDoneBonus);
+            return !HasAttribute(SpellAttr3.IgnoreCasterModifiers);
         }
 
         public bool IsAffectedBySpellMod(SpellModifier mod)
@@ -1025,9 +1025,9 @@ namespace Game.Spells
                     return SpellCastResult.TargetAffectingCombat;
 
                 // only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts
-                if (HasAttribute(SpellAttr3.OnlyTargetGhosts) != unitTarget.HasAuraType(AuraType.Ghost))
+                if (HasAttribute(SpellAttr3.OnlyOnGhosts) != unitTarget.HasAuraType(AuraType.Ghost))
                 {
-                    if (HasAttribute(SpellAttr3.OnlyTargetGhosts))
+                    if (HasAttribute(SpellAttr3.OnlyOnGhosts))
                         return SpellCastResult.TargetNotGhost;
                     else
                         return SpellCastResult.BadTargets;
@@ -1089,7 +1089,7 @@ namespace Game.Spells
                 return SpellCastResult.SpellCastOk;
 
             // corpseOwner and unit specific target checks
-            if (HasAttribute(SpellAttr3.OnlyTargetPlayers) && !unitTarget.IsTypeId(TypeId.Player))
+            if (HasAttribute(SpellAttr3.OnlyOnPlayer) && !unitTarget.IsTypeId(TypeId.Player))
                 return SpellCastResult.TargetNotPlayer;
 
             if (!IsAllowingDeadTarget() && !unitTarget.IsAlive())
@@ -2544,7 +2544,7 @@ namespace Game.Spells
                         }
                     }
 
-                    if (!auraSpellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                    if (!auraSpellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                     {
                         AuraType auraName = auraSpellEffectInfo.ApplyAuraName;
                         if (auraName != 0)
@@ -2868,7 +2868,7 @@ namespace Game.Spells
                 else
                 {
                     WeaponAttackType slot = WeaponAttackType.BaseAttack;
-                    if (!HasAttribute(SpellAttr3.MainHand) && HasAttribute(SpellAttr3.ReqOffhand))
+                    if (!HasAttribute(SpellAttr3.RequiresMainHandWeapon) && HasAttribute(SpellAttr3.RequiresOffHandWeapon))
                         slot = WeaponAttackType.OffAttack;
 
                     speed = unitCaster.GetBaseAttackTime(slot);
@@ -3175,7 +3175,7 @@ namespace Game.Spells
                 return this;
 
             // Client ignores spell with these attributes (sub_53D9D0)
-            if (HasAttribute(SpellAttr0.AuraIsDebuff) || HasAttribute(SpellAttr2.AllowLowLevelBuff) || HasAttribute(SpellAttr3.DrainSoul))
+            if (HasAttribute(SpellAttr0.AuraIsDebuff) || HasAttribute(SpellAttr2.AllowLowLevelBuff) || HasAttribute(SpellAttr3.OnlyProcOnCaster))
                 return this;
 
             bool needRankSelection = false;

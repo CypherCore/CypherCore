@@ -264,7 +264,7 @@ namespace Game.AI
                     var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
-                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer);
                         target = SelectTarget(SelectTargetMethod.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
                     }
                     break;
@@ -278,7 +278,7 @@ namespace Game.AI
                     var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
-                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                        bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer);
                         float range = spellInfo.GetMaxRange(false);
 
                         DefaultTargetSelector targetSelector = new(me, range, playerOnly, true, -(int)spellId);

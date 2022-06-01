@@ -289,7 +289,7 @@ namespace Game.Spells
 
                         if (noTargetFound)
                         {
-                            SendCastResult(m_spellInfo.Id == 51690 ? SpellCastResult.OutOfRange : SpellCastResult.BadTargets);
+                            SendCastResult(SpellCastResult.BadImplicitTargets);
                             Finish(false);
                             return;
                         }
@@ -1558,9 +1558,9 @@ namespace Game.Spells
                     break;
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers))
+            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
                 retMask &= GridMapTypeMask.Corpse | GridMapTypeMask.Player;
-            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyTargetGhosts))
+            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyOnGhosts))
                 retMask &= GridMapTypeMask.Player;
 
             if (condList != null)
@@ -2943,7 +2943,8 @@ namespace Game.Spells
             if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
                 m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
 
-            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
+                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSpellCast
             Creature caster = m_originalCaster.ToCreature();
@@ -3209,7 +3210,8 @@ namespace Game.Spells
                 }
             }
 
-            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
+            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
+                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -3354,7 +3356,8 @@ namespace Game.Spells
             if (creatureCaster != null)
                 creatureCaster.ReleaseSpellFocus(this);
 
-            Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
+            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
+                Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
 
             if (!ok)
                 return;
@@ -4229,7 +4232,7 @@ namespace Game.Spells
             resurrectRequest.ResurrectOffererVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             resurrectRequest.Name = sentName;
             resurrectRequest.Sickness = m_caster.IsUnit() && !m_caster.IsTypeId(TypeId.Player); // "you'll be afflicted with resurrection sickness"
-            resurrectRequest.UseTimer = !m_spellInfo.HasAttribute(SpellAttr3.IgnoreResurrectionTimer);
+            resurrectRequest.UseTimer = !m_spellInfo.HasAttribute(SpellAttr3.NoResTimer);
 
             Pet pet = target.GetPet();
             if (pet)
@@ -4866,8 +4869,8 @@ namespace Game.Spells
             }
 
             // Spell casted only on Battleground
-            if (m_spellInfo.HasAttribute(SpellAttr3.Battleground) && m_caster.IsTypeId(TypeId.Player))
-                if (!m_caster.ToPlayer().InBattleground())
+            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyBattlegrounds))
+                if (!m_caster.GetMap().IsBattleground())
                     return SpellCastResult.OnlyBattlegrounds;
 
             // do not allow spells to be cast in arenas or rated Battlegrounds
@@ -6783,7 +6786,7 @@ namespace Game.Spells
                 });
 
                 // main hand weapon required
-                if (m_spellInfo.HasAttribute(SpellAttr3.MainHand))
+                if (m_spellInfo.HasAttribute(SpellAttr3.RequiresMainHandWeapon))
                 {
                     SpellCastResult mainHandResult = weaponCheck(WeaponAttackType.BaseAttack);
                     if (mainHandResult != SpellCastResult.SpellCastOk)
@@ -6791,7 +6794,7 @@ namespace Game.Spells
                 }
 
                 // offhand hand weapon required
-                if (m_spellInfo.HasAttribute(SpellAttr3.ReqOffhand))
+                if (m_spellInfo.HasAttribute(SpellAttr3.RequiresOffHandWeapon))
                 {
                     SpellCastResult offHandResult = weaponCheck(WeaponAttackType.OffAttack);
                     if (offHandResult != SpellCastResult.SpellCastOk)
@@ -8195,13 +8198,12 @@ namespace Game.Spells
             if ((MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2) && spell.GetCaster().IsPlayer() && unit.IsPlayer() && spell.GetCaster().IsValidAttackTarget(unit, spell.GetSpellInfo()))
                 unit.SetInCombatWith(spell.GetCaster().ToPlayer());
 
-            _enablePVP = false; // need to check PvP state before spell effects, but act on it afterwards
+            // if target is flagged for pvp also flag caster if a player
+            _enablePVP = (MissCondition == SpellMissInfo.None || spell.m_spellInfo.HasAttribute(SpellAttr3.PvpEnabling))
+                && unit.IsPvP() && spell.GetCaster().IsPlayer(); // need to check PvP state before spell effects, but act on it afterwards
+
             if (_spellHitTarget)
             {
-                // if target is flagged for pvp also flag caster if a player
-                if (unit.IsPvP() && spell.GetCaster().IsPlayer())
-                    _enablePVP = true; // Decide on PvP flagging now, but act on it later.
-
                 SpellMissInfo missInfo = spell.PreprocessSpellHit(_spellHitTarget, this);
                 if (missInfo != SpellMissInfo.None)
                 {
@@ -8276,8 +8278,9 @@ namespace Game.Spells
                 ProcFlagsHit hitMask = ProcFlagsHit.None;
 
                 // Spells with this flag cannot trigger if effect is cast on self
-                bool canEffectTrigger = !spell.m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && spell.unitTarget.CanProc() &&
-                    (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
+                bool canEffectTrigger = (!spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs) || !spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs))
+                    && spell.unitTarget.CanProc()
+                    && (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
 
                 // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
                 if (canEffectTrigger && !procAttacker && !procVictim)
@@ -8440,6 +8443,12 @@ namespace Game.Spells
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
+                    if (spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
+                        procAttacker = new ProcFlagsInit();
+
+                    if (spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs))
+                        procVictim = new ProcFlagsInit();
+
                     Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
 
                     // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
@@ -8465,7 +8474,7 @@ namespace Game.Spells
                     if (unitCaster != null)
                         unitCaster.AtTargetAttacked(unit, spell.m_spellInfo.HasInitialAggro());
 
-                    if (!unit.IsStandState())
+                    if (!spell.m_spellInfo.HasAttribute(SpellAttr3.DoNotTriggerTargetStand) && !unit.IsStandState())
                         unit.SetStandState(UnitStandStateType.Stand);
                 }
 
@@ -8508,10 +8517,10 @@ namespace Game.Spells
 
                 // Needs to be called after dealing damage/healing to not remove breaking on damage auras
                 spell.DoTriggersOnSpellHit(_spellHitTarget, EffectMask);
-
-                if (_enablePVP)
-                    spell.GetCaster().ToPlayer().UpdatePvP(true);
             }
+            
+            if (_enablePVP)
+                spell.GetCaster().ToPlayer().UpdatePvP(true);
 
             spell.spellAura = HitAura;
             spell.CallScriptAfterHitHandlers();

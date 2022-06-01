@@ -1688,38 +1688,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr3 : uint
     {
-        Unk0 = 0x01, //  0
-        NoProcEquipRequirement = 0x02, //  1 Ignores subclass mask check when checking proc
-        Unk2 = 0x04, //  2
-        BlockableSpell = 0x08, //  3 Only Dmg Class Melee In 3.1.3
-        IgnoreResurrectionTimer = 0x10, //  4 You Don'T Have To Wait To Be Resurrected With These Spells
-        NoDurabilityLoss = 0x20, //  5 No Durability Loss
-        Unk6 = 0x40, //  6
-        StackForDiffCasters = 0x80, //  7 Separate Stack For Every Caster
-        OnlyTargetPlayers = 0x100, //  8 Can Only Target Players
-        NotAProc = 0x200, //  9 Without this attribute, any triggered spell will be unable to trigger other auras' procs
-        MainHand = 0x400, // 10 Main Hand Weapon Required
-        Battleground = 0x800, // 11 Can Casted Only On Battleground
-        OnlyTargetGhosts = 0x1000, // 12
-        DontDisplayChannelBar = 0x2000, // 13 Clientside attribute - will not display channeling bar
-        IsHonorlessTarget = 0x4000, // 14 "Honorless Target" Only This Spells Have This Flag
-        Unk15 = 0x8000, // 15 Auto Shoot, Shoot, Throw,  - This Is Autoshot Flag
-        CantTriggerProc = 0x10000, // 16 Confirmed With Many Patchnotes
-        NoInitialAggro = 0x20000, // 17 Soothe Animal, 39758, Mind Soothe
-        IgnoreHitResult = 0x40000, // 18 Spell Should Always Hit Its Target
-        DisableProc = 0x80000, // 19 During Aura Proc No Spells Can Trigger (20178, 20375)
-        DeathPersistent = 0x100000, // 20 Death Persistent Spells
-        Unk21 = 0x200000, // 21 Unused
-        ReqWand = 0x400000, // 22 Req Wand
-        Unk23 = 0x800000, // 23
-        ReqOffhand = 0x1000000, // 24 Req Offhand Weapon
-        TreatAsPeriodic = 0x2000000, // 25 Makes the spell appear as periodic in client combat logs - used by spells that trigger another spell on each tick
-        CanProcFromProcs = 0x4000000, // 26 Can Proc From Procs
-        DrainSoul = 0x8000000, // 27 Only Drain Soul Has This Flag
-        Unk28 = 0x10000000, // 28
-        NoDoneBonus = 0x20000000, // 29 Ignore Caster Spellpower And Done Damage Mods?  Client Doesn'T Apply Spellmods For Those Spells
-        DontDisplayRange = 0x40000000, // 30 Client Doesn'T Display Range In Tooltip For Those Spells
-        Unk31 = 0x80000000  // 31
+        PvpEnabling = 0x01, // Pvp Enabling
+        NoProcEquipRequirement = 0x02, // No Proc Equip Requirement Description Ignores Subclass Mask Check When Checking Proc
+        NoCastingBarText = 0x04, // No Casting Bar Text
+        CompletelyBlocked = 0x08, // Completely Blocked
+        NoResTimer = 0x10, // No Res Timer
+        NoDurabilityLoss = 0x20, // No Durability Loss
+        NoAvoidance = 0x40, // No Avoidance
+        DotStackingRule = 0x80, // Dot Stacking Rule Description Stack Separately For Each Caster
+        OnlyOnPlayer = 0x100, // Only On Player
+        NotAProc = 0x200, // Not A Proc Description Without This Attribute, Any Triggered Spell Will Be Unable To Trigger Other Auras' Procs
+        RequiresMainHandWeapon = 0x400, // Requires Main-Hand Weapon
+        OnlyBattlegrounds = 0x800, // Only Battlegrounds
+        OnlyOnGhosts = 0x1000, // Only On Ghosts
+        HideChannelBar = 0x2000, // Hide Channel Bar (Client Only)
+        HideInRaidFilter = 0x4000, // Hide In Raid Filter (Client Only)
+        NormalRangedAttack = 0x8000, // Normal Ranged Attack Description Auto Shoot, Shoot, Throw - Ranged Normal Attack Attribute?
+        SuppressCasterProcs = 0x10000, // Suppress Caster Procs
+        SuppressTargetProcs = 0x20000, // Suppress Target Procs
+        AlwaysHit = 0x40000, // Always Hit Description Spell Cannot Miss, Or Be Dodged/Parried/Blocked
+        InstantTargetProcs = 0x80000, // Instant Target Procs Description Proc Events Are Triggered Before Spell Batching Processes The Spell Hit On Target
+        AllowAuraWhileDead = 0x100000, // Allow Aura While Dead
+        OnlyProcOutdoors = 0x200000, // Only Proc Outdoors
+        DoNotTriggerTargetStand = 0x400000, // Do Not Trigger Target Stand
+        NoDamageHistory = 0x800000, /*Nyi, No Damage History Implementation*/ // No Damage History
+        RequiresOffHandWeapon = 0x1000000, // Requires Off-Hand Weapon
+        TreatAsPeriodic = 0x2000000, // Treat As Periodic
+        CanProcFromProcs = 0x4000000, // Can Proc From Procs
+        OnlyProcOnCaster = 0x8000000, // Only Proc On Caster
+        IgnoreCasterAndTargetRestrictions = 0x10000000, /*Nyi*/ // Ignore Caster & Target Restrictions
+        IgnoreCasterModifiers = 0x20000000, // Ignore Caster Modifiers
+        DoNotDisplayRange = 0x40000000, // Do Not Display Range (Client Only)
+        NotOnAoeImmune = 0x80000000  /*Nyi, No Aoe Immunity Implementation*/ // Not On Aoe Immune
     }
     public enum SpellAttr4 : uint
     {

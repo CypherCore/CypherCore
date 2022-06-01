@@ -2734,7 +2734,7 @@ namespace Game.Entities
                 }
 
                 // spells ignoring hit result should not be binary
-                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     bool setFlag = false;
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -3185,12 +3185,6 @@ namespace Game.Entities
                 });
             });
 
-            // Execute
-            ApplySpellFix(new[] { 5308 }, spellInfo =>
-            {
-                spellInfo.AttributesEx3 |= SpellAttr3.CantTriggerProc;
-            });
-
             ApplySpellFix(new[] {
                 31347, // Doom
                 36327, // Shoot Arcane Explosion Arrow
@@ -3340,7 +3334,7 @@ namespace Game.Entities
             // Oscillation Field
             ApplySpellFix(new[] { 37408 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
             });
 
             // Crafty's Ultra-Advanced Proto-Typical Shortening Blaster
@@ -3395,12 +3389,6 @@ namespace Game.Entities
                 {
                     spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly);
                 });
-            });
-
-            // Vampiric Embrace
-            ApplySpellFix(new[] { 15290 }, spellInfo =>
-            {
-                spellInfo.AttributesEx3 |= SpellAttr3.NoInitialAggro;
             });
 
             // Earthbind Totem (instant pulse)
@@ -3475,7 +3463,7 @@ namespace Game.Entities
             // Paralyze
             ApplySpellFix(new[] { 48278 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
             });
 
             ApplySpellFix(new[] {
@@ -3685,7 +3673,7 @@ namespace Game.Entities
                 64381  // Strength of the Pack (Auriaya)
             }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
             });
 
             ApplySpellFix(new[] {
@@ -3845,13 +3833,7 @@ namespace Game.Entities
             // Shadow's Fate
             ApplySpellFix(new[] { 71169 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
-            });
-
-            // Lock Players and Tap Chest
-            ApplySpellFix(new[] { 72347 }, spellInfo =>
-            {
-                spellInfo.AttributesEx3 &= ~SpellAttr3.NoInitialAggro;
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
             });
 
             // Resistant Skin (Deathbringer Saurfang adds)
@@ -3918,7 +3900,7 @@ namespace Game.Entities
             // Empowered Flare (Blood Prince Council)
             ApplySpellFix(new[] { 71708 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
             });
 
             // Swarming Shadows
@@ -3930,7 +3912,7 @@ namespace Game.Entities
             // Corruption
             ApplySpellFix(new[] { 70602 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
             });
 
             // Column of Frost (visual marker)
@@ -3974,7 +3956,7 @@ namespace Game.Entities
             // Chilled to the Bone
             ApplySpellFix(new[] { 70106 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
                 spellInfo.AttributesEx6 |= SpellAttr6.IgnoreCasterDamageModifiers;
             });
 
@@ -4024,7 +4006,7 @@ namespace Game.Entities
             // Harvest Soul
             ApplySpellFix(new[] { 73655 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
             });
 
             // Summon Shadow Trap
@@ -4194,12 +4176,6 @@ namespace Game.Entities
                 spellInfo.Stances = 1ul << ((int)ShapeShiftForm.TreeOfLife - 1);
             });
 
-            // Feral Charge (Cat Form)
-            ApplySpellFix(new[] { 49376 }, spellInfo =>
-            {
-                spellInfo.AttributesEx3 &= ~SpellAttr3.CantTriggerProc;
-            });
-
             // Gaze of Occu'thar
             ApplySpellFix(new[] { 96942 }, spellInfo =>
             {
@@ -4254,13 +4230,13 @@ namespace Game.Entities
             // Baron Rivendare (Stratholme) - Unholy Aura
             ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.NoInitialAggro;
+                spellInfo.AttributesEx2 |= SpellAttr2.NoInitialThreat;
             });
 
             // Spore - Spore Visual
             ApplySpellFix(new[] { 42525 }, spellInfo =>
             {
-                spellInfo.AttributesEx3 |= SpellAttr3.DeathPersistent;
+                spellInfo.AttributesEx3 |= SpellAttr3.AllowAuraWhileDead;
                 spellInfo.AttributesEx2 |= SpellAttr2.AllowDeadTarget;
             });
 

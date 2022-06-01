@@ -210,7 +210,7 @@ namespace Game.Combat
             {
                 if (spell.HasAttribute(SpellAttr1.NoThreat))
                     return;
-                if (!_owner.IsEngaged() && spell.HasAttribute(SpellAttr3.NoInitialAggro))
+                if (!_owner.IsEngaged() && spell.HasAttribute(SpellAttr2.NoInitialThreat))
                     return;
             }
 
