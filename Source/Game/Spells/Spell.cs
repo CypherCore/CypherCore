@@ -2511,19 +2511,14 @@ namespace Game.Spells
             else
                 m_casttime = m_spellInfo.CalcCastTime(this);
 
-            // don't allow channeled spells / spells with cast time to be casted while moving
-            // exception are only channeled spells that have no casttime and dont have movement interrupt flag
-            // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
-            // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsPlayer() && !(m_caster.ToUnit().IsCharmed() && m_caster.ToUnit().GetCharmerGUID().IsCreature()) && m_caster.ToUnit().IsMoving() &&
-                m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) && !m_caster.ToUnit().CanCastSpellWhileMoving(m_spellInfo))
+            if (m_caster.IsUnit() && m_caster.ToUnit().IsMoving())
             {
-                // 1. Has casttime, 2. Or doesn't have flag to allow movement during channel
-                if (m_casttime != 0 || !m_spellInfo.IsMoveAllowedChannel())
+                result = CheckMovement();
+                if (result != SpellCastResult.SpellCastOk)
                 {
-                    SendCastResult(SpellCastResult.Moving);
+                    SendCastResult(result);
                     Finish(false);
-                    return SpellCastResult.Moving;
+                    return result;
                 }
             }
 
@@ -3284,20 +3279,13 @@ namespace Game.Spells
 
             // check if the player caster has moved before the spell finished
             // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
-            if ((m_caster.IsTypeId(TypeId.Player) && m_timer != 0) &&
-                m_caster.ToUnit().IsMoving() && (m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) &&
-                (!m_spellInfo.HasEffect(SpellEffectName.Stuck) || !m_caster.ToUnit().HasUnitMovementFlag(MovementFlag.FallingFar)) &&
-                !m_caster.ToUnit().CanCastSpellWhileMoving(m_spellInfo))
+            if (m_timer != 0 && m_caster.IsUnit() && m_caster.ToUnit().IsMoving() && CheckMovement() != SpellCastResult.SpellCastOk)
             {
-                // don't cancel for melee, autorepeat, triggered and instant spells
-                if (!m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !(IsChannelActive() && m_spellInfo.IsMoveAllowedChannel()))
-                {
-                    // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
-                    // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
-                    // however, checking what type of movement the spline is for every single spline would be really expensive
-                    if (!m_caster.ToUnit().GetCharmerGUID().IsCreature())
-                        Cancel();
-                }
+                // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
+                // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
+                // however, checking what type of movement the spline is for every single spline would be really expensive
+                if (!m_caster.ToUnit().GetCharmerGUID().IsCreature())
+                    Cancel();
             }
 
             switch (m_spellState)
@@ -4766,19 +4754,6 @@ namespace Game.Spells
 
                     if (reqCombat && unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat())
                         return SpellCastResult.AffectingCombat;
-                }
-
-                // cancel autorepeat spells if cast start when moving
-                // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-                // Do not cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-                if (unitCaster.IsPlayer() && unitCaster.ToPlayer().IsMoving()
-                    && (!unitCaster.IsCharmed() || !unitCaster.GetCharmerGUID().IsCreature())
-                    && !unitCaster.CanCastSpellWhileMoving(m_spellInfo))
-                {
-                    // skip stuck spell to allow use it in falling case and apply spell limitations at movement
-                    if ((!unitCaster.HasUnitMovementFlag(MovementFlag.FallingFar) || !m_spellInfo.HasEffect(SpellEffectName.Stuck)) &&
-                        (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing)))
-                        return SpellCastResult.Moving;
                 }
 
                 // Check vehicle flags
@@ -7800,6 +7775,33 @@ namespace Game.Spells
         }
 
         List<SpellScript> m_loadedScripts = new();
+
+        public SpellCastResult CheckMovement()
+        {
+            if (IsTriggered())
+                return SpellCastResult.SpellCastOk;
+
+            Unit unitCaster = m_caster.ToUnit();
+            if (unitCaster != null)
+            {
+                if (!unitCaster.CanCastSpellWhileMoving(m_spellInfo))
+                {
+                    if (m_casttime != 0)
+                    {
+                        if (m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
+                            return SpellCastResult.Moving;
+                    }
+                    else
+                    {
+                        // only fail channeled casts if they are instant but cannot be channeled while moving
+                        if (m_spellInfo.IsChanneled() && !m_spellInfo.IsMoveAllowedChannel())
+                            return SpellCastResult.Moving;
+                    }
+                }
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
 
         int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
         {

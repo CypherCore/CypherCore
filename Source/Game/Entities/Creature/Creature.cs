@@ -1160,7 +1160,7 @@ namespace Game.Entities
             if (spell != null)
             {
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
-                    if (spell.GetSpellInfo().IsMoveAllowedChannel())
+                    if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
                         if (HasUnitState(UnitState.Casting))
                             return true;
             }

@@ -1058,7 +1058,7 @@ namespace Game.Entities
             spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
             if (spell != null)
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
-                    if (spell.GetSpellInfo().IsMoveAllowedChannel())
+                    if (spell.GetSpellInfo().IsMoveAllowedChannel() || CanCastSpellWhileMoving(spell.GetSpellInfo()))
                         return false;
 
             // prohibit movement for all other spell casts
