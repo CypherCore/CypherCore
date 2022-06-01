@@ -341,7 +341,7 @@ namespace Framework.Constants
         ModSpellPowerPct = 317,
         Mastery = 318,
         ModMeleeHaste3 = 319,
-        ModRangedHaste2 = 320,
+        Unk320 = 320,
         ModNoActions = 321,
         InterfereTargetting = 322,
         Unk323 = 323,  // Not Used In 4.3.4
@@ -393,7 +393,7 @@ namespace Framework.Constants
         EnablePowerBarTimer = 369,
         SpellOverrideNameGroup = 370, // picks a random SpellOverrideName id from a group (group id in miscValue)
         Unk371 = 371,
-        Unk372 = 372,
+        OverrideMountFromSet = 372, // NYI
         ModSpeedNoControl = 373, // NYI
         ModifyFallDamagePct = 374,
         ModPossessPet = 375,

@@ -3880,7 +3880,6 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModRangedHaste)]
-        [AuraEffectHandler(AuraType.ModRangedHaste2)]
         void HandleAuraModRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
