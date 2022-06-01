@@ -72,6 +72,9 @@ namespace Game
             player.duel.StartTime = now + 3;
             target.duel.StartTime = now + 3;
 
+            player.duel.State = DuelState.Countdown;
+            target.duel.State = DuelState.Countdown;
+
             DuelCountdown packet = new(3000);
 
             player.SendPacket(packet);
