@@ -1763,7 +1763,7 @@ namespace Framework.Constants
         AllowWhileStunned = 0x08, // Allow While Stunned
         TriggersChanneling = 0x10, // Triggers Channeling
         LimitN = 0x20, // Limit N Description Remove Previous Application To Another Unit If Applied
-        IgnoreAreaEffectPvpCheck = 0x40, /*Nyi*/ // Ignore Area Effect Pvp Check
+        IgnoreAreaEffectPvpCheck = 0x40, // Ignore Area Effect Pvp Check
         NotOnPlayer = 0x80, /*Nyi*/ // Not On Player
         NotOnPlayerControlledNpc = 0x100, /*Nyi*/ // Not On Player Controlled Npc
         ExtraInitialPeriod = 0x200, // Extra Initial Period Description Immediately Do Periodic Tick On Apply

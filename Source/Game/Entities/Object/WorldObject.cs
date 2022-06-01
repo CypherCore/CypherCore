@@ -2641,7 +2641,7 @@ namespace Game.Entities
             // additional checks - only PvP case
             if (playerAffectingAttacker && playerAffectingTarget)
             {
-                if (playerAffectingTarget.IsPvP())
+                if (playerAffectingTarget.IsPvP() || (bySpell != null && bySpell.HasAttribute(SpellAttr5.IgnoreAreaEffectPvpCheck)))
                     return true;
 
                 if (playerAffectingAttacker.IsFFAPvP() && playerAffectingTarget.IsFFAPvP())
