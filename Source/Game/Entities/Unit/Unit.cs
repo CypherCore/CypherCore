@@ -2682,7 +2682,7 @@ namespace Game.Entities
 
                 if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.DOT)
                 {
-                    if (victim != attacker && (spellProto == null || !(spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
+                    if (victim != attacker && (spellProto == null || !(spellProto.HasAttribute(SpellAttr6.NoPushback) || spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
                     {
                         Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
                         if (spell != null)
@@ -2723,15 +2723,14 @@ namespace Game.Entities
                                     spell.Delayed();
                             }
                         }
+                    }
 
-                        if (damage != 0 && victim.IsPlayer())
-                        {
-                            Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
-                            if (spell1 != null)
-                                if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
-                                    spell1.DelayedChannel();
-                        }
-
+                    if (damage != 0 && victim.IsPlayer())
+                    {
+                        Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                        if (spell1 != null)
+                            if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
+                                spell1.DelayedChannel();
                     }
                 }
 

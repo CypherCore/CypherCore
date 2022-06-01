@@ -1807,7 +1807,7 @@ namespace Framework.Constants
         AllowWhileRidingVehicle = 0x1000, // Allow While Riding Vehicle
         IgnorePhaseShift = 0x2000, // Ignore Phase Shift
         AiPrimaryRangedAttack = 0x4000, /*Nyi*/ // Ai Primary Ranged Attack
-        NoPushback = 0x8000, /*Nyi*/ // No Pushback
+        NoPushback = 0x8000, // No Pushback
         NoJumpPathing = 0x10000, /*Nyi*/ // No Jump Pathing
         AllowEquipWhileCasting = 0x20000, // Allow Equip While Casting
         OriginateFromController = 0x40000, // Originate From Controller Description Client Will Prevent Casting If Not Possessed, Charmer Will Be Caster For All Intents And Purposes
