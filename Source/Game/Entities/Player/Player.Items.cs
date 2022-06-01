@@ -4942,8 +4942,15 @@ namespace Game.Entities
                         if (IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer != 0)
                             return InventoryResult.ItemCooldown;
 
-                        if (IsNonMeleeSpellCast(false))
-                            return InventoryResult.ClientLockedOut;
+                        Spell currentGenericSpell = GetCurrentSpell(CurrentSpellTypes.Generic);
+                        if (currentGenericSpell != null)
+                            if (!currentGenericSpell.GetSpellInfo().HasAttribute(SpellAttr6.AllowEquipWhileCasting))
+                                return InventoryResult.ClientLockedOut;
+
+                        Spell currentChanneledSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
+                        if (currentChanneledSpell != null)
+                            if (!currentChanneledSpell.GetSpellInfo().HasAttribute(SpellAttr6.AllowEquipWhileCasting))
+                                return InventoryResult.ClientLockedOut;
                     }
 
                     ContentTuningLevels? requiredLevels = null;
