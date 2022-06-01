@@ -4940,7 +4940,7 @@ namespace Game.Entities
                         }
 
                         if (IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer != 0)
-                            return InventoryResult.ClientLockedOut;         // maybe exist better err
+                            return InventoryResult.ItemCooldown;
 
                         if (IsNonMeleeSpellCast(false))
                             return InventoryResult.ClientLockedOut;
