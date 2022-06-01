@@ -1061,7 +1061,6 @@ namespace Game.Spells
             // spell with single target specific types
             switch (spec)
             {
-                case SpellSpecificType.Judgement:
                 case SpellSpecificType.MagePolymorph:
                     if (aura.GetSpellInfo().GetSpellSpecific() == spec)
                         return true;

@@ -724,14 +724,6 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr5.LimitN))
                 return true;
 
-            switch (GetSpellSpecific())
-            {
-                case SpellSpecificType.Judgement:
-                    return true;
-                default:
-                    break;
-            }
-
             return false;
         }
 
@@ -779,7 +771,6 @@ namespace Game.Spells
                 case SpellSpecificType.Curse:
                 case SpellSpecificType.Bane:
                 case SpellSpecificType.Aspect:
-                case SpellSpecificType.Judgement:
                 case SpellSpecificType.WarlockCorruption:
                     return spellSpec == spellInfo.GetSpellSpecific();
                 default:
@@ -1576,10 +1567,6 @@ namespace Game.Spells
 
                     if (SpellFamilyFlags[0].HasAnyFlag(0x00002190u))
                         _spellSpecific = SpellSpecificType.Hand;
-
-                    // Judgement
-                    if (Id == 20271)
-                        _spellSpecific = SpellSpecificType.Judgement;
 
                     // only paladin auras have this (for palaldin class family)
                     switch (Id)
