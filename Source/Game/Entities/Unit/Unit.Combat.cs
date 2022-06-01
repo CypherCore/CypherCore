@@ -672,12 +672,6 @@ namespace Game.Entities
             if (targetOwner != null)
                 targetOwner.EngageWithTarget(this);
 
-            //Patch 3.0.8: All player spells which cause a creature to become aggressive to you will now also immediately cause the creature to be tapped.
-            Creature creature = target.ToCreature();
-            if (creature != null)
-                if (!creature.HasLootRecipient() && IsPlayer())
-                    creature.SetLootRecipient(this);
-
             Player myPlayerOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
             Player targetPlayerOwner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
             if (myPlayerOwner && targetPlayerOwner && !(myPlayerOwner.duel != null && myPlayerOwner.duel.Opponent == targetPlayerOwner))

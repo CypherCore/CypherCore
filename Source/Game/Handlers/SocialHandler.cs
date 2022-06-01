@@ -321,7 +321,7 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            ObjectGuid ignoreGuid;
+            ObjectGuid ignoreGuid = ObjectGuid.Empty;
             FriendsResult ignoreResult = FriendsResult.IgnoreNotFound;
 
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);

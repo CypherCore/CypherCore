@@ -1815,7 +1815,7 @@ namespace Framework.Constants
         AuraIconOnlyForCasterLimit10 = 0x100000, // Aura Icon Only For Caster (Limit 10) (Client Only)
         ShowMechanicAsCombatText = 0x200000, // Show Mechanic As Combat Text (Client Only)
         AbsorbCannotBeIgnore = 0x400000, // Absorb Cannot Be Ignore
-        TapsImmediately = 0x800000, /*Nyi*/ // Taps Immediately
+        TapsImmediately = 0x800000, // Taps Immediately
         CanTargetUntargetable = 0x1000000, // Can Target Untargetable
         DoesntResetSwingTimerIfInstant = 0x2000000, // Doesn'T Reset Swing Timer If Instant
         VehicleImmunityCategory = 0x4000000, /*Nyi*/ // Vehicle Immunity Category
