@@ -384,7 +384,7 @@ namespace Game
                 return;
 
             // not allow remove spells with attr SPELL_ATTR0_CANT_CANCEL
-            if (spellInfo.HasAttribute(SpellAttr0.CantCancel))
+            if (spellInfo.HasAttribute(SpellAttr0.NoAuraCancel))
                 return;
 
             // channeled spell case (it currently casted then)
@@ -412,7 +412,7 @@ namespace Game
             GetPlayer().RemoveAurasByType(AuraType.ModScale, aurApp =>
             {
                 SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
-                return !spellInfo.HasAttribute(SpellAttr0.CantCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
+                return !spellInfo.HasAttribute(SpellAttr0.NoAuraCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
             });
         }
 
@@ -422,7 +422,7 @@ namespace Game
             GetPlayer().RemoveAurasByType(AuraType.Mounted, aurApp =>
             {
                 SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
-                return !spellInfo.HasAttribute(SpellAttr0.CantCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
+                return !spellInfo.HasAttribute(SpellAttr0.NoAuraCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
             });
         }
 
@@ -478,7 +478,7 @@ namespace Game
                 return;
 
             // not allow remove spells with attr SPELL_ATTR0_CANT_CANCEL
-            if (spellInfo.HasAttribute(SpellAttr0.CantCancel))
+            if (spellInfo.HasAttribute(SpellAttr0.NoAuraCancel))
                 return;
 
             var spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);

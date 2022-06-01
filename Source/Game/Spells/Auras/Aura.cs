@@ -434,7 +434,7 @@ namespace Game.Spells
             // set infinity cooldown state for spells
             if (caster != null && caster.IsTypeId(TypeId.Player))
             {
-                if (m_spellInfo.HasAttribute(SpellAttr0.DisabledWhileActive))
+                if (m_spellInfo.IsCooldownStartedOnEvent())
                 {
                     Item castItem = !m_castItemGuid.IsEmpty() ? caster.ToPlayer().GetItemByGuid(m_castItemGuid) : null;
                     caster.GetSpellHistory().StartCooldown(m_spellInfo, castItem != null ? castItem.GetEntry() : 0, null, true);
@@ -1009,7 +1009,7 @@ namespace Game.Spells
             return GetCasterGUID() == target.GetGUID()
                 && m_spellInfo.Stances != 0
                 && !m_spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)
-                && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshift);
+                && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshifted);
         }
         
         public bool CanBeSaved()

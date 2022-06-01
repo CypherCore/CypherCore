@@ -758,7 +758,7 @@ namespace Game.Entities
                 return SpellMissInfo.Resist;
 
             // Same spells cannot be parried/dodged
-            if (spellInfo.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock))
+            if (spellInfo.HasAttribute(SpellAttr0.NoActiveDefense))
                 return SpellMissInfo.None;
 
             bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
@@ -1223,7 +1223,7 @@ namespace Game.Entities
             if (idList.ContainsKey(spellInfo.Id))
                 return true;
 
-            if (spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
             uint dispel = (uint)spellInfo.Dispel;
@@ -1379,7 +1379,7 @@ namespace Game.Entities
                 return false;
 
             // for example 40175
-            if (spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return false;
 
             if (spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
@@ -1748,7 +1748,7 @@ namespace Game.Entities
         bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             // These spells can't be blocked
-            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
+            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.NoActiveDefense) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
                 return false;
 
             // Can't block when casting/controlled

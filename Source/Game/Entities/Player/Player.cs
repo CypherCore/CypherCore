@@ -6398,8 +6398,8 @@ namespace Game.Entities
             if (IsInFlight())
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck) && !IsOutdoors())
-                RemoveAurasWithAttribute(SpellAttr0.OutdoorsOnly);
+            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
+                RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
 
             uint areaId = GetAreaId();
             if (areaId == 0)

@@ -1914,10 +1914,10 @@ namespace Game.Entities
             if (!unitCaster)
                 return;
 
-            if (!(spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
+            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster.m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
+            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                 castTime = (int)(castTime * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
             else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && unitCaster.HasAura(67556)) // cooking with Chef Hat.
                 castTime = 500;
@@ -1940,10 +1940,10 @@ namespace Game.Entities
             if (!unitCaster)
                 return;
 
-            if (!(spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
+            if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 duration = (int)(duration * unitCaster.m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
+            else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                 duration = (int)(duration * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
         }
 
@@ -2750,7 +2750,7 @@ namespace Game.Entities
         public Unit GetMagicHitRedirectTarget(Unit victim, SpellInfo spellInfo)
         {
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-            if (spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr1.CantBeRedirected) || spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr1.CantBeRedirected) || spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return victim;
 
             var magnetAuras = victim.GetAuraEffectsByType(AuraType.SpellMagnet);

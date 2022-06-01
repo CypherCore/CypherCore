@@ -79,7 +79,7 @@ namespace Game
                 SpellInfo spell = (flag == ActiveStates.Enabled || flag == ActiveStates.Passive) ? Global.SpellMgr.GetSpellInfo(spellid, pet.GetMap().GetDifficultyID()) : null;
                 if (spell == null)
                     return;
-                if (!spell.HasAttribute(SpellAttr0.CastableWhileDead))
+                if (!spell.HasAttribute(SpellAttr0.AllowCastWhileDead))
                     return;
             }
 

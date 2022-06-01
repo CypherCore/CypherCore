@@ -480,7 +480,7 @@ namespace Game.Spells
 
         public bool IsCooldownStartedOnEvent()
         {
-            if (HasAttribute(SpellAttr0.DisabledWhileActive))
+            if (HasAttribute(SpellAttr0.CooldownOnEvent))
                 return true;
 
             SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey(CategoryId);
@@ -529,7 +529,7 @@ namespace Game.Spells
 
         public bool CanBeUsedInCombat()
         {
-            return !HasAttribute(SpellAttr0.CantUsedInCombat);
+            return !HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful);
         }
 
         public bool IsPositive()
@@ -563,7 +563,7 @@ namespace Game.Spells
 
         public bool IsNextMeleeSwingSpell()
         {
-            return HasAttribute(SpellAttr0.OnNextSwing | SpellAttr0.OnNextSwing2);
+            return HasAttribute(SpellAttr0.OnNextSwingNoDamage | SpellAttr0.OnNextSwing);
         }
 
         public bool IsBreakingStealth()
@@ -575,7 +575,7 @@ namespace Game.Spells
         {
             return (SpellFamilyName == SpellFamilyNames.Hunter && !SpellFamilyFlags[1].HasAnyFlag(0x10000000u)) // for 53352, cannot find better way
                 || Convert.ToBoolean(EquippedItemSubClassMask & (int)ItemSubClassWeapon.MaskRanged)
-                || Attributes.HasAnyFlag(SpellAttr0.ReqAmmo);
+                || Attributes.HasAnyFlag(SpellAttr0.UsesRangedSlot);
         }
 
         public bool IsAutoRepeatRangedSpell()
@@ -681,11 +681,11 @@ namespace Game.Spells
         public bool CanPierceImmuneAura(SpellInfo auraSpellInfo)
         {
             // aura can't be pierced
-            if (auraSpellInfo == null || auraSpellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (auraSpellInfo == null || auraSpellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
             // these spells pierce all avalible spells (Resurrection Sickness for example)
-            if (HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (HasAttribute(SpellAttr0.NoImmunities))
                 return true;
 
             // these spells (Cyclone for example) can pierce all...
@@ -708,11 +708,11 @@ namespace Game.Spells
         public bool CanDispelAura(SpellInfo auraSpellInfo)
         {
             // These auras (like Divine Shield) can't be dispelled
-            if (auraSpellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (auraSpellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
             // These spells (like Mass Dispel) can dispel all auras
-            if (HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (HasAttribute(SpellAttr0.NoImmunities))
                 return true;
 
             // These auras (Cyclone for example) are not dispelable
@@ -827,7 +827,7 @@ namespace Game.Spells
 
             if (actAsShifted)
             {
-                if (HasAttribute(SpellAttr0.NotShapeshift) || (shapeInfo != null && shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.CanOnlyCastShapeshiftSpells))) // not while shapeshifted
+                if (HasAttribute(SpellAttr0.NotShapeshifted) || (shapeInfo != null && shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.CanOnlyCastShapeshiftSpells))) // not while shapeshifted
                     return SpellCastResult.NotShapeshift;
                 else if (Stances != 0)   // needs other shapeshift
                     return SpellCastResult.OnlyShapeshift;
@@ -1243,7 +1243,7 @@ namespace Game.Spells
                     checkMask = VehicleSeatFlags.CanAttack;
 
                 var vehicleSeat = vehicle.GetSeatForPassenger(caster);
-                if (!HasAttribute(SpellAttr6.CastableWhileOnVehicle) && !HasAttribute(SpellAttr0.CastableWhileMounted)
+                if (!HasAttribute(SpellAttr6.CastableWhileOnVehicle) && !HasAttribute(SpellAttr0.AllowWhileMounted)
                     && (vehicleSeat.Flags & (int)checkMask) != (int)checkMask)
                     return SpellCastResult.CantDoThatRightNow;
 
@@ -2587,7 +2587,7 @@ namespace Game.Spells
             if (!HasAttribute(SpellAttr1.DispelAurasOnImmunity))
                 return false;
 
-            if (aurEff.GetSpellInfo().HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (aurEff.GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
             foreach (var effectInfo in GetEffects())
@@ -2715,7 +2715,7 @@ namespace Game.Spells
             if (spell != null)
                 spell.GetCaster().ModSpellCastTime(this, ref castTime, spell);
 
-            if (HasAttribute(SpellAttr0.ReqAmmo) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.AimedShot))
+            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.AimedShot))
                 castTime += 500;
 
             return (castTime > 0) ? castTime : 0;
@@ -2949,7 +2949,7 @@ namespace Game.Spells
 
             if (!unitCaster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
             {
-                if (HasAttribute(SpellAttr0.LevelDamageCalculation))
+                if (HasAttribute(SpellAttr0.ScalesWithCreatureLevel))
                 {
                     GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
                     GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(unitCaster.GetLevel());
@@ -3180,7 +3180,7 @@ namespace Game.Spells
                 return this;
 
             // Client ignores spell with these attributes (sub_53D9D0)
-            if (HasAttribute(SpellAttr0.Negative1) || HasAttribute(SpellAttr2.Unk3) || HasAttribute(SpellAttr3.DrainSoul))
+            if (HasAttribute(SpellAttr0.AuraIsDebuff) || HasAttribute(SpellAttr2.Unk3) || HasAttribute(SpellAttr3.DrainSoul))
                 return this;
 
             bool needRankSelection = false;
@@ -3325,7 +3325,7 @@ namespace Game.Spells
                 return true;
 
             // not found a single positive spell with this attribute
-            if (spellInfo.HasAttribute(SpellAttr0.Negative1))
+            if (spellInfo.HasAttribute(SpellAttr0.AuraIsDebuff))
                 return false;
 
             visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
@@ -4257,7 +4257,7 @@ namespace Game.Spells
                 ExpectedStatType stat = GetScalingExpectedStat();
                 if (stat != ExpectedStatType.None)
                 {
-                    if (_spellInfo.HasAttribute(SpellAttr0.LevelDamageCalculation))
+                    if (_spellInfo.HasAttribute(SpellAttr0.ScalesWithCreatureLevel))
                         stat = ExpectedStatType.CreatureAutoAttackDps;
 
                     // TODO - add expansion and content tuning id args?

@@ -324,7 +324,7 @@ namespace Game.AI
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
             {
                 AISpellInfoType AIInfo = new();
-                if (spellInfo.HasAttribute(SpellAttr0.CastableWhileDead))
+                if (spellInfo.HasAttribute(SpellAttr0.AllowCastWhileDead))
                     AIInfo.condition = AICondition.Die;
                 else if (spellInfo.IsPassive() || spellInfo.GetDuration() == -1)
                     AIInfo.condition = AICondition.Aggro;

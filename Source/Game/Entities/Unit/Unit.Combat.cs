@@ -42,7 +42,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
             if (spell != null)
                 if (spell.GetState() == SpellState.Preparing
-                    && spell.m_spellInfo.HasAttribute(SpellAttr0.CantUsedInCombat)
+                    && spell.m_spellInfo.HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful)
                     && spell.m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat))
                     InterruptNonMeleeSpells(false);
 

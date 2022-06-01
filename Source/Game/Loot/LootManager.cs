@@ -393,7 +393,7 @@ namespace Game.Loots
                 {
                     // not report about not trainable spells (optionally supported by DB)
                     // ignore 61756 (Northrend Inscription Research (FAST QA VERSION) for example
-                    if (!spellInfo.HasAttribute(SpellAttr0.NotShapeshift) || spellInfo.HasAttribute(SpellAttr0.Tradespell))
+                    if (!spellInfo.HasAttribute(SpellAttr0.NotShapeshifted) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill))
                     {
                         Spell.ReportNonExistingId(spellInfo.Id, spellInfo.Id);
                     }

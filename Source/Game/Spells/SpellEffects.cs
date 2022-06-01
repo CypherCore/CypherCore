@@ -1002,7 +1002,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            DoCreateItem(effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
+            DoCreateItem(effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.IsTradeskill) ? ItemContext.TradeSkill : ItemContext.None);
             ExecuteLogEffectCreateItem(effectInfo.Effect, effectInfo.ItemType);
         }
 
@@ -1017,7 +1017,7 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
 
-            ItemContext context = m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None;
+            ItemContext context = m_spellInfo.HasAttribute(SpellAttr0.IsTradeskill) ? ItemContext.TradeSkill : ItemContext.None;
 
             // Pick a random item from spell_loot_template
             if (m_spellInfo.IsLootCrafting())
@@ -1046,7 +1046,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
 
             // create some random items
-            player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
+            player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, m_spellInfo.HasAttribute(SpellAttr0.IsTradeskill) ? ItemContext.TradeSkill : ItemContext.None);
             // @todo ExecuteLogEffectCreateItem(i, GetEffect(i].ItemType);
         }
 
@@ -2029,7 +2029,7 @@ namespace Game.Spells
                 unitTarget = player;
                 // and add a scroll
                 damage = 1;
-                DoCreateItem(effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
+                DoCreateItem(effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.IsTradeskill) ? ItemContext.TradeSkill : ItemContext.None);
                 itemTarget = null;
                 m_targets.SetItemTarget(null);
             }

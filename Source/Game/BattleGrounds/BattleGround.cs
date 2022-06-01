@@ -435,7 +435,7 @@ namespace Game.BattleGrounds
                                 {
                                     Aura aura = aurApp.GetBase();
                                     return !aura.IsPermanent() && aura.GetDuration() <= 30 * Time.InMilliseconds && aurApp.IsPositive()
-                                    && !aura.GetSpellInfo().HasAttribute(SpellAttr0.UnaffectedByInvulnerability) && !aura.HasEffectType(AuraType.ModInvisibility);
+                                    && !aura.GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities) && !aura.HasEffectType(AuraType.ModInvisibility);
                                 });
                             }
                         }

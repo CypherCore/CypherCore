@@ -292,7 +292,7 @@ namespace Game.Entities
         {
             SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (transformSpellInfo != null)
-                if (transformSpellInfo.HasAttribute(SpellAttr0.CastableWhileMounted))
+                if (transformSpellInfo.HasAttribute(SpellAttr0.AllowWhileMounted))
                     return false;
 
             if (form != 0)
@@ -656,7 +656,7 @@ namespace Game.Entities
             {
                 SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(gameObj.GetSpellId(), GetMap().GetDifficultyID());
                 // Need disable spell use for owner
-                if (createBySpell != null && createBySpell.HasAttribute(SpellAttr0.DisabledWhileActive))
+                if (createBySpell != null && createBySpell.IsCooldownStartedOnEvent())
                     // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
                     GetSpellHistory().StartCooldown(createBySpell, 0, null, true);
             }

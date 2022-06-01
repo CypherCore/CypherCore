@@ -105,8 +105,8 @@ namespace Game.Spells
 
             // Determine if spell can be reflected back to the caster
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-            m_canReflect = caster.IsUnit() && m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.Ability)
-                && !m_spellInfo.HasAttribute(SpellAttr1.CantBeReflected) && !m_spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability)
+            m_canReflect = caster.IsUnit() && m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)
+                && !m_spellInfo.HasAttribute(SpellAttr1.CantBeReflected) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
                 && !m_spellInfo.IsPassive();
 
             CleanupTargetList();
@@ -2881,7 +2881,7 @@ namespace Game.Spells
                     else
                         procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
                 }
-                else if (m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                 {
                     if (IsPositive())
                         procAttacker.Or(ProcFlags.DealHelpfulAbility);
@@ -3156,7 +3156,7 @@ namespace Game.Spells
                     else
                         procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
                 }
-                else if (m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                 {
                     if (IsPositive())
                         procAttacker.Or(ProcFlags.DealHelpfulAbility);
@@ -3357,7 +3357,7 @@ namespace Game.Spells
             }
 
             // Stop Attack for some spells
-            if (m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget))
+            if (m_spellInfo.HasAttribute(SpellAttr0.CancelsAutoAttackCombat))
                 unitCaster.AttackStop();
         }
 
@@ -3654,7 +3654,7 @@ namespace Game.Spells
             if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
                 castFlags |= SpellCastFlags.Pending;
 
-            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
+            if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
                 castFlags |= SpellCastFlags.Projectile;
 
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
@@ -3755,7 +3755,7 @@ namespace Game.Spells
             if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
                 castFlags |= SpellCastFlags.Pending;
 
-            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
+            if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
                 castFlags |= SpellCastFlags.Projectile;                        // arrows/bullets visual
 
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
@@ -4523,7 +4523,7 @@ namespace Game.Spells
             SpellCastResult castResult;
 
             // check death state
-            if (m_caster.ToUnit() && !m_caster.ToUnit().IsAlive() && !m_spellInfo.IsPassive() && !(m_spellInfo.HasAttribute(SpellAttr0.CastableWhileDead) || (IsTriggered() && m_triggeredByAuraSpell == null)))
+            if (m_caster.ToUnit() && !m_caster.ToUnit().IsAlive() && !m_spellInfo.IsPassive() && !(m_spellInfo.HasAttribute(SpellAttr0.AllowCastWhileDead) || (IsTriggered() && m_triggeredByAuraSpell == null)))
                 return SpellCastResult.CasterDead;
 
             // Prevent cheating in case the player has an immunity effect and tries to interact with a non-allowed gameobject. The error message is handled by the client so we don't report anything here
@@ -4544,7 +4544,7 @@ namespace Game.Spells
                     {
                         // These two auras check SpellFamilyName defined by db2 class data instead of current spell SpellFamilyName
                         if (playerCaster.HasAuraType(AuraType.DisableCastingExceptAbilities)
-                            && !m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo)
+                            && !m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                             && !m_spellInfo.HasEffect(SpellEffectName.Attack)
                             && !m_spellInfo.HasAttribute(SpellAttr12.IgnoreCastingDisabled)
                             && !playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableCastingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
@@ -4554,7 +4554,7 @@ namespace Game.Spells
                         {
                             if (!playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableAttackingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
                             {
-                                if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo)
+                                if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
                                     || m_spellInfo.IsNextMeleeSwingSpell()
                                     || m_spellInfo.HasAttribute(SpellAttr1.MeleeCombatStart)
                                     || m_spellInfo.HasAttribute(SpellAttr2.Unk20)
@@ -4590,7 +4590,7 @@ namespace Game.Spells
 
             // Check global cooldown
             if (strict && !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreGCD) && HasGlobalCooldown())
-                return !m_spellInfo.HasAttribute(SpellAttr0.DisabledWhileActive) ? SpellCastResult.NotReady : SpellCastResult.DontReport;
+                return !m_spellInfo.HasAttribute(SpellAttr0.CooldownOnEvent) ? SpellCastResult.NotReady : SpellCastResult.DontReport;
 
             // only triggered spells can be processed an ended Battleground
             if (!IsTriggered() && m_caster.IsTypeId(TypeId.Player))
@@ -4603,10 +4603,10 @@ namespace Game.Spells
 
             if (m_caster.IsTypeId(TypeId.Player) && Global.VMapMgr.IsLineOfSightCalcEnabled())
             {
-                if (m_spellInfo.HasAttribute(SpellAttr0.OutdoorsOnly) && !m_caster.IsOutdoors())
+                if (m_spellInfo.HasAttribute(SpellAttr0.OnlyOutdoors) && !m_caster.IsOutdoors())
                     return SpellCastResult.OnlyOutdoors;
 
-                if (m_spellInfo.HasAttribute(SpellAttr0.IndoorsOnly) && m_caster.IsOutdoors())
+                if (m_spellInfo.HasAttribute(SpellAttr0.OnlyIndoors) && m_caster.IsOutdoors())
                     return SpellCastResult.OnlyIndoors;
             }
 
@@ -4844,7 +4844,7 @@ namespace Game.Spells
             // not let players cast spells at mount (and let do it to creatures)
             if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle))
             {
-                if (m_caster.IsPlayer() && m_caster.ToPlayer().IsMounted() && !m_spellInfo.IsPassive() && !m_spellInfo.HasAttribute(SpellAttr0.CastableWhileMounted))
+                if (m_caster.IsPlayer() && m_caster.ToPlayer().IsMounted() && !m_spellInfo.IsPassive() && !m_spellInfo.HasAttribute(SpellAttr0.AllowWhileMounted))
                 {
                     if (m_caster.ToPlayer().IsInFlight())
                         return SpellCastResult.NotOnTaxi;
@@ -6129,7 +6129,7 @@ namespace Game.Spells
                     rangeMod += 8.0f / 3.0f;
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && m_caster.IsTypeId(TypeId.Player))
+            if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && m_caster.IsTypeId(TypeId.Player))
             {
                 Item ranged = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.RangedAttack, true);
                 if (ranged)
@@ -7652,7 +7652,7 @@ namespace Game.Spells
                 }
 
                 bool isMeleeOrRangedSpell = m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged ||
-                    m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr0.Ability);
+                    m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr0.IsAbility);
 
                 // Apply haste rating
                 if (gcd > MinGCD && (m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell))
@@ -8265,7 +8265,7 @@ namespace Game.Spells
                                     procVictim.Or(ProcFlags.TakeHarmfulPeriodic);
                                 }
                             }
-                            else if (spell.m_spellInfo.HasAttribute(SpellAttr0.Ability))
+                            else if (spell.m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
                             {
                                 if (positive)
                                 {
@@ -8393,7 +8393,7 @@ namespace Game.Spells
                     if (caster.IsPlayer() && procSpellType.HasAnyFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
                     {
                         if (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged)
-                            if (!spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs))
+                            if (!spell.m_spellInfo.HasAttribute(SpellAttr0.CancelsAutoAttackCombat) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs))
                                 caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
                     }
                 }

@@ -637,7 +637,7 @@ namespace Game.AI
                 SpellInfo auraInfo = aura.GetSpellInfo();
                 if (auraInfo == null)
                     continue;
-                if (auraInfo.HasAttribute(SpellAttr0.CantCancel))
+                if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
                     continue;
                 if (!auraInfo.IsPositive() || auraInfo.IsPassive())
                     continue;
