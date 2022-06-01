@@ -1636,7 +1636,8 @@ namespace Game.Entities
                 case CurrentSpellTypes.Generic:
                 {
                     // generic spells always break channeled not delayed spells
-                    InterruptSpell(CurrentSpellTypes.Channeled, false);
+                    if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                        InterruptSpell(CurrentSpellTypes.Channeled, false);
 
                     // autorepeat breaking
                     if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
