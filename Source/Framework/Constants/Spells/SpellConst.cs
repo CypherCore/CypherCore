@@ -1793,7 +1793,7 @@ namespace Framework.Constants
     public enum SpellAttr6 : uint
     {
         NoCooldownOnTooltip = 0x01, // No Cooldown On Tooltip (Client Only)
-        DoNotResetCooldownInArena = 0x02, /*Nyi*/ // Do Not Reset Cooldown In Arena
+        DoNotResetCooldownInArena = 0x02, // Do Not Reset Cooldown In Arena
         NotAnAttack = 0x04, /*Nyi*/ // Not An Attack
         CanAssistImmunePc = 0x08, // Can Assist Immune Pc
         IgnoreForModTimeRate = 0x10, /*Nyi, Time Rate Not Implemented*/ // Ignore For Mod Time Rate
