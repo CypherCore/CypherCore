@@ -41,7 +41,7 @@ namespace Game.Spells
                 if (spellEffect == null)
                     continue;
 
-                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects.EnsureWritableListIndex((uint)spellEffect.EffectIndex, new SpellEffectInfo(this));
                 _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
@@ -259,7 +259,7 @@ namespace Game.Spells
 
             foreach (SpellEffectRecord spellEffect in effects)
             {
-                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects.EnsureWritableListIndex((uint)spellEffect.EffectIndex, new SpellEffectInfo(this));
                 _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
@@ -4026,7 +4026,7 @@ namespace Game.Spells
             _spellInfo = spellInfo;
             if (effect != null)
             {
-                EffectIndex = effect.EffectIndex;
+                EffectIndex = (uint)effect.EffectIndex;
                 Effect = (SpellEffectName)effect.Effect;
                 ApplyAuraName = (AuraType)effect.EffectAura;
                 ApplyAuraPeriod = effect.EffectAuraPeriod;
@@ -4205,7 +4205,7 @@ namespace Game.Spells
                         {
                             RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
                             if (randPropPoints == null)
-                                randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.Count - 1);
+                                randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.GetNumRows() - 1);
 
                             tempValue = Scaling.Class == -8 ? randPropPoints.DamageReplaceStatF : randPropPoints.DamageSecondaryF;
                         }

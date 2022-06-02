@@ -9320,12 +9320,12 @@ namespace Game.Spells
 
         public bool HasFlag(ProcFlags procFlags)
         {
-            return (_storage[0] & procFlags) != 0;
+            return (_storage[0] & (int)procFlags) != 0;
         }
 
         public bool HasFlag(ProcFlags2 procFlags)
         {
-            return (_storage[1] & procFlags) != 0;
+            return (_storage[1] & (int)procFlags) != 0;
         }
     }
 }

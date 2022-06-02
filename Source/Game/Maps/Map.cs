@@ -2580,7 +2580,7 @@ namespace Game.Maps
                 return;
 
             var respawnInfo = spawnMap.LookupByKey(info.spawnId);
-            Cypher.Assert(respawnInfo != info, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
+            Cypher.Assert(respawnInfo != null, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
             spawnMap.Remove(info.spawnId);
 
             // respawn heap

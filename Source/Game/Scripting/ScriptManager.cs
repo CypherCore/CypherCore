@@ -165,6 +165,8 @@ namespace Game.Scripting
                             case "SceneScript":
                             case "QuestScript":
                             case "ConversationScript":
+                            case "AchievementScript":
+                            case "BattlefieldScript":
                                 if (!attribute.Name.IsEmpty())
                                     name = attribute.Name;
 

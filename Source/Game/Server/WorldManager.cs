@@ -400,8 +400,7 @@ namespace Game
                 || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!Global.MapMgr.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !Global.MapMgr.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
             {
                 Log.outError(LogFilter.ServerLoading, "Unable to load critical files - server shutting down !!!");
-                ShutdownServ(0, 0, ShutdownExitCode.Error);
-                return;
+                Environment.Exit(1);
             }
 
             // Initialize pool manager
@@ -498,9 +497,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             GameObjectModel.LoadGameObjectModelList();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Script Names...");
-            Global.ObjectMgr.LoadScriptNames();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
             Global.ObjectMgr.LoadInstanceTemplate();

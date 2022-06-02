@@ -1417,7 +1417,7 @@ namespace Game.Entities
                         }
                         if ((procEntry.AttributesMask & ~ProcAttributes.AllAllowed) != 0)
                         {
-                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `AttributesMask` value specifying invalid attributes 0x{procEntry.AttributesMask & ~ProcAttributes.AllAllowed:X2}.");
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `AttributesMask` value specifying invalid attributes 0x{(procEntry.AttributesMask & ~ProcAttributes.AllAllowed):X}.");
                             procEntry.AttributesMask &= ProcAttributes.AllAllowed;
                         }
 
@@ -1448,7 +1448,7 @@ namespace Game.Entities
                     continue;
 
                 // Nothing to do if no flags set
-                if (!spellInfo.ProcFlags)
+                if (spellInfo.ProcFlags == null)
                     continue;
 
                 bool addTriggerFlag = false;
@@ -2369,7 +2369,7 @@ namespace Game.Entities
                     uint spellId = effectsResult.Read<uint>(0);
                     Difficulty difficulty = (Difficulty)effectsResult.Read<uint>(2);
                     SpellEffectRecord effect = new();
-                    effect.EffectIndex = effectsResult.Read<uint>(1);
+                    effect.EffectIndex = effectsResult.Read<int>(1);
                     effect.Effect = effectsResult.Read<uint>(3);
                     effect.EffectAura = effectsResult.Read<short>(4);
                     effect.EffectAmplitude = effectsResult.Read<float>(5);
@@ -4822,7 +4822,7 @@ namespace Game.Entities
     {
         public SpellSchoolMask SchoolMask { get; set; }                                 // if nonzero - bitmask for matching proc condition based on spell's school
         public SpellFamilyNames SpellFamilyName { get; set; }                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyName
-        public FlagArray128 SpellFamilyMask { get; set; } = new FlagArray128();    // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
+        public FlagArray128 SpellFamilyMask { get; set; } = new(4);    // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
         public ProcFlagsInit ProcFlags { get; set; }                                   // if nonzero - owerwrite procFlags field for given Spell.dbc entry, bitmask for matching proc condition, see enum ProcFlags
         public ProcFlagsSpellType SpellTypeMask { get; set; }                              // if nonzero - bitmask for matching proc condition based on candidate spell's damage/heal effects, see enum ProcFlagsSpellType
         public ProcFlagsSpellPhase SpellPhaseMask { get; set; }                             // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase

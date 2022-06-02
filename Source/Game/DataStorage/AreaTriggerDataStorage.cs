@@ -222,7 +222,7 @@ namespace Game.DataStorage
             }
 
             //                                                       0                               1           2             3                4             5        6                 7
-            SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit` ORDER BY `SpellMiscId`");
+            SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit`");
             if (!circularMovementInfos.IsEmpty())
             {
                 do

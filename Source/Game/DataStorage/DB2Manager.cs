@@ -853,7 +853,7 @@ namespace Game.DataStorage
 
         public uint GetEmptyAnimStateID()
         {
-            return (uint)AnimationDataStorage.Count;
+            return AnimationDataStorage.GetNumRows();
         }
 
         public List<uint> GetAreasForGroup(uint areaGroupId)
@@ -943,7 +943,7 @@ namespace Game.DataStorage
                     return levels[tier];
             }
 
-            return (uint)AzeriteLevelInfoStorage.Count;
+            return AzeriteLevelInfoStorage.GetNumRows();
         }
 
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, Locale locale = Locale.enUS, Gender gender = Gender.Male, bool forceGender = false)

@@ -281,7 +281,7 @@ namespace Game.DataStorage
         public uint Id;
         public short EffectAura;
         public uint DifficultyID;
-        public uint EffectIndex;
+        public int EffectIndex;
         public uint Effect;
         public float EffectAmplitude;
         public SpellEffectAttributes EffectAttributes;

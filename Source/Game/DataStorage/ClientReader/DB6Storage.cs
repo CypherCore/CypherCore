@@ -22,6 +22,7 @@ using Framework.IO;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 
@@ -389,6 +390,8 @@ namespace Game.DataStorage
 
         public uint GetTableHash() { return _header.TableHash; }
 
+        public uint GetNumRows() { return Keys.Max() + 1; }
+        
         public string GetName()
         {
             return _tableName;

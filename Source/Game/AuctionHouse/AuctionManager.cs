@@ -829,7 +829,7 @@ namespace Game
             {
                 knownAppearanceIds = player.GetSession().GetCollectionMgr().GetAppearanceIds();
                 //todo fix me
-                //if (knownPetSpecies.size() < CliDB.BattlePetSpeciesStorage.GetNumRows())
+                //if (knownPetSpecies.Length < CliDB.BattlePetSpeciesStorage.GetNumRows())
                     //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
             }
 

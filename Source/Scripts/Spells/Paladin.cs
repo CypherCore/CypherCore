@@ -650,7 +650,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 54149 - Infusion of Light
     class spell_pal_infusion_of_light : AuraScript
     {
-        static FlagArray128 HolyLightSpellClassMask = new FlagArray128(0, 0, 0x400);
+        static FlagArray128 HolyLightSpellClassMask = new(0, 0, 0x400);
 
         public override bool Validate(SpellInfo spellInfo)
         {

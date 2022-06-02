@@ -578,7 +578,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             gossipMenuItemsStorage.Clear();
-            
+
             //                                         0       1         2           3           4                      5           6              7         8             9            10        11        12       13
             SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionIcon, OptionText, OptionBroadcastTextID, OptionType, OptionNpcFlag, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
                 "FROM gossip_menu_option ORDER BY MenuID, OptionID");
@@ -1024,48 +1024,6 @@ namespace Game
         }
 
         //Scripts
-        public void LoadScriptNames()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            scriptNamesStorage.Add("");
-            SQLResult result = DB.World.Query(
-              "SELECT DISTINCT(ScriptName) FROM battleground_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM conversation_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM creature WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM creature_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM criteria_data WHERE ScriptName <> '' AND type = 11 " +
-              "UNION SELECT DISTINCT(ScriptName) FROM gameobject WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM gameobject_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM item_script_names WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM areatrigger_scripts WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM areatrigger_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM spell_script_names WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM transports WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM game_weather WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM conditions WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM outdoorpvp_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM scene_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM quest_template_addon WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(script) FROM instance_template WHERE script <> ''");
-
-            if (result.IsEmpty())
-            {
-                Log.outError(LogFilter.ServerLoading, "Loaded empty set of Script Names!");
-                return;
-            }
-
-            uint count = 1;
-            do
-            {
-                scriptNamesStorage.Add(result.Read<string>(0));
-                ++count;
-            }
-            while (result.NextRow());
-
-            scriptNamesStorage.Sort();
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Names in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
         public void LoadAreaTriggerScripts()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1658,25 +1616,34 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Validated {0} scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
+
         public List<uint> GetSpellScriptsBounds(uint spellId)
         {
             return spellScriptsStorage.LookupByKey(spellId);
         }
+        public List<string> GetAllDBScriptNames()
+        {
+            return _scriptNamesStorage.GetAllDBScriptNames();
+        }
         public string GetScriptName(uint id)
         {
-            return id < scriptNamesStorage.Count ? scriptNamesStorage[(int)id] : "";
+            var entry = _scriptNamesStorage.Find(id);
+            if (entry != null)
+                return entry.Name;
+
+            return "";
         }
-        public uint GetScriptId(string name)
+        bool IsScriptDatabaseBound(uint id)
         {
-            // use binary search to find the script name in the sorted vector
-            // assume "" is the first element
-            if (string.IsNullOrEmpty(name))
-                return 0;
+            var entry = _scriptNamesStorage.Find(id);
+            if (entry != null)
+                return entry.IsScriptDatabaseBound;
 
-            if (!scriptNamesStorage.Contains(name))
-                return 0;
-
-            return (uint)scriptNamesStorage.IndexOf(name);
+            return false;
+        }
+        public uint GetScriptId(string name, bool isDatabaseBound = true)
+        {
+            return _scriptNamesStorage.Insert(name, isDatabaseBound);
         }
         public uint GetAreaTriggerScriptId(uint triggerid)
         {
@@ -3236,7 +3203,7 @@ namespace Game
 
             _creatureDefaultTrainers.Clear();
 
-            SQLResult result = DB.World.Query("SELECT CreatureId, TrainerId, MenuId, OptionIndex FROM creature_trainer");
+            SQLResult result = DB.World.Query("SELECT CreatureID, TrainerID, MenuID, OptionID FROM creature_trainer");
             if (!result.IsEmpty())
             {
                 do
@@ -7980,7 +7947,7 @@ namespace Game
 
             uint count = 0;
 
-            SQLResult result = DB.World.Query($"SELECT id, quest FROM {table} qr LEFT JOIN pool_quest pq ON qr.quest = pq.entry");
+            SQLResult result = DB.World.Query($"SELECT id, quest FROM {table}");
 
             if (result.IsEmpty())
             {
@@ -8828,7 +8795,7 @@ namespace Game
             _gossipMenuItemsLocaleStorage.Clear();                              // need for reload case
 
             //                                         0       1            2       3           4
-            SQLResult result = DB.World.Query("SELECT MenuId, OptionIndex, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
+            SQLResult result = DB.World.Query("SELECT MenuId, OptionID, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
             if (result.IsEmpty())
                 return;
 
@@ -10803,7 +10770,7 @@ namespace Game
         Dictionary<uint, QuestGreetingLocale>[] _questGreetingLocaleStorage = new Dictionary<uint, QuestGreetingLocale>[2];
 
         //Scripts
-        List<string> scriptNamesStorage = new();
+        ScriptNameContainer _scriptNamesStorage = new();
         MultiMap<uint, uint> spellScriptsStorage = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
@@ -11955,6 +11922,78 @@ namespace Game
         public bool HasQuest(uint questId)
         {
             return Contains(questId) && (!_onlyActive || Quest.IsTakingQuestEnabled(questId));
+        }
+    }
+
+    class ScriptNameContainer
+    {
+        Dictionary<string, Entry> NameToIndex = new();
+        List<Entry> IndexToName = new();
+
+        public ScriptNameContainer()
+        {
+            // We insert an empty placeholder here so we can use the
+            // script id 0 as dummy for "no script found".
+            uint id = Insert("", false);
+
+            Cypher.Assert(id == 0);
+        }
+
+        public uint Insert(string scriptName, bool isScriptNameBound)
+        {
+            Entry entry = new((uint)NameToIndex.Count, isScriptNameBound, scriptName);
+            var result = NameToIndex.TryAdd(scriptName, entry);
+            if (result)
+            {
+                Cypher.Assert(NameToIndex.Count <= int.MaxValue);
+                IndexToName.Add(entry);
+            }
+
+            return entry.Id;
+        }
+
+        public int GetSize()
+        {
+            return IndexToName.Count;
+        }
+
+        public Entry Find(uint index)
+        {
+            return index < IndexToName.Count ? IndexToName[(int)index] : null;
+        }
+
+        public Entry Find(string name)
+        {
+            // assume "" is the first element
+            if (name.IsEmpty())
+                return null;
+
+            return NameToIndex.LookupByKey(name);
+        }
+
+        public List<string> GetAllDBScriptNames()
+        {
+            List<string> scriptNames = new();
+
+            foreach (var (name, entry) in NameToIndex)
+                if (entry.IsScriptDatabaseBound)
+                    scriptNames.Add(name);
+
+            return scriptNames;
+        }
+
+        public class Entry
+        {
+            public uint Id;
+            public bool IsScriptDatabaseBound;
+            public string Name;
+
+            public Entry(uint id, bool isScriptDatabaseBound, string name)
+            {
+                Id = id;
+                IsScriptDatabaseBound = isScriptDatabaseBound;
+                Name = name;
+            }
         }
     }
 }

@@ -776,7 +776,7 @@ namespace Game.Networking.Packets
         public sbyte ArenaSlot;
     }
 
-    struct BattlegroundCapturePointInfo
+    class BattlegroundCapturePointInfo
     {
         public ObjectGuid Guid;
         public Vector2 Pos;

@@ -680,7 +680,7 @@ namespace Game.Networking.Packets
         public DeclinedName DeclinedNames = new();
     }
 
-    public struct NameCacheUnused920
+    public class NameCacheUnused920
     {
         public uint Unused1;
         public ObjectGuid Unused2;
@@ -700,23 +700,23 @@ namespace Game.Networking.Packets
     public struct NameCacheLookupResult
     {
         public ObjectGuid Player;
-        public byte Result = 0; // 0 - full packet, != 0 - only guid
+        public byte Result; // 0 - full packet, != 0 - only guid
         public PlayerGuidLookupData Data;
-        public NameCacheUnused920? Unused920;
+        public NameCacheUnused920 Unused920;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Result);
             data.WritePackedGuid(Player);
             data.WriteBit(Data != null);
-            data.WriteBit(Unused920.HasValue);
+            data.WriteBit(Unused920 != null);
             data.FlushBits();
 
             if (Data != null)
                 Data.Write(data);
 
-            if (Unused920.HasValue)
-                Unused920.Value.Write(data);
+            if (Unused920 != null)
+                Unused920.Write(data);
         }
     }
 

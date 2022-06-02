@@ -354,13 +354,13 @@ namespace Game.DataStorage
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
-            uint pathCount = TaxiPathStorage.Keys.Max() + 1;
+            uint pathCount = TaxiPathStorage.GetNumRows();
 
             // Calculate path nodes count
             uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
             foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
                 if (pathLength[entry.PathID] < entry.NodeIndex + 1)
-                    pathLength[entry.PathID] = entry.NodeIndex + 1u;
+                    pathLength[entry.PathID] = (uint)entry.NodeIndex + 1u;
 
             // Set path length
             for (uint i = 0; i < pathCount; ++i)
@@ -370,7 +370,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            var taxiMaskSize = ((TaxiNodesStorage.Count - 1) / 8) + 1;
+            var taxiMaskSize = TaxiNodesStorage.GetNumRows() + 1;
             TaxiNodesMask = new byte[taxiMaskSize];
             OldContinentsNodesMask = new byte[taxiMaskSize];
             HordeTaxiNodesMask = new byte[taxiMaskSize];

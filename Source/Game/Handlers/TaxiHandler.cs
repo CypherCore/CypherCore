@@ -240,7 +240,7 @@ namespace Game
             {
                 if (GetPlayer().m_taxi.RequestEarlyLanding())
                 {
-                    flight.LoadPath(GetPlayer(), flight.GetPath()[(int)flight.GetCurrentNode()].NodeIndex);
+                    flight.LoadPath(GetPlayer(), (uint)flight.GetPath()[(int)flight.GetCurrentNode()].NodeIndex);
                     flight.Reset(GetPlayer());
                 }
             }

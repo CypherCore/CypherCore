@@ -31,8 +31,6 @@ namespace WorldServer
 {
     public class Server
     {
-        const uint WorldSleep = 1;
-
         static void Main()
         {
             //Set Culture

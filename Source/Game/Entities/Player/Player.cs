@@ -5983,7 +5983,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, i), 0);
 
             // Reset no reagent cost field
-            SetNoRegentCostMask(new Framework.Dynamic.FlagArray128());
+            SetNoRegentCostMask(new FlagArray128());
 
             // Init data for form but skip reapply item mods for form
             InitDataForForm(reapplyMods);

@@ -219,7 +219,7 @@ namespace Game.DataStorage
                         if (Header.HasIndexTable() && indexData.Length != sparseIndexData.Length)
                             throw new Exception("indexData.Length != sparseIndexData.Length");
 
-                        //indexData = sparseIndexData;
+                        indexData = sparseIndexData;
                     }
 
                     BitReader bitReader = new(recordsData);
@@ -328,7 +328,7 @@ namespace Game.DataStorage
                     else
                         return columnMeta.Common.DefaultValue.As<T>();
                 case DB2ColumnCompression.Pallet:
-                case DB2ColumnCompression.PalletArray: //need for SummonProperties.db2
+                case DB2ColumnCompression.PalletArray:
                     uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
                     return _palletData[fieldIndex][palletIndex].As<T>();
             }
@@ -363,12 +363,12 @@ namespace Game.DataStorage
 
                     return arr2;
                 case DB2ColumnCompression.SignedImmediate:
-                    T[] arr4 = new T[arraySize];
+                    T[] arr3 = new T[arraySize];
 
-                    for (int i = 0; i < arr4.Length; i++)
-                        arr4[i] = _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
+                    for (int i = 0; i < arr3.Length; i++)
+                        arr3[i] = _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
 
-                    return arr4;
+                    return arr3;
                 case DB2ColumnCompression.PalletArray:
                     int cardinality = columnMeta.Pallet.Cardinality;
 
@@ -377,12 +377,12 @@ namespace Game.DataStorage
 
                     uint palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
 
-                    T[] arr3 = new T[cardinality];
+                    T[] arr4 = new T[cardinality];
 
-                    for (int i = 0; i < arr3.Length; i++)
-                        arr3[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
+                    for (int i = 0; i < arr4.Length; i++)
+                        arr4[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
 
-                    return arr3;
+                    return arr4;
             }
             throw new Exception(string.Format("Unexpected compression type {0}", columnMeta.CompressionType));
         }

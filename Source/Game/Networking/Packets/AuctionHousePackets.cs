@@ -48,7 +48,7 @@ namespace Game.Networking.Packets
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
 
-            int sizeLimit = CliDB.BattlePetSpeciesStorage.Count / 8 +1;
+            uint sizeLimit = CliDB.BattlePetSpeciesStorage.GetNumRows() / 8 + 1;
             if (knownPetSize >= sizeLimit)
                 throw new System.Exception($"Attempted to read more array elements from packet {knownPetSize} than allowed {sizeLimit}");
 

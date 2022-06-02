@@ -28,7 +28,7 @@ namespace Framework.Dynamic
             _storage = new dynamic[length];
         }
 
-        public FlagsArray(params T[] parts)
+        public FlagsArray(T[] parts)
         {
             _storage = new dynamic[parts.Length];
             for (var i = 0; i < parts.Length; ++i)
@@ -37,64 +37,67 @@ namespace Framework.Dynamic
 
         public FlagsArray(T[] parts, uint length)
         {
-            _storage = new dynamic[length];
-            for (var i = 0; i < length && i < parts.Length; ++i)
+            for (var i = 0; i < parts.Length; ++i)
                 _storage[i] = parts[i];
         }
 
         public static bool operator <(FlagsArray<T> left, FlagsArray<T> right)
         {
-            for (var i = left._storage.Length; i > 0; --i)
+            for (int i = (int)left.GetSize(); i > 0; --i)
             {
-                if ((dynamic)left._storage[i - 1] < right._storage[i - 1])
+                if ((dynamic)left[i - 1] < right[i - 1])
                     return true;
-                else if ((dynamic)left._storage[i - 1] > right._storage[i - 1])
+                else if ((dynamic)left[i - 1] > right[i - 1])
                     return false;
             }
             return false;
         }
         public static bool operator >(FlagsArray<T> left, FlagsArray<T> right)
         {
-            for (var i = left._storage.Length; i > 0; --i)
+            for (int i = (int)left.GetSize(); i > 0; --i)
             {
-                if ((dynamic)left._storage[i - 1] > right._storage[i - 1])
+                if ((dynamic)left[i - 1] > right[i - 1])
                     return true;
-                else if ((dynamic)left._storage[i - 1] < right._storage[i - 1])
+                else if ((dynamic)left[i - 1] < right[i - 1])
                     return false;
             }
             return false;
         }
 
-        public static FlagArray128 operator &(FlagsArray<T> left, FlagsArray<T> right)
+        public static FlagsArray<T> operator &(FlagsArray<T> left, FlagsArray<T> right)
         {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._storage.Length; ++i)
-                fl[i] = left._storage[i] & right._storage[i];
+            FlagsArray<T> fl = new(left.GetSize());
+            for (var i = 0; i < left.GetSize(); ++i)
+                fl[i] = (dynamic)left[i] & right[i];
+
             return fl;
         }
-        public static FlagArray128 operator |(FlagsArray<T> left, FlagsArray<T> right)
+        public static FlagsArray<T> operator |(FlagsArray<T> left, FlagsArray<T> right)
         {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._storage.Length; ++i)
-                fl[i] = left._storage[i] | right._storage[i];
+            FlagsArray<T> fl = new(left.GetSize());
+            for (var i = 0; i < left.GetSize(); ++i)
+                fl[i] = (dynamic)left[i] | right[i];
+
             return fl;
         }
-        public static FlagArray128 operator ^(FlagsArray<T> left, FlagsArray<T> right)
+        public static FlagsArray<T> operator ^(FlagsArray<T> left, FlagsArray<T> right)
         {
-            FlagArray128 fl = new();
-            for (var i = 0; i < left._storage.Length; ++i)
-                fl[i] = left._storage[i] ^ right._storage[i];
+            FlagsArray<T> fl = new(left.GetSize());
+            for (var i = 0; i < left.GetSize(); ++i)
+                fl[i] = (dynamic)left[i] ^ right[i];
             return fl;
         }
 
         public static implicit operator bool(FlagsArray<T> left)
         {
-            for (var i = 0; i < left._storage.Length; ++i)
-                if (left._storage[i] != 0)
+            for (var i = 0; i < left.GetSize(); ++i)
+                if ((dynamic)left[i] != 0)
                     return true;
 
             return false;
         }
+
+        public uint GetSize() => (uint)_storage.Length;
 
         public T this[int i]
         {
@@ -111,7 +114,21 @@ namespace Framework.Dynamic
 
     public class FlagArray128 : FlagsArray<uint>
     {
-        public FlagArray128(params uint[] parts) : base(parts, 4) { }
+        public FlagArray128(uint p1 = 0, uint p2 = 0, uint p3 = 0, uint p4 = 0) : base(4)
+        {
+            _storage[0] = p1;
+            _storage[1] = p2;
+            _storage[2] = p3;
+            _storage[3] = p4;
+        }
+
+        public FlagArray128(uint[] parts) : base(4)
+        {
+            _storage[0] = parts[0];
+            _storage[1] = parts[1];
+            _storage[2] = parts[2];
+            _storage[3] = parts[3];
+        }
 
         public bool IsEqual(params uint[] parts)
         {
@@ -131,6 +148,28 @@ namespace Framework.Dynamic
         {
             for (var i = 0; i < parts.Length; ++i)
                 _storage[i] = parts[i];
+        }
+
+        public static FlagArray128 operator &(FlagArray128 left, FlagArray128 right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] & right._storage[i];
+            return fl;
+        }
+        public static FlagArray128 operator |(FlagArray128 left, FlagArray128 right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] | right._storage[i];
+            return fl;
+        }
+        public static FlagArray128 operator ^(FlagArray128 left, FlagArray128 right)
+        {
+            FlagArray128 fl = new();
+            for (var i = 0; i < left._storage.Length; ++i)
+                fl[i] = left._storage[i] ^ right._storage[i];
+            return fl;
         }
     }
 

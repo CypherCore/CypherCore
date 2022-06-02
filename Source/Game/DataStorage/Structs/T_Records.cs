@@ -72,7 +72,7 @@ namespace Game.DataStorage
         public Vector3 Loc;
         public uint Id;
         public ushort PathID;
-        public uint NodeIndex;
+        public int NodeIndex;
         public ushort ContinentID;
         public TaxiPathNodeFlags Flags;
         public uint Delay;

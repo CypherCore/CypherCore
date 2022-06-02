@@ -17,6 +17,7 @@
 
 using MySqlConnector;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Framework.Database
 {
@@ -39,15 +40,68 @@ namespace Framework.Database
 
         public T Read<T>(int column)
         {
-            var value = _reader[column];
-
-            if (value == DBNull.Value)
+            if (_reader.IsDBNull(column))
                 return default;
 
-            if (value.GetType() != typeof(T))
-                return (T)Convert.ChangeType(value, typeof(T));//todo remove me when all fields are the right type  this is super slow
+            var columnType = _reader.GetFieldType(column);
+            if (columnType == typeof(T))
+                return _reader.GetFieldValue<T>(column);
 
-            return (T)value;
+            switch (Type.GetTypeCode(columnType))
+            {
+                case TypeCode.SByte:
+                {
+                    var value = _reader.GetSByte(column);
+                    return Unsafe.As<sbyte, T>(ref value);
+                }
+                case TypeCode.Byte:
+                {
+                    var value = _reader.GetByte(column);
+                    return Unsafe.As<byte, T>(ref value);
+                }
+                case TypeCode.Int16:
+                {
+                    var value = _reader.GetInt16(column);
+                    return Unsafe.As<short, T>(ref value);
+                }
+                case TypeCode.UInt16:
+                {
+                    var value = _reader.GetUInt16(column);
+                    return Unsafe.As<ushort, T>(ref value);
+                }
+                case TypeCode.Int32:
+                {
+                    var value = _reader.GetInt32(column);
+                    return Unsafe.As<int, T>(ref value);
+                }
+                case TypeCode.UInt32:
+                {
+                    var value = _reader.GetUInt32(column);
+                    return Unsafe.As<uint, T>(ref value);
+                }
+                case TypeCode.Int64:
+                {
+                    var value = _reader.GetInt64(column);
+                    return Unsafe.As<long, T>(ref value);
+                }
+                case TypeCode.UInt64:
+                {
+                    var value = _reader.GetUInt64(column);
+                    return Unsafe.As<ulong, T>(ref value);
+                }
+                case TypeCode.Single:
+                {
+                    var value = _reader.GetFloat(column);
+                    return Unsafe.As<float, T>(ref value);
+                }
+                case TypeCode.Double:
+                {
+                    var value = _reader.GetDouble(column);
+                    return Unsafe.As<double, T>(ref value);
+                }
+            }
+
+            return default;
         }
 
         public T[] ReadValues<T>(int startIndex, int numColumns)
