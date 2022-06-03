@@ -3088,24 +3088,38 @@ namespace Game.Maps
         {
             AddToActiveHelper(obj);
 
-            if (obj.IsTypeId(TypeId.Unit))
+            Position respawnLocation = null;
+            switch (obj.GetTypeId())
             {
-                Creature c = obj.ToCreature();
-                // also not allow unloading spawn grid to prevent creating creature clone at load
-                if (!c.IsPet() && c.GetSpawnId() != 0)
-                {
-                    float x, y;
-                    c.GetRespawnPosition(out x, out y, out _);
-                    GridCoord p = GridDefines.ComputeGridCoord(x, y);
-                    if (GetGrid(p.X_coord, p.Y_coord) != null)
-                        GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
-                    else
+                case TypeId.Unit:
+                    Creature creature = obj.ToCreature();
+                    if (creature != null && !creature.IsPet() && creature.GetSpawnId() != 0)
                     {
-                        GridCoord p2 = GridDefines.ComputeGridCoord(c.GetPositionX(), c.GetPositionY());
-                        Log.outError(LogFilter.Maps,
-                            "Active creature (GUID: {0} Entry: {1}) added to grid[{2}, {3}] but spawn grid[{4}, {5}] was not loaded.",
-                            c.GetGUID().ToString(), c.GetEntry(), p.X_coord, p.Y_coord, p2.X_coord, p2.Y_coord);
+                        respawnLocation = new();
+                        creature.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ);
                     }
+                    break;
+                case TypeId.GameObject:
+                    GameObject gameObject = obj.ToGameObject(); ;
+                    if (gameObject != null && gameObject.GetSpawnId() != 0)
+                    {
+                        respawnLocation = new();
+                        gameObject.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ, out _);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (respawnLocation != null)
+            {
+                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
+                if (GetGrid(p.X_coord, p.Y_coord) != null)
+                    GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
+                else
+                {
+                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+                    Log.outError(LogFilter.Maps, $"Active object {obj.GetGUID()} added to grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
                 }
             }
         }
@@ -3119,24 +3133,38 @@ namespace Game.Maps
         {
             RemoveFromActiveHelper(obj);
 
-            if (obj.IsTypeId(TypeId.Unit))
+            Position respawnLocation = null;
+            switch (obj.GetTypeId())
             {
-                Creature c = obj.ToCreature();
-                // also allow unloading spawn grid
-                if (!c.IsPet() && c.GetSpawnId() != 0)
-                {
-                    float x, y;
-                    c.GetRespawnPosition(out x, out y, out _);
-                    GridCoord p = GridDefines.ComputeGridCoord(x, y);
-                    if (GetGrid(p.X_coord, p.Y_coord) != null)
-                        GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();
-                    else
+                case TypeId.Unit:
+                    Creature creature = obj.ToCreature();
+                    if (creature != null && !creature.IsPet() && creature.GetSpawnId() != 0)
                     {
-                        GridCoord p2 = GridDefines.ComputeGridCoord(c.GetPositionX(), c.GetPositionY());
-                        Log.outDebug(LogFilter.Maps,
-                            "Active creature (GUID: {0} Entry: {1}) removed from grid[{2}, {3}] but spawn grid[{4}, {5}] was not loaded.",
-                            c.GetGUID().ToString(), c.GetEntry(), p.X_coord, p.Y_coord, p2.X_coord, p2.Y_coord);
+                        respawnLocation = new();
+                        creature.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ);
                     }
+                    break;
+                case TypeId.GameObject:
+                    GameObject gameObject = obj.ToGameObject();
+                    if (gameObject != null && gameObject.GetSpawnId() != 0)
+                    {
+                        respawnLocation = new();
+                        gameObject.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ, out _);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (respawnLocation != null)
+            {
+                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
+                if (GetGrid(p.X_coord, p.Y_coord) != null)
+                    GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();
+                else
+                {
+                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+                    Log.outDebug(LogFilter.Maps, $"Active object {obj.GetGUID()} removed from grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
                 }
             }
         }
