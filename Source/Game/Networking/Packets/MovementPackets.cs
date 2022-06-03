@@ -490,7 +490,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public float SplineDist;
     }
-    
+
     public class MoveSplineSetSpeed : ServerPacket
     {
         public MoveSplineSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
@@ -1028,7 +1028,7 @@ namespace Game.Networking.Packets
         public ObjectGuid MoverGUID;
         public uint TimeSkipped;
     }
-    
+
     class SummonResponse : ClientPacket
     {
         public SummonResponse(WorldPacket packet) : base(packet) { }
@@ -1239,6 +1239,18 @@ namespace Game.Networking.Packets
         }
     }
 
+    class MoveInitActiveMoverComplete : ClientPacket
+    {
+        public uint Ticks;
+
+        public MoveInitActiveMoverComplete(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            _worldPacket.WriteUInt32(Ticks);
+        }
+    }
+    
     //Structs
     public struct MovementAck
     {

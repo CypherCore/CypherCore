@@ -780,6 +780,9 @@ namespace Game.Entities
                     GetName(), viewpoint.GetEntry(), viewpoint.GetTypeId());
                 SetViewpoint(viewpoint, false);
             }
+
+            RemovePlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
+            SetTransportServerTime(0);
         }
 
         void ScheduleDelayedOperation(PlayerDelayedOperations operation)
@@ -4097,6 +4100,13 @@ namespace Game.Entities
                     return true;
             }
             return false;
+        }
+
+        public override bool CanNeverSee(WorldObject obj)
+        {
+            // the intent is to delay sending visible objects until client is ready for them
+            // some gameobjects dont function correctly if they are sent before TransportServerTime is correctly set (after CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)
+            return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
         }
 
         public override bool CanAlwaysSee(WorldObject obj)
@@ -7738,6 +7748,8 @@ namespace Game.Entities
 
         public void AddAuraVision(PlayerFieldByte2Flags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
+
+        public void SetTransportServerTime(int transportServerTime) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); }
 
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 

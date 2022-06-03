@@ -828,5 +828,14 @@ namespace Game
                 _timeSyncClockDelta = back.Item1;
             }
         }
+
+        [WorldPacketHandler(ClientOpcodes.MoveInitActiveMoverComplete, Processing = PacketProcessing.ThreadSafe)]
+        void HandleMoveInitActiveMoverComplete(MoveInitActiveMoverComplete moveInitActiveMoverComplete)
+        {
+            _player.SetPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
+            _player.SetTransportServerTime((int)(GameTime.GetGameTimeMS() - moveInitActiveMoverComplete.Ticks));
+
+            _player.UpdateObjectVisibility(false);
+        }
     }
 }

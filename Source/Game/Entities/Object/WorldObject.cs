@@ -1232,7 +1232,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool CanNeverSee(WorldObject obj)
+        public virtual bool CanNeverSee(WorldObject obj)
         {
             return GetMap() != obj.GetMap() || !IsInPhase(obj);
         }
