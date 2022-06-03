@@ -2082,7 +2082,16 @@ namespace Game.Entities
             summonRequest.SummonerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             summonRequest.AreaID = (int)summoner.GetZoneId();
             SendPacket(summonRequest);
+
+            Group group = GetGroup();
+            if (group != null)
+            {
+                BroadcastSummonCast summonCast = new();
+                summonCast.Target = GetGUID();
+                group.BroadcastPacket(summonCast, false, -1, GetGUID());
+            }
         }
+
         public bool IsInAreaTriggerRadius(AreaTriggerRecord trigger)
         {
             if (trigger == null)
@@ -2114,15 +2123,31 @@ namespace Game.Entities
 
         public void SummonIfPossible(bool agree)
         {
+            void broadcastSummonResponse(bool accepted)
+            {
+                Group group = GetGroup();
+                if (group != null)
+                {
+                    BroadcastSummonResponse summonResponse = new();
+                    summonResponse.Target = GetGUID();
+                    summonResponse.Accepted = accepted;
+                    group.BroadcastPacket(summonResponse, false, -1, GetGUID());
+                }
+            }
+
             if (!agree)
             {
                 m_summon_expire = 0;
+                broadcastSummonResponse(false);
                 return;
             }
 
             // expire and auto declined
             if (m_summon_expire < GameTime.GetGameTime())
+            {
+                broadcastSummonResponse(false);
                 return;
+            }
 
             // stop taxi flight at summon
             FinishTaxiFlight();
@@ -2140,6 +2165,8 @@ namespace Game.Entities
 
             m_summon_location.SetOrientation(GetOrientation());
             TeleportTo(m_summon_location);
+
+            broadcastSummonResponse(true);
         }
 
         public override void OnPhaseChange()

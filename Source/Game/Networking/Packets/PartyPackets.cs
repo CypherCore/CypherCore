@@ -16,7 +16,7 @@
  */
 
 using Framework.Constants;
-using Framework.Dynamic;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Spells;
@@ -285,8 +285,13 @@ namespace Game.Networking.Packets
             MemberStats.WmoDoodadPlacementID = 0;
 
             // Vehicle
-            if (player.GetVehicle() && player.GetVehicle().GetVehicleInfo() != null)
-                MemberStats.VehicleSeat = player.GetVehicle().GetVehicleInfo().SeatID[player.m_movementInfo.transport.seat];
+            Vehicle vehicle = player.GetVehicle();
+            if (vehicle != null)
+            {
+                VehicleSeatRecord vehicleSeat = vehicle.GetSeatForPassenger(player);
+                if (vehicleSeat != null)
+                    MemberStats.VehicleSeat = (int)vehicleSeat.Id;
+            }
 
             // Auras
             foreach (AuraApplication aurApp in player.GetVisibleAuras())
@@ -874,6 +879,33 @@ namespace Game.Networking.Packets
         public ObjectGuid Victim;
     }
 
+    class BroadcastSummonCast : ServerPacket
+    {
+        public ObjectGuid Target;
+
+        public BroadcastSummonCast() : base(ServerOpcodes.BroadcastSummonCast) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Target);
+        }
+    }
+
+    class BroadcastSummonResponse : ServerPacket
+    {
+        public ObjectGuid Target;
+        public bool Accepted;
+
+        public BroadcastSummonResponse() : base(ServerOpcodes.BroadcastSummonResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Target);
+            _worldPacket.WriteBit(Accepted);
+            _worldPacket.FlushBits();
+        }
+    }
+    
     //Structs
     public struct PartyMemberPhase
     {
