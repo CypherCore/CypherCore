@@ -1386,21 +1386,7 @@ namespace Game.Entities
             int level = (minlevel == maxlevel ? minlevel : RandomHelper.IRand(minlevel, maxlevel));
             SetLevel((uint)level);
 
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-
-            var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
-            if (levels != null)
-            {
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
-            }
-
-            int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
-            int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
-            int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), scaling.ContentTuningID);
+            ApplyLevelScaling();
 
             UpdateLevelDependantStats();
         }
@@ -2610,10 +2596,25 @@ namespace Game.Entities
 
         public bool HasScalableLevels()
         {
-            CreatureTemplate cinfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cinfo.GetLevelScaling(GetMap().GetDifficultyID());
+            return m_unitData.ContentTuningID != 0;
+        }
 
-            return scaling.ContentTuningID != 0;
+        public void ApplyLevelScaling()
+        {
+            CreatureLevelScaling scaling = GetCreatureTemplate().GetLevelScaling(GetMap().GetDifficultyID());
+            var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
+            if (levels.HasValue)
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
+            }
+
+            int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), scaling.ContentTuningID);
         }
 
         ulong GetMaxHealthByLevel(uint level)

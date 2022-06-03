@@ -574,9 +574,9 @@ namespace Game.Entities
             {
                 // remove elite bonuses included in DB values
                 CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
-                CreatureLevelScaling scaling = cinfo.GetLevelScaling(GetMap().GetDifficultyID());
+                ApplyLevelScaling();
 
-                SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
+                SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
                 SetCreateMana(stats.GenerateMana(cinfo));
 
                 SetCreateStat(Stats.Strength, 22);
