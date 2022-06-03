@@ -1149,15 +1149,6 @@ namespace Game.AI
 
                         break;
                     }
-                    case SmartEvents.ActionDone:
-                    {
-                        if (e.Event.doAction.eventId > EventId.Charge)
-                        {
-                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid event id {e.Event.doAction.eventId}, skipped.");
-                            return false;
-                        }
-                        break;
-                    }
                     case SmartEvents.FriendlyHealthPCT:
                         if (!IsMinMaxValid(e, e.Event.friendlyHealthPct.repeatMin, e.Event.friendlyHealthPct.repeatMax))
                             return false;
@@ -1284,6 +1275,7 @@ namespace Game.AI
                     case SmartEvents.TransportRelocate:
                     case SmartEvents.CorpseRemoved:
                     case SmartEvents.AiInit:
+                    case SmartEvents.ActionDone:
                     case SmartEvents.TransportAddplayer:
                     case SmartEvents.TransportRemovePlayer:
                     case SmartEvents.Aggro:
