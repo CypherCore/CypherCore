@@ -186,7 +186,7 @@ namespace Scripts.World.ItemScripts
             if (player.GetZoneId() != Misc.ZoneIdHowling)
                 return false;
 
-            if (!player.GetTransport() || player.GetAreaId() != Misc.AreaIdShatteredStraits)
+            if (player.GetTransport() == null || player.GetAreaId() != Misc.AreaIdShatteredStraits)
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PetrovBomb, Difficulty.None);
                 if (spellInfo != null)

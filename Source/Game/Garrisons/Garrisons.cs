@@ -839,7 +839,7 @@ namespace Game.Garrisons
                 float y = spawn.GetPositionY();
                 float z = spawn.GetPositionZ();
                 float o = spawn.GetOrientation();
-                TransportPosHelper.CalculatePassengerPosition(ref x, ref y, ref z, ref o, building.GetPositionX(), building.GetPositionY(), building.GetPositionZ(), building.GetOrientation());
+                ITransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o, building.GetPositionX(), building.GetPositionY(), building.GetPositionZ(), building.GetOrientation());
 
                 spawn.Relocate(x, y, z, o);
                 switch (spawn.GetTypeId())

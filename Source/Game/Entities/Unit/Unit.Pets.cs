@@ -295,7 +295,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (IsTypeId(TypeId.Player) && ToPlayer().GetTransport())
+            if (IsPlayer() && ToPlayer().GetTransport() != null)
             {
                 Log.outFatal(LogFilter.Unit, "Unit:SetCharmedBy: Player on transport is trying to charm {0} (GUID {1})", GetEntry(), GetGUID().ToString());
                 return false;

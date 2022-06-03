@@ -111,8 +111,8 @@ namespace Game.Entities
             if (IsWorldObject())
                 SetActive(true);    //must before add to map to be put in world container
 
-            Transport transport = caster.GetTransport();
-            if (transport)
+            ITransport transport = caster.GetTransport();
+            if (transport != null)
             {
                 float x, y, z, o;
                 pos.GetPosition(out x, out y, out z, out o);
@@ -126,7 +126,7 @@ namespace Game.Entities
             if (!GetMap().AddToMap(this))
             {
                 // Returning false will cause the object to be deleted - remove from transport
-                if (transport)
+                if (transport != null)
                     transport.RemovePassenger(this);
                 return false;
             }

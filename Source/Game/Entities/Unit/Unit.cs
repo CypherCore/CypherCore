@@ -1003,7 +1003,7 @@ namespace Game.Entities
             }
 
             Cypher.Assert(!m_vehicle);
-            vehicle.AddPassenger(this, seatId);
+            vehicle.AddVehiclePassenger(this, seatId);
         }
 
         public void ChangeSeat(sbyte seatId, bool next = true)
@@ -1067,7 +1067,7 @@ namespace Game.Entities
 
             // This should be done before dismiss, because there may be some aura removal
             VehicleSeatAddon seatAddon = m_vehicle.GetSeatAddonForSeatOfPassenger(this);
-            Vehicle vehicle = m_vehicle.RemovePassenger(this);
+            Vehicle vehicle = (Vehicle)m_vehicle.RemovePassenger(this);
 
             if (vehicle == null)
             {
@@ -1997,6 +1997,12 @@ namespace Game.Entities
         public void SetUnitFlag3(UnitFlags3 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
         public void RemoveUnitFlag3(UnitFlags3 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
         public void ReplaceAllUnitFlags3(UnitFlags3 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
+
+        public UnitDynFlags GetDynamicFlags() { return (UnitDynFlags)(uint)m_objectData.DynamicFlags; }
+        public bool HasDynamicFlag(UnitDynFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
+        public void SetDynamicFlag(UnitDynFlags flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
         public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
 

@@ -1360,7 +1360,7 @@ namespace Game.AI
                         break;
 
                     if (e.GetTargetType() == SmartTargets.Self)
-                        _me.SetFacingTo((_me.GetTransport() ? _me.GetTransportHomePosition() : _me.GetHomePosition()).GetOrientation());
+                        _me.SetFacingTo((_me.GetTransport() != null ? _me.GetTransportHomePosition() : _me.GetHomePosition()).GetOrientation());
                     else if (e.GetTargetType() == SmartTargets.Position)
                         _me.SetFacingTo(e.Target.o);
                     else if (!targets.Empty())

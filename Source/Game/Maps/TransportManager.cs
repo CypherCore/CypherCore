@@ -425,6 +425,18 @@ namespace Game.Maps
             _transportAnimations[transportEntry] = animNode;
         }
 
+        public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
+        {
+            if (!_transportAnimations.ContainsKey(transportEntry))
+                _transportAnimations[transportEntry] = new();
+
+            TransportAnimation animNode = _transportAnimations[transportEntry];
+            animNode.Rotations[timeSeg] = node;
+
+            if (animNode.Path.Empty() && animNode.TotalTime < timeSeg)
+                animNode.TotalTime = timeSeg;
+        }
+
         public Transport CreateTransport(uint entry, ulong guid = 0, Map map = null, PhaseUseFlagsValues phaseUseFlags = 0, uint phaseId = 0, uint phaseGroupId = 0)
         {
             // instance case, execute GetGameObjectEntry hook
@@ -530,14 +542,6 @@ namespace Game.Maps
         {
             return _transportSpawns.LookupByKey(spawnId);
         }
-        
-        public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
-        {
-            if (!_transportAnimations.ContainsKey(transportEntry))
-                _transportAnimations[transportEntry] = new TransportAnimation();
-
-            _transportAnimations[transportEntry].Rotations[timeSeg] = node;
-        }
 
         Dictionary<uint, TransportTemplate> _transportTemplates = new();
         MultiMap<uint, uint> _instanceTransports = new();
@@ -557,8 +561,8 @@ namespace Game.Maps
             mode = Spline.EvaluationMode.Catmullrom;
             cyclic = false;
             points = new Vector3[_points.Count];
-            
-            for(var i = 0; i < _points.Count; ++i)
+
+            for (var i = 0; i < _points.Count; ++i)
                 points[i] = _points[i];
 
             lo = 1;
@@ -627,26 +631,59 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        TransportAnimationRecord GetAnimNode(uint time)
+        public Dictionary<uint, TransportAnimationRecord> Path = new();
+        public Dictionary<uint, TransportRotationRecord> Rotations = new();
+        public uint TotalTime;
+
+        public TransportAnimationRecord GetPrevAnimNode(uint time)
         {
             if (Path.Empty())
                 return null;
 
-            foreach (var pair in Path)
-                if (time >= pair.Key)
-                    return pair.Value;
+            List<uint> lKeys = Path.Keys.ToList();
+            int reqIndex = lKeys.IndexOf(time) - 1;
 
-            return Path.First().Value;
+            if (reqIndex != -1)
+                return Path[lKeys[reqIndex]];
+
+            return Path.LastOrDefault().Value;
         }
 
-        TransportRotationRecord GetAnimRotation(uint time)
+        public TransportRotationRecord GetPrevAnimRotation(uint time)
         {
-            return Rotations.LookupByKey(time);
+            if (Rotations.Empty())
+                return null;
+
+            List<uint> lKeys = Rotations.Keys.ToList();
+            int reqIndex = lKeys.IndexOf(time) - 1;
+
+            if (reqIndex != -1)
+                return Rotations[lKeys[reqIndex]];
+
+            return Rotations.LastOrDefault().Value;
         }
 
-        public Dictionary<uint, TransportAnimationRecord> Path = new();
-        public Dictionary<uint, TransportRotationRecord> Rotations = new();
-        public uint TotalTime;
+        public TransportAnimationRecord GetNextAnimNode(uint time)
+        {
+            if (Path.Empty())
+                return null;
+
+            if (Path.TryGetValue(time, out TransportAnimationRecord record))
+                return record;
+
+            return Path.FirstOrDefault().Value;
+        }
+
+        public TransportRotationRecord GetNextAnimRotation(uint time)
+        {
+            if (Rotations.Empty())
+                return null;
+
+            if (Rotations.TryGetValue(time, out TransportRotationRecord record))
+                return record;
+
+            return Rotations.FirstOrDefault().Value;
+        }
     }
 
     public class TransportSpawn

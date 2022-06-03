@@ -1254,7 +1254,12 @@ namespace Game.Entities
                 return;
             }
 
-            uint mapId = GetTransport() ? (uint)GetTransport().GetGoInfo().MoTransport.SpawnMap : GetMapId();
+            uint mapId = GetMapId();
+            ITransport transport = GetTransport();
+            if (transport != null)
+                if (transport.GetMapIdForSpawning() >= 0)
+                    mapId = (uint)transport.GetMapIdForSpawning();
+
             SaveToDB(mapId, data.SpawnDifficulties);
         }
 

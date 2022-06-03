@@ -291,7 +291,7 @@ namespace Game.Entities
             // @VehicleJoinEvent.Abort
         }
 
-        public bool AddPassenger(Unit unit, sbyte seatId)
+        public bool AddVehiclePassenger(Unit unit, sbyte seatId)
         {
             // @Prevent adding passengers when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
             if (_status == Status.UnInstalling)
@@ -355,8 +355,12 @@ namespace Game.Entities
             return true;
         }
 
-        public Vehicle RemovePassenger(Unit unit)
+        public ITransport RemovePassenger(WorldObject passenger)
         {
+            Unit unit = passenger.ToUnit();
+            if (unit == null)
+                return null;
+
             if (unit.GetVehicle() != this)
                 return null;
 
@@ -421,8 +425,8 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var pair in seatRelocation)
-                pair.Item1.UpdatePosition(pair.Item2);
+            foreach (var (passenger, position) in seatRelocation)
+                ITransport.UpdatePassengerPosition(this, _me.GetMap(), passenger, position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation(), false);
         }
 
         public bool IsVehicleInUse()
@@ -487,20 +491,28 @@ namespace Game.Entities
             return ret;
         }
 
+        public ObjectGuid GetTransportGUID() { return GetBase().GetGUID(); }
+
+        public float GetTransportOrientation() { return GetBase().GetOrientation(); }
+
+        public void AddPassenger(WorldObject passenger) { Log.outFatal(LogFilter.Vehicle, "Vehicle cannot directly gain passengers without auras"); }
+        
         public void CalculatePassengerPosition(ref float x, ref float y, ref float z, ref float o)
         {
-            TransportPosHelper.CalculatePassengerPosition(ref x, ref y, ref z, ref o, 
+            ITransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o, 
                 GetBase().GetPositionX(), GetBase().GetPositionY(), 
                 GetBase().GetPositionZ(), GetBase().GetOrientation());
         }
 
         public void CalculatePassengerOffset(ref float x, ref float y, ref float z, ref float o)
         {
-            TransportPosHelper.CalculatePassengerOffset(ref x, ref y, ref z, ref o,
+            ITransport.CalculatePassengerOffset(ref x, ref y, ref z, ref o,
                 GetBase().GetPositionX(), GetBase().GetPositionY(),
                 GetBase().GetPositionZ(), GetBase().GetOrientation());
         }
 
+        public int GetMapIdForSpawning() { return (int)GetBase().GetMapId(); }
+        
         public void RemovePendingEvent(VehicleJoinEvent e)
         {
             foreach (var Event in _pendingJoinEvents)

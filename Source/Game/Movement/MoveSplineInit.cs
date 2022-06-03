@@ -222,11 +222,14 @@ namespace Game.Movement
             if (args.TransformForTransport)
             {
                 Unit vehicle = unit.GetVehicleBase();
-                Transport transport = unit.GetTransport();
                 if (vehicle != null)
-                    angle -= vehicle.Orientation;
-                else if (transport != null)
-                    angle -= transport.Orientation;
+                    angle -= vehicle.GetOrientation();
+                else
+                {
+                    ITransport transport = unit.GetTransport();
+                    if (transport != null)
+                        angle -= transport.GetTransportOrientation();
+                }
             }
 
             args.facing.angle = MathFunctions.wrap(angle, 0.0f, MathFunctions.TwoPi);

@@ -93,7 +93,7 @@ namespace Framework.Constants
         Max = 3
     }
 
-    public enum GameObjectDynamicLowFlags
+    public enum GameObjectDynamicLowFlags : ushort
     {
         HideModel = 0x02,
         Activate = 0x04,

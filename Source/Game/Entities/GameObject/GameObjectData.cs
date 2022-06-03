@@ -544,6 +544,8 @@ namespace Game.Entities
                     return SpellFocus.GiganticAOI != 0;
                 case GameObjectTypes.Goober:
                     return Goober.GiganticAOI != 0;
+                case GameObjectTypes.Transport:
+                    return true;
                 case GameObjectTypes.SpellCaster:
                     return SpellCaster.GiganticAOI != 0;
                 case GameObjectTypes.FlagStand:

@@ -103,7 +103,7 @@ namespace Game.Maps
         {
             // at this moment i_clientGUIDs have guids that not iterate at grid level checks
             // but exist one case when this possible and object not out of range: transports
-            Transport transport = i_player.GetTransport();
+            Transport transport = i_player.GetTransport<Transport>();
             if (transport)
             {
                 foreach (var obj in transport.GetPassengers())
@@ -127,6 +127,9 @@ namespace Game.Maps
                                 break;
                             case TypeId.DynamicObject:
                                 i_player.UpdateVisibilityOf(obj.ToDynamicObject(), i_data, i_visibleNow);
+                                break;
+                            case TypeId.AreaTrigger:
+                                i_player.UpdateVisibilityOf(obj.ToAreaTrigger(), i_data, i_visibleNow);
                                 break;
                             default:
                                 break;

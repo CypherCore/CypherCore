@@ -1686,8 +1686,8 @@ namespace Game.Entities
             {
                 Log.outDebug(LogFilter.Maps, "Player {0} using client without required expansion tried teleport to non accessible map {1}", GetName(), mapid);
 
-                Transport _transport = GetTransport();
-                if (_transport)
+                ITransport _transport = GetTransport();
+                if (_transport != null)
                 {
                     _transport.RemovePassenger(this);
                     RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
@@ -1708,8 +1708,8 @@ namespace Game.Entities
             DisableSpline();
             GetMotionMaster().Remove(MovementGeneratorType.Effect);
 
-            Transport transport = GetTransport();
-            if (transport)
+            ITransport transport = GetTransport();
+            if (transport != null)
             {
                 if (!options.HasAnyFlag(TeleportToOptions.NotLeaveTransport))
                     transport.RemovePassenger(this);
@@ -1849,11 +1849,11 @@ namespace Game.Entities
                     transferPending.MapID = (int)mapid;
                     transferPending.OldMapPosition = GetPosition();
 
-                    transport = GetTransport();
-                    if (transport)
+                    Transport transport1 = (Transport)GetTransport();
+                    if (transport1 != null)
                     {
                         TransferPending.ShipTransferPending shipTransferPending = new();
-                        shipTransferPending.Id = transport.GetEntry();
+                        shipTransferPending.Id = transport1.GetEntry();
                         shipTransferPending.OriginMapID = (int)GetMapId();
                         transferPending.Ship = shipTransferPending;
                     }
@@ -6242,14 +6242,6 @@ namespace Game.Entities
         {
             switch (target.GetTypeId())
             {
-                case TypeId.GameObject:
-                    // @HACK: This is to prevent objects like deeprun tram from disappearing when player moves far from its spawn point while riding it
-                    // But exclude stoppable elevators from this hack - they would be teleporting from one end to another
-                    // if affected transports move so far horizontally that it causes them to run out of visibility range then you are out of luck
-                    // fix visibility instead of adding hacks here
-                    if (!target.ToGameObject().IsDynTransport())
-                        s64.Add(target.GetGUID());
-                    break;
                 case TypeId.Unit:
                     s64.Add(target.GetGUID());
                     v.Add(target.ToCreature());

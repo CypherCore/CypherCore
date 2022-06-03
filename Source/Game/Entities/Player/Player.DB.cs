@@ -3429,8 +3429,9 @@ namespace Game.Entities
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
                 ulong transLowGUID = 0;
-                if (GetTransport())
-                    transLowGUID = GetTransport().GetGUID().GetCounter();
+                Transport transport = GetTransport<Transport>();
+                if (transport != null)
+                    transLowGUID = transport.GetGUID().GetCounter();
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new();
@@ -3570,8 +3571,9 @@ namespace Game.Entities
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
                 ulong transLowGUID = 0;
-                if (GetTransport())
-                    transLowGUID = GetTransport().GetGUID().GetCounter();
+                Transport transport = GetTransport<Transport>();
+                if (transport != null)
+                    transLowGUID = transport.GetGUID().GetCounter();
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new();

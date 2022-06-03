@@ -7077,8 +7077,8 @@ namespace Game.Spells
 
                     if (target.GetGUID() != corpse.GetOwnerGUID())
                         return false;
-
-                    if (!corpse.HasDynamicFlag(UnitDynFlags.Lootable))
+                    
+                    if (!corpse.HasCorpseDynamicFlag(CorpseDynFlags.Lootable))
                         return false;
 
                     if (!corpse.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))

@@ -1079,7 +1079,7 @@ namespace Game.Chat
         [Command("transport", RBACPermissions.CommandDebugTransport)]
         static bool HandleDebugTransportCommand(CommandHandler handler, string operation)
         {
-            Transport transport = handler.GetSession().GetPlayer().GetTransport();
+            Transport transport = handler.GetSession().GetPlayer().GetTransport<Transport>();
             if (!transport)
                 return false;
 

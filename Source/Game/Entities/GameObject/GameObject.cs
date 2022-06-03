@@ -60,8 +60,6 @@ namespace Game.Entities
         {
             m_AI = null;
             m_model = null;
-            if (m_goInfo != null && m_goInfo.type == GameObjectTypes.Transport)
-                m_goValue.Transport.StopFrames.Clear();
 
             base.Dispose();
         }
@@ -311,38 +309,15 @@ namespace Game.Entities
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
                     break;
                 case GameObjectTypes.Transport:
-                    m_goValue.Transport.AnimationInfo = Global.TransportMgr.GetTransportAnimInfo(goInfo.entry);
-                    m_goValue.Transport.PathProgress = Time.GetMSTime();
-                    if (!m_goValue.Transport.AnimationInfo.Path.Empty())
-                        m_goValue.Transport.PathProgress -= m_goValue.Transport.PathProgress % GetTransportPeriod();    // align to period
-                    m_goValue.Transport.CurrentSeg = 0;
-                    m_goValue.Transport.StateUpdateTimer = 0;
-                    m_goValue.Transport.StopFrames = new List<uint>();
-                    if (goInfo.Transport.Timeto2ndfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto2ndfloor);
-                    if (goInfo.Transport.Timeto3rdfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto3rdfloor);
-                    if (goInfo.Transport.Timeto4thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto4thfloor);
-                    if (goInfo.Transport.Timeto5thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto5thfloor);
-                    if (goInfo.Transport.Timeto6thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto6thfloor);
-                    if (goInfo.Transport.Timeto7thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto7thfloor);
-                    if (goInfo.Transport.Timeto8thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto8thfloor);
-                    if (goInfo.Transport.Timeto9thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto9thfloor);
-                    if (goInfo.Transport.Timeto10thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto10thfloor);
+                    m_goTypeImpl = new GameObjectType.Transport(this);
 
                     if (goInfo.Transport.startOpen != 0)
-                        SetTransportState(GameObjectState.TransportStopped, goInfo.Transport.startOpen - 1);
+                        SetGoState(GameObjectState.TransportStopped);
                     else
-                        SetTransportState(GameObjectState.TransportActive);
+                        SetGoState(GameObjectState.TransportActive);
 
                     SetGoAnimProgress(animProgress);
+                    SetActive(true);
                     break;
                 case GameObjectTypes.FishingNode:
                     SetLevel(1);
@@ -452,6 +427,9 @@ namespace Game.Entities
                 }
             }
 
+            if (m_goTypeImpl != null)
+                m_goTypeImpl.Update(diff);
+
             switch (m_lootState)
             {
                 case LootState.NotReady:
@@ -475,50 +453,6 @@ namespace Game.Entities
                             m_lootState = LootState.Ready;
                             break;
                         }
-                        case GameObjectTypes.Transport:
-                            if (m_goValue.Transport.AnimationInfo.Path.Empty())
-                                break;
-
-                            m_goValue.Transport.PathProgress += diff;
-
-                            if (GetGoState() == GameObjectState.TransportActive)
-                            {
-                                m_goValue.Transport.PathProgress += diff;
-                                /* TODO: Fix movement in unloaded grid - currently GO will just disappear
-                                public uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
-                                TransportAnimationEntry const* node = m_goValue.Transport.AnimationInfo.GetAnimNode(timer);
-                                if (node && m_goValue.Transport.CurrentSeg != node.TimeSeg)
-                                {
-                                m_goValue.Transport.CurrentSeg = node.TimeSeg;
-
-                                G3D.Quat rotation = m_goValue.Transport.AnimationInfo.GetAnimRotation(timer);
-                                G3D.Vector3 pos = rotation.toRotationMatrix()
-                                G3D.Matrix3.fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f)
-                                G3D.Vector3(node.X, node.Y, node.Z);
-
-                                pos += G3D.Vector3(GetStationaryX(), GetStationaryY(), GetStationaryZ());
-
-                                G3D.Vector3 src(GetPositionX(), GetPositionY(), GetPositionZ());
-
-                                TC_LOG_DEBUG("misc", "Src: {0} Dest: {1}", src.toString().c_str(), pos.toString().c_str());
-
-                                GetMap().GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
-                                }
-                                */
-                                if (!m_goValue.Transport.StopFrames.Empty())
-                                {
-                                    uint visualStateBefore = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
-                                    m_goValue.Transport.StateUpdateTimer += diff;
-                                    uint visualStateAfter = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
-                                    if (visualStateBefore != visualStateAfter)
-                                    {
-                                        m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level);
-                                        m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State);
-                                        ForceUpdateFieldChange();
-                                    }
-                                }
-                            }
-                            break;
                         case GameObjectTypes.FishingNode:
                         {
                             // fishing code (bobber ready)
@@ -1072,7 +1006,13 @@ namespace Game.Entities
                 return;
             }
 
-            SaveToDB(GetMapId(), data.SpawnDifficulties);
+            uint mapId = GetMapId();
+            ITransport transport = GetTransport();
+            if (transport != null)
+                if (transport.GetMapIdForSpawning() >= 0)
+                    mapId = (uint)transport.GetMapIdForSpawning();
+
+            SaveToDB(mapId, data.SpawnDifficulties);
         }
 
         public void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
@@ -1293,7 +1233,7 @@ namespace Game.Entities
             if (gInfo == null)
                 return false;
 
-            return gInfo.type == GameObjectTypes.MapObjTransport || (gInfo.type == GameObjectTypes.Transport && m_goValue.Transport.StopFrames.Empty());
+            return gInfo.type == GameObjectTypes.MapObjTransport || gInfo.type == GameObjectTypes.Transport;
         }
 
         public bool IsDestructibleBuilding()
@@ -1581,7 +1521,7 @@ namespace Game.Entities
                 case GameObjectActions.GoTo9thFloor:
                 case GameObjectActions.GoTo10thFloor:
                     if (GetGoType() == GameObjectTypes.Transport)
-                        SetTransportState(GameObjectState.TransportStopped, (uint)(action - GameObjectActions.GoTo1stFloor));
+                        SetGoState((GameObjectState)action);
                     else
                         Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only action \"Go to Floor\" {action} in effect {effectIndex}");
                     break;
@@ -2453,7 +2393,7 @@ namespace Game.Entities
         {
             Quaternion localRotation = GetLocalRotation();
 
-            Transport transport = GetTransport();
+            Transport transport = GetTransport<Transport>();
             if (transport != null)
             {
                 Quaternion worldRotation = transport.GetWorldRotation();
@@ -2473,7 +2413,7 @@ namespace Game.Entities
         {
             return $"{base.GetDebugInfo()}\nSpawnId: {GetSpawnId()} GoState: {GetGoState()} ScriptId: {GetScriptId()} AIName: {GetAIName()}";
         }
-        
+
         public bool IsAtInteractDistance(Player player, SpellInfo spell = null)
         {
             if (spell != null || (spell = GetSpellForLock(player)) != null)
@@ -2518,7 +2458,7 @@ namespace Game.Entities
         {
             return IsInMap(player) && IsInPhase(player) && IsAtInteractDistance(player);
         }
-        
+
         public SpellInfo GetSpellForLock(Player player)
         {
             if (!player)
@@ -2563,7 +2503,6 @@ namespace Game.Entities
             return null;
         }
 
-        
         public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
             if (m_goValue.Building.MaxHealth == 0 || change == 0)
@@ -2742,9 +2681,14 @@ namespace Game.Entities
 
         public void SetGoState(GameObjectState state)
         {
+            GameObjectState oldState = GetGoState();
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State), (sbyte)state);
             if (GetAI() != null)
                 GetAI().OnStateChanged(state);
+
+            if (m_goTypeImpl != null)
+                m_goTypeImpl.OnStateChanged(oldState, state);
+
             if (m_model != null && !IsTransport())
             {
                 if (!IsInWorld)
@@ -2756,38 +2700,6 @@ namespace Game.Entities
                     collision = !collision;
 
                 EnableCollision(collision);
-            }
-        }
-
-        public virtual uint GetTransportPeriod()
-        {
-            Cypher.Assert(GetGoInfo().type == GameObjectTypes.Transport);
-            if (!m_goValue.Transport.AnimationInfo.Path.Empty())
-                return m_goValue.Transport.AnimationInfo.TotalTime;
-
-            return 0;
-        }
-
-        public void SetTransportState(GameObjectState state, uint stopFrame = 0)
-        {
-            if (GetGoState() == state)
-                return;
-
-            Cypher.Assert(GetGoInfo().type == GameObjectTypes.Transport);
-            Cypher.Assert(state >= GameObjectState.TransportActive);
-            if (state == GameObjectState.TransportActive)
-            {
-                m_goValue.Transport.StateUpdateTimer = 0;
-                m_goValue.Transport.PathProgress = Time.GetMSTime();
-                if (GetGoState() >= GameObjectState.TransportStopped)
-                    m_goValue.Transport.PathProgress += m_goValue.Transport.StopFrames.LookupByIndex(GetGoState() - GameObjectState.TransportStopped);
-                SetGoState(GameObjectState.TransportActive);
-            }
-            else
-            {
-                Cypher.Assert(stopFrame < m_goValue.Transport.StopFrames.Count);
-                m_goValue.Transport.PathProgress = Time.GetMSTime() + m_goValue.Transport.StopFrames[(int)stopFrame];
-                SetGoState((GameObjectState)((int)GameObjectState.TransportStopped + stopFrame));
             }
         }
 
@@ -2985,12 +2897,64 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        public List<uint> GetPauseTimes()
+        {
+            GameObjectType.Transport transport = m_goTypeImpl as GameObjectType.Transport;
+            if (transport != null)
+                return transport.GetPauseTimes();
+
+            return null;
+        }
+
+        public void SetPathProgressForClient(float progress)
+        {
+            DoWithSuppressingObjectUpdates(() =>
+            {
+                ObjectFieldData dynflagMask = new();
+                dynflagMask.MarkChanged(m_objectData.DynamicFlags);
+                bool marked = (m_objectData.GetUpdateMask() & dynflagMask.GetUpdateMask()).IsAnySet();
+
+                uint dynamicFlags = (uint)GetDynamicFlags();
+                dynamicFlags &= 0xFFFF; // remove high bits
+                dynamicFlags |= (uint)(progress * 65535.0f) << 16;
+                ReplaceAllDynamicFlags((GameObjectDynamicLowFlags)dynamicFlags);
+
+                if (!marked)
+                    m_objectData.ClearChanged(m_objectData.DynamicFlags);
+            });
+        }
+
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
         {
             if (m_goData != null)
                 m_goData.SpawnPoint.GetPosition(out x, out y, out z, out ori);
             else
                 GetPosition(out x, out y, out z, out ori);
+        }
+
+        public ITransport ToTransportBase()
+        {
+            switch (GetGoType())
+            {
+                case GameObjectTypes.Transport:
+                    return (GameObjectType.Transport)m_goTypeImpl;
+                case GameObjectTypes.MapObjTransport:
+                    return (Transport)this;
+                default:
+                    break;
+            }
+
+            return null;
+        }
+
+        public void AfterRelocation()
+        {
+            UpdateModelPosition();
+            UpdatePositionData();
+            if (m_goTypeImpl != null)
+                m_goTypeImpl.OnRelocated();
+
+            UpdateObjectVisibility(false);
         }
 
         public float GetInteractionDistance()
@@ -3239,7 +3203,7 @@ namespace Game.Entities
             return m_goValue.CapturePoint.State == BattlegroundCapturePointState.ContestedHorde
                 || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
         }
-        
+
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
@@ -3307,6 +3271,12 @@ namespace Game.Entities
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
+
+        public GameObjectDynamicLowFlags GetDynamicFlags() { return (GameObjectDynamicLowFlags)(uint)m_objectData.DynamicFlags; }
+        public bool HasDynamicFlag(GameObjectDynamicLowFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
+        public void SetDynamicFlag(GameObjectDynamicLowFlags flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void RemoveDynamicFlag(GameObjectDynamicLowFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void ReplaceAllDynamicFlags(GameObjectDynamicLowFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
         public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }
         public void SetGoType(GameObjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.TypeID), (sbyte)type); }
@@ -3389,6 +3359,7 @@ namespace Game.Entities
         public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }
         public override float GetStationaryZ() { return StationaryPosition.GetPositionZ(); }
         public override float GetStationaryO() { return StationaryPosition.GetOrientation(); }
+        public Position GetStationaryPosition() { return StationaryPosition; }
 
         public void RelocateStationaryPosition(float x, float y, float z, float o) { StationaryPosition.Relocate(x, y, z, o); }
 
@@ -3407,6 +3378,12 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, deliverer, GetVisibilityRange());
         }
 
+        void HandleCustomTypeCommand(GameObjectTypeBase.CustomCommand command)
+        {
+            if (m_goTypeImpl != null)
+                command.Execute(m_goTypeImpl);
+        }
+
         public void CreateModel()
         {
             m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
@@ -3419,8 +3396,9 @@ namespace Game.Entities
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
         #region Fields
-        protected GameObjectFieldData m_gameObjectData;
-        protected GameObjectValue m_goValue;
+        public GameObjectFieldData m_gameObjectData;
+        GameObjectTypeBase m_goTypeImpl;
+        protected GameObjectValue m_goValue; // TODO: replace with m_goTypeImpl
         protected GameObjectTemplate m_goInfo;
         protected GameObjectTemplateAddon m_goTemplateAddon;
         GameObjectData m_goData;
@@ -3509,6 +3487,26 @@ namespace Game.Entities
         GameObject _owner;
     }
 
+    // Base class for GameObject type specific implementations
+    class GameObjectTypeBase
+    {
+        protected GameObject _owner;
+
+        public GameObjectTypeBase(GameObject owner)
+        {
+            _owner = owner;
+        }
+
+        public virtual void Update(uint diff) { }
+        public virtual void OnStateChanged(GameObjectState oldState, GameObjectState newState) { }
+        public virtual void OnRelocated() { }
+
+        public class CustomCommand
+        {
+            public virtual void Execute(GameObjectTypeBase type) { }
+        }
+    }
+
     public struct GameObjectValue
     {
         public transport Transport;
@@ -3547,6 +3545,389 @@ namespace Game.Entities
             public int LastTeamCapture;
             public BattlegroundCapturePointState State;
             public uint AssaultTimer;
+        }
+    }
+
+    namespace GameObjectType
+    {
+        //11 GAMEOBJECT_TYPE_TRANSPORT
+        class Transport : GameObjectTypeBase, ITransport
+        {
+            TransportAnimation _animationInfo;
+            uint _pathProgress;
+            uint _stateChangeTime;
+            uint _stateChangeProgress;
+            List<uint> _stopFrames = new();
+            bool _autoCycleBetweenStopFrames;
+            TimeTracker _positionUpdateTimer;
+            List<WorldObject> _passengers = new();
+
+            static TimeSpan PositionUpdateInterval = TimeSpan.FromMilliseconds(50);
+
+            public Transport(GameObject owner) : base(owner)
+            {
+                _animationInfo = Global.TransportMgr.GetTransportAnimInfo(owner.GetGoInfo().entry);
+                _pathProgress = GameTime.GetGameTimeMS() % GetTransportPeriod();
+                _stateChangeTime = GameTime.GetGameTimeMS();
+                _stateChangeProgress = _pathProgress;
+
+                GameObjectTemplate goInfo = _owner.GetGoInfo();
+                if (goInfo.Transport.Timeto2ndfloor > 0)
+                {
+                    _stopFrames.Add(goInfo.Transport.Timeto2ndfloor);
+                    if (goInfo.Transport.Timeto3rdfloor > 0)
+                    {
+                        _stopFrames.Add(goInfo.Transport.Timeto3rdfloor);
+                        if (goInfo.Transport.Timeto4thfloor > 0)
+                        {
+                            _stopFrames.Add(goInfo.Transport.Timeto4thfloor);
+                            if (goInfo.Transport.Timeto5thfloor > 0)
+                            {
+                                _stopFrames.Add(goInfo.Transport.Timeto5thfloor);
+                                if (goInfo.Transport.Timeto6thfloor > 0)
+                                {
+                                    _stopFrames.Add(goInfo.Transport.Timeto6thfloor);
+                                    if (goInfo.Transport.Timeto7thfloor > 0)
+                                    {
+                                        _stopFrames.Add(goInfo.Transport.Timeto7thfloor);
+                                        if (goInfo.Transport.Timeto8thfloor > 0)
+                                        {
+                                            _stopFrames.Add(goInfo.Transport.Timeto8thfloor);
+                                            if (goInfo.Transport.Timeto9thfloor > 0)
+                                            {
+                                                _stopFrames.Add(goInfo.Transport.Timeto9thfloor);
+                                                if (goInfo.Transport.Timeto10thfloor > 0)
+                                                    _stopFrames.Add(goInfo.Transport.Timeto10thfloor);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _positionUpdateTimer.Reset(PositionUpdateInterval);
+            }
+
+            public override void Update(uint diff)
+            {
+                if (_animationInfo == null)
+                    return;
+
+                _positionUpdateTimer.Update(diff);
+                if (!_positionUpdateTimer.Passed())
+                    return;
+
+                _positionUpdateTimer.Reset(PositionUpdateInterval);
+
+                uint now = GameTime.GetGameTimeMS();
+                uint period = GetTransportPeriod();
+                uint newProgress = 0;
+                if (_stopFrames.Empty())
+                    newProgress = now % period;
+                else
+                {
+                    int stopTargetTime = 0;
+                    if (_owner.GetGoState() == GameObjectState.TransportActive)
+                        stopTargetTime = 0;
+                    else
+                        stopTargetTime = (int)(_stopFrames[_owner.GetGoState() - GameObjectState.TransportStopped]);
+
+                    if (now < _owner.m_gameObjectData.Level)
+                    {
+                        int timeToStop = (int)(_owner.m_gameObjectData.Level - _stateChangeTime);
+                        float stopSourcePathPct = (float)_stateChangeProgress / (float)period;
+                        float stopTargetPathPct = (float)stopTargetTime / (float)period;
+                        float timeSinceStopProgressPct = (float)(now - _stateChangeTime) / (float)timeToStop;
+
+                        float progressPct;
+                        if (!_owner.HasDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement))
+                        {
+                            if (_owner.GetGoState() == GameObjectState.TransportActive)
+                                stopTargetPathPct = 1.0f;
+
+                            float pathPctBetweenStops = stopTargetPathPct - stopSourcePathPct;
+                            if (pathPctBetweenStops < 0.0f)
+                                pathPctBetweenStops += 1.0f;
+
+                            progressPct = pathPctBetweenStops * timeSinceStopProgressPct + stopSourcePathPct;
+                            if (progressPct > 1.0f)
+                                progressPct = progressPct - 1.0f;
+                        }
+                        else
+                        {
+                            float pathPctBetweenStops = stopSourcePathPct - stopTargetPathPct;
+                            if (pathPctBetweenStops < 0.0f)
+                                pathPctBetweenStops += 1.0f;
+
+                            progressPct = stopSourcePathPct - pathPctBetweenStops * timeSinceStopProgressPct;
+                            if (progressPct < 0.0f)
+                                progressPct += 1.0f;
+                        }
+
+                        newProgress = (uint)((float)period * progressPct) % period;
+                    }
+                    else
+                        newProgress = (uint)stopTargetTime;
+
+                    if (newProgress == stopTargetTime && newProgress != _pathProgress)
+                    {
+                        uint eventId;
+                        switch (_owner.GetGoState() - GameObjectState.TransportActive)
+                        {
+                            case 0:
+                                eventId = _owner.GetGoInfo().Transport.Reached1stfloor;
+                                break;
+                            case 1:
+                                eventId = _owner.GetGoInfo().Transport.Reached2ndfloor;
+                                break;
+                            case 2:
+                                eventId = _owner.GetGoInfo().Transport.Reached3rdfloor;
+                                break;
+                            case 3:
+                                eventId = _owner.GetGoInfo().Transport.Reached4thfloor;
+                                break;
+                            case 4:
+                                eventId = _owner.GetGoInfo().Transport.Reached5thfloor;
+                                break;
+                            case 5:
+                                eventId = _owner.GetGoInfo().Transport.Reached6thfloor;
+                                break;
+                            case 6:
+                                eventId = _owner.GetGoInfo().Transport.Reached7thfloor;
+                                break;
+                            case 7:
+                                eventId = _owner.GetGoInfo().Transport.Reached8thfloor;
+                                break;
+                            case 8:
+                                eventId = _owner.GetGoInfo().Transport.Reached9thfloor;
+                                break;
+                            case 9:
+                                eventId = _owner.GetGoInfo().Transport.Reached10thfloor;
+                                break;
+                            default:
+                                eventId = 0u;
+                                break;
+                        }
+
+                        if (eventId != 0)
+                            GameEvents.Trigger(eventId, _owner, null);
+
+                        if (_autoCycleBetweenStopFrames)
+                        {
+                            GameObjectState currentState = _owner.GetGoState();
+                            GameObjectState newState;
+                            if (currentState == GameObjectState.TransportActive)
+                                newState = GameObjectState.TransportStopped;
+                            else if (currentState - GameObjectState.TransportActive == _stopFrames.Count)
+                                newState = currentState - 1;
+                            else if (_owner.HasDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement))
+                                newState = currentState - 1;
+                            else
+                                newState = currentState + 1;
+
+                            _owner.SetGoState(newState);
+                        }
+                    }
+                }
+
+                if (_pathProgress == newProgress)
+                    return;
+
+                _pathProgress = newProgress;
+
+                TransportAnimationRecord oldAnimation = _animationInfo.GetPrevAnimNode(newProgress);
+                TransportAnimationRecord newAnimation = _animationInfo.GetNextAnimNode(newProgress);
+                if (oldAnimation != null && newAnimation != null)
+                {
+                    Matrix4x4 pathRotation = Matrix4x4.CreateFromQuaternion(new Quaternion(_owner.m_gameObjectData.ParentRotation.GetValue().X, _owner.m_gameObjectData.ParentRotation.GetValue().Y,
+                        _owner.m_gameObjectData.ParentRotation.GetValue().Z, _owner.m_gameObjectData.ParentRotation.GetValue().W));
+
+                    Vector3 prev = new(oldAnimation.Pos.X, oldAnimation.Pos.Y, oldAnimation.Pos.Z);
+                    Vector3 next = new(newAnimation.Pos.X, newAnimation.Pos.Y, newAnimation.Pos.Z);
+
+                    float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+
+                    Vector3 dst = Vector3.Transform(Vector3.Lerp(prev, next, animProgress), pathRotation);//todo check this
+
+                    dst += _owner.GetStationaryPosition();
+
+                    _owner.GetMap().GameObjectRelocation(_owner, dst.X, dst.Y, dst.Z, _owner.GetOrientation());
+                }
+
+                TransportRotationRecord oldRotation = _animationInfo.GetPrevAnimRotation(newProgress);
+                TransportRotationRecord newRotation = _animationInfo.GetNextAnimRotation(newProgress);
+                if (oldRotation != null && newRotation != null)
+                {
+                    Quaternion prev = new(oldRotation.Rot[0], oldRotation.Rot[1], oldRotation.Rot[2], oldRotation.Rot[3]);
+                    Quaternion next = new(newRotation.Rot[0], newRotation.Rot[1], newRotation.Rot[2], newRotation.Rot[3]);
+
+                    float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+
+                    Quaternion rotation = Quaternion.Lerp(prev, next, animProgress);
+
+                    _owner.SetLocalRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
+                    _owner.UpdateModelPosition();
+                }
+
+                // update progress marker for client
+                _owner.SetPathProgressForClient((float)_pathProgress / (float)period);
+            }
+
+            public override void OnStateChanged(GameObjectState oldState, GameObjectState newState)
+            {
+                Cypher.Assert(newState >= GameObjectState.TransportActive);
+
+                // transports without stop frames just keep animating in state 24
+                if (_stopFrames.Empty())
+                {
+                    if (newState != GameObjectState.TransportActive)
+                        _owner.SetGoState(GameObjectState.TransportActive);
+                    return;
+                }
+
+                uint stopPathProgress = 0;
+
+                if (newState != GameObjectState.TransportActive)
+                {
+                    Cypher.Assert(newState < (GameObjectState)(GameObjectState.TransportStopped + 9));
+                    int stopFrame = (int)(newState - GameObjectState.TransportStopped);
+                    Cypher.Assert(stopFrame < _stopFrames.Count);
+                    stopPathProgress = _stopFrames[stopFrame];
+                }
+
+                _stateChangeTime = GameTime.GetGameTimeMS();
+                _stateChangeProgress = _pathProgress;
+                uint timeToStop = (uint)Math.Abs(_pathProgress - stopPathProgress);
+                _owner.SetLevel(GameTime.GetGameTimeMS() + timeToStop);
+                _owner.SetPathProgressForClient((float)_pathProgress / (float)GetTransportPeriod());
+
+                if (oldState == GameObjectState.Active || oldState == newState)
+                {
+                    // initialization
+                    if (_pathProgress > stopPathProgress)
+                        _owner.SetDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement);
+                    else
+                        _owner.RemoveDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement);
+
+                    return;
+                }
+
+                int pauseTimesCount = _stopFrames.Count;
+                int newToOldStateDelta = newState - oldState;
+                if (newToOldStateDelta < 0)
+                    newToOldStateDelta += pauseTimesCount + 1;
+
+                int oldToNewStateDelta = oldState - newState;
+                if (oldToNewStateDelta < 0)
+                    oldToNewStateDelta += pauseTimesCount + 1;
+
+                if (oldToNewStateDelta < newToOldStateDelta)
+                    _owner.SetDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement);
+                else
+                    _owner.RemoveDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement);
+            }
+
+            public override void OnRelocated()
+            {
+                UpdatePassengerPositions();
+            }
+
+            public void UpdatePassengerPositions()
+            {
+                foreach (WorldObject passenger in _passengers)
+                {
+                    float x, y, z, o;
+                    passenger.m_movementInfo.transport.pos.GetPosition(out x, out y, out z, out o);
+                    CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    ITransport.UpdatePassengerPosition(this, _owner.GetMap(), passenger, x, y, z, o, true);
+                }
+            }
+
+            public uint GetTransportPeriod()
+            {
+                if (_animationInfo != null)
+                    return _animationInfo.TotalTime;
+
+                return 1;
+            }
+
+            public List<uint> GetPauseTimes()
+            {
+                return _stopFrames;
+            }
+
+            public ObjectGuid GetTransportGUID() { return _owner.GetGUID(); }
+
+            public float GetTransportOrientation() { return _owner.GetOrientation(); }
+
+            public void AddPassenger(WorldObject passenger)
+            {
+                if (!_owner.IsInWorld)
+                    return;
+
+                if (!_passengers.Contains(passenger))
+                {
+                    _passengers.Add(passenger);
+                    passenger.SetTransport(this);
+                    passenger.m_movementInfo.transport.guid = GetTransportGUID();
+                    Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} boarded transport {_owner.GetName()}.");
+                }
+            }
+
+            public ITransport RemovePassenger(WorldObject passenger)
+            {
+                if (_passengers.Remove(passenger))
+                {
+                    passenger.SetTransport(null);
+                    passenger.m_movementInfo.transport.Reset();
+                    Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} removed from transport {_owner.GetName()}.");
+
+                    Player plr = passenger.ToPlayer();
+                    if (plr != null)
+                        plr.SetFallInformation(0, plr.GetPositionZ());
+                }
+
+                return this;
+            }
+
+            public void CalculatePassengerPosition(ref float x, ref float y, ref float z, ref float o)
+            {
+                ITransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o, _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), _owner.GetOrientation());
+            }
+
+            public void CalculatePassengerOffset(ref float x, ref float y, ref float z, ref float o)
+            {
+                ITransport.CalculatePassengerOffset(ref x, ref y, ref z, ref o, _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), _owner.GetOrientation());
+            }
+
+            public int GetMapIdForSpawning()
+            {
+                return _owner.GetGoInfo().Transport.SpawnMap;
+            }
+
+            public void SetAutoCycleBetweenStopFrames(bool on)
+            {
+                _autoCycleBetweenStopFrames = on;
+            }
+        }
+
+        class SetTransportAutoCycleBetweenStopFrames : GameObjectTypeBase.CustomCommand
+        {
+            bool _on;
+
+            public SetTransportAutoCycleBetweenStopFrames(bool on)
+            {
+                _on = on;
+            }
+
+            public override void Execute(GameObjectTypeBase type)
+            {
+                Transport transport = (Transport)type;
+                if (transport != null)
+                    transport.SetAutoCycleBetweenStopFrames(_on);
+            }
         }
     }
 }

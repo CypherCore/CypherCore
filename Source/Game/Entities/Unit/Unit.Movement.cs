@@ -209,7 +209,7 @@ namespace Game.Entities
 
             MoveSplineInit init = new(this);
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
-            if (GetTransport())
+            if (GetTransport() != null)
                 init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
             init.SetFacing(ori);
 
@@ -1834,7 +1834,7 @@ namespace Game.Entities
             if (GetVehicle() != null)
                 return GetVehicleBase().GetGUID();
             if (GetTransport() != null)
-                return GetTransport().GetGUID();
+                return GetTransport().GetTransportGUID();
 
             return ObjectGuid.Empty;
         }

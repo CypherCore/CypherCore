@@ -191,8 +191,8 @@ namespace Game.Entities
             }
 
             // movement on transport of areatriggers on unit is handled by themself
-            Transport transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
-            if (transport)
+            ITransport transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
+            if (transport != null)
             {
                 float x, y, z, o;
                 pos.GetPosition(out x, out y, out z, out o);
@@ -211,7 +211,7 @@ namespace Game.Entities
 
             if (!GetMap().AddToMap(this))
             {         // Returning false will cause the object to be deleted - remove from transport
-                if (transport)
+                if (transport != null)
                     transport.RemovePassenger(this);
                 return false;
             }

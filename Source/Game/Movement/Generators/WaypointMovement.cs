@@ -303,10 +303,10 @@ namespace Game.Movement
                         owner.SetHomePosition(x, y, z, o);
                     else
                     {
-                        Transport trans = owner.GetTransport();
-                        if (trans)
+                        ITransport trans = owner.GetTransport();
+                        if (trans != null)
                         {
-                            o -= trans.GetOrientation();
+                            o -= trans.GetTransportOrientation();
                             owner.SetTransportHomePosition(x, y, z, o);
                             trans.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
                             owner.SetHomePosition(x, y, z, o);

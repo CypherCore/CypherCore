@@ -1131,9 +1131,7 @@ namespace Game.Maps
             else
             {
                 go.Relocate(x, y, z, orientation);
-                go.UpdateModelPosition();
-                go.UpdatePositionData();
-                go.UpdateObjectVisibility(false);
+                go.AfterRelocation();
                 RemoveGameObjectFromMoveList(go);
             }
 
@@ -1354,9 +1352,7 @@ namespace Game.Maps
                 {
                     // update pos
                     go.Relocate(go._newPosition);
-                    go.UpdateModelPosition();
-                    go.UpdatePositionData();
-                    go.UpdateObjectVisibility(false);
+                    go.AfterRelocation();
                 }
                 else
                 {
@@ -2247,7 +2243,7 @@ namespace Game.Maps
             var data = new UpdateData(player.GetMapId());
 
             // attach to player data current transport data
-            Transport transport = player.GetTransport();
+            Transport transport = player.GetTransport<Transport>();
             if (transport != null)
             {
                 transport.BuildCreateUpdateBlockForPlayer(data, player);
@@ -4168,8 +4164,8 @@ namespace Game.Maps
             if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId, true))
                 return null;
 
-            Transport transport = summoner != null ? summoner.GetTransport() : null;
-            if (transport)
+            ITransport transport = summoner != null ? summoner.GetTransport() : null;
+            if (transport != null)
             {
                 pos.GetPosition(out float x, out float y, out float z, out float o);
                 transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
@@ -4209,7 +4205,7 @@ namespace Game.Maps
             if (!AddToMap(summon.ToCreature()))
             {
                 // Returning false will cause the object to be deleted - remove from transport
-                if (transport)
+                if (transport != null)
                     transport.RemovePassenger(summon);
 
                 summon.Dispose();

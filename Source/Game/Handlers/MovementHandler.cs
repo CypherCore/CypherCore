@@ -110,31 +110,37 @@ namespace Game
 
                 if (plrMover)
                 {
-                    if (!plrMover.GetTransport())
+                    if (plrMover.GetTransport() == null)
                     {
-                        Transport transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
-                        if (transport)
-                            transport.AddPassenger(plrMover);
+                        GameObject go = plrMover.GetMap().GetGameObject(movementInfo.transport.guid);
+                        if (go != null)
+                        {
+                            ITransport transport = go.ToTransportBase();
+                            if (transport != null)
+                                transport.AddPassenger(plrMover);
+                        }
                     }
-                    else if (plrMover.GetTransport().GetGUID() != movementInfo.transport.guid)
+                    else if (plrMover.GetTransport().GetTransportGUID() != movementInfo.transport.guid)
                     {
                         plrMover.GetTransport().RemovePassenger(plrMover);
-                        Transport transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
-                        if (transport)
-                            transport.AddPassenger(plrMover);
+                        GameObject go = plrMover.GetMap().GetGameObject(movementInfo.transport.guid);
+                        if (go != null)
+                        {
+                            ITransport transport = go.ToTransportBase();
+                            if (transport != null)
+                                transport.AddPassenger(plrMover);
+                            else
+                                movementInfo.ResetTransport();
+                        }
                         else
                             movementInfo.ResetTransport();
                     }
                 }
 
-                if (!mover.GetTransport() && !mover.GetVehicle())
-                {
-                    GameObject go = mover.GetMap().GetGameObject(movementInfo.transport.guid);
-                    if (!go || go.GetGoType() != GameObjectTypes.Transport)
-                        movementInfo.transport.Reset();
-                }
+                if (mover.GetTransport() == null && !mover.GetVehicle())
+                    movementInfo.transport.Reset();
             }
-            else if (plrMover && plrMover.GetTransport())                // if we were on a transport, leave
+            else if (plrMover && plrMover.GetTransport() != null)                // if we were on a transport, leave
                 plrMover.GetTransport().RemovePassenger(plrMover);
 
             // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
@@ -531,7 +537,7 @@ namespace Game
                     return;
             }
 
-            if (!GetPlayer().GetTransport() && Math.Abs(GetPlayer().GetSpeed(move_type) - packet.Speed) > 0.01f)
+            if (GetPlayer().GetTransport() == null && Math.Abs(GetPlayer().GetSpeed(move_type) - packet.Speed) > 0.01f)
             {
                 if (GetPlayer().GetSpeed(move_type) > packet.Speed)         // must be greater - just correct
                 {

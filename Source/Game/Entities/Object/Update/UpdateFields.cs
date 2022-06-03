@@ -79,27 +79,27 @@ namespace Game.Entities
 
         uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, WorldObject obj, Player receiver)
         {
-            UnitDynFlags unitDynFlags = (UnitDynFlags)(uint)objectData.DynamicFlags;
+            uint unitDynFlags = objectData.DynamicFlags;
 
             Unit unit = obj.ToUnit();
             if (unit != null)
             {
-                unitDynFlags &= ~UnitDynFlags.Tapped;
+                unitDynFlags &= ~(uint)UnitDynFlags.Tapped;
 
                 Creature creature = obj.ToCreature();
                 if (creature != null)
                 {
                     if (creature.HasLootRecipient() && !creature.IsTappedBy(receiver))
-                        unitDynFlags |= UnitDynFlags.Tapped;
+                        unitDynFlags |= (uint)UnitDynFlags.Tapped;
 
                     if (!receiver.IsAllowedToLoot(creature))
-                        unitDynFlags &= ~UnitDynFlags.Lootable;
+                        unitDynFlags &= ~(uint)UnitDynFlags.Lootable;
                 }
 
                 // unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED auras
-                if (unitDynFlags.HasAnyFlag(UnitDynFlags.TrackUnit))
+                if (unitDynFlags.HasAnyFlag((uint)UnitDynFlags.TrackUnit))
                     if (!unit.HasAuraTypeWithCaster(AuraType.ModStalked, receiver.GetGUID()))
-                        unitDynFlags &= ~UnitDynFlags.TrackUnit;
+                        unitDynFlags &= ~(uint)UnitDynFlags.TrackUnit;
             }
             else
             {
@@ -126,12 +126,18 @@ namespace Game.Entities
                                 dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.Transport:
+                        {
+                            dynFlags = (GameObjectDynamicLowFlags)((int)unitDynFlags & 0xFFFF);
+                            pathProgress = (ushort)((int)unitDynFlags >> 16);
+                            break;
+                        }
                         case GameObjectTypes.MapObjTransport:
                         {
-                            uint transportPeriod = gameObject.GetTransportPeriod();
+                            Transport transport = gameObject.ToTransport();
+                            uint transportPeriod = transport.GetTransportPeriod();
                             if (transportPeriod != 0)
                             {
-                                float timer = (float)(gameObject.GetGoValue().Transport.PathProgress % transportPeriod);
+                                float timer = (float)(transport.GetTimer() % transportPeriod);
                                 pathProgress = (ushort)(timer / (float)transportPeriod * 65535.0f);
                             }
                             break;
@@ -146,11 +152,11 @@ namespace Game.Entities
                             break;
                     }
 
-                    unitDynFlags = (UnitDynFlags)((pathProgress << 16) | (ushort)dynFlags);
+                    unitDynFlags = (uint)((pathProgress << 16) | (ushort)dynFlags);
                 }
             }
 
-            return (uint)unitDynFlags;
+            return unitDynFlags;
         }
     }
 
@@ -4946,13 +4952,13 @@ namespace Game.Entities
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
+            data.WriteInt8(State);
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
             data.WriteInt32(EnableDoodadSets.Size());
             data.WriteUInt32(CustomParam);
-            data.WriteUInt32(GetViewerGameObjectLevel(this, owner, receiver));
+            data.WriteUInt32(Level);
             data.WriteUInt32(AnimGroupInstance);
             for (int i = 0; i < EnableDoodadSets.Size(); ++i)
             {
@@ -5053,7 +5059,7 @@ namespace Game.Entities
                 }
                 if (changesMask[14])
                 {
-                    data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
+                    data.WriteInt8(State);
                 }
                 if (changesMask[15])
                 {
@@ -5073,7 +5079,7 @@ namespace Game.Entities
                 }
                 if (changesMask[19])
                 {
-                    data.WriteUInt32(GetViewerGameObjectLevel(this, owner, receiver));
+                    data.WriteUInt32(Level);
                 }
                 if (changesMask[20])
                 {
@@ -5115,24 +5121,6 @@ namespace Game.Entities
                     flags |= (uint)(GameObjectFlags.Locked | GameObjectFlags.NotSelectable);
 
             return flags;
-        }
-
-        uint GetViewerGameObjectLevel(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
-        {
-            uint level = gameObjectData.Level;
-            bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
-            return isStoppableTransport ? gameObject.GetGoValue().Transport.PathProgress : level;
-        }
-
-        sbyte GetViewerGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
-        {
-            sbyte state = gameObjectData.State;
-            bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
-            if (isStoppableTransport && gameObject.GetGoState() == GameObjectState.TransportActive)
-                if (((gameObject.GetGoValue().Transport.StateUpdateTimer / 20000) & 1) != 0)
-                    state = (sbyte)GameObjectState.TransportStopped;
-
-            return state;
         }
     }
 

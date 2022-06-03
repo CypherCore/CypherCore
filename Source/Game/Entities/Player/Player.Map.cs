@@ -803,7 +803,7 @@ namespace Game.Entities
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
 
                 // Fatigue bar state (if not on flight path or transport)
-                if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) && !IsInFlight() && !GetTransport())
+                if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) && !IsInFlight() && GetTransport() == null)
                     m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
 
                 // Lava state (any contact)

@@ -654,7 +654,7 @@ namespace Game.Chat
                 Player chr = handler.GetSession().GetPlayer();
                 Map map = chr.GetMap();
 
-                Transport trans = chr.GetTransport();
+                Transport trans = chr.GetTransport<Transport>();
                 if (trans)
                 {
                     ulong guid = Global.ObjectMgr.GenerateCreatureSpawnId();

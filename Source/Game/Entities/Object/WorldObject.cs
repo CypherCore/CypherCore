@@ -246,14 +246,10 @@ namespace Game.Entities
         
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags, Player target)
         {
-            int PauseTimesCount = 0;
-
+            List<uint> PauseTimes = null;
             GameObject go = ToGameObject();
             if (go)
-            {
-                if (go.GetGoType() == GameObjectTypes.Transport)
-                    PauseTimesCount = go.GetGoValue().Transport.StopFrames.Count;
-            }
+                PauseTimes = go.GetPauseTimes();
 
             data.WriteBit(flags.NoBirthAnim);
             data.WriteBit(flags.EnablePortals);
@@ -368,7 +364,7 @@ namespace Game.Entities
                     MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
             }
 
-            data.WriteInt32(PauseTimesCount);
+            data.WriteInt32(PauseTimes != null ? PauseTimes.Count : 0);
 
             if (flags.Stationary)
             {
@@ -381,20 +377,9 @@ namespace Game.Entities
 
             if (flags.CombatVictim)
                 data.WritePackedGuid(ToUnit().GetVictim().GetGUID());                      // CombatVictim
-
+            
             if (flags.ServerTime)
-            {
-                GameObject go1 = ToGameObject();
-                /** @TODO Use IsTransport() to also handle type 11 (TRANSPORT)
-                    Currently grid objects are not updated if there are no nearby players,
-                    this causes clients to receive different PathProgress
-                    resulting in players seeing the object in a different position
-                */
-                if (go1 && go1.ToTransport())                                    // ServerTime
-                    data.WriteUInt32(go1.GetGoValue().Transport.PathProgress);
-                else
-                    data.WriteUInt32(GameTime.GetGameTimeMS());
-            }
+                data.WriteUInt32(GameTime.GetGameTimeMS());
 
             if (flags.Vehicle)
             {
@@ -413,11 +398,9 @@ namespace Game.Entities
             if (flags.Rotation)
                 data.WriteInt64(ToGameObject().GetPackedLocalRotation());                 // Rotation
 
-            if (go)
-            {
-                for (int i = 0; i < PauseTimesCount; ++i)
-                    data.WriteUInt32(go.GetGoValue().Transport.StopFrames[i]);
-            }
+            if (PauseTimes != null && !PauseTimes.Empty())
+                foreach (var stopFrame in PauseTimes)
+                    data.WriteUInt32(stopFrame);
 
             if (flags.MovementTransport)
             {
@@ -969,19 +952,9 @@ namespace Game.Entities
                 return;
 
             if (on)
-            {
-                if (IsTypeId(TypeId.Unit))
-                    map.AddToActive(ToCreature());
-                else if (IsTypeId(TypeId.DynamicObject))
-                    map.AddToActive(ToDynamicObject());
-            }
+                map.AddToActive(this);
             else
-            {
-                if (IsTypeId(TypeId.Unit))
-                    map.RemoveFromActive(ToCreature());
-                else if (IsTypeId(TypeId.DynamicObject))
-                    map.RemoveFromActive(ToDynamicObject());
-            }
+                map.RemoveFromActive(this);
         }
 
         bool IsFarVisible() { return m_isFarVisible; }
@@ -1010,8 +983,8 @@ namespace Game.Entities
             if (IsInWorld)
                 RemoveFromWorld();
 
-            Transport transport = GetTransport();
-            if (transport)
+            ITransport transport = GetTransport();
+            if (transport != null)
                 transport.RemovePassenger(this);
         }
 
@@ -2957,12 +2930,6 @@ namespace Game.Entities
         public float GetObjectScale() { return m_objectData.Scale; }
         public virtual void SetObjectScale(float scale) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.Scale), scale); }
 
-        public UnitDynFlags GetDynamicFlags() { return (UnitDynFlags)(uint)m_objectData.DynamicFlags; }
-        public bool HasDynamicFlag(UnitDynFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
-        public void SetDynamicFlag(UnitDynFlags flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
-        public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
-        public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
-
         public TypeId GetTypeId() { return ObjectTypeId; }
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }
         public bool IsTypeMask(TypeMask mask) { return Convert.ToBoolean(mask & ObjectTypeMask); }
@@ -3007,7 +2974,11 @@ namespace Game.Entities
         public bool IsActiveObject() { return m_isActive; }
         public bool IsPermanentWorldObject() { return m_isWorldObject; }
 
-        public Transport GetTransport() { return m_transport; }
+        public ITransport GetTransport() { return m_transport; }
+        public T GetTransport<T>() where T : ITransport
+        {
+            return (T)m_transport;
+        }
         public float GetTransOffsetX() { return m_movementInfo.transport.pos.GetPositionX(); }
         public float GetTransOffsetY() { return m_movementInfo.transport.pos.GetPositionY(); }
         public float GetTransOffsetZ() { return m_movementInfo.transport.pos.GetPositionZ(); }
@@ -3017,12 +2988,12 @@ namespace Game.Entities
         public sbyte GetTransSeat() { return m_movementInfo.transport.seat; }
         public virtual ObjectGuid GetTransGUID()
         {
-            if (GetTransport())
-                return GetTransport().GetGUID();
+            if (GetTransport() != null)
+                return GetTransport().GetTransportGUID();
 
             return ObjectGuid.Empty;
         }
-        public void SetTransport(Transport t) { m_transport = t; }
+        public void SetTransport(ITransport t) { m_transport = t; }
 
         public virtual float GetStationaryX() { return GetPositionX(); }
         public virtual float GetStationaryY() { return GetPositionY(); }
@@ -3065,7 +3036,7 @@ namespace Game.Entities
             Position thisOrTransport = this;
             Position objOrObjTransport = obj;
 
-            if (GetTransport() && obj.GetTransport() != null && obj.GetTransport().GetGUID() == GetTransport().GetGUID())
+            if (GetTransport() != null && obj.GetTransport() != null && obj.GetTransport().GetTransportGUID() == GetTransport().GetTransportGUID())
             {
                 thisOrTransport = m_movementInfo.transport.pos;
                 objOrObjTransport = obj.m_movementInfo.transport.pos;
@@ -3340,7 +3311,7 @@ namespace Game.Entities
         public void UpdateAllowedPositionZ(float x, float y, ref float z, ref float groundZ)
         {
             // TODO: Allow transports to be part of dynamic vmap tree
-            if (GetTransport())
+            if (GetTransport() != null)
             {
                 groundZ = z;
                 return;
@@ -3690,7 +3661,7 @@ namespace Game.Entities
         bool m_isWorldObject;
         public ZoneScript m_zoneScript;
 
-        Transport m_transport;
+        ITransport m_transport;
         Map _currMap;
         uint instanceId;
         PhaseShift _phaseShift = new();
