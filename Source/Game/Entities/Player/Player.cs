@@ -4106,7 +4106,7 @@ namespace Game.Entities
         {
             // the intent is to delay sending visible objects until client is ready for them
             // some gameobjects dont function correctly if they are sent before TransportServerTime is correctly set (after CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)
-            return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
+            return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime) || base.CanNeverSee(obj);
         }
 
         public override bool CanAlwaysSee(WorldObject obj)
