@@ -2088,7 +2088,7 @@ namespace Game.Entities
             {
                 BroadcastSummonCast summonCast = new();
                 summonCast.Target = GetGUID();
-                group.BroadcastPacket(summonCast, false, -1, GetGUID());
+                group.BroadcastPacket(summonCast, false);
             }
         }
 
@@ -2131,7 +2131,7 @@ namespace Game.Entities
                     BroadcastSummonResponse summonResponse = new();
                     summonResponse.Target = GetGUID();
                     summonResponse.Accepted = accepted;
-                    group.BroadcastPacket(summonResponse, false, -1, GetGUID());
+                    group.BroadcastPacket(summonResponse, false);
                 }
             }
 
