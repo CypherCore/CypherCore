@@ -367,6 +367,10 @@ namespace Framework.Constants
         RequiredLevelCurve = 27,
         DescriptionText = 30,             // Item Description
         OverrideName = 31,             // Itemnamedescription Id
+        ItemBonusListGroup = 34,
+        ItemLimitCategory = 35,
+        ItemConversion = 37,
+        ItemHistorySlot = 38,
     }
 
     public enum ItemContext : byte
