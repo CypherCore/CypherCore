@@ -3503,7 +3503,7 @@ namespace Game.Entities
         public override byte GetNameSetId() { return _owner.GetNameSetId(); }
         public override bool IsInPhase(PhaseShift phaseShift) { return _owner.GetPhaseShift().CanSee(phaseShift); }
         public override Vector3 GetPosition() { return new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()); }
-        public override float GetOrientation() { return _owner.GetOrientation(); }
+        public override Quaternion GetRotation() { return new Quaternion(_owner.GetLocalRotation().X, _owner.GetLocalRotation().Y, _owner.GetLocalRotation().Z, _owner.GetLocalRotation().W); }
         public override float GetScale() { return _owner.GetObjectScale(); }
 
         GameObject _owner;

@@ -36,7 +36,7 @@ namespace Game.Collision
         public abstract byte GetNameSetId();
         public abstract bool IsInPhase(PhaseShift phaseShift);
         public abstract Vector3 GetPosition();
-        public abstract float GetOrientation();
+        public abstract Quaternion GetRotation();
         public abstract float GetScale();
     }
 
@@ -65,7 +65,7 @@ namespace Game.Collision
             iScale = modelOwner.GetScale();
             iInvScale = 1.0f / iScale;
 
-            Matrix4x4 iRotation = Extensions.fromEulerAnglesZYX(modelOwner.GetOrientation(), 0, 0);
+            Matrix4x4 iRotation = Matrix4x4.CreateFromQuaternion(modelOwner.GetRotation());
             Matrix4x4.Invert(iRotation, out iInvRot);
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
@@ -204,7 +204,7 @@ namespace Game.Collision
 
             iPos = owner.GetPosition();
 
-            Matrix4x4 iRotation = Extensions.fromEulerAnglesZYX(owner.GetOrientation(), 0, 0);
+            Matrix4x4 iRotation = Matrix4x4.CreateFromQuaternion(owner.GetRotation());
             Matrix4x4.Invert(iRotation, out iInvRot);
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
