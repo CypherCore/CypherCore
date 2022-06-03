@@ -260,11 +260,11 @@ namespace Game.PvP
             Map map = Global.MapMgr.FindMap(530, 0);
             var bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_capturePointSpawnId);
             foreach (var go in bounds)
-                go.SetGoArtKit((byte)artkit);
+                go.SetGoArtKit(artkit);
 
             bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_Objects[m_TowerType]);
             foreach (var go in bounds)
-                go.SetGoArtKit((byte)artkit2);
+                go.SetGoArtKit(artkit2);
 
             // send world state update
             if (field != 0)

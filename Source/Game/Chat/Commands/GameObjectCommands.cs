@@ -753,7 +753,7 @@ namespace Game.Chat
                         obj.SetGoType((GameObjectTypes)objectState);
                         break;
                     case 2:
-                        obj.SetGoArtKit((byte)objectState);
+                        obj.SetGoArtKit(objectState);
                         break;
                     case 3:
                         obj.SetGoAnimProgress(objectState);

@@ -1438,7 +1438,7 @@ namespace Game.Entities
         public Quaternion rotation;
         public uint animprogress;
         public GameObjectState goState;
-        public byte artKit;
+        public uint artKit;
 
         public GameObjectData() : base(SpawnObjectType.GameObject) { }
     }

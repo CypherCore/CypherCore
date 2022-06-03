@@ -293,7 +293,7 @@ namespace Game.Entities
             SetGoType(goInfo.type);
             m_prevGoState = goState;
             SetGoState(goState);
-            SetGoArtKit((byte)artKit);
+            SetGoArtKit(artKit);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
@@ -1566,7 +1566,7 @@ namespace Game.Entities
                     if (artKitValue == 0)
                         Log.outError(LogFilter.Sql, $"GameObject {GetEntry()} hit by spell {spellId} needs `artkit{artKitIndex}` in `gameobject_template_addon`");
                     else
-                        SetGoArtKit((byte)artKitValue);
+                        SetGoArtKit(artKitValue);
 
                     break;
                 }
@@ -1624,7 +1624,7 @@ namespace Game.Entities
             }
         }
 
-        public void SetGoArtKit(byte kit)
+        public void SetGoArtKit(uint kit)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ArtKit), kit);
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(m_spawnId);
@@ -1632,7 +1632,7 @@ namespace Game.Entities
                 data.artKit = kit;
         }
 
-        public void SetGoArtKit(byte artkit, GameObject go, uint lowguid)
+        public void SetGoArtKit(uint artkit, GameObject go, uint lowguid)
         {
             GameObjectData data = null;
             if (go != null)
