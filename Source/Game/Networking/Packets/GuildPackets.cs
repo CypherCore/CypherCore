@@ -1638,6 +1638,8 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Level);
             data.WriteUInt8(ClassID);
             data.WriteUInt8(Gender);
+            data.WriteUInt64(GuildClubMemberID);
+            data.WriteUInt8(RaceID);
 
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteBits(Note.GetByteCount(), 8);
@@ -1670,6 +1672,8 @@ namespace Game.Networking.Packets
         public byte Level;
         public byte ClassID;
         public byte Gender;
+        public ulong GuildClubMemberID;
+        public byte RaceID;
         public bool Authenticated;
         public bool SorEligible;
         public GuildRosterProfessionData[] Profession = new GuildRosterProfessionData[2];

@@ -129,8 +129,10 @@ namespace Game.Networking.Packets
         {
             Header.Read(_worldPacket);
             TargetCharacterGUID = _worldPacket.ReadPackedGuid();
+            ReportType = _worldPacket.ReadInt32();
+            MajorCategory = _worldPacket.ReadInt32();
+            MinorCategoryFlags = _worldPacket.ReadInt32();
             ChatLog.Read(_worldPacket);
-            ComplaintType = _worldPacket.ReadBits<byte>(5);
 
             uint noteLength = _worldPacket.ReadBits<uint>(10);
             bool hasMailInfo = _worldPacket.HasBit();
@@ -209,7 +211,9 @@ namespace Game.Networking.Packets
         public SupportTicketHeader Header;
         public SupportTicketChatLog ChatLog;
         public ObjectGuid TargetCharacterGUID;
-        public byte ComplaintType;
+        public int ReportType;
+        public int MajorCategory;
+        public int MinorCategoryFlags;
         public string Note;
         public SupportTicketHorusChatLog HorusChatLog;
         public SupportTicketMailInfo? MailInfo;
@@ -578,10 +582,12 @@ namespace Game.Networking.Packets
             MapID = packet.ReadUInt32();
             Position = packet.ReadVector3();
             Facing = packet.ReadFloat();
+            Program = packet.ReadInt32();
         }
 
         public uint MapID;
         public Vector3 Position;
         public float Facing;
+        public int Program;
     }
 }

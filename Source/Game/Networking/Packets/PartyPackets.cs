@@ -1084,6 +1084,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Flags);
             data.WriteUInt8(RolesAssigned);
             data.WriteUInt8(Class);
+            data.WriteUInt8(FactionGroup);
             data.WriteString(Name);
             if (!VoiceStateID.IsEmpty())
                 data.WriteString(VoiceStateID);
@@ -1097,6 +1098,7 @@ namespace Game.Networking.Packets
         public byte Subgroup;
         public byte Flags;
         public byte RolesAssigned;
+        public byte FactionGroup;
         public bool FromSocialQueue;
         public bool VoiceChatSilenced;
     }

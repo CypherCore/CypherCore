@@ -169,6 +169,26 @@ namespace Game.Networking.Packets
         public QualifiedGUID Player;
     }
 
+    class SocialContractRequest : ClientPacket
+    {
+        public SocialContractRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SocialContractRequestResponse : ServerPacket
+    {
+        public bool ShowSocialContract;
+
+        public SocialContractRequestResponse() : base(ServerOpcodes.SocialContractRequestResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(ShowSocialContract);
+            _worldPacket.FlushBits();
+        }
+    }
+    
     //Structs
     public class ContactInfo
     {

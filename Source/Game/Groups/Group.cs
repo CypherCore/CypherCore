@@ -399,6 +399,7 @@ namespace Game.Groups
             MemberSlot member = new();
             member.guid = player.GetGUID();
             member.name = player.GetName();
+            member.race = player.GetRace();
             member._class = (byte)player.GetClass();
             member.group = subGroup;
             member.flags = 0;
@@ -1468,6 +1469,10 @@ namespace Game.Groups
                 playerInfos.GUID = member.guid;
                 playerInfos.Name = member.name;
                 playerInfos.Class = member._class;
+
+                ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey((uint)member.race);
+                FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
+                playerInfos.FactionGroup = raceFaction.FactionGroup;
 
                 playerInfos.Status = GroupMemberOnlineStatus.Offline;
                 if (memberPlayer && memberPlayer.GetSession() && !memberPlayer.GetSession().PlayerLogout())
@@ -2845,6 +2850,7 @@ namespace Game.Groups
     {
         public ObjectGuid guid;
         public string name;
+        public Race race;
         public byte _class;
         public byte group;
         public GroupMemberFlags flags;

@@ -83,7 +83,9 @@ namespace Game
             comp.SetFacing(packet.Header.Facing);
             comp.SetChatLog(packet.ChatLog);
             comp.SetTargetCharacterGuid(packet.TargetCharacterGUID);
-            comp.SetComplaintType((GMSupportComplaintType)packet.ComplaintType);
+            comp.SetReportType((ReportType)packet.ReportType);
+            comp.SetMajorCategory((ReportMajorCategory)packet.MajorCategory);
+            comp.SetMinorCategoryFlags((ReportMinorCategory)packet.MinorCategoryFlags);
             comp.SetNote(packet.Note);
 
             Global.SupportMgr.AddTicket(comp);

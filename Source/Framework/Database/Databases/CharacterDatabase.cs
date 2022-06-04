@@ -304,7 +304,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_MONEY, "INSERT INTO guild_member_withdraw (guid, money) VALUES (?, ?) ON DUPLICATE KEY UPDATE money = VALUES (money)");
             PrepareStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW, "TRUNCATE guild_member_withdraw");
 
-            PrepareStatement(CharStatements.SEL_CHAR_DATA_FOR_GUILD, "SELECT name, level, class, gender, zone, account FROM characters WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_DATA_FOR_GUILD, "SELECT name, level, race, class, gender, zone, account FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_GUILD_ACHIEVEMENT, "DELETE FROM guild_achievement WHERE guildId = ? AND achievement = ?");
             PrepareStatement(CharStatements.INS_GUILD_ACHIEVEMENT, "INSERT INTO guild_achievement (guildId, achievement, date, guids) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GUILD_ACHIEVEMENT_CRITERIA, "DELETE FROM guild_achievement_progress WHERE guildId = ? AND criteria = ?");
@@ -439,8 +439,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_ALL_GM_BUGS, "TRUNCATE TABLE gm_bug");
 
             // GM Complaint
-            PrepareStatement(CharStatements.SEL_GM_COMPLAINTS, "SELECT id, playerGuid, note, createTime, mapId, posX, posY, posZ, facing, targetCharacterGuid, complaintType, reportLineIndex, assignedTo, closedBy, comment FROM gm_complaint");
-            PrepareStatement(CharStatements.REP_GM_COMPLAINT, "REPLACE INTO gm_complaint (id, playerGuid, note, createTime, mapId, posX, posY, posZ, facing, targetCharacterGuid, complaintType, reportLineIndex, assignedTo, closedBy, comment) VALUES (?, ?, ?, UNIX_TIMESTAMP(NOW()), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.SEL_GM_COMPLAINTS, "SELECT id, playerGuid, note, createTime, mapId, posX, posY, posZ, facing, targetCharacterGuid, reportType, reportMajorCategory, reportMinorCategoryFlags, reportLineIndex, assignedTo, closedBy, comment FROM gm_complaint");
+            PrepareStatement(CharStatements.REP_GM_COMPLAINT, "REPLACE INTO gm_complaint (id, playerGuid, note, createTime, mapId, posX, posY, posZ, facing, targetCharacterGuid, reportType, reportMajorCategory, reportMinorCategoryFlags, reportLineIndex, assignedTo, closedBy, comment) VALUES (?, ?, ?, UNIX_TIMESTAMP(NOW()), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GM_COMPLAINT, "DELETE FROM gm_complaint WHERE id = ?");
             PrepareStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES, "SELECT timestamp, text FROM gm_complaint_chatlog WHERE complaintId = ? ORDER BY lineId ASC");
             PrepareStatement(CharStatements.INS_GM_COMPLAINT_CHATLINE, "INSERT INTO gm_complaint_chatlog (complaintId, lineId, timestamp, text) VALUES (?, ?, ?, ?)");

@@ -3569,7 +3569,7 @@ namespace Game.Entities
         public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 585, 586);
         public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 585, 589);
         public UpdateFieldArray<uint> BuybackPrice = new(12, 592, 593);
-        public UpdateFieldArray<uint> BuybackTimestamp = new(12, 592, 605);
+        public UpdateFieldArray<long> BuybackTimestamp = new(12, 592, 605);
         public UpdateFieldArray<uint> CombatRatings = new(32, 617, 618);
         public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 650, 651);
         public UpdateFieldArray<uint> NoReagentCostMask = new(4, 657, 658);
@@ -3658,7 +3658,7 @@ namespace Game.Entities
             for (int i = 0; i < 12; ++i)
             {
                 data.WriteUInt32(BuybackPrice[i]);
-                data.WriteUInt32(BuybackTimestamp[i]);
+                data.WriteInt64(BuybackTimestamp[i]);
             }
             data.WriteUInt16(TodayHonorableKills);
             data.WriteUInt16(YesterdayHonorableKills);
@@ -4697,7 +4697,7 @@ namespace Game.Entities
                     }
                     if (changesMask[605 + i])
                     {
-                        data.WriteUInt32(BuybackTimestamp[i]);
+                        data.WriteInt64(BuybackTimestamp[i]);
                     }
                 }
             }

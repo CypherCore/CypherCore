@@ -3025,7 +3025,7 @@ namespace Game.Entities
                 // if current back slot non-empty search oldest or free
                 if (m_items[slot] != null)
                 {
-                    uint oldest_time = m_activePlayerData.BuybackTimestamp[0];
+                    long oldest_time = m_activePlayerData.BuybackTimestamp[0];
                     uint oldest_slot = InventorySlots.BuyBackStart;
 
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
@@ -3037,8 +3037,7 @@ namespace Game.Entities
                             break;
                         }
 
-                        uint i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
-
+                        long i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
                         if (oldest_time > i_time)
                         {
                             oldest_time = i_time;
@@ -3489,7 +3488,7 @@ namespace Game.Entities
             DB.Characters.CommitTransaction(trans);
         }
         public void SetBuybackPrice(uint slot, uint price) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, (int)slot), price); }
-        public void SetBuybackTimestamp(uint slot, uint timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, (int)slot), timestamp); }
+        public void SetBuybackTimestamp(uint slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, (int)slot), timestamp); }
 
         public Item GetItemFromBuyBackSlot(uint slot)
         {

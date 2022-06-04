@@ -400,34 +400,29 @@ namespace Game.Networking.Packets
         public string CustomName = "";
     }
 
-    class GarrisonMission
+    class GarrisonEncounter
     {
+        public int GarrEncounterID;
+        public List<int> Mechanics = new();
+        public int GarrAutoCombatantID;
+        public int Health;
+        public int MaxHealth;
+        public int Attack;
+        public sbyte BoardIndex;
+
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(DbID);
-            data.WriteInt64(OfferTime);
-            data.WriteUInt32(OfferDuration);
-            data.WriteInt64(StartTime);
-            data.WriteUInt32(TravelDuration);
-            data.WriteUInt32(MissionDuration);
-            data.WriteUInt32(MissionRecID);
-            data.WriteUInt32(MissionState);
-            data.WriteUInt32(SuccessChance);
-            data.WriteUInt32(Flags);
-            data.WriteFloat(MissionScalar);
-        }
+            data.WriteInt32(GarrEncounterID);
+            data.WriteInt32(Mechanics.Count);
+            data.WriteInt32(GarrAutoCombatantID);
+            data.WriteInt32(Health);
+            data.WriteInt32(MaxHealth);
+            data.WriteInt32(Attack);
+            data.WriteInt8(BoardIndex);
 
-        public ulong DbID;
-        public uint MissionRecID;
-        public long OfferTime;
-        public uint OfferDuration;
-        public long StartTime = 2288912640;
-        public uint TravelDuration;
-        public uint MissionDuration;
-        public uint MissionState;
-        public uint SuccessChance;
-        public uint Flags;
-        public float MissionScalar = 1.0f;
+            if (!Mechanics.Empty())
+                Mechanics.ForEach(id => data.WriteInt32(id));
+        }
     }
 
     struct GarrisonMissionReward
@@ -456,6 +451,53 @@ namespace Game.Networking.Packets
         public uint GarrMssnBonusAbilityID;
         public int ItemFileDataID;
         public ItemInstance ItemInstance;
+    }
+
+    class GarrisonMission
+    {
+        public ulong DbID;
+        public int MissionRecID;
+        public long OfferTime;
+        public uint OfferDuration;
+        public long StartTime = 2288912640;
+        public uint TravelDuration;
+        public uint MissionDuration;
+        public int MissionState = 0;
+        public int SuccessChance = 0;
+        public uint Flags = 0;
+        public float MissionScalar = 1.0f;
+        public int ContentTuningID = 0;
+        public List<GarrisonEncounter> Encounters = new();
+        public List<GarrisonMissionReward> Rewards = new();
+        public List<GarrisonMissionReward> OvermaxRewards = new();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt64(DbID);
+            data.WriteInt32(MissionRecID);
+            data.WriteInt64(OfferTime);
+            data.WriteUInt32(OfferDuration);
+            data.WriteInt64(StartTime);
+            data.WriteUInt32(TravelDuration);
+            data.WriteUInt32(MissionDuration);
+            data.WriteInt32(MissionState);
+            data.WriteInt32(SuccessChance);
+            data.WriteUInt32(Flags);
+            data.WriteFloat(MissionScalar);
+            data.WriteInt32(ContentTuningID);
+            data.WriteInt32(Encounters.Count);
+            data.WriteInt32(Rewards.Count);
+            data.WriteInt32(OvermaxRewards.Count);
+
+            foreach (GarrisonEncounter encounter in Encounters)
+                encounter.Write(data);
+
+            foreach (GarrisonMissionReward missionRewardItem in Rewards)
+                missionRewardItem.Write(data);
+
+            foreach (GarrisonMissionReward missionRewardItem in OvermaxRewards)
+                missionRewardItem.Write(data);
+        }
     }
 
     struct GarrisonMissionBonusAbility

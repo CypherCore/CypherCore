@@ -3806,10 +3806,8 @@ namespace Game.Entities
             Direction = data.ReadVector3();
             TransportID = data.ReadUInt32();
             Magnitude = data.ReadFloat();
+            Unused910 = data.ReadInt32();
             Type = (MovementForceType)data.ReadBits<byte>(2);
-            bool has910 = data.HasBit();
-            if (has910)
-                Unused910 = data.ReadInt32();
         }
 
         public void Write(WorldPacket data)

@@ -236,6 +236,7 @@ namespace Game.Guilds
                 memberData.Level = member.GetLevel();
                 memberData.ClassID = (byte)member.GetClass();
                 memberData.Gender = (byte)member.GetGender();
+                memberData.RaceID = (byte)member.GetRace();
 
                 memberData.Authenticated = false;
                 memberData.SorEligible = false;
@@ -1650,10 +1651,11 @@ namespace Game.Guilds
                     member.SetStats(
                         name,
                         result.Read<byte>(1),
-                        (Class)result.Read<byte>(2),
-                        (Gender)result.Read<byte>(3),
-                        result.Read<ushort>(4),
-                        result.Read<uint>(5),
+                        (Race)result.Read<byte>(2),
+                        (Class)result.Read<byte>(3),
+                        (Gender)result.Read<byte>(4),
+                        result.Read<ushort>(5),
+                        result.Read<uint>(6),
                         0);
 
                     ok = member.CheckStats();
@@ -2603,6 +2605,7 @@ namespace Game.Guilds
             {
                 m_name = player.GetName();
                 m_level = (byte)player.GetLevel();
+                m_race = player.GetRace();
                 m_class = player.GetClass();
                 _gender = player.GetNativeGender();
                 m_zoneId = player.GetZoneId();
@@ -2610,10 +2613,11 @@ namespace Game.Guilds
                 m_achievementPoints = player.GetAchievementPoints();
             }
 
-            public void SetStats(string name, byte level, Class _class, Gender gender, uint zoneId, uint accountId, uint reputation)
+            public void SetStats(string name, byte level, Race race, Class _class, Gender gender, uint zoneId, uint accountId, uint reputation)
             {
                 m_name = name;
                 m_level = level;
+                m_race = race;
                 m_class = _class;
                 _gender = gender;
                 m_zoneId = zoneId;
@@ -2685,12 +2689,13 @@ namespace Game.Guilds
 
                 SetStats(field.Read<string>(14),
                          field.Read<byte>(15),                          // characters.level
-                         (Class)field.Read<byte>(16),                   // characters.class
-                         (Gender)field.Read<byte>(17),                  // characters.gender
-                         field.Read<ushort>(18),                        // characters.zone
-                         field.Read<uint>(19),                          // characters.account
+                         (Race)field.Read<byte>(16),                    // characters.race
+                         (Class)field.Read<byte>(17),                   // characters.class
+                         (Gender)field.Read<byte>(18),                  // characters.gender
+                         field.Read<ushort>(19),                        // characters.zone
+                         field.Read<uint>(20),                          // characters.account
                          0);
-                m_logoutTime = field.Read<ulong>(20);                    // characters.logout_time
+                m_logoutTime = field.Read<ulong>(21);                    // characters.logout_time
                 m_totalActivity = 0;
                 m_weekActivity = 0;
                 m_weekReputation = 0;
@@ -2711,13 +2716,19 @@ namespace Game.Guilds
             {
                 if (m_level < 1)
                 {
-                    Log.outError(LogFilter.Guild, "Player ({0}) has a broken data in field `characters`.`level`, deleting him from guild!", m_guid.ToString());
+                    Log.outError(LogFilter.Guild, $"{m_guid} has a broken data in field `characters`.`level`, deleting him from guild!");
                     return false;
                 }
 
-                if (m_class < Class.Warrior || m_class >= Class.Max)
+                if (!CliDB.ChrRacesStorage.ContainsKey((uint)m_race))
                 {
-                    Log.outError(LogFilter.Guild, "Player ({0}) has a broken data in field `characters`.`class`, deleting him from guild!", m_guid.ToString());
+                    Log.outError(LogFilter.Guild, $"{m_guid} has a broken data in field `characters`.`race`, deleting him from guild!");
+                    return false;
+                }
+
+                if (!CliDB.ChrClassesStorage.ContainsKey((uint)m_class))
+                {
+                    Log.outError(LogFilter.Guild, $"{m_guid} has a broken data in field `characters`.`class`, deleting him from guild!");
                     return false;
                 }
                 return true;
@@ -2790,6 +2801,7 @@ namespace Game.Guilds
             public ulong GetLogoutTime() { return m_logoutTime; }
             public string GetPublicNote() { return m_publicNote; }
             public string GetOfficerNote() { return m_officerNote; }
+            public Race GetRace() { return m_race; }
             public Class GetClass() { return m_class; }
             public Gender GetGender() { return _gender; }
             public byte GetLevel() { return m_level; }
@@ -2822,6 +2834,7 @@ namespace Game.Guilds
             string m_name;
             uint m_zoneId;
             byte m_level;
+            Race m_race;
             Class m_class;
             Gender _gender;
             GuildMemberFlags m_flags;

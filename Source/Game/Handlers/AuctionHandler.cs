@@ -541,6 +541,33 @@ namespace Game
             SendPacket(response);
         }
 
+        [WorldPacketHandler(ClientOpcodes.AuctionRequestFavoriteList)]
+        void HandleAuctionRequestFavoriteList(AuctionRequestFavoriteList requestFavoriteList)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_FAVORITE_AUCTIONS);
+            stmt.AddValue(0, _player.GetGUID().GetCounter());
+            GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt)).WithCallback(favoriteAuctionResult =>
+            {
+                AuctionFavoriteList favoriteItems = new();
+                if (!favoriteAuctionResult.IsEmpty())
+                {
+                    do
+                    {
+                        AuctionFavoriteInfo item = new();
+                        item.Order = favoriteAuctionResult.Read<uint>(0);
+                        item.ItemID = favoriteAuctionResult.Read<uint>(1);
+                        item.ItemLevel = favoriteAuctionResult.Read<uint>(2);
+                        item.BattlePetSpeciesID = favoriteAuctionResult.Read<uint>(3);
+                        item.SuffixItemNameDescriptionID = favoriteAuctionResult.Read<uint>(4);
+                        favoriteItems.Items.Add(item);
+
+                    } while (favoriteAuctionResult.NextRow());
+
+                }
+                SendPacket(favoriteItems);
+            });
+        }
+
         [WorldPacketHandler(ClientOpcodes.AuctionSellCommodity)]
         void HandleAuctionSellCommodity(AuctionSellCommodity sellCommodity)
         {

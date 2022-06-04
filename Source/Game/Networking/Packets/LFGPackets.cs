@@ -762,6 +762,8 @@ namespace Game.Networking.Packets
             Id = data.ReadUInt32();
             Type = (RideType)data.ReadUInt32();
             Time = data.ReadInt64();
+            Unknown925 = data.HasBit();
+            data.ResetBitPos();
         }
 
         public void Write(WorldPacket data)
@@ -770,12 +772,15 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Id);
             data.WriteUInt32((uint)Type);
             data.WriteInt64(Time);
+            data.WriteBit(Unknown925);
+            data.FlushBits();
         }
 
         public ObjectGuid RequesterGuid;
         public uint Id;
         public RideType Type;
         public long Time;
+        public bool Unknown925;
     }
 
     public enum RideType

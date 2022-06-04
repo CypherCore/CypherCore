@@ -213,7 +213,9 @@ namespace Game.SupportSystem
     {
         float _facing;
         ObjectGuid _targetCharacterGuid;
-        GMSupportComplaintType _complaintType;
+        ReportType _reportType;
+        ReportMajorCategory _majorCategory;
+        ReportMinorCategory _minorCategoryFlags = ReportMinorCategory.TextChat;
         SupportTicketSubmitComplaint.SupportTicketChatLog _chatLog;
         string _note;
 
@@ -239,7 +241,9 @@ namespace Game.SupportSystem
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
             _targetCharacterGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
-            _complaintType = (GMSupportComplaintType)fields.Read<byte>(++idx);
+            _reportType = (ReportType)fields.Read<int>(++idx);
+            _majorCategory = (ReportMajorCategory)fields.Read<int>(++idx);
+            _minorCategoryFlags = (ReportMinorCategory)fields.Read<int>(++idx);
             int reportLineIndex = fields.Read<int>(++idx);
             if (reportLineIndex != -1)
                 _chatLog.ReportLineIndex = (uint)reportLineIndex;
@@ -282,7 +286,9 @@ namespace Game.SupportSystem
             stmt.AddValue(++idx, _pos.Z);
             stmt.AddValue(++idx, _facing);
             stmt.AddValue(++idx, _targetCharacterGuid.GetCounter());
-            stmt.AddValue(++idx, (byte)_complaintType);
+            stmt.AddValue(++idx, (int)_reportType);
+            stmt.AddValue(++idx, (int)_majorCategory);
+            stmt.AddValue(++idx, (int)_minorCategoryFlags);
             if (_chatLog.ReportLineIndex.HasValue)
                 stmt.AddValue(++idx, _chatLog.ReportLineIndex.Value);
             else
@@ -342,7 +348,9 @@ namespace Game.SupportSystem
         }
 
         ObjectGuid GetTargetCharacterGuid() { return _targetCharacterGuid; }
-        GMSupportComplaintType GetComplaintType() { return _complaintType; }
+        ReportType GetReportType() { return _reportType; }
+        ReportMajorCategory GetMajorCategory() { return _majorCategory; }
+        ReportMinorCategory GetMinorCategoryFlags() { return _minorCategoryFlags; }
         string GetNote() { return _note; }
 
         public void SetFacing(float facing) { _facing = facing; }
@@ -350,7 +358,9 @@ namespace Game.SupportSystem
         {
             _targetCharacterGuid = targetCharacterGuid;
         }
-        public void SetComplaintType(GMSupportComplaintType type) { _complaintType = type; }
+        public void SetReportType(ReportType reportType) { _reportType = reportType; }
+        public void SetMajorCategory(ReportMajorCategory majorCategory) { _majorCategory = majorCategory; }
+        public void SetMinorCategoryFlags(ReportMinorCategory minorCategoryFlags) { _minorCategoryFlags = minorCategoryFlags; }
         public void SetChatLog(SupportTicketSubmitComplaint.SupportTicketChatLog log) { _chatLog = log; }
         public void SetNote(string note) { _note = note; }
     }
