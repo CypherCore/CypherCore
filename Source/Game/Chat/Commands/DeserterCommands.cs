@@ -35,15 +35,15 @@ namespace Game.Chat.Commands
         class DeserterInstanceCommands
         {
             [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
-            static bool HandleDeserterInstanceAdd(CommandHandler handler, StringArguments args)
+            static bool HandleDeserterInstanceAdd(CommandHandler handler, uint time)
             {
-                return HandleDeserterAdd(args, handler, true);
+                return HandleDeserterAdd(handler, time, true);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterInstanceRemove)]
-            static bool HandleDeserterInstanceRemove(CommandHandler handler, StringArguments args)
+            static bool HandleDeserterInstanceRemove(CommandHandler handler)
             {
-                return HandleDeserterRemove(args, handler, true);
+                return HandleDeserterRemove(handler, true);
             }
         }
 
@@ -51,33 +51,24 @@ namespace Game.Chat.Commands
         class DeserterBGCommands
         {
             [Command("add", RBACPermissions.CommandDeserterBgAdd)]
-            static bool HandleDeserterBGAdd(CommandHandler handler, StringArguments args)
+            static bool HandleDeserterBGAdd(CommandHandler handler, uint time)
             {
-                return HandleDeserterAdd(args, handler, false);
+                return HandleDeserterAdd(handler, time, false);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterBgRemove)]
-            static bool HandleDeserterBGRemove(CommandHandler handler, StringArguments args)
+            static bool HandleDeserterBGRemove(CommandHandler handler)
             {
-                return HandleDeserterRemove(args, handler, false);
+                return HandleDeserterRemove(handler, false);
             }
         }
 
-        static bool HandleDeserterAdd(StringArguments args, CommandHandler handler, bool isInstance)
+        static bool HandleDeserterAdd(CommandHandler handler, uint time, bool isInstance)
         {
-            if (args.Empty())
-                return false;
-
             Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            if (!uint.TryParse(args.NextString(), out uint time) || time == 0)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
@@ -92,7 +83,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleDeserterRemove(StringArguments args, CommandHandler handler, bool isInstance)
+        static bool HandleDeserterRemove(CommandHandler handler, bool isInstance)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
