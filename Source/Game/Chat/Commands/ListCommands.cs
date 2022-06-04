@@ -30,7 +30,7 @@ namespace Game.Chat.Commands
     class ListCommands
     {
         [Command("auras", RBACPermissions.CommandListAuras)]
-        static bool HandleListAurasCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListAurasCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -44,10 +44,8 @@ namespace Game.Chat.Commands
 
             var auras = unit.GetAppliedAuras();
             handler.SendSysMessage(CypherStrings.CommandTargetListauras, auras.Count);
-            foreach (var pair in auras)
+            foreach (var (_, aurApp) in auras)
             {
-
-                AuraApplication aurApp = pair.Value;
                 Aura aura = aurApp.GetBase();
                 string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];
                 bool talent = aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.IsTalent);
@@ -69,30 +67,16 @@ namespace Game.Chat.Commands
 
                 handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, i);
 
-                foreach (var eff in auraList)
-                    handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, eff.GetId(), eff.GetEffIndex(), eff.GetAmount());
+                foreach (var effect in auraList)
+                    handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());
             }
 
             return true;
         }
 
         [Command("creature", RBACPermissions.CommandListCreature, true)]
-        static bool HandleListCreatureCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListCreatureCommand(CommandHandler handler, uint creatureId, uint? countArg)
         {
-            if (args.Empty())
-                return false;
-
-            // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!uint.TryParse(id, out uint creatureId) || creatureId == 0)
-            {
-                handler.SendSysMessage(CypherStrings.CommandInvalidcreatureid, creatureId);
-                return false;
-            }
-
             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(creatureId);
             if (cInfo == null)
             {
@@ -100,8 +84,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!uint.TryParse(args.NextString(), out uint count))
-                count = 10;
+            uint count = countArg.GetValueOrDefault(10);
 
             if (count == 0)
                 return false;
@@ -173,30 +156,9 @@ namespace Game.Chat.Commands
         }
 
         [Command("item", RBACPermissions.CommandListItem, true)]
-        static bool HandleListItemCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListItemCommand(CommandHandler handler, uint itemId, uint? countArg)
         {
-            if (args.Empty())
-                return false;
-
-            string id = handler.ExtractKeyFromLink(args, "Hitem");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!uint.TryParse(id, out uint itemId) || itemId == 0)
-            {
-                handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
-                return false;
-            }
-
-            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
-            if (itemTemplate == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
-                return false;
-            }
-
-            if (!uint.TryParse(args.NextString(), out uint count))
-                count = 10;
+            uint count = countArg.GetValueOrDefault(10);
 
             if (count == 0)
                 return false;
@@ -471,22 +433,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("object", RBACPermissions.CommandListObject, true)]
-        static bool HandleListObjectCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListObjectCommand(CommandHandler handler, uint gameObjectId, uint? countArg)
         {
-            if (args.Empty())
-                return false;
-
-            // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!uint.TryParse(id, out uint gameObjectId) || gameObjectId == 0)
-            {
-                handler.SendSysMessage(CypherStrings.CommandListobjinvalidid, gameObjectId);
-                return false;
-            }
-
             GameObjectTemplate gInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObjectId);
             if (gInfo == null)
             {
@@ -494,8 +442,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!uint.TryParse(args.NextString(), out uint count))
-                count = 10;
+            uint count = countArg.GetValueOrDefault(10);
 
             if (count == 0)
                 return false;
@@ -568,14 +515,10 @@ namespace Game.Chat.Commands
         }
 
         [Command("respawns", RBACPermissions.CommandListRespawns)]
-        static bool HandleListRespawnsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListRespawnsCommand(CommandHandler handler, uint range)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
-
-            uint range = 0;
-            if (!args.Empty())
-                range = args.NextUInt32();
 
             Locale locale = handler.GetSession().GetSessionDbcLocale();
             string stringOverdue = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsOverdue, locale);
@@ -626,7 +569,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("scenes", RBACPermissions.CommandListScenes)]
-        static bool HandleListScenesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListScenesCommand(CommandHandler handler)
         {
             Player target = handler.GetSelectedPlayer();
             if (!target)
@@ -649,7 +592,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("spawnpoints", RBACPermissions.CommandListSpawnpoints)]
-        static bool HandleListSpawnPointsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListSpawnPointsCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
