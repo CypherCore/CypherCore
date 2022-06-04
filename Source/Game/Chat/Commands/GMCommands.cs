@@ -26,43 +26,39 @@ namespace Game.Chat
     class GMCommands
     {
         [Command("", RBACPermissions.CommandGm)]
-        static bool HandleGMCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMCommand(CommandHandler handler, bool? enableArg)
         {
             Player _player = handler.GetSession().GetPlayer();
 
-            if (args.Empty())
+            if (!enableArg.HasValue)
             {
                 handler.SendNotification(_player.IsGameMaster() ? CypherStrings.GmOn : CypherStrings.GmOff);
                 return true;
             }
 
-            string param = args.NextString();
-            if (param == "on")
+            if (enableArg.Value)
             {
                 _player.SetGameMaster(true);
                 handler.SendNotification(CypherStrings.GmOn);
                 _player.UpdateTriggerVisibility();
-                return true;
             }
-            if (param == "off")
+            else
             {
                 _player.SetGameMaster(false);
                 handler.SendNotification(CypherStrings.GmOff);
                 _player.UpdateTriggerVisibility();
-                return true;
             }
 
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
+            return true;
         }
 
         [Command("chat", RBACPermissions.CommandGmChat)]
-        static bool HandleGMChatCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMChatCommand(CommandHandler handler, bool? enableArg)
         {
             WorldSession session = handler.GetSession();
             if (session != null)
             {
-                if (args.Empty())
+                if (!enableArg.HasValue)
                 {
                     if (session.HasPermission(RBACPermissions.ChatUseStaffBadge) && session.GetPlayer().IsGMChat())
                         session.SendNotification(CypherStrings.GmChatOn);
@@ -71,21 +67,18 @@ namespace Game.Chat
                     return true;
                 }
 
-                string param = args.NextString();
-
-                if (param == "on")
+                if (enableArg.HasValue)
                 {
                     session.GetPlayer().SetGMChat(true);
                     session.SendNotification(CypherStrings.GmChatOn);
-                    return true;
                 }
-
-                if (param == "off")
+                else
                 {
                     session.GetPlayer().SetGMChat(false);
                     session.SendNotification(CypherStrings.GmChatOff);
-                    return true;
                 }
+
+                return true;
             }
 
             handler.SendSysMessage(CypherStrings.UseBol);
@@ -93,50 +86,40 @@ namespace Game.Chat
         }
 
         [Command("fly", RBACPermissions.CommandGmFly)]
-        static bool HandleGMFlyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMFlyCommand(CommandHandler handler, bool enable)
         {
-            if (args.Empty())
-                return false;
-
             Player target = handler.GetSelectedPlayer();
             if (target == null)
                 target = handler.GetPlayer();
 
-            string arg = args.NextString().ToLower();
-
-            if (arg == "on")
+            if (enable)
             { 
                 target.SetCanFly(true);
                 target.SetCanTransitionBetweenSwimAndFly(true);
             }
-            else if (arg == "off")
+            else
             { 
                 target.SetCanFly(false);
                 target.SetCanTransitionBetweenSwimAndFly(false);
             }
-            else
-            {
-                handler.SendSysMessage(CypherStrings.UseBol);
-                return false;
-            }
-            handler.SendSysMessage(CypherStrings.CommandFlymodeStatus, handler.GetNameLink(target), arg);
+
+            handler.SendSysMessage(CypherStrings.CommandFlymodeStatus, handler.GetNameLink(target), enable ? "on" : "off");
             return true;
         }
 
         [Command("ingame", RBACPermissions.CommandGmIngame, true)]
-        static bool HandleGMListIngameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMListIngameCommand(CommandHandler handler)
         {
             bool first = true;
             bool footer = false;
 
-            var m = Global.ObjAccessor.GetPlayers();
-            foreach (var pl in m)
+            foreach (var player in Global.ObjAccessor.GetPlayers())
             {
-                AccountTypes accountType = pl.GetSession().GetSecurity();
-                if ((pl.IsGameMaster() ||
-                    (pl.GetSession().HasPermission(RBACPermissions.CommandsAppearInGmList) &&
-                     accountType <= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInGmList))) &&
-                    (handler.GetSession() == null || pl.IsVisibleGloballyFor(handler.GetSession().GetPlayer())))
+                AccountTypes playerSec = player.GetSession().GetSecurity();
+                if ((player.IsGameMaster() ||
+                    (player.GetSession().HasPermission(RBACPermissions.CommandsAppearInGmList) &&
+                     playerSec <= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInGmList))) &&
+                    (handler.GetSession() == null || player.IsVisibleGloballyFor(handler.GetSession().GetPlayer())))
                 {
                     if (first)
                     {
@@ -145,16 +128,16 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.GmsOnSrv);
                         handler.SendSysMessage("========================");
                     }
-                    int size = pl.GetName().Length;
-                    byte security = (byte)accountType;
+                    int size = player.GetName().Length;
+                    byte security = (byte)playerSec;
                     int max = ((16 - size) / 2);
                     int max2 = max;
                     if ((max + max2 + size) == 16)
                         max2 = max - 1;
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage("|    {0} GMLevel {1}", pl.GetName(), security);
+                        handler.SendSysMessage("|    {0} GMLevel {1}", player.GetName(), security);
                     else
-                        handler.SendSysMessage("|{0}{1}{2}|   {3}  |", max, " ", pl.GetName(), max2, " ", security);
+                        handler.SendSysMessage("|{0}{1}{2}|   {3}  |", max, " ", player.GetName(), max2, " ", security);
                 }
             }
             if (footer)
@@ -165,7 +148,7 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGmList, true)]
-        static bool HandleGMListFullCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMListFullCommand(CommandHandler handler)
         {
             // Get the accounts with GM Level >0
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
@@ -200,20 +183,19 @@ namespace Game.Chat
         }
 
         [Command("visible", RBACPermissions.CommandGmVisible)]
-        static bool HandleGMVisibleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMVisibleCommand(CommandHandler handler, bool? visibleArg)
         {
             Player _player = handler.GetSession().GetPlayer();
 
-            if (args.Empty())
+            if (!visibleArg.HasValue)
             {
                 handler.SendSysMessage(CypherStrings.YouAre, _player.IsGMVisible() ? Global.ObjectMgr.GetCypherString(CypherStrings.Visible) : Global.ObjectMgr.GetCypherString(CypherStrings.Invisible));
                 return true;
             }
 
             uint VISUAL_AURA = 37800;
-            string param = args.NextString();
 
-            if (param == "on")
+            if (visibleArg.Value)
             {
                 if (_player.HasAura(VISUAL_AURA, ObjectGuid.Empty))
                     _player.RemoveAurasDueToSpell(VISUAL_AURA);
@@ -221,20 +203,16 @@ namespace Game.Chat
                 _player.SetGMVisible(true);
                 _player.UpdateObjectVisibility();
                 handler.GetSession().SendNotification(CypherStrings.InvisibleVisible);
-                return true;
             }
-
-            if (param == "off")
+            else
             {
                 _player.AddAura(VISUAL_AURA, _player);
                 _player.SetGMVisible(false);
                 _player.UpdateObjectVisibility();
                 handler.GetSession().SendNotification(CypherStrings.InvisibleInvisible);
-                return true;
             }
 
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
+            return true;
         }
     }
 }
