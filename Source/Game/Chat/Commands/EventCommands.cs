@@ -24,19 +24,8 @@ namespace Game.Chat
     class EventCommands
     {
         [Command("info", RBACPermissions.CommandEvent, true)]
-        static bool HandleEventInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleEventInfoCommand(CommandHandler handler, ushort eventId)
         {
-            if (args.Empty())
-                return false;
-
-            // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!ushort.TryParse(id, out ushort eventId))
-                return false;
-
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId >= events.Length)
             {
@@ -71,7 +60,7 @@ namespace Game.Chat
         }
 
         [Command("activelist", RBACPermissions.CommandEventActivelist, true)]
-        static bool HandleEventActiveListCommand(CommandHandler handler, StringArguments args)
+        static bool HandleEventActiveListCommand(CommandHandler handler)
         {
             uint counter = 0;
 
@@ -99,19 +88,8 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandEventStart, true)]
-        static bool HandleEventStartCommand(CommandHandler handler, StringArguments args)
+        static bool HandleEventStartCommand(CommandHandler handler, ushort eventId)
         {
-            if (args.Empty())
-                return false;
-
-            // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!ushort.TryParse(id, out ushort eventId))
-                return false;
-
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId < 1 || eventId >= events.Length)
             {
@@ -138,19 +116,8 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandEventStop, true)]
-        static bool HandleEventStopCommand(CommandHandler handler, StringArguments args)
+        static bool HandleEventStopCommand(CommandHandler handler, ushort eventId)
         {
-            if (args.Empty())
-                return false;
-
-            // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!ushort.TryParse(id, out ushort eventId))
-                return false;
-
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId < 1 || eventId >= events.Length)
             {
