@@ -474,30 +474,9 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("commands", RBACPermissions.CommandCommands, true)]
-        static bool HandleCommandsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCommandsCommand(CommandHandler handler)
         {
-            string list = "";
-            foreach (var command in CommandManager.GetCommands())
-            {
-                if (handler.IsAvailable(command))
-                {
-                    if (handler.GetSession() != null)
-                        list += "\n    ";
-                    else
-                        list += "\n\r    ";
-
-                    list += command.Name;
-
-                    if (!command.ChildCommands.Empty())
-                        list += " ...";
-                }
-            }
-
-            if (list.IsEmpty())
-                return false;
-
-            handler.SendSysMessage(CypherStrings.AvailableCmd);
-            handler.SendSysMessage(list);
+            handler.ShowHelpForCommand(CommandManager.GetCommands(), "");
             return true;
         }
 
@@ -630,38 +609,34 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dev", RBACPermissions.CommandDev)]
-        static bool HandleDevCommand(CommandHandler handler, string enable)
+        static bool HandleDevCommand(CommandHandler handler, bool? enableArg)
         {
             Player player = handler.GetSession().GetPlayer();
 
-            if (enable.IsEmpty())
+            if (!enableArg.HasValue)
             {
                 handler.GetSession().SendNotification(player.IsDeveloper() ? CypherStrings.DevOn : CypherStrings.DevOff);
                 return true;
             }
 
-            if (enable == "on")
+            if (enableArg.Value)
             {
                 player.SetDeveloper(true);
                 handler.GetSession().SendNotification(CypherStrings.DevOn);
-                return true;
             }
-            else if (enable == "off")
+            else
             {
                 player.SetDeveloper(false);
                 handler.GetSession().SendNotification(CypherStrings.DevOff);
-                return true;
             }
 
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
+            return true;
         }
 
         [CommandNonGroup("die", RBACPermissions.CommandDie)]
-        static bool HandleDieCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDieCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-
             if (!target && handler.GetPlayer().GetTarget().IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -680,7 +655,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dismount", RBACPermissions.CommandDismount)]
-        static bool HandleDismountCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDismountCommand(CommandHandler handler)
         {
             Player player = handler.GetSelectedPlayerOrSelf();
 
@@ -981,7 +956,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("guid", RBACPermissions.CommandGuid)]
-        static bool HandleGUIDCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGUIDCommand(CommandHandler handler)
         {
             ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
 
@@ -996,17 +971,16 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
-        static bool HandleHelpCommand(CommandHandler handler, StringArguments args)
+        static bool HandleHelpCommand(CommandHandler handler, string cmdArg)
         {
-            string cmd = args.NextString("");
-            if (cmd.IsEmpty())
+            if (cmdArg.IsEmpty())
             {
                 handler.ShowHelpForCommand(CommandManager.GetCommands(), "help");
                 handler.ShowHelpForCommand(CommandManager.GetCommands(), "");
             }
             else
             {
-                if (!handler.ShowHelpForCommand(CommandManager.GetCommands(), cmd))
+                if (!handler.ShowHelpForCommand(CommandManager.GetCommands(), cmdArg))
                     handler.SendSysMessage(CypherStrings.NoHelpCmd);
             }
 
@@ -1055,14 +1029,8 @@ namespace Game.Chat
 
         // move item to other slot
         [CommandNonGroup("itemmove", RBACPermissions.CommandItemmove)]
-        static bool HandleItemMoveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleItemMoveCommand(CommandHandler handler, byte srcSlot, byte dstSlot)
         {
-            if (args.Empty())
-                return false;
-
-            byte srcSlot = args.NextByte();
-            byte dstSlot = args.NextByte();
-
             if (srcSlot == dstSlot)
                 return true;
 
@@ -1115,22 +1083,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool HandleLinkGraveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, string teamArg)
         {
-            if (args.Empty())
-                return false;
-
-            uint graveyardId = args.NextUInt32();
-            if (graveyardId == 0)
-                return false;
-
-            string px2 = args.NextString();
             Team team;
-            if (string.IsNullOrEmpty(px2))
+            if (teamArg.IsEmpty())
                 team = 0;
-            else if (px2 == "horde")
+            else if (teamArg.Equals("horde"))
                 team = Team.Horde;
-            else if (px2 == "alliance")
+            else if (teamArg.Equals("alliance"))
                 team = Team.Alliance;
             else
                 return false;
@@ -1418,28 +1378,27 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
-        static bool HandleNearGraveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNearGraveCommand(CommandHandler handler, string teamArg)
         {
-            string px2 = args.NextString();
             Team team;
-            if (string.IsNullOrEmpty(px2))
+            if (teamArg.IsEmpty())
                 team = 0;
-            else if (px2 == "horde")
+            else if (teamArg.Equals("horde"))
                 team = Team.Horde;
-            else if (px2 == "alliance")
+            else if (teamArg.Equals("alliance"))
                 team = Team.Alliance;
             else
                 return false;
 
             Player player = handler.GetSession().GetPlayer();
-            uint zone_id = player.GetZoneId();
+            uint zoneId = player.GetZoneId();
 
             WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
             if (graveyard != null)
             {
                 uint graveyardId = graveyard.Id;
 
-                GraveYardData data = Global.ObjectMgr.FindGraveYardData(graveyardId, zone_id);
+                GraveYardData data = Global.ObjectMgr.FindGraveYardData(graveyardId, zoneId);
                 if (data == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandGraveyarderror, graveyardId);
@@ -1457,7 +1416,7 @@ namespace Game.Chat
                 else if (team == Team.Alliance)
                     team_name = handler.GetCypherString(CypherStrings.CommandGraveyardAlliance);
 
-                handler.SendSysMessage(CypherStrings.CommandGraveyardnearest, graveyardId, team_name, zone_id);
+                handler.SendSysMessage(CypherStrings.CommandGraveyardnearest, graveyardId, team_name, zoneId);
             }
             else
             {
@@ -1469,9 +1428,9 @@ namespace Game.Chat
                     team_name = handler.GetCypherString(CypherStrings.CommandGraveyardAlliance);
 
                 if (team == 0)
-                    handler.SendSysMessage(CypherStrings.CommandZonenograveyards, zone_id);
+                    handler.SendSysMessage(CypherStrings.CommandZonenograveyards, zoneId);
                 else
-                    handler.SendSysMessage(CypherStrings.CommandZonenografaction, zone_id, team_name);
+                    handler.SendSysMessage(CypherStrings.CommandZonenografaction, zoneId, team_name);
             }
 
             return true;
@@ -1865,7 +1824,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pvpstats", RBACPermissions.CommandPvpstats, true)]
-        static bool HandlePvPstatsCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePvPstatsCommand(CommandHandler handler)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
@@ -1999,7 +1958,7 @@ namespace Game.Chat
 
         // Save all players in the world
         [CommandNonGroup("saveall", RBACPermissions.CommandSaveall, true)]
-        static bool HandleSaveAllCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSaveAllCommand(CommandHandler handler)
         {
             Global.ObjAccessor.SaveAllPlayers();
             handler.SendSysMessage(CypherStrings.PlayersSaved);
@@ -2007,7 +1966,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("save", RBACPermissions.CommandSave)]
-        static bool HandleSaveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSaveCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 

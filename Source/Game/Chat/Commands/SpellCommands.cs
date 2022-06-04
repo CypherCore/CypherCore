@@ -72,7 +72,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
-        static bool HandleAuraCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAuraCommand(CommandHandler handler, uint spellId)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -82,24 +82,21 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, target.GetMap().GetDifficultyID());
-            if (spellInfo != null)
-            {
-                ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, target.GetMapId(), spellId, target.GetMap().GenerateLowGuid(HighGuid.Cast));
-                AuraCreateInfo createInfo = new(castId, spellInfo, target.GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, target);
-                createInfo.SetCaster(target);
+            if (spellInfo == null)
+                return false;
 
-                Aura.TryRefreshStackOrCreate(createInfo);
-            }
+            ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, target.GetMapId(), spellId, target.GetMap().GenerateLowGuid(HighGuid.Cast));
+            AuraCreateInfo createInfo = new(castId, spellInfo, target.GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, target);
+            createInfo.SetCaster(target);
+
+            Aura.TryRefreshStackOrCreate(createInfo);
 
             return true;
         }
 
         [CommandNonGroup("unaura", RBACPermissions.CommandUnaura)]
-        static bool UnAura(CommandHandler handler, StringArguments args)
+        static bool HandleUnAuraCommand(CommandHandler handler, uint spellId = 0)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -109,20 +106,18 @@ namespace Game.Chat
                 return false;
             }
 
-            string argstr = args.NextString();
-            if (argstr == "all")
+            if (spellId == 0)
             {
                 target.RemoveAllAuras();
                 return true;
             }
 
-            args.Reset();
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
-            target.RemoveAurasDueToSpell(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            if (spellInfo != null)
+            {
+                target.RemoveAurasDueToSpell(spellInfo.Id);
+                return true;
+            }
 
             return true;
         }
