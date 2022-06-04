@@ -27,7 +27,7 @@ namespace Game.Chat
     class SpellCommands
     {
         [CommandNonGroup("cooldown", RBACPermissions.CommandCooldown)]
-        static bool HandleCooldownCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCooldownCommand(CommandHandler handler, uint? spellIdArg)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -44,7 +44,7 @@ namespace Game.Chat
             }
 
             string nameLink = handler.GetNameLink(owner);
-            if (args.Empty())
+            if (!spellIdArg.HasValue)
             {
                 target.GetSpellHistory().ResetAllCooldowns();
                 target.GetSpellHistory().ResetAllCharges();
@@ -52,21 +52,16 @@ namespace Game.Chat
             }
             else
             {
-                // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-                uint spellIid = handler.ExtractSpellIdFromLink(args);
-                if (spellIid == 0)
-                    return false;
-
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellIid, target.GetMap().GetDifficultyID());
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellIdArg.Value, target.GetMap().GetDifficultyID());
                 if (spellInfo == null)
                 {
                     handler.SendSysMessage(CypherStrings.UnknownSpell, owner == handler.GetSession().GetPlayer() ? handler.GetCypherString(CypherStrings.You) : nameLink);
                     return false;
                 }
 
-                target.GetSpellHistory().ResetCooldown(spellIid, true);
+                target.GetSpellHistory().ResetCooldown(spellInfo.Id, true);
                 target.GetSpellHistory().ResetCharges(spellInfo.ChargeCategoryId);
-                handler.SendSysMessage(CypherStrings.RemoveallCooldown, spellIid, owner == handler.GetSession().GetPlayer() ? handler.GetCypherString(CypherStrings.You) : nameLink);
+                handler.SendSysMessage(CypherStrings.RemoveallCooldown, spellInfo.Id, owner == handler.GetSession().GetPlayer() ? handler.GetCypherString(CypherStrings.You) : nameLink);
             }
             return true;
         }
@@ -123,23 +118,8 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("setskill", RBACPermissions.CommandSetskill)]
-        static bool SetSkill(CommandHandler handler, StringArguments args)
+        static bool HandleSetSkillCommand(CommandHandler handler, uint skillId, uint level, uint? maxSkillArg)
         {
-            // number or [name] Shift-click form |color|Hskill:skill_id|h[name]|h|r
-            string skillStr = handler.ExtractKeyFromLink(args, "Hskill");
-            if (string.IsNullOrEmpty(skillStr))
-                return false;
-
-            if (!uint.TryParse(skillStr, out uint skill) || skill == 0)
-            {
-                handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
-                return false;
-            }
-
-            uint level = args.NextUInt32();
-            if (level == 0)
-                return false;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
@@ -147,19 +127,18 @@ namespace Game.Chat
                 return false;
             }
 
-            SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(skill);
+            SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillLine == null)
             {
-                handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
+                handler.SendSysMessage(CypherStrings.InvalidSkillId, skillId);
                 return false;
             }
 
-            bool targetHasSkill = target.GetSkillValue((SkillType)skill) != 0;
+            bool targetHasSkill = target.GetSkillValue((SkillType)skillId) != 0;
 
-            ushort maxPureSkill = args.NextUInt16();
             // If our target does not yet have the skill they are trying to add to them, the chosen level also becomes
             // the max level of the new profession.
-            ushort max = maxPureSkill != 0 ? maxPureSkill : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
+            ushort max = (ushort)maxSkillArg.GetValueOrDefault(targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skillId) : level);
 
             if (level == 0 || level > max)
                 return false;
@@ -167,8 +146,8 @@ namespace Game.Chat
             // If the player has the skill, we get the current skill step. If they don't have the skill, we
             // add the skill to the player's book with step 1 (which is the first rank, in most cases something
             // like 'Apprentice <skill>'.
-            target.SetSkill((SkillType)skill, (uint)(targetHasSkill ? target.GetSkillStep((SkillType)skill) : 1), level, max);
-            handler.SendSysMessage(CypherStrings.SetSkill, skill, skillLine.DisplayName[handler.GetSessionDbcLocale()], handler.GetNameLink(target), level, max);
+            target.SetSkill((SkillType)skillId, (uint)(targetHasSkill ? target.GetSkillStep((SkillType)skillId) : 1), level, max);
+            handler.SendSysMessage(CypherStrings.SetSkill, skillId, skillLine.DisplayName[handler.GetSessionDbcLocale()], handler.GetNameLink(target), level, max);
             return true;
         }
     }

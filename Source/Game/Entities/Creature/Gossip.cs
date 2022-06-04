@@ -267,7 +267,6 @@ namespace Game.Misc
                 opt.Confirm = item.BoxMessage;      // accept text (related to money) pop up box, 2.0.3
                 opt.Status = GossipOptionStatus.Available;
                 packet.GossipOptions.Add(opt);
-
             }
 
             for (byte i = 0; i < _questMenu.GetMenuItemCount(); ++i)

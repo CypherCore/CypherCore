@@ -28,9 +28,9 @@ namespace Game.Chat
     class MessageCommands
     {
         [CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
-        static bool HandleNameAnnounceCommand(CommandHandler handler, object[] args)
+        static bool HandleNameAnnounceCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
             string name = "Console";
@@ -38,14 +38,14 @@ namespace Game.Chat
             if (session)
                 name = session.GetPlayer().GetName();
 
-            Global.WorldMgr.SendWorldText(CypherStrings.AnnounceColor, name, args);
+            Global.WorldMgr.SendWorldText(CypherStrings.AnnounceColor, name, message);
             return true;
         }
 
         [CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
-        static bool HandleGMNameAnnounceCommand(CommandHandler handler, object[] args)
+        static bool HandleGMNameAnnounceCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
             string name = "Console";
@@ -53,40 +53,38 @@ namespace Game.Chat
             if (session)
                 name = session.GetPlayer().GetName();
 
-            Global.WorldMgr.SendGMText(CypherStrings.AnnounceColor, name, args);
+            Global.WorldMgr.SendGMText(CypherStrings.AnnounceColor, name, message);
             return true;
         }
 
         [CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
-        static bool HandleAnnounceCommand(CommandHandler handler, object[] args)
+        static bool HandleAnnounceCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
-            string str = handler.GetParsedString(CypherStrings.Systemmessage, args);
-            Global.WorldMgr.SendServerMessage(ServerMessageType.String, str);
+            Global.WorldMgr.SendServerMessage(ServerMessageType.String, handler.GetParsedString(CypherStrings.Systemmessage, message));
             return true;
         }
 
         [CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
-        static bool HandleGMAnnounceCommand(CommandHandler handler, object[] args)
+        static bool HandleGMAnnounceCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
-            Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, args);
+            Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, message);
             return true;
         }
 
         [CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
-        static bool HandleNotifyCommand(CommandHandler handler, object[] args)
+        static bool HandleNotifyCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
             string str = handler.GetCypherString(CypherStrings.GlobalNotify);
-            foreach (string str2 in args)
-                str += str2;
+            str += message;
 
             Global.WorldMgr.SendGlobalMessage(new PrintNotification(str));
 
@@ -94,14 +92,13 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
-        static bool HandleGMNotifyCommand(CommandHandler handler, object[] args)
+        static bool HandleGMNotifyCommand(CommandHandler handler, string message)
         {
-            if (args.Length == 0)
+            if (message.IsEmpty())
                 return false;
 
             string str = handler.GetCypherString(CypherStrings.GmNotify);
-            foreach (string str2 in args)
-                str += str2;
+            str += message;
 
             Global.WorldMgr.SendGlobalGMMessage(new PrintNotification(str));
 

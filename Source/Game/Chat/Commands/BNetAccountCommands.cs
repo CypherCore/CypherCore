@@ -26,31 +26,19 @@ namespace Game.Chat.Commands
     class BNetAccountCommands
     {
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, bool? createGameAccount)
         {
-            if (args.Empty())
-                return false;
-
-            // Parse the command line arguments
-            string accountName = args.NextString();
-            string password = args.NextString();
-            if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password))
-                return false;
-
             if (!accountName.Contains('@'))
             {
                 handler.SendSysMessage(CypherStrings.AccountInvalidBnetName);
                 return false;
             }
 
-            if (!bool.TryParse(args.NextString(), out bool createGameAccount))
-                createGameAccount = true;
-
             string gameAccountName;
-            switch (Global.BNetAccountMgr.CreateBattlenetAccount(accountName, password, createGameAccount, out gameAccountName))
+            switch (Global.BNetAccountMgr.CreateBattlenetAccount(accountName, password, createGameAccount.GetValueOrDefault(true), out gameAccountName))
             {
                 case AccountOpResult.Ok:
-                    if (createGameAccount)
+                    if (createGameAccount.Value)
                         handler.SendSysMessage(CypherStrings.AccountCreatedBnetWithGame, accountName, gameAccountName);
                     else
                         handler.SendSysMessage(CypherStrings.AccountCreated, accountName);
@@ -59,7 +47,7 @@ namespace Game.Chat.Commands
                     {
                         Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] ({3}) created Battle.net account {4}{5}{6}",
                             handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(), handler.GetSession().GetPlayer().GetName(), 
-                            handler.GetSession().GetPlayer().GetGUID().ToString(), accountName, createGameAccount ? " with game account " : "", createGameAccount ? gameAccountName : "");
+                            handler.GetSession().GetPlayer().GetGUID().ToString(), accountName, createGameAccount.Value ? " with game account " : "", createGameAccount.Value ? gameAccountName : "");
                     }
                     break;
                 case AccountOpResult.NameTooLong:

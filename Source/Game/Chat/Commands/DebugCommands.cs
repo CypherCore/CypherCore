@@ -142,7 +142,7 @@ namespace Game.Chat
         }
 
         [Command("dummy", RBACPermissions.CommandDebugDummy)]
-        static bool HandleDebugDummyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugDummyCommand(CommandHandler handler)
         {
             handler.SendSysMessage("This command does nothing right now. Edit your local core (DebugCommands.cs) to make it do whatever you need for testing.");
             return true;

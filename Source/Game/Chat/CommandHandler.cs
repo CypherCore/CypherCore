@@ -705,7 +705,7 @@ namespace Game.Chat
                 int partIndex = 0;
                 while (true)
                 {
-                    if (partIndex >= part.Length)
+                    if (partIndex >= part.Length || part[partIndex] == ' ')
                         return true;
                     else if (partIndex >= name.Length)
                         return false;

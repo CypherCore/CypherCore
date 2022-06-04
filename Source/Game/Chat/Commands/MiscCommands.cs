@@ -186,25 +186,16 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("additem set", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemSetCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAddItemSetCommand(CommandHandler handler, uint itemSetId, string bonuses, string context)
         {
-            if (args.Empty())
-                return false;
-
-            string idStr = handler.ExtractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
-            if (string.IsNullOrEmpty(idStr))
-                return false;
-
             // prevent generation all items with itemset field value '0'
-            if (!uint.TryParse(idStr, out uint itemSetId) || itemSetId == 0)
+            if (itemSetId == 0)
             {
                 handler.SendSysMessage(CypherStrings.NoItemsFromItemsetFound, itemSetId);
                 return false;
             }
 
             List<uint> bonusListIDs = new();
-            var bonuses = args.NextString();
-            var context = args.NextString();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
             if (!bonuses.IsEmpty())
@@ -411,14 +402,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("bank", RBACPermissions.CommandBank)]
-        static bool HandleBankCommand(CommandHandler handler, StringArguments args)
+        static bool HandleBankCommand(CommandHandler handler)
         {
             handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID());
             return true;
         }
 
         [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
-        static bool HandleBindSightCommand(CommandHandler handler, StringArguments args)
+        static bool HandleBindSightCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -458,7 +449,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
-        static bool HandleComeToMeCommand(CommandHandler handler, StringArguments args)
+        static bool HandleComeToMeCommand(CommandHandler handler)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -988,11 +979,8 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("hidearea", RBACPermissions.CommandHidearea)]
-        static bool HandleHideAreaCommand(CommandHandler handler, StringArguments args)
+        static bool HandleHideAreaCommand(CommandHandler handler, uint areaId)
         {
-            if (args.Empty())
-                return false;
-
             Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
@@ -1000,7 +988,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area == null)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -1122,7 +1110,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("listfreeze", RBACPermissions.CommandListfreeze)]
-        static bool HandleListFreezeCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListFreezeCommand(CommandHandler handler)
         {
             // Get names from DB
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
@@ -1159,7 +1147,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("mailbox", RBACPermissions.CommandMailbox)]
-        static bool HandleMailBoxCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMailBoxCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -1168,7 +1156,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
-        static bool HandleMovegensCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMovegensCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -1251,7 +1239,7 @@ namespace Game.Chat
             return true;
         }
 
-        // mute player for some times
+        // mute player for the specified duration
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
         static bool HandleMuteCommand(CommandHandler handler, StringArguments args)
         {
@@ -1336,15 +1324,8 @@ namespace Game.Chat
 
         // mutehistory command
         [CommandNonGroup("mutehistory", RBACPermissions.CommandMutehistory, true)]
-        static bool HandleMuteInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMuteHistoryCommand(CommandHandler handler, string accountName)
         {
-            if (args.Empty())
-                return false;
-
-            string accountName = args.NextString("");
-            if (accountName.IsEmpty())
-                return false;
-
             uint accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
@@ -1791,29 +1772,22 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
-        static bool HandlePlayAllCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePlayAllCommand(CommandHandler handler, uint soundId, uint? broadcastTextId)
         {
-            if (args.Empty())
-                return false;
-
-            uint soundId = args.NextUInt32();
-
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
                 handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
                 return false;
             }
 
-            uint broadcastTextId = args.NextUInt32();
-
-            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId, broadcastTextId));
+            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId, broadcastTextId.GetValueOrDefault(0)));
 
             handler.SendSysMessage(CypherStrings.CommandPlayedToAll, soundId);
             return true;
         }
 
         [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
-        static bool HandlePossessCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePossessCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -1899,7 +1873,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("respawn", RBACPermissions.CommandRespawn)]
-        static bool HandleRespawnCommand(CommandHandler handler, StringArguments args)
+        static bool HandleRespawnCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -1991,11 +1965,8 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("showarea", RBACPermissions.CommandShowarea)]
-        static bool HandleShowAreaCommand(CommandHandler handler, StringArguments args)
+        static bool HandleShowAreaCommand(CommandHandler handler, uint areaId)
         {
-            if (args.Empty())
-                return false;
-
             Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
@@ -2003,7 +1974,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area == null)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -2144,7 +2115,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unbindsight", RBACPermissions.CommandUnbindsight)]
-        static bool HandleUnbindSightCommand(CommandHandler handler, StringArguments args)
+        static bool HandleUnbindSightCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -2156,15 +2127,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
-        static bool HandleUnFreezeCommand(CommandHandler handler, StringArguments args)
+        static bool HandleUnFreezeCommand(CommandHandler handler, string targetNameArg)
         {
             string name = "";
             Player player;
-            string targetName = args.NextString(); // Get entered name
 
-            if (!string.IsNullOrEmpty(targetName))
+            if (!targetNameArg.IsEmpty())
             {
-                name = targetName;
+                name = targetNameArg;
                 ObjectManager.NormalizePlayerName(ref name);
                 player = Global.ObjAccessor.FindPlayerByName(name);
             }
@@ -2186,7 +2156,7 @@ namespace Game.Chat
             }
             else
             {
-                if (!string.IsNullOrEmpty(targetName))
+                if (!targetNameArg.IsEmpty())
                 {
                     // Check for offline players
                     ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
@@ -2267,7 +2237,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unpossess", RBACPermissions.CommandUnpossess)]
-        static bool HandleUnPossessCommand(CommandHandler handler, StringArguments args)
+        static bool HandleUnPossessCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -2354,26 +2324,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("wchange", RBACPermissions.CommandWchange)]
-        static bool HandleChangeWeather(CommandHandler handler, StringArguments args)
+        static bool HandleChangeWeather(CommandHandler handler, uint type, float intensity)
         {
-            if (args.Empty())
-                return false;
-
             // Weather is OFF
             if (!WorldConfig.GetBoolValue(WorldCfg.Weather))
             {
                 handler.SendSysMessage(CypherStrings.WeatherDisabled);
                 return false;
-            }
-
-            // *Change the weather of a cell            
-            //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-            if (!uint.TryParse(args.NextString(), out uint type))
-                return false; 
-            
-            //0 to 1, sending -1 is instand good weather
-            if (!float.TryParse(args.NextString(), out float grade))
-                return false;                       
+            }                      
 
             Player player = handler.GetSession().GetPlayer();
             uint zoneid = player.GetZoneId();
@@ -2385,7 +2343,7 @@ namespace Game.Chat
                 return false;
             }
 
-            weather.SetWeather((WeatherType)type, grade);
+            weather.SetWeather((WeatherType)type, intensity);
             return true;
         }
     }
