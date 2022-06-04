@@ -34,27 +34,19 @@ namespace Game.Chat
     class NPCCommands
     {
         [Command("despawngroup", RBACPermissions.CommandNpcDespawngroup)]
-        static bool HandleNpcDespawnGroup(CommandHandler handler, StringArguments args)
+        static bool HandleNpcDespawnGroup(CommandHandler handler, string[] opts)
         {
-            if (args.Empty())
+            if (opts.Empty())
                 return false;
 
             bool deleteRespawnTimes = false;
             uint groupId = 0;
 
             // Decode arguments
-            string arg = args.NextString();
-            while (!arg.IsEmpty())
+            foreach (var variant in opts)
             {
-                string thisArg = arg.ToLower();
-                if (thisArg == "removerespawntime")
+                if (!uint.TryParse(variant, out groupId))
                     deleteRespawnTimes = true;
-                else if (thisArg.IsEmpty() || !thisArg.IsNumber())
-                    return false;
-                else
-                    groupId = uint.Parse(thisArg);
-
-                arg = args.NextString();
             }
 
             Player player = handler.GetSession().GetPlayer();
@@ -69,7 +61,7 @@ namespace Game.Chat
         }
 
         [Command("evade", RBACPermissions.CommandNpcEvade)]
-        static bool HandleNpcEvadeCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcEvadeCommand(CommandHandler handler, EvadeReason? why, string force)
         {
             Creature creatureTarget = handler.GetSelectedCreature();
             if (!creatureTarget || creatureTarget.IsPet())
@@ -84,36 +76,15 @@ namespace Game.Chat
                 return false;
             }
 
-            string type_str = args.NextString();
-            string force_str = args.NextString();
-
-            EvadeReason why = EvadeReason.Other;
-            bool force = false;
-            if (!type_str.IsEmpty())
-            {
-                if (type_str.Equals("NO_HOSTILES") || type_str.Equals("EVADE_REASON_NO_HOSTILES"))
-                    why = EvadeReason.NoHostiles;
-                else if (type_str.Equals("BOUNDARY") || type_str.Equals("EVADE_REASON_BOUNDARY"))
-                    why = EvadeReason.Boundary;
-                else if (type_str.Equals("SEQUENCE_BREAK") || type_str.Equals("EVADE_REASON_SEQUENCE_BREAK"))
-                    why = EvadeReason.SequenceBreak;
-                else if (type_str.Equals("FORCE"))
-                    force = true;
-
-                if (!force && !force_str.IsEmpty())
-                    if (force_str.Equals("FORCE"))
-                        force = true;
-            }
-
-            if (force)
+            if (force.Equals("force"))
                 creatureTarget.ClearUnitState(UnitState.Evade);
-            creatureTarget.GetAI().EnterEvadeMode(why);
+            creatureTarget.GetAI().EnterEvadeMode(why.GetValueOrDefault(EvadeReason.Other));
 
             return true;
         }
 
         [Command("info", RBACPermissions.CommandNpcInfo)]
-        static bool HandleNpcInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcInfoCommand(CommandHandler handler)
         {
             Creature target = handler.GetSelectedCreature();
             if (!target)
@@ -202,28 +173,17 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandNpcMove)]
-        static bool HandleNpcMoveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcMoveCommand(CommandHandler handler, ulong? spawnId)
         {
-            ulong lowguid;
-
             Creature creature = handler.GetSelectedCreature();
             Player player = handler.GetSession().GetPlayer();
             if (player == null)
                 return false;
 
-            if (creature != null)
-                lowguid = creature.GetSpawnId();
-            else
-            {
-                // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
-                string cId = handler.ExtractKeyFromLink(args, "Hcreature");
-                if (cId.IsEmpty())
-                    return false;
+            if (!spawnId.HasValue && creature == null)
+                return false;
 
-                if (!ulong.TryParse(cId, out lowguid))
-                    return false;
-            }
-
+            ulong lowguid = spawnId.HasValue ? spawnId.Value : creature.GetSpawnId();
 
             // Attempting creature load from DB data
             CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
@@ -254,23 +214,17 @@ namespace Game.Chat
             DB.World.Execute(stmt);
 
             // respawn selected creature at the new location
-            if (creature)
-            {
-                if (creature.IsAlive())
-                    creature.SetDeathState(DeathState.JustDied);
-                creature.Respawn(true);
-                if (!creature.GetRespawnCompatibilityMode())
-                    creature.AddObjectToRemoveList();
-            }
+            if (creature != null)
+                creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1));
 
             handler.SendSysMessage(CypherStrings.CommandCreaturemoved);
             return true;
         }
 
         [Command("near", RBACPermissions.CommandNpcNear)]
-        static bool HandleNpcNearCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcNearCommand(CommandHandler handler, float? dist)
         {
-            float distance = args.Empty() ? 10.0f : args.NextSingle();
+            float distance = dist.GetValueOrDefault(10.0f);
             uint count = 0;
 
             Player player = handler.GetPlayer();
@@ -314,10 +268,8 @@ namespace Game.Chat
         }
 
         [Command("playemote", RBACPermissions.CommandNpcPlayemote)]
-        static bool HandleNpcPlayEmoteCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcPlayEmoteCommand(CommandHandler handler, uint emote)
         {
-            uint emote = args.NextUInt32();
-
             Creature target = handler.GetSelectedCreature();
             if (!target)
             {
@@ -331,9 +283,9 @@ namespace Game.Chat
         }
 
         [Command("say", RBACPermissions.CommandNpcSay)]
-        static bool HandleNpcSayCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcSayCommand(CommandHandler handler, string text)
         {
-            if (args.Empty())
+            if (text.IsEmpty())
                 return false;
 
             Creature creature = handler.GetSelectedCreature();
@@ -342,7 +294,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
-            string text = args.GetString();
+
             creature.Say(text, Language.Universal);
 
             // make some emotes
@@ -363,7 +315,7 @@ namespace Game.Chat
         }
 
         [Command("showloot", RBACPermissions.CommandNpcShowloot)]
-        static bool HandleNpcShowLootCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcShowLootCommand(CommandHandler handler, string all)
         {
             Creature creatureTarget = handler.GetSelectedCreature();
             if (creatureTarget == null || creatureTarget.IsPet())
@@ -382,7 +334,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.CommandNpcShowLootHeader, creatureTarget.GetName(), creatureTarget.GetEntry());
             handler.SendSysMessage(CypherStrings.CommandNpcShowLootMoney, loot.gold / MoneyConstants.Gold, (loot.gold % MoneyConstants.Gold) / MoneyConstants.Silver, loot.gold % MoneyConstants.Silver);
 
-            if (args.NextString() == "all") // nonzero from strcmp <. not equal
+            if (all.Equals("all")) // nonzero from strcmp <. not equal
             {
                 handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel, "Standard items", loot.items.Count);
                 foreach (LootItem item in loot.items)
@@ -424,9 +376,9 @@ namespace Game.Chat
         }
 
         [Command("spawngroup", RBACPermissions.CommandNpcSpawngroup)]
-        static bool HandleNpcSpawnGroup(CommandHandler handler, StringArguments args)
+        static bool HandleNpcSpawnGroup(CommandHandler handler, string[] opts)
         {
-            if (args.Empty())
+            if (opts.Empty())
                 return false;
 
             bool ignoreRespawn = false;
@@ -434,20 +386,20 @@ namespace Game.Chat
             uint groupId = 0;
 
             // Decode arguments
-            string arg = args.NextString();
-            while (!arg.IsEmpty())
+            foreach (var variant in opts)
             {
-                string thisArg = arg.ToLower();
-                if (thisArg == "ignorerespawn")
-                    ignoreRespawn = true;
-                else if (thisArg == "force")
-                    force = true;
-                else if (thisArg.IsEmpty() || !thisArg.IsNumber())
-                    return false;
-                else
-                    groupId = uint.Parse(thisArg);
-
-                arg = args.NextString();
+                switch (variant)
+                {
+                    case "force":
+                        force = true;
+                        break;
+                    case "ignorerespawn":
+                        ignoreRespawn = true;
+                        break;
+                    default:
+                        uint.TryParse(variant, out groupId);
+                        break;
+                }
             }
 
             Player player = handler.GetSession().GetPlayer();
@@ -465,7 +417,7 @@ namespace Game.Chat
         }
 
         [Command("tame", RBACPermissions.CommandNpcTame)]
-        static bool HandleNpcTameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcTameCommand(CommandHandler handler)
         {
             Creature creatureTarget = handler.GetSelectedCreature();
             if (!creatureTarget || creatureTarget.IsPet())
@@ -528,34 +480,24 @@ namespace Game.Chat
         }
 
         [Command("textemote", RBACPermissions.CommandNpcTextemote)]
-        static bool HandleNpcTextEmoteCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcTextEmoteCommand(CommandHandler handler, string text)
         {
-            if (args.Empty())
-                return false;
-
             Creature creature = handler.GetSelectedCreature();
-
             if (!creature)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
 
-            creature.TextEmote(args.NextString());
+            creature.TextEmote(text);
 
             return true;
         }
 
         [Command("whisper", RBACPermissions.CommandNpcWhisper)]
-        static bool HandleNpcWhisperCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcWhisperCommand(CommandHandler handler, string recv, string text)
         {
-            if (args.Empty())
-                return false;
-
-            string receiver_str = args.NextString();
-            string text = args.NextString("");
-
-            if (string.IsNullOrEmpty(receiver_str) || string.IsNullOrEmpty(text))
+            if (text.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CmdSyntax);
                 return false;
@@ -568,13 +510,8 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!ulong.TryParse(receiver_str, out ulong guid))
-                return false;
-
-            ObjectGuid receiver_guid = ObjectGuid.Create(HighGuid.Player, guid);
-
             // check online security
-            Player receiver = Global.ObjAccessor.FindPlayer(receiver_guid);
+            Player receiver = Global.ObjAccessor.FindPlayerByName(recv);
             if (handler.HasLowerSecurity(receiver, ObjectGuid.Empty))
                 return false;
 
@@ -583,9 +520,9 @@ namespace Game.Chat
         }
 
         [Command("yell", RBACPermissions.CommandNpcYell)]
-        static bool HandleNpcYellCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNpcYellCommand(CommandHandler handler, string text)
         {
-            if (args.Empty())
+            if (text.IsEmpty())
                 return false;
 
             Creature creature = handler.GetSelectedCreature();
@@ -595,7 +532,7 @@ namespace Game.Chat
                 return false;
             }
 
-            creature.Yell(args.NextString(), Language.Universal);
+            creature.Yell(text, Language.Universal);
 
             // make an emote
             creature.HandleEmoteCommand(Emote.OneshotShout);
@@ -639,16 +576,9 @@ namespace Game.Chat
         class AddCommands
         {
             [Command("", RBACPermissions.CommandNpcAdd)]
-            static bool HandleNpcAddCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcAddCommand(CommandHandler handler, uint id)
             {
-                if (args.Empty())
-                    return false;
-
-                string charID = handler.ExtractKeyFromLink(args, "Hcreature_entry");
-                if (string.IsNullOrEmpty(charID))
-                    return false;
-
-                if (!uint.TryParse(charID, out uint id) || Global.ObjectMgr.GetCreatureTemplate(id) == null)
+                if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
@@ -695,27 +625,13 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcAddItem)]
-            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, uint? mc, uint? it, uint? ec, string bonusListIds)
             {
-                if (args.Empty())
-                    return false;
-
-                byte type = 1; // FIXME: make type (1 item, 2 currency) an argument
-
-                string pitem = handler.ExtractKeyFromLink(args, "Hitem");
-                if (string.IsNullOrEmpty(pitem))
+                if (itemId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.CommandNeeditemsend);
                     return false;
                 }
-
-                if (!uint.TryParse(pitem, out uint itemId) || itemId == 0)
-                    return false;
-
-                uint maxcount = args.NextUInt32();
-                uint incrtime = args.NextUInt32();
-                uint extendedcost = args.NextUInt32();
-                string fbonuslist = args.NextString();
 
                 Creature vendor = handler.GetSelectedCreature();
                 if (!vendor)
@@ -724,6 +640,9 @@ namespace Game.Chat
                     return false;
                 }
 
+                uint maxcount = mc.GetValueOrDefault(0);
+                uint incrtime = it.GetValueOrDefault(0);
+                uint extendedcost = ec.GetValueOrDefault(0);
                 uint vendor_entry = vendor.GetEntry();
 
                 VendorItem vItem = new();
@@ -731,11 +650,11 @@ namespace Game.Chat
                 vItem.maxcount = maxcount;
                 vItem.incrtime = incrtime;
                 vItem.ExtendedCost = extendedcost;
-                vItem.Type = (ItemVendorType)type;
+                vItem.Type = ItemVendorType.Item;
 
-                if (fbonuslist.IsEmpty())
+                if (!bonusListIds.IsEmpty())
                 {
-                    var bonusListIDsTok = new StringArray(fbonuslist, ';');
+                    var bonusListIDsTok = new StringArray(bonusListIds, ';');
                     if (!bonusListIDsTok.IsEmpty())
                     {
                         foreach (string token in bonusListIDsTok)
@@ -758,14 +677,8 @@ namespace Game.Chat
             }
 
             [Command("move", RBACPermissions.CommandNpcAddMove)]
-            static bool HandleNpcAddMoveCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcAddMoveCommand(CommandHandler handler, ulong lowGuid)
             {
-                if (args.Empty())
-                    return false;
-
-                ulong lowGuid = args.NextUInt64();
-                string waitStr = args.NextString();
-
                 // attempt check creature existence by DB data
                 CreatureData data = Global.ObjectMgr.GetCreatureData(lowGuid);
                 if (data == null)
@@ -773,9 +686,6 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.CommandCreatguidnotfound, lowGuid);
                     return false;
                 }
-
-                if (!int.TryParse(waitStr, out int wait) || wait < 0)
-                    wait = 0;
 
                 // Update movement type
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
@@ -789,14 +699,9 @@ namespace Game.Chat
             }
 
             [Command("formation", RBACPermissions.CommandNpcAddFormation)]
-            static bool HandleNpcAddFormationCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcAddFormationCommand(CommandHandler handler, ulong leaderGUID)
             {
-                if (args.Empty())
-                    return false;
-
-                uint leaderGUID = args.NextUInt32();
                 Creature creature = handler.GetSelectedCreature();
-
                 if (!creature || creature.GetSpawnId() == 0)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -835,30 +740,24 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandNpcAddTemp)]
-            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, string lootStr, uint id)
             {
-                if (args.Empty())
-                    return false;
-
                 bool loot = false;
-                string spawntype_str = args.NextString();
-                if (spawntype_str.Equals("LOOT"))
-                    loot = true;
-                else if (spawntype_str.Equals("NOLOOT"))
-                    loot = false;
-
-                string charID = handler.ExtractKeyFromLink(args, "Hcreature_entry");
-                if (string.IsNullOrEmpty(charID))
-                    return false;
-
-                if (!uint.TryParse(charID, out uint id) || id == 0)
-                    return false;
+                if (!lootStr.IsEmpty())
+                {
+                    if (lootStr.Equals("loot"))
+                        loot = true;
+                    else if (lootStr.Equals("noloot"))
+                        loot = false;
+                    else
+                        return false;
+                }
 
                 if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                chr.SummonCreature(id, chr, loot ? TempSummonType.CorpseTimedDespawn : TempSummonType.CorpseDespawn, TimeSpan.FromSeconds(30));
+                chr.SummonCreature(id, chr.GetPosition(), loot ? TempSummonType.CorpseTimedDespawn : TempSummonType.CorpseDespawn, TimeSpan.FromSeconds(30));
 
                 return true;
             }
@@ -868,26 +767,14 @@ namespace Game.Chat
         class DeleteCommands
         {
             [Command("", RBACPermissions.CommandNpcDelete)]
-            static bool HandleNpcDeleteCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcDeleteCommand(CommandHandler handler, ulong? spawnIdArg)
             {
                 ulong spawnId;
-
-                if (!args.Empty())
-                {
-                    // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
-                    string cId = handler.ExtractKeyFromLink(args, "Hcreature");
-                    if (string.IsNullOrEmpty(cId))
-                        return false;
-
-                    if (!ulong.TryParse(cId, out ulong guidLow) || guidLow == 0)
-                        return false;
-
-                    spawnId = guidLow;
-                }
+                if (spawnIdArg.HasValue)
+                    spawnId = spawnIdArg.Value;
                 else
                 {
                     Creature creature = handler.GetSelectedCreature();
-
                     if (!creature || creature.IsPet() || creature.IsTotem())
                     {
                         handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -915,11 +802,8 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcDeleteItem)]
-            static bool HandleNpcDeleteVendorItemCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcDeleteVendorItemCommand(CommandHandler handler, uint itemId)
             {
-                if (args.Empty())
-                    return false;
-
                 Creature vendor = handler.GetSelectedCreature();
                 if (!vendor || !vendor.IsVendor())
                 {
@@ -927,19 +811,10 @@ namespace Game.Chat
                     return false;
                 }
 
-                string pitem = handler.ExtractKeyFromLink(args, "Hitem");
-                if (string.IsNullOrEmpty(pitem))
-                {
-                    handler.SendSysMessage(CypherStrings.CommandNeeditemsend);
-                    return false;
-                }
-
-                if (!uint.TryParse(pitem, out uint itemId))
+                if (itemId == 0)
                     return false;
 
-                ItemVendorType type = ItemVendorType.Item; // FIXME: make type (1 item, 2 currency) an argument
-
-                if (!Global.ObjectMgr.RemoveVendorItem(vendor.GetEntry(), itemId, type))
+                if (!Global.ObjectMgr.RemoveVendorItem(vendor.GetEntry(), itemId, ItemVendorType.Item))
                 {
                     handler.SendSysMessage(CypherStrings.ItemNotInList, itemId);
                     return false;
@@ -955,7 +830,7 @@ namespace Game.Chat
         class FollowCommands
         {
             [Command("", RBACPermissions.CommandNpcFollow)]
-            static bool HandleNpcFollowCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcFollowCommand(CommandHandler handler)
             {
                 Player player = handler.GetSession().GetPlayer();
                 Creature creature = handler.GetSelectedCreature();
@@ -974,7 +849,7 @@ namespace Game.Chat
             }
 
             [Command("stop", RBACPermissions.CommandNpcFollowStop)]
-            static bool HandleNpcUnFollowCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcUnFollowCommand(CommandHandler handler)
             {
                 Player player = handler.GetPlayer();
                 Creature creature = handler.GetSelectedCreature();
@@ -1011,7 +886,7 @@ namespace Game.Chat
         class SetCommands
         {
             [Command("allowmove", RBACPermissions.CommandNpcSetAllowmove)]
-            static bool HandleNpcSetAllowMovementCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetAllowMovementCommand(CommandHandler handler)
             {
                 /*
                 if (Global.WorldMgr.getAllowMovement())
@@ -1029,17 +904,8 @@ namespace Game.Chat
             }
 
             [Command("data", RBACPermissions.CommandNpcSetData)]
-            static bool HandleNpcSetDataCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetDataCommand(CommandHandler handler, uint data_1, uint data_2)
             {
-                if (args.Empty())
-                    return false;
-
-                uint data_1 = args.NextUInt32();
-                uint data_2 = args.NextUInt32();
-
-                if (data_1 == 0 || data_2 == 0)
-                    return false;
-
                 Creature creature = handler.GetSelectedCreature();
                 if (!creature)
                 {
@@ -1054,12 +920,8 @@ namespace Game.Chat
             }
 
             [Command("entry", RBACPermissions.CommandNpcSetEntry)]
-            static bool HandleNpcSetEntryCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetEntryCommand(CommandHandler handler, uint newEntryNum)
             {
-                if (args.Empty())
-                    return false;
-
-                uint newEntryNum = args.NextUInt32();
                 if (newEntryNum == 0)
                     return false;
 
@@ -1079,13 +941,8 @@ namespace Game.Chat
             }
 
             [Command("factionid", RBACPermissions.CommandNpcSetFactionid)]
-            static bool HandleNpcSetFactionIdCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetFactionIdCommand(CommandHandler handler, uint factionId)
             {
-                if (args.Empty())
-                    return false;
-
-                uint factionId = args.NextUInt32();
-
                 if (!CliDB.FactionTemplateStorage.ContainsKey(factionId))
                 {
                     handler.SendSysMessage(CypherStrings.WrongFaction, factionId);
@@ -1093,7 +950,6 @@ namespace Game.Chat
                 }
 
                 Creature creature = handler.GetSelectedCreature();
-
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -1145,12 +1001,8 @@ namespace Game.Chat
             }
 
             [Command("level", RBACPermissions.CommandNpcSetLevel)]
-            static bool HandleNpcSetLevelCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetLevelCommand(CommandHandler handler, byte lvl)
             {
-                if (args.Empty())
-                    return false;
-
-                byte lvl = args.NextByte();
                 if (lvl < 1 || lvl > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) + 3)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
@@ -1173,13 +1025,8 @@ namespace Game.Chat
             }
 
             [Command("link", RBACPermissions.CommandNpcSetLink)]
-            static bool HandleNpcSetLinkCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetLinkCommand(CommandHandler handler, ulong linkguid)
             {
-                if (args.Empty())
-                    return false;
-
-                ulong linkguid = args.NextUInt64();
-
                 Creature creature = handler.GetSelectedCreature();
                 if (!creature)
                 {
@@ -1204,15 +1051,9 @@ namespace Game.Chat
             }
 
             [Command("model", RBACPermissions.CommandNpcSetModel)]
-            static bool HandleNpcSetModelCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetModelCommand(CommandHandler handler, uint displayId)
             {
-                if (args.Empty())
-                    return false;
-
-                uint displayId = args.NextUInt32();
-
                 Creature creature = handler.GetSelectedCreature();
-
                 if (!creature || creature.IsPet())
                 {
                     handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -1221,7 +1062,7 @@ namespace Game.Chat
 
                 if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
                 {
-                    handler.SendSysMessage(CypherStrings.CommandInvalidParam, args);
+                    handler.SendSysMessage(CypherStrings.CommandInvalidParam, displayId);
                     return false;
                 }
 
@@ -1234,11 +1075,8 @@ namespace Game.Chat
             }
 
             [Command("movetype", RBACPermissions.CommandNpcSetMovetype)]
-            static bool HandleNpcSetMoveTypeCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetMoveTypeCommand(CommandHandler handler, ulong? lowGuid, string type, string nodel)
             {
-                if (args.Empty())
-                    return false;
-
                 // 3 arguments:
                 // GUID (optional - you can also select the creature)
                 // stay|random|way (determines the kind of movement)
@@ -1246,56 +1084,28 @@ namespace Game.Chat
                 //        this is very handy if you want to do waypoints, that are
                 //        later switched on/off according to special events (like escort
                 //        quests, etc)
-                string guid_str = args.NextString();
-                string type = args.NextString();
-                string dontdel_str = args.NextString();
+                bool doNotDelete = !nodel.IsEmpty();
 
-                bool doNotDelete = false;
-
-                if (string.IsNullOrEmpty(guid_str))
-                    return false;
-
+                ulong lowguid = 0;
                 Creature creature = null;
 
-                if (!string.IsNullOrEmpty(dontdel_str))
+                if (!lowGuid.HasValue)                                           // case .setmovetype $move_type (with selected creature)
                 {
-                    Log.outDebug(LogFilter.Misc, "DEBUG: All 3 params are set");
-
-                    // All 3 params are set
-                    // GUID
-                    // type
-                    // doNotDEL
-                    if (dontdel_str == "NODEL")
-                        doNotDelete = true;
-                }
-                else
-                {
-                    // Only 2 params - but maybe NODEL is set
-                    if (!string.IsNullOrEmpty(type))
-                    {
-                        Log.outDebug(LogFilter.Server, "DEBUG: Only 2 params ");
-                        if (type == "NODEL")
-                        {
-                            doNotDelete = true;
-                            type = null;
-                        }
-                    }
-                }
-
-                if (string.IsNullOrEmpty(type))                                           // case .setmovetype $move_type (with selected creature)
-                {
-                    type = guid_str;
                     creature = handler.GetSelectedCreature();
                     if (!creature || creature.IsPet())
                         return false;
+
+                    lowguid = creature.GetSpawnId();
                 }
-                else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
+                else
                 {
-                    if (!ulong.TryParse(guid_str, out ulong lowguid) || lowguid != 0)
+                    lowguid = lowGuid.Value;
+
+                    if (lowguid != 0)
                         creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
 
                     // attempt check creature existence by DB data
-                    if (!creature)
+                    if (creature == null)
                     {
                         CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
                         if (data == null)
@@ -1304,6 +1114,10 @@ namespace Game.Chat
                             return false;
                         }
                     }
+                    else
+                    {
+                        lowguid = creature.GetSpawnId();
+                    }
                 }
 
                 // now lowguid is low guid really existed creature
@@ -1311,19 +1125,25 @@ namespace Game.Chat
 
                 MovementGeneratorType move_type;
 
-                if (type == "stay")
-                    move_type = MovementGeneratorType.Idle;
-                else if (type == "random")
-                    move_type = MovementGeneratorType.Random;
-                else if (type == "way")
-                    move_type = MovementGeneratorType.Waypoint;
-                else
-                    return false;
+                switch (type)
+                {
+                    case "stay":
+                        move_type = MovementGeneratorType.Idle;
+                        break;
+                    case "random":
+                        move_type = MovementGeneratorType.Random;
+                        break;
+                    case "way":
+                        move_type = MovementGeneratorType.Waypoint;
+                        break;
+                    default:
+                        return false;
+                }
 
                 if (creature)
                 {
                     // update movement type
-                    if (doNotDelete == false)
+                    if (!doNotDelete)
                         creature.LoadPath(0);
 
                     creature.SetDefaultMovementType(move_type);
@@ -1335,6 +1155,7 @@ namespace Game.Chat
                     }
                     creature.SaveToDB();
                 }
+
                 if (!doNotDelete)
                 {
                     handler.SendSysMessage(CypherStrings.MoveTypeSet, type);
@@ -1348,13 +1169,9 @@ namespace Game.Chat
             }
 
             [Command("phase", RBACPermissions.CommandNpcSetPhase)]
-            static bool HandleNpcSetPhaseCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetPhaseCommand(CommandHandler handler, uint phaseId)
             {
-                if (args.Empty())
-                    return false;
-
-                uint phaseId = args.NextUInt32();
-                if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+                if (phaseId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.PhaseNotfound);
                     return false;
@@ -1400,12 +1217,8 @@ namespace Game.Chat
             }
 
             [Command("wanderdistance", RBACPermissions.CommandNpcSetSpawndist)]
-            static bool HandleNpcSetWanderDistanceCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetWanderDistanceCommand(CommandHandler handler, float option)
             {
-                if (args.Empty())
-                    return false;
-
-                float option = args.NextSingle();
                 if (option < 0.0f)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
@@ -1445,22 +1258,15 @@ namespace Game.Chat
             }
 
             [Command("spawntime", RBACPermissions.CommandNpcSetSpawntime)]
-            static bool HandleNpcSetSpawnTimeCommand(CommandHandler handler, StringArguments args)
+            static bool HandleNpcSetSpawnTimeCommand(CommandHandler handler, uint spawnTime)
             {
-                if (args.Empty())
-                    return false;
-
-                uint spawnTime = args.NextUInt32();
-
                 Creature creature = handler.GetSelectedCreature();
                 if (!creature)
                     return false;
 
-                ulong guidLow = creature.GetSpawnId();
-
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
                 stmt.AddValue(0, spawnTime);
-                stmt.AddValue(1, guidLow);
+                stmt.AddValue(1, creature.GetSpawnId());
                 DB.World.Execute(stmt);
 
                 creature.SetRespawnDelay(spawnTime);
