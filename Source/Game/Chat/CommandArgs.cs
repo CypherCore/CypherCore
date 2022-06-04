@@ -26,9 +26,11 @@ namespace Game.Chat
 {
     class CommandArgs
     {
-        public static object[] Parse(Type[] parameterTypes, StringArguments args)
+        public static object[] Parse(CommandHandler handler, Type[] parameterTypes, StringArguments args)
         {
             List<object> arguments = new();
+            arguments.Add(handler);
+
             //for each arg we need to see if its a:
             //1: hyperlink
             //2: Optional arg

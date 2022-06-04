@@ -210,7 +210,7 @@ namespace Game.Chat
             if (parameterTypes.Contains(typeof(StringArguments)))//Old system, can remove once all commands are changed.
                 return (bool)_methodInfo.Invoke(null, new object[] { handler, args });
             else
-                return (bool)_methodInfo.Invoke(null, new object[] { handler }.Combine(CommandArgs.Parse(parameterTypes, args)));
+                return (bool)_methodInfo.Invoke(null, CommandArgs.Parse(handler, parameterTypes, args));
 
         }
 

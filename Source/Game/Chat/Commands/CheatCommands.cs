@@ -24,92 +24,111 @@ namespace Game.Chat.Commands
     [CommandGroup("cheat", RBACPermissions.CommandCheat)]
     class CheatCommands
     {
-        [Command("god", RBACPermissions.CommandCheatGod)]
-        static bool HandleGodModeCheatCommand(CommandHandler handler, StringArguments args)
-        {
-            string argstr = args.NextString();
-            if (args.Empty())
-                argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God)) ? "off" : "on";
-
-            if (argstr == "off")
-            {
-                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.God);
-                handler.SendSysMessage("Godmode is OFF. You can take damage.");
-                return true;
-            }
-            else if (argstr == "on")
-            {
-                handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.God);
-                handler.SendSysMessage("Godmode is ON. You won't take damage.");
-                return true;
-            }
-
-            return false;
-        }
-
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]
-        static bool HandleCasttimeCheatCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCasttimeCheatCommand(CommandHandler handler, bool? enableArg)
         {
-            string argstr = args.NextString();
+            bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Casttime);
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
 
-            if (args.Empty())
-                argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Casttime)) ? "off" : "on";
-
-            if (argstr == "off")
-            {
-                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Casttime);
-                handler.SendSysMessage("CastTime Cheat is OFF. Your spells will have a casttime.");
-                return true;
-            }
-            else if (argstr == "on")
+            if (enable)
             {
                 handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.Casttime);
                 handler.SendSysMessage("CastTime Cheat is ON. Your spells won't have a casttime.");
-                return true;
+            }
+            else
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Casttime);
+                handler.SendSysMessage("CastTime Cheat is OFF. Your spells will have a casttime.");
             }
 
-            return false;
+            return true;
         }
 
         [Command("cooldown", RBACPermissions.CommandCheatCooldown)]
-        static bool HandleCoolDownCheatCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCoolDownCheatCommand(CommandHandler handler, bool? enableArg)
         {
-            string argstr = args.NextString();
+            bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Cooldown);
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
 
-            if (args.Empty())
-                argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Cooldown)) ? "off" : "on";
-
-            if (argstr == "off")
-            {
-                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Cooldown);
-                handler.SendSysMessage("Cooldown Cheat is OFF. You are on the global cooldown.");
-                return true;
-            }
-            else if (argstr == "on")
+            if (enable)
             {
                 handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.Cooldown);
                 handler.SendSysMessage("Cooldown Cheat is ON. You are not on the global cooldown.");
-                return true;
+            }
+            else
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Cooldown);
+                handler.SendSysMessage("Cooldown Cheat is OFF. You are on the global cooldown.");
             }
 
-            return false;
+            return true;
+        }
+
+        [Command("explore", RBACPermissions.CommandCheatExplore)]
+        static bool HandleExploreCheatCommand(CommandHandler handler, bool reveal)
+        {
+            Player chr = handler.GetSelectedPlayer();
+            if (!chr)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
+
+            if (reveal)
+            {
+                handler.SendSysMessage(CypherStrings.YouSetExploreAll, handler.GetNameLink(chr));
+                if (handler.NeedReportToTarget(chr))
+                    chr.SendSysMessage(CypherStrings.YoursExploreSetAll, handler.GetNameLink());
+            }
+            else
+            {
+                handler.SendSysMessage(CypherStrings.YouSetExploreNothing, handler.GetNameLink(chr));
+                if (handler.NeedReportToTarget(chr))
+                    chr.SendSysMessage(CypherStrings.YoursExploreSetNothing, handler.GetNameLink());
+            }
+
+            for (ushort i = 0; i < PlayerConst.ExploredZonesSize; ++i)
+            {
+                if (reveal)
+                    handler.GetSession().GetPlayer().AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
+                else
+                    handler.GetSession().GetPlayer().RemoveExploredZones(i, 0xFFFFFFFFFFFFFFFF);
+            }
+
+            return true;
+        }
+
+        [Command("god", RBACPermissions.CommandCheatGod)]
+        static bool HandleGodModeCheatCommand(CommandHandler handler, bool? enableArg)
+        {
+            bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God);
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
+
+            if (enable)
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.God);
+                handler.SendSysMessage("Godmode is ON. You won't take damage.");
+            }
+            else
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.God);
+                handler.SendSysMessage("Godmode is OFF. You can take damage.");
+            }
+
+            return true;
         }
 
         [Command("power", RBACPermissions.CommandCheatPower)]
-        static bool HandlePowerCheatCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePowerCheatCommand(CommandHandler handler, bool? enableArg)
         {
-            string argstr = args.NextString();
+            bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Power);
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
 
-            if (args.Empty())
-                argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Power)) ? "off" : "on";
-
-            if (argstr == "off")
-            {
-                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Power);
-                handler.SendSysMessage("Power Cheat is OFF. You need mana/rage/energy to use spells.");
-                return true;
-            }
-            else if (argstr == "on")
+            if (enable)
             {
                 Player player = handler.GetSession().GetPlayer();
                 // Set max power to all powers
@@ -118,14 +137,18 @@ namespace Game.Chat.Commands
 
                 player.SetCommandStatusOn(PlayerCommandStates.Power);
                 handler.SendSysMessage("Power Cheat is ON. You don't need mana/rage/energy to use spells.");
-                return true;
+            }
+            else
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Power);
+                handler.SendSysMessage("Power Cheat is OFF. You need mana/rage/energy to use spells.");
             }
 
-            return false;
+            return true;
         }
 
         [Command("status", RBACPermissions.CommandCheatStatus)]
-        static bool HandleCheatStatusCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCheatStatusCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -142,102 +165,55 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
-        static bool HandleWaterWalkCheatCommand(CommandHandler handler, StringArguments args)
-        {
-            string argstr = args.NextString();
-
-            Player target = handler.GetSession().GetPlayer();
-            if (args.Empty())
-                argstr = (target.GetCommandStatus(PlayerCommandStates.Waterwalk)) ? "off" : "on";
-
-            if (argstr == "off")
-            {
-                target.SetCommandStatusOff(PlayerCommandStates.Waterwalk);
-                target.SetWaterWalking(false);
-                handler.SendSysMessage("Waterwalking is OFF. You can't walk on water.");
-                return true;
-            }
-            else if (argstr == "on")
-            {
-                target.SetCommandStatusOn(PlayerCommandStates.Waterwalk);
-                target.SetWaterWalking(true);
-                handler.SendSysMessage("Waterwalking is ON. You can walk on water.");
-                return true;
-            }
-
-            return false;
-        }
-
         [Command("taxi", RBACPermissions.CommandCheatTaxi)]
-        static bool HandleTaxiCheatCommand(CommandHandler handler, StringArguments args)
+        static bool HandleTaxiCheatCommand(CommandHandler handler, bool? enableArg)
         {
-            string argstr = args.NextString();
-
             Player chr = handler.GetSelectedPlayer();
             if (!chr)
                 chr = handler.GetSession().GetPlayer();
             else if (handler.HasLowerSecurity(chr, ObjectGuid.Empty)) // check online security
                 return false;
 
-            if (args.Empty())
-                argstr = (chr.IsTaxiCheater()) ? "off" : "on";
+            bool enable = !chr.IsTaxiCheater();
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
 
-            if (argstr == "off")
-            {
-                chr.SetTaxiCheater(false);
-                handler.SendSysMessage(CypherStrings.YouRemoveTaxis, handler.GetNameLink(chr));
-                if (handler.NeedReportToTarget(chr))
-                    chr.SendSysMessage(CypherStrings.YoursTaxisRemoved, handler.GetNameLink());
-
-                return true;
-            }
-            else if (argstr == "on")
+            if (enable)
             {
                 chr.SetTaxiCheater(true);
                 handler.SendSysMessage(CypherStrings.YouGiveTaxis, handler.GetNameLink(chr));
                 if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursTaxisAdded, handler.GetNameLink());
-                return true;
-            }
-
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
-        }
-
-        [Command("explore", RBACPermissions.CommandCheatExplore)]
-        static bool HandleExploreCheatCommand(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
-
-            int flag = args.NextInt32();
-            Player chr = handler.GetSelectedPlayer();
-            if (!chr)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            if (flag != 0)
-            {
-                handler.SendSysMessage(CypherStrings.YouSetExploreAll, handler.GetNameLink(chr));
-                if (handler.NeedReportToTarget(chr))
-                    chr.SendSysMessage(CypherStrings.YoursExploreSetAll, handler.GetNameLink());
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.YouSetExploreNothing, handler.GetNameLink(chr));
+                chr.SetTaxiCheater(false);
+                handler.SendSysMessage(CypherStrings.YouRemoveTaxis, handler.GetNameLink(chr));
                 if (handler.NeedReportToTarget(chr))
-                    chr.SendSysMessage(CypherStrings.YoursExploreSetNothing, handler.GetNameLink());
+                    chr.SendSysMessage(CypherStrings.YoursTaxisRemoved, handler.GetNameLink());
             }
 
-            for (ushort i = 0; i < PlayerConst.ExploredZonesSize; ++i)
+            return true;
+        }
+
+        [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
+        static bool HandleWaterWalkCheatCommand(CommandHandler handler, bool? enableArg)
+        {
+            bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Waterwalk);
+            if (enableArg.HasValue)
+                enable = enableArg.Value;
+
+            if (enable)
             {
-                if (flag != 0)
-                    handler.GetSession().GetPlayer().AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
-                else
-                    handler.GetSession().GetPlayer().RemoveExploredZones(i, 0xFFFFFFFFFFFFFFFF);
+                handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.Waterwalk);
+                handler.GetSession().GetPlayer().SetWaterWalking(true);
+                handler.SendSysMessage("Waterwalking is ON. You can walk on water.");
+            }
+            else
+            {
+                handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.Waterwalk);
+                handler.GetSession().GetPlayer().SetWaterWalking(false);
+                handler.SendSysMessage("Waterwalking is OFF. You can't walk on water.");
             }
 
             return true;
