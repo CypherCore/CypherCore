@@ -250,7 +250,9 @@ namespace Game.Misc
             GossipMessagePkt packet = new();
             packet.GossipGUID = objectGUID;
             packet.GossipID = (int)_gossipMenu.GetMenuId();
-            packet.TextID = (int)titleTextId;
+            NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
+            if (text != null)
+                packet.TextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
 
             foreach (var pair in _gossipMenu.GetMenuItems())
             {
@@ -275,24 +277,24 @@ namespace Game.Misc
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
-                    ClientGossipText text = new();
-                    text.QuestID = questID;
-                    text.ContentTuningID = quest.ContentTuningId;
-                    text.QuestType = item.QuestIcon;
-                    text.QuestFlags = (uint)quest.Flags;
-                    text.QuestFlagsEx = (uint)quest.FlagsEx;
-                    text.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    ClientGossipText gossipText = new();
+                    gossipText.QuestID = questID;
+                    gossipText.ContentTuningID = quest.ContentTuningId;
+                    gossipText.QuestType = item.QuestIcon;
+                    gossipText.QuestFlags = (uint)quest.Flags;
+                    gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
+                    gossipText.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
 
-                    text.QuestTitle = quest.LogTitle;
+                    gossipText.QuestTitle = quest.LogTitle;
                     Locale locale = _session.GetSessionDbLocaleIndex();
                     if (locale != Locale.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                         if (localeData != null)
-                            ObjectManager.GetLocaleString(localeData.LogTitle, locale, ref text.QuestTitle);
+                            ObjectManager.GetLocaleString(localeData.LogTitle, locale, ref gossipText.QuestTitle);
                     }
 
-                    packet.GossipText.Add(text);
+                    packet.GossipText.Add(gossipText);
                 }
             }
 

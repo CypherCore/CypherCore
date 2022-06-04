@@ -3063,7 +3063,6 @@ namespace Game
                     npcText.Data[i].BroadcastTextID = result.Read<uint>(9 + i);
                 }
 
-                BitSet erasedBroadcastTexts = new(SharedConst.MaxNpcTextOptions);
                 for (int i = 0; i < SharedConst.MaxNpcTextOptions; i++)
                 {
                     if (npcText.Data[i].BroadcastTextID != 0)
@@ -3071,20 +3070,28 @@ namespace Game
                         if (!CliDB.BroadcastTextStorage.ContainsKey(npcText.Data[i].BroadcastTextID))
                         {
                             Log.outError(LogFilter.Sql, "NPCText (Id: {0}) has a non-existing BroadcastText (ID: {1}, Index: {2})", textID, npcText.Data[i].BroadcastTextID, i);
+                            npcText.Data[i].Probability = 0.0f;
                             npcText.Data[i].BroadcastTextID = 0;
-                            erasedBroadcastTexts[i] = true;
                         }
                     }
                 }
 
                 for (byte i = 0; i < SharedConst.MaxNpcTextOptions; i++)
                 {
-                    if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0 && !erasedBroadcastTexts[i])
+                    if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0)
                     {
                         Log.outError(LogFilter.Sql, "NPCText (ID: {0}) has a probability (Index: {1}) set, but no BroadcastTextID to go with it", textID, i);
                         npcText.Data[i].Probability = 0;
                     }
                 }
+
+                float probabilitySum = npcText.Data.Aggregate(0f, (float sum, NpcTextData data) => { return sum + data.Probability; });
+                if (probabilitySum <= 0.0f)
+                {
+                    Log.outError(LogFilter.Sql, $"NPCText (ID: {textID}) has a probability sum 0, no text can be selected from it, skipped.");
+                    continue;
+                }
+
                 npcTextStorage[textID] = npcText;
             } while (result.NextRow());
 
