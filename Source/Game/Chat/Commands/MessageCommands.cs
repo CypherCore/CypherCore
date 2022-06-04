@@ -28,9 +28,9 @@ namespace Game.Chat
     class MessageCommands
     {
         [CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
-        static bool HandleNameAnnounceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNameAnnounceCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
             string name = "Console";
@@ -43,9 +43,9 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
-        static bool HandleGMNameAnnounceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMNameAnnounceCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
             string name = "Console";
@@ -58,34 +58,35 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
-        static bool HandleAnnounceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAnnounceCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
-            string str = handler.GetParsedString(CypherStrings.Systemmessage, args.NextString(""));
+            string str = handler.GetParsedString(CypherStrings.Systemmessage, args);
             Global.WorldMgr.SendServerMessage(ServerMessageType.String, str);
             return true;
         }
 
         [CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
-        static bool HandleGMAnnounceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMAnnounceCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
-            Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, args.NextString(""));
+            Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, args);
             return true;
         }
 
         [CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
-        static bool HandleNotifyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleNotifyCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
             string str = handler.GetCypherString(CypherStrings.GlobalNotify);
-            str += args.NextString("");
+            foreach (string str2 in args)
+                str += str2;
 
             Global.WorldMgr.SendGlobalMessage(new PrintNotification(str));
 
@@ -93,13 +94,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
-        static bool HandleGMNotifyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGMNotifyCommand(CommandHandler handler, object[] args)
         {
-            if (args.Empty())
+            if (args.Length == 0)
                 return false;
 
             string str = handler.GetCypherString(CypherStrings.GmNotify);
-            str += args.NextString("");
+            foreach (string str2 in args)
+                str += str2;
 
             Global.WorldMgr.SendGlobalGMMessage(new PrintNotification(str));
 
@@ -107,54 +109,28 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
-        static bool HandleWhispersCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg)
         {
-            if (args.Empty())
+            if (!operationArg.HasValue)
             {
                 handler.SendSysMessage(CypherStrings.CommandWhisperaccepting, handler.GetSession().GetPlayer().IsAcceptWhispers() ? handler.GetCypherString(CypherStrings.On) : handler.GetCypherString(CypherStrings.Off));
                 return true;
             }
 
-            string argStr = args.NextString();
-            // whisper on
-            if (argStr == "on")
+            if (operationArg.HasValue)
             {
                 handler.GetSession().GetPlayer().SetAcceptWhispers(true);
                 handler.SendSysMessage(CypherStrings.CommandWhisperon);
-                return true;
             }
-
-            // whisper off
-            if (argStr == "off")
+            else
             {
                 // Remove all players from the Gamemaster's whisper whitelist
                 handler.GetSession().GetPlayer().ClearWhisperWhiteList();
                 handler.GetSession().GetPlayer().SetAcceptWhispers(false);
                 handler.SendSysMessage(CypherStrings.CommandWhisperoff);
-                return true;
             }
 
-            if (argStr == "remove")
-            {
-                string name = args.NextString();
-                if (ObjectManager.NormalizePlayerName(ref name))
-                {
-                    Player player = Global.ObjAccessor.FindPlayerByName(name);
-                    if (player)
-                    {
-                        handler.GetSession().GetPlayer().RemoveFromWhisperWhiteList(player.GetGUID());
-                        handler.SendSysMessage(CypherStrings.CommandWhisperoffplayer, name);
-                        return true;
-                    }
-                    else
-                    {
-                        handler.SendSysMessage(CypherStrings.PlayerNotFound, name);
-                        return false;
-                    }
-                }
-            }
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
+            return true;
         }        
     }
 
@@ -165,21 +141,12 @@ namespace Game.Chat
         class ChannelSetCommands
         {
             [Command("ownership", RBACPermissions.CommandChannelSetOwnership)]
-            static bool HandleChannelSetOwnership(CommandHandler handler, StringArguments args)
+            static bool HandleChannelSetOwnership(CommandHandler handler, string channelName, bool grantOwnership)
             {
-                if (args.Empty())
-                    return false;
-
-                string channelStr = args.NextString();
-                string argStr = args.NextString("");
-
-                if (channelStr.IsEmpty() || argStr.IsEmpty())
-                    return false;
-
                 uint channelId = 0;
                 foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
                 {
-                    if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelStr))
+                    if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName))
                     {
                         channelId = channelEntry.Id;
                         break;
@@ -189,7 +156,7 @@ namespace Game.Chat
                 AreaTableRecord zoneEntry = null;
                 foreach (var entry in CliDB.AreaTableStorage.Values)
                 {
-                    if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelStr))
+                    if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelName))
                     {
                         zoneEntry = entry;
                         break;
@@ -201,30 +168,28 @@ namespace Game.Chat
 
                 ChannelManager cMgr = ChannelManager.ForTeam(player.GetTeam());
                 if (cMgr != null)
-                    channel = cMgr.GetChannel(channelId, channelStr, player, false, zoneEntry);
+                    channel = cMgr.GetChannel(channelId, channelName, player, false, zoneEntry);
 
-                if (argStr.ToLower() == "on")
+                if (grantOwnership)
                 {
                     if (channel != null)
                         channel.SetOwnership(true);
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 1);
-                    stmt.AddValue(1, channelStr);
+                    stmt.AddValue(1, channelName);
                     DB.Characters.Execute(stmt);
-                    handler.SendSysMessage(CypherStrings.ChannelEnableOwnership, channelStr);
+                    handler.SendSysMessage(CypherStrings.ChannelEnableOwnership, channelName);
                 }
-                else if (argStr.ToLower() == "off")
+                else
                 {
                     if (channel != null)
                         channel.SetOwnership(false);
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 0);
-                    stmt.AddValue(1, channelStr);
+                    stmt.AddValue(1, channelName);
                     DB.Characters.Execute(stmt);
-                    handler.SendSysMessage(CypherStrings.ChannelDisableOwnership, channelStr);
+                    handler.SendSysMessage(CypherStrings.ChannelDisableOwnership, channelName);
                 }
-                else
-                    return false;
 
                 return true;
             }
