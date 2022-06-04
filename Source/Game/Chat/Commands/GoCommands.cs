@@ -184,9 +184,10 @@ namespace Game.Chat.Commands
         }
 
         [Command("grid", RBACPermissions.CommandGo)]
-        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, uint mapId)
+        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, uint? mapIdArg)
         {
             Player player = handler.GetSession().GetPlayer();
+            uint mapId = mapIdArg.GetValueOrDefault(player.GetMapId());
 
             // center of grid
             float x = (gridX - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
@@ -301,39 +302,29 @@ namespace Game.Chat.Commands
         }
 
         [Command("offset", RBACPermissions.CommandGo)]
-        static bool HandleGoOffsetCommand(CommandHandler handler, float dX, float dY, float dZ, float dO)
+        static bool HandleGoOffsetCommand(CommandHandler handler, float dX, float? dY, float? dZ, float? dO)
         {
             Position loc = handler.GetSession().GetPlayer().GetPosition();
-            loc.RelocateOffset(new Position(dX, dY, dZ, dO));
+            loc.RelocateOffset(new Position(dX, dY.GetValueOrDefault(0f), dZ.GetValueOrDefault(0f), dO.GetValueOrDefault(0f)));
 
             return DoTeleport(handler, loc);
         }
 
         [Command("quest", RBACPermissions.CommandGo)]
-        static bool HandleGoQuestCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGoQuestCommand(CommandHandler handler, uint questId)
         {
-            if (args.Empty())
-                return false;
-
             Player player = handler.GetSession().GetPlayer();
 
-            string id = handler.ExtractKeyFromLink(args, "Hquest");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!uint.TryParse(id, out uint questID) || questID == 0)
-                return false;
-
-            if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
+            if (Global.ObjectMgr.GetQuestTemplate(questId) == null)
             {
-                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, questID);
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, questId);
                 return false;
             }
 
             float x, y, z;
             uint mapId;
 
-            var poiData = Global.ObjectMgr.GetQuestPOIData(questID);
+            var poiData = Global.ObjectMgr.GetQuestPOIData(questId);
             if (poiData != null)
             {
                 var data = poiData.Blobs[0];
@@ -345,7 +336,7 @@ namespace Game.Chat.Commands
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, questID);
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, questId);
                 return false;
             }
 
@@ -391,7 +382,7 @@ namespace Game.Chat.Commands
         static bool HandleGoXYZCommand(CommandHandler handler, float x, float y, float? z, uint? id, float? o)
         {
             Player player = handler.GetSession().GetPlayer();
-            uint mapId = id.HasValue ? id.Value : player.GetMapId();
+            uint mapId = id.GetValueOrDefault(player.GetMapId());
             if (z.HasValue)
             {
                 if (!GridDefines.IsValidMapCoord(mapId, x, y, z.Value))
@@ -416,26 +407,11 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates
         [Command("zonexy", RBACPermissions.CommandGo)]
-        static bool HandleGoZoneXYCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGoZoneXYCommand(CommandHandler handler, float x, float y, uint? areaIdArg)
         {
-            if (args.Empty())
-                return false;
-
             Player player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), out float x))
-                return false;
-
-            if (!float.TryParse(args.NextString(),out float y))
-                return false;
-
-            // prevent accept wrong numeric args
-            if (x == 0.0f || y == 0.0f)
-                return false;
-
-            string idStr = handler.ExtractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
-            if (!uint.TryParse(idStr, out uint areaId))
-                areaId = player.GetZoneId();
+            uint areaId = areaIdArg.HasValue ? areaIdArg.Value : player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (x < 0 || x > 100 || y < 0 || y > 100 || areaEntry == null)
@@ -449,7 +425,6 @@ namespace Game.Chat.Commands
             Cypher.Assert(zoneEntry != null);
 
             Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
-
             if (map.Instanceable())
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], map.GetId(), map.GetMapName());
@@ -460,7 +435,6 @@ namespace Game.Chat.Commands
             y /= 100.0f;
 
             Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y);
-
             if (!GridDefines.IsValidMapCoord(zoneEntry.ContinentID, x, y))
             {
                 handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.ContinentID);
