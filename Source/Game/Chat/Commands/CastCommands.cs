@@ -27,7 +27,7 @@ namespace Game.Chat
     class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        static bool HandleCastCommand(CommandHandler handler, SpellInfo spell, string triggeredStr)
+        static bool HandleCastCommand(CommandHandler handler, uint spellId, string triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -36,24 +36,19 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!CheckSpellExistsAndIsValid(handler, spell))
+            if (!CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            TriggerCastFlags triggerFlags = TriggerCastFlags.None;
-            if (!triggeredStr.IsEmpty())
-            {
-                if ("triggered".Contains(triggeredStr)) // check if "triggered" starts with *triggeredStr (e.g. "trig", "trigger", etc.)
-                    triggerFlags = TriggerCastFlags.FullDebugMask;
-                else
-                    return false;
-            }
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
+                return false;
 
-            handler.GetSession().GetPlayer().CastSpell(target, spell.Id, new CastSpellExtraArgs(triggerFlags));
+            handler.GetSession().GetPlayer().CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
             return true;
         }
 
         [Command("back", RBACPermissions.CommandCastBack)]
-        static bool HandleCastBackCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCastBackCommand(CommandHandler handler, uint spellId, string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -62,67 +57,39 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            string triggeredStr = args.NextString();
-            if (!string.IsNullOrEmpty(triggeredStr))
-            {
-                if (triggeredStr != "triggered")
-                    return false;
-            }
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
+                return false;
 
-            bool triggered = (triggeredStr != null);
-
-            caster.CastSpell(handler.GetSession().GetPlayer(), spellId, triggered);
+            caster.CastSpell(handler.GetSession().GetPlayer(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
             return true;
         }
 
         [Command("dist", RBACPermissions.CommandCastDist)]
-        static bool HandleCastDistCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, string triggeredStr)
         {
-            if (args.Empty())
-                return false;
-
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            float dist = args.NextSingle();
-
-            string triggeredStr = args.NextString();
-            if (!string.IsNullOrEmpty(triggeredStr))
-            {
-                if (triggeredStr != "triggered")
-                    return false;
-            }
-
-            bool triggered = (triggeredStr != null);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
+                return false;
 
             float x, y, z;
             handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, dist);
 
-            handler.GetSession().GetPlayer().CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggered));
+            handler.GetSession().GetPlayer().CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
             return true;
         }
 
         [Command("self", RBACPermissions.CommandCastSelf)]
-        static bool HandleCastSelfCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, string triggeredStr)
         {
-            if (args.Empty())
-                return false;
-
             Unit target = handler.GetSelectedUnit();
             if (!target)
             {
@@ -130,21 +97,20 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
             if (!CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            target.CastSpell(target, spellId, false);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
+                return false;
+
+            target.CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
             return true;
         }
 
         [Command("target", RBACPermissions.CommandCastTarget)]
-        static bool HandleCastTargetCommad(CommandHandler handler, StringArguments args)
+        static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
             if (!caster)
@@ -159,30 +125,20 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            string triggeredStr = args.NextString();
-            if (!string.IsNullOrEmpty(triggeredStr))
-            {
-                if (triggeredStr != "triggered")
-                    return false;
-            }
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
+                return false;
 
-            bool triggered = (triggeredStr != null);
-
-            caster.CastSpell(caster.GetVictim(), spellId, triggered);
+            caster.CastSpell(caster.GetVictim(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
             return true;
         }
 
         [Command("dest", RBACPermissions.CommandCastDest)]
-        static bool HandleCastDestCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, string triggeredStr)
         {
             Unit caster = handler.GetSelectedUnit();
             if (!caster)
@@ -191,42 +147,33 @@ namespace Game.Chat
                 return false;
             }
 
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0)
-                return false;
-
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            float x = args.NextSingle();
-            float y = args.NextSingle();
-            float z = args.NextSingle();
-
-            if (x == 0f || y == 0f || z == 0f)
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            if (!triggerFlags.HasValue)
                 return false;
 
-            string triggeredStr = args.NextString();
-            if (!string.IsNullOrEmpty(triggeredStr))
-            {
-                if (triggeredStr != "triggered")
-                    return false;
-            }
-
-            bool triggered = (triggeredStr != null);
-
-            caster.CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggered));
+            caster.CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
             return true;
         }
 
-        static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
+        static TriggerCastFlags? GetTriggerFlags(string triggeredStr)
         {
-            return CheckSpellExistsAndIsValid(handler, Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None));
+            if (!triggeredStr.IsEmpty())
+            {
+                if (triggeredStr.StartsWith("triggered")) // check if "triggered" starts with *triggeredStr (e.g. "trig", "trigger", etc.)
+                    return TriggerCastFlags.FullDebugMask;
+                else
+                    return null;
+            }
+            return TriggerCastFlags.None;
         }
         
-        static bool CheckSpellExistsAndIsValid(CommandHandler handler, SpellInfo spellInfo)
+        static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandNospellfound);
