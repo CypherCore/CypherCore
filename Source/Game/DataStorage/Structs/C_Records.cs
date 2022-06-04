@@ -92,7 +92,7 @@ namespace Game.DataStorage
         public uint SelectScreenFileDataID;
         public uint IconFileDataID;
         public uint LowResScreenFileDataID;
-        public uint Flags;
+        public int Flags;
         public uint SpellTextureBlobFileDataID;
         public uint RolesMask;
         public uint ArmorTypeMask;
@@ -202,7 +202,7 @@ namespace Game.DataStorage
         public float[] FaceCustomizationOffset = new float[3];
         public float[] CustomizeOffset = new float[3];
         public uint Id;
-        public int Sex;
+        public sbyte Sex;
         public uint DisplayID;
         public int CharComponentTextureLayoutID;
         public int Flags;
@@ -556,7 +556,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public Vector2 Pos;
-        public Vector2 PosPreSquish;
+        public Vector2 PreSLSquishPos;
         public ushort CurveID;
         public byte OrderIndex;
     }

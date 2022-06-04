@@ -140,8 +140,8 @@ namespace Game.DataStorage
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
-        public uint ItemBonusListGroupID;
-        public uint ParentItemBonusTreeNodeID;
+        public uint ChildItemBonusListGroupID;
+        public uint IblGroupPointsModSetID;
         public uint ParentItemBonusTreeID;
     }
 

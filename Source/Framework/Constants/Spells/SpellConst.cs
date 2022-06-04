@@ -2757,6 +2757,7 @@ namespace Framework.Constants
         Unk149 = 149,
         UnitOwnCritter = 150, // own battle pet from UNIT_FIELD_CRITTER
         Unk151 = 151,
+        Unk152 = 152,
         TotalSpellTargets
     }
     public enum SpellTargetSelectionCategories

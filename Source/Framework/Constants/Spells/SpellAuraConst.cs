@@ -528,6 +528,10 @@ namespace Framework.Constants
         ModHealingTakenFromCaster = 504,
         ModPlayerChoiceRerolls = 505, // NYI
         DisableInertia = 506, // NYI
+        Unk507 = 507,
+        Unk508 = 508,
+        Unk509 = 509,
+        ModifiedRaidInstance = 510, // Related to "Fated" raid affixes
         Total
     }
 

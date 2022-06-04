@@ -51,7 +51,7 @@ namespace Game.DataStorage
         public short WindSettingsID;
         public int ZmpFileDataID;
         public int WdtFileDataID;
-        public MapFlags[] Flags = new MapFlags[2];
+        public MapFlags[] Flags = new MapFlags[3];
 
         // Helpers
         public Expansion Expansion() { return (Expansion)ExpansionID; }

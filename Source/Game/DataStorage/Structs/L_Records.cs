@@ -42,7 +42,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public string Description;
         public LfgType TypeID;
-        public byte Subtype;
+        public sbyte Subtype;
         public sbyte Faction;
         public int IconTextureFileID;
         public int RewardsBgTextureFileID;

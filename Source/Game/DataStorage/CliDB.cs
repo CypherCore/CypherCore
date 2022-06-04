@@ -400,13 +400,13 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!CliDB.AreaTableStorage.ContainsKey(13574) ||               // last area added in 9.0.2 (37176)
-                !CliDB.CharTitlesStorage.ContainsKey(694) ||                // last char title added in 9.0.2 (37176)
-                !CliDB.GemPropertiesStorage.ContainsKey(3825) ||            // last gem property added in 9.0.2 (37176)
-                !CliDB.ItemStorage.ContainsKey(184869) ||                   // last item added in 9.0.2 (37176)
-                !CliDB.ItemExtendedCostStorage.ContainsKey(7048) ||         // last item extended cost added in 9.0.2 (37176)
-                !CliDB.MapStorage.ContainsKey(2453) ||                      // last map added in 9.0.2 (37176)
-                !CliDB.SpellNameStorage.ContainsKey(349043))                // last spell added in 9.0.2 (37176)
+            if (!CliDB.AreaTableStorage.ContainsKey(14083) ||               // last area added in 9.0.2 (37176)
+                !CliDB.CharTitlesStorage.ContainsKey(727) ||                // last char title added in 9.0.2 (37176)
+                !CliDB.GemPropertiesStorage.ContainsKey(3922) ||            // last gem property added in 9.0.2 (37176)
+                !CliDB.ItemStorage.ContainsKey(193265) ||                   // last item added in 9.0.2 (37176)
+                !CliDB.ItemExtendedCostStorage.ContainsKey(7302) ||         // last item extended cost added in 9.0.2 (37176)
+                !CliDB.MapStorage.ContainsKey(2559) ||                      // last map added in 9.0.2 (37176)
+                !CliDB.SpellNameStorage.ContainsKey(375051))                // last spell added in 9.0.2 (37176)
             {
                 Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);

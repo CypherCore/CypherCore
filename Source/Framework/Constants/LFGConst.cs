@@ -74,7 +74,8 @@ namespace Framework.Constants
         LRF = 2,
         Scenario = 3,
         Flex = 4,
-        WorldPvP = 5
+        WorldPvP = 5,
+        ScheduledPvp = 6,    // pvp brawl
     }
 
     public enum LfgLockStatusType
@@ -114,9 +115,10 @@ namespace Framework.Constants
         None = 0,
         Dungeon = 1,
         Raid = 2,
+        Quest = 3,
         Zone = 4,
-        Quest = 5,
-        RandomDungeon = 6
+        Heroic = 5,
+        Random = 6
     }
 
     public enum LfgProposalState

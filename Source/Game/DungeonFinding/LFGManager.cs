@@ -180,7 +180,7 @@ namespace Game.DungeonFinding
                 {
                     case LfgType.Dungeon:
                     case LfgType.Raid:
-                    case LfgType.RandomDungeon:
+                    case LfgType.Random:
                     case LfgType.Zone:
                         LfgDungeonStore[dungeon.Id] = new LFGDungeonData(dungeon);
                         break;
@@ -225,7 +225,7 @@ namespace Game.DungeonFinding
                 LFGDungeonData dungeon = pair.Value;
 
                 // No teleport coords in database, load from areatriggers
-                if (dungeon.type != LfgType.RandomDungeon && dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f)
+                if (dungeon.type != LfgType.Random && dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f)
                 {
                     AreaTriggerStruct at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
                     if (at == null)
@@ -241,7 +241,7 @@ namespace Game.DungeonFinding
                     dungeon.o = at.target_Orientation;
                 }
 
-                if (dungeon.type != LfgType.RandomDungeon)
+                if (dungeon.type != LfgType.Random)
                     CachedDungeonMapStore.Add((byte)dungeon.group, dungeon.id);
                 CachedDungeonMapStore.Add(0, dungeon.id);
             }
@@ -451,7 +451,7 @@ namespace Game.DungeonFinding
                     LfgType type = GetDungeonType(it);
                     switch (type)
                     {
-                        case LfgType.RandomDungeon:
+                        case LfgType.Random:
                             if (dungeons.Count > 1)               // Only allow 1 random dungeon
                                 joinData.result = LfgJoinResult.InvalidSlot;
                             else
@@ -968,7 +968,7 @@ namespace Game.DungeonFinding
                 {
                     uint rDungeonId = dungeons[0];
                     LFGDungeonData rDungeon = GetLFGDungeon(rDungeonId);
-                    if (rDungeon != null && rDungeon.type == LfgType.RandomDungeon)
+                    if (rDungeon != null && rDungeon.type == LfgType.Random)
                         player.CastSpell(player, SharedConst.LFGSpellDungeonCooldown, false);
                 }
             }
@@ -1386,7 +1386,7 @@ namespace Game.DungeonFinding
                 // Give rewards only if its a random dungeon
                 LFGDungeonData dungeon = GetLFGDungeon(rDungeonId);
 
-                if (dungeon == null || (dungeon.type != LfgType.RandomDungeon && !dungeon.seasonal))
+                if (dungeon == null || (dungeon.type != LfgType.Random && !dungeon.seasonal))
                 {
                     Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} dungeon {rDungeonId} is not random or seasonal");
                     continue;
@@ -2055,7 +2055,7 @@ namespace Game.DungeonFinding
                 if (!dungeons.Empty())
                 {
                     LFGDungeonData dungeon = GetLFGDungeon(dungeons.First());
-                    if (dungeon != null && (dungeon.type == LfgType.RandomDungeon || dungeon.seasonal))
+                    if (dungeon != null && (dungeon.type == LfgType.Random || dungeon.seasonal))
                         return true;
                 }
             }
@@ -2097,7 +2097,7 @@ namespace Game.DungeonFinding
             List<uint> randomDungeons = new();
             foreach (var dungeon in LfgDungeonStore.Values)
             {
-                if (!(dungeon.type == LfgType.RandomDungeon || (dungeon.seasonal && Global.LFGMgr.IsSeasonActive(dungeon.id))))
+                if (!(dungeon.type == LfgType.Random || (dungeon.seasonal && Global.LFGMgr.IsSeasonActive(dungeon.id))))
                     continue;
 
                 if (dungeon.expansion > expansion)

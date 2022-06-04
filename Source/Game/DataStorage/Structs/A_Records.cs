@@ -60,7 +60,7 @@ namespace Game.DataStorage
         public string ContinueDescription;
         public byte Type;
         public uint PlayerConditionID;
-        public byte Flags;
+        public int Flags;
         public byte ButtonActionType;
         public int TextureFileDataID;
         public ushort LfgDungeonID;

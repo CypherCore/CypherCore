@@ -76,6 +76,7 @@ namespace Framework.Constants
         EpicQuality = 0x100,
         LegendaryQuality = 0x200,
         ArtifactQuality = 0x400,
+        LegendaryCraftedItemOnly = 0x800,
     }
 
     public enum AuctionHouseSortOrder

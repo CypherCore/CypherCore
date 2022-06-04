@@ -31,7 +31,7 @@ namespace Game.DataStorage
         public ushort FirstSectionID;
         public ushort UiMapID;
         public uint MapDisplayConditionID;
-        public byte Flags;
+        public int Flags;
         public sbyte DifficultyMask;
     }
 
@@ -50,8 +50,8 @@ namespace Game.DataStorage
         public int UiModelSceneID;
         public int SpellID;
         public int IconFileDataID;
-        public ushort Flags;
-        public ushort IconFlags;
+        public int Flags;
+        public int IconFlags;
         public sbyte DifficultyMask;
     }
 
@@ -66,7 +66,7 @@ namespace Game.DataStorage
         public int ButtonSmallFileDataID;
         public int LoreFileDataID;
         public byte OrderIndex;
-        public byte Flags;
+        public int Flags;
         public ushort AreaID;
     }
 
