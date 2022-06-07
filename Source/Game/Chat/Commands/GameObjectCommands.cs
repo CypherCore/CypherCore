@@ -94,7 +94,7 @@ namespace Game.Chat
             // Decode arguments
             foreach (var variant in opts)
             {
-                if (variant.Equals("removerespawntime"))
+                if (variant.Equals("removerespawntime", StringComparison.OrdinalIgnoreCase))
                     deleteRespawnTimes = true;
                 else
                     uint.TryParse(variant, out groupId);
@@ -122,7 +122,7 @@ namespace Game.Chat
 
             uint entry;
             ulong spawnId = 0;
-            if (!isGuid.IsEmpty() && isGuid.Equals("guid"))
+            if (!isGuid.IsEmpty() && isGuid.Equals("guid", StringComparison.OrdinalIgnoreCase))
             {
                 spawnId = data;
                 spawnData = Global.ObjectMgr.GetGameObjectData(spawnId);

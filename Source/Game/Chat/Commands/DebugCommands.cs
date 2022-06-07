@@ -470,7 +470,7 @@ namespace Game.Chat
 
             bool explain = false;
             uint groupID = 0;
-            if (explainOrGroupId.Equals("explain"))
+            if (explainOrGroupId.Equals("explain", StringComparison.OrdinalIgnoreCase))
                 explain = true;
             else
                 groupID = uint.Parse(explainOrGroupId);

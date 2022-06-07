@@ -1076,9 +1076,9 @@ namespace Game.Chat
             Team team;
             if (teamArg.IsEmpty())
                 team = 0;
-            else if (teamArg.Equals("horde"))
+            else if (teamArg.Equals("horde", StringComparison.OrdinalIgnoreCase))
                 team = Team.Horde;
-            else if (teamArg.Equals("alliance"))
+            else if (teamArg.Equals("alliance", StringComparison.OrdinalIgnoreCase))
                 team = Team.Alliance;
             else
                 return false;
@@ -1364,9 +1364,9 @@ namespace Game.Chat
             Team team;
             if (teamArg.IsEmpty())
                 team = 0;
-            else if (teamArg.Equals("horde"))
+            else if (teamArg.Equals("horde", StringComparison.OrdinalIgnoreCase))
                 team = Team.Horde;
-            else if (teamArg.Equals("alliance"))
+            else if (teamArg.Equals("alliance", StringComparison.OrdinalIgnoreCase))
                 team = Team.Alliance;
             else
                 return false;

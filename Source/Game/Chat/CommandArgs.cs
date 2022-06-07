@@ -17,7 +17,7 @@
 
 using Framework.Constants;
 using Framework.IO;
-using Game.DataStorage;
+using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace Game.Chat
                 int oldPos = args.GetCurrentPosition();
 
                 //Is this a hyperlink?
-                if (Hyperlink.TryConsume(out dynamic value, parameterTypes[index], args) || ParseArgument(out value, parameterTypes[index], args))
+                if (ParseArgument(out dynamic value, parameterTypes[index], args))
                     index++;
 
                 if (args.IsAtEnd() && index < parameterTypes.Length)
@@ -58,14 +58,17 @@ namespace Game.Chat
             return arguments.ToArray();
         }
 
-        public static bool ParseArgument(out dynamic value, Type type, StringArguments args)
+        static bool ParseArgument(out dynamic value, Type type, StringArguments args)
         {
             value = default;
+
+            if (Hyperlink.TryParse(out value, type, args))
+                return true;
 
             if (args.IsAtEnd())
                 return false;
 
-            if (Hyperlink.TryConsume(out value, type, args))
+            if (Hyperlink.TryParse(out value, type, args))
                 return value;
 
             if (type.IsEnum)
@@ -115,12 +118,6 @@ namespace Game.Chat
 
                     switch (type.Name)
                     {
-                        case nameof(AchievementRecord):
-                            value = CliDB.AchievementStorage.LookupByKey(args.NextUInt32());
-                            break;
-                        case nameof(CurrencyTypesRecord):
-                            value = CliDB.CurrencyTypesStorage.LookupByKey(args.NextUInt32());
-                            break;
                         case nameof(GameTele):
                             value = Global.ObjectMgr.GetGameTele(args.NextString());
                             break;
@@ -136,6 +133,91 @@ namespace Game.Chat
                     return false;
             }
             return true;
+        }
+    }
+
+    class PlayerIdentifier
+    {
+        string _name;
+        ObjectGuid _guid;
+        Player _player;
+
+        public PlayerIdentifier(string name, ObjectGuid guid)
+        {
+            _name = name;
+            _guid = guid;
+        }
+
+        public PlayerIdentifier(Player player)
+        {
+            _name = player.GetName();
+            _guid = player.GetGUID();
+            _player = player;
+        }
+
+        public string GetName() { return _name; }
+        public ObjectGuid GetGUID() { return _guid; }
+        public Player GetPlayer() { return _player; }
+
+        public static PlayerIdentifier FromTarget(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
+            if (player != null)
+            {
+                Player target = player.GetSelectedPlayer();
+                if (target != null)
+                    return new PlayerIdentifier(target);
+            }
+
+            return null;
+        }
+
+        public static PlayerIdentifier FromSelf(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
+            if (player != null)
+                return new PlayerIdentifier(player);
+
+            return null;
+        }
+
+        public static PlayerIdentifier FromTargetOrSelf(CommandHandler handler)
+        {
+            PlayerIdentifier fromTarget = FromTarget(handler);
+            if (fromTarget != null)
+                return fromTarget;
+            else
+                return FromSelf(handler);
+        }
+
+        public static PlayerIdentifier ParseFromString(string arg)
+        {
+            ulong guid = 0;
+            string name;
+            if (!Hyperlink.TryParse(out name, arg) || !ulong.TryParse(arg, out guid))
+                name = arg;
+
+            if (!name.IsEmpty())
+            {
+                ObjectManager.NormalizePlayerName(ref name);
+                var player = Global.ObjAccessor.FindPlayerByName(name);
+                if (player != null)
+                    return new PlayerIdentifier(player);
+                else
+                {
+                    var objectGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
+                    if (objectGuid.IsEmpty())
+                        return new PlayerIdentifier(name, objectGuid);
+                }
+            }
+            else if (guid != 0)
+            {
+                var player = Global.ObjAccessor.FindPlayerByLowGUID(guid);
+                if (player != null)
+                    return new PlayerIdentifier(player);
+            }
+
+            return null;
         }
     }
 }

@@ -364,13 +364,13 @@ namespace Game.Chat
             static bool SetClosed(CommandHandler handler, StringArguments args)
             {
                 string arg1 = args.NextString();
-                if (arg1.Equals("on"))
+                if (arg1.Equals("on", StringComparison.OrdinalIgnoreCase))
                 {
                     handler.SendSysMessage(CypherStrings.WorldClosed);
                     Global.WorldMgr.SetClosed(true);
                     return true;
                 }
-                else if (arg1.Equals("off"))
+                else if (arg1.Equals("off", StringComparison.OrdinalIgnoreCase))
                 {
                     handler.SendSysMessage(CypherStrings.WorldOpened);
                     Global.WorldMgr.SetClosed(false);

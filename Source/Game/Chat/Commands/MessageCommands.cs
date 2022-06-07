@@ -143,7 +143,7 @@ namespace Game.Chat
                 uint channelId = 0;
                 foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
                 {
-                    if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName))
+                    if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
                     {
                         channelId = channelEntry.Id;
                         break;
@@ -153,7 +153,7 @@ namespace Game.Chat
                 AreaTableRecord zoneEntry = null;
                 foreach (var entry in CliDB.AreaTableStorage.Values)
                 {
-                    if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelName))
+                    if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
                     {
                         zoneEntry = entry;
                         break;

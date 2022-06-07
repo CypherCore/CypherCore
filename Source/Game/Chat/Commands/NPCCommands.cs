@@ -76,7 +76,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (force.Equals("force"))
+            if (force.Equals("force", StringComparison.OrdinalIgnoreCase))
                 creatureTarget.ClearUnitState(UnitState.Evade);
             creatureTarget.GetAI().EnterEvadeMode(why.GetValueOrDefault(EvadeReason.Other));
 
@@ -334,7 +334,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.CommandNpcShowLootHeader, creatureTarget.GetName(), creatureTarget.GetEntry());
             handler.SendSysMessage(CypherStrings.CommandNpcShowLootMoney, loot.gold / MoneyConstants.Gold, (loot.gold % MoneyConstants.Gold) / MoneyConstants.Silver, loot.gold % MoneyConstants.Silver);
 
-            if (all.Equals("all")) // nonzero from strcmp <. not equal
+            if (all.Equals("all", StringComparison.OrdinalIgnoreCase)) // nonzero from strcmp <. not equal
             {
                 handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel, "Standard items", loot.items.Count);
                 foreach (LootItem item in loot.items)
@@ -745,9 +745,9 @@ namespace Game.Chat
                 bool loot = false;
                 if (!lootStr.IsEmpty())
                 {
-                    if (lootStr.Equals("loot"))
+                    if (lootStr.Equals("loot", StringComparison.OrdinalIgnoreCase))
                         loot = true;
-                    else if (lootStr.Equals("noloot"))
+                    else if (lootStr.Equals("noloot", StringComparison.OrdinalIgnoreCase))
                         loot = false;
                     else
                         return false;

@@ -26,7 +26,20 @@ namespace Game.Chat
 {
     class Hyperlink
     {
-        public static bool TryConsume(out dynamic value, Type type, StringArguments args)
+        public static bool TryParse(out string value, string arg)
+        {
+            value = null;
+
+            HyperlinkInfo info = ParseHyperlink(arg);
+            // invalid hyperlinks cannot be consumed
+            if (info == null)
+                return false;
+
+            value = info.Data;
+            return true;
+        }
+
+        public static bool TryParse(out dynamic value, Type type, StringArguments args)
         {
             value = default;
 
@@ -60,27 +73,18 @@ namespace Game.Chat
                     return true;
                 }
                 case TypeCode.Object:
-                    return TryConsumeObject(out value, type, info);
+                    return TryParseToObject(out value, type, info);
             }
 
             return false;
         }
 
-        public static bool TryConsumeObject(out dynamic value, Type type, HyperlinkInfo info)
+        public static bool TryParseToObject(out dynamic value, Type type, HyperlinkInfo info)
         {
             value = default;
 
             switch (type.Name)
             {
-                case nameof(AchievementRecord):
-                {
-                    HyperlinkDataTokenizer t = new(info.Data);
-                    if (!t.TryConsumeTo(out uint achievementId))
-                        return false;
-
-                    value = CliDB.AchievementStorage.LookupByKey(achievementId);
-                    return true;
-                }
                 case nameof(CurrencyTypesRecord):
                 {
                     HyperlinkDataTokenizer t = new(info.Data);

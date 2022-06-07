@@ -51,11 +51,11 @@ namespace Game.Chat
             string para = args.NextString();
 
             bool useStraightPath = false;
-            if (para.Equals("true"))
+            if (para.Equals("true", StringComparison.OrdinalIgnoreCase))
                 useStraightPath = true;
 
             bool useRaycast = false;
-            if (para.Equals("line") || para.Equals("ray") || para.Equals("raycast"))
+            if (para.Equals("line", StringComparison.OrdinalIgnoreCase) || para.Equals("ray", StringComparison.OrdinalIgnoreCase) || para.Equals("raycast", StringComparison.OrdinalIgnoreCase))
                 useRaycast = true;
 
             // unit locations

@@ -191,7 +191,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out Player target, out ObjectGuid targetGuid, out string targetName))
                 return false;
 
-            if (teleStr.Equals("$home"))    // References target's homebind
+            if (teleStr.Equals("home", StringComparison.OrdinalIgnoreCase))    // References target's homebind
             {
                 if (target)
                     target.TeleportTo(target.GetHomebind());

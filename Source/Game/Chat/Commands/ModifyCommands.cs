@@ -420,7 +420,7 @@ namespace Game.Chat
                     if (string.IsNullOrEmpty(rank))
                         continue;
 
-                    if (rank.Equals(rankStr))
+                    if (rank.Equals(rankStr, StringComparison.OrdinalIgnoreCase))
                         break;
 
                     if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
