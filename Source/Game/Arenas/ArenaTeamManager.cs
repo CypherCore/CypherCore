@@ -36,27 +36,26 @@ namespace Game.Arenas
         public ArenaTeam GetArenaTeamByName(string arenaTeamName)
         {
             string search = arenaTeamName.ToLower();
-            foreach (var team in ArenaTeamStorage.Values)
-            {
-                string teamName = team.GetName().ToLower();
-                if (search == teamName)
+            foreach (var (_, team) in ArenaTeamStorage)
+                if (search == team.GetName().ToLower())
                     return team;
-            }
+
             return null;
         }
 
         public ArenaTeam GetArenaTeamByCaptain(ObjectGuid guid)
         {
-            foreach (var pair in ArenaTeamStorage)
-                if (pair.Value.GetCaptain() == guid)
-                    return pair.Value;
+            foreach (var (_, team) in ArenaTeamStorage)
+                if (team.GetCaptain() == guid)
+                    return team;
 
             return null;
         }
 
         public void AddArenaTeam(ArenaTeam arenaTeam)
         {
-            ArenaTeamStorage[arenaTeam.GetId()] = arenaTeam;
+            var added = ArenaTeamStorage.TryAdd(arenaTeam.GetId(), arenaTeam);
+            Cypher.Assert(!added, $"Duplicate arena team with ID {arenaTeam.GetId()}");
         }
 
         public void RemoveArenaTeam(uint arenaTeamId)

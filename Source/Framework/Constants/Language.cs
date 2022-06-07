@@ -796,7 +796,7 @@ namespace Framework.Constants
         ArenaErrorNameExists = 858,
         ArenaErrorSize = 859,
         ArenaErrorCombat = 860,
-        AreanErrorNameNotFound = 861,
+        ArenaErrorNameNotFound = 861,
         ArenaErrorNotMember = 862,
         ArenaErrorCaptain = 863,
         ArenaCreate = 864,

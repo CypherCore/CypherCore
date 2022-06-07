@@ -16,9 +16,8 @@
  */
 
 using Framework.Constants;
-using Framework.IO;
 using Game.Arenas;
-using Game.Entities;
+using System;
 
 namespace Game.Chat
 {
@@ -26,69 +25,44 @@ namespace Game.Chat
     class ArenaCommands
     {
         [Command("create", RBACPermissions.CommandArenaCreate, true)]
-        static bool HandleArenaCreateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaCreateCommand(CommandHandler handler, string captainName, string name, ArenaTypes type)
         {
-            if (args.Empty())
-                return false;
-
-            Player target;
-            if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
-                return false;
-
-            string name = handler.ExtractQuotedArg(args.NextString());
-            if (string.IsNullOrEmpty(name))
-                return false;
-
-            byte type = args.NextByte();
-            if (type == 0)
-                return false;
-
             if (Global.ArenaTeamMgr.GetArenaTeamByName(name) != null)
             {
                 handler.SendSysMessage(CypherStrings.ArenaErrorNameExists, name);
                 return false;
             }
+            
+            var captain = PlayerIdentifier.ParseFromString(captainName);
+            if (captain == null)
+                captain = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (captain == null)
+                return false;
 
-            if (type == 2 || type == 3 || type == 5)
+            if (Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(captain.GetGUID(), (byte)type) != 0)
             {
-                if (Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(target.GetGUID(), type) != 0)
-                {
-                    handler.SendSysMessage(CypherStrings.ArenaErrorSize, target.GetName());
-                    return false;
-                }
-
-                ArenaTeam arena = new();
-
-                if (!arena.Create(target.GetGUID(), type, name, 4293102085, 101, 4293253939, 4, 4284049911))
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-
-                Global.ArenaTeamMgr.AddArenaTeam(arena);
-                handler.SendSysMessage(CypherStrings.ArenaCreate, arena.GetName(), arena.GetId(), arena.GetArenaType(), arena.GetCaptain());
+                handler.SendSysMessage(CypherStrings.ArenaErrorSize, captain.GetName());
+                return false;
             }
-            else
+
+            ArenaTeam arena = new();
+
+            if (!arena.Create(captain.GetGUID(), (byte)type, name, 4293102085, 101, 4293253939, 4, 4284049911))
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
+            Global.ArenaTeamMgr.AddArenaTeam(arena);
+            handler.SendSysMessage(CypherStrings.ArenaCreate, arena.GetName(), arena.GetId(), arena.GetArenaType(), arena.GetCaptain());
+
             return true;
         }
 
         [Command("disband", RBACPermissions.CommandArenaDisband, true)]
-        static bool HandleArenaDisbandCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaDisbandCommand(CommandHandler handler, uint teamId)
         {
-            if (args.Empty())
-                return false;
-
-            uint teamId = args.NextUInt32();
-            if (teamId == 0)
-                return false;
-
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
-
             if (arena == null)
             {
                 handler.SendSysMessage(CypherStrings.ArenaErrorNotFound, teamId);
@@ -103,46 +77,24 @@ namespace Game.Chat
 
             string name = arena.GetName();
             arena.Disband();
-            if (handler.GetSession() != null)
-                Log.outDebug(LogFilter.Arena, "GameMaster: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}].",
-                      handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(), arena.GetArenaType(), teamId);
-            else
-                Log.outDebug(LogFilter.Arena, "Console: disbanded arena team type: {0} [Id: {1}].", arena.GetArenaType(), teamId);
 
             handler.SendSysMessage(CypherStrings.ArenaDisband, name, teamId);
             return true;
         }
 
         [Command("rename", RBACPermissions.CommandArenaRename, true)]
-        static bool HandleArenaRenameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaRenameCommand(CommandHandler handler, string oldName, string newName)
         {
-            if (args.Empty())
-                return false;
-
-            string oldArenaStr = handler.ExtractQuotedArg(args.NextString());
-            if (string.IsNullOrEmpty(oldArenaStr))
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            string newArenaStr = handler.ExtractQuotedArg(args.NextString());
-            if (string.IsNullOrEmpty(newArenaStr))
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamByName(oldArenaStr);
+            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamByName(oldName);
             if (arena == null)
             {
-                handler.SendSysMessage(CypherStrings.AreanErrorNameNotFound, oldArenaStr);
+                handler.SendSysMessage(CypherStrings.ArenaErrorNameNotFound, oldName);
                 return false;
             }
 
-            if (Global.ArenaTeamMgr.GetArenaTeamByName(newArenaStr) != null)
+            if (Global.ArenaTeamMgr.GetArenaTeamByName(newName) != null)
             {
-                handler.SendSysMessage(CypherStrings.ArenaErrorNameExists, oldArenaStr);
+                handler.SendSysMessage(CypherStrings.ArenaErrorNameExists, oldName);
                 return false;
             }
 
@@ -152,103 +104,63 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!arena.SetName(newArenaStr))
+            if (!arena.SetName(newName))
             {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
+                handler.SendSysMessage(CypherStrings.ArenaRename, arena.GetId(), oldName, newName);
+                return true;
             }
 
-            handler.SendSysMessage(CypherStrings.ArenaRename, arena.GetId(), oldArenaStr, newArenaStr);
-            if (handler.GetSession() != null)
-                Log.outDebug(LogFilter.Arena, "GameMaster: {0} [GUID: {1}] rename arena team \"{2}\"[Id: {3}] to \"{4}\"",
-                    handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(), oldArenaStr, arena.GetId(), newArenaStr);
-            else
-                Log.outDebug(LogFilter.Arena, "Console: rename arena team \"{0}\"[Id: {1}] to \"{2}\"", oldArenaStr, arena.GetId(), newArenaStr);
-
-            return true;
+            handler.SendSysMessage(CypherStrings.BadValue);
+            return false;
         }
 
         [Command("captain", RBACPermissions.CommandArenaCaptain)]
-        static bool HandleArenaCaptainCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaCaptainCommand(CommandHandler handler, uint teamId, string targetName)
         {
-            if (args.Empty())
-                return false;
-
-            string idStr;
-            string nameStr;
-            handler.ExtractOptFirstArg(args, out idStr, out nameStr);
-            if (string.IsNullOrEmpty(idStr))
-                return false;
-
-            if (!uint.TryParse(idStr, out uint teamId) || teamId == 0)
-                return false;
-
-            Player target;
-            ObjectGuid targetGuid;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid))
-                return false;
-
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
-
             if (arena == null)
             {
                 handler.SendSysMessage(CypherStrings.ArenaErrorNotFound, teamId);
                 return false;
             }
 
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotExistOrOffline, nameStr);
-                return false;
-            }
-
             if (arena.IsFighting())
             {
                 handler.SendSysMessage(CypherStrings.ArenaErrorCombat);
                 return false;
             }
 
-            if (!arena.IsMember(targetGuid))
+            var target = PlayerIdentifier.ParseFromString(targetName);
+            if (target == null)
+                target = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (target == null)
+                return false;
+            
+            if (!arena.IsMember(target.GetGUID()))
             {
-                handler.SendSysMessage(CypherStrings.ArenaErrorNotMember, nameStr, arena.GetName());
+                handler.SendSysMessage(CypherStrings.ArenaErrorNotMember, target.GetName(), arena.GetName());
                 return false;
             }
 
-            if (arena.GetCaptain() == targetGuid)
+            if (arena.GetCaptain() == target.GetGUID())
             {
-                handler.SendSysMessage(CypherStrings.ArenaErrorCaptain, nameStr, arena.GetName());
+                handler.SendSysMessage(CypherStrings.ArenaErrorCaptain, target.GetName(), arena.GetName());
                 return false;
             }
 
-            arena.SetCaptain(targetGuid);
-
-            string oldCaptainName;
-            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(arena.GetCaptain(), out oldCaptainName))
+            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(arena.GetCaptain(), out string oldCaptainName))
                 return false;
 
+            arena.SetCaptain(target.GetGUID());
             handler.SendSysMessage(CypherStrings.ArenaCaptain, arena.GetName(), arena.GetId(), oldCaptainName, target.GetName());
-            if (handler.GetSession() != null)
-                Log.outDebug(LogFilter.Arena, "GameMaster: {0} [GUID: {1}] promoted player: {2} [GUID: {3}] to leader of arena team \"{4}\"[Id: {5}]",
-                    handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(), target.GetName(), target.GetGUID().ToString(), arena.GetName(), arena.GetId());
-            else
-                Log.outDebug(LogFilter.Arena, "Console: promoted player: {0} [GUID: {1}] to leader of arena team \"{2}\"[Id: {3}]",
-                    target.GetName(), target.GetGUID().ToString(), arena.GetName(), arena.GetId());
 
             return true;
         }
 
         [Command("info", RBACPermissions.CommandArenaInfo, true)]
-        static bool HandleArenaInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaInfoCommand(CommandHandler handler, uint teamId)
         {
-            if (args.Empty())
-                return false;
-
-            uint teamId = args.NextUInt32();
-            if (teamId == 0)
-                return false;
-
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
-
             if (arena == null)
             {
                 handler.SendSysMessage(CypherStrings.ArenaErrorNotFound, teamId);
@@ -263,21 +175,19 @@ namespace Game.Chat
         }
 
         [Command("lookup", RBACPermissions.CommandArenaLookup)]
-        static bool HandleArenaLookupCommand(CommandHandler handler, StringArguments args)
+        static bool HandleArenaLookupCommand(CommandHandler handler, string needle)
         {
-            if (args.Empty())
+            if (needle.IsEmpty())
                 return false;
 
-            string name = args.NextString().ToLower();
-
             bool found = false;
-            foreach (var arena in Global.ArenaTeamMgr.GetArenaTeamMap().Values)
+            foreach (var (_, team) in Global.ArenaTeamMgr.GetArenaTeamMap())
             {
-                if (arena.GetName() == name)
+                if (team.GetName().Equals(needle, StringComparison.OrdinalIgnoreCase))
                 {
                     if (handler.GetSession() != null)
                     {
-                        handler.SendSysMessage(CypherStrings.ArenaLookup, arena.GetName(), arena.GetId(), arena.GetArenaType(), arena.GetArenaType());
+                        handler.SendSysMessage(CypherStrings.ArenaLookup, team.GetName(), team.GetId(), team.GetArenaType(), team.GetArenaType());
                         found = true;
                         continue;
                     }
@@ -285,7 +195,7 @@ namespace Game.Chat
             }
 
             if (!found)
-                handler.SendSysMessage(CypherStrings.AreanErrorNameNotFound, name);
+                handler.SendSysMessage(CypherStrings.ArenaErrorNameNotFound, needle);
 
             return true;
         }

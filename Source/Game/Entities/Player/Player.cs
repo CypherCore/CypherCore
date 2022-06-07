@@ -4006,7 +4006,8 @@ namespace Game.Entities
                 return Global.ObjAccessor.GetUnit(this, selectionGUID);
             return null;
         }
-        Player GetSelectedPlayer()
+        
+        public Player GetSelectedPlayer()
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())

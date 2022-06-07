@@ -36,8 +36,8 @@ namespace Game.Arenas
 
         public bool Create(ObjectGuid captainGuid, byte _type, string arenaTeamName, uint backgroundColor, byte emblemStyle, uint emblemColor, byte borderStyle, uint borderColor)
         {
-            // Check if captain is present
-            if (!Global.ObjAccessor.FindPlayer(captainGuid))
+            // Check if captain exists
+            if (Global.CharacterCacheStorage.GetCharacterCacheByGuid(captainGuid) == null)
                 return false;
 
             // Check if arena team name is already taken
@@ -570,11 +570,9 @@ namespace Game.Arenas
 
             // Update team's rank, start with rank 1 and increase until no team with more rating was found
             stats.Rank = 1;
-            foreach (var i in Global.ArenaTeamMgr.GetArenaTeamMap())
-            {
-                if (i.Value.GetArenaType() == type && i.Value.GetStats().Rating > stats.Rating)
+            foreach (var (_, team) in Global.ArenaTeamMgr.GetArenaTeamMap())
+                if (team.GetArenaType() == type && team.GetStats().Rating > stats.Rating)
                     ++stats.Rank;
-            }
         }
 
         public int WonAgainst(uint ownMMRating, uint opponentMMRating, ref int ratingChange)
