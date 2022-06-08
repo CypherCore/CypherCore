@@ -31,17 +31,21 @@ namespace Game.Chat
     class CharacterCommands
     {
         [Command("titles", RBACPermissions.CommandCharacterTitles, true)]
-        static bool HandleCharacterTitlesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterTitlesCommand(CommandHandler handler, string playerName)
         {
-            if (args.Empty())
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null || !player.IsConnected())
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotExistOrOffline);
                 return false;
+            }
 
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
-                return false;
+            Player target = player.GetConnectedPlayer();
 
             Locale loc = handler.GetSessionDbcLocale();
-            string targetName = target.GetName();
+            string targetName = player.GetName();
             string knownStr = handler.GetCypherString(CypherStrings.Known);
 
             // Search in CharTitles.dbc
@@ -49,18 +53,21 @@ namespace Game.Chat
             {
                 if (target.HasTitle(titleInfo))
                 {
-                    string name = (target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
-                    if (string.IsNullOrEmpty(name))
+                    string name = (target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[loc];
+                    if (name.IsEmpty())
+                        name = (target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[Global.WorldMgr.GetDefaultDbcLocale()];
+                    if (name.IsEmpty())
                         continue;
 
-                    string activeStr = target.m_playerData.PlayerTitle == titleInfo.MaskID
-                    ? handler.GetCypherString(CypherStrings.Active) : "";
+                    string activeStr = "";
+                    if (target.m_playerData.PlayerTitle == titleInfo.MaskID)
+                        activeStr = handler.GetCypherString(CypherStrings.Active);
 
-                    string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
+                    string titleName = string.Format(name.ConvertFormatSyntax(), targetName);
 
                     // send title in "id (idx:idx) - [namedlink locale]" format
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleNameStr, loc, knownStr, activeStr);
+                        handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleName, loc, knownStr, activeStr);
                     else
                         handler.SendSysMessage(CypherStrings.TitleListConsole, titleInfo.Id, titleInfo.MaskID, name, loc, knownStr, activeStr);
                 }
@@ -71,45 +78,30 @@ namespace Game.Chat
 
         //rename characters
         [Command("rename", RBACPermissions.CommandCharacterRename, true)]
-        static bool HandleCharacterRenameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterRenameCommand(CommandHandler handler, string playerName, string newName)
         {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            var playerIdentifier = PlayerIdentifier.ParseFromString(playerName);
+            if (playerIdentifier == null && !newName.IsEmpty())
                 return false;
 
-            string newNameStr = args.NextString();
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null)
+                return false;
+            
+            // check online security
+            if (handler.HasLowerSecurity(null, playerIdentifier.GetGUID()))
+                return false;
 
-            if (!string.IsNullOrEmpty(newNameStr))
+            if (!newName.IsEmpty())
             {
-                string playerOldName;
-                string newName = newNameStr;
-
-                if (target)
-                {
-                    // check online security
-                    if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                        return false;
-
-                    playerOldName = target.GetName();
-                }
-                else
-                {
-                    // check offline security
-                    if (handler.HasLowerSecurity(null, targetGuid))
-                        return false;
-
-                    Global.CharacterCacheStorage.GetCharacterNameByGuid(targetGuid, out playerOldName);
-                }
-
                 if (!ObjectManager.NormalizePlayerName(ref newName))
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
                 }
 
-                if (ObjectManager.CheckPlayerName(newName, target ? target.GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale(), true) != ResponseCodes.CharNameSuccess)
+                if (ObjectManager.CheckPlayerName(newName, playerIdentifier.IsConnected() ? playerIdentifier.GetConnectedPlayer().GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale(), true) != ResponseCodes.CharNameSuccess)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
@@ -136,10 +128,11 @@ namespace Game.Chat
 
                 // Remove declined name from db
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-                stmt.AddValue(0, targetGuid.GetCounter());
+                stmt.AddValue(0, playerIdentifier.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
 
-                if (target)
+                Player target = playerIdentifier.GetConnectedPlayer();
+                if (target != null)
                 {
                     target.SetName(newName);
                     session = target.GetSession();
@@ -150,43 +143,42 @@ namespace Game.Chat
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_NAME_BY_GUID);
                     stmt.AddValue(0, newName);
-                    stmt.AddValue(1, targetGuid.GetCounter());
+                    stmt.AddValue(1, playerIdentifier.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }
 
-                Global.CharacterCacheStorage.UpdateCharacterData(targetGuid, newName);
+                Global.CharacterCacheStorage.UpdateCharacterData(playerIdentifier.GetGUID(), newName);
 
-                handler.SendSysMessage(CypherStrings.RenamePlayerWithNewName, playerOldName, newName);
+                handler.SendSysMessage(CypherStrings.RenamePlayerWithNewName, playerIdentifier.GetName(), newName);
 
-                Player player = handler.GetPlayer();
-                if (player)
-                    Log.outCommand(session.GetAccountId(), "GM {0} (Account: {1}) forced rename {2} to player {3} (Account: {4})", player.GetName(), session.GetAccountId(), newName, playerOldName, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid));
+                if (session != null)
+                {
+                    Player player = session.GetPlayer();
+                    if (player)
+                        Log.outCommand(session.GetAccountId(), "GM {0} (Account: {1}) forced rename {2} to player {3} (Account: {4})", player.GetName(), session.GetAccountId(), newName, player.GetName(), Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID()));
+                }
                 else
-                    Log.outCommand(0, "CONSOLE forced rename '{0}' to '{1}' ({2})", playerOldName, newName, targetGuid.ToString());
+                    Log.outCommand(0, "CONSOLE forced rename '{0}' to '{1}' ({2})", playerIdentifier.GetName(), newName, playerIdentifier.GetGUID().ToString());
             }
             else
             {
-                if (target)
+                Player target = playerIdentifier.GetConnectedPlayer();
+                if (target != null)
                 {
-                    // check online security
-                    if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                        return false;
-
                     handler.SendSysMessage(CypherStrings.RenamePlayer, handler.GetNameLink(target));
                     target.SetAtLoginFlag(AtLoginFlags.Rename);
                 }
                 else
                 {
                     // check offline security
-                    if (handler.HasLowerSecurity(null, targetGuid))
+                    if (handler.HasLowerSecurity(null, playerIdentifier.GetGUID()))
                         return false;
 
-                    string oldNameLink = handler.PlayerLink(targetName);
-                    handler.SendSysMessage(CypherStrings.RenamePlayerGuid, oldNameLink, targetGuid.ToString());
+                    handler.SendSysMessage(CypherStrings.RenamePlayerGuid, handler.PlayerLink(playerIdentifier.GetName()), playerIdentifier.GetGUID().ToString());
 
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                     stmt.AddValue(0, (ushort)AtLoginFlags.Rename);
-                    stmt.AddValue(1, targetGuid.GetCounter());
+                    stmt.AddValue(1, playerIdentifier.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }
             }
@@ -195,92 +187,91 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandCharacterLevel, true)]
-        static bool HandleCharacterLevelCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterLevelCommand(CommandHandler handler, string playerName, short newlevel)
         {
-            string nameStr;
-            string levelStr;
-            handler.ExtractOptFirstArg(args, out nameStr, out levelStr);
-            if (string.IsNullOrEmpty(levelStr))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
-            // exception opt second arg: .character level $name
-            if (!levelStr.IsNumber())
-            {
-                nameStr = levelStr;
-                levelStr = null;                                    // current level will used
-            }
-
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
-                return false;
-
-            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
-
-            if (!int.TryParse(levelStr, out int newlevel))
-                newlevel = oldlevel;
+            uint oldlevel = player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID());
 
             if (newlevel < 1)
-                return false;                                       // invalid level
+                newlevel = 1;
 
-            if (newlevel > SharedConst.StrongMaxLevel)                         // hardcoded maximum level
+            if (newlevel > SharedConst.StrongMaxLevel)
                 newlevel = SharedConst.StrongMaxLevel;
 
-            HandleCharacterLevel(target, targetGuid, oldlevel, newlevel, handler);
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including player == NULL
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
             {
-                string nameLink = handler.PlayerLink(targetName);
-                handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
+                target.GiveLevel((uint)newlevel);
+                target.InitTalentForLevel();
+                target.SetXP(0);
+
+                if (handler.NeedReportToTarget(target))
+                {
+                    if (oldlevel == newlevel)
+                        target.SendSysMessage(CypherStrings.YoursLevelProgressReset, handler.GetNameLink());
+                    else if (oldlevel < newlevel)
+                        target.SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), newlevel);
+                    else                                                // if (oldlevel > newlevel)
+                        target.SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), newlevel);
+                }
             }
+            else
+            {
+                // Update level and reset XP, everything else will be updated at login
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_LEVEL);
+                stmt.AddValue(0, (byte)newlevel);
+                stmt.AddValue(1, player.GetGUID().GetCounter());
+                DB.Characters.Execute(stmt);
+            }
+
+            if (!handler.GetSession() || (handler.GetSession().GetPlayer() != player.GetConnectedPlayer()))      // including chr == NULL
+                handler.SendSysMessage(CypherStrings.YouChangeLvl, handler.PlayerLink(player.GetName()), newlevel);
 
             return true;
         }
 
-        // customize characters
         [Command("customize", RBACPermissions.CommandCharacterCustomize, true)]
-        static bool HandleCharacterCustomizeCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterCustomizeCommand(CommandHandler handler, string playerName)
         {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTarget(handler);
+            if (player == null)
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
-            if (target)
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
                 target.SetAtLoginFlag(AtLoginFlags.Customize);
-                stmt.AddValue(1, target.GetGUID().GetCounter());
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
-                stmt.AddValue(1, targetGuid.GetCounter());
-                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
+                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
+                stmt.AddValue(1, player.GetGUID().GetCounter());
+                DB.Characters.Execute(stmt);
             }
-            DB.Characters.Execute(stmt);
 
             return true;
         }
 
         [Command("changeaccount", RBACPermissions.CommandCharacterChangeaccount, true)]
-        static bool HandleCharacterChangeAccountCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterChangeAccountCommand(CommandHandler handler, string playerName, string newAccountName)
         {
-            string playerNameStr;
-            string accountName;
-            handler.ExtractOptFirstArg(args, out playerNameStr, out accountName);
-            if (accountName.IsEmpty())
+            var playerIdentifier = PlayerIdentifier.ParseFromString(playerName);
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null)
                 return false;
 
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(new StringArguments(playerNameStr), out _, out targetGuid, out targetName))
-                return false;
-
-            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(targetGuid);
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(playerIdentifier.GetGUID());
             if (characterInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -288,46 +279,35 @@ namespace Game.Chat
             }
 
             uint oldAccountId = characterInfo.AccountId;
-            uint newAccountId;
-
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
-            stmt.AddValue(0, accountName);
-            SQLResult result = DB.Login.Query(stmt);
-            if (!result.IsEmpty())
-                newAccountId = result.Read<uint>(0);
-            else
-            {
-                handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-                return false;
-            }
+            var newAccount = AccountIdentifier.ParseFromString(newAccountName);
 
             // nothing to do :)
-            if (newAccountId == oldAccountId)
+            if (newAccount.GetID() == oldAccountId)
                 return true;
 
-            uint charCount = Global.AccountMgr.GetCharactersCount(newAccountId);
+            uint charCount = Global.AccountMgr.GetCharactersCount(newAccount.GetID());
             if (charCount != 0)
             {
                 if (charCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
                 {
-                    handler.SendSysMessage(CypherStrings.AccountCharacterListFull, accountName, newAccountId);
+                    handler.SendSysMessage(CypherStrings.AccountCharacterListFull, newAccount.GetName(), newAccount.GetID());
                     return false;
                 }
             }
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
-            stmt.AddValue(0, newAccountId);
-            stmt.AddValue(1, targetGuid.GetCounter());
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
+            stmt.AddValue(0, newAccount.GetID());
+            stmt.AddValue(1, playerIdentifier.GetGUID().GetCounter());
             DB.Characters.DirectExecute(stmt);
 
             Global.WorldMgr.UpdateRealmCharCount(oldAccountId);
-            Global.WorldMgr.UpdateRealmCharCount(newAccountId);
+            Global.WorldMgr.UpdateRealmCharCount(newAccount.GetID());
 
-            Global.CharacterCacheStorage.UpdateCharacterAccountId(targetGuid, newAccountId);
+            Global.CharacterCacheStorage.UpdateCharacterAccountId(playerIdentifier.GetGUID(), newAccount.GetID());
 
-            handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, targetName, accountName);
+            handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, playerIdentifier.GetName(), newAccount.GetName());
 
-            string logString = $"changed ownership of player {targetName} ({targetGuid}) from account {oldAccountId} to account {newAccountId}";
+            string logString = $"changed ownership of player {playerIdentifier.GetName()} ({playerIdentifier.GetGUID()}) from account {oldAccountId} to account {newAccount.GetID()}";
             WorldSession session = handler.GetSession();
             if (session != null)
             {
@@ -341,70 +321,72 @@ namespace Game.Chat
         }
 
         [Command("changefaction", RBACPermissions.CommandCharacterChangefaction, true)]
-        static bool HandleCharacterChangeFactionCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterChangeFactionCommand(CommandHandler handler, string playerName)
         {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTarget(handler);
+            if (player == null)
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, (ushort)AtLoginFlags.ChangeFaction);
-            if (target)
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
                 target.SetAtLoginFlag(AtLoginFlags.ChangeFaction);
-                stmt.AddValue(1, target.GetGUID().GetCounter());
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
-                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
-                stmt.AddValue(1, targetGuid.GetCounter());
+                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                stmt.AddValue(0, (ushort)AtLoginFlags.ChangeFaction);
+                stmt.AddValue(1, player.GetGUID().GetCounter());
+                DB.Characters.Execute(stmt);
             }
-            DB.Characters.Execute(stmt);
 
             return true;
         }
 
         [Command("changerace", RBACPermissions.CommandCharacterChangerace, true)]
-        static bool HandleCharacterChangeRaceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterChangeRaceCommand(CommandHandler handler, string playerName)
         {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTarget(handler);
+            if (player == null)
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, (ushort)AtLoginFlags.ChangeRace);
-            if (target)
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
             {
-                // @todo add text into database
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
                 target.SetAtLoginFlag(AtLoginFlags.ChangeRace);
-                stmt.AddValue(1, target.GetGUID().GetCounter());
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
-                // @todo add text into database
-                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
-                stmt.AddValue(1, targetGuid.GetCounter());
+                handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                stmt.AddValue(0, (ushort)AtLoginFlags.ChangeRace);
+                stmt.AddValue(1, player.GetGUID().GetCounter());
+                DB.Characters.Execute(stmt);
             }
-            DB.Characters.Execute(stmt);
 
             return true;
         }
 
         [Command("reputation", RBACPermissions.CommandCharacterReputation, true)]
-        static bool HandleCharacterReputationCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterReputationCommand(CommandHandler handler, string playerName)
         {
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null || !player.IsConnected())
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
+            }
 
+            Player target = player.GetConnectedPlayer();
             Locale loc = handler.GetSessionDbcLocale();
 
             var targetFSL = target.GetReputationMgr().GetStateList();
@@ -443,44 +425,24 @@ namespace Game.Chat
         }
 
         [Command("erase", RBACPermissions.CommandCharacterErase, true)]
-        static bool HandleCharacterEraseCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCharacterEraseCommand(CommandHandler handler, string playerName)
         {
-            if (args.Empty())
-                return false;
-
-            string characterName = args.NextString();
-            if (string.IsNullOrEmpty(characterName))
-                return false;
-
-            if (!ObjectManager.NormalizePlayerName(ref characterName))
-                return false;
-
-            ObjectGuid characterGuid;
             uint accountId;
 
-            Player player = Global.ObjAccessor.FindPlayerByName(characterName);
-            if (player)
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player != null && player.IsConnected())
             {
-                characterGuid = player.GetGUID();
-                accountId = player.GetSession().GetAccountId();
-                player.GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
+                accountId = player.GetConnectedPlayer().GetSession().GetAccountId();
+                player.GetConnectedPlayer().GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
             }
             else
-            {
-                characterGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(characterName);
-                if (characterGuid.IsEmpty())
-                {
-                    handler.SendSysMessage(CypherStrings.NoPlayer, characterName);
-                    return false;
-                }
-                accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(characterGuid);
-            }
+                accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
 
             string accountName;
             Global.AccountMgr.GetName(accountId, out accountName);
 
-            Player.DeleteFromDB(characterGuid, accountId, true, true);
-            handler.SendSysMessage(CypherStrings.CharacterDeleted, characterName, characterGuid.ToString(), accountName, accountId);
+            Player.DeleteFromDB(player.GetGUID(), accountId, true, true);
+            handler.SendSysMessage(CypherStrings.CharacterDeleted, player.GetName(), player.GetGUID().ToString(), accountName, accountId);
 
             return true;
         }
@@ -489,14 +451,10 @@ namespace Game.Chat
         class DeletedCommands
         {
             [Command("delete", RBACPermissions.CommandCharacterDeletedDelete, true)]
-            static bool HandleCharacterDeletedDeleteCommand(CommandHandler handler, StringArguments args)
+            static bool HandleCharacterDeletedDeleteCommand(CommandHandler handler, string needle)
             {
-                // It is required to submit at least one argument
-                if (args.Empty())
-                    return false;
-
                 List<DeletedInfo> foundList = new();
-                if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
+                if (!GetDeletedCharacterInfoList(foundList, needle))
                     return false;
 
                 if (foundList.Empty())
@@ -516,10 +474,10 @@ namespace Game.Chat
             }
 
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
-            static bool HandleCharacterDeletedListCommand(CommandHandler handler, StringArguments args)
+            static bool HandleCharacterDeletedListCommand(CommandHandler handler, string needle)
             {
                 List<DeletedInfo> foundList = new();
-                if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
+                if (!GetDeletedCharacterInfoList(foundList, needle))
                     return false;
 
                 // if no characters have been found, output a warning
@@ -535,18 +493,10 @@ namespace Game.Chat
             }
 
             [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
-            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, StringArguments args)
+            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, string newCharName, string accountName)
             {
-                // It is required to submit at least one argument
-                if (args.Empty())
-                    return false;
-
-                string searchString = args.NextString();
-                string newCharName = args.NextString();
-                uint newAccount = args.NextUInt32();
-
                 List<DeletedInfo> foundList = new();
-                if (!GetDeletedCharacterInfoList(foundList, searchString))
+                if (!GetDeletedCharacterInfoList(foundList, needle))
                     return false;
 
                 if (foundList.Empty())
@@ -563,45 +513,41 @@ namespace Game.Chat
                     // Drop not existed account cases
                     foreach (var info in foundList)
                         HandleCharacterDeletedRestoreHelper(info, handler);
+
+                    return true;
                 }
-                else if (foundList.Count == 1 && ObjectManager.NormalizePlayerName(ref newCharName))
+
+                if (foundList.Count == 1)
                 {
                     DeletedInfo delInfo = foundList[0];
 
                     // update name
                     delInfo.name = newCharName;
 
+                    var newAccount = AccountIdentifier.ParseFromString(accountName);
                     // if new account provided update deleted info
-                    if (newAccount != 0 && newAccount != delInfo.accountId)
+                    if (newAccount != null)
                     {
-                        delInfo.accountId = newAccount;
-                        Global.AccountMgr.GetName(newAccount, out delInfo.accountName);
+                        delInfo.accountId = newAccount.GetID();
+                        delInfo.accountName = newAccount.GetName();
                     }
 
                     HandleCharacterDeletedRestoreHelper(delInfo, handler);
+                    return true;
                 }
-                else
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedErrRename);
-
-                return true;
+                
+                handler.SendSysMessage(CypherStrings.CharacterDeletedErrRename);
+                return false;
             }
 
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
-            static bool HandleCharacterDeletedOldCommand(CommandHandler handler, StringArguments args)
+            static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
             {
                 int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
 
-                string daysStr = args.NextString();
-                if (!daysStr.IsEmpty())
-                {
-                    if (!daysStr.IsNumber())
-                        return false;
-
-                    if (!int.TryParse(daysStr, out keepDays) || keepDays < 0)
-                        return false;
-                }
-                // config option value 0 . disabled and can't be used
-                else if (keepDays <= 0)
+                if (days.HasValue)
+                    keepDays = days.Value;
+                else if (keepDays <= 0) // config option value 0 -> disabled and can't be used
                     return false;
 
                 Player.DeleteOldCharacters(keepDays);
@@ -662,6 +608,7 @@ namespace Game.Chat
 
                 return true;
             }
+
             static void HandleCharacterDeletedListHelper(List<DeletedInfo> foundList, CommandHandler handler)
             {
                 if (handler.GetSession() == null)
@@ -688,6 +635,7 @@ namespace Game.Chat
                 if (!handler.GetSession())
                     handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
             }
+
             static void HandleCharacterDeletedRestoreHelper(DeletedInfo delInfo, CommandHandler handler)
             {
                 if (delInfo.accountName.IsEmpty())                    // account not exist
@@ -730,73 +678,53 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool HandleLevelUpCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLevelUpCommand(CommandHandler handler, string playerName, short? level)
         {
-            string nameStr;
-            string levelStr;
-            handler.ExtractOptFirstArg(args, out nameStr, out levelStr);
-
-            // exception opt second arg: .character level $name
-            if (!string.IsNullOrEmpty(levelStr) && !levelStr.IsNumber())
-            {
-                nameStr = levelStr;
-                levelStr = null;                                    // current level will used
-            }
-
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
-            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
-            if (!int.TryParse(levelStr, out int addlevel))
-                addlevel = 1;
+            int oldlevel = (int)(player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID()));
+            int newlevel = oldlevel + level.GetValueOrDefault(1);
 
-            int newlevel = oldlevel + addlevel;
             if (newlevel < 1)
                 newlevel = 1;
 
             if (newlevel > SharedConst.StrongMaxLevel)                         // hardcoded maximum level
                 newlevel = SharedConst.StrongMaxLevel;
 
-            HandleCharacterLevel(target, targetGuid, oldlevel, newlevel, handler);
-
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including chr == NULL
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
             {
-                string nameLink = handler.PlayerLink(targetName);
-                handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
-            }
+                target.GiveLevel((uint)newlevel);
+                target.InitTalentForLevel();
+                target.SetXP(0);
 
-            return true;
-        }
-
-        public static void HandleCharacterLevel(Player player, ObjectGuid playerGuid, int oldLevel, int newLevel, CommandHandler handler)
-        {
-            if (player)
-            {
-                player.GiveLevel((uint)newLevel);
-                player.InitTalentForLevel();
-                player.SetXP(0);
-
-                if (handler.NeedReportToTarget(player))
+                if (handler.NeedReportToTarget(player.GetConnectedPlayer()))
                 {
-                    if (oldLevel == newLevel)
-                        player.SendSysMessage(CypherStrings.YoursLevelProgressReset, handler.GetNameLink());
-                    else if (oldLevel < newLevel)
-                        player.SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), newLevel);
+                    if (oldlevel == newlevel)
+                        player.GetConnectedPlayer().SendSysMessage(CypherStrings.YoursLevelProgressReset, handler.GetNameLink());
+                    else if (oldlevel < newlevel)
+                        player.GetConnectedPlayer().SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), newlevel);
                     else                                                // if (oldlevel > newlevel)
-                        player.SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), newLevel);
+                        player.GetConnectedPlayer().SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), newlevel);
                 }
             }
             else
             {
                 // Update level and reset XP, everything else will be updated at login
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_LEVEL);
-                stmt.AddValue(0, newLevel);
-                stmt.AddValue(1, playerGuid.GetCounter());
+                stmt.AddValue(0, newlevel);
+                stmt.AddValue(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
+            
+            if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including chr == NULL
+                handler.SendSysMessage(CypherStrings.YouChangeLvl, handler.PlayerLink(player.GetName()), newlevel);
+
+            return true;
         }
     }
 
@@ -804,21 +732,9 @@ namespace Game.Chat
     class PdumpCommand
     {
         [Command("load", RBACPermissions.CommandPdumpLoad, true)]
-        static bool HandlePDumpLoadCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePDumpLoadCommand(CommandHandler handler, string fileName, string accountName, string characterName, ulong? characterGuid)
         {
             /*
-            if (args.Empty())
-                return false;
-
-            string fileStr = strtok((char*)args, " ");
-            if (!fileStr)
-                return false;
-
-            char* accountStr = strtok(NULL, " ");
-            if (!accountStr)
-                return false;
-
-            string accountName = accountStr;
             if (!AccountMgr.normalizeString(accountName))
             {
                 handler.SendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName);
@@ -844,9 +760,6 @@ namespace Game.Chat
                 handler.SetSentErrorMessage(true);
                 return false;
             }
-
-            char* guidStr = NULL;
-            char* nameStr = strtok(NULL, " ");
 
             string name;
             if (nameStr)
@@ -917,48 +830,16 @@ namespace Game.Chat
         }
 
         [Command("write", RBACPermissions.CommandPdumpWrite, true)]
-        static bool HandlePDumpWriteCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePDumpWriteCommand(CommandHandler handler, string fileName, string playerName)
         {
-            if (args.Empty())
-                return false;
             /*
-            char* fileStr = strtok((char*)args, " ");
-            char* playerStr = strtok(NULL, " ");
-
-            if (!fileStr || !playerStr)
-                return false;
-
-            uint64 guid;
-            // character name can't start from number
-            if (isNumeric(playerStr))
-                guid = MAKE_NEW_GUID(atoi(playerStr), 0, HIGHGUID_PLAYER);
-            else
-            {
-                string name = handler.extractPlayerNameFromLink(playerStr);
-                if (name.empty())
-                {
-                    handler.SendSysMessage(LANG_PLAYER_NOT_FOUND);
-
-                    return false;
-                }
-
-                guid = Global.ObjectMgr.GetPlayerGUIDByName(name);
-            }
-
-            if (!Global.ObjectMgr.GetPlayerAccountIdByGUID(guid))
-            {
-                handler.SendSysMessage(LANG_PLAYER_NOT_FOUND);
-                handler.SetSentErrorMessage(true);
-                return false;
-            }
-
-            switch (PlayerDumpWriter().WriteDump(fileStr, uint32(guid)))
+            switch (PlayerDumpWriter().WriteDump(fileName, player.GetGUID().GetCounter()))
             {
                 case DUMP_SUCCESS:
                     handler.SendSysMessage(LANG_COMMAND_EXPORT_SUCCESS);
                     break;
                 case DUMP_FILE_OPEN_ERROR:
-                    handler.SendSysMessage(LANG_FILE_OPEN_FAIL, fileStr);
+                    handler.SendSysMessage(LANG_FILE_OPEN_FAIL, fileName);
 
                     return false;
                 case DUMP_CHARACTER_DELETED:

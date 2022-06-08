@@ -157,8 +157,9 @@ namespace Game.Chat
 
         public string GetName() { return _name; }
         public ObjectGuid GetGUID() { return _guid; }
-        public Player GetPlayer() { return _player; }
-
+        public bool IsConnected() { return _player != null; }
+        public Player GetConnectedPlayer() { return _player; }
+        
         public static PlayerIdentifier FromTarget(CommandHandler handler)
         {
             Player player = handler.GetPlayer();
@@ -219,5 +220,59 @@ namespace Game.Chat
 
             return null;
         }
+    }
+
+    class AccountIdentifier
+    {
+        uint _id;
+        string _name;
+        WorldSession _session;
+
+        public AccountIdentifier(WorldSession session)
+        {
+            _id = session.GetAccountId();
+            _name = session.GetAccountName();
+            _session = session;
+        }
+
+        public uint GetID() { return _id; }
+        public string GetName() { return _name; }
+        public WorldSession GetSession() { return _session; }
+
+        public static AccountIdentifier ParseFromString(string arg)
+        {
+            // try parsing as account name
+            var session = Global.WorldMgr.FindSession(Global.AccountMgr.GetId(arg));
+            if (session != null) // account with name exists, we are done
+                return new AccountIdentifier(session);
+
+            // try parsing as account id
+            if (uint.TryParse(arg, out uint id))
+                return null;
+
+            session = Global.WorldMgr.FindSession(id);
+            if (session != null)
+                return new AccountIdentifier(session);
+
+            return null;
+        }
+
+        public static AccountIdentifier FromTarget(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
+            if (player != null)
+            {
+                Player target = player.GetSelectedPlayer();
+                if (target != null)
+                {
+                    WorldSession session = target.GetSession();
+                    if (session != null)
+                        return new AccountIdentifier(session);
+                }
+            }
+
+            return null;
+        }
+
     }
 }
