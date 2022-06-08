@@ -2603,6 +2603,7 @@ namespace Framework.Constants
         RaidEncounter = 22,           // Cctt|
         Healthy75Percent = 23,           // C   |
         WoundHealth35_80 = 24,            //   T |
+        Max,
 
         PerCasterAuraStateMask = (1 << (RaidEncounter2 - 1)) | (1 << (RoguePoisoned - 1))
     }

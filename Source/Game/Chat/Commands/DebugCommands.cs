@@ -49,7 +49,7 @@ namespace Game.Chat
         [Command("areatriggers", RBACPermissions.CommandDebugAreatriggers)]
         static bool HandleDebugAreaTriggersCommand(CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
             if (!player.IsDebugAreaTriggers)
             {
                 handler.SendSysMessage(CypherStrings.DebugAreatriggerOn);
@@ -80,7 +80,7 @@ namespace Game.Chat
         [Command("boundary", RBACPermissions.CommandDebugBoundary)]
         static bool HandleDebugBoundaryCommand(CommandHandler handler, string fill, uint durationArg)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
             if (!player)
                 return false;
 
@@ -104,7 +104,7 @@ namespace Game.Chat
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
-                target = handler.GetSession().GetPlayer();
+                target = handler.GetPlayer();
 
             handler.SendSysMessage($"Combat refs: (Combat state: {target.IsInCombat()} | Manager state: {target.GetCombatManager().HasCombat()})");
             foreach (var refe in target.GetCombatManager().GetPvPCombatRefs())
@@ -122,15 +122,8 @@ namespace Game.Chat
         }
 
         [Command("conversation", RBACPermissions.CommandDebugConversation)]
-        static bool HandleDebugConversationCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugConversationCommand(CommandHandler handler, uint conversationEntry)
         {
-            if (args.Empty())
-                return false;
-
-            uint conversationEntry = args.NextUInt32();
-            if (conversationEntry == 0)
-                return false;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
@@ -156,12 +149,12 @@ namespace Game.Chat
                 return false;
 
             if (entry == 0)
-                handler.GetSession().GetPlayer().EnterVehicle(target, seatId);
+                handler.GetPlayer().EnterVehicle(target, seatId);
             else
             {
-                var check = new AllCreaturesOfEntryInRange(handler.GetSession().GetPlayer(), entry, 20.0f);
-                var searcher = new CreatureSearcher(handler.GetSession().GetPlayer(), check);
-                Cell.VisitAllObjects(handler.GetSession().GetPlayer(), searcher, 30.0f);
+                var check = new AllCreaturesOfEntryInRange(handler.GetPlayer(), entry, 20.0f);
+                var searcher = new CreatureSearcher(handler.GetPlayer(), check);
+                Cell.VisitAllObjects(handler.GetPlayer(), searcher, 30.0f);
                 var passenger = searcher.GetTarget();
                 if (!passenger || passenger == target)
                     return false;
@@ -196,7 +189,7 @@ namespace Game.Chat
 
             Player player = handler.GetSelectedPlayer();
             if (!player)
-                player = handler.GetSession().GetPlayer();
+                player = handler.GetPlayer();
 
             if (!listQueue && !checkAll)
             {
@@ -460,20 +453,18 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebugInstancespawn)]
-        static bool HandleDebugInstanceSpawns(CommandHandler handler, StringArguments args)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, string optArg)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
             if (player == null)
                 return false;
 
-            string explainOrGroupId = args.NextString();
-
             bool explain = false;
             uint groupID = 0;
-            if (explainOrGroupId.Equals("explain", StringComparison.OrdinalIgnoreCase))
+            if (optArg.Equals("explain", StringComparison.OrdinalIgnoreCase))
                 explain = true;
             else
-                groupID = uint.Parse(explainOrGroupId);
+                groupID = uint.Parse(optArg);
 
             if (groupID != 0 && Global.ObjectMgr.GetSpawnGroupData(groupID) == null)
             {
@@ -571,12 +562,12 @@ namespace Game.Chat
         [Command("itemexpire", RBACPermissions.CommandDebugItemexpire)]
         static bool HandleDebugItemExpireCommand(CommandHandler handler, ulong guid)
         {
-            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
+            Item item = handler.GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
             if (!item)
                 return false;
 
-            handler.GetSession().GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
-            Global.ScriptMgr.OnItemExpire(handler.GetSession().GetPlayer(), item.GetTemplate());
+            handler.GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            Global.ScriptMgr.OnItemExpire(handler.GetPlayer(), item.GetTemplate());
 
             return true;
         }
@@ -584,7 +575,7 @@ namespace Game.Chat
         [Command("loadcells", RBACPermissions.CommandDebugLoadcells)]
         static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint mapId = 0xFFFFFFFF)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
             if (!player)
                 return false;
 
@@ -619,7 +610,7 @@ namespace Game.Chat
             Unit unit = handler.GetSelectedUnit();
             if (unit)
             {
-                Player player = handler.GetSession().GetPlayer();
+                Player player = handler.GetPlayer();
                 handler.SendSysMessage($"Checking LoS {player.GetName()} . {unit.GetName()}:");
                 handler.SendSysMessage($"    VMAP LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Vmap) ? "clear" : "obstructed")}");
                 handler.SendSysMessage($"    GObj LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Gobject) ? "clear" : "obstructed")}");
@@ -630,37 +621,25 @@ namespace Game.Chat
         }
 
         [Command("moveflags", RBACPermissions.CommandDebugMoveflags)]
-        static bool HandleDebugMoveflagsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugMoveflagsCommand(CommandHandler handler, uint? moveFlags, uint? moveFlagsExtra)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
-                target = handler.GetSession().GetPlayer();
+                target = handler.GetPlayer();
 
-            if (args.Empty())
+            if (!moveFlags.HasValue)
             {
                 //! Display case
                 handler.SendSysMessage(CypherStrings.MoveflagsGet, target.GetUnitMovementFlags(), target.GetUnitMovementFlags2());
             }
             else
             {
-                string mask1 = args.NextString();
-                if (string.IsNullOrEmpty(mask1))
-                    return false;
-
-                string mask2 = args.NextString(" \n");
-
-                if (!uint.TryParse(mask1, out uint moveFlags))
-                    return false;
-                target.SetUnitMovementFlags((MovementFlag)moveFlags);
-
                 // @fixme: port master's HandleDebugMoveflagsCommand; flags need different handling
 
-                if (!string.IsNullOrEmpty(mask2))
-                {
-                    if (!uint.TryParse(mask2, out uint moveFlagsExtra))
-                        return false;
+                target.SetUnitMovementFlags((MovementFlag)moveFlags);
+
+                if (moveFlagsExtra.HasValue)
                     target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra);
-                }
 
                 if (!target.IsTypeId(TypeId.Player))
                     target.DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
@@ -680,7 +659,7 @@ namespace Game.Chat
         [Command("neargraveyard", RBACPermissions.CommandNearGraveyard)]
         static bool HandleDebugNearGraveyard(CommandHandler handler, string linked)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
             WorldSafeLocsEntry nearestLoc = null;
 
             if (linked == "linked")
@@ -869,14 +848,8 @@ namespace Game.Chat
         }
 
         [Command("setaurastate", RBACPermissions.CommandDebugSetaurastate)]
-        static bool HandleDebugSetAuraStateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugSetAuraStateCommand(CommandHandler handler, AuraStateType? state, bool apply)
         {
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
             {
@@ -884,42 +857,26 @@ namespace Game.Chat
                 return false;
             }
 
-            int state = args.NextInt32();
             if (state == 0)
             {
                 // reset all states
-                for (int i = 1; i <= 32; ++i)
-                    unit.ModifyAuraState((AuraStateType)i, false);
+                for (AuraStateType s = 0; s < AuraStateType.Max; ++s)
+                    unit.ModifyAuraState(s, false);
                 return true;
             }
 
-            unit.ModifyAuraState((AuraStateType)Math.Abs(state), state > 0);
-            return true;
-        }
-
-        [Command("setvid", RBACPermissions.CommandDebugSetvid)]
-        static bool HandleDebugSetVehicleIdCommand(CommandHandler handler, StringArguments args)
-        {
-            Unit target = handler.GetSelectedUnit();
-            if (!target || target.IsVehicle())
-                return false;
-
-            if (args.Empty())
-                return false;
-
-            uint id = args.NextUInt32();
-            handler.SendSysMessage("Vehicle id set to {0}", id);
+            unit.ModifyAuraState(state.GetValueOrDefault(0), apply);
             return true;
         }
 
         [Command("spawnvehicle", RBACPermissions.CommandDebugSpawnvehicle)]
         static bool HandleDebugSpawnVehicleCommand(CommandHandler handler, uint entry, uint id)
         {
-            float x, y, z, o = handler.GetSession().GetPlayer().GetOrientation();
-            handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, handler.GetSession().GetPlayer().GetCombatReach());
+            float x, y, z, o = handler.GetPlayer().GetOrientation();
+            handler.GetPlayer().GetClosePoint(out x, out y, out z, handler.GetPlayer().GetCombatReach());
 
             if (id == 0)
-                return handler.GetSession().GetPlayer().SummonCreature(entry, x, y, z, o);
+                return handler.GetPlayer().SummonCreature(entry, x, y, z, o);
 
             CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (creatureTemplate == null)
@@ -929,7 +886,7 @@ namespace Game.Chat
             if (vehicleRecord == null)
                 return false;
 
-            Map map = handler.GetSession().GetPlayer().GetMap();
+            Map map = handler.GetPlayer().GetMap();
             Position pos = new(x, y, z, o);
 
             Creature creature = Creature.CreateCreature(entry, map, pos, id);
@@ -945,7 +902,7 @@ namespace Game.Chat
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
-                target = handler.GetSession().GetPlayer();
+                target = handler.GetPlayer();
 
             ThreatManager mgr = target.GetThreatManager();
             if (!target.IsAlive())
@@ -1079,7 +1036,7 @@ namespace Game.Chat
         [Command("transport", RBACPermissions.CommandDebugTransport)]
         static bool HandleDebugTransportCommand(CommandHandler handler, string operation)
         {
-            Transport transport = handler.GetSession().GetPlayer().GetTransport<Transport>();
+            Transport transport = handler.GetPlayer().GetTransport<Transport>();
             if (!transport)
                 return false;
 
@@ -1106,22 +1063,13 @@ namespace Game.Chat
         [Command("worldstate", RBACPermissions.CommandDebugWorldState)]
         static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
         {
-            handler.GetSession().GetPlayer().SendUpdateWorldState(variable, value);
+            handler.GetPlayer().SendUpdateWorldState(variable, value);
             return true;
         }
 
         [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWorldStateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugWorldStateCommand(CommandHandler handler, uint worldStateId, uint? value)
         {
-            if (args.Empty())
-                return false;
-
-            string worldStateIdStr = args.NextString();
-            string valueStr = args.NextString();
-
-            if (worldStateIdStr.IsEmpty())
-                return false;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
             {
@@ -1129,13 +1077,10 @@ namespace Game.Chat
                 return false;
             }
 
-            uint worldStateId = uint.Parse(worldStateIdStr);
-            uint value = valueStr.IsEmpty() ? 0 : uint.Parse(valueStr);
-
-            if (value != 0)
+            if (value.HasValue)
             {
-                Global.WorldMgr.SetWorldState(worldStateId, value);
-                target.SendUpdateWorldState(worldStateId, value);
+                Global.WorldMgr.SetWorldState(worldStateId, value.Value);
+                target.SendUpdateWorldState(worldStateId, value.Value);
             }
             else
                 handler.SendSysMessage($"Worldstate {worldStateId} actual value : {Global.WorldMgr.GetWorldState(worldStateId)}");
@@ -1146,7 +1091,7 @@ namespace Game.Chat
         [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
         static bool HandleWPGPSCommand(CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetPlayer();
 
             Log.outInfo(LogFilter.SqlDev, $"(@PATH, XX, {player.GetPositionX():3F}, {player.GetPositionY():3F}, {player.GetPositionZ():5F}, {player.GetOrientation():5F}, 0, 0, 0, 100, 0)");
 
@@ -1155,18 +1100,8 @@ namespace Game.Chat
         }
 
         [Command("wsexpression", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWSExpressionCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugWSExpressionCommand(CommandHandler handler, uint expressionId)
         {
-            if (args.Empty())
-                return false;
-
-            string expressionIdStr = args.NextString();
-
-            if (expressionIdStr.IsEmpty())
-                return false;
-
-            uint expressionId = uint.Parse(expressionIdStr);
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
             {
@@ -1213,7 +1148,7 @@ namespace Game.Chat
                     handler.SendSysMessage("{0} waypoints dumped", list.Count);
                 }
 
-                handler.GetSession().GetPlayer().SendCinematicStart(cinematicId);
+                handler.GetPlayer().SendCinematicStart(cinematicId);
                 return true;
             }
 
@@ -1226,7 +1161,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                handler.GetSession().GetPlayer().SendMovieStart(movieId);
+                handler.GetPlayer().SendMovieStart(movieId);
                 return true;
             }
 
@@ -1239,7 +1174,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Player player = handler.GetSession().GetPlayer();
+                Player player = handler.GetPlayer();
 
                 player.PlayDirectMusic(musicId, player);
 
@@ -1256,7 +1191,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Player player = handler.GetSession().GetPlayer();
+                Player player = handler.GetPlayer();
 
                 Unit unit = handler.GetSelectedUnit();
                 if (!unit)
@@ -1314,63 +1249,44 @@ namespace Game.Chat
         class SendCommands
         {
             [Command("buyerror", RBACPermissions.CommandDebugSendBuyerror)]
-            static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, BuyResult error)
             {
-                if (args.Empty())
-                    return false;
-
-                BuyResult msg = (BuyResult)args.NextUInt32();
-                handler.GetSession().GetPlayer().SendBuyError(msg, null, 0);
+                handler.GetPlayer().SendBuyError(error, null, 0);
                 return true;
             }
 
             [Command("channelnotify", RBACPermissions.CommandDebugSendChannelnotify)]
-            static bool HandleDebugSendChannelNotifyCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendChannelNotifyCommand(CommandHandler handler, ChatNotify type)
             {
-                if (args.Empty())
-                    return false;
-
-                string name = "test";
-                byte code = args.NextByte();
                 ChannelNotify packet = new();
-                packet.Type = (ChatNotify)code;
-                packet.Channel = name;
+                packet.Type = type;
+                packet.Channel = "test";
                 handler.GetSession().SendPacket(packet);
                 return true;
             }
 
             [Command("chatmessage", RBACPermissions.CommandDebugSendChatmessage)]
-            static bool HandleDebugSendChatMsgCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendChatMsgCommand(CommandHandler handler, ChatMsg type)
             {
-                if (args.Empty())
-                    return false;
-
-                string msg = "testtest";
-                byte type = args.NextByte();
                 ChatPkt data = new();
-                data.Initialize((ChatMsg)type, Language.Universal, handler.GetSession().GetPlayer(), handler.GetSession().GetPlayer(), msg, 0, "chan");
+                data.Initialize(type, Language.Universal, handler.GetPlayer(), handler.GetPlayer(), "testtest", 0, "chan");
                 handler.GetSession().SendPacket(data);
                 return true;
             }
 
             [Command("equiperror", RBACPermissions.CommandDebugSendEquiperror)]
-            static bool HandleDebugSendEquipErrorCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendEquipErrorCommand(CommandHandler handler, InventoryResult error)
             {
-                if (args.Empty())
-                    return false;
-
-                InventoryResult msg = (InventoryResult)args.NextUInt32();
-                handler.GetSession().GetPlayer().SendEquipError(msg);
+                handler.GetPlayer().SendEquipError(error);
                 return true;
             }
 
             [Command("largepacket", RBACPermissions.CommandDebugSendLargepacket)]
             static bool HandleDebugSendLargePacketCommand(CommandHandler handler)
             {
-                const string stuffingString = "This is a dummy string to push the packet's size beyond 128000 bytes. ";
                 StringBuilder ss = new();
                 while (ss.Length < 128000)
-                    ss.Append(stuffingString);
+                    ss.Append("This is a dummy string to push the packet's size beyond 128000 bytes. ");
                 handler.SendSysMessage(ss.ToString());
                 return true;
             }
@@ -1383,42 +1299,31 @@ namespace Game.Chat
             }
 
             [Command("playerchoice", RBACPermissions.CommandDebugSendPlayerChoice)]
-            static bool HandleDebugSendPlayerChoiceCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendPlayerChoiceCommand(CommandHandler handler, int choiceId)
             {
-                if (args.Empty())
-                    return false;
-
-                int choiceId = args.NextInt32();
-                Player player = handler.GetSession().GetPlayer();
-
+                Player player = handler.GetPlayer();
                 player.SendPlayerChoice(player.GetGUID(), choiceId);
                 return true;
             }
 
             [Command("qpartymsg", RBACPermissions.CommandDebugSendQpartymsg)]
-            static bool HandleDebugSendQuestPartyMsgCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendQuestPartyMsgCommand(CommandHandler handler, QuestPushReason msg)
             {
-                uint msg = args.NextUInt32();
-                handler.GetSession().GetPlayer().SendPushToPartyResponse(handler.GetSession().GetPlayer(), (QuestPushReason)msg);
+                handler.GetPlayer().SendPushToPartyResponse(handler.GetPlayer(), msg);
                 return true;
             }
 
             [Command("qinvalidmsg", RBACPermissions.CommandDebugSendQinvalidmsg)]
-            static bool HandleDebugSendQuestInvalidMsgCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendQuestInvalidMsgCommand(CommandHandler handler, QuestFailedReasons msg)
             {
-                QuestFailedReasons msg = (QuestFailedReasons)args.NextUInt32();
-                handler.GetSession().GetPlayer().SendCanTakeQuestResponse(msg);
+                handler.GetPlayer().SendCanTakeQuestResponse(msg);
                 return true;
             }
 
             [Command("sellerror", RBACPermissions.CommandDebugSendSellerror)]
-            static bool HandleDebugSendSellErrorCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendSellErrorCommand(CommandHandler handler, SellResult error)
             {
-                if (args.Empty())
-                    return false;
-
-                SellResult msg = (SellResult)args.NextUInt32();
-                handler.GetSession().GetPlayer().SendSellError(msg, null, ObjectGuid.Empty);
+                handler.GetPlayer().SendSellError(error, null, ObjectGuid.Empty);
                 return true;
             }
 
@@ -1436,28 +1341,19 @@ namespace Game.Chat
                 if (uiMapPhaseId != 0)
                     phaseShift.AddUiMapPhaseId(uiMapPhaseId);
 
-                PhasingHandler.SendToPlayer(handler.GetSession().GetPlayer(), phaseShift);
+                PhasingHandler.SendToPlayer(handler.GetPlayer(), phaseShift);
                 return true;
             }
 
             [Command("spellfail", RBACPermissions.CommandDebugSendSpellfail)]
-            static bool HandleDebugSendSpellFailCommand(CommandHandler handler, StringArguments args)
+            static bool HandleDebugSendSpellFailCommand(CommandHandler handler, SpellCastResult result, int? failArg1, int? failArg2)
             {
-                if (args.Empty())
-                    return false;
-
-                if (!byte.TryParse(args.NextString(), out byte failNum) || failNum == 0)
-                    return false;
-
-                int failArg1 = args.NextInt32();
-                int failArg2 = args.NextInt32();
-
                 CastFailed castFailed = new();
                 castFailed.CastID = ObjectGuid.Empty;
                 castFailed.SpellID = 133;
-                castFailed.Reason = (SpellCastResult)failNum;
-                castFailed.FailedArg1 = failArg1;
-                castFailed.FailedArg2 = failArg2;
+                castFailed.Reason = result;
+                castFailed.FailedArg1 = failArg1.GetValueOrDefault(-1);
+                castFailed.FailedArg2 = failArg2.GetValueOrDefault(-1);
                 handler.GetSession().SendPacket(castFailed);
 
                 return true;
