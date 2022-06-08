@@ -21,6 +21,7 @@ using Framework.IO;
 using Game.DungeonFinding;
 using Game.Entities;
 using Game.Groups;
+using System;
 
 namespace Game.Chat
 {
@@ -102,9 +103,9 @@ namespace Game.Chat
         }
 
         [Command("queue", RBACPermissions.CommandLfgQueue, true)]
-        static bool HandleLfgQueueInfoCommand(CommandHandler handler, bool full)
+        static bool HandleLfgQueueInfoCommand(CommandHandler handler, string full)
         {
-            handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(full));
+            handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(!full.IsEmpty()));
             return true;
         }
 
