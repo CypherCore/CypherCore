@@ -322,33 +322,6 @@ namespace Game.Chat
             return null;
         }
 
-        public void ExtractOptFirstArg(StringArguments args, out string arg1, out string arg2)
-        {
-            string p1 = args.NextString();
-            string p2 = args.NextString();
-
-            if (string.IsNullOrEmpty(p2))
-            {
-                p2 = p1;
-                p1 = null;
-            }
-
-            arg1 = p1;
-            arg2 = p2;
-        }
-
-        public GameTele ExtractGameTeleFromLink(StringArguments args)
-        {
-            string cId = ExtractKeyFromLink(args, "Htele");
-            if (string.IsNullOrEmpty(cId))
-                return null;
-
-            if (uint.TryParse(cId, out uint id))
-                return Global.ObjectMgr.GetGameTele(id);
-
-            return Global.ObjectMgr.GetGameTele(cId);
-        }
-
         public string ExtractQuotedArg(string str)
         {
             if (string.IsNullOrEmpty(str))

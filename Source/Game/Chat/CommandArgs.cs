@@ -40,7 +40,6 @@ namespace Game.Chat
             {
                 int oldPos = args.GetCurrentPosition();
 
-                //Is this a hyperlink?
                 if (ParseArgument(out dynamic value, parameterTypes[index], args))
                     index++;
 
@@ -67,9 +66,6 @@ namespace Game.Chat
 
             if (args.IsAtEnd())
                 return false;
-
-            if (Hyperlink.TryParse(out value, type, args))
-                return value;
 
             if (type.IsEnum)
                 type = type.GetEnumUnderlyingType();

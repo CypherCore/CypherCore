@@ -1241,26 +1241,22 @@ namespace Game.Chat
 
         // mute player for the specified duration
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool HandleMuteCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMuteCommand(CommandHandler handler, string playerName, uint muteTime, string muteReason)
         {
-            string nameStr;
-            string delayStr;
-            handler.ExtractOptFirstArg(args, out nameStr, out delayStr);
-            if (string.IsNullOrEmpty(delayStr))
+            if (muteReason.IsEmpty())
+                muteReason = handler.GetCypherString(CypherStrings.NoReason);
+
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTarget(handler);
+            if (player == null)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
+            }
 
-            string muteReason = args.NextString();
-            string muteReasonStr = "No reason";
-            if (muteReason != null)
-                muteReasonStr = muteReason;
-
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
-                return false;
-
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            Player target = player.GetConnectedPlayer();
+            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
 
             // find only player from same account if any
             if (!target)
@@ -1270,55 +1266,56 @@ namespace Game.Chat
                     target = session.GetPlayer();
             }
 
-            if (!uint.TryParse(delayStr, out uint notSpeakTime))
-                return false;
-
             // must have strong lesser security level
-            if (handler.HasLowerSecurity(target, targetGuid, true))
+            if (handler.HasLowerSecurity(target, player.GetGUID(), true))
                 return false;
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
             string muteBy;
-            if (handler.GetSession() != null)
-                muteBy = handler.GetSession().GetPlayerName();
+            Player gmPlayer = handler.GetPlayer();
+            if (gmPlayer != null)
+                muteBy = gmPlayer.GetName();
             else
-                muteBy = "Console";
+                muteBy = handler.GetCypherString(CypherStrings.Console);
 
             if (target)
             {
                 // Target is online, mute will be in effect right away.
-                long muteTime = GameTime.GetGameTime() + notSpeakTime * Time.Minute;
-                target.GetSession().m_muteTime = muteTime;
-                stmt.AddValue(0, muteTime);
-                string nameLink = handler.PlayerLink(targetName);
-
-                if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
-                {
-                    Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, (handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server"), nameLink, notSpeakTime, muteReasonStr);
-                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
-                }
-                else
-                {
-                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
-                }
+                long mutedUntil = GameTime.GetGameTime() + muteTime * Time.Minute;
+                target.GetSession().m_muteTime = mutedUntil;
+                stmt.AddValue(0, mutedUntil);
             }
             else
             {
-                // Target is offline, mute will be in effect starting from the next login.
-                int muteTime = -(int)(notSpeakTime * Time.Minute);
-                stmt.AddValue(0, muteTime);
+                stmt.AddValue(0, -(muteTime * Time.Minute));
             }
 
-            stmt.AddValue(1, muteReasonStr);
+            stmt.AddValue(1, muteReason);
             stmt.AddValue(2, muteBy);
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
-            string nameLink_ = handler.PlayerLink(targetName);
 
-            if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld) && !target)
-                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, handler.GetSession().GetPlayerName(), nameLink_, notSpeakTime, muteReasonStr);
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT_MUTE);
+            stmt.AddValue(0, accountId);
+            stmt.AddValue(1, muteTime);
+            stmt.AddValue(2, muteBy);
+            stmt.AddValue(3, muteReason);
+            DB.Login.Execute(stmt);
+
+            string nameLink = handler.PlayerLink(player.GetName());
+
+            if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
+                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReason);
+            if (target)
+            {
+                target.SendSysMessage(CypherStrings.YourChatDisabled, muteTime, muteBy, muteReason);
+                handler.SendSysMessage(CypherStrings.YouDisableChat, nameLink, muteTime, muteReason);
+            }
             else
-                handler.SendSysMessage(target ? CypherStrings.YouDisableChat : CypherStrings.CommandDisableChatDelayed, nameLink_, notSpeakTime, muteReasonStr);
+            {
+                handler.SendSysMessage(CypherStrings.CommandDisableChatDelayed, nameLink, muteTime, muteReason);
+            }
+
             return true;
         }
 

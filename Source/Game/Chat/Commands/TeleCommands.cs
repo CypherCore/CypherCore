@@ -182,23 +182,24 @@ namespace Game.Chat
         }
 
         [Command("name", RBACPermissions.CommandTeleName, true)]
-        static bool HandleTeleNameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleTeleNameCommand(CommandHandler handler, string playerName, string where)
         {
-            handler.ExtractOptFirstArg(args, out string nameStr, out string teleStr);
-            if (teleStr.IsEmpty())
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
+            
+            Player target = player.GetConnectedPlayer();
 
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out Player target, out ObjectGuid targetGuid, out string targetName))
-                return false;
-
-            if (teleStr.Equals("home", StringComparison.OrdinalIgnoreCase))    // References target's homebind
+            if (where.Equals("home", StringComparison.OrdinalIgnoreCase))    // References target's homebind
             {
                 if (target)
                     target.TeleportTo(target.GetHomebind());
                 else
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
-                    stmt.AddValue(0, targetGuid.GetCounter());
+                    stmt.AddValue(0, player.GetGUID().GetCounter());
                     SQLResult result = DB.Characters.Query(stmt);
 
                     if (!result.IsEmpty())
@@ -206,7 +207,7 @@ namespace Game.Chat
                         WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
                         uint zoneId = result.Read<ushort>(1);
 
-                        Player.SavePositionInDB(loc, zoneId, targetGuid);
+                        Player.SavePositionInDB(loc, zoneId, player.GetGUID());
                     }
                 }
 
@@ -214,12 +215,9 @@ namespace Game.Chat
             }
 
             // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(new StringArguments(teleStr));
+            GameTele tele = Global.ObjectMgr.GetGameTele(where);
             if (tele == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
                 return false;
-            }
 
             if (target)
             {
@@ -227,7 +225,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                string chrNameLink = handler.PlayerLink(targetName);
+                string chrNameLink = handler.PlayerLink(target.GetName());
 
                 if (target.IsBeingTeleported() == true)
                 {
@@ -250,15 +248,15 @@ namespace Game.Chat
             else
             {
                 // check offline security
-                if (handler.HasLowerSecurity(null, targetGuid))
+                if (handler.HasLowerSecurity(null, target.GetGUID()))
                     return false;
 
-                string nameLink = handler.PlayerLink(targetName);
+                string nameLink = handler.PlayerLink(target.GetName());
 
                 handler.SendSysMessage(CypherStrings.TeleportingTo, nameLink, handler.GetCypherString(CypherStrings.Offline), tele.name);
 
                 Player.SavePositionInDB(new WorldLocation(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation),
-                    Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, tele.mapId, tele.posX, tele.posY, tele.posZ), targetGuid);
+                    Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, tele.mapId, tele.posX, tele.posY, tele.posZ), target.GetGUID());
             }
 
             return true;

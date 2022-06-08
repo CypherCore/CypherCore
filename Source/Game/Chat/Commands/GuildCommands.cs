@@ -128,20 +128,15 @@ namespace Game.Chat
         }
 
         [Command("rank", RBACPermissions.CommandGuildRank, true)]
-        static bool HandleGuildRankCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGuildRankCommand(CommandHandler handler, string playerName, byte rank)
         {
-            string nameStr;
-            string rankStr;
-            handler.ExtractOptFirstArg(args, out nameStr, out rankStr);
-            if (string.IsNullOrEmpty(rankStr))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
-            Player target;
-            ObjectGuid targetGuid;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out _))
-                return false;
-
-            ulong guildId = target ? target.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetGuid);
+            ulong guildId = player.IsConnected() ? player.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(player.GetGUID());
             if (guildId == 0)
                 return false;
 
@@ -149,10 +144,7 @@ namespace Game.Chat
             if (!targetGuild)
                 return false;
 
-            if (!byte.TryParse(rankStr, out byte newRank))
-                return false;
-
-            return targetGuild.ChangeMemberRank(null, targetGuid, (GuildRankId)newRank);
+            return targetGuild.ChangeMemberRank(null, player.GetGUID(), (GuildRankId)rank);
         }
 
         [Command("rename", RBACPermissions.CommandGuildRename, true)]
