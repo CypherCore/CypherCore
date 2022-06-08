@@ -28,42 +28,41 @@ namespace Game.Chat
     class LFGCommands
     {
         [Command("player", RBACPermissions.CommandLfgPlayer, true)]
-        static bool HandleLfgPlayerInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLfgPlayerInfoCommand(CommandHandler handler, string playerName)
         {
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
-            GetPlayerInfo(handler, target);
-            return true;
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
+            {
+                PrintPlayerInfo(handler, target);
+                return true;
+            }
+
+            return false;
         }
 
         [Command("group", RBACPermissions.CommandLfgGroup, true)]
-        static bool HandleLfgGroupInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLfgGroupInfoCommand(CommandHandler handler, string playerName)
         {
-            if (args.Empty())
-                return false;
-
-            Player playerTarget;
-            ObjectGuid guidTarget;
-            string nameTarget;
-
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
-            {
-                playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
-                guidTarget = parseGUID;
-            }
-            else if (!handler.ExtractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
             Group groupTarget = null;
-            if (playerTarget)
-                groupTarget = playerTarget.GetGroup();
+            Player target = player.GetConnectedPlayer();
+            if (target != null)
+                groupTarget = target.GetGroup();
             else
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
-                stmt.AddValue(0, guidTarget.GetCounter());
+                stmt.AddValue(0, player.GetGUID().GetCounter());
                 SQLResult resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
@@ -71,7 +70,7 @@ namespace Game.Chat
 
             if (!groupTarget)
             {
-                handler.SendSysMessage(CypherStrings.LfgNotInGroup, nameTarget);
+                handler.SendSysMessage(CypherStrings.LfgNotInGroup, player.GetName());
                 return false;
             }
 
@@ -82,7 +81,7 @@ namespace Game.Chat
             {
                 Player p = Global.ObjAccessor.FindPlayer(slot.guid);
                 if (p)
-                    GetPlayerInfo(handler, p);
+                    PrintPlayerInfo(handler, p);
                 else
                     handler.SendSysMessage("{0} is offline.", slot.name);
             }
@@ -91,19 +90,11 @@ namespace Game.Chat
         }
 
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
-        static bool HandleLfgOptionsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLfgOptionsCommand(CommandHandler handler, uint? optionsArg)
         {
-            string str = args.NextString();
-            int options = -1;
-            if (!string.IsNullOrEmpty(str))
+            if (optionsArg.HasValue)
             {
-                if (!int.TryParse(str, out options) || options < -1)
-                    return false;
-            }
-
-            if (options != -1)
-            {
-                Global.LFGMgr.SetOptions((LfgOptions)options);
+                Global.LFGMgr.SetOptions((LfgOptions)optionsArg.Value);
                 handler.SendSysMessage(CypherStrings.LfgOptionsChanged);
             }
             handler.SendSysMessage(CypherStrings.LfgOptions, Global.LFGMgr.GetOptions());
@@ -111,21 +102,21 @@ namespace Game.Chat
         }
 
         [Command("queue", RBACPermissions.CommandLfgQueue, true)]
-        static bool HandleLfgQueueInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLfgQueueInfoCommand(CommandHandler handler, bool full)
         {
-            handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(args.NextBoolean()));
+            handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(full));
             return true;
         }
 
         [Command("clean", RBACPermissions.CommandLfgClean, true)]
-        static bool HandleLfgCleanCommand(CommandHandler handler, StringArguments args)
+        static bool HandleLfgCleanCommand(CommandHandler handler)
         {
             handler.SendSysMessage(CypherStrings.LfgClean);
             Global.LFGMgr.Clean();
             return true;
         }
 
-        static void GetPlayerInfo(CommandHandler handler, Player player)
+        static void PrintPlayerInfo(CommandHandler handler, Player player)
         {
             if (!player)
                 return;
