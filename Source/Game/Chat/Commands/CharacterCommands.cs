@@ -430,10 +430,11 @@ namespace Game.Chat
             uint accountId;
 
             var player = PlayerIdentifier.ParseFromString(playerName);
-            if (player != null && player.IsConnected())
+            Player target = player?.GetConnectedPlayer();
+            if (target != null)
             {
-                accountId = player.GetConnectedPlayer().GetSession().GetAccountId();
-                player.GetConnectedPlayer().GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
+                accountId = target.GetSession().GetAccountId();
+                target.GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
             }
             else
                 accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
@@ -678,7 +679,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool HandleLevelUpCommand(CommandHandler handler, string playerName, short? level)
+        static bool HandleLevelUpCommand(CommandHandler handler, string playerName, short level)
         {
             var player = PlayerIdentifier.ParseFromString(playerName);
             if (player == null)
@@ -687,7 +688,7 @@ namespace Game.Chat
                 return false;
 
             int oldlevel = (int)(player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID()));
-            int newlevel = oldlevel + level.GetValueOrDefault(1);
+            int newlevel = oldlevel + level;
 
             if (newlevel < 1)
                 newlevel = 1;
