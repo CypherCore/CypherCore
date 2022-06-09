@@ -295,6 +295,10 @@ namespace Game.Chat
                 }
             }
 
+            Player onlinePlayer = playerIdentifier.GetConnectedPlayer();
+            if (onlinePlayer != null)
+                onlinePlayer.GetSession().KickPlayer("HandleCharacterChangeAccountCommand GM Command transferring character to another account");
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
             stmt.AddValue(0, newAccount.GetID());
             stmt.AddValue(1, playerIdentifier.GetGUID().GetCounter());
