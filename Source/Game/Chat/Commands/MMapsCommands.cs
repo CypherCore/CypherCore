@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("mmap", RBACPermissions.CommandMmap, true)]
+    [CommandGroup("mmap")]
     class MMapsCommands
     {
         [Command("path", RBACPermissions.CommandMmapPath)]

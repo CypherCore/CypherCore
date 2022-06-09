@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("reset", RBACPermissions.CommandReset, true)]
+    [CommandGroup("reset")]
     class ResetCommands
     {
         [Command("achievements", RBACPermissions.CommandResetAchievements, true)]

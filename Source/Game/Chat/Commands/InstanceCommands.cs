@@ -24,7 +24,7 @@ using Game.DataStorage;
 
 namespace Game.Chat
 {
-    [CommandGroup("instance", RBACPermissions.CommandInstance, true)]
+    [CommandGroup("instance")]
     class InstanceCommands
     {
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]

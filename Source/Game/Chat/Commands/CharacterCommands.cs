@@ -27,7 +27,7 @@ using System.Text;
 
 namespace Game.Chat
 {
-    [CommandGroup("character", RBACPermissions.CommandCharacter, true)]
+    [CommandGroup("character")]
     class CharacterCommands
     {
         [Command("titles", RBACPermissions.CommandCharacterTitles, true)]
@@ -448,7 +448,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("deleted", RBACPermissions.CommandCharacterDeleted, true)]
+        [CommandGroup("deleted")]
         class DeletedCommands
         {
             [Command("delete", RBACPermissions.CommandCharacterDeletedDelete, true)]
@@ -729,7 +729,7 @@ namespace Game.Chat
         }
     }
 
-    [CommandGroup("pdump", RBACPermissions.CommandPdump, true)]
+    [CommandGroup("pdump")]
     class PdumpCommand
     {
         [Command("load", RBACPermissions.CommandPdumpLoad, true)]

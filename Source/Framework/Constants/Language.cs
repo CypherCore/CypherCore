@@ -984,6 +984,25 @@ namespace Framework.Constants
         DisallowTicketsConfig = 1218,
         // 1219-1499 - free
 
+        CmdparserEither = 1500,
+        CmdparserOr = 1501,
+        CmdparserStringValueInvalid = 1502,
+        CmdparserInvalidUtf8 = 1503,
+        CmdparserLinkdataInvalid = 1504,
+        CmdparserAccountNameNoExist = 1505,
+        CmdparserAccountIdNoExist = 1506,
+        CmdparserCharGuidNoExist = 1507,
+        CmdparserCharNameNoExist = 1508,
+        CmdparserCharNameInvalid = 1509,
+        CmdparserAchievementNoExist = 1510,
+        CmdparserGameTeleIdNoExist = 1511,
+        CmdparserGameTeleNoExist = 1512,
+        CmdparserItemNoExist = 1513,
+        CmdparserSpellNoExist = 1514,
+        CmdparserExactSeqMismatch = 1515,
+        CmdparserCurrencyNoExist = 1516,
+
+        // 1516-1998 - free
         DebugAreatriggerLeft = 1999,
         // Ticket Strings 2003-2028
         CommandTicketclosed = 2003,

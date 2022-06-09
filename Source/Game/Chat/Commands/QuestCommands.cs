@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace Game.Chat
 {
-    [CommandGroup("quest", RBACPermissions.CommandQuest)]
+    [CommandGroup("quest")]
     class QuestCommands
     {
         [Command("add", RBACPermissions.CommandQuestAdd)]

@@ -21,7 +21,7 @@ using System;
 
 namespace Game.Chat
 {
-    [CommandGroup("arena", RBACPermissions.CommandArena)]
+    [CommandGroup("arena")]
     class ArenaCommands
     {
         [Command("create", RBACPermissions.CommandArenaCreate, true)]

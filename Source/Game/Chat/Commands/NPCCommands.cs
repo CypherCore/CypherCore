@@ -30,7 +30,7 @@ using Game.Loots;
 
 namespace Game.Chat
 {
-    [CommandGroup("npc", RBACPermissions.CommandNpc)]
+    [CommandGroup("npc")]
     class NPCCommands
     {
         [Command("despawngroup", RBACPermissions.CommandNpcDespawngroup)]
@@ -572,7 +572,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("add", RBACPermissions.CommandNpcAdd)]
+        [CommandGroup("add")]
         class AddCommands
         {
             [Command("", RBACPermissions.CommandNpcAdd)]
@@ -763,7 +763,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("delete", RBACPermissions.CommandNpcDelete)]
+        [CommandGroup("delete")]
         class DeleteCommands
         {
             [Command("", RBACPermissions.CommandNpcDelete)]
@@ -826,7 +826,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("follow", RBACPermissions.CommandNpcFollow)]
+        [CommandGroup("follow")]
         class FollowCommands
         {
             [Command("", RBACPermissions.CommandNpcFollow)]
@@ -882,7 +882,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("set", RBACPermissions.CommandNpcSet, true)]
+        [CommandGroup("set")]
         class SetCommands
         {
             [Command("allowmove", RBACPermissions.CommandNpcSetAllowmove)]

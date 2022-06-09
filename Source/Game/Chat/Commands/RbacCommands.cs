@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("rbac", RBACPermissions.CommandRbac, true)]
+    [CommandGroup("rbac")]
     class RbacComands
     {
         [Command("list", RBACPermissions.CommandRbacList, true)]
@@ -62,7 +62,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("account", RBACPermissions.CommandRbacAcc, true)]
+        [CommandGroup("account")]
         class RbacAccountCommands
         {
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]

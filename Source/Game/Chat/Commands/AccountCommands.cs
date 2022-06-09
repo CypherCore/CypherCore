@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Chat
 {
-    [CommandGroup("account", RBACPermissions.CommandAccount, true)]
+    [CommandGroup("account")]
     class AccountCommands
     {
         [Command("", RBACPermissions.CommandAccount)]
@@ -322,7 +322,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("set", RBACPermissions.CommandAccountSet, true)]
+        [CommandGroup("set")]
         class SetCommands
         {
             [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
@@ -495,7 +495,7 @@ namespace Game.Chat
                 return true;
             }
 
-            [CommandGroup("sec", RBACPermissions.CommandAccountSetSec, true)]
+            [CommandGroup("sec")]
             class SetSecCommands
             {
                 [Command("email", RBACPermissions.CommandAccountSetSecEmail, true)]
@@ -584,7 +584,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("lock", RBACPermissions.CommandAccountLock)]
+        [CommandGroup("lock")]
         class LockCommands
         {
             [Command("country", RBACPermissions.CommandAccountLockCountry)]

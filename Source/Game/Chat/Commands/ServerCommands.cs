@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Chat
 {
-    [CommandGroup("server", RBACPermissions.CommandServer, true)]
+    [CommandGroup("server")]
     class ServerCommands
     {
         [Command("corpses", RBACPermissions.CommandServerCorpses, true)]
@@ -230,7 +230,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("idleRestart", RBACPermissions.CommandServerIdlerestart, true)]
+        [CommandGroup("idleRestart")]
         class IdleRestartCommands
         {
             [Command("", RBACPermissions.CommandServerIdlerestart, true)]
@@ -249,7 +249,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("idleshutdown", RBACPermissions.CommandServerIdleshutdown, true)]
+        [CommandGroup("idleshutdown")]
         class IdleshutdownCommands
         {
             [Command("", RBACPermissions.CommandServerIdleshutdown, true)]
@@ -269,7 +269,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("restart", RBACPermissions.CommandServerInfo, true)]
+        [CommandGroup("restart")]
         class RestartCommands
         {
             [Command("", RBACPermissions.CommandServerRestart, true)]
@@ -295,7 +295,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("shutdown", RBACPermissions.CommandServerMotd, true)]
+        [CommandGroup("shutdown")]
         class ShutdownCommands
         {
             [Command("", RBACPermissions.CommandServerShutdown, true)]
@@ -321,7 +321,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("set", RBACPermissions.CommandServerSet, true)]
+        [CommandGroup("set")]
         class SetCommands
         {
             [Command("difftime", RBACPermissions.CommandServerSetDifftime, true)]

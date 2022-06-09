@@ -22,36 +22,9 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-    [CommandGroup("gm", RBACPermissions.CommandGm)]
+    [CommandGroup("gm")]
     class GMCommands
     {
-        [Command("", RBACPermissions.CommandGm)]
-        static bool HandleGMCommand(CommandHandler handler, bool? enableArg)
-        {
-            Player _player = handler.GetSession().GetPlayer();
-
-            if (!enableArg.HasValue)
-            {
-                handler.SendNotification(_player.IsGameMaster() ? CypherStrings.GmOn : CypherStrings.GmOff);
-                return true;
-            }
-
-            if (enableArg.Value)
-            {
-                _player.SetGameMaster(true);
-                handler.SendNotification(CypherStrings.GmOn);
-                _player.UpdateTriggerVisibility();
-            }
-            else
-            {
-                _player.SetGameMaster(false);
-                handler.SendNotification(CypherStrings.GmOff);
-                _player.UpdateTriggerVisibility();
-            }
-
-            return true;
-        }
-
         [Command("chat", RBACPermissions.CommandGmChat)]
         static bool HandleGMChatCommand(CommandHandler handler, bool? enableArg)
         {
@@ -179,6 +152,24 @@ namespace Game.Chat
             }
             else
                 handler.SendSysMessage( CypherStrings.GmlistEmpty);
+            return true;
+        }
+
+        [Command("off", RBACPermissions.CommandGm)]
+        static bool HandleGMOffCommand(CommandHandler handler)
+        {
+            handler.GetPlayer().SetGameMaster(false);
+            handler.GetPlayer().UpdateTriggerVisibility();
+            handler.GetSession().SendNotification(CypherStrings.GmOff);
+            return true;
+        }
+
+        [Command("on", RBACPermissions.CommandGm)]
+        static bool HandleGMOnCommand(CommandHandler handler)
+        {
+            handler.GetPlayer().SetGameMaster(true);
+            handler.GetPlayer().UpdateTriggerVisibility();
+            handler.GetSession().SendNotification(CypherStrings.GmOn);
             return true;
         }
 

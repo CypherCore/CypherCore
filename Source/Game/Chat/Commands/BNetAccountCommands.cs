@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("bnetaccount", RBACPermissions.CommandBnetAccount, true)]
+    [CommandGroup("bnetaccount")]
     class BNetAccountCommands
     {
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
@@ -273,7 +273,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("lock", RBACPermissions.CommandBnetAccount, true)]
+        [CommandGroup("lock")]
         class LockCommands
         {
             [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
@@ -360,7 +360,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("set", RBACPermissions.CommandBnetAccountSet, true)]
+        [CommandGroup("set")]
         class SetCommands
         {
             [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]

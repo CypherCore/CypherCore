@@ -21,7 +21,7 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("honor", RBACPermissions.CommandHonor)]
+    [CommandGroup("honor")]
     class HonorCommands
     {
         [Command("update", RBACPermissions.CommandHonorUpdate)]
@@ -42,7 +42,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("add", RBACPermissions.CommandHonorAdd)]
+        [CommandGroup("add")]
         class HonorAddCommands
         {
             [Command("", RBACPermissions.CommandHonorAdd)]

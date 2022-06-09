@@ -112,6 +112,11 @@ namespace Framework.Constants
 
         // Free Space For Core Permissions (Till 149)
         // Roles (Permissions With Delegated Permissions) Use 199 And Descending
+        RoleAdministrator = 196,
+        RoleGamemaster = 197,
+        RoleModerator = 198,
+        RolePlayer = 199,
+
         CommandRbac = 200,
         CommandRbacAcc = 201,
         CommandRbacAccPermList = 202,
@@ -124,7 +129,7 @@ namespace Framework.Constants
         CommandBnetAccountLockCountry = 209,
         CommandBnetAccountLockIp = 210,
         CommandBnetAccountPassword = 211,
-        CommandBnetAccountSet = 212,
+        // 212 previously used, do not reuse
         CommandBnetAccountSetPassword = 213,
         CommandBnetAccountLink = 214,
         CommandBnetAccountUnlink = 215,
@@ -142,41 +147,41 @@ namespace Framework.Constants
         CommandAccountSetAddon = 227,
         CommandAccountSetSecLevel = 228,
         CommandAccountSetPassword = 229,
-        CommandAchievement = 230,
+        // 230 previously used, do not reuse
         CommandAchievementAdd = 231,
-        CommandArena = 232,
+        // 232 previously used, do not reuse
         CommandArenaCaptain = 233,
         CommandArenaCreate = 234,
         CommandArenaDisband = 235,
         CommandArenaInfo = 236,
         CommandArenaLookup = 237,
         CommandArenaRename = 238,
-        CommandBan = 239,
+        // 239 previously used, do not reuse
         CommandBanAccount = 240,
         CommandBanCharacter = 241,
         CommandBanIp = 242,
         CommandBanPlayeraccount = 243,
-        CommandBaninfo = 244,
+        // 244 previously used, do not reuse
         CommandBaninfoAccount = 245,
         CommandBaninfoCharacter = 246,
         CommandBaninfoIp = 247,
-        CommandBanlist = 248,
+        // 248 previously used, do not reuse
         CommandBanlistAccount = 249,
         CommandBanlistCharacter = 250,
         CommandBanlistIp = 251,
-        CommandUnban = 252,
+        // 252 previously used, do not reuse
         CommandUnbanAccount = 253,
         CommandUnbanCharacter = 254,
         CommandUnbanIp = 255,
         CommandUnbanPlayeraccount = 256,
-        CommandBf = 257,
+        // 257 previously used, do not reuse
         CommandBfStart = 258,
         CommandBfStop = 259,
         CommandBfSwitch = 260,
         CommandBfTimer = 261,
         CommandBfEnable = 262,
         CommandAccountEmail = 263,
-        CommandAccountSetSec = 264,
+        // 264 previously used, do not reuse
         CommandAccountSetSecEmail = 265,
         CommandAccountSetSecRegmail = 266,
         CommandCast = 267,
@@ -185,11 +190,11 @@ namespace Framework.Constants
         CommandCastSelf = 270,
         CommandCastTarget = 271,
         CommandCastDest = 272,
-        CommandCharacter = 273,
+        // 273 previously used, do not reuse
         CommandCharacterCustomize = 274,
         CommandCharacterChangefaction = 275,
         CommandCharacterChangerace = 276,
-        CommandCharacterDeleted = 277,
+        // 277 previously used, do not reuse
         CommandCharacterDeletedDelete = 278,
         CommandCharacterDeletedList = 279,
         CommandCharacterDeletedRestore = 280,
@@ -200,10 +205,10 @@ namespace Framework.Constants
         CommandCharacterReputation = 285,
         CommandCharacterTitles = 286,
         CommandLevelup = 287,
-        CommandPdump = 288,
+        // 288 previously used, do not reuse
         CommandPdumpLoad = 289,
         CommandPdumpWrite = 290,
-        CommandCheat = 291,
+        // 291 previously used, do not reuse
         CommandCheatCasttime = 292,
         CommandCheatCooldown = 293,
         CommandCheatExplore = 294,
@@ -213,55 +218,13 @@ namespace Framework.Constants
         CommandCheatTaxi = 298,
         CommandCheatWaterwalk = 299,
         CommandDebug = 300,
-        CommandDebugAnim = 301,
-        CommandDebugAreatriggers = 302,
-        CommandDebugArena = 303,
-        CommandDebugBg = 304,
-        CommandDebugEntervehicle = 305,
-        CommandDebugGetitemstate = 306,
-        CommandDebugGetitemvalue = 307, // DEPRECATED: DON'T REUSE
-        CommandDebugGetvalue = 308, // DEPRECATED: DON'T REUSE
-        CommandDebugCombat = 309,
-        CommandDebugItemexpire = 310,
-        CommandDebugLootrecipient = 311,
-        CommandDebugLos = 312,
-        CommandDebugMod32value = 313, // DEPRECATED: DON'T REUSE
-        CommandDebugMoveflags = 314,
-        CommandDebugPlay = 315,
-        CommandDebugPlayCinematic = 316,
-        CommandDebugPlayMovie = 317,
-        CommandDebugPlaySound = 318,
-        CommandDebugSend = 319,
-        CommandDebugSendBuyerror = 320,
-        CommandDebugSendChannelnotify = 321,
-        CommandDebugSendChatmessage = 322,
-        CommandDebugSendEquiperror = 323,
-        CommandDebugSendLargepacket = 324,
-        CommandDebugSendOpcode = 325,
-        CommandDebugSendQinvalidmsg = 326,
-        CommandDebugSendQpartymsg = 327,
-        CommandDebugSendSellerror = 328,
-        CommandDebugSendSetphaseshift = 329,
-        CommandDebugSendSpellfail = 330,
-        CommandDebugSetaurastate = 331,
-        CommandDebugSetbit = 332, // DEPRECATED: DON'T REUSE
-        CommandDebugSetitemvalue = 333, // DEPRECATED: DON'T REUSE
-        CommandDebugSetvalue = 334, // DEPRECATED: DON'T REUSE
-        CommandDebugSetvid = 335,
-        CommandDebugSpawnvehicle = 336,
-        CommandDebugThreat = 337,
-        CommandDebugUpdate = 338, // DEPRECATED: DON'T REUSE
-        CommandDebugWorldState = 339,
-        CommandWpgps = 340,
-        CommandDeserter = 341,
-        CommandDeserterBg = 342,
+        // 301-342 previously used, do not reuse
         CommandDeserterBgAdd = 343,
         CommandDeserterBgRemove = 344,
-        CommandDeserterInstance = 345,
+        // 345 previously used, do not reuse
         CommandDeserterInstanceAdd = 346,
         CommandDeserterInstanceRemove = 347,
-        CommandDisable = 348,
-        CommandDisableAdd = 349,
+        // 348-349 previously used, do not reuse
         CommandDisableAddCriteria = 350,
         CommandDisableAddBattleground = 351,
         CommandDisableAddMap = 352,
@@ -270,7 +233,7 @@ namespace Framework.Constants
         CommandDisableAddQuest = 355,
         CommandDisableAddSpell = 356,
         CommandDisableAddVmap = 357,
-        CommandDisableRemove = 358,
+        // 358 previously used, do not reuse
         CommandDisableRemoveCriteria = 359,
         CommandDisableRemoveBattleground = 360,
         CommandDisableRemoveMap = 361,
@@ -279,7 +242,7 @@ namespace Framework.Constants
         CommandDisableRemoveQuest = 364,
         CommandDisableRemoveSpell = 365,
         CommandDisableRemoveVmap = 366,
-        CommandEvent = 367,
+        CommandEventInfo = 367,
         CommandEventActivelist = 368,
         CommandEventStart = 369,
         CommandEventStop = 370,
@@ -299,7 +262,7 @@ namespace Framework.Constants
         //                                                       = 384, // DEPRECATED: DON'T REUSE
         //                                                       = 385, // DEPRECATED: DON'T REUSE
         //                                                       = 386, // DEPRECATED: DON'T REUSE
-        CommandGobject = 387,
+        // 387 previously used, do not reuse
         CommandGobjectActivate = 388,
         CommandGobjectAdd = 389,
         CommandGobjectAddTemp = 390,
@@ -307,12 +270,12 @@ namespace Framework.Constants
         CommandGobjectInfo = 392,
         CommandGobjectMove = 393,
         CommandGobjectNear = 394,
-        CommandGobjectSet = 395,
+        // 395 previously used, do not reuse
         CommandGobjectSetPhase = 396,
         CommandGobjectSetState = 397,
         CommandGobjectTarget = 398,
         CommandGobjectTurn = 399,
-        CommandDebugTransport = 400,
+        // 400 previously used, do not reuse
         CommandGuild = 401,
         CommandGuildCreate = 402,
         CommandGuildDelete = 403,
@@ -330,7 +293,7 @@ namespace Framework.Constants
         CommandInstanceStats = 415,
         CommandInstanceSavedata = 416,
         CommandLearn = 417,
-        CommandLearnAll = 418,
+        // 418 previously used, do not reuse
         CommandLearnAllMy = 419,
         CommandLearnAllMyClass = 420,
         CommandLearnAllMyPettalents = 421,
@@ -342,13 +305,13 @@ namespace Framework.Constants
         CommandLearnAllLang = 427,
         CommandLearnAllRecipes = 428,
         CommandUnlearn = 429,
-        CommandLfg = 430,
+        // 430 previously used, do not reuse
         CommandLfgPlayer = 431,
         CommandLfgGroup = 432,
         CommandLfgQueue = 433,
         CommandLfgClean = 434,
         CommandLfgOptions = 435,
-        CommandList = 436,
+        // 436 previously used, do not reuse
         CommandListCreature = 437,
         CommandListItem = 438,
         CommandListObject = 439,
@@ -482,7 +445,7 @@ namespace Framework.Constants
         CommandModifySpell = 567,
         CommandModifyStandstate = 568,
         CommandModifyTalentpoints = 569,
-        CommandNpc = 570,
+        // 570 previously used, do not reuse
         CommandNpcAdd = 571,
         CommandNpcAddFormation = 572,
         CommandNpcAddItem = 573,
@@ -540,7 +503,7 @@ namespace Framework.Constants
         CommandReloadAreatriggerTeleport = 625,
         CommandReloadAuctions = 626,
         CommandReloadAutobroadcast = 627,
-        CommandReloadCommand = 628,
+        // 628 previously used, do not reuse
         CommandReloadConditions = 629,
         CommandReloadConfig = 630,
         CommandReloadBattlegroundTemplate = 631,
@@ -617,7 +580,7 @@ namespace Framework.Constants
         CommandReloadSpellThreats = 702,
         CommandReloadSpellGroupStackRules = 703,
         CommandReloadCypherString = 704,
-        CommandReloadWardenAction = 705,
+        // 705 previously used, do not reuse
         CommandReloadWaypointScripts = 706,
         CommandReloadWaypointData = 707,
         CommandReloadVehicleAccesory = 708,
@@ -688,9 +651,9 @@ namespace Framework.Constants
         CommandWpReload = 773,
         CommandWpShow = 774,
         CommandModifyCurrency = 775,
-        CommandDebugPhase = 776,
+        // 776 previously used, do not reuse
         CommandMailbox = 777,
-        CommandAhbot = 778,
+        // 778 previously used, do not reuse
         CommandAhbotItems = 779,
         CommandAhbotItemsGray = 780,
         CommandAhbotItemsWhite = 781,
@@ -747,8 +710,7 @@ namespace Framework.Constants
         CommandTicketResetComplaint = 832,
         CommandTicketResetSuggestion = 833,
         //                                                       = 834, // DEPRECATED: DON'T REUSE
-        CommandDebugLoadcells = 835,
-        CommandDebugBoundary = 836,
+        // 835-836 previously used, do not reuse
         CommandNpcEvade = 837,
         CommandPetLevel = 838,
         CommandServerShutdownForce = 839,
@@ -764,10 +726,9 @@ namespace Framework.Constants
         CommandListScenes = 849,
         CommandReloadSceneTemplate = 850,
         CommandReloadAreatriggerTemplate = 851,
-        CommandDebugDummy = 852,
+        // 852 previously used, do not reuse
         CommandReloadConversationTemplate = 853,
-        CommandDebugConversation = 854,
-        CommandDebugPlayMusic = 855,
+        // 854-855 previously used, do not reuse
         CommandNpcSpawngroup = 856,
         CommandNpcDespawngroup = 857,
         CommandGobjectSpawngroup = 858,
@@ -781,17 +742,15 @@ namespace Framework.Constants
         CommandListSpawnpoints = 866,
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,
-        CommandDebugSendPlayerChoice = 869,
-        CommandDebugThreatinfo = 870,
-        CommandDebugInstancespawn = 871,
+        // 869 previously used, do not reuse
+        // 870-871 previously used, do not reuse
         CommandServerDebug = 872,
         CommandReloadCreatureMovementOverride = 873,
-        //                                                       = 874, // DEPRECATED: DON'T REUSE
+        // 874 previously used, do not reuse
         CommandLookupMapId = 875,
         CommandLookupItemId = 876,
         CommandLookupQuestId = 877,
-        CommandDebugQuestreset = 878,
-        // 879 previously used, do not reuse
+        // 878-879 previously used, do not reuse
         CommandPdumpCopy = 880,
         CommandReloadVehicleTemplate = 881,
         // Custom Permissions 1000+

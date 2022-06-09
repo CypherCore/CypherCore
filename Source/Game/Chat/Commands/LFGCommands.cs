@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DungeonFinding;
 using Game.Entities;
 using Game.Groups;
@@ -25,7 +24,7 @@ using System;
 
 namespace Game.Chat
 {
-    [CommandGroup("lfg", RBACPermissions.CommandLfg, true)]
+    [CommandGroup("lfg")]
     class LFGCommands
     {
         [Command("player", RBACPermissions.CommandLfgPlayer, true)]

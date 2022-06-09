@@ -60,7 +60,7 @@ namespace Game.Chat
                 do
                 {
                     string name = result.Read<string>(0);
-                    SetDataForCommandInTable(GetCommands(), name, result.Read<uint>(1), result.Read<string>(2), name);
+                    SetDataForCommandInTable(GetCommands(), name, result.Read<string>(1), name);
                 }
                 while (result.NextRow());
             }
@@ -94,7 +94,7 @@ namespace Game.Chat
             command.SortChildCommands();
         }
 
-        static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, uint permission, string help, string fullcommand)
+        static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, string help, string fullcommand)
         {
             StringArguments args = new(text);
             string cmd = args.NextString().ToLower();
@@ -109,7 +109,7 @@ namespace Game.Chat
                 if (!command.ChildCommands.Empty())
                 {
                     var arg = args.NextString("");
-                    if (SetDataForCommandInTable(command.ChildCommands, arg, permission, help, fullcommand))
+                    if (SetDataForCommandInTable(command.ChildCommands, arg, help, fullcommand))
                         return true;
                     else if (!arg.IsEmpty())
                         return false;
@@ -123,10 +123,6 @@ namespace Game.Chat
                     return false;
                 }
 
-                if (command.Permission != (RBACPermissions)permission)
-                    Log.outInfo(LogFilter.Misc, "Table `command` overwrite for command '{0}' default permission ({1}) by {2}", fullcommand, command.Permission, permission);
-
-                command.Permission = (RBACPermissions)permission;
                 command.Help = help;
                 return true;
             }

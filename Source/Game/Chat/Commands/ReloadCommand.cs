@@ -24,7 +24,7 @@ using Game.Spells;
 
 namespace Game.Chat
 {
-    [CommandGroup("reload", RBACPermissions.CommandReload, true)]
+    [CommandGroup("reload")]
     class ReloadCommand
     {
         [Command("access_requirement", RBACPermissions.CommandReloadAccessRequirement, true)]
@@ -117,9 +117,6 @@ namespace Game.Chat
             handler.SendGlobalGMSysMessage("DB table `character_template` and `character_template_class` reloaded.");
             return true;
         }
-
-        [Command("command", RBACPermissions.CommandReloadCommand, true)]
-        static bool HandleReloadCommandCommand(CommandHandler handler, StringArguments args) { return true; }
 
         [Command("conditions", RBACPermissions.CommandReloadConditions, true)]
         static bool HandleReloadConditions(CommandHandler handler, StringArguments args)
@@ -921,21 +918,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("warden_action", RBACPermissions.CommandReloadWardenAction, true)]
-        static bool HandleReloadWardenactionCommand(CommandHandler handler, StringArguments args)
-        {
-            if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
-            {
-                handler.SendSysMessage("Warden system disabled by config - reloading warden_action skipped.");
-                return false;
-            }
-
-            //Log.outInfo(LogFilter.Misc, "Re-Loading warden_action Table!");
-            //Global.WardenCheckMgr.LoadWardenOverrides();
-            //handler.SendGlobalGMSysMessage("DB table `warden_action` reloaded.");
-            return true;
-        }
-
         [Command("waypoint_data", RBACPermissions.CommandReloadWaypointData, true)]
         static bool HandleReloadWpCommand(CommandHandler handler, StringArguments args)
         {
@@ -970,7 +952,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("all", RBACPermissions.CommandReloadAll, true)]
+        [CommandGroup("all")]
         class AllCommand
         {
             [Command("", RBACPermissions.CommandReloadAll, true)]

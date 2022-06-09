@@ -21,7 +21,7 @@ using Game.BattleFields;
 
 namespace Game.Chat
 {
-    [CommandGroup("bf", RBACPermissions.CommandBf)]
+    [CommandGroup("bf")]
     class BattleFieldCommands
     {
         [Command("enable", RBACPermissions.CommandBfEnable)]

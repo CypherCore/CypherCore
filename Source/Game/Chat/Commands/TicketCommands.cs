@@ -22,7 +22,7 @@ using Game.SupportSystem;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("ticket", RBACPermissions.CommandTicket, true)]
+    [CommandGroup("ticket")]
     class TicketCommands
     {
         [Command("togglesystem", RBACPermissions.CommandTicketTogglesystem, true)]
@@ -40,7 +40,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("bug", RBACPermissions.CommandTicketBug, true)]
+        [CommandGroup("bug")]
         class TicketBugCommands
         {
             [Command("assign", RBACPermissions.CommandTicketBugAssign, true)]
@@ -92,7 +92,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("complaint", RBACPermissions.CommandTicketComplaint, true)]
+        [CommandGroup("complaint")]
         class TicketComplaintCommands
         {
             [Command("assign", RBACPermissions.CommandTicketComplaintAssign, true)]
@@ -144,7 +144,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("suggestion", RBACPermissions.CommandTicketSuggestion, true)]
+        [CommandGroup("suggestion")]
         class TicketSuggestionCommands
         {
             [Command("assign", RBACPermissions.CommandTicketSuggestionAssign, true)]
@@ -196,7 +196,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("reset", RBACPermissions.CommandTicketReset, true)]
+        [CommandGroup("reset")]
         class TicketResetCommands
         {
             [Command("all", RBACPermissions.CommandTicketResetAll, true)]

@@ -131,10 +131,10 @@ namespace Game.Chat
         }        
     }
 
-    [CommandGroup("channel", RBACPermissions.CommandChannel, true)]
+    [CommandGroup("channel")]
     class ChannelCommands
     {
-        [CommandGroup("set", RBACPermissions.CommandChannelSet, true)]
+        [CommandGroup("set")]
         class ChannelSetCommands
         {
             [Command("ownership", RBACPermissions.CommandChannelSetOwnership)]

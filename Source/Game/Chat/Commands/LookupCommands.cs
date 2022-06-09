@@ -27,7 +27,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("lookup", RBACPermissions.CommandLookup, true)]
+    [CommandGroup("lookup")]
     class LookupCommands
     {
         static int maxResults = 50;
@@ -643,7 +643,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("item", RBACPermissions.CommandLookupItem, true)]
+        [CommandGroup("item")]
         class ItemCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupItem, true)]
@@ -710,7 +710,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("map", RBACPermissions.CommandLookupMap, true)]
+        [CommandGroup("map")]
         class MapCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupMap, true)]
@@ -833,7 +833,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("player", RBACPermissions.CommandLookupPlayer, true)]
+        [CommandGroup("player")]
         class PlayerCommandGroup
         {
             [Command("ip", RBACPermissions.CommandLookupPlayerIp)]
@@ -921,7 +921,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("quest", RBACPermissions.CommandLookupQuest, true)]
+        [CommandGroup("quest")]
         class QuestCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupQuest, true)]
@@ -1133,7 +1133,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("spell",RBACPermissions.CommandLookupSpell)]
+        [CommandGroup("spell")]
         class SpellCommandGroup
         {
             [Command("", RBACPermissions.CommandLookupSpell)]

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("learn", RBACPermissions.CommandLearn)]
+    [CommandGroup("learn")]
     class LearnCommands
     {
         [Command("", RBACPermissions.CommandLearn)]
@@ -72,7 +72,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("all", RBACPermissions.CommandLearnAll)]
+        [CommandGroup("all")]
         class LearnAllCommands
         {
             [Command("gm", RBACPermissions.CommandLearnAllGm)]
@@ -239,7 +239,7 @@ namespace Game.Chat.Commands
                 }
             }
 
-            [CommandGroup("my", RBACPermissions.CommandLearnAllMy)]
+            [CommandGroup("my")]
             class LearnAllMyCommands
             {
                 [Command("class", RBACPermissions.CommandLearnAllMyClass)]

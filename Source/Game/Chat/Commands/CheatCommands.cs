@@ -21,7 +21,7 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("cheat", RBACPermissions.CommandCheat)]
+    [CommandGroup("cheat")]
     class CheatCommands
     {
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]

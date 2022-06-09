@@ -55,7 +55,8 @@ namespace Game.Chat
     [AttributeUsage(AttributeTargets.Class)]
     public class CommandGroupAttribute : CommandAttribute
     {
-        public CommandGroupAttribute(string command, RBACPermissions rbac, bool allowConsole = false) : base(command, rbac, allowConsole) { }
+        //todo fix me.
+        public CommandGroupAttribute(string command) : base(command, RBACPermissions.Max, true) { }
     }
 
     [AttributeUsage(AttributeTargets.Method)]

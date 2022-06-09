@@ -22,7 +22,7 @@ using Game.Spells;
 
 namespace Game.Chat
 {
-    [CommandGroup("pet", RBACPermissions.CommandPet)]
+    [CommandGroup("pet")]
     class PetCommands
     {
         [Command("create", RBACPermissions.CommandPetCreate)]

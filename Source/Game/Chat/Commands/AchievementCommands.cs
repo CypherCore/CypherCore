@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("achievement", RBACPermissions.CommandAchievement)]
+    [CommandGroup("achievement")]
     class AchievementCommand
     {
         [Command("add", RBACPermissions.CommandAchievementAdd)]

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("modify", RBACPermissions.CommandModify)]
+    [CommandGroup("modify")]
     class ModifyCommand
     {
         [Command("hp", RBACPermissions.CommandModifyHp)]
@@ -740,7 +740,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("speed", RBACPermissions.CommandModifySpeed)]
+        [CommandGroup("speed")]
         class ModifySpeed
         {
             [Command("", RBACPermissions.CommandModifySpeed)]

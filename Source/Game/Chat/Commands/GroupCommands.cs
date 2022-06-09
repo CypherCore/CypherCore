@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("group", RBACPermissions.CommandGroup)]
+    [CommandGroup("group")]
     class GroupCommands
     {
         // Summon group of player
@@ -343,7 +343,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("set", RBACPermissions.CommandGroupSet)]
+        [CommandGroup("set")]
         class GroupSetCommands
         {
             [Command("assistant", RBACPermissions.CommandGroupAssistant)]

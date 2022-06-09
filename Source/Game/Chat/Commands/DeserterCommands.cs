@@ -28,10 +28,10 @@ namespace Game.Chat.Commands
         public const uint BGDeserter = 26013;
     }
 
-    [CommandGroup("deserter", RBACPermissions.CommandDeserter)]
+    [CommandGroup("deserter")]
     class DeserterCommands
     {
-        [CommandGroup("instance", RBACPermissions.CommandDeserterInstance)]
+        [CommandGroup("instance")]
         class DeserterInstanceCommands
         {
             [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
@@ -47,7 +47,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("bg", RBACPermissions.CommandDeserterBg)]
+        [CommandGroup("bg")]
         class DeserterBGCommands
         {
             [Command("add", RBACPermissions.CommandDeserterBgAdd)]

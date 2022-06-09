@@ -692,6 +692,7 @@ namespace Game.Chat
             return true;
         }
 
+        public bool IsConsole() { return _session == null; }
         public WorldSession GetSession()
         {
             return _session;

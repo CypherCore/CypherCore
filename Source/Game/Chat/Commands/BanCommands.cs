@@ -24,7 +24,7 @@ using System.Net;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("ban", RBACPermissions.CommandBan, true)]
+    [CommandGroup("ban")]
     class BanCommands
     {
         [Command("account", RBACPermissions.CommandBanAccount, true)]
@@ -182,7 +182,7 @@ namespace Game.Chat.Commands
         }
     }
 
-    [CommandGroup("baninfo", RBACPermissions.CommandBaninfo, true)]
+    [CommandGroup("baninfo")]
     class BanInfoCommands
     {
         [Command("account", RBACPermissions.CommandBaninfoAccount, true)]
@@ -311,7 +311,7 @@ namespace Game.Chat.Commands
 
     }
 
-    [CommandGroup("banlist", RBACPermissions.CommandBanlist, true)]
+    [CommandGroup("banlist")]
     class BanListCommands
     {
         [Command("account", RBACPermissions.CommandBanlistAccount, true)]
@@ -591,7 +591,7 @@ namespace Game.Chat.Commands
         }
     }
 
-    [CommandGroup("unban", RBACPermissions.CommandUnban, true)]
+    [CommandGroup("unban")]
     class UnBanCommands
     {
         [Command("account", RBACPermissions.CommandUnbanAccount, true)]

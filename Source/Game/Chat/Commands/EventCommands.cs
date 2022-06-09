@@ -20,10 +20,10 @@ using Framework.IO;
 
 namespace Game.Chat
 {
-    [CommandGroup("event", RBACPermissions.CommandEvent)]
+    [CommandGroup("event")]
     class EventCommands
     {
-        [Command("info", RBACPermissions.CommandEvent, true)]
+        [Command("info", RBACPermissions.CommandEventInfo, true)]
         static bool HandleEventInfoCommand(CommandHandler handler, ushort eventId)
         {
             var events = Global.GameEventMgr.GetEventMap();

@@ -22,10 +22,10 @@ using Game.DataStorage;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("disable", RBACPermissions.CommandDisable)]
+    [CommandGroup("disable")]
     class DisableCommands
     {
-        [CommandGroup("add", RBACPermissions.CommandDisableAdd, true)]
+        [CommandGroup("add")]
         class DisableAddCommands
         {
             static bool HandleAddDisables(StringArguments args, CommandHandler handler, DisableType disableType)
@@ -222,7 +222,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("remove", RBACPermissions.CommandDisableRemove, true)]
+        [CommandGroup("remove")]
         class DisableRemoveCommands
         {
             static bool HandleRemoveDisables(StringArguments args, CommandHandler handler, DisableType disableType)

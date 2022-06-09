@@ -23,7 +23,7 @@ using System;
 
 namespace Game.Chat
 {
-    [CommandGroup("cast", RBACPermissions.CommandCast)]
+    [CommandGroup("cast")]
     class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]

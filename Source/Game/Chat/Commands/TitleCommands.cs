@@ -24,7 +24,7 @@ using System;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("titles", RBACPermissions.CommandTitles)]
+    [CommandGroup("titles")]
     class TitleCommands
     {
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
@@ -159,7 +159,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("set", RBACPermissions.CommandTitlesSet)]
+        [CommandGroup("set")]
         class TitleSetCommands
         {
             //Edit Player KnownTitles

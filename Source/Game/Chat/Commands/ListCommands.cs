@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("list", RBACPermissions.CommandList, true)]
+    [CommandGroup("list")]
     class ListCommands
     {
         [Command("auras", RBACPermissions.CommandListAuras)]

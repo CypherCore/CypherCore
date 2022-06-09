@@ -61,11 +61,11 @@ namespace Game.Chat
         {
             value = default;
 
-            if (Hyperlink.TryParse(out value, type, args))
-                return true;
-
             if (args.IsAtEnd())
                 return false;
+
+            if (Hyperlink.TryParse(out value, type, args))
+                return true;
 
             if (type.IsEnum)
                 type = type.GetEnumUnderlyingType();
@@ -269,6 +269,5 @@ namespace Game.Chat
 
             return null;
         }
-
     }
 }

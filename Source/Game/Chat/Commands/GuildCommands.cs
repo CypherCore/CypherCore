@@ -22,7 +22,7 @@ using Game.Guilds;
 
 namespace Game.Chat
 {
-    [CommandGroup("guild", RBACPermissions.CommandGuild, true)]
+    [CommandGroup("guild")]
     class GuildCommands
     {
         [Command("create", RBACPermissions.CommandGuildCreate, true)]

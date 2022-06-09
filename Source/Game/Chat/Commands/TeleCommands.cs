@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("tele", RBACPermissions.CommandTele)]
+    [CommandGroup("tele")]
     class TeleCommands
     {
         [Command("", RBACPermissions.CommandTele)]

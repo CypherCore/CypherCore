@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("send", RBACPermissions.CommandSend, false)]
+    [CommandGroup("send")]
     class SendCommands
     {
         [Command("mail", RBACPermissions.CommandSendMail, true)]

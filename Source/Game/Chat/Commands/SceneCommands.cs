@@ -22,7 +22,7 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-    [CommandGroup("scene", RBACPermissions.CommandScene)]
+    [CommandGroup("scene")]
     class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]

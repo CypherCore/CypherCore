@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("wp", RBACPermissions.CommandWp)]
+    [CommandGroup("wp")]
     class WPCommands
     {
         [Command("add", RBACPermissions.CommandWpAdd)]

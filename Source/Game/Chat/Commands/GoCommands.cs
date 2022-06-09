@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace Game.Chat.Commands
 {
-    [CommandGroup("go", RBACPermissions.CommandGo)]
+    [CommandGroup("go")]
     class GoCommands
     {
         [Command("areatrigger", RBACPermissions.CommandGo)]
@@ -497,7 +497,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("creature", RBACPermissions.CommandGo)]
+        [CommandGroup("creature")]
         class GoCommandCreature
         {
             [Command("", RBACPermissions.CommandGo)]
@@ -541,7 +541,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("gameobject", RBACPermissions.CommandGo)]
+        [CommandGroup("gameobject")]
         class GoCommandGameobject
         {
             [Command("", RBACPermissions.CommandGo)]

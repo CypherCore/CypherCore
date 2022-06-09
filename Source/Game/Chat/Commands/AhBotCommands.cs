@@ -21,7 +21,7 @@ using Framework.IO;
 namespace Game.Chat.Commands
 {
     //Holder for now.
-    [CommandGroup("ahbot", RBACPermissions.CommandAhbot)]
+    [CommandGroup("ahbot")]
     class AhBotCommands
     {
         [Command("rebuild", RBACPermissions.CommandAhbotRebuild, true)]
@@ -113,7 +113,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [CommandGroup("items", RBACPermissions.CommandAhbotItems)]
+        [CommandGroup("items")]
         class ItemsCommands
         {
             [Command("", RBACPermissions.CommandAhbotItems, true)]
@@ -174,7 +174,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        [CommandGroup("ratio", RBACPermissions.CommandAhbotRatio)]
+        [CommandGroup("ratio")]
         class RatioCommands
         {
             [Command("", RBACPermissions.CommandAhbotRatio, true)]

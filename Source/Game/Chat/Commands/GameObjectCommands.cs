@@ -28,7 +28,7 @@ using System.Text;
 
 namespace Game.Chat
 {
-    [CommandGroup("gobject", RBACPermissions.CommandGobject)]
+    [CommandGroup("gobject")]
     class GameObjectCommands
     {
         [Command("activate", RBACPermissions.CommandGobjectActivate)]
@@ -478,7 +478,7 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandGroup("add", RBACPermissions.CommandGobjectAdd)]
+        [CommandGroup("add")]
         class AddCommands
         {
             [Command("", RBACPermissions.CommandGobjectAdd)]
@@ -548,7 +548,7 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("set", RBACPermissions.CommandGobjectSet)]
+        [CommandGroup("set")]
         class SetCommands
         {
             [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
