@@ -572,23 +572,45 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("loadcells", RBACPermissions.CommandDebug)]
-        static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint mapId = 0xFFFFFFFF)
+        [Command("loadcells", RBACPermissions.CommandDebug, true)]
+        static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint? mapId, uint? tileX, uint? tileY)
         {
-            Player player = handler.GetPlayer();
-            if (!player)
-                return false;
-
             Map map = null;
-            if (mapId != 0xFFFFFFFF)
-                map = Global.MapMgr.FindBaseNonInstanceMap(mapId);
+            if (mapId.HasValue)
+                map = Global.MapMgr.FindBaseNonInstanceMap(mapId.Value);
+            else
+            {
+                Player player = handler.GetPlayer();
+                if (player != null)
+                {
+                    // Fallback to player's map if no map has been specified
+                    map = player.GetMap();
+                }
+            }
 
             if (!map)
-                map = player.GetMap();
+                return false;
 
-            map.LoadAllCells();
+            // Load 1 single tile if specified, otherwise load the whole map
+            if (tileX.HasValue && tileY.HasValue)
+            {
+                handler.SendSysMessage($"Loading cell (mapId: {map.GetId()} tile: {tileX}, {tileY}). Current GameObjects {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
 
-            handler.SendSysMessage("Cells loaded (mapId: {0})", map.GetId());
+                // Some unit convertions to go from TileXY to GridXY to WorldXY
+                float x = (((float)(64 - 1 - tileX.Value) - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+                float y = (((float)(64 - 1 - tileY.Value) - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+                map.LoadGrid(x, y);
+
+                handler.SendSysMessage($"Cell loaded (mapId: {map.GetId()} tile: {tileX}, {tileY}) After load - GameObject {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
+            }
+            else
+            {
+                handler.SendSysMessage($"Loading all cells (mapId: {map.GetId()}). Current GameObjects {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
+
+                map.LoadAllCells();
+
+                handler.SendSysMessage($"Cells loaded (mapId: {map.GetId()}) After load - GameObject {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
+            }
             return true;
         }
 
