@@ -277,53 +277,170 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("onlinelist", RBACPermissions.CommandAccountOnlineList, true)]
-        static bool HandleAccountOnlineListCommand(CommandHandler handler)
-        {
-            // Get the list of accounts ID logged to the realm
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ONLINE);
 
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
+
+        [CommandGroup("lock")]
+        class AccountLockCommands
+        {
+            [Command("country", RBACPermissions.CommandAccountLockCountry)]
+            static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
             {
-                handler.SendSysMessage(CypherStrings.AccountListEmpty);
+                if (state)
+                {
+                    /*var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
+                    Array.Reverse(ipBytes);
+
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
+                    stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
+
+                    SQLResult result = DB.Login.Query(stmt);
+                    if (!result.IsEmpty())
+                    {
+                        string country = result.Read<string>(0);
+                        stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
+                        stmt.AddValue(0, country);
+                        stmt.AddValue(1, handler.GetSession().GetAccountId());
+                        DB.Login.Execute(stmt);
+                        handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
+                    }
+                    else
+                    {
+                        handler.SendSysMessage("[IP2NATION] Table empty");
+                        Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
+                    }*/
+                }
+                else
+                {
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
+                    stmt.AddValue(0, "00");
+                    stmt.AddValue(1, handler.GetSession().GetAccountId());
+                    DB.Login.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
+                }
                 return true;
             }
 
-            // Display the list of account/characters online
-            handler.SendSysMessage(CypherStrings.AccountListBarHeader);
-            handler.SendSysMessage(CypherStrings.AccountListHeader);
-            handler.SendSysMessage(CypherStrings.AccountListBar);
-
-            // Cycle through accounts
-            do
+            [Command("ip", RBACPermissions.CommandAccountLockIp)]
+            static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
             {
-                string name = result.Read<string>(0);
-                uint account = result.Read<uint>(1);
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
 
-                // Get the username, last IP and GM level of each account
-                // No SQL injection. account is uint32.
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO);
-                stmt.AddValue(0, account);
-                SQLResult resultLogin = DB.Login.Query(stmt);
-
-                if (!resultLogin.IsEmpty())
+                if (state)
                 {
-                    handler.SendSysMessage(CypherStrings.AccountListLine, resultLogin.Read<string>(0),
-                        name, resultLogin.Read<string>(1), result.Read<ushort>(2), result.Read<ushort>(3),
-                        resultLogin.Read<byte>(3), resultLogin.Read<byte>(2));
+                    stmt.AddValue(0, true);                                     // locked
+                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
                 }
                 else
-                    handler.SendSysMessage(CypherStrings.AccountListError, name);
-            }
-            while (result.NextRow());
+                {
+                    stmt.AddValue(0, false);                                    // unlocked
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
+                }
 
-            handler.SendSysMessage(CypherStrings.AccountListBar);
-            return true;
+                stmt.AddValue(1, handler.GetSession().GetAccountId());
+
+                DB.Login.Execute(stmt);
+                return true;
+            }
+        }
+
+        [CommandGroup("onlinelist")]
+        class AccountOnlineListCommands
+        {
+            [Command("", RBACPermissions.CommandAccountOnlineList, true)]
+            static bool HandleAccountOnlineListCommand(CommandHandler handler)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, null);
+            }
+
+            [Command("ip", RBACPermissions.CommandAccountOnlineList, true)]
+            static bool HandleAccountOnlineListWithIpFilterCommand(CommandHandler handler, string ipAddress)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, null, null, null);
+            }
+
+            [Command("limit", RBACPermissions.CommandAccountOnlineList, true)]
+            static bool HandleAccountOnlineListWithLimitCommand(CommandHandler handler, uint limit)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, limit, null, null);
+            }
+
+            [Command("map", RBACPermissions.CommandAccountOnlineList, true)]
+            static bool HandleAccountOnlineListWithMapFilterCommand(CommandHandler handler, uint mapId)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, mapId, null);
+            }
+
+            [Command("zone", RBACPermissions.CommandAccountOnlineList, true)]
+            static bool HandleAccountOnlineListWithZoneFilterCommand(CommandHandler handler, uint zoneId)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, zoneId);
+            }
+
+            static bool HandleAccountOnlineListCommandWithParameters(CommandHandler handler, string ipAddress, uint? limit, uint? mapId, uint? zoneId)
+            {
+                int sessionsMatchCount = 0;
+
+                foreach (var session in Global.WorldMgr.GetAllSessions())
+                {
+                    Player player = session.GetPlayer();
+
+                    // Ignore sessions on character selection screen
+                    if (player == null)
+                        continue;
+
+                    uint playerMapId = player.GetMapId();
+                    uint playerZoneId = player.GetZoneId();
+
+                    // Apply optional ipAddress filter
+                    if (!ipAddress.IsEmpty() && ipAddress != session.GetRemoteAddress())
+                        continue;
+
+                    // Apply optional mapId filter
+                    if (mapId.HasValue && mapId != playerMapId)
+                        continue;
+
+                    // Apply optional zoneId filter
+                    if (zoneId.HasValue && zoneId != playerZoneId)
+                        continue;
+
+                    if (sessionsMatchCount == 0)
+                    {
+                        ///- Display the list of account/characters online on the first matched sessions
+                        handler.SendSysMessage(CypherStrings.AccountListBarHeader);
+                        handler.SendSysMessage(CypherStrings.AccountListHeader);
+                        handler.SendSysMessage(CypherStrings.AccountListBar);
+                    }
+
+                    handler.SendSysMessage(CypherStrings.AccountListLine,
+                        session.GetAccountName(),
+                        session.GetPlayerName(),
+                        session.GetRemoteAddress(),
+                        playerMapId,
+                        playerZoneId,
+                        session.GetAccountExpansion(),
+                        session.GetSecurity());
+
+                    ++sessionsMatchCount;
+
+                    // Apply optional count limit
+                    if (limit.HasValue && sessionsMatchCount >= limit)
+                        break;
+                }
+
+                // Header is printed on first matched session. If it wasn't printed then no sessions matched the criteria
+                if (sessionsMatchCount == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountListEmpty);
+                    return true;
+                }
+
+                handler.SendSysMessage(CypherStrings.AccountListBar);
+                return true;
+            }
         }
 
         [CommandGroup("set")]
-        class SetCommands
+        class AccountSetCommands
         {
             [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
             static bool HandleAccountSetAddonCommand(CommandHandler handler, string accountName, byte expansion)
@@ -584,68 +701,6 @@ namespace Game.Chat
             }
         }
 
-        [CommandGroup("lock")]
-        class LockCommands
-        {
-            [Command("country", RBACPermissions.CommandAccountLockCountry)]
-            static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
-            {
-                if (state)
-                {
-                    /*var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
-                    Array.Reverse(ipBytes);
 
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
-                    stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
-
-                    SQLResult result = DB.Login.Query(stmt);
-                    if (!result.IsEmpty())
-                    {
-                        string country = result.Read<string>(0);
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
-                        stmt.AddValue(0, country);
-                        stmt.AddValue(1, handler.GetSession().GetAccountId());
-                        DB.Login.Execute(stmt);
-                        handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-                    }
-                    else
-                    {
-                        handler.SendSysMessage("[IP2NATION] Table empty");
-                        Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
-                    }*/
-                }
-                else
-                {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
-                    stmt.AddValue(0, "00");
-                    stmt.AddValue(1, handler.GetSession().GetAccountId());
-                    DB.Login.Execute(stmt);
-                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-                }
-                return true;
-            }
-
-            [Command("ip", RBACPermissions.CommandAccountLockIp)]
-            static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
-            {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
-
-                if (state)
-                {
-                    stmt.AddValue(0, true);                                     // locked
-                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-                }
-                else
-                {
-                    stmt.AddValue(0, false);                                    // unlocked
-                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-                }
-
-                stmt.AddValue(1, handler.GetSession().GetAccountId());
-
-                DB.Login.Execute(stmt);
-                return true;
-            }
-        }
     }
 }
