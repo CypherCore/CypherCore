@@ -302,8 +302,7 @@ namespace Game.Chat
         static bool HandleGroupRepairCommand(CommandHandler handler, StringArguments args)
         {
             Player playerTarget;
-            ObjectGuid playerTargetGuid;
-            if (!handler.ExtractPlayerTarget(args, out playerTarget, out playerTargetGuid))
+            if (!handler.ExtractPlayerTarget(args, out playerTarget))
                 return false;
 
             Group groupTarget = playerTarget.GetGroup();
@@ -324,8 +323,7 @@ namespace Game.Chat
         static bool HandleGroupReviveCommand(CommandHandler handler, StringArguments args)
         {
             Player playerTarget;
-            ObjectGuid playerTargetGuid;
-            if (!handler.ExtractPlayerTarget(args, out playerTarget, out playerTargetGuid))
+            if (!handler.ExtractPlayerTarget(args, out playerTarget))
                 return false;
 
             Group groupTarget = playerTarget.GetGroup();
