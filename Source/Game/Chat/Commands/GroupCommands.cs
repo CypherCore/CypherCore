@@ -119,6 +119,52 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("level", RBACPermissions.CommandCharacterLevel, true)]
+        static bool HandleGroupLevelCommand(CommandHandler handler, string playerName, short level)
+        {
+            if (level < 1)
+                return false;
+
+            var player = PlayerIdentifier.ParseFromString(playerName);
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
+                return false;
+
+            Player target = player.GetConnectedPlayer();
+            if (target == null)
+                return false;
+
+            Group groupTarget = target.GetGroup();
+            if (groupTarget == null)
+                return false;
+
+            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
+            {
+                target = it.GetSource();
+                if (target != null)
+                {
+                    uint oldlevel = target.GetLevel();
+
+                    if (level != oldlevel)
+                    {
+                        target.SetLevel((uint)level);
+                        target.InitTalentForLevel();
+                        target.SetXP(0);
+                    }
+
+                    if (handler.NeedReportToTarget(target))
+                    {
+                        if (oldlevel < level)
+                            target.SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), level);
+                        else                                                // if (oldlevel > newlevel)
+                            target.SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), level);
+                    }
+                }
+            }
+            return true;
+        }
+
         [Command("list", RBACPermissions.CommandGroupList)]
         static bool HandleGroupListCommand(CommandHandler handler, StringArguments args)
         {
@@ -252,7 +298,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("revive", RBACPermissions.CommandRevive)]
+        [Command("revive", RBACPermissions.CommandRevive, true)]
         static bool HandleGroupReviveCommand(CommandHandler handler, StringArguments args)
         {
             Player playerTarget;
@@ -264,7 +310,7 @@ namespace Game.Chat
             if (groupTarget == null)
                 return false;
 
-            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = i.Next())
+            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
             {
                 Player target = it.GetSource();
                 if (target)
