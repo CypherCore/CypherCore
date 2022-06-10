@@ -3865,6 +3865,11 @@ namespace Game.Maps
             return m_activePlayers;
         }
 
+        public int GetActiveNonPlayersCount()
+        {
+            return m_activeNonPlayers.Count;
+        }
+        
         public Dictionary<ObjectGuid, WorldObject> GetObjectsStore() { return _objectsStore; }
 
         public MultiMap<ulong, Creature> GetCreatureBySpawnIdStore() { return _creatureBySpawnIdStore; }

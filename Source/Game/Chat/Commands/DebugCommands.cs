@@ -733,7 +733,7 @@ namespace Game.Chat
         {
             void HandleDebugObjectCountMap(Map map)
             {
-                handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()}");
+                handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()} SetActive Objects: {map.GetActiveNonPlayersCount()}");
 
                 Dictionary<uint, uint> creatureIds = new();
                 foreach (var p in map.GetObjectsStore())
