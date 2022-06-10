@@ -17,18 +17,64 @@
 
 using Framework.Constants;
 using Framework.IO;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
-using Game.DataStorage;
+using System;
 
 namespace Game.Chat
 {
     [CommandGroup("instance")]
     class InstanceCommands
     {
+        [Command("getbossstate", RBACPermissions.CommandInstanceGetBossState)]
+        static bool HandleInstanceGetBossStateCommand(CommandHandler handler, uint encounterId, string playerName)
+        {
+            var player = PlayerIdentifier.ParseFromString(playerName);
+
+            // Character name must be provided when using this from console.
+            if (player == null || handler.GetSession() == null)
+            {
+                handler.SendSysMessage(CypherStrings.CmdSyntax);
+                return false;
+            }
+
+            if (player == null)
+                player = PlayerIdentifier.FromSelf(handler);
+
+            if (player.IsConnected())
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            InstanceMap map = player.GetConnectedPlayer().GetMap().ToInstanceMap();
+            if (map == null)
+            {
+                handler.SendSysMessage(CypherStrings.NotDungeon);
+                return false;
+            }
+
+            if (map.GetInstanceScript() == null)
+            {
+                handler.SendSysMessage(CypherStrings.NoInstanceData);
+                return false;
+            }
+
+            if (encounterId > map.GetInstanceScript().GetEncounterCount())
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            EncounterState state = map.GetInstanceScript().GetBossState(encounterId);
+            handler.SendSysMessage(CypherStrings.CommandInstGetBossState, encounterId, state);
+            return true;
+        }
+
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
-        static bool HandleInstanceListBinds(CommandHandler handler, StringArguments args)
+        static bool HandleInstanceListBindsCommand(CommandHandler handler)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
@@ -40,11 +86,11 @@ namespace Game.Chat
             foreach (var difficulty in CliDB.DifficultyStorage.Values)
             {
                 var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
-                foreach (var pair in binds)
+                foreach (var (mapId, bind) in binds)
                 {
-                    InstanceSave save = pair.Value.save;
+                    InstanceSave save = bind.save;
                     string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
-                    handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
+                    handler.SendSysMessage(format, mapId, save.GetInstanceId(), bind.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                     counter++;
                 }
             }
@@ -57,72 +103,16 @@ namespace Game.Chat
                 foreach (var difficulty in CliDB.DifficultyStorage.Values)
                 {
                     var binds = group.GetBoundInstances((Difficulty)difficulty.Id);
-                    foreach (var pair in binds)
+                    foreach (var (mapId, bind) in binds)
                     {
-                        InstanceSave save = pair.Value.save;
+                        InstanceSave save = bind.save;
                         string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
-                        handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
+                        handler.SendSysMessage(format, mapId, save.GetInstanceId(), bind.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                         counter++;
                     }
                 }
             }
             handler.SendSysMessage("group binds: {0}", counter);
-
-            return true;
-        }
-
-        [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleInstanceUnbind(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
-
-            Player player = handler.GetSelectedPlayer();
-            if (!player)
-                player = handler.GetSession().GetPlayer();
-
-            string map = args.NextString();
-            if (!sbyte.TryParse(args.NextString(), out sbyte diff))
-                diff = -1;
-
-            ushort counter = 0;
-            ushort MapId = 0;
-
-            if (map != "all")
-            {
-                if (!ushort.TryParse(map, out MapId) || MapId == 0)
-                    return false;
-            }
-
-            foreach (var difficulty in CliDB.DifficultyStorage.Values)
-            {
-                var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
-                foreach (var pair in binds)
-                {
-                    InstanceSave save = pair.Value.save;
-                    if (pair.Key != player.GetMapId() && (MapId == 0 || MapId == pair.Key) && (diff == -1 || diff == (sbyte)save.GetDifficultyID()))
-                    {
-                        string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
-                        handler.SendSysMessage("unbinding map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}", pair.Key, save.GetInstanceId(),
-                            pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
-                        player.UnbindInstance(pair.Key, (Difficulty)difficulty.Id);
-                        counter++;
-                    }
-                }
-            }
-            handler.SendSysMessage("instances unbound: {0}", counter);
-
-            return true;
-        }
-
-        [Command("stats", RBACPermissions.CommandInstanceStats, true)]
-        static bool HandleInstanceStats(CommandHandler handler, StringArguments args)
-        {
-            handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
-            handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
-            handler.SendSysMessage("instance saves: {0}", Global.InstanceSaveMgr.GetNumInstanceSaves());
-            handler.SendSysMessage("players bound: {0}", Global.InstanceSaveMgr.GetNumBoundPlayersTotal());
-            handler.SendSysMessage("groups bound: {0}", Global.InstanceSaveMgr.GetNumBoundGroupsTotal());
 
             return true;
         }
@@ -150,38 +140,27 @@ namespace Game.Chat
         }
 
         [Command("setbossstate", RBACPermissions.CommandInstanceSetBossState)]
-        static bool HandleInstanceSetBossState(CommandHandler handler, StringArguments args)
+        static bool HandleInstanceSetBossStateCommand(CommandHandler handler, uint encounterId, EncounterState state, string playerName)
         {
-            if (args.Empty())
-                return false;
-
-            string param1 = args.NextString();
-            string param2 = args.NextString();
-            string param3 = args.NextString();
-            Player player = null;
+            var player = PlayerIdentifier.ParseFromString(playerName);
 
             // Character name must be provided when using this from console.
-            if (string.IsNullOrEmpty(param2) || (string.IsNullOrEmpty(param3) && handler.GetSession() == null))
+            if (player == null || handler.GetSession() == null)
             {
                 handler.SendSysMessage(CypherStrings.CmdSyntax);
                 return false;
             }
 
-            if (string.IsNullOrEmpty(param3))
-                player = handler.GetSession().GetPlayer();
-            else
-            {
-                if (ObjectManager.NormalizePlayerName(ref param3))
-                    player = Global.ObjAccessor.FindPlayerByName(param3);
-            }
+            if (player == null)
+                player = PlayerIdentifier.FromSelf(handler);
 
-            if (!player)
+            if (!player.IsConnected())
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            InstanceMap map = player.GetMap().ToInstanceMap();
+            InstanceMap map = player.GetConnectedPlayer().GetMap().ToInstanceMap();
             if (map == null)
             {
                 handler.SendSysMessage(CypherStrings.NotDungeon);
@@ -194,15 +173,8 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!uint.TryParse(param1, out uint encounterId))
-                return false;
-
-            EncounterState state = EncounterState.NotStarted;
-            if (int.TryParse(param2, out int param2Value))
-                state = (EncounterState)param2Value;
-
             // Reject improper values.
-            if (state > EncounterState.ToBeDecided || encounterId > map.GetInstanceScript().GetEncounterCount())
+            if (encounterId > map.GetInstanceScript().GetEncounterCount())
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
@@ -213,61 +185,50 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("getbossstate", RBACPermissions.CommandInstanceGetBossState)]
-        static bool HandleInstanceGetBossState(CommandHandler handler, StringArguments args)
+        [Command("stats", RBACPermissions.CommandInstanceStats, true)]
+        static bool HandleInstanceStatsCommand(CommandHandler handler)
         {
-            if (args.Empty())
-                return false;
+            handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
+            handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
+            handler.SendSysMessage("instance saves: {0}", Global.InstanceSaveMgr.GetNumInstanceSaves());
+            handler.SendSysMessage("players bound: {0}", Global.InstanceSaveMgr.GetNumBoundPlayersTotal());
+            handler.SendSysMessage("groups bound: {0}", Global.InstanceSaveMgr.GetNumBoundGroupsTotal());
 
-            string param1 = args.NextString();
-            string param2 = args.NextString();
-            Player player = null;
+            return true;
+        }
 
-            // Character name must be provided when using this from console.
-            if (string.IsNullOrEmpty(param1) || (string.IsNullOrEmpty(param2) && handler.GetSession() == null))
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(param2))
-                player = handler.GetSession().GetPlayer();
-            else
-            {
-                if (ObjectManager.NormalizePlayerName(ref param2))
-                    player = Global.ObjAccessor.FindPlayerByName(param2);
-            }
-
+        [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
+        static bool HandleInstanceUnbindCommand(CommandHandler handler, string mapArg, byte? difficultyArg)
+        {
+            Player player = handler.GetSelectedPlayer();
             if (!player)
+                player = handler.GetSession().GetPlayer();
+
+            ushort counter = 0;
+            uint mapId = 0;
+
+            if (!mapArg.IsEmpty() && mapArg.IsNumber())
+                if (!uint.TryParse(mapArg, out mapId) || mapId == 0)
+                    return false;
+
+            foreach (var difficulty in CliDB.DifficultyStorage.Values)
             {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                return false;
+                var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
+                foreach (var pair in binds)
+                {
+                    InstanceSave save = pair.Value.save;
+                    if (pair.Key != player.GetMapId() && (mapId == 0 || mapId == pair.Key) && (!difficultyArg.HasValue || difficultyArg.Value == (byte)save.GetDifficultyID()))
+                    {
+                        string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
+                        handler.SendSysMessage("unbinding map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}", pair.Key, save.GetInstanceId(),
+                            pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
+                        player.UnbindInstance(pair.Key, (Difficulty)difficulty.Id);
+                        counter++;
+                    }
+                }
             }
+            handler.SendSysMessage("instances unbound: {0}", counter);
 
-            InstanceMap map = player.GetMap().ToInstanceMap();
-            if (map == null)
-            {
-                handler.SendSysMessage(CypherStrings.NotDungeon);
-                return false;
-            }
-
-            if (map.GetInstanceScript() == null)
-            {
-                handler.SendSysMessage(CypherStrings.NoInstanceData);
-                return false;
-            }
-
-            if (!uint.TryParse(param1, out uint encounterId))
-                return false;
-
-            if (encounterId > map.GetInstanceScript().GetEncounterCount())
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            EncounterState state = map.GetInstanceScript().GetBossState(encounterId);
-            handler.SendSysMessage(CypherStrings.CommandInstGetBossState, encounterId, state);
             return true;
         }
     }

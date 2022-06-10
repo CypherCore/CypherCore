@@ -287,7 +287,7 @@ namespace Framework.Constants
         CommandHonorAdd = 409,
         CommandHonorAddKill = 410,
         CommandHonorUpdate = 411,
-        CommandInstance = 412,
+        // 412 previously used, do not reuse
         CommandInstanceListbinds = 413,
         CommandInstanceUnbind = 414,
         CommandInstanceStats = 415,
