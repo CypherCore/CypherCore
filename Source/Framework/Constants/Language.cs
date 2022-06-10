@@ -818,7 +818,8 @@ namespace Framework.Constants
         AccountSecType = 880,
         RbacEmailRequired = 881,
         //                                  = 882, LANG_PINFO_CHR_MAP_WITH_AREA
-        // Room For In-Game Strings           883-999 Not Used
+        Account = 883,
+        // Room For In-Game Strings           884-999 Not Used
 
         // Level 4 (Cli Only Commands)
         CommandExit = 1000,

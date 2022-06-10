@@ -1623,7 +1623,7 @@ namespace Game.Chat
                 result2 = DB.Characters.Query(stmt);
             }
             else
-                banType = handler->GetTrinityString(LANG_ACCOUNT);
+                banType = handler.GetCypherString(CypherStrings.Account);
 
             if (!result2.IsEmpty())
             {
