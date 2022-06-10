@@ -298,6 +298,28 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("repair", RBACPermissions.CommandRepairitems, true)]
+        static bool HandleGroupRepairCommand(CommandHandler handler, StringArguments args)
+        {
+            Player playerTarget;
+            ObjectGuid playerTargetGuid;
+            if (!handler.ExtractPlayerTarget(args, out playerTarget, out playerTargetGuid))
+                return false;
+
+            Group groupTarget = playerTarget.GetGroup();
+            if (groupTarget == null)
+                return false;
+
+            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
+            {
+                Player target = it.GetSource();
+                if (target != null)
+                    target.DurabilityRepairAll(false, 0, false);
+            }
+
+            return true;
+        }
+
         [Command("revive", RBACPermissions.CommandRevive, true)]
         static bool HandleGroupReviveCommand(CommandHandler handler, StringArguments args)
         {
