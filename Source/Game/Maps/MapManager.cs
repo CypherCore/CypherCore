@@ -428,6 +428,10 @@ namespace Game.Entities
             return GetAreaId(phaseShift, loc.GetMapId(), loc);
         }
 
+        public uint GetZoneId(PhaseShift phaseShift, uint mapid, Position pos) { return GetZoneId(phaseShift, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
+        
+        public uint GetZoneId(PhaseShift phaseShift, WorldLocation loc) { return GetZoneId(phaseShift, loc.GetMapId(), loc); }
+        
         public uint GetZoneId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
             Map m = CreateBaseMap(mapid);
