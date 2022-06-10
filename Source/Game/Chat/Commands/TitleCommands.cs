@@ -28,19 +28,8 @@ namespace Game.Chat.Commands
     class TitleCommands
     {
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
-        static bool HandleTitlesCurrentCommand(CommandHandler handler, StringArguments args)
+        static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
         {
-            // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
-            if (string.IsNullOrEmpty(id_p))
-                return false;
-
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
-            {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
-                return false;
-            }
-
             Player target = handler.GetSelectedPlayer();
             if (!target)
             {
@@ -52,36 +41,26 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
             if (titleInfo == null)
             {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
+                handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
                 return false;
             }
 
             string tNameLink = handler.GetNameLink(target);
+            string titleNameStr = string.Format(target.GetNativeGender() == Gender.Male ? titleInfo.Name[handler.GetSessionDbcLocale()] : titleInfo.Name1[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
-            target.SetTitle(titleInfo);                            // to be sure that title now known
+            target.SetTitle(titleInfo);
             target.SetChosenTitle(titleInfo.MaskID);
 
-            handler.SendSysMessage(CypherStrings.TitleCurrentRes, id, (target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()], tNameLink);
+            handler.SendSysMessage(CypherStrings.TitleCurrentRes, titleId, titleNameStr, tNameLink);
             return true;
         }
 
         [Command("add", RBACPermissions.CommandTitlesAdd)]
-        static bool HandleTitlesAddCommand(CommandHandler handler, StringArguments args)
+        static bool HandleTitlesAddCommand(CommandHandler handler, uint titleId)
         {
-            // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
-            if (string.IsNullOrEmpty(id_p))
-                return false;
-
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
-            {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
-                return false;
-            }
-
             Player target = handler.GetSelectedPlayer();
             if (!target)
             {
@@ -93,10 +72,10 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
             if (titleInfo == null)
             {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
+                handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
                 return false;
             }
 
@@ -105,25 +84,14 @@ namespace Game.Chat.Commands
             string titleNameStr = string.Format((target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
             target.SetTitle(titleInfo);
-            handler.SendSysMessage(CypherStrings.TitleAddRes, id, titleNameStr, tNameLink);
+            handler.SendSysMessage(CypherStrings.TitleAddRes, titleId, titleNameStr, tNameLink);
 
             return true;
         }
 
         [Command("remove", RBACPermissions.CommandTitlesRemove)]
-        static bool HandleTitlesRemoveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleTitlesRemoveCommand(CommandHandler handler, uint titleId)
         {
-            // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
-            if (string.IsNullOrEmpty(id_p))
-                return false;
-
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
-            {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
-                return false;
-            }
-
             Player target = handler.GetSelectedPlayer();
             if (!target)
             {
@@ -135,20 +103,19 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
             if (titleInfo == null)
             {
-                handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
+                handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
                 return false;
             }
 
             target.SetTitle(titleInfo, true);
 
             string tNameLink = handler.GetNameLink(target);
-
             string titleNameStr = string.Format((target.GetNativeGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
-            handler.SendSysMessage(CypherStrings.TitleRemoveRes, id, titleNameStr, tNameLink);
+            handler.SendSysMessage(CypherStrings.TitleRemoveRes, titleId, titleNameStr, tNameLink);
 
             if (!target.HasTitle(target.m_playerData.PlayerTitle))
             {
@@ -164,13 +131,8 @@ namespace Game.Chat.Commands
         {
             //Edit Player KnownTitles
             [Command("mask", RBACPermissions.CommandTitlesSetMask)]
-            static bool HandleTitlesSetMaskCommand(CommandHandler handler, StringArguments args)
+            static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
             {
-                if (args.Empty())
-                    return false;
-
-                ulong titles = args.NextUInt64();
-
                 Player target = handler.GetSelectedPlayer();
                 if (!target)
                 {
@@ -182,14 +144,14 @@ namespace Game.Chat.Commands
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                ulong titles2 = titles;
+                ulong titles2 = mask;
 
                 foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
                     titles2 &= ~(1ul << tEntry.MaskID);
 
-                titles &= ~titles2;                                     // remove not existed titles
+                mask &= ~titles2;                                     // remove not existed titles
 
-                target.SetKnownTitles(0, titles);
+                target.SetKnownTitles(0, mask);
                 handler.SendSysMessage(CypherStrings.Done);
 
                 if (!target.HasTitle(target.m_playerData.PlayerTitle))

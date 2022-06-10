@@ -636,11 +636,11 @@ namespace Framework.Constants
         CommandTicketUnassign = 758, // Deprecated Since Draenor Don'T Reuse
         CommandTicketViewid = 759, // Deprecated Since Draenor Don'T Reuse
         CommandTicketViewname = 760, // Deprecated Since Draenor Don'T Reuse
-        CommandTitles = 761,
+        // 761 previously used, do not reuse
         CommandTitlesAdd = 762,
         CommandTitlesCurrent = 763,
         CommandTitlesRemove = 764,
-        CommandTitlesSet = 765,
+        // 765 previously used, do not reuse
         CommandTitlesSetMask = 766,
         CommandWp = 767,
         CommandWpAdd = 768,
