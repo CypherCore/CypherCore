@@ -22,6 +22,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat.Commands
@@ -29,51 +30,6 @@ namespace Game.Chat.Commands
     [CommandGroup("list")]
     class ListCommands
     {
-        [Command("auras", RBACPermissions.CommandListAuras)]
-        static bool HandleListAurasCommand(CommandHandler handler)
-        {
-            Unit unit = handler.GetSelectedUnit();
-            if (!unit)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            string talentStr = handler.GetCypherString(CypherStrings.Talent);
-            string passiveStr = handler.GetCypherString(CypherStrings.Passive);
-
-            var auras = unit.GetAppliedAuras();
-            handler.SendSysMessage(CypherStrings.CommandTargetListauras, auras.Count);
-            foreach (var (_, aurApp) in auras)
-            {
-                Aura aura = aurApp.GetBase();
-                string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];
-                bool talent = aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.IsTalent);
-
-                string ss_name = "|cffffffff|Hspell:" + aura.GetId() + "|h[" + name + "]|h|r";
-
-                handler.SendSysMessage(CypherStrings.CommandTargetAuradetail, aura.GetId(), (handler.GetSession() != null ? ss_name : name),
-                    aurApp.GetEffectMask(), aura.GetCharges(), aura.GetStackAmount(), aurApp.GetSlot(),
-                    aura.GetDuration(), aura.GetMaxDuration(), (aura.IsPassive() ? passiveStr : ""),
-                    (talent ? talentStr : ""), aura.GetCasterGUID().IsPlayer() ? "player" : "creature",
-                    aura.GetCasterGUID().ToString());
-            }
-
-            for (ushort i = 0; i < (int)AuraType.Total; ++i)
-            {
-                var auraList = unit.GetAuraEffectsByType((AuraType)i);
-                if (auraList.Empty())
-                    continue;
-
-                handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, i);
-
-                foreach (var effect in auraList)
-                    handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());
-            }
-
-            return true;
-        }
-
         [Command("creature", RBACPermissions.CommandListCreature, true)]
         static bool HandleListCreatureCommand(CommandHandler handler, uint creatureId, uint? countArg)
         {
@@ -633,6 +589,100 @@ namespace Game.Chat.Commands
         {
             AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
             return zoneEntry != null ? zoneEntry.AreaName[locale] : "<unknown zone>";
+        }
+
+        [CommandGroup("auras")]
+        class ListAuraCommands
+        {
+            [Command("", RBACPermissions.CommandListAuras)]
+            static bool HandleListAllAurasCommand(CommandHandler handler)
+            {
+                return ListAurasCommand(handler, null, null);
+            }
+
+            [Command("id", RBACPermissions.CommandListAuras)]
+            static bool HandleListAurasByIdCommand(CommandHandler handler, uint spellId)
+            {
+                return ListAurasCommand(handler, spellId, null);
+            }
+
+            [Command("name", RBACPermissions.CommandListAuras)]
+            static bool HandleListAurasByNameCommand(CommandHandler handler, string namePart)
+            {
+                return ListAurasCommand(handler, null, namePart);
+            }
+
+            static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
+            {
+                Unit unit = handler.GetSelectedUnit();
+                if (!unit)
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                    return false;
+                }
+
+                string talentStr = handler.GetCypherString(CypherStrings.Talent);
+                string passiveStr = handler.GetCypherString(CypherStrings.Passive);
+
+                var auras = unit.GetAppliedAuras();
+                handler.SendSysMessage(CypherStrings.CommandTargetListauras, auras.Count);
+                foreach (var (_, aurApp) in auras)
+                {
+                    Aura aura = aurApp.GetBase();
+                    string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];
+                    bool talent = aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.IsTalent);
+
+                    if (!ShouldListAura(aura.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
+                        continue;
+
+                    string ss_name = "|cffffffff|Hspell:" + aura.GetId() + "|h[" + name + "]|h|r";
+
+                    handler.SendSysMessage(CypherStrings.CommandTargetAuradetail, aura.GetId(), (handler.GetSession() != null ? ss_name : name),
+                        aurApp.GetEffectMask(), aura.GetCharges(), aura.GetStackAmount(), aurApp.GetSlot(),
+                        aura.GetDuration(), aura.GetMaxDuration(), (aura.IsPassive() ? passiveStr : ""),
+                        (talent ? talentStr : ""), aura.GetCasterGUID().IsPlayer() ? "player" : "creature",
+                        aura.GetCasterGUID().ToString());
+                }
+
+                for (ushort i = 0; i < (int)AuraType.Total; ++i)
+                {
+                    var auraList = unit.GetAuraEffectsByType((AuraType)i);
+                    if (auraList.Empty())
+                        continue;
+
+                    bool sizeLogged = false;
+
+                    foreach (var effect in auraList)
+                    {
+                        if (!ShouldListAura(effect.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
+                            continue;
+
+                        if (!sizeLogged)
+                        {
+                            sizeLogged = true;
+                            handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, i);
+                        }
+
+                        handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());
+                    }
+                }
+
+                return true;
+            }
+
+            static bool ShouldListAura(SpellInfo spellInfo, uint? spellId, string namePart, Locale locale)
+            {
+                if (spellId.HasValue)
+                    return spellInfo.Id == spellId.Value;
+
+                if (!namePart.IsEmpty())
+                {
+                    string name = spellInfo.SpellName[locale];
+                    return name.Like(namePart);
+                }
+
+                return true;
+            }
         }
     }
 }
