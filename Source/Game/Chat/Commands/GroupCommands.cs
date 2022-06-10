@@ -31,122 +31,6 @@ namespace Game.Chat
     [CommandGroup("group")]
     class GroupCommands
     {
-        // Summon group of player
-        [Command("summon", RBACPermissions.CommandGroupSummon)]
-        static bool HandleGroupSummonCommand(CommandHandler handler, StringArguments args)
-        {
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
-                return false;
-
-            // check online security
-            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                return false;
-
-            Group group = target.GetGroup();
-
-            string nameLink = handler.GetNameLink(target);
-
-            if (!group)
-            {
-                handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
-                return false;
-            }
-
-            Player gmPlayer = handler.GetSession().GetPlayer();
-            Map gmMap = gmPlayer.GetMap();
-            bool toInstance = gmMap.Instanceable();
-            bool onlyLocalSummon = false;
-
-            // make sure people end up on our instance of the map, disallow far summon if intended destination is different from actual destination
-            // note: we could probably relax this further by checking permanent saves and the like, but eh
-            // :close enough:
-            if (toInstance)
-            {
-                Player groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
-                if (!groupLeader || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
-                {
-                    handler.SendSysMessage(CypherStrings.PartialGroupSummon);
-                    onlyLocalSummon = true;
-                }
-            }
-
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-            {
-                Player player = refe.GetSource();
-
-                if (!player || player == gmPlayer || player.GetSession() == null)
-                    continue;
-
-                // check online security
-                if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
-                    continue;
-
-                string plNameLink = handler.GetNameLink(player);
-
-                if (player.IsBeingTeleported())
-                {
-                    handler.SendSysMessage(CypherStrings.IsTeleported, plNameLink);
-                    continue;
-                }
-
-                if (toInstance)
-                {
-                    Map playerMap = player.GetMap();
-
-                    if ((onlyLocalSummon || (playerMap.Instanceable() && playerMap.GetId() == gmMap.GetId())) && // either no far summon allowed or we're in the same map as player (no map switch)
-                        ((playerMap.GetId() != gmMap.GetId()) || (playerMap.GetInstanceId() != gmMap.GetInstanceId()))) // so we need to be in the same map and instance of the map, otherwise skip
-                    {
-                        // cannot summon from instance to instance
-                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, plNameLink);
-                        continue;
-                    }
-                }
-
-                handler.SendSysMessage(CypherStrings.Summoning, plNameLink, "");
-                if (handler.NeedReportToTarget(player))
-                    player.SendSysMessage(CypherStrings.SummonedBy, handler.GetNameLink());
-
-                // stop flight if need
-                if (player.IsInFlight())
-                    player.FinishTaxiFlight();                
-                else
-                    player.SaveRecallPosition(); // save only in non-flight case
-
-                // before GM
-                float x, y, z;
-                gmPlayer.GetClosePoint(out x, out y, out z, player.GetCombatReach());
-                player.TeleportTo(gmPlayer.GetMapId(), x, y, z, player.GetOrientation());
-            }
-
-            return true;
-        }
-
-        [Command("leader", RBACPermissions.CommandGroupLeader)]
-        static bool HandleGroupLeaderCommand(CommandHandler handler, StringArguments args)
-        {
-            Player player;
-            Group group;
-            ObjectGuid guid;
-
-            if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
-                return false;
-
-            if (!group)
-            {
-                handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
-                return false;
-            }
-
-            if (group.GetLeaderGUID() != guid)
-            {
-                group.ChangeLeader(guid);
-                group.SendUpdate();
-            }
-
-            return true;
-        }
-
         [Command("disband", RBACPermissions.CommandGroupDisband)]
         static bool HandleGroupDisbandCommand(CommandHandler handler, StringArguments args)
         {
@@ -164,27 +48,6 @@ namespace Game.Chat
             }
 
             group.Disband();
-            return true;
-        }
-
-        [Command("remove", RBACPermissions.CommandGroupRemove)]
-        static bool HandleGroupRemoveCommand(CommandHandler handler, StringArguments args)
-        {
-            Player player;
-            Group group;
-            ObjectGuid guid;
-            string nameStr = args.NextString();
-
-            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
-                return false;
-
-            if (!group)
-            {
-                handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
-                return false;
-            }
-
-            group.RemoveMember(guid);
             return true;
         }
 
@@ -228,6 +91,31 @@ namespace Game.Chat
             groupSource.AddMember(playerTarget);
             groupSource.BroadcastGroupUpdate();
             handler.SendSysMessage(CypherStrings.GroupPlayerJoined, playerTarget.GetName(), playerSource.GetName());
+            return true;
+        }
+
+        [Command("leader", RBACPermissions.CommandGroupLeader)]
+        static bool HandleGroupLeaderCommand(CommandHandler handler, StringArguments args)
+        {
+            Player player;
+            Group group;
+            ObjectGuid guid;
+
+            if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
+                return false;
+
+            if (!group)
+            {
+                handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
+                return false;
+            }
+
+            if (group.GetLeaderGUID() != guid)
+            {
+                group.ChangeLeader(guid);
+                group.SendUpdate();
+            }
+
             return true;
         }
 
@@ -340,6 +228,143 @@ namespace Game.Chat
             }
 
             // And finish after every iterator is done.
+            return true;
+        }
+
+        [Command("remove", RBACPermissions.CommandGroupRemove)]
+        static bool HandleGroupRemoveCommand(CommandHandler handler, StringArguments args)
+        {
+            Player player;
+            Group group;
+            ObjectGuid guid;
+            string nameStr = args.NextString();
+
+            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
+                return false;
+
+            if (!group)
+            {
+                handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
+                return false;
+            }
+
+            group.RemoveMember(guid);
+            return true;
+        }
+
+        [Command("revive", RBACPermissions.CommandRevive)]
+        static bool HandleGroupReviveCommand(CommandHandler handler, StringArguments args)
+        {
+            Player playerTarget;
+            ObjectGuid playerTargetGuid;
+            if (!handler.ExtractPlayerTarget(args, out playerTarget, out playerTargetGuid))
+                return false;
+
+            Group groupTarget = playerTarget.GetGroup();
+            if (groupTarget == null)
+                return false;
+
+            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = i.Next())
+            {
+                Player target = it.GetSource();
+                if (target)
+                {
+                    target.ResurrectPlayer(target.GetSession().HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
+                    target.SpawnCorpseBones();
+                    target.SaveToDB();
+                }
+            }
+
+            return true;
+        }
+
+        [Command("summon", RBACPermissions.CommandGroupSummon)]
+        static bool HandleGroupSummonCommand(CommandHandler handler, StringArguments args)
+        {
+            Player target;
+            if (!handler.ExtractPlayerTarget(args, out target))
+                return false;
+
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
+
+            Group group = target.GetGroup();
+
+            string nameLink = handler.GetNameLink(target);
+
+            if (!group)
+            {
+                handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
+                return false;
+            }
+
+            Player gmPlayer = handler.GetSession().GetPlayer();
+            Map gmMap = gmPlayer.GetMap();
+            bool toInstance = gmMap.Instanceable();
+            bool onlyLocalSummon = false;
+
+            // make sure people end up on our instance of the map, disallow far summon if intended destination is different from actual destination
+            // note: we could probably relax this further by checking permanent saves and the like, but eh
+            // :close enough:
+            if (toInstance)
+            {
+                Player groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
+                if (!groupLeader || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
+                {
+                    handler.SendSysMessage(CypherStrings.PartialGroupSummon);
+                    onlyLocalSummon = true;
+                }
+            }
+
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            {
+                Player player = refe.GetSource();
+
+                if (!player || player == gmPlayer || player.GetSession() == null)
+                    continue;
+
+                // check online security
+                if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
+                    continue;
+
+                string plNameLink = handler.GetNameLink(player);
+
+                if (player.IsBeingTeleported())
+                {
+                    handler.SendSysMessage(CypherStrings.IsTeleported, plNameLink);
+                    continue;
+                }
+
+                if (toInstance)
+                {
+                    Map playerMap = player.GetMap();
+
+                    if ((onlyLocalSummon || (playerMap.Instanceable() && playerMap.GetId() == gmMap.GetId())) && // either no far summon allowed or we're in the same map as player (no map switch)
+                        ((playerMap.GetId() != gmMap.GetId()) || (playerMap.GetInstanceId() != gmMap.GetInstanceId()))) // so we need to be in the same map and instance of the map, otherwise skip
+                    {
+                        // cannot summon from instance to instance
+                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, plNameLink);
+                        continue;
+                    }
+                }
+
+                handler.SendSysMessage(CypherStrings.Summoning, plNameLink, "");
+                if (handler.NeedReportToTarget(player))
+                    player.SendSysMessage(CypherStrings.SummonedBy, handler.GetNameLink());
+
+                // stop flight if need
+                if (player.IsInFlight())
+                    player.FinishTaxiFlight();                
+                else
+                    player.SaveRecallPosition(); // save only in non-flight case
+
+                // before GM
+                float x, y, z;
+                gmPlayer.GetClosePoint(out x, out y, out z, player.GetCombatReach());
+                player.TeleportTo(gmPlayer.GetMapId(), x, y, z, player.GetOrientation());
+            }
+
             return true;
         }
 
