@@ -619,6 +619,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
+            handler.SendSysMessage(CypherStrings.UnbanUnbanned, name);
             return true;
         }
 

@@ -1622,10 +1622,13 @@ namespace Game.Chat
                 stmt.AddValue(0, lowguid);
                 result2 = DB.Characters.Query(stmt);
             }
+            else
+                banType = handler->GetTrinityString(LANG_ACCOUNT);
 
             if (!result2.IsEmpty())
             {
-                banTime = (result2.Read<ulong>(1) != 0 ? 0 : result2.Read<uint>(0));
+                bool permanent = result2.Read<ulong>(1) != 0;
+                banTime = !permanent ? result2.Read<uint>(0) : 0;
                 bannedBy = result2.Read<string>(2);
                 banReason = result2.Read<string>(3);
             }
