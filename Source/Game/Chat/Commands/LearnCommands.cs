@@ -185,9 +185,6 @@ namespace Game.Chat.Commands
                         locale = 0;
                         for (; locale < Locale.Total; ++locale)
                         {
-                            if (locale == handler.GetSessionDbcLocale())
-                                continue;
-
                             name = skillInfo.DisplayName[locale];
                             if (name.IsEmpty())
                                 continue;
