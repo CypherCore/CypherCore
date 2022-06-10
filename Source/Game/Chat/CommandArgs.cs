@@ -233,7 +233,8 @@ namespace Game.Chat
 
         public uint GetID() { return _id; }
         public string GetName() { return _name; }
-        public WorldSession GetSession() { return _session; }
+        public bool IsConnected() { return _session != null; }
+        public WorldSession GetConnectedSession() { return _session; }
 
         public static AccountIdentifier ParseFromString(string arg)
         {

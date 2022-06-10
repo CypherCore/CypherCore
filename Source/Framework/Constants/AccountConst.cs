@@ -117,8 +117,8 @@ namespace Framework.Constants
         RoleModerator = 198,
         RolePlayer = 199,
 
-        CommandRbac = 200,
-        CommandRbacAcc = 201,
+        // 200 previously used, do not reuse
+        // 201 previously used, do not reuse
         CommandRbacAccPermList = 202,
         CommandRbacAccPermGrant = 203,
         CommandRbacAccPermDeny = 204,
@@ -283,7 +283,7 @@ namespace Framework.Constants
         CommandGuildUninvite = 405,
         CommandGuildRank = 406,
         CommandGuildRename = 407,
-        CommandHonor = 408,
+        // 408 previously used, do not reuse
         CommandHonorAdd = 409,
         CommandHonorAddKill = 410,
         CommandHonorUpdate = 411,
