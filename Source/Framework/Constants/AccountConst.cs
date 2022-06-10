@@ -296,9 +296,9 @@ namespace Framework.Constants
         // 418 previously used, do not reuse
         CommandLearnAllMy = 419,
         CommandLearnAllMyClass = 420,
-        CommandLearnAllMyPettalents = 421,
+        CommandLearnMyPetTalents = 421,
         CommandLearnAllMySpells = 422,
-        CommandLearnAllMyTalents = 423,
+        CommandLearnAllTalents = 423,
         CommandLearnAllGm = 424,
         CommandLearnAllCrafts = 425,
         CommandLearnAllDefault = 426,

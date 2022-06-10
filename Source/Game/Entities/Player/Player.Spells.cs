@@ -2047,15 +2047,6 @@ namespace Game.Entities
             SendPacket(new SendUnlearnSpells());
         }
 
-        public void LearnSpellHighestRank(uint spellid)
-        {
-            LearnSpell(spellid, false);
-
-            uint next = Global.SpellMgr.GetNextSpellInChain(spellid);
-            if (next != 0)
-                LearnSpellHighestRank(next);
-        }
-
         public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false)
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);

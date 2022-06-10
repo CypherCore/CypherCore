@@ -91,6 +91,12 @@ namespace Game.Entities
             }
         }
 
+        public bool IsSpellValid(uint spellId, Player player = null, bool msg = true)
+        {
+            SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
+            return IsSpellValid(spellInfo, player, msg);
+        }
+
         public bool IsSpellValid(SpellInfo spellInfo, Player player = null, bool msg = true)
         {
             // not exist
