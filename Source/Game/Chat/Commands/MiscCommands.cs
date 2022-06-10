@@ -175,6 +175,7 @@ namespace Game.Chat
             if (count > 0 && item)
             {
                 player.SendNewItem(item, (uint)count, false, true);
+                handler.SendSysMessage(CypherStrings.Additem, itemId, count, handler.GetNameLink(playerTarget));
                 if (player != playerTarget)
                     playerTarget.SendNewItem(item, (uint)count, true, false);
             }
