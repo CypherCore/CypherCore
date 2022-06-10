@@ -411,7 +411,5 @@ namespace Game.Chat.Commands
                 return true;
             }
         }
-
-
     }
 }

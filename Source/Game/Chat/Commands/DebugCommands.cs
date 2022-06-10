@@ -1266,7 +1266,6 @@ namespace Game.Chat
             }
         }
 
-
         [CommandGroup("send")]
         class SendCommands
         {

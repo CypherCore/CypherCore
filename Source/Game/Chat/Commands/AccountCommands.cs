@@ -452,10 +452,10 @@ namespace Game.Chat
                     realmID = realmId.Value;
 
                 AccountTypes playerSecurity;
-                if (handler.GetSession() != null)
-                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
-                else
+                if (handler.IsConsole())
                     playerSecurity = AccountTypes.Console;
+                else
+                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
 
                 // can set security level only for target with less security and to less security that we have
                 // This is also reject self apply in fact

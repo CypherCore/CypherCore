@@ -236,6 +236,7 @@ namespace Game.Chat
             return true;
         }
 
+        [CommandGroup("name")]
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
@@ -279,6 +280,7 @@ namespace Game.Chat
                 return DoNameTeleport(handler, player, tele.mapId, new Position(tele.posX, tele.posY, tele.posZ, tele.orientation), tele.name);
             }
 
+            [CommandGroup("npc")]
             class TeleNameNpcCommands
             {
                 [Command("guid", RBACPermissions.CommandTeleName, true)]
