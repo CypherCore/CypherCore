@@ -28,7 +28,7 @@ namespace Game.Chat
     class ReloadCommand
     {
         [Command("access_requirement", RBACPermissions.CommandReloadAccessRequirement, true)]
-        static bool HandleReloadAccessRequirementCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAccessRequirementCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Access Requirement definitions...");
             Global.ObjectMgr.LoadAccessRequirements();
@@ -37,7 +37,7 @@ namespace Game.Chat
         }
 
         [Command("achievement_reward", RBACPermissions.CommandReloadAchievementReward, true)]
-        static bool HandleReloadAchievementRewardCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAchievementRewardCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Achievement Reward Data...");
             Global.AchievementMgr.LoadRewards();
@@ -46,7 +46,7 @@ namespace Game.Chat
         }
 
         [Command("areatrigger_involvedrelation", RBACPermissions.CommandReloadAreatriggerInvolvedrelation, true)]
-        static bool HandleReloadQuestAreaTriggersCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadQuestAreaTriggersCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Quest Area Triggers...");
             Global.ObjectMgr.LoadQuestAreaTriggers();
@@ -55,7 +55,7 @@ namespace Game.Chat
         }
 
         [Command("areatrigger_tavern", RBACPermissions.CommandReloadAreatriggerTavern, true)]
-        static bool HandleReloadAreaTriggerTavernCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAreaTriggerTavernCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Tavern Area Triggers...");
             Global.ObjectMgr.LoadTavernAreaTriggers();
@@ -64,7 +64,7 @@ namespace Game.Chat
         }
 
         [Command("areatrigger_teleport", RBACPermissions.CommandReloadAreatriggerTeleport, true)]
-        static bool HandleReloadAreaTriggerTeleportCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAreaTriggerTeleportCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading AreaTrigger teleport definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
@@ -73,7 +73,7 @@ namespace Game.Chat
         }
 
         [Command("areatrigger_template", RBACPermissions.CommandReloadSceneTemplate, true)]
-        static bool HandleReloadAreaTriggerTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAreaTriggerTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading areatrigger_template table...");
             Global.AreaTriggerDataStorage.LoadAreaTriggerTemplates();
@@ -82,7 +82,7 @@ namespace Game.Chat
         }
 
         [Command("auctions", RBACPermissions.CommandReloadAuctions, true)]
-        static bool HandleReloadAuctionsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAuctionsCommand(CommandHandler handler)
         {
             // Reload dynamic data tables from the database
             Log.outInfo(LogFilter.Server, "Re-Loading Auctions...");
@@ -92,7 +92,7 @@ namespace Game.Chat
         }
 
         [Command("autobroadcast", RBACPermissions.CommandReloadAutobroadcast, true)]
-        static bool HandleReloadAutobroadcastCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAutobroadcastCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Autobroadcasts...");
             Global.WorldMgr.LoadAutobroadcasts();
@@ -101,7 +101,7 @@ namespace Game.Chat
         }
 
         [Command("battleground_template", RBACPermissions.CommandReloadBattlegroundTemplate, true)]
-        static bool HandleReloadBattlegroundTemplate(CommandHandler handler, StringArguments args)
+        static bool HandleReloadBattlegroundTemplate(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Misc, "Re-Loading Battleground Templates...");
             Global.BattlegroundMgr.LoadBattlegroundTemplates();
@@ -110,7 +110,7 @@ namespace Game.Chat
         }
 
         [Command("character_template", RBACPermissions.CommandReloadCharacterTemplate, true)]
-        static bool HandleReloadCharacterTemplate(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCharacterTemplate(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Character Templates...");
             Global.CharacterTemplateDataStorage.LoadCharacterTemplates();
@@ -119,7 +119,7 @@ namespace Game.Chat
         }
 
         [Command("conditions", RBACPermissions.CommandReloadConditions, true)]
-        static bool HandleReloadConditions(CommandHandler handler, StringArguments args)
+        static bool HandleReloadConditions(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Conditions...");
             Global.ConditionMgr.LoadConditions(true);
@@ -128,7 +128,7 @@ namespace Game.Chat
         }
 
         [Command("config", RBACPermissions.CommandReloadConfig, true)]
-        static bool HandleReloadConfigCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadConfigCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading config settings...");
             Global.WorldMgr.LoadConfigSettings(true);
@@ -138,7 +138,7 @@ namespace Game.Chat
         }
 
         [Command("conversation_template", RBACPermissions.CommandReloadConversationTemplate, true)]
-        static bool HandleReloadConversationTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadConversationTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading conversation_* tables...");
             Global.ConversationDataStorage.LoadConversationTemplates();
@@ -147,7 +147,7 @@ namespace Game.Chat
         }
 
         [Command("creature_linked_respawn", RBACPermissions.CommandReloadCreatureLinkedRespawn, true)]
-        static bool HandleReloadLinkedRespawnCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLinkedRespawnCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading Linked Respawns... (`creature_linked_respawn`)");
             Global.ObjectMgr.LoadLinkedRespawn();
@@ -156,7 +156,7 @@ namespace Game.Chat
         }
 
         [Command("creature_loot_template", RBACPermissions.CommandReloadCreatureLootTemplate, true)]
-        static bool HandleReloadLootTemplatesCreatureCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesCreatureCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`creature_loot_template`)");
             LootManager.LoadLootTemplates_Creature();
@@ -167,7 +167,7 @@ namespace Game.Chat
         }
 
         [Command("creature_movement_override", RBACPermissions.CommandReloadCreatureMovementOverride, true)]
-        static bool HandleReloadCreatureMovementOverrideCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureMovementOverrideCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Creature movement overrides...");
             Global.ObjectMgr.LoadCreatureMovementOverrides();
@@ -176,7 +176,7 @@ namespace Game.Chat
         }
 
         [Command("creature_onkill_reputation", RBACPermissions.CommandReloadCreatureOnkillReputation, true)]
-        static bool HandleReloadOnKillReputationCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadOnKillReputationCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading creature award reputation definitions...");
             Global.ObjectMgr.LoadReputationOnKill();
@@ -185,7 +185,7 @@ namespace Game.Chat
         }
 
         [Command("creature_questender", RBACPermissions.CommandReloadCreatureQuestender, true)]
-        static bool HandleReloadCreatureQuestEnderCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureQuestEnderCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading Quests Relations... (`creature_questender`)");
             Global.ObjectMgr.LoadCreatureQuestEnders();
@@ -194,7 +194,7 @@ namespace Game.Chat
         }
 
         [Command("creature_queststarter", RBACPermissions.CommandReloadCreatureQueststarter, true)]
-        static bool HandleReloadCreatureQuestStarterCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureQuestStarterCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading Quests Relations... (`creature_queststarter`)");
             Global.ObjectMgr.LoadCreatureQuestStarters();
@@ -203,7 +203,7 @@ namespace Game.Chat
         }
 
         [Command("creature_summon_groups", RBACPermissions.CommandReloadCreatureSummonGroups, true)]
-        static bool HandleReloadCreatureSummonGroupsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureSummonGroupsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading creature summon groups...");
             Global.ObjectMgr.LoadTempSummons();
@@ -250,7 +250,7 @@ namespace Game.Chat
         }
 
         [Command("creature_text", RBACPermissions.CommandReloadCreatureText, true)]
-        static bool HandleReloadCreatureText(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureText(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Creature Texts...");
             Global.CreatureTextMgr.LoadCreatureTexts();
@@ -259,7 +259,7 @@ namespace Game.Chat
         }
 
         [Command("trinity_string", RBACPermissions.CommandReloadCypherString, true)]
-        static bool HandleReloadCypherStringCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCypherStringCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading trinity_string Table!");
             Global.ObjectMgr.LoadCypherStrings();
@@ -268,7 +268,7 @@ namespace Game.Chat
         }
 
         [Command("criteria_data", RBACPermissions.CommandReloadCriteriaData, true)]
-        static bool HandleReloadCriteriaDataCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCriteriaDataCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Additional Criteria Data...");
             Global.CriteriaMgr.LoadCriteriaData();
@@ -277,7 +277,7 @@ namespace Game.Chat
         }
 
         [Command("disables", RBACPermissions.CommandReloadDisables, true)]
-        static bool HandleReloadDisablesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadDisablesCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading disables table...");
             Global.DisableMgr.LoadDisables();
@@ -288,7 +288,7 @@ namespace Game.Chat
         }
 
         [Command("disenchant_loot_template", RBACPermissions.CommandReloadDisenchantLootTemplate, true)]
-        static bool HandleReloadLootTemplatesDisenchantCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesDisenchantCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`disenchant_loot_template`)");
             LootManager.LoadLootTemplates_Disenchant();
@@ -319,7 +319,7 @@ namespace Game.Chat
         }
 
         [Command("fishing_loot_template", RBACPermissions.CommandReloadFishingLootTemplate, true)]
-        static bool HandleReloadLootTemplatesFishingCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesFishingCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`fishing_loot_template`)");
             LootManager.LoadLootTemplates_Fishing();
@@ -330,7 +330,7 @@ namespace Game.Chat
         }
 
         [Command("graveyard_zone", RBACPermissions.CommandReloadGraveyardZone, true)]
-        static bool HandleReloadGameGraveyardZoneCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGameGraveyardZoneCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Graveyard-zone links...");
 
@@ -342,7 +342,7 @@ namespace Game.Chat
         }
 
         [Command("game_tele", RBACPermissions.CommandReloadGameTele, true)]
-        static bool HandleReloadGameTeleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGameTeleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Game Tele coordinates...");
 
@@ -354,7 +354,7 @@ namespace Game.Chat
         }
 
         [Command("gameobject_loot_template", RBACPermissions.CommandReloadGameobjectQuestLootTemplate, true)]
-        static bool HandleReloadLootTemplatesGameobjectCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesGameobjectCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`gameobject_loot_template`)");
             LootManager.LoadLootTemplates_Gameobject();
@@ -365,7 +365,7 @@ namespace Game.Chat
         }
 
         [Command("gameobject_questender", RBACPermissions.CommandReloadGameobjectQuestender, true)]
-        static bool HandleReloadGOQuestEnderCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGOQuestEnderCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading Quests Relations... (`gameobject_questender`)");
             Global.ObjectMgr.LoadGameobjectQuestEnders();
@@ -374,7 +374,7 @@ namespace Game.Chat
         }
 
         [Command("gameobject_queststarter", RBACPermissions.CommandReloadGameobjectQueststarter, true)]
-        static bool HandleReloadGOQuestStarterCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGOQuestStarterCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading Quests Relations... (`gameobject_queststarter`)");
             Global.ObjectMgr.LoadGameobjectQuestStarters();
@@ -383,7 +383,7 @@ namespace Game.Chat
         }
 
         [Command("gossip_menu", RBACPermissions.CommandReloadGossipMenu, true)]
-        static bool HandleReloadGossipMenuCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGossipMenuCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `gossip_menu` Table!");
             Global.ObjectMgr.LoadGossipMenu();
@@ -393,7 +393,7 @@ namespace Game.Chat
         }
 
         [Command("gossip_menu_option", RBACPermissions.CommandReloadGossipMenuOption, true)]
-        static bool HandleReloadGossipMenuOptionCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGossipMenuOptionCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `gossip_menu_option` Table!");
             Global.ObjectMgr.LoadGossipMenuItems();
@@ -403,7 +403,7 @@ namespace Game.Chat
         }
 
         [Command("item_random_bonus_list_template", RBACPermissions.CommandReloadItemRandomBonusListTemplate, true)]
-        static bool HandleReloadItemRandomBonusListTemplatesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadItemRandomBonusListTemplatesCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Random item bonus list definitions...");
             ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
@@ -412,7 +412,7 @@ namespace Game.Chat
         }
 
         [Command("item_loot_template", RBACPermissions.CommandReloadItemLootTemplate, true)]
-        static bool HandleReloadLootTemplatesItemCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesItemCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`item_loot_template`)");
             LootManager.LoadLootTemplates_Item();
@@ -423,7 +423,7 @@ namespace Game.Chat
         }
 
         [Command("lfg_dungeon_rewards", RBACPermissions.CommandReloadLfgDungeonRewards, true)]
-        static bool HandleReloadLfgRewardsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLfgRewardsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading lfg dungeon rewards...");
             Global.LFGMgr.LoadRewards();
@@ -432,7 +432,7 @@ namespace Game.Chat
         }
 
         [Command("achievement_reward_locale", RBACPermissions.CommandReloadAchievementRewardLocale, true)]
-        static bool HandleReloadAchievementRewardLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadAchievementRewardLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Achievement Reward Data Locale...");
             Global.AchievementMgr.LoadRewardLocales();
@@ -441,7 +441,7 @@ namespace Game.Chat
         }
 
         [Command("creature_template_locale", RBACPermissions.CommandReloadCreatureTemplateLocale, true)]
-        static bool HandleReloadCreatureTemplateLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureTemplateLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Creature Template Locale...");
             Global.ObjectMgr.LoadCreatureLocales();
@@ -450,7 +450,7 @@ namespace Game.Chat
         }
 
         [Command("creature_text_locale", RBACPermissions.CommandReloadCreatureTextLocale, true)]
-        static bool HandleReloadCreatureTextLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadCreatureTextLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Creature Texts Locale...");
             Global.CreatureTextMgr.LoadCreatureTextLocales();
@@ -459,7 +459,7 @@ namespace Game.Chat
         }
 
         [Command("gameobject_template_locale", RBACPermissions.CommandReloadGameobjectTemplateLocale, true)]
-        static bool HandleReloadGameobjectTemplateLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGameobjectTemplateLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Gameobject Template Locale... ");
             Global.ObjectMgr.LoadGameObjectLocales();
@@ -468,7 +468,7 @@ namespace Game.Chat
         }
 
         [Command("gossip_menu_option_locale", RBACPermissions.CommandReloadGossipMenuOptionLocale, true)]
-        static bool HandleReloadGossipMenuOptionLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadGossipMenuOptionLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Gossip Menu Option Locale... ");
             Global.ObjectMgr.LoadGossipMenuItemsLocales();
@@ -477,7 +477,7 @@ namespace Game.Chat
         }
 
         [Command("page_text_locale", RBACPermissions.CommandReloadPageTextLocale, true)]
-        static bool HandleReloadPageTextLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadPageTextLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Page Text Locale... ");
             Global.ObjectMgr.LoadPageTextLocales();
@@ -486,7 +486,7 @@ namespace Game.Chat
         }
 
         [Command("points_of_interest_locale", RBACPermissions.CommandReloadPointsOfInterestLocale, true)]
-        static bool HandleReloadPointsOfInterestLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadPointsOfInterestLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Points Of Interest Locale... ");
             Global.ObjectMgr.LoadPointOfInterestLocales();
@@ -495,7 +495,7 @@ namespace Game.Chat
         }
 
         [Command("mail_level_reward", RBACPermissions.CommandReloadMailLevelReward, true)]
-        static bool HandleReloadMailLevelRewardCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadMailLevelRewardCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Player level dependent mail rewards...");
             Global.ObjectMgr.LoadMailLevelRewards();
@@ -504,7 +504,7 @@ namespace Game.Chat
         }
 
         [Command("mail_loot_template", RBACPermissions.CommandReloadMailLootTemplate, true)]
-        static bool HandleReloadLootTemplatesMailCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesMailCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`mail_loot_template`)");
             LootManager.LoadLootTemplates_Mail();
@@ -515,7 +515,7 @@ namespace Game.Chat
         }
 
         [Command("milling_loot_template", RBACPermissions.CommandReloadMillingLootTemplate, true)]
-        static bool HandleReloadLootTemplatesMillingCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesMillingCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`milling_loot_template`)");
             LootManager.LoadLootTemplates_Milling();
@@ -526,7 +526,7 @@ namespace Game.Chat
         }
 
         [Command("npc_spellclick_spells", RBACPermissions.CommandReloadNpcSpellclickSpells, true)]
-        static bool HandleReloadSpellClickSpellsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellClickSpellsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `npc_spellclick_spells` Table!");
             Global.ObjectMgr.LoadNPCSpellClickSpells();
@@ -535,7 +535,7 @@ namespace Game.Chat
         }
 
         [Command("npc_vendor", RBACPermissions.CommandReloadNpcVendor, true)]
-        static bool HandleReloadNpcVendorCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadNpcVendorCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `npc_vendor` Table!");
             Global.ObjectMgr.LoadVendors();
@@ -544,7 +544,7 @@ namespace Game.Chat
         }
 
         [Command("page_text", RBACPermissions.CommandReloadPageText, true)]
-        static bool HandleReloadPageTextsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadPageTextsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Page Text...");
             Global.ObjectMgr.LoadPageTexts();
@@ -553,7 +553,7 @@ namespace Game.Chat
         }
 
         [Command("pickpocketing_loot_template", RBACPermissions.CommandReloadPickpocketingLootTemplate, true)]
-        static bool HandleReloadLootTemplatesPickpocketingCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesPickpocketingCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`pickpocketing_loot_template`)");
             LootManager.LoadLootTemplates_Pickpocketing();
@@ -564,7 +564,7 @@ namespace Game.Chat
         }
 
         [Command("points_of_interest", RBACPermissions.CommandReloadPointsOfInterest, true)]
-        static bool HandleReloadPointsOfInterestCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadPointsOfInterestCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `points_of_interest` Table!");
             Global.ObjectMgr.LoadPointsOfInterest();
@@ -573,7 +573,7 @@ namespace Game.Chat
         }
 
         [Command("prospecting_loot_template", RBACPermissions.CommandReloadProspectingLootTemplate, true)]
-        static bool HandleReloadLootTemplatesProspectingCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesProspectingCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`prospecting_loot_template`)");
             LootManager.LoadLootTemplates_Prospecting();
@@ -584,7 +584,7 @@ namespace Game.Chat
         }
 
         [Command("quest_greeting", RBACPermissions.CommandReloadQuestGreeting, true)]
-        static bool HandleReloadQuestGreetingCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadQuestGreetingCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Quest Greeting ... ");
             Global.ObjectMgr.LoadQuestGreetings();
@@ -593,7 +593,7 @@ namespace Game.Chat
         }
 
         [Command("quest_locale", RBACPermissions.CommandReloadQuestTemplateLocale, true)]
-        static bool HandleReloadQuestTemplateLocaleCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadQuestTemplateLocaleCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Quest Locale... ");
             Global.ObjectMgr.LoadQuestTemplateLocale();
@@ -610,7 +610,7 @@ namespace Game.Chat
         }
 
         [Command("quest_poi", RBACPermissions.CommandReloadQuestPoi, true)]
-        static bool HandleReloadQuestPOICommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadQuestPOICommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Quest POI ...");
             Global.ObjectMgr.LoadQuestPOI();
@@ -620,7 +620,7 @@ namespace Game.Chat
         }
 
         [Command("quest_template", RBACPermissions.CommandReloadQuestTemplate, true)]
-        static bool HandleReloadQuestTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadQuestTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Quest Templates...");
             Global.ObjectMgr.LoadQuests();
@@ -635,7 +635,7 @@ namespace Game.Chat
         }
 
         [Command("rbac", RBACPermissions.CommandReloadRbac, true)]
-        static bool HandleReloadRBACCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadRBACCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading RBAC tables...");
             Global.AccountMgr.LoadRBAC();
@@ -645,7 +645,7 @@ namespace Game.Chat
         }
 
         [Command("reference_loot_template", RBACPermissions.CommandReloadReferenceLootTemplate, true)]
-        static bool HandleReloadLootTemplatesReferenceCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesReferenceCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`reference_loot_template`)");
             LootManager.LoadLootTemplates_Reference();
@@ -655,7 +655,7 @@ namespace Game.Chat
         }
 
         [Command("reputation_reward_rate", RBACPermissions.CommandReloadReputationRewardRate, true)]
-        static bool HandleReloadReputationRewardRateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadReputationRewardRateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `reputation_reward_rate` Table!");
             Global.ObjectMgr.LoadReputationRewardRate();
@@ -664,7 +664,7 @@ namespace Game.Chat
         }
 
         [Command("reputation_spillover_template", RBACPermissions.CommandReloadSpilloverTemplate, true)]
-        static bool HandleReloadReputationSpilloverTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadReputationSpilloverTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading `reputation_spillover_template` Table!");
             Global.ObjectMgr.LoadReputationSpilloverTemplate();
@@ -673,7 +673,7 @@ namespace Game.Chat
         }
 
         [Command("reserved_name", RBACPermissions.CommandReloadReservedName, true)]
-        static bool HandleReloadReservedNameCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadReservedNameCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Loading ReservedNames... (`reserved_name`)");
             Global.ObjectMgr.LoadReservedPlayersNames();
@@ -682,7 +682,7 @@ namespace Game.Chat
         }
 
         [Command("scene_template", RBACPermissions.CommandReloadSceneTemplate, true)]
-        static bool HandleReloadSceneTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSceneTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Misc, "Reloading scene_template table...");
             Global.ObjectMgr.LoadSceneTemplates();
@@ -691,7 +691,7 @@ namespace Game.Chat
         }
 
         [Command("skill_discovery_template", RBACPermissions.CommandReloadSkillDiscoveryTemplate, true)]
-        static bool HandleReloadSkillDiscoveryTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSkillDiscoveryTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Skill Discovery Table...");
             SkillDiscovery.LoadSkillDiscoveryTable();
@@ -699,7 +699,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool HandleReloadSkillPerfectItemTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSkillPerfectItemTemplateCommand(CommandHandler handler)
         { // latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group (and i don't want to chance all the command IDs)
             Log.outInfo(LogFilter.Misc, "Re-Loading Skill Perfection Data Table...");
             SkillPerfectItems.LoadSkillPerfectItemTable();
@@ -708,17 +708,17 @@ namespace Game.Chat
         }
 
         [Command("skill_extra_item_template", RBACPermissions.CommandReloadSkillExtraItemTemplate, true)]
-        static bool HandleReloadSkillExtraItemTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSkillExtraItemTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Skill Extra Item Table...");
             SkillExtraItems.LoadSkillExtraItemTable();
             handler.SendGlobalGMSysMessage("DB table `skill_extra_item_template` (extra item creation when crafting) reloaded.");
 
-            return HandleReloadSkillPerfectItemTemplateCommand(handler, args);
+            return HandleReloadSkillPerfectItemTemplateCommand(handler);
         }
 
         [Command("skill_fishing_base_level", RBACPermissions.CommandReloadSkillFishingBaseLevel, true)]
-        static bool HandleReloadSkillFishingBaseLevelCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSkillFishingBaseLevelCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Skill Fishing base level requirements...");
             Global.ObjectMgr.LoadFishingBaseSkillLevel();
@@ -727,7 +727,7 @@ namespace Game.Chat
         }
 
         [Command("skinning_loot_template", RBACPermissions.CommandReloadSkinningLootTemplate, true)]
-        static bool HandleReloadLootTemplatesSkinningCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesSkinningCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`skinning_loot_template`)");
             LootManager.LoadLootTemplates_Skinning();
@@ -738,7 +738,7 @@ namespace Game.Chat
         }
 
         [Command("smart_scripts", RBACPermissions.CommandReloadSmartScripts, true)]
-        static bool HandleReloadSmartScripts(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSmartScripts(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Smart Scripts...");
             Global.SmartAIMgr.LoadFromDB();
@@ -747,7 +747,7 @@ namespace Game.Chat
         }
 
         [Command("spell_area", RBACPermissions.CommandReloadSpellArea, true)]
-        static bool HandleReloadSpellAreaCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellAreaCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading SpellArea Data...");
             Global.SpellMgr.LoadSpellAreas();
@@ -756,7 +756,7 @@ namespace Game.Chat
         }
 
         [Command("spell_group", RBACPermissions.CommandReloadSpellGroup, true)]
-        static bool HandleReloadSpellGroupsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellGroupsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Groups...");
             Global.SpellMgr.LoadSpellGroups();
@@ -765,7 +765,7 @@ namespace Game.Chat
         }
 
         [Command("spell_group_stack_rules", RBACPermissions.CommandReloadSpellGroupStackRules, true)]
-        static bool HandleReloadSpellGroupStackRulesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellGroupStackRulesCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Group Stack Rules...");
             Global.SpellMgr.LoadSpellGroupStackRules();
@@ -774,7 +774,7 @@ namespace Game.Chat
         }
 
         [Command("spell_learn_spell", RBACPermissions.CommandReloadSpellLearnSpell, true)]
-        static bool HandleReloadSpellLearnSpellCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellLearnSpellCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Learn Spells...");
             Global.SpellMgr.LoadSpellLearnSpells();
@@ -783,7 +783,7 @@ namespace Game.Chat
         }
 
         [Command("spell_linked_spell", RBACPermissions.CommandReloadSpellLinkedSpell, true)]
-        static bool HandleReloadSpellLinkedSpellCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellLinkedSpellCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Linked Spells...");
             Global.SpellMgr.LoadSpellLinked();
@@ -792,7 +792,7 @@ namespace Game.Chat
         }
 
         [Command("spell_loot_template", RBACPermissions.CommandReloadSpellLootTemplate, true)]
-        static bool HandleReloadLootTemplatesSpellCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadLootTemplatesSpellCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables... (`spell_loot_template`)");
             LootManager.LoadLootTemplates_Spell();
@@ -803,7 +803,7 @@ namespace Game.Chat
         }
 
         [Command("spell_pet_auras", RBACPermissions.CommandReloadSpellPetAuras, true)]
-        static bool HandleReloadSpellPetAurasCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellPetAurasCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell pet auras...");
             Global.SpellMgr.LoadSpellPetAuras();
@@ -812,7 +812,7 @@ namespace Game.Chat
         }
 
         [Command("spell_proc", RBACPermissions.CommandReloadSpellProc, true)]
-        static bool HandleReloadSpellProcsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellProcsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Proc conditions and data...");
             Global.SpellMgr.LoadSpellProcs();
@@ -821,7 +821,7 @@ namespace Game.Chat
         }
 
         [Command("spell_required", RBACPermissions.CommandReloadSpellRequired, true)]
-        static bool HandleReloadSpellRequiredCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellRequiredCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell Required Data... ");
             Global.SpellMgr.LoadSpellRequired();
@@ -861,7 +861,7 @@ namespace Game.Chat
         }
         
         [Command("spell_target_position", RBACPermissions.CommandReloadSpellTargetPosition, true)]
-        static bool HandleReloadSpellTargetPositionCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellTargetPositionCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Spell target coordinates...");
             Global.SpellMgr.LoadSpellTargetPositions();
@@ -870,7 +870,7 @@ namespace Game.Chat
         }
 
         [Command("spell_threats", RBACPermissions.CommandReloadSpellThreats, true)]
-        static bool HandleReloadSpellThreatsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSpellThreatsCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Aggro Spells Definitions...");
             Global.SpellMgr.LoadSpellThreats();
@@ -879,7 +879,7 @@ namespace Game.Chat
         }
 
         [Command("support", RBACPermissions.CommandReloadSupportSystem, true)]
-        static bool HandleReloadSupportSystemCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadSupportSystemCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Re-Loading Support System Tables...");
             Global.SupportMgr.LoadBugTickets();
@@ -890,7 +890,7 @@ namespace Game.Chat
         }
 
         [Command("trainer", RBACPermissions.CommandReloadTrainer, true)]
-        static bool HandleReloadTrainerCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadTrainerCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Misc, "Re-Loading `trainer` Table!");
             Global.ObjectMgr.LoadTrainers();
@@ -903,7 +903,7 @@ namespace Game.Chat
         }
 
         [Command("vehicle_accessory", RBACPermissions.CommandReloadVehicleAccesory, true)]
-        static bool HandleReloadVehicleAccessoryCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadVehicleAccessoryCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading vehicle_accessory table...");
             Global.ObjectMgr.LoadVehicleAccessories();
@@ -912,7 +912,7 @@ namespace Game.Chat
         }
 
         [Command("vehicle_template", RBACPermissions.CommandReloadVehicleTemplate, true)]
-        static bool HandleReloadVehicleTemplateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadVehicleTemplateCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading vehicle_template table...");
             Global.ObjectMgr.LoadVehicleTemplate();
@@ -921,7 +921,7 @@ namespace Game.Chat
         }
 
         [Command("vehicle_template_accessory", RBACPermissions.CommandReloadVehicleTemplateAccessory, true)]
-        static bool HandleReloadVehicleTemplateAccessoryCommand(CommandHandler handler, StringArguments args)
+        static bool HandleReloadVehicleTemplateAccessoryCommand(CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading vehicle_template_accessory table...");
             Global.ObjectMgr.LoadVehicleTemplateAccessories();
@@ -967,89 +967,88 @@ namespace Game.Chat
         class AllCommand
         {
             [Command("", RBACPermissions.CommandReloadAll, true)]
-            static bool HandleReloadAllCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllCommand(CommandHandler handler)
             {
-                HandleReloadSkillFishingBaseLevelCommand(handler, args);
+                HandleReloadSkillFishingBaseLevelCommand(handler);
 
-                HandleReloadAllAchievementCommand(handler, args);
-                HandleReloadAllAreaCommand(handler, args);
-                HandleReloadAllLootCommand(handler, args);
-                HandleReloadAllNpcCommand(handler, args);
-                HandleReloadAllQuestCommand(handler, args);
-                HandleReloadAllSpellCommand(handler, args);
-                HandleReloadAllItemCommand(handler, args);
-                HandleReloadAllGossipsCommand(handler, args);
-                HandleReloadAllLocalesCommand(handler, args);
+                HandleReloadAllAchievementCommand(handler);
+                HandleReloadAllAreaCommand(handler);
+                HandleReloadAllLootCommand(handler);
+                HandleReloadAllNpcCommand(handler);
+                HandleReloadAllQuestCommand(handler);
+                HandleReloadAllSpellCommand(handler);
+                HandleReloadAllItemCommand(handler);
+                HandleReloadAllGossipsCommand(handler);
+                HandleReloadAllLocalesCommand(handler);
 
-                HandleReloadAccessRequirementCommand(handler, args);
-                HandleReloadMailLevelRewardCommand(handler, args);
-                HandleReloadReservedNameCommand(handler, args);
-                HandleReloadCypherStringCommand(handler, args);
-                HandleReloadGameTeleCommand(handler, args);
+                HandleReloadAccessRequirementCommand(handler);
+                HandleReloadMailLevelRewardCommand(handler);
+                HandleReloadReservedNameCommand(handler);
+                HandleReloadCypherStringCommand(handler);
+                HandleReloadGameTeleCommand(handler);
 
-                HandleReloadCreatureMovementOverrideCommand(handler, args);
-                HandleReloadCreatureSummonGroupsCommand(handler, args);
+                HandleReloadCreatureMovementOverrideCommand(handler);
+                HandleReloadCreatureSummonGroupsCommand(handler);
 
-                HandleReloadVehicleAccessoryCommand(handler, args);
-                HandleReloadVehicleTemplateAccessoryCommand(handler, args);
+                HandleReloadVehicleAccessoryCommand(handler);
+                HandleReloadVehicleTemplateAccessoryCommand(handler);
 
-                HandleReloadAutobroadcastCommand(handler, args);
-                HandleReloadBattlegroundTemplate(handler, args);
-                HandleReloadCharacterTemplate(handler, args);
+                HandleReloadAutobroadcastCommand(handler);
+                HandleReloadBattlegroundTemplate(handler);
+                HandleReloadCharacterTemplate(handler);
                 return true;
             }
 
             [Command("achievement", RBACPermissions.CommandReloadAllAchievement, true)]
-            static bool HandleReloadAllAchievementCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllAchievementCommand(CommandHandler handler)
             {
-                HandleReloadCriteriaDataCommand(handler, args);
-                HandleReloadAchievementRewardCommand(handler, args);
+                HandleReloadCriteriaDataCommand(handler);
+                HandleReloadAchievementRewardCommand(handler);
                 return true;
             }
 
             [Command("area", RBACPermissions.CommandReloadAllArea, true)]
-            static bool HandleReloadAllAreaCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllAreaCommand(CommandHandler handler)
             {
-                HandleReloadAreaTriggerTeleportCommand(handler, args);
-                HandleReloadAreaTriggerTavernCommand(handler, args);
-                HandleReloadGameGraveyardZoneCommand(handler, args);
+                HandleReloadAreaTriggerTeleportCommand(handler);
+                HandleReloadAreaTriggerTavernCommand(handler);
+                HandleReloadGameGraveyardZoneCommand(handler);
                 return true;
             }
 
             [Command("gossips", RBACPermissions.CommandReloadAllGossip, true)]
-            static bool HandleReloadAllGossipsCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllGossipsCommand(CommandHandler handler)
             {
-                HandleReloadGossipMenuCommand(handler, null);
-                HandleReloadGossipMenuOptionCommand(handler, null);
-                if (args == null)                                          // already reload from all_scripts
-                    HandleReloadPointsOfInterestCommand(handler, null);
+                HandleReloadGossipMenuCommand(handler);
+                HandleReloadGossipMenuOptionCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
                 return true;
             }
 
             [Command("item", RBACPermissions.CommandReloadAllItem, true)]
-            static bool HandleReloadAllItemCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllItemCommand(CommandHandler handler)
             {
-                HandleReloadPageTextsCommand(handler, null);
-                HandleReloadItemRandomBonusListTemplatesCommand(handler, null);
+                HandleReloadPageTextsCommand(handler);
+                HandleReloadItemRandomBonusListTemplatesCommand(handler);
                 return true;
             }
 
             [Command("locales", RBACPermissions.CommandReloadAllLocales, true)]
-            static bool HandleReloadAllLocalesCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllLocalesCommand(CommandHandler handler)
             {
-                HandleReloadAchievementRewardLocaleCommand(handler, null);
-                HandleReloadCreatureTemplateLocaleCommand(handler, null);
-                HandleReloadCreatureTextLocaleCommand(handler, null);
-                HandleReloadGameobjectTemplateLocaleCommand(handler, null);
-                HandleReloadGossipMenuOptionLocaleCommand(handler, null);
-                HandleReloadPageTextLocaleCommand(handler, null);
-                HandleReloadPointsOfInterestCommand(handler, null);
-                HandleReloadQuestTemplateLocaleCommand(handler, null);
+                HandleReloadAchievementRewardLocaleCommand(handler);
+                HandleReloadCreatureTemplateLocaleCommand(handler);
+                HandleReloadCreatureTextLocaleCommand(handler);
+                HandleReloadGameobjectTemplateLocaleCommand(handler);
+                HandleReloadGossipMenuOptionLocaleCommand(handler);
+                HandleReloadPageTextLocaleCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
+                HandleReloadQuestTemplateLocaleCommand(handler);
                 return true;
             }
 
             [Command("loot", RBACPermissions.CommandReloadAllLoot, true)]
-            static bool HandleReloadAllLootCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllLootCommand(CommandHandler handler)
             {
                 Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables...");
                 LootManager.LoadLootTables();
@@ -1059,25 +1058,22 @@ namespace Game.Chat
             }
 
             [Command("npc", RBACPermissions.CommandReloadAllNpc, true)]
-            static bool HandleReloadAllNpcCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllNpcCommand(CommandHandler handler)
             {
-                if (args != null)                                          // will be reloaded from all_gossips
-                {
-                    HandleReloadTrainerCommand(handler, null);
-                    HandleReloadNpcVendorCommand(handler, null);
-                    HandleReloadPointsOfInterestCommand(handler, null);
-                    HandleReloadSpellClickSpellsCommand(handler, null);
-                }
+                HandleReloadTrainerCommand(handler);
+                HandleReloadNpcVendorCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
+                HandleReloadSpellClickSpellsCommand(handler);
                 return true;
             }
 
             [Command("quest", RBACPermissions.CommandReloadAllQuest, true)]
-            static bool HandleReloadAllQuestCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllQuestCommand(CommandHandler handler)
             {
-                HandleReloadQuestAreaTriggersCommand(handler, null);
-                HandleReloadQuestGreetingCommand(handler, null);
-                HandleReloadQuestPOICommand(handler, null);
-                HandleReloadQuestTemplateCommand(handler, null);
+                HandleReloadQuestAreaTriggersCommand(handler);
+                HandleReloadQuestGreetingCommand(handler);
+                HandleReloadQuestPOICommand(handler);
+                HandleReloadQuestTemplateCommand(handler);
 
                 Log.outInfo(LogFilter.Server, "Re-Loading Quests Relations...");
                 Global.ObjectMgr.LoadQuestStartersAndEnders();
@@ -1086,7 +1082,7 @@ namespace Game.Chat
             }
 
             [Command("scripts", RBACPermissions.CommandReloadAllScripts, true)]
-            static bool HandleReloadAllScriptsCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllScriptsCommand(CommandHandler handler)
             {
                 if (Global.MapMgr.IsScriptScheduled())
                 {
@@ -1104,20 +1100,20 @@ namespace Game.Chat
             }
 
             [Command("spell", RBACPermissions.CommandReloadAllSpell, true)]
-            static bool HandleReloadAllSpellCommand(CommandHandler handler, StringArguments args)
+            static bool HandleReloadAllSpellCommand(CommandHandler handler)
             {
-                HandleReloadSkillDiscoveryTemplateCommand(handler, null);
-                HandleReloadSkillExtraItemTemplateCommand(handler, null);
-                HandleReloadSpellRequiredCommand(handler, null);
-                HandleReloadSpellAreaCommand(handler, null);
-                HandleReloadSpellGroupsCommand(handler, null);
-                HandleReloadSpellLearnSpellCommand(handler, null);
-                HandleReloadSpellLinkedSpellCommand(handler, null);
-                HandleReloadSpellProcsCommand(handler, null);
-                HandleReloadSpellTargetPositionCommand(handler, null);
-                HandleReloadSpellThreatsCommand(handler, null);
-                HandleReloadSpellGroupStackRulesCommand(handler, null);
-                HandleReloadSpellPetAurasCommand(handler, null);
+                HandleReloadSkillDiscoveryTemplateCommand(handler);
+                HandleReloadSkillExtraItemTemplateCommand(handler);
+                HandleReloadSpellRequiredCommand(handler);
+                HandleReloadSpellAreaCommand(handler);
+                HandleReloadSpellGroupsCommand(handler);
+                HandleReloadSpellLearnSpellCommand(handler);
+                HandleReloadSpellLinkedSpellCommand(handler);
+                HandleReloadSpellProcsCommand(handler);
+                HandleReloadSpellTargetPositionCommand(handler);
+                HandleReloadSpellThreatsCommand(handler);
+                HandleReloadSpellGroupStackRulesCommand(handler);
+                HandleReloadSpellPetAurasCommand(handler);
                 return true;
             }
         }

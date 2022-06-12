@@ -284,35 +284,26 @@ namespace Game.Chat.Commands
         }
 
         [Command("mail", RBACPermissions.CommandListMail, true)]
-        static bool HandleListMailCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListMailCommand(CommandHandler handler, PlayerIdentifier player)
         {
-            if (args.Empty())
-                return false;
-
-            ObjectGuid targetGuid;
-            string targetName;
-
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
-            {
-                targetGuid = parseGUID;
-            }
-            else if (!handler.ExtractPlayerTarget(args, out _, out targetGuid, out targetName))
+            if (player == null)
+                player = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (player == null)
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
-            stmt.AddValue(0, targetGuid.GetCounter());
+            stmt.AddValue(0, player.GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 uint countMail = result.Read<uint>(0);
 
-                string nameLink = handler.PlayerLink(targetName);
-                handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, targetGuid.ToString());
+                string nameLink = handler.PlayerLink(player.GetName());
+                handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, player.GetGUID().ToString());
                 handler.SendSysMessage(CypherStrings.AccountListBar);
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_INFO);
-                stmt.AddValue(0, targetGuid.GetCounter());
+                stmt.AddValue(0, player.GetGUID().GetCounter());
                 SQLResult result1 = DB.Characters.Query(stmt);
 
                 if (!result1.IsEmpty())

@@ -26,7 +26,7 @@ namespace Game.Chat.Commands
     class TicketCommands
     {
         [Command("togglesystem", RBACPermissions.CommandTicketTogglesystem, true)]
-        static bool HandleTicketToggleSystem(CommandHandler handler, StringArguments args)
+        static bool HandleToggleGMTicketSystem(CommandHandler handler)
         {
             if (!WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled))
             {

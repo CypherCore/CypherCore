@@ -26,7 +26,7 @@ namespace Game.Chat
     class PetCommands
     {
         [Command("create", RBACPermissions.CommandPetCreate)]
-        static bool HandlePetCreateCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePetCreateCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             Creature creatureTarget = handler.GetSelectedCreature();

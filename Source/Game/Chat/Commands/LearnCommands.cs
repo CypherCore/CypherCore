@@ -134,7 +134,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("languages", CypherStrings.CommandLearnAllLanguagesHelp, RBACPermissions.CommandLearnAllLang)]
-            static bool HandleLearnAllLangCommand(CommandHandler handler, StringArguments args)
+            static bool HandleLearnAllLangCommand(CommandHandler handler)
             {
                 Global.LanguageMgr.ForEachLanguage((_, languageDesc) =>
                 {
@@ -211,7 +211,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("talents", CypherStrings.CommandLearnAllTalentsHelp, RBACPermissions.CommandLearnAllTalents)]
-            static bool HandleLearnAllMyTalentsCommand(CommandHandler handler, StringArguments args)
+            static bool HandleLearnAllTalentsCommand(CommandHandler handler)
             {
                 Player player = handler.GetSession().GetPlayer();
                 uint playerClass = (uint)player.GetClass();
@@ -240,7 +240,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("pettalents", CypherStrings.CommandLearnAllPettalentHelp, RBACPermissions.CommandLearnMyPetTalents)]
-            static bool HandleLearnAllMyPetTalentsCommand(CommandHandler handler, StringArguments args) { return true; }
+            static bool HandleLearnAllPetTalentsCommand(CommandHandler handler) { return true; }
 
             static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
             {

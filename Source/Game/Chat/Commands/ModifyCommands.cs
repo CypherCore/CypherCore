@@ -205,7 +205,7 @@ namespace Game.Chat
         }
 
         [Command("talentpoints", RBACPermissions.CommandModifyTalentpoints)]
-        static bool HandleModifyTalentCommand(CommandHandler handler, StringArguments args) { return false; }
+        static bool HandleModifyTalentCommand(CommandHandler handler) { return false; }
 
         [Command("scale", RBACPermissions.CommandModifyScale)]
         static bool HandleModifyScaleCommand(CommandHandler handler, StringArguments args)
@@ -725,7 +725,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("demorph", RBACPermissions.CommandDemorph)]
-        static bool HandleDeMorphCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDeMorphCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)

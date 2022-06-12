@@ -26,11 +26,8 @@ namespace Game.Chat
     class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        static bool HandleCancelSceneCommand(CommandHandler handler, StringArguments args)
+        static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
         {
-            if (args.Empty())
-                return false;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
@@ -38,17 +35,15 @@ namespace Game.Chat
                 return false;
             }
 
-            uint id = args.NextUInt32();
-
-            if (!CliDB.SceneScriptPackageStorage.HasRecord(id))
+            if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
                 return false;
 
-            target.GetSceneMgr().CancelSceneByPackageId(id);
+            target.GetSceneMgr().CancelSceneByPackageId(sceneScriptPackageId);
             return true;
         }
 
         [Command("debug", RBACPermissions.CommandSceneDebug)]
-        static bool HandleDebugSceneCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDebugSceneCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             if (player)
@@ -61,12 +56,8 @@ namespace Game.Chat
         }
 
         [Command("play", RBACPermissions.CommandScenePlay)]
-        static bool HandlePlaySceneCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
         {
-            if (args.Empty())
-                return false;
-
-            uint sceneId = args.NextUInt32();
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
@@ -82,15 +73,8 @@ namespace Game.Chat
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
         {
-            if (args.Empty())
-                return false;
-
-            uint scenePackageId = args.NextUInt32();
-            if (!uint.TryParse(args.NextString(""), out uint flags))
-                flags = (uint)SceneFlags.None;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
@@ -98,10 +82,10 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!CliDB.SceneScriptPackageStorage.HasRecord(scenePackageId))
+            if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
                 return false;
 
-            target.GetSceneMgr().PlaySceneByPackageId(scenePackageId, (SceneFlags)flags);
+            target.GetSceneMgr().PlaySceneByPackageId(sceneScriptPackageId, flags.GetValueOrDefault(0));
             return true;
         }
     }

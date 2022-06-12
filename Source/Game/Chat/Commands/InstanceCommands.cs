@@ -116,7 +116,7 @@ namespace Game.Chat
         }
 
         [Command("savedata", RBACPermissions.CommandInstanceSavedata)]
-        static bool HandleInstanceSaveData(CommandHandler handler, StringArguments args)
+        static bool HandleInstanceSaveData(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             InstanceMap map = player.GetMap().ToInstanceMap();

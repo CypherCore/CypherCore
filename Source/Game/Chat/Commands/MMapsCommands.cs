@@ -29,7 +29,7 @@ namespace Game.Chat
     class MMapsCommands
     {
         [Command("path", RBACPermissions.CommandMmapPath)]
-        static bool PathCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMmapPathCommand(CommandHandler handler, StringArguments args)
         {
             if (Global.MMapMgr.GetNavMesh(handler.GetPlayer().GetMapId()) == null)
             {
@@ -91,7 +91,7 @@ namespace Game.Chat
         }
 
         [Command("loc", RBACPermissions.CommandMmapLoc)]
-        static bool LocCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMmapLocCommand(CommandHandler handler)
         {
             handler.SendSysMessage("mmap tileloc:");
 
@@ -157,7 +157,7 @@ namespace Game.Chat
         }
 
         [Command("loadedtiles", RBACPermissions.CommandMmapLoadedtiles)]
-        static bool LoadedTilesCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMmapLoadedTilesCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -183,7 +183,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandMmapStats)]
-        static bool HandleMmapStatsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleMmapStatsCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -227,7 +227,7 @@ namespace Game.Chat
         }
 
         [Command("testarea", RBACPermissions.CommandMmapTestarea)]
-        static bool TestArea(CommandHandler handler)
+        static bool HandleMmapTestArea(CommandHandler handler)
         {
             float radius = 40.0f;
             WorldObject obj = handler.GetPlayer();

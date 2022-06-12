@@ -28,7 +28,7 @@ namespace Game.Chat
     class QuestCommands
     {
         [Command("add", RBACPermissions.CommandQuestAdd)]
-        static bool Add(CommandHandler handler, StringArguments args)
+        static bool HandleQuestAdd(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
@@ -71,7 +71,7 @@ namespace Game.Chat
         }
 
         [Command("complete", RBACPermissions.CommandQuestComplete)]
-        static bool Complete(CommandHandler handler, StringArguments args)
+        static bool HandleQuestComplete(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
@@ -169,7 +169,7 @@ namespace Game.Chat
         }
 
         [Command("remove", RBACPermissions.CommandQuestRemove)]
-        static bool Remove(CommandHandler handler, StringArguments args)
+        static bool HandleQuestRemove(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)
@@ -231,7 +231,7 @@ namespace Game.Chat
         }
 
         [Command("reward", RBACPermissions.CommandQuestReward)]
-        static bool Reward(CommandHandler handler, StringArguments args)
+        static bool HandleQuestReward(CommandHandler handler, StringArguments args)
         {
             Player player = handler.GetSelectedPlayer();
             if (!player)

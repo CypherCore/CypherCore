@@ -960,7 +960,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("unload", RBACPermissions.CommandWpUnload)]
-        static bool HandleWpUnLoadCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpUnLoadCommand(CommandHandler handler)
         {
             Creature target = handler.GetSelectedCreature();
             if (!target)

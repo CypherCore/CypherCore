@@ -67,15 +67,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("gameaccountcreate", RBACPermissions.CommandBnetAccountCreateGame, true)]
-        static bool HandleGameAccountCreateCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGameAccountCreateCommand(CommandHandler handler, string bnetAccountName)
         {
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
-            string bnetAccountName = args.NextString();
             uint accountId = Global.BNetAccountMgr.GetId(bnetAccountName);
             if (accountId == 0)
             {
@@ -120,17 +113,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("link", RBACPermissions.CommandBnetAccountLink, true)]
-        static bool HandleAccountLinkCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAccountLinkCommand(CommandHandler handler, string bnetAccountName, string gameAccountName)
         {
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
-            string bnetAccountName = args.NextString();
-            string gameAccountName = args.NextString();
-
             switch (Global.BNetAccountMgr.LinkWithGameAccount(bnetAccountName, gameAccountName))
             {
                 case AccountOpResult.Ok:
@@ -150,12 +134,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("listgameaccounts", RBACPermissions.CommandBnetAccountListGameAccounts, true)]
-        static bool HandleListGameAccountsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleListGameAccountsCommand(CommandHandler handler, string battlenetAccountName)
         {
-            if (args.Empty())
-                return false;
-
-            string battlenetAccountName = args.NextString();
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, battlenetAccountName);
 
@@ -187,27 +167,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("password", RBACPermissions.CommandBnetAccountPassword, true)]
-        static bool HandleAccountPasswordCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string passwordConfirmation)
         {
-            // If no args are given at all, we can return false right away.
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
-            // Command is supposed to be: .account password [$oldpassword] [$newpassword] [$newpasswordconfirmation] [$emailconfirmation]
-            string oldPassword = args.NextString();       // This extracts [$oldpassword]
-            string newPassword = args.NextString();              // This extracts [$newpassword]
-            string passwordConfirmation = args.NextString();     // This extracts [$newpasswordconfirmation]
-
-            //Is any of those variables missing for any reason ? We return false.
-            if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(passwordConfirmation))
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
             // We compare the old, saved password to the entered old password - no chance for the unauthorized.
             if (!Global.BNetAccountMgr.CheckPassword(handler.GetSession().GetBattlenetAccountId(), oldPassword))
             {
@@ -246,15 +207,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("unlink", RBACPermissions.CommandBnetAccountUnlink, true)]
-        static bool HandleAccountUnlinkCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAccountUnlinkCommand(CommandHandler handler, string gameAccountName)
         {
-            if (args.Empty())
-            {
-                handler.SendSysMessage(CypherStrings.CmdSyntax);
-                return false;
-            }
-
-            string gameAccountName = args.NextString();
             switch (Global.BNetAccountMgr.UnlinkGameAccount(gameAccountName))
             {
                 case AccountOpResult.Ok:
@@ -274,112 +228,68 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("lock")]
-        class LockCommands
+        class AccountLockCommands
         {
             [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
-            static bool HandleLockCountryCommand(CommandHandler handler, StringArguments args)
+            static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
             {
-                if (args.Empty())
+                /*if (state)
                 {
-                    handler.SendSysMessage(CypherStrings.UseBol);
-                    return false;
+                    if (IpLocationRecord const* location = sIPLocation->GetLocationRecord(handler->GetSession()->GetRemoteAddress()))
+            {
+                        LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
+                        stmt->setString(0, location->CountryCode);
+                        stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
+                        LoginDatabase.Execute(stmt);
+                        handler->PSendSysMessage(LANG_COMMAND_ACCLOCKLOCKED);
+                    }
+            else
+                    {
+                        handler->PSendSysMessage("IP2Location] No information");
+                        TC_LOG_DEBUG("server.bnetserver", "IP2Location] No information");
+                    }
                 }
-
-                string param = args.NextString();
-                if (!string.IsNullOrEmpty(param))
+                else
                 {
-                    if (param == "on")
-                    {
-                        /*PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
-                        var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
-                        Array.Reverse(ipBytes);
-                        stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
-                        SQLResult result = DB.Login.Query(stmt);
-                        if (!result.IsEmpty())
-                        {
-                            string country = result.Read<string>(0);
-                            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK_CONTRY);
-                            stmt.AddValue(0, country);
-                            stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
-                            DB.Login.Execute(stmt);
-                            handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-                        }
-                        else
-                        {
-                            handler.SendSysMessage("[IP2NATION] Table empty");
-                            Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
-                        }*/
-                    }
-                    else if (param == "off")
-                    {
-                        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK_CONTRY);
-                        stmt.AddValue(0, "00");
-                        stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
-                        DB.Login.Execute(stmt);
-                        handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-                    }
-                    return true;
+                    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
+                    stmt->setString(0, "00");
+                    stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
+                    LoginDatabase.Execute(stmt);
+                    handler->PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
                 }
-
-                handler.SendSysMessage(CypherStrings.UseBol);
-                return false;
+                */
+                return true;
             }
 
             [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
-            static bool HandleLockIpCommand(CommandHandler handler, StringArguments args)
+            static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
             {
-                if (args.Empty())
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
+
+                if (state)
                 {
-                    handler.SendSysMessage(CypherStrings.UseBol);
-                    return false;
+                    stmt.AddValue(0, true);                                     // locked
+                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
+                }
+                else
+                {
+                    stmt.AddValue(0, false);                                    // unlocked
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
                 }
 
-                string param = args.NextString();
+                stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
 
-                if (!string.IsNullOrEmpty(param))
-                {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
-                    if (param == "on")
-                    {
-                        stmt.AddValue(0, true);                                     // locked
-                        handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-                    }
-                    else if (param == "off")
-                    {
-                        stmt.AddValue(0, false);                                    // unlocked
-                        handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-                    }
-
-                    stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
-                    DB.Login.Execute(stmt);
-                    return true;
-                }
-
-                handler.SendSysMessage(CypherStrings.UseBol);
-                return false;
+                DB.Login.Execute(stmt);
+                return true;
             }
         }
 
         [CommandGroup("set")]
-        class SetCommands
+        class AccountSetCommands
         {
             [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
-            static bool HandleSetPasswordCommand(CommandHandler handler, StringArguments args)
+            static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string passwordConfirmation)
             {
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CmdSyntax);
-                    return false;
-                }
-
-                // Get the command line arguments
-                string accountName = args.NextString();
-                string password = args.NextString();
-                string passwordConfirmation = args.NextString();
-
-                if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordConfirmation))
-                    return false;
-
                 uint targetAccountId = Global.BNetAccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {
