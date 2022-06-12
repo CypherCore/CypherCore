@@ -140,7 +140,7 @@ namespace Game.Chat
                 float x, y, z;
                 target.GetClosePoint(out x, out y, out z, _player.GetCombatReach(), 1.0f);
 
-                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), TeleportToOptions.GMMode);
+                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), TeleportToOptions.GMMode, target.GetInstanceId());
                 PhasingHandler.InheritPhaseShift(_player, target);
                 _player.UpdateObjectVisibility();
             }
@@ -1856,7 +1856,7 @@ namespace Game.Chat
                 // before GM
                 float x, y, z;
                 _player.GetClosePoint(out x, out y, out z, target.GetCombatReach());
-                target.TeleportTo(_player.GetMapId(), x, y, z, target.GetOrientation());
+                target.TeleportTo(_player.GetMapId(), x, y, z, target.GetOrientation(), 0, map.GetInstanceId());
                 PhasingHandler.InheritPhaseShift(target, _player);
                 target.UpdateObjectVisibility();
             }

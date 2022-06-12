@@ -427,7 +427,7 @@ namespace Game.Chat
                 // before GM
                 float x, y, z;
                 gmPlayer.GetClosePoint(out x, out y, out z, player.GetCombatReach());
-                player.TeleportTo(gmPlayer.GetMapId(), x, y, z, player.GetOrientation());
+                player.TeleportTo(gmPlayer.GetMapId(), x, y, z, player.GetOrientation(), 0, gmPlayer.GetInstanceId());
             }
 
             return true;

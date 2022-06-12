@@ -254,7 +254,7 @@ namespace Game
                 player.m_InstanceValid = true;
 
             Map oldMap = player.GetMap();
-            Map newMap = Global.MapMgr.CreateMap(loc.GetMapId(), player);
+            Map newMap = GetPlayer().GetTeleportDestInstanceId().HasValue ? Global.MapMgr.FindMap(loc.GetMapId(), GetPlayer().GetTeleportDestInstanceId().Value) : Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
 
             if (player.IsInWorld)
             {

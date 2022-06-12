@@ -95,6 +95,7 @@ namespace Game.Entities
         uint m_lastFallTime;
         float m_lastFallZ;
         WorldLocation teleportDest;
+        uint? m_teleport_instanceId;
         TeleportToOptions m_teleport_options;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
@@ -138,6 +139,7 @@ namespace Game.Entities
         // Player summoning
         long m_summon_expire;
         WorldLocation m_summon_location;
+        uint m_summon_instanceId;
 
         RestMgr _restMgr;
 
@@ -225,6 +227,7 @@ namespace Game.Entities
 
         // Recall position
         WorldLocation m_recall_location;
+        uint m_recall_instanceId;
         WorldLocation homebind = new();
         uint homebindAreaId;
         uint m_HomebindTimer;

@@ -1651,11 +1651,11 @@ namespace Game.Entities
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
         bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
-        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0)
+        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, uint? instanceId = null)
         {
-            return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options);
+            return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options, instanceId);
         }
-        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0)
+        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
         {
             if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
             {
@@ -1721,7 +1721,7 @@ namespace Game.Entities
             if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter))
                 DuelComplete(DuelCompleteType.Fled);
 
-            if (GetMapId() == mapid)
+            if (GetMapId() == mapid && (!instanceId.HasValue || GetInstanceId() == instanceId))
             {
                 //lets reset far teleport flag if it wasn't reset during chained teleports
                 SetSemaphoreTeleportFar(false);
@@ -1734,6 +1734,7 @@ namespace Game.Entities
                     SetSemaphoreTeleportNear(true);
                     //lets save teleport destination for player
                     teleportDest = new WorldLocation(mapid, x, y, z, orientation);
+                    m_teleport_instanceId = null;
                     m_teleport_options = options;
                     return true;
                 }
@@ -1753,6 +1754,7 @@ namespace Game.Entities
 
                 // this will be used instead of the current location in SaveToDB
                 teleportDest = new WorldLocation(mapid, x, y, z, orientation);
+                m_teleport_instanceId = null;
                 m_teleport_options = options;
                 SetFallInformation(0, GetPositionZ());
 
@@ -1793,6 +1795,7 @@ namespace Game.Entities
                     SetSemaphoreTeleportFar(true);
                     //lets save teleport destination for player
                     teleportDest = new WorldLocation(mapid, x, y, z, orientation);
+                    m_teleport_instanceId = instanceId;
                     m_teleport_options = options;
                     return true;
                 }
@@ -1866,6 +1869,7 @@ namespace Game.Entities
                     oldmap.RemovePlayerFromMap(this, false);
 
                 teleportDest = new WorldLocation(mapid, x, y, z, orientation);
+                m_teleport_instanceId = instanceId;
                 m_teleport_options = options;
                 SetFallInformation(0, GetPositionZ());
                 // if the player is saved before worldportack (at logout for example)
@@ -2079,6 +2083,7 @@ namespace Game.Entities
 
             m_summon_expire = GameTime.GetGameTime() + PlayerConst.MaxPlayerSummonDelay;
             m_summon_location = new WorldLocation(summoner);
+            m_summon_instanceId = summoner.GetInstanceId();
 
             SummonRequest summonRequest = new();
             summonRequest.SummonerGUID = summoner.GetGUID();
@@ -2166,8 +2171,7 @@ namespace Game.Entities
             UpdateCriteria(CriteriaType.AcceptSummon, 1);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Summon);
 
-            m_summon_location.SetOrientation(GetOrientation());
-            TeleportTo(m_summon_location);
+            TeleportTo(m_summon_location, 0, m_summon_instanceId);
 
             broadcastSummonResponse(true);
         }
@@ -5872,8 +5876,10 @@ namespace Game.Entities
         public void SaveRecallPosition()
         {
             m_recall_location = new WorldLocation(this);
+            m_recall_instanceId = GetInstanceId();
         }
-        public void Recall() { TeleportTo(m_recall_location); }
+
+        public void Recall() { TeleportTo(m_recall_location, 0, m_recall_instanceId); }
 
         public uint GetSaveTimer() { return m_nextSave; }
         void SetSaveTimer(uint timer) { m_nextSave = timer; }
@@ -7615,10 +7621,17 @@ namespace Game.Entities
         {
             return teleportDest;
         }
+
+        public uint? GetTeleportDestInstanceId() 
+        { 
+            return m_teleport_instanceId;
+        }
+
         public WorldLocation GetHomebind()
         {
             return homebind;
         }
+
         public WorldLocation GetRecall()
         {
             return m_recall_location;
