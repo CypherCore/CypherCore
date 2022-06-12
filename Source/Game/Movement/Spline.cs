@@ -79,14 +79,14 @@ namespace Game.Movement
         {
             initializer.Initialize(ref m_mode, ref _cyclic, ref points, ref index_lo, ref index_hi);
         }
-        public void InitCyclicSpline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point, float orientation)
+        public void InitCyclicSpline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point, float orientation = 0f)
         {
             m_mode = m;
             _cyclic = true;
 
             InitSpline(controls, count, m, orientation);
         }
-        public void InitSpline(Span<Vector3> controls, int count, EvaluationMode m, float orientation = 0)
+        public void InitSpline(Span<Vector3> controls, int count, EvaluationMode m, float orientation = 0f)
         {
             m_mode = m;
             _cyclic = false;
@@ -230,9 +230,9 @@ namespace Game.Movement
 
             int i = 1;
             double length = 0;
-            while (i <= 3)
+            while (i <= stepsPerSegment)
             {
-                C_Evaluate(p, i / (float)3, s_catmullRomCoeffs, out nextPos);
+                C_Evaluate(p, i / (float)stepsPerSegment, s_catmullRomCoeffs, out nextPos);
                 length += (nextPos - curPos).Length();
                 curPos = nextPos;
                 ++i;
@@ -251,9 +251,9 @@ namespace Game.Movement
 
             int i = 1;
             double length = 0;
-            while (i <= 3)
+            while (i <= stepsPerSegment)
             {
-                C_Evaluate(p, i / (float)3, s_Bezier3Coeffs, out nextPos);
+                C_Evaluate(p, i / (float)stepsPerSegment, s_Bezier3Coeffs, out nextPos);
                 length += (nextPos - curPos).Length();
                 curPos = nextPos;
                 ++i;
@@ -261,6 +261,8 @@ namespace Game.Movement
             return (float)length;
         }
         #endregion
+
+        void set_steps_per_segment(int newStepsPerSegment) { stepsPerSegment = newStepsPerSegment; }
 
         public void ComputeIndex(float t, ref int index, ref float u)
         {
@@ -368,6 +370,13 @@ namespace Game.Movement
         public EvaluationMode m_mode;
         bool _cyclic;
         float initialOrientation;
+
+        // could be modified, affects segment length evaluation precision
+        // lesser value saves more performance in cost of lover precision
+        // minimal value is 1
+        // client's value is 20, blizzs use 2-3 steps to compute length
+        int stepsPerSegment = 3;
+
         int index_lo;
         int index_hi;
         public enum EvaluationMode
