@@ -644,7 +644,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("item")]
-        class ItemCommandGroup
+        class LookupItemCommands
         {
             [Command("", RBACPermissions.CommandLookupItem, true)]
             static bool HandleLookupItemCommand(CommandHandler handler, string namePart)
@@ -708,14 +708,76 @@ namespace Game.Chat
 
                 return true;
             }
+
+            [Command("set", RBACPermissions.CommandLookupItemset, true)]
+            static bool HandleLookupItemSetCommand(CommandHandler handler, string namePart)
+            {
+                if (namePart.IsEmpty())
+                    return false;
+
+                bool found = false;
+                uint count = 0;
+                uint maxResults = WorldConfig.GetUIntValue(WorldCfg.MaxResultsLookupCommands);
+
+                // Search in ItemSet.dbc
+                foreach (var (id, set) in CliDB.ItemSetStorage)
+                {
+                    Locale locale = handler.GetSessionDbcLocale();
+                    string name = set.Name[locale];
+                    if (name.IsEmpty())
+                        continue;
+
+                    if (!name.Equals(namePart, StringComparison.OrdinalIgnoreCase))
+                    {
+                        locale = Locale.enUS;
+                        for (; locale < Locale.Total; ++locale)
+                        {
+                            if (locale == handler.GetSessionDbcLocale())
+                                continue;
+
+                            name = set.Name[locale];
+                            if (name.IsEmpty())
+                                continue;
+
+                            if (name.Equals(namePart, StringComparison.OrdinalIgnoreCase))
+                                break;
+                        }
+                    }
+
+                    if (locale < Locale.Total)
+                    {
+                        if (maxResults != 0 && count++ == maxResults)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                            return true;
+                        }
+
+                        // send item set in "id - [namedlink locale]" format
+                        if (handler.GetSession())
+                            handler.SendSysMessage(CypherStrings.ItemsetListChat, id, id, name, "");
+                        else
+                            handler.SendSysMessage(CypherStrings.ItemsetListConsole, id, name, "");
+
+                        if (!found)
+                            found = true;
+                    }
+                }
+                if (!found)
+                    handler.SendSysMessage(CypherStrings.CommandNoitemsetfound);
+
+                return true;
+            }
         }
 
         [CommandGroup("map")]
-        class MapCommandGroup
+        class LookupMapCommands
         {
-            [Command("", RBACPermissions.CommandLookupMap, true)]
+            [Command("map", RBACPermissions.CommandLookupMap, true)]
             static bool HandleLookupMapCommand(CommandHandler handler, string namePart)
             {
+                if (namePart.IsEmpty())
+                    return false;
+
                 uint counter = 0;
 
                 // search in Map.dbc
@@ -785,7 +847,7 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("", RBACPermissions.CommandLookupMap, true)]
+            [Command("id", RBACPermissions.CommandLookupMapId, true)]
             static bool HandleLookupMapIdCommand(CommandHandler handler, uint id)
             {
                 var mapInfo = CliDB.MapStorage.LookupByKey(id);
@@ -834,7 +896,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("player")]
-        class PlayerCommandGroup
+        class LookupPlayerCommands
         {
             [Command("ip", RBACPermissions.CommandLookupPlayerIp)]
             static bool HandleLookupPlayerIpCommand(CommandHandler handler, string ip, int limit = -1)
@@ -922,7 +984,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("quest")]
-        class QuestCommandGroup
+        class LookupQuestCommands
         {
             [Command("", RBACPermissions.CommandLookupQuest, true)]
             static bool HandleLookupQuestCommand(CommandHandler handler, string namePart)
@@ -1134,7 +1196,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("spell")]
-        class SpellCommandGroup
+        class LookupSpellCommands
         {
             [Command("", RBACPermissions.CommandLookupSpell)]
             static bool HandleLookupSpellCommand(CommandHandler handler, string namePart)

@@ -236,7 +236,7 @@ namespace Framework.IO
 
         public bool IsAtEnd()
         {
-            return activeposition == activestring.Length;
+            return activestring.IsEmpty() || activeposition == activestring.Length;
         }
 
         public int GetCurrentPosition()

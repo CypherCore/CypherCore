@@ -74,10 +74,10 @@ namespace Framework.Constants
         Systemmessage = 3,
         Eventmessage = 4,
         NoHelpCmd = 5,
-        NoCmd = 6,
-        NoSubcmd = 7,
+        CmdInvalid = 6,
+        SubcmdAmbiguous = 7,
         SubcmdsList = 8,
-        AvailableCmd = 9,
+        AvailableCmds = 9,
         CmdSyntax = 10,
         AccountLevel = 11,
         ConnectedUsers = 12,
@@ -155,9 +155,15 @@ namespace Framework.Constants
         GoinfoSize = 84,
         GoinfoAddon = 85,
         GoinfoModel = 86,
-        // Free 87 - 95
-
-
+        UnknownError = 87,
+    TwoFACommandsNotSetup = 88,
+        TwoFAAlreadySetup = 89,
+        TwoFAInvalidToken = 90,
+        TwoFASecretSuggestion = 91,
+        TwoFASetupComplete = 92,
+        TwoFANotSetup = 93,
+        TwoFARemoveNeedToken = 94,
+        TwoFARemoveComplete = 95,
         GuildRenameAlreadyExists = 96,
         GuildRenameDone = 97,
         RenamePlayerAlreadyExists = 98,
@@ -190,7 +196,7 @@ namespace Framework.Constants
         YouChangeEnergy = 122,
         YoursEnergyChanged = 123,
 
-        CurrentEnergy = 124,
+        CurrentEnergy = 124,              //Log
         YouChangeRage = 125,
         YoursRageChanged = 126,
         YouChangeLvl = 127,
@@ -259,10 +265,19 @@ namespace Framework.Constants
         PhaseFlagCosmetic = 183,
         PhaseFlagPersonal = 184,
 
-        //                                    185 not used
+        //                                      185 Not Used
         TransportPosition = 186,
         PartialGroupSummon = 187,
-        // Room For More Level 1              188-199 not used
+        TwoFASecretTooLong = 188,
+        TwoFASecretInvalid = 189,
+        TwoFASecretSetComplete = 190,
+        SubcmdsListEntry = 191,
+        SubcmdsListEntryEllipsis = 192,
+        SubcmdInvalid = 193,
+        CmdAmbiguous = 194,
+        CmdHelpGeneric = 195,
+        CmdNoHelpAvailable = 196,
+        // Room For More Level 1                197-199 Not Used
 
         // Level 2 Chat
         NoSelection = 200,
@@ -362,14 +377,14 @@ namespace Framework.Constants
         CommandWhisperoff = 286,
         CommandCreatguidnotfound = 287,
         CommandNotDeadOrNoLoot = 288,
-        CommandNpcShowLootHeader = 289,
-        CommandNpcShowLootLabel = 290,
-        CommandNpcShowLootEntry = 291,
-        CommandNpcShowLootMoney = 292,
-        CommandNpcShowLootLabel2 = 293,
-        CommandNpcShowLootSublabel = 294,
-        CommandNpcShowLootEntry2 = 295,
-        // 296 free
+        CommandNpcShowlootHeader = 289,
+        CommandNpcShowlootLabel = 290,
+        CommandNpcShowlootEntry = 291,
+        CommandNpcShowlootMoney = 292,
+        CommandNpcShowlootLabel2 = 293,
+        CommandNpcShowlootSublabel = 294,
+        CommandNpcShowlootEntry2 = 295,
+        // 296 Free
 
         // End
         CommandWanderDistance = 297,
@@ -442,7 +457,37 @@ namespace Framework.Constants
         CommandCheatWw = 362,
         CommandWhisperoffplayer = 363,
         CommandCheatTaxinodes = 364,
-        // Room For More Level 2              365-399 Not Used
+        CommandAchievementAddHelp = 365,
+        CommandAccSetAddonHelp = 366,
+        CommandAccSetSecRegmailHelp = 367,
+        CommandAccSetSecEmailHelp = 368,
+        CommandAccSet2faHelp = 369,
+        CommandAccSetSeclevelHelp = 370,
+        CommandAccSetPasswordHelp = 371,
+        CommandAcc2faSetupHelp = 372,
+        CommandAcc2faRemoveHelp = 373,
+        CommandAccAddonHelp = 374,
+        CommandAccCreateHelp = 375,
+        CommandAccDeleteHelp = 376,
+        CommandAccEmailHelp = 377,
+        CommandAccOnlinelistHelp = 378,
+        CommandAccLockCountryHelp = 379,
+        CommandAccLockIpHelp = 380,
+        CommandAccPasswordHelp = 381,
+        CommandAccountHelp = 382,
+        CommandLearnHelp = 383,
+        CommandUnlearnHelp = 384,
+        CommandLearnMyQuestsHelp = 385,
+        CommandLearnMyTrainerHelp = 386,
+        CommandLearnAllBlizzardHelp = 387,
+        CommandLearnAllDebugHelp = 388,
+        CommandLearnAllCraftsHelp = 389,
+        CommandLearnAllDefaultHelp = 390,
+        CommandLearnAllLanguagesHelp = 391,
+        CommandLearnAllRecipesHelp = 392,
+        CommandLearnAllTalentsHelp = 393,
+        CommandLearnAllPettalentHelp = 394,
+        // Room For More Level 2                395-399 Not Used
 
         // Level 3 Chat
         ScriptsReloaded = 400,
@@ -504,7 +549,7 @@ namespace Framework.Constants
         CommandGraveyardalrlinked = 450,
         CommandGraveyardlinked = 451,
         CommandGraveyardwrongzone = 452,
-        //                                  = 453, See PinfoPlayer
+        //                                    = 453, See PinfoPlayer
         CommandGraveyarderror = 454,
         CommandGraveyardNoteam = 455,
         CommandGraveyardAny = 456,
@@ -515,7 +560,7 @@ namespace Framework.Constants
         CommandZonenografaction = 461,
         CommandTpAlreadyexist = 462,
         CommandTpAdded = 463,
-        CommandTpAddedError = 464,
+        CommandTpAddedErr = 464,
         CommandTpDeleted = 465,
         CommandNotaxinodefound = 466,
         CommandTargetListauras = 467,
@@ -595,7 +640,7 @@ namespace Framework.Constants
         MovegensIdle = 527,
         MovegensRandom = 528,
         MovegensWaypoint = 529,
-        //                                  = 530, not used
+        //                                    = 530, Not Used
         MovegensConfused = 531,
         MovegensChasePlayer = 532,
         MovegensChaseCreature = 533,
@@ -615,9 +660,9 @@ namespace Framework.Constants
         NpcinfoTrainer = 546,
         NpcinfoDungeonId = 547,
 
-        //                                  = 548, See PinfoGmActive
-        //                                  = 549, See PinfoBanned
-        //                                  = 550, See PinfoMuted
+        //                                    = 548, See PinfoGmActive
+        //                                    = 549, See PinfoBanned
+        //                                    = 550, See PinfoMuted
 
         YouSetExploreAll = 551,
         YouSetExploreNothing = 552,
@@ -678,11 +723,12 @@ namespace Framework.Constants
         Gmlist = 597,
         GmlistHeader = 598,
         GmlistEmpty = 599,
+
         RemoveitemFailure = 600,
 
         // End Level 3 List, Continued At 1100
 
-        // 601-704 - free
+        // 601-704 - Free
 
         WaitBeforeSpeaking = 705,
         NotEquippedItem = 706,
@@ -694,9 +740,9 @@ namespace Framework.Constants
         BgQueueAnnounceSelf = 711,
         BgQueueAnnounceWorld = 712,
         YourArenaLevelReqError = 713,
-        //                                      = 714, See PinfoAccAccount
+        //                                        = 714, See PinfoAccAccount
         YourBgLevelReqError = 715,
-        //                                      = 716, See PinfoAccLastlogin
+        //                                        = 716, See PinfoAccLastlogin
         BgStartedAnnounceWorld = 717,
         ArenaQueueAnnounceWorldJoin = 718,
         ArenaQueueAnnounceWorldExit = 719,
@@ -705,7 +751,7 @@ namespace Framework.Constants
         ArenaGroupTooLarge = 721,              // "Your Group Is Too Large For This Arena. Please Regroup To Join."
         ArenaYourTeamOnly = 722,              // "Your Group Has Members Not In Your Arena Team. Please Regroup To Join."
         ArenaNotEnoughPlayers = 723,              // "Your Group Does Not Have Enough Players To Join This Match."
-        // 724-726 - free
+                                                  //                                      724-726 - Free
         BgGroupOfflineMember = 727,              // "Your Group Has An Offline Member. Please Remove Him Before Joining."
         BgGroupMixedFaction = 728,              // "Your Group Has Players From The Opposing Faction. You Can'T Join The Battleground As A Group."
         BgGroupMixedLevels = 729,              // "Your Group Has Players From Different Battleground Brakets. You Can'T Join As Group."
@@ -721,24 +767,25 @@ namespace Framework.Constants
         DebugArenaOff = 738,
         DebugBgOn = 739,
         DebugBgOff = 740,
-        //  DistArenaPointsStart        = 741,
-        //  DistArenaPointsOnlineStart = 742,
-        //  DistArenaPointsOnlineEnd   = 743,
-        //  DistArenaPointsTeamStart   = 744,
-        //  DistArenaPointsTeamEnd     = 745,
-        //  DistArenaPointsEnd          = 746,
+        DistArenaPointsStart = 741, // 3.3.5 Reserved
+        DistArenaPointsOnlineStart = 742, // 3.3.5 Reserved
+        DistArenaPointsOnlineEnd = 743, // 3.3.5 Reserved
+        DistArenaPointsTeamStart = 744, // 3.3.5 Reserved
+        DistArenaPointsTeamEnd = 745, // 3.3.5 Reserved
+        DistArenaPointsEnd = 746, // 3.3.5 Reserved
         BgDisabled = 747,
         ArenaDisabled = 748,
-        //                                      = 749, See PinfoAccOs
+        //                                        = 749, See PinfoAccOs
         BattlegroundPrematureFinishWarning = 750,       // "Not Enough Players. This Game Will Close In %U Mins."
         BattlegroundPrematureFinishWarningSecs = 751,  // "Not Enough Players. This Game Will Close In %U Seconds."
-        //                                      = 752, See PinfoAccIp
-        // 753-755 - free
-        // Room For Bg/Arena                = 773-784
+                                                       //                                        = 752, See PinfoAccIp
+                                                       // 753-755 - Free
+
+        // Room For Bg/Arena                  = 773-784
         ArenaTesting = 785,
         AutoAnn = 786,
         AnnounceColor = 787,
-        // 788-799 - free
+        // 788-799 - Free
 
         // In Game Strings
         PetInvalidName = 800,
@@ -751,7 +798,7 @@ namespace Framework.Constants
         NeedCharacterName = 807,
         PlayerNotExistOrOffline = 808,
         AccountForPlayerNotFound = 809,
-        // Unused                           = 810,
+        // Unused                             = 810,
         GuildMaster = 811,
         GuildOfficer = 812,
         GuildVeteran = 813,
@@ -806,7 +853,7 @@ namespace Framework.Constants
         ArenaInfoHeader = 868,
         ArenaInfoMembers = 869,
         ArenaLookup = 870,
-        //                                  = 871, See PinfoChrLevelHigh
+        //                                    = 871, See PinfoChrLevelHigh
         CommandWrongemail = 872,
         NewEmailsNotMatch = 873,
         CommandEmail = 874,
@@ -814,12 +861,12 @@ namespace Framework.Constants
         CommandNotchangeemail = 876,
         OldEmailIsNewEmail = 877,
         CommandEmailOutput = 878,
-        //                                  = 879, See PinfoChrRegmails
+        //                                    = 879, See PinfoChrRegmails
         AccountSecType = 880,
         RbacEmailRequired = 881,
-        //                                  = 882, LANG_PINFO_CHR_MAP_WITH_AREA
+        //                                    = 882, PinfoChrMapWithArea
         Account = 883,
-        // Room For In-Game Strings           884-999 Not Used
+        // Room For In-Game Strings             884-999 Not Used
 
         // Level 4 (Cli Only Commands)
         CommandExit = 1000,
@@ -858,7 +905,7 @@ namespace Framework.Constants
         AccountCreatedBnet = 1033,
         AccountBnetListHeader = 1034,
         AccountBnetListNoAccounts = 1035,
-        // Room For More Level 4              1036-1099 Not Used
+        // Room For More Level 4                1036-1099 Not Used
 
         // Level 3 (Continue)
         AccountSetaddon = 1100,
@@ -945,7 +992,7 @@ namespace Framework.Constants
         GuildInfoBankGold = 1181,
         GuildInfoMotd = 1182,
         GuildInfoExtraInfo = 1183,
-        ChangeAccountSuccess = 1184,             // log
+        ChangeAccountSuccess = 1184,             // Log
         GroupNotInRaidGroup = 1185,
         GroupRoleChanged = 1186,
         LeaderCannotBeAssistant = 1187,
@@ -953,14 +1000,14 @@ namespace Framework.Constants
         CommandNoInstancesMatch = 1189,
         CommandMultipleInstancesMatch = 1190,
         CommandMultipleInstancesEntry = 1191,
-        // 1192 unused,
+        //                                      1192 Unused
         CommandInstanceNoEntrance = 1193,
         CommandInstanceNoExit = 1194,
         CommandWentToInstanceGate = 1195,
         CommandWentToInstanceStart = 1196,
         CommandGoInstanceGateFailed = 1197,
         CommandGoInstanceStartFailed = 1198,
-                                             // Room for more level 3                1199 not used
+        // Room For More Level 3                1199 Not Used
 
         // Debug Commands
         CinematicNotExist = 1200,
@@ -983,8 +1030,9 @@ namespace Framework.Constants
         AccountBnetUnlinked = 1216,
         AccountBnetNotLinked = 1217,
         DisallowTicketsConfig = 1218,
-        // 1219-1499 - free
+        // 1219-1499 - Free
 
+        // Command Argument Parsers
         CmdparserEither = 1500,
         CmdparserOr = 1501,
         CmdparserStringValueInvalid = 1502,
@@ -1003,15 +1051,20 @@ namespace Framework.Constants
         CmdparserExactSeqMismatch = 1515,
         CmdparserCurrencyNoExist = 1516,
 
-        // 1516-1998 - free
+        // 1516-1998 - Free
         DebugAreatriggerLeft = 1999,
-        // Ticket Strings 2003-2028
+        // Ticket Strings 2000-2030
+        CommandTicketnew = 2000, // 3.3.5 Reserved
+        CommandTicketupdated = 2001, // 3.3.5 Reserved
+        CommandTicketplayerabandon = 2002, // 3.3.5 Reserved
         CommandTicketclosed = 2003,
         CommandTicketdeleted = 2004,
         CommandTicketnotexist = 2005,
         CommandTicketclosefirst = 2006,
         CommandTicketalreadyassigned = 2007,
+        CommandTicketreload = 2008, // 3.3.5 Reserved
         CommandTicketshowlist = 2009,
+        CommandTicketshowonlinelist = 2010, // 3.3.5 Reserved
         CommandTicketshowclosedlist = 2011,
         CommandTicketassignerrorA = 2012,
         CommandTicketassignerrorB = 2013,
@@ -1020,16 +1073,20 @@ namespace Framework.Constants
         CommandTicketcannotclose = 2016,
         CommandTicketlistguid = 2017,
         CommandTicketlistname = 2018,
+        CommandTicketlistage = 2019, // 3.3.5 Reserved
         CommandTicketlistassignedto = 2020,
         CommandTicketlistunassigned = 2021,
         CommandTicketlistmessage = 2022,
         CommandTicketlistcomment = 2023,
         CommandTicketlistaddcomment = 2024,
         CommandTicketlistagecreate = 2025,
+        CommandTicketshowescalatedlist = 2026, // 3.3.5 Reserved
         CommandTicketpending = 2027,
         CommandTicketreset = 2028,
+        CommandTicketlistresponse = 2029, // 3.3.5 Reserved
+        CommandTicketcompleted = 2030, // 3.3.5 Reserved
 
-        // Trinity Strings                    5000-9999
+        // Trinity Strings                      5000-9999
         CommandFreeze = 5000,
         CommandFreezeError = 5001,
         CommandFreezeWrong = 5002,
@@ -1049,7 +1106,7 @@ namespace Framework.Constants
         Battleground = 5015,
         Arena = 5016,
         Raid = 5017,
-        NpcinfoReactState = 5018,
+        NpcinfoReactstate = 5018,
         CommandTempFrozenPlayer = 5019,
         NpcinfoPhases = 5020,
         NpcinfoArmor = 5021,
@@ -1062,7 +1119,7 @@ namespace Framework.Constants
         GoinfoLootid = 5028,
         CommandLookupMaxResults = 5029,
         Unauthorized = 5030,
-        ObjectInfoAIInfo = 5031,
+        ObjectinfoAiInfo = 5031,
         CommandNoBattlegroundFound = 5032,
         CommandNoAchievementCriteriaFound = 5033,
         CommandNoOutdoorPvpForund = 5034,
@@ -1120,17 +1177,16 @@ namespace Framework.Constants
         ListRespawnsZone = 5078,
         ListRespawnsListheader = 5079,
         ListRespawnsOverdue = 5080,
-        // unused 5081
-        // unused 5082
-        ObjectInfoAIType = 5083,
-
+        // Unused 5081
+        // Unused 5082
+        ObjectinfoAiType = 5083,
         NpcinfoUnitFieldFlags2 = 5084,
         NpcinfoUnitFieldFlags3 = 5085,
         NpcinfoNpcFlags = 5086,
         NpcinfoPhaseIds = 5087,
         Scenario = 5088,
 
-        // Room For More Trinity Strings      5089-6603
+        // Room For More Trinity Strings        5089-6603
 
         // Level Requirement Notifications
         SayReq = 6604,
@@ -1148,7 +1204,7 @@ namespace Framework.Constants
         GmNotify = 6614,
         GmAnnounceColor = 6615,
 
-        GmSilence = 6616,              // "Silence Is On For %S" - Spell 1852
+        GmSilence = 6616,  // "Silence Is On For %S" - Spell 1852
 
         WorldClosed = 7523,
         WorldOpened = 7524,
@@ -1174,8 +1230,8 @@ namespace Framework.Constants
         LfgRoleNone = 9998,
         LfgError = 9999,
 
-        // Use For Not-In-Offcial-Sources Patches
-        //                                    10000-10999
+        // Use For Not-In-Official-Sources Patches
+        //                                      10000-10999
         // Opvp Si
         OpvpSiCaptureH = 10049,
         OpvpSiCaptureA = 10050,
@@ -1186,9 +1242,9 @@ namespace Framework.Constants
         OpvpZmGossipAlliance = 10054,
         OpvpZmGossipHorde = 10055,
 
-        // 10056-10066 - free
+        // 10056-10066 - Free
 
-        // Use For Custom Patches             11000-11999
+        // Use For Custom Patches               11000-11999
         AutoBroadcast = 11000,
         InvalidRealmid = 11001,
 

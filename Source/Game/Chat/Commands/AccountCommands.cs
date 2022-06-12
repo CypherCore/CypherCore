@@ -25,7 +25,7 @@ namespace Game.Chat
     [CommandGroup("account")]
     class AccountCommands
     {
-        [Command("", RBACPermissions.CommandAccount)]
+        [Command("", CypherStrings.CommandAccountHelp, RBACPermissions.CommandAccount)]
         static bool HandleAccountCommand(CommandHandler handler)
         {
             if (handler.GetSession() == null)
@@ -68,7 +68,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("addon", RBACPermissions.CommandAccountAddon)]
+        [Command("addon", CypherStrings.CommandAccAddonHelp, RBACPermissions.CommandAccountAddon)]
         static bool HandleAccountAddonCommand(CommandHandler handler, byte expansion)
         {
             if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
@@ -86,7 +86,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("create", RBACPermissions.CommandAccountCreate, true)]
+        [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
         static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, string email)
         {
             if (accountName.Contains("@"))
@@ -128,7 +128,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("delete", RBACPermissions.CommandAccountDelete, true)]
+        [Command("delete", CypherStrings.CommandAccDeleteHelp, RBACPermissions.CommandAccountDelete, true)]
         static bool HandleAccountDeleteCommand(CommandHandler handler, string accountName)
         {
             uint accountId = Global.AccountMgr.GetId(accountName);
@@ -161,7 +161,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("email", RBACPermissions.CommandAccountEmail)]
+        [Command("email", CypherStrings.CommandAccEmailHelp, RBACPermissions.CommandAccountEmail)]
         static bool HandleAccountEmailCommand(CommandHandler handler, string oldEmail, string password, string email, string emailConfirm)
         {
             if (!Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), oldEmail))
@@ -220,7 +220,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("password", RBACPermissions.CommandAccountPassword)]
+        [Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
         static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, string confirmEmail)
         {
             // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
@@ -277,12 +277,10 @@ namespace Game.Chat
             return true;
         }
 
-
-
         [CommandGroup("lock")]
         class AccountLockCommands
         {
-            [Command("country", RBACPermissions.CommandAccountLockCountry)]
+            [Command("country", CypherStrings.CommandAccLockCountryHelp, RBACPermissions.CommandAccountLockCountry)]
             static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
             {
                 if (state)
@@ -320,7 +318,7 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("ip", RBACPermissions.CommandAccountLockIp)]
+            [Command("ip", CypherStrings.CommandAccLockIpHelp, RBACPermissions.CommandAccountLockIp)]
             static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
             {
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
@@ -346,31 +344,31 @@ namespace Game.Chat
         [CommandGroup("onlinelist")]
         class AccountOnlineListCommands
         {
-            [Command("", RBACPermissions.CommandAccountOnlineList, true)]
+            [Command("", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListCommand(CommandHandler handler)
             {
                 return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, null);
             }
 
-            [Command("ip", RBACPermissions.CommandAccountOnlineList, true)]
+            [Command("ip", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithIpFilterCommand(CommandHandler handler, string ipAddress)
             {
                 return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, null, null, null);
             }
 
-            [Command("limit", RBACPermissions.CommandAccountOnlineList, true)]
+            [Command("limit", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithLimitCommand(CommandHandler handler, uint limit)
             {
                 return HandleAccountOnlineListCommandWithParameters(handler, null, limit, null, null);
             }
 
-            [Command("map", RBACPermissions.CommandAccountOnlineList, true)]
+            [Command("map", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithMapFilterCommand(CommandHandler handler, uint mapId)
             {
                 return HandleAccountOnlineListCommandWithParameters(handler, null, null, mapId, null);
             }
 
-            [Command("zone", RBACPermissions.CommandAccountOnlineList, true)]
+            [Command("zone", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithZoneFilterCommand(CommandHandler handler, uint zoneId)
             {
                 return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, zoneId);
@@ -442,7 +440,7 @@ namespace Game.Chat
         [CommandGroup("set")]
         class AccountSetCommands
         {
-            [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
+            [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
             static bool HandleAccountSetAddonCommand(CommandHandler handler, string accountName, byte expansion)
             {
                 uint accountId;
@@ -488,13 +486,13 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("gmlevel", RBACPermissions.CommandAccountSetSecLevel, true)]
+            [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
             static bool HandleAccountSetGmLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int realmId = -1)
             {
                 return HandleAccountSetSecLevelCommand(handler, accountName, securityLevel, realmId);
             }
 
-            [Command("password", RBACPermissions.CommandAccountSetPassword, true)]
+            [Command("password", CypherStrings.CommandAccSetPasswordHelp, RBACPermissions.CommandAccountSetPassword, true)]
             static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string confirmPassword)
             {
                 uint targetAccountId = Global.AccountMgr.GetId(accountName);
@@ -535,7 +533,7 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
+            [Command("seclevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
             static bool HandleAccountSetSecLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int? realmId)
             {
                 uint accountId;
@@ -615,7 +613,7 @@ namespace Game.Chat
             [CommandGroup("sec")]
             class SetSecCommands
             {
-                [Command("email", RBACPermissions.CommandAccountSetSecEmail, true)]
+                [Command("email", CypherStrings.CommandAccSetSecEmailHelp, RBACPermissions.CommandAccountSetSecEmail, true)]
                 static bool HandleAccountSetEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
                 {
                     uint targetAccountId = Global.AccountMgr.GetId(accountName);
@@ -657,7 +655,7 @@ namespace Game.Chat
                     return true;
                 }
 
-                [Command("regmail", RBACPermissions.CommandAccountSetSecRegmail, true)]
+                [Command("regmail", CypherStrings.CommandAccSetSecRegmailHelp, RBACPermissions.CommandAccountSetSecRegmail, true)]
                 static bool HandleAccountSetRegEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
                 {
                     uint targetAccountId = Global.AccountMgr.GetId(accountName);

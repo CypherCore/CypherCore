@@ -48,10 +48,10 @@ namespace Game.Chat
                     //We found a optional arg and we dont have the correct amount of args
                     args.SetCurrentPosition(oldPos);
                     arguments.Add(default);
+                    index++;
                 }
                 else
                     arguments.Add(value);
-
             }
 
             return arguments.ToArray();
@@ -109,25 +109,22 @@ namespace Game.Chat
                     value = args.NextChar();
                     break;
                 case TypeCode.Object:
-                    if (type.IsGenericType)
-                        type = type.GenericTypeArguments[0].UnderlyingSystemType;
-
                     switch (type.Name)
                     {
-                        case nameof(GameTele):
-                            value = Global.ObjectMgr.GetGameTele(args.NextString());
+                        case nameof(PlayerIdentifier):
+                            value = PlayerIdentifier.ParseFromString(args.NextString());
                             break;
-                        case nameof(SpellInfo):
-                            value = Global.SpellMgr.GetSpellInfo(args.NextUInt32(), Difficulty.None);
+                        case nameof(AccountIdentifier):
+                            value = AccountIdentifier.ParseFromString(args.NextString());
                             break;
                         default:
                             return false;
                     }
-
                     return true;
                 default:
                     return false;
             }
+
             return true;
         }
     }

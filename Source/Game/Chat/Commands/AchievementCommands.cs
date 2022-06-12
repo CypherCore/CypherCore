@@ -26,7 +26,7 @@ namespace Game.Chat.Commands
     [CommandGroup("achievement")]
     class AchievementCommand
     {
-        [Command("add", RBACPermissions.CommandAchievementAdd)]
+        [Command("add", CypherStrings.CommandAchievementAddHelp, RBACPermissions.CommandAchievementAdd)]
         static bool HandleAchievementAddCommand(CommandHandler handler, uint achievemntId)
         {
             AchievementRecord achievementEntry = CliDB.AchievementStorage.LookupByKey(achievemntId);

@@ -120,12 +120,11 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandCharacterLevel, true)]
-        static bool HandleGroupLevelCommand(CommandHandler handler, string playerName, short level)
+        static bool HandleGroupLevelCommand(CommandHandler handler, PlayerIdentifier player, short level)
         {
             if (level < 1)
                 return false;
 
-            var player = PlayerIdentifier.ParseFromString(playerName);
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
             if (player == null)

@@ -674,6 +674,35 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("xp", RBACPermissions.CommandModifyXp)]
+        static bool HandleModifyXPCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
+
+            int xp = args.NextInt32();
+
+            if (xp < 1)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            Player target = handler.GetSelectedPlayerOrSelf();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
+
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
+
+            // we can run the command
+            target.GiveXP((uint)xp, null);
+            return true;
+        }
+
         [CommandNonGroup("morph", RBACPermissions.CommandMorph)]
         static bool HandleModifyMorphCommand(CommandHandler handler, StringArguments args)
         {
@@ -708,35 +737,6 @@ namespace Game.Chat
 
             target.DeMorph();
 
-            return true;
-        }
-
-        [Command("xp", RBACPermissions.CommandModifyXp)]
-        static bool HandleModifyXPCommand(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
-
-            int xp = args.NextInt32();
-
-            if (xp < 1)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                return false;
-
-            // we can run the command
-            target.GiveXP((uint)xp, null);
             return true;
         }
 

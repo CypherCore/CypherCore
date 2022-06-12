@@ -149,11 +149,11 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
             handler.SendSysMessage(CypherStrings.NpcinfoPosition, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
-            handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, target.GetAIName(), target.GetScriptName());
-            handler.SendSysMessage(CypherStrings.NpcinfoReactState, target.GetReactState());
+            handler.SendSysMessage(CypherStrings.ObjectinfoAiInfo, target.GetAIName(), target.GetScriptName());
+            handler.SendSysMessage(CypherStrings.NpcinfoReactstate, target.GetReactState());
             var ai = target.GetAI();
             if (ai != null)
-                handler.SendSysMessage(CypherStrings.ObjectInfoAIType, nameof(ai));
+                handler.SendSysMessage(CypherStrings.ObjectinfoAiType, nameof(ai));
             handler.SendSysMessage(CypherStrings.NpcinfoFlagsExtra, cInfo.FlagsExtra);
             foreach (uint value in Enum.GetValues(typeof(CreatureFlagsExtra)))
                 if (cInfo.FlagsExtra.HasAnyFlag((CreatureFlagsExtra)value))
@@ -331,43 +331,43 @@ namespace Game.Chat
                 return false;
             }
 
-            handler.SendSysMessage(CypherStrings.CommandNpcShowLootHeader, creatureTarget.GetName(), creatureTarget.GetEntry());
-            handler.SendSysMessage(CypherStrings.CommandNpcShowLootMoney, loot.gold / MoneyConstants.Gold, (loot.gold % MoneyConstants.Gold) / MoneyConstants.Silver, loot.gold % MoneyConstants.Silver);
+            handler.SendSysMessage(CypherStrings.CommandNpcShowlootHeader, creatureTarget.GetName(), creatureTarget.GetEntry());
+            handler.SendSysMessage(CypherStrings.CommandNpcShowlootMoney, loot.gold / MoneyConstants.Gold, (loot.gold % MoneyConstants.Gold) / MoneyConstants.Silver, loot.gold % MoneyConstants.Silver);
 
             if (all.Equals("all", StringComparison.OrdinalIgnoreCase)) // nonzero from strcmp <. not equal
             {
-                handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel, "Standard items", loot.items.Count);
+                handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel, "Standard items", loot.items.Count);
                 foreach (LootItem item in loot.items)
                     if (!item.is_looted)
                         _ShowLootEntry(handler, item.itemid, item.count);
 
-                handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel, "Quest items", loot.quest_items.Count);
+                handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel, "Quest items", loot.quest_items.Count);
                 foreach (LootItem item in loot.quest_items)
                     if (!item.is_looted)
                         _ShowLootEntry(handler, item.itemid, item.count);
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel, "Standard items", loot.items.Count);
+                handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel, "Standard items", loot.items.Count);
                 foreach (LootItem item in loot.items)
                     if (!item.is_looted && !item.freeforall && item.conditions.Empty())
                         _ShowLootEntry(handler, item.itemid, item.count);
 
                 if (!loot.GetPlayerQuestItems().Empty())
                 {
-                    handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel2, "Per-player quest items");
+                    handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "Per-player quest items");
                     _IterateNotNormalLootMap(handler, loot.GetPlayerQuestItems(), loot.quest_items);
                 }
 
                 if (!loot.GetPlayerFFAItems().Empty())
                 {
-                    handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel2, "FFA items per allowed player");
+                    handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "FFA items per allowed player");
                     _IterateNotNormalLootMap(handler, loot.GetPlayerFFAItems(), loot.items);
                 }
 
                 if (!loot.GetPlayerNonQuestNonFFAConditionalItems().Empty())
                 {
-                    handler.SendSysMessage(CypherStrings.CommandNpcShowLootLabel2, "Per-player conditional items");
+                    handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "Per-player conditional items");
                     _IterateNotNormalLootMap(handler, loot.GetPlayerNonQuestNonFFAConditionalItems(), loot.items);
                 }
             }
@@ -548,7 +548,7 @@ namespace Game.Chat
             if (itemTemplate != null)
                 name = itemTemplate.GetName(handler.GetSessionDbcLocale());
 
-            handler.SendSysMessage(alternateString ? CypherStrings.CommandNpcShowLootEntry2 : CypherStrings.CommandNpcShowLootEntry,
+            handler.SendSysMessage(alternateString ? CypherStrings.CommandNpcShowlootEntry2 : CypherStrings.CommandNpcShowlootEntry,
                 itemCount, ItemConst.ItemQualityColors[(int)(itemTemplate != null ? itemTemplate.GetQuality() : ItemQuality.Poor)], itemId, name, itemId);
         }
         static void _IterateNotNormalLootMap(CommandHandler handler, MultiMap<ObjectGuid, NotNormalLootItem> map, List<LootItem> items)
@@ -561,7 +561,7 @@ namespace Game.Chat
                 var list = map[key];
 
                 Player player = Global.ObjAccessor.FindConnectedPlayer(key);
-                handler.SendSysMessage(CypherStrings.CommandNpcShowLootSublabel, player ? player.GetName() : $"Offline player (GUID {key})", list.Count);
+                handler.SendSysMessage(CypherStrings.CommandNpcShowlootSublabel, player ? player.GetName() : $"Offline player (GUID {key})", list.Count);
 
                 foreach (var it in list)
                 {

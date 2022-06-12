@@ -28,9 +28,8 @@ namespace Game.Chat
     class LFGCommands
     {
         [Command("player", RBACPermissions.CommandLfgPlayer, true)]
-        static bool HandleLfgPlayerInfoCommand(CommandHandler handler, string playerName)
+        static bool HandleLfgPlayerInfoCommand(CommandHandler handler, PlayerIdentifier player)
         {
-            var player = PlayerIdentifier.ParseFromString(playerName);
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
             if (player == null)
@@ -47,9 +46,8 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandLfgGroup, true)]
-        static bool HandleLfgGroupInfoCommand(CommandHandler handler, string playerName)
+        static bool HandleLfgGroupInfoCommand(CommandHandler handler, PlayerIdentifier player)
         {
-            var player = PlayerIdentifier.ParseFromString(playerName);
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
             if (player == null)

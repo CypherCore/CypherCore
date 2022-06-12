@@ -23,10 +23,22 @@ namespace Game.Chat
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class CommandAttribute : Attribute
     {
+        public CommandAttribute(string command)
+        {
+            Name = command.ToLower();
+        }
+
         public CommandAttribute(string command, RBACPermissions rbac, bool allowConsole = false)
         {
             Name = command.ToLower();
-            Help = "";
+            RBAC = rbac;
+            AllowConsole = allowConsole;
+        }
+
+        public CommandAttribute(string command, CypherStrings help, RBACPermissions rbac, bool allowConsole = false)
+        {
+            Name = command.ToLower();
+            Help = help;
             RBAC = rbac;
             AllowConsole = allowConsole;
         }
@@ -37,9 +49,9 @@ namespace Game.Chat
         public string Name { get; private set; }
 
         /// <summary>
-        /// Help text for command.
+        /// Help String for command.
         /// </summary>
-        public string Help { get; set; }
+        public CypherStrings Help { get; set; }
 
         /// <summary>
         /// Allow Console?
@@ -55,13 +67,13 @@ namespace Game.Chat
     [AttributeUsage(AttributeTargets.Class)]
     public class CommandGroupAttribute : CommandAttribute
     {
-        //todo fix me.
-        public CommandGroupAttribute(string command) : base(command, RBACPermissions.Max, true) { }
+        public CommandGroupAttribute(string command) : base(command) { }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class CommandNonGroupAttribute : CommandAttribute
     {
+        public CommandNonGroupAttribute(string command, CypherStrings help, RBACPermissions rbac, bool allowConsole = false) : base(command, help, rbac, allowConsole) { }
         public CommandNonGroupAttribute(string command, RBACPermissions rbac, bool allowConsole = false) : base(command, rbac, allowConsole) { }
     }
 }

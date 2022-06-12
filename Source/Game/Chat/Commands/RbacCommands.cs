@@ -63,9 +63,8 @@ namespace Game.Chat.Commands
         class RbacAccountCommands
         {
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
-            static bool HandleRBACPermDenyCommand(CommandHandler handler, string accountName, uint permId, int? realmId)
+            static bool HandleRBACPermDenyCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
             {
-                var account = AccountIdentifier.ParseFromString(accountName);
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
                 if (account == null)
@@ -107,9 +106,8 @@ namespace Game.Chat.Commands
             }
 
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
-            static bool HandleRBACPermGrantCommand(CommandHandler handler, string accountName, uint permId, int? realmId)
+            static bool HandleRBACPermGrantCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
             {
-                var account = AccountIdentifier.ParseFromString(accountName);
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
                 if (account == null)
@@ -151,9 +149,8 @@ namespace Game.Chat.Commands
             }
 
             [Command("list", RBACPermissions.CommandRbacAccPermList, true)]
-            static bool HandleRBACPermListCommand(CommandHandler handler, string accountName)
+            static bool HandleRBACPermListCommand(CommandHandler handler, AccountIdentifier account)
             {
-                var account = AccountIdentifier.ParseFromString(accountName);
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
                 if (account == null)
@@ -203,9 +200,8 @@ namespace Game.Chat.Commands
             }
 
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
-            static bool HandleRBACPermRevokeCommand(CommandHandler handler, string accountName, uint permId, int? realmId)
+            static bool HandleRBACPermRevokeCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
             {
-                var account = AccountIdentifier.ParseFromString(accountName);
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
                 if (account == null)

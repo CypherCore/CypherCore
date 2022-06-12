@@ -227,7 +227,7 @@ namespace Game.Chat
         }
 
         [Command("testarea", RBACPermissions.CommandMmapTestarea)]
-        static bool TestArea(CommandHandler handler, StringArguments args)
+        static bool TestArea(CommandHandler handler)
         {
             float radius = 40.0f;
             WorldObject obj = handler.GetPlayer();

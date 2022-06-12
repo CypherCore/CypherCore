@@ -92,7 +92,7 @@ namespace Game.Chat
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.CommandTpAddedError);
+                handler.SendSysMessage(CypherStrings.CommandTpAddedErr);
                 return false;
             }
 
@@ -240,9 +240,8 @@ namespace Game.Chat
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
-            static bool HandleTeleNameCommand(CommandHandler handler, string playerName, string where)
+            static bool HandleTeleNameCommand(CommandHandler handler, PlayerIdentifier player, string where)
             {
-                var player = PlayerIdentifier.ParseFromString(playerName);
                 if (player == null)
                     player = PlayerIdentifier.FromTargetOrSelf(handler);
                 if (player == null)
@@ -284,9 +283,8 @@ namespace Game.Chat
             class TeleNameNpcCommands
             {
                 [Command("guid", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, string playerName, ulong spawnId)
+                static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, ulong spawnId)
                 {
-                    var player = PlayerIdentifier.ParseFromString(playerName);
                     if (player == null)
                         return false;
 
@@ -303,9 +301,8 @@ namespace Game.Chat
                 }
 
                 [Command("id", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcIdCommand(CommandHandler handler, string playerName, uint creatureId)
+                static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, uint creatureId)
                 {
-                    var player = PlayerIdentifier.ParseFromString(playerName);
                     if (player == null)
                         return false;
 
@@ -336,9 +333,8 @@ namespace Game.Chat
                 }
 
                 [Command("name", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcNameCommand(CommandHandler handler, string playerName, string name)
+                static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, string name)
                 {
-                    var player = PlayerIdentifier.ParseFromString(playerName);
                     if (player == null)
                         return false;
 

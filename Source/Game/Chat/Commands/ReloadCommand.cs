@@ -849,6 +849,17 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("spell_script_names", RBACPermissions.CommandReloadSpellScriptNames, true)]
+        static bool HandleReloadSpellScriptNamesCommand(CommandHandler handler)
+        {
+            Log.outInfo(LogFilter.Misc, "Reloading spell_script_names table...");
+            Global.ObjectMgr.LoadSpellScriptNames();
+            //Global.ScriptMgr.NotifyScriptIDUpdate();
+            Global.ObjectMgr.ValidateSpellScripts();
+            handler.SendGlobalGMSysMessage("Spell scripts reloaded.");
+            return true;
+        }
+        
         [Command("spell_target_position", RBACPermissions.CommandReloadSpellTargetPosition, true)]
         static bool HandleReloadSpellTargetPositionCommand(CommandHandler handler, StringArguments args)
         {

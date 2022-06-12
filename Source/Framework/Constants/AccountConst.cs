@@ -753,6 +753,7 @@ namespace Framework.Constants
         // 878-879 previously used, do not reuse
         CommandPdumpCopy = 880,
         CommandReloadVehicleTemplate = 881,
+        CommandReloadSpellScriptNames = 882,
         // Custom Permissions 1000+
         Max
     }

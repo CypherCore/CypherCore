@@ -128,9 +128,8 @@ namespace Game.Chat
         }
 
         [Command("rank", RBACPermissions.CommandGuildRank, true)]
-        static bool HandleGuildRankCommand(CommandHandler handler, string playerName, byte rank)
+        static bool HandleGuildRankCommand(CommandHandler handler, PlayerIdentifier player, byte rank)
         {
-            var player = PlayerIdentifier.ParseFromString(playerName);
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
             if (player == null)

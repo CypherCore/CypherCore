@@ -25,7 +25,7 @@ namespace Game.Chat
     class ArenaCommands
     {
         [Command("create", RBACPermissions.CommandArenaCreate, true)]
-        static bool HandleArenaCreateCommand(CommandHandler handler, string captainName, string name, ArenaTypes type)
+        static bool HandleArenaCreateCommand(CommandHandler handler, PlayerIdentifier captain, string name, ArenaTypes type)
         {
             if (Global.ArenaTeamMgr.GetArenaTeamByName(name) != null)
             {
@@ -33,7 +33,6 @@ namespace Game.Chat
                 return false;
             }
             
-            var captain = PlayerIdentifier.ParseFromString(captainName);
             if (captain == null)
                 captain = PlayerIdentifier.FromTargetOrSelf(handler);
             if (captain == null)
@@ -115,7 +114,7 @@ namespace Game.Chat
         }
 
         [Command("captain", RBACPermissions.CommandArenaCaptain)]
-        static bool HandleArenaCaptainCommand(CommandHandler handler, uint teamId, string targetName)
+        static bool HandleArenaCaptainCommand(CommandHandler handler, uint teamId, PlayerIdentifier target)
         {
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
             if (arena == null)
@@ -130,7 +129,6 @@ namespace Game.Chat
                 return false;
             }
 
-            var target = PlayerIdentifier.ParseFromString(targetName);
             if (target == null)
                 target = PlayerIdentifier.FromTargetOrSelf(handler);
             if (target == null)

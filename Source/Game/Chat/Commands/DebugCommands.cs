@@ -1082,31 +1082,28 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
+        [Command("warden force", RBACPermissions.CommandDebug, true)]
+        static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
         {
-            handler.GetPlayer().SendUpdateWorldState(variable, value);
+            /*if (checkIds.Empty())
+                return false;
+
+            Warden  warden = handler.GetSession().GetWarden();
+            if (warden == null)
+            {
+                handler.SendSysMessage("Warden system is not enabled");
+                return true;
+            }
+
+            size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
+            handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
             return true;
         }
 
         [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWorldStateCommand(CommandHandler handler, uint worldStateId, uint? value)
+        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
         {
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (target == null)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                return false;
-            }
-
-            if (value.HasValue)
-            {
-                Global.WorldMgr.SetWorldState(worldStateId, value.Value);
-                target.SendUpdateWorldState(worldStateId, value.Value);
-            }
-            else
-                handler.SendSysMessage($"Worldstate {worldStateId} actual value : {Global.WorldMgr.GetWorldState(worldStateId)}");
-
+            handler.GetPlayer().SendUpdateWorldState(variable, value);
             return true;
         }
 
@@ -1143,8 +1140,18 @@ namespace Game.Chat
             return true;
         }
 
+        [CommandGroup("asan")]
+        class DebugAsanCommands
+        {
+            [Command("memoryleak", RBACPermissions.CommandDebug, true)]
+            static bool HandleDebugMemoryLeak(CommandHandler handler) { return true; }
+
+            [Command("outofbounds", RBACPermissions.CommandDebug, true)]
+            static bool HandleDebugOutOfBounds(CommandHandler handler) { return true; }
+        }
+
         [CommandGroup("play")]
-        class PlayCommands
+        class DebugPlayCommands
         {
             [Command("cinematic", RBACPermissions.CommandDebug)]
             static bool HandleDebugPlayCinematicCommand(CommandHandler handler, uint cinematicId)
@@ -1233,7 +1240,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("pvp")]
-        class PvpCommands
+        class DebugPvpCommands
         {
             [Command("warmode", RBACPermissions.CommandDebug)]
             static bool HandleDebugWarModeFactionBalanceCommand(CommandHandler handler, string command, int rewardValue = 0)
@@ -1267,7 +1274,7 @@ namespace Game.Chat
         }
 
         [CommandGroup("send")]
-        class SendCommands
+        class DebugSendCommands
         {
             [Command("buyerror", RBACPermissions.CommandDebug)]
             static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, BuyResult error)
@@ -1315,7 +1322,7 @@ namespace Game.Chat
             [Command("opcode", RBACPermissions.CommandDebug)]
             static bool HandleDebugSendOpcodeCommand(CommandHandler handler)
             {
-                handler.SendSysMessage(CypherStrings.NoCmd);
+                handler.SendSysMessage(CypherStrings.CmdInvalid);
                 return true;
             }
 
@@ -1377,6 +1384,28 @@ namespace Game.Chat
                 castFailed.FailedArg2 = failArg2.GetValueOrDefault(-1);
                 handler.GetSession().SendPacket(castFailed);
 
+                return true;
+            }
+        }
+
+        [CommandGroup("warden")]
+        class DebugWardenCommands
+        {
+            [Command("force", RBACPermissions.CommandDebug, true)]
+            static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
+            {
+                /*if (checkIds.Empty())
+                    return false;
+
+                Warden  warden = handler.GetSession().GetWarden();
+                if (warden == null)
+                {
+                    handler.SendSysMessage("Warden system is not enabled");
+                    return true;
+                }
+
+                size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
+                handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
                 return true;
             }
         }

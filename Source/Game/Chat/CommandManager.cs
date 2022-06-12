@@ -19,6 +19,8 @@ using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.DataStorage;
+using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,18 +40,17 @@ namespace Game.Chat
                 var groupAttribute = type.GetCustomAttribute<CommandGroupAttribute>(true);
                 if (groupAttribute != null)
                 {
-                    ChatCommand command = new(groupAttribute);
-                    BuildChildCommandsForCommand(command, type);
+                    ChatCommandNode command = new(groupAttribute);
+                    BuildSubCommandsForCommand(command, type);
                     _commands.Add(groupAttribute.Name, command);
                 }
-                else
+
+                //This check for any command not part of that group,  but saves us from having to add them into a new class.
+                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
                 {
-                    foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
-                    {
-                        var commandAttribute = method.GetCustomAttribute<CommandNonGroupAttribute>(true);
-                        if (commandAttribute != null)
-                            _commands.Add(commandAttribute.Name, new ChatCommand(commandAttribute, method));
-                    }
+                    var commandAttribute = method.GetCustomAttribute<CommandNonGroupAttribute>(true);
+                    if (commandAttribute != null)
+                        _commands.Add(commandAttribute.Name, new ChatCommandNode(commandAttribute, method));
                 }
             }
 
@@ -60,13 +61,45 @@ namespace Game.Chat
                 do
                 {
                     string name = result.Read<string>(0);
-                    SetDataForCommandInTable(GetCommands(), name, result.Read<string>(1), name);
+                    string help = result.Read<string>(1);
+
+                    ChatCommandNode cmd = null;
+                    var map = _commands;
+                    foreach (var key in name.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var it = map.LookupByKey(key);
+                        if (it != null)
+                        {
+                            cmd = it;
+                            map = cmd._subCommands;
+                        }
+                        else
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `command` contains data for non-existant command '{name}'. Skipped.");
+                            cmd = null;
+                            break;
+                        }
+                    }
+
+                    if (cmd == null)
+                        continue;
+
+                    if (!cmd._helpText.IsEmpty())
+                        Log.outError(LogFilter.Sql, $"Table `command` contains duplicate data for command '{name}'. Skipped.");
+
+                    if (cmd._helpString == 0)
+                        cmd._helpText = help;
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `command` contains legacy help text for command '{name}', which uses `trinity_string`. Skipped.");
                 }
                 while (result.NextRow());
             }
+
+            foreach (var (name, cmd) in _commands)
+                cmd.ResolveNames(name);
         }
 
-        static void BuildChildCommandsForCommand(ChatCommand command, Type type)
+        static void BuildSubCommandsForCommand(ChatCommandNode command, Type type)
         {
             foreach (var nestedType in type.GetNestedTypes(BindingFlags.NonPublic))
             {
@@ -74,9 +107,9 @@ namespace Game.Chat
                 if (groupAttribute == null)
                     continue;
 
-                ChatCommand childCommand = new(groupAttribute);
-                BuildChildCommandsForCommand(childCommand, nestedType);
-                command.AddChildCommand(childCommand);
+                ChatCommandNode subCommand = new(groupAttribute);
+                BuildSubCommandsForCommand(subCommand, nestedType);
+                command.AddSubCommand(subCommand);
             }
 
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
@@ -88,55 +121,8 @@ namespace Game.Chat
                 if (commandAttribute.GetType() == typeof(CommandNonGroupAttribute))
                     continue;
 
-                command.AddChildCommand(new ChatCommand(commandAttribute, method));
+                command.AddSubCommand(new ChatCommandNode(commandAttribute, method));
             }
-
-            command.SortChildCommands();
-        }
-
-        static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, string help, string fullcommand)
-        {
-            StringArguments args = new(text);
-            string cmd = args.NextString().ToLower();
-
-            foreach (var command in table)
-            {
-                // for data fill use full explicit command names
-                if (command.Name != cmd)
-                    continue;
-
-                // select subcommand from child commands list (including "")
-                if (!command.ChildCommands.Empty())
-                {
-                    var arg = args.NextString("");
-                    if (SetDataForCommandInTable(command.ChildCommands, arg, help, fullcommand))
-                        return true;
-                    else if (!arg.IsEmpty())
-                        return false;
-
-                    // fail with "" subcommands, then use normal level up command instead
-                }
-                // expected subcommand by full name DB content
-                else if (!args.NextString().IsEmpty())
-                {
-                    Log.outError(LogFilter.Sql, "Table `command` have unexpected subcommand '{0}' in command '{1}', skip.", text, fullcommand);
-                    return false;
-                }
-
-                command.Help = help;
-                return true;
-            }
-
-            // in case "" command let process by caller
-            if (!cmd.IsEmpty())
-            {
-                if (table == GetCommands())
-                    Log.outError(LogFilter.Sql, "Table `command` have not existed command '{0}', skip.", cmd);
-                else
-                    Log.outError(LogFilter.Sql, "Table `command` have not existed subcommand '{0}' in command '{1}', skip.", cmd, fullcommand);
-            }
-
-            return false;
         }
 
         public static void InitConsole()
@@ -150,55 +136,255 @@ namespace Game.Chat
             var handler = new ConsoleHandler();
             while (!Global.WorldMgr.IsStopped)
             {
-                handler.ParseCommand(Console.ReadLine());
+                handler.ParseCommands(Console.ReadLine());
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("Cypher>> ");
             }
         }
 
-        public static ICollection<ChatCommand> GetCommands()
+        public static SortedDictionary<string, ChatCommandNode> GetCommands()
         {
-            return _commands.Values;
+            return _commands;
         }
 
-        static SortedDictionary<string, ChatCommand> _commands = new();
+        static SortedDictionary<string, ChatCommandNode> _commands = new();
     }
 
     public delegate bool HandleCommandDelegate(CommandHandler handler, StringArguments args);
 
-    public class ChatCommand
+    public class ChatCommandNode
     {
-        public string Name;
-        public RBACPermissions Permission;
-        public bool AllowConsole;
-        public string Help;
-        public List<ChatCommand> ChildCommands = new();
+        public string _name;
+        public CommandPermissions _permission;
+        public string _helpText;
+        public CypherStrings _helpString;
+        public SortedDictionary<string, ChatCommandNode> _subCommands = new();
 
         MethodInfo _methodInfo;
         Type[] parameterTypes;
 
-        public ChatCommand(CommandAttribute attribute)
+        public ChatCommandNode(CommandAttribute attribute)
         {
-            Name = attribute.Name;
-            Permission = attribute.RBAC;
-            AllowConsole = attribute.AllowConsole;
-            Help = attribute.Help;
+            _name = attribute.Name;
+            _permission = new CommandPermissions(attribute.RBAC, attribute.AllowConsole);
+            _helpString = attribute.Help;
         }
 
-        public ChatCommand(CommandAttribute attribute, MethodInfo methodInfo) : this(attribute)
+        public ChatCommandNode(CommandAttribute attribute, MethodInfo methodInfo) : this(attribute)
         {
             _methodInfo = methodInfo;
             parameterTypes = (from parameter in methodInfo.GetParameters() select parameter.ParameterType).ToArray();
         }
 
-        public void AddChildCommand(ChatCommand command)
+        public static bool TryExecuteCommand(CommandHandler handler, string cmdStr)
         {
-            ChildCommands.Add(command);
+            ChatCommandNode cmd = null;
+            var map = CommandManager.GetCommands();
+
+            cmdStr = cmdStr.Trim(' ');
+
+            string oldTail = cmdStr;
+            while (!oldTail.IsEmpty())
+            {
+                /* oldTail = token DELIMITER newTail */
+                var (token, newTail) = oldTail.Tokenize();
+                Cypher.Assert(!token.IsEmpty());
+                var listOfPossibleCommands = map.Where(p => p.Key.StartsWith(token) && p.Value.IsVisible(handler)).ToList();
+                if (listOfPossibleCommands.Empty())
+                    break; /* no matching subcommands found */
+
+                if (!listOfPossibleCommands[0].Key.Equals(token, StringComparison.OrdinalIgnoreCase))
+                { /* ok, so it1 points at a partially matching subcommand - let's see if there are others */
+
+                    if (listOfPossibleCommands.Count > 1)
+                    { /* there are multiple matching subcommands - print possibilities and return */
+                        if (cmd != null)
+                            handler.SendSysMessage(CypherStrings.SubcmdAmbiguous, cmd._name, ' ', token);
+                        else
+                            handler.SendSysMessage(CypherStrings.CmdAmbiguous, token);
+
+                        handler.SendSysMessage(listOfPossibleCommands[0].Value.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, listOfPossibleCommands[0].Key);
+                        foreach (var (name, command) in listOfPossibleCommands)
+                            handler.SendSysMessage(command.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, name);
+
+                        return true;
+                    }
+                }
+
+                /* now we matched exactly one subcommand, and it1 points to it; go down the rabbit hole */
+                cmd = listOfPossibleCommands[0].Value;
+                map = cmd._subCommands;
+
+                oldTail = newTail;
+            }
+
+            if (cmd != null)
+            { /* if we matched a command at some point, invoke it */
+                if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, new StringArguments(oldTail)))
+                { /* invocation succeeded, log this */
+                    if (!handler.IsConsole())
+                        LogCommandUsage(handler.GetSession(), (uint)cmd._permission.RequiredPermission, cmdStr);
+                }
+                else if (!handler.HasSentErrorMessage())
+                { /* invocation failed, we should show usage */
+                    cmd.SendCommandHelp(handler);
+                }
+                return true;
+            }
+
+            return false;
         }
 
-        public void SortChildCommands()
+        public static void SendCommandHelpFor(CommandHandler handler, string cmdStr)
         {
-            ChildCommands = ChildCommands.OrderBy(p => string.IsNullOrEmpty(p.Name)).ThenBy(p => p.Name).ToList();
+            ChatCommandNode cmd = null;
+            var map = CommandManager.GetCommands();
+            foreach (var token in cmdStr.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var listOfPossibleCommands = map.Where(p => p.Key.StartsWith(token) && p.Value.IsVisible(handler)).ToList();
+                if (listOfPossibleCommands.Empty())
+                { /* no matching subcommands found */
+                    if (cmd != null)
+                    {
+                        cmd.SendCommandHelp(handler);
+                        handler.SendSysMessage(CypherStrings.SubcmdInvalid, cmd._name, ' ', token);
+                    }
+                    else
+                        handler.SendSysMessage(CypherStrings.CmdInvalid, token);
+                    return;
+                }
+
+                if (!listOfPossibleCommands[0].Key.Equals(token, StringComparison.OrdinalIgnoreCase))
+                { /* ok, so it1 points at a partially matching subcommand - let's see if there are others */
+
+                    if (listOfPossibleCommands.Count > 1)
+                    { /* there are multiple matching subcommands - print possibilities and return */
+                        if (cmd != null)
+                            handler.SendSysMessage(CypherStrings.SubcmdAmbiguous, cmd._name, ' ', token);
+                        else
+                            handler.SendSysMessage(CypherStrings.CmdAmbiguous, token);
+
+                        handler.SendSysMessage(listOfPossibleCommands[0].Value.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, listOfPossibleCommands[0].Key);
+                        foreach (var (name, command) in listOfPossibleCommands)
+                            handler.SendSysMessage(command.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, name);
+
+                        return;
+                    }
+                }
+
+                cmd = listOfPossibleCommands[0].Value;
+                map = cmd._subCommands;
+            }
+
+            if (cmd != null)
+                cmd.SendCommandHelp(handler);
+            else if (cmdStr.IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.AvailableCmds);
+                foreach (var (name, command) in map)
+                    handler.SendSysMessage(command.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, name);
+            }
+            else
+                handler.SendSysMessage(CypherStrings.CmdInvalid, cmdStr);
+        }
+
+        bool IsInvokerVisible(CommandHandler who)
+        {
+            if (_methodInfo == null)
+                return false;
+
+            if (who.IsConsole() && !_permission.AllowConsole)
+                return false;
+
+            return who.HasPermission(_permission.RequiredPermission);
+        }
+
+        bool HasVisibleSubCommands(CommandHandler who)
+        {
+            foreach (var (_, command) in _subCommands)
+                if (command.IsVisible(who))
+                    return true;
+            return false;
+        }
+
+        public void ResolveNames(string name)
+        {
+            if (_methodInfo != null && (_helpText.IsEmpty() && _helpString == 0))
+                Log.outWarn(LogFilter.Sql, $"Table `command` is missing help text for command '{name}'.");
+
+            _name = name;
+            foreach (var (subToken, cmd) in _subCommands)
+                cmd.ResolveNames($"{name} {subToken}");
+        }
+
+        static void LogCommandUsage(WorldSession session, uint permission, string cmdStr)
+        {
+            if (Global.AccountMgr.IsPlayerAccount(session.GetSecurity()))
+                return;
+
+            if (Global.AccountMgr.GetRBACPermission((uint)RBACPermissions.RolePlayer).GetLinkedPermissions().Contains(permission))
+                return;
+
+            Player player = session.GetPlayer();
+            ObjectGuid targetGuid = player.GetTarget();
+            uint areaId = player.GetAreaId();
+            string areaName = "Unknown";
+            string zoneName = "Unknown";
+
+            var area = CliDB.AreaTableStorage.LookupByKey(areaId);
+            if (area != null)
+            {
+                Locale locale = session.GetSessionDbcLocale();
+                areaName = area.AreaName[locale];
+                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                if (zone != null)
+                    zoneName = zone.AreaName[locale];
+            }
+
+            Log.outCommand(session.GetAccountId(), $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +
+                $"X: {player.GetPositionX()} Y: {player.GetPositionY()} Z: {player.GetPositionZ()} Map: {player.GetMapId()} ({(player.GetMap() ? player.GetMap().GetMapName() : "Unknown")}) " +
+                $"Area: {areaId} ({areaName}) Zone: {zoneName} Selected: {(player.GetSelectedUnit() ? player.GetSelectedUnit().GetName() : "")} ({targetGuid})]");
+        }
+
+        public void SendCommandHelp(CommandHandler handler)
+        {
+            bool hasInvoker = IsInvokerVisible(handler);
+            if (hasInvoker)
+            {
+                if (_helpString != 0)
+                    handler.SendSysMessage(_helpString);
+                else if (!_helpText.IsEmpty())
+                    handler.SendSysMessage(_helpText);
+                else
+                {
+                    handler.SendSysMessage(CypherStrings.CmdHelpGeneric, _name);
+                    handler.SendSysMessage(CypherStrings.CmdNoHelpAvailable, _name);
+                }
+            }
+
+            bool header = false;
+            foreach (var (_, command) in _subCommands)
+            {
+                bool subCommandHasSubCommand = command.HasVisibleSubCommands(handler);
+                if (!subCommandHasSubCommand && !command.IsInvokerVisible(handler))
+                    continue;
+                if (!header)
+                {
+                    if (!hasInvoker)
+                        handler.SendSysMessage(CypherStrings.CmdHelpGeneric, _name);
+                    handler.SendSysMessage(CypherStrings.SubcmdsList);
+                    header = true;
+                }
+                handler.SendSysMessage(subCommandHasSubCommand ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, command._name);
+            }
+        }
+
+        bool IsVisible(CommandHandler who) { return IsInvokerVisible(who) || HasVisibleSubCommands(who); }
+
+        public void AddSubCommand(ChatCommandNode command)
+        {
+            if (!_subCommands.TryAdd(command._name, command))
+                Log.outError(LogFilter.Commands, $"Error trying to add subcommand, Already exists Command: {_name} SubCommand: {command._name}");
         }
 
         public bool Invoke(CommandHandler handler, StringArguments args)
@@ -209,15 +395,17 @@ namespace Game.Chat
                 return (bool)_methodInfo.Invoke(null, CommandArgs.Parse(handler, parameterTypes, args));
 
         }
+    }
 
-        public bool HasHandler()
-        {
-            return _methodInfo != null;
-        }
+    public struct CommandPermissions
+    {
+        public RBACPermissions RequiredPermission;
+        public bool AllowConsole;
 
-        public override string ToString()
+        public CommandPermissions(RBACPermissions perm, bool allowConsole)
         {
-            return $"Name: {Name} Permission: {Permission} AllowConsole: {AllowConsole} ChildCommandCount: {ChildCommands.Count}";
+            RequiredPermission = perm;
+            AllowConsole = allowConsole;
         }
     }
 }

@@ -173,7 +173,7 @@ namespace Game
             if (string.IsNullOrEmpty(msg))
                 return;
 
-            if (new CommandHandler(this).ParseCommand(msg))
+            if (new CommandHandler(this).ParseCommands(msg))
                 return;
 
             switch (type)
@@ -398,7 +398,7 @@ namespace Game
             if (!WorldConfig.GetBoolValue(WorldCfg.AddonChannel))
                 return;
 
-            if (prefix == AddonChannelCommandHandler.PREFIX && new AddonChannelCommandHandler(this).ParseCommand(text))
+            if (prefix == AddonChannelCommandHandler.PREFIX && new AddonChannelCommandHandler(this).ParseCommands(text))
                 return;
 
             switch (type)

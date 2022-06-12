@@ -185,10 +185,10 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
 
-            handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, gameObjectInfo.AIName, Global.ObjectMgr.GetScriptName(gameObjectInfo.ScriptId));
+            handler.SendSysMessage(CypherStrings.ObjectinfoAiInfo, gameObjectInfo.AIName, Global.ObjectMgr.GetScriptName(gameObjectInfo.ScriptId));
             var ai = thisGO != null ? thisGO.GetAI() : null;
             if (ai != null)
-                handler.SendSysMessage(CypherStrings.ObjectInfoAIType, nameof(ai));
+                handler.SendSysMessage(CypherStrings.ObjectinfoAiType, nameof(ai));
 
             GameObjectDisplayInfoRecord modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
             if (modelInfo != null)

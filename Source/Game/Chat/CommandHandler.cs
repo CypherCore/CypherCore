@@ -37,9 +37,9 @@ namespace Game.Chat
             _session = session;
         }
 
-        public virtual bool ParseCommand(string text)
+        public virtual bool ParseCommands(string text)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text.IsEmpty())
                 return false;
 
             // chat case (.command or !command format)
@@ -51,7 +51,10 @@ namespace Game.Chat
                 return false;
 
             // ignore messages staring from many dots.
-            if (text[1] == '!' || text[1] == '.')
+            if (text[1] == text[0])
+                return false;
+
+            if (text[1] == ' ')
                 return false;
 
             return _ParseCommands(text.Substring(1));
@@ -59,7 +62,7 @@ namespace Game.Chat
 
         public bool _ParseCommands(string text)
         {
-            if (ExecuteCommandInTable(CommandManager.GetCommands(), text, text))
+            if (ChatCommandNode.TryExecuteCommand(this, text))
                 return true;
 
             // Pretend commands don't exist for regular players
@@ -67,205 +70,17 @@ namespace Game.Chat
                 return false;
 
             // Send error message for GMs
-            SendSysMessage(CypherStrings.NoCmd);
+            SendSysMessage(CypherStrings.CmdInvalid, text);
             return true;
         }
 
-        public bool ExecuteCommandInTable(ICollection<ChatCommand> table, string text, string fullcmd)
+        public virtual bool IsAvailable(ChatCommandNode cmd)
         {
-            StringArguments args = new(text);
-            string cmd = args.NextString();
-
-            foreach (var command in table)
-            {
-                if (!HasStringAbbr(command.Name, cmd))
-                    continue;
-
-                bool match = false;
-                if (command.Name.Length > cmd.Length)
-                {
-                    foreach (var command2 in table)
-                    {
-                        if (!HasStringAbbr(command2.Name, cmd))
-                            continue;
-
-                        if (command2.Name.Equals(cmd))
-                        {
-                            match = true;
-                            break;
-                        }
-                    }
-                }
-                if (match)
-                    continue;
-
-                if (!command.ChildCommands.Empty())
-                {
-                    string arg = args.NextString("");
-                    if (!ExecuteCommandInTable(command.ChildCommands, arg, fullcmd))
-                    {
-                        if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
-                            return false;
-
-                        if (!arg.IsEmpty())
-                            SendSysMessage(CypherStrings.NoSubcmd);
-                        else
-                            SendSysMessage(CypherStrings.CmdSyntax);
-
-                        ShowHelpForCommand(command.ChildCommands, arg);
-                    }
-
-                    return true;
-                }
-
-                // must be available and have handler
-                if (!command.HasHandler() || !IsAvailable(command))
-                    continue;
-
-                _sentErrorMessage = false;
-                if (command.Invoke(this, new StringArguments(!command.Name.IsEmpty() ? args.NextString("") : text)))
-                {
-                    if (GetSession() == null) // ignore console
-                        return true;
-
-                    Player player = GetPlayer();
-                    if (!Global.AccountMgr.IsPlayerAccount(GetSession().GetSecurity()))
-                    {
-                        ObjectGuid guid = player.GetTarget();
-                        uint areaId = player.GetAreaId();
-                        string areaName = "Unknown";
-                        string zoneName = "Unknown";
-
-                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
-                        if (area != null)
-                        {
-                            var locale = GetSessionDbcLocale();
-                            areaName = area.AreaName[locale];
-                            AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                            if (zone != null)
-                                zoneName = zone.AreaName[locale];
-                        }
-                        
-                        Log.outCommand(GetSession().GetAccountId(), "Command: {0} [Player: {1} ({2}) (Account: {3}) Postion: {4} Map: {5} ({6}) Area: {7} ({8}) Zone: {9} Selected: {10} ({11})]",
-                            fullcmd, player.GetName(), player.GetGUID().ToString(), GetSession().GetAccountId(), player.GetPosition(), player.GetMapId(),
-                            player.GetMap() ? player.GetMap().GetMapName() : "Unknown", areaId, areaName, zoneName, (player.GetSelectedUnit()) ? player.GetSelectedUnit().GetName() : "", guid.ToString());
-                    }
-                }
-                else if (!HasSentErrorMessage())
-                {
-                    if (!command.Help.IsEmpty())
-                        SendSysMessage(command.Help);
-                    else
-                        SendSysMessage(CypherStrings.CmdSyntax);
-                }
-
-                return true;
-            }
-
-            return false;
+            return HasPermission(cmd._permission.RequiredPermission);
         }
 
-        public bool ShowHelpForCommand(ICollection<ChatCommand> table, string text)
-        {
-            StringArguments args = new(text);
-            if (!args.Empty())
-            {
-                string cmd = args.NextString();
-                foreach (var command in table)
-                {
-                    // must be available (ignore handler existence for show command with possible available subcommands)
-                    if (!IsAvailable(command))
-                        continue;
-
-                    if (!HasStringAbbr(command.Name, cmd))
-                        continue;
-
-                    // have subcommand
-                    string subcmd = !cmd.IsEmpty() ? args.NextString() : "";
-                    if (!command.ChildCommands.Empty() && !subcmd.IsEmpty())
-                    {
-                        if (ShowHelpForCommand(command.ChildCommands, subcmd))
-                            return true;
-                    }
-
-                    if (!command.Help.IsEmpty())
-                        SendSysMessage(command.Help);
-
-                    if (!command.ChildCommands.Empty())
-                        if (ShowHelpForSubCommands(command.ChildCommands, command.Name, subcmd))
-                            return true;
-
-                    return !command.Help.IsEmpty();
-                }
-            }
-            else
-            {
-                foreach (var command in table)
-                {
-                    // must be available (ignore handler existence for show command with possible available subcommands)
-                    if (!IsAvailable(command))
-                        continue;
-
-                    if (!command.Name.IsEmpty())
-                        continue;
-
-                    if (!command.Help.IsEmpty())
-                        SendSysMessage(command.Help);
-
-                    if (!command.ChildCommands.Empty())
-                        if (ShowHelpForSubCommands(command.ChildCommands, "", ""))
-                            return true;
-
-                    return !command.Help.IsEmpty();
-                }
-            }
-
-            return ShowHelpForSubCommands(table, "", text);
-        }
-
-        public bool ShowHelpForSubCommands(ICollection<ChatCommand> table, string cmd, string subcmd)
-        {
-            string list = "";
-            foreach (var command in table)
-            {
-                // must be available (ignore handler existence for show command with possible available subcommands)
-                if (!IsAvailable(command))
-                    continue;
-
-                // for empty subcmd show all available
-                if (!subcmd.IsEmpty() && !HasStringAbbr(command.Name, subcmd))
-                    continue;
-
-                if (GetSession() != null)
-                    list += "\n    ";
-                else
-                    list += "\n\r    ";
-
-                list += command.Name;
-
-                if (!command.ChildCommands.Empty())
-                    list += " ...";
-            }
-
-            if (list.IsEmpty())
-                return false;
-
-            if (table == CommandManager.GetCommands())
-            {
-                SendSysMessage(CypherStrings.AvailableCmd);
-                SendSysMessage(list);
-            }
-            else
-                SendSysMessage(CypherStrings.SubcmdsList, cmd, list);
-
-            return true;
-        }
-
-        public virtual bool IsAvailable(ChatCommand cmd)
-        {
-            return HasPermission(cmd.Permission);
-        }
-
+        public virtual bool IsHumanReadable() { return true; }
+        
         public virtual bool HasPermission(RBACPermissions permission) { return _session.HasPermission(permission); }
 
         public string ExtractKeyFromLink(StringArguments args, params string[] linkType)
@@ -699,7 +514,7 @@ namespace Game.Chat
         }
         public Player GetPlayer()
         {
-            return _session.GetPlayer();
+            return _session?.GetPlayer();
         }
         public string GetCypherString(CypherStrings str)
         {
@@ -822,27 +637,27 @@ namespace Game.Chat
 
         public AddonChannelCommandHandler(WorldSession session) : base(session) { }
 
-        public override bool ParseCommand(string text)
+        public override bool ParseCommands(string str)
         {
-            if (text.IsEmpty())
+            if (str.Length < 5)
                 return false;
 
-            if (text.Length < 5) // str[1] through str[4] is 4-character command counter
-                return false;
+            char opcode = str[0];
+            echo = str.Substring(1);
 
-            echo = text.Substring(1);
-
-            switch (text[0])
+            switch (opcode)
             {
                 case 'p': // p Ping
                     SendAck();
                     return true;
                 case 'h': // h Issue human-readable command
                 case 'i': // i Issue command
-                    if (text.Length < 6)
+                    if (str.Length < 6)
                         return false;
-                    humanReadable = (text[0] == 'h');
-                    if (_ParseCommands(text + 5)) // actual command starts at str[5]
+
+                    humanReadable = opcode == 'h';
+                    string cmd = str.Substring(5);
+                    if (_ParseCommands(cmd)) // actual command starts at str[5]
                     {
                         if (!hadAck)
                             SendAck();
@@ -853,7 +668,7 @@ namespace Game.Chat
                     }
                     else
                     {
-                        SendSysMessage(CypherStrings.NoCmd);
+                        SendSysMessage(CypherStrings.CmdInvalid, cmd);
                         SendFailed();
                     }
                     return true;
@@ -906,13 +721,15 @@ namespace Game.Chat
             msg.Append(body, lastpos, pos - lastpos);
             Send(msg.ToString());
         }
+
+        public override bool IsHumanReadable() { return humanReadable; }
     }
 
     public class ConsoleHandler : CommandHandler
     {
-        public override bool IsAvailable(ChatCommand cmd)
+        public override bool IsAvailable(ChatCommandNode cmd)
         {
-            return cmd.AllowConsole;
+            return cmd._permission.AllowConsole;
         }
 
         public override bool HasPermission(RBACPermissions permission)
@@ -927,7 +744,7 @@ namespace Game.Chat
             Log.outInfo(LogFilter.Server, str);
         }
 
-        public override bool ParseCommand(string str)
+        public override bool ParseCommands(string str)
         {
             if (str.IsEmpty())
                 return false;
@@ -969,9 +786,9 @@ namespace Game.Chat
             _reportToRA = reportToRA;
         }
 
-        public override bool IsAvailable(ChatCommand cmd)
+        public override bool IsAvailable(ChatCommandNode cmd)
         {
-            return cmd.AllowConsole;
+            return cmd._permission.AllowConsole;
         }
 
         public override bool HasPermission(RBACPermissions permission)
@@ -986,7 +803,7 @@ namespace Game.Chat
             _reportToRA(str);
         }
 
-        public override bool ParseCommand(string str)
+        public override bool ParseCommands(string str)
         {
             if (str.IsEmpty())
                 return false;

@@ -73,44 +73,18 @@ namespace Game.Chat
                     return true;
                 }
                 case TypeCode.Object:
-                    return TryParseToObject(out value, type, info);
-            }
-
-            return false;
-        }
-
-        public static bool TryParseToObject(out dynamic value, Type type, HyperlinkInfo info)
-        {
-            value = default;
-
-            switch (type.Name)
-            {
-                case nameof(CurrencyTypesRecord):
                 {
-                    HyperlinkDataTokenizer t = new(info.Data);
-                    if (!t.TryConsumeTo(out uint currencyId))
-                        return false;
-
-                    value = CliDB.CurrencyTypesStorage.LookupByKey(currencyId);
-                    return true;
-                }
-                case nameof(GameTele):
-                {
-                    HyperlinkDataTokenizer t = new(info.Data);
-                    if (!t.TryConsumeTo(out uint teleId))
-                        return false;
-
-                    value = Global.ObjectMgr.GetGameTele(teleId);
-                    return true;
-                }
-                case nameof(SpellInfo):
-                {
-                    HyperlinkDataTokenizer t = new(info.Data);
-                    if (!t.TryConsumeTo(out uint spellId))
-                        return false;
-
-                    value = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-
+                    switch (type.Name)
+                    {
+                        case nameof(PlayerIdentifier):
+                            value = PlayerIdentifier.ParseFromString(args.NextString());
+                            break;
+                        case nameof(AccountIdentifier):
+                            value = AccountIdentifier.ParseFromString(args.NextString());
+                            break;
+                        default:
+                            return false;
+                    }
                     return true;
                 }
             }

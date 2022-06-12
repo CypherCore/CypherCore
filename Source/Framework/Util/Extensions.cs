@@ -322,6 +322,9 @@ namespace System
 
         public static bool Like(this string toSearch, string toFind)
         {
+            if (toSearch == null || toFind == null)
+                return false;
+
             return toSearch.ToLower().Contains(toFind.ToLower());
         }
 
@@ -385,6 +388,34 @@ namespace System
             {
                 throw new Exception("Unsuccessful Match.");
             }
+        }
+
+        public static (string token, string tail) Tokenize(this string args)
+        {
+            string token;
+            string tail = "";
+
+            int delimPos = args.IndexOf(' ');
+            if (delimPos != -1)
+            {
+                token = args.Substring(0, delimPos);
+                int tailPos = args.FindFirstNotOf(" ", delimPos);
+                if (tailPos != -1)
+                    tail = args.Substring(tailPos);
+            }
+            else
+                token = args;
+
+            return (token, tail);
+        }
+
+        public static int FindFirstNotOf(this string source, string chars, int pos)
+        {
+            for (int i = pos; i < source.Length; i++)
+                if (chars.IndexOf(source[i]) == -1)
+                    return i;
+
+            return -1;
         }
         #endregion
 

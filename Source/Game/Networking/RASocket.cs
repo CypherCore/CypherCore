@@ -210,7 +210,7 @@ namespace Game.Networking
             }
 
             RemoteAccessHandler cmd = new(CommandPrint);
-            cmd.ParseCommand(command);
+            cmd.ParseCommands(command);
 
             return true;
         }
