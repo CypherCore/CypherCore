@@ -1065,7 +1065,7 @@ namespace Game
                 if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                     continue;
 
-                var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
+                var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemEffect.SpellID);
                 if (speciesEntry != null)
                     GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }

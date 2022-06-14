@@ -1752,7 +1752,7 @@ namespace Game.Spells
 
                     bool dependent = false;
 
-                    var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
+                    var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemEffect.SpellID);
                     if (speciesEntry != null)
                     {
                         player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));

@@ -46,6 +46,13 @@ namespace Game.BattlePets
             if (!result.IsEmpty())
                 Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Set(result.Read<ulong>(0) + 1);
 
+            foreach (var battlePetSpecies in CliDB.BattlePetSpeciesStorage.Values)
+            {
+                uint creatureId = battlePetSpecies.CreatureID;
+                if (creatureId != 0)
+                    _battlePetSpeciesByCreature[creatureId] = battlePetSpecies;
+            }
+
             foreach (var battlePetBreedState in CliDB.BattlePetBreedStateStorage.Values)
             {
                 if (!BattlePetBreedStates.ContainsKey(battlePetBreedState.BattlePetBreedID))
@@ -135,6 +142,21 @@ namespace Game.BattlePets
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} battle pet qualities.", _defaultQualityPerSpecies.Count);
         }
 
+        public static void AddBattlePetSpeciesBySpell(uint spellId, BattlePetSpeciesRecord speciesEntry)
+        {
+            _battlePetSpeciesBySpell[spellId] = speciesEntry;
+        }
+
+        public static BattlePetSpeciesRecord GetBattlePetSpeciesByCreature(uint creatureId)
+        {
+            return _battlePetSpeciesByCreature.LookupByKey(creatureId);
+        }
+
+        public static BattlePetSpeciesRecord GetBattlePetSpeciesBySpell(uint spellId)
+        {
+            return _battlePetSpeciesBySpell.LookupByKey(spellId);
+        }
+        
         public static ushort RollPetBreed(uint species)
         {
             var list = _availableBreedsPerSpecies.LookupByKey(species);
@@ -878,6 +900,8 @@ namespace Game.BattlePets
 
         public static Dictionary<uint, Dictionary<BattlePetState, int>> BattlePetBreedStates = new();
         public static Dictionary<uint, Dictionary<BattlePetState, int>> BattlePetSpeciesStates = new();
+        static Dictionary<uint, BattlePetSpeciesRecord> _battlePetSpeciesByCreature = new();
+        static Dictionary<uint, BattlePetSpeciesRecord> _battlePetSpeciesBySpell = new();
         static MultiMap<uint, byte> _availableBreedsPerSpecies = new();
         static Dictionary<uint, BattlePetBreedQuality> _defaultQualityPerSpecies = new();
     }

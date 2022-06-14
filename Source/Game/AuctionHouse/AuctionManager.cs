@@ -17,16 +17,16 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
+using Framework.IO;
+using Game.BattlePets;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Mails;
 using Game.Networking.Packets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.IO;
-using System.Collections;
 
 namespace Game
 {
@@ -926,7 +926,7 @@ namespace Game
                             if (player.HasSpell((uint)itemTemplate.Effects[1].SpellID))
                                 continue;
 
-                            var battlePetSpecies = Global.SpellMgr.GetBattlePetSpecies((uint)itemTemplate.Effects[1].SpellID);
+                            var battlePetSpecies = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemTemplate.Effects[1].SpellID);
                             if (battlePetSpecies != null)
                                 if (knownPetSpecies.Get((int)battlePetSpecies.Id))
                                     continue;

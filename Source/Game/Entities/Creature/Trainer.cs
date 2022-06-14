@@ -75,7 +75,7 @@ namespace Game.Entities
             }
 
             bool sendSpellVisual = true;
-            var speciesEntry = Global.SpellMgr.GetBattlePetSpecies(trainerSpell.SpellId);
+            var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell(trainerSpell.SpellId);
             if (speciesEntry != null)
             {
                 if (player.GetSession().GetBattlePetMgr().HasMaxPetCount(speciesEntry, player.GetGUID()))

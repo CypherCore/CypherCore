@@ -20,6 +20,7 @@ using Framework.Database;
 using Framework.Dynamic;
 using Game.BattleFields;
 using Game.BattleGrounds;
+using Game.BattlePets;
 using Game.DataStorage;
 using Game.Movement;
 using Game.Spells;
@@ -2162,7 +2163,7 @@ namespace Game.Entities
                         {
                             var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
                             if (battlePetSpecies != null)
-                                mBattlePets[effect.SpellID] = battlePetSpecies;
+                                BattlePetMgr.AddBattlePetSpeciesBySpell(effect.SpellID, battlePetSpecies);
                         }
                     }
                 }
@@ -4728,11 +4729,6 @@ namespace Game.Entities
             return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
         }
 
-        public BattlePetSpeciesRecord GetBattlePetSpecies(uint spellId)
-        {
-            return mBattlePets.LookupByKey(spellId);
-        }
-
         #region Fields
         Dictionary<uint, SpellChainNode> mSpellChains = new();
         MultiMap<uint, uint> mSpellsReqSpell = new();
@@ -4760,7 +4756,6 @@ namespace Game.Entities
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
         MultiMap<uint, SpellInfo> mSpellInfoMap = new();
         Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
-        Dictionary<uint, BattlePetSpeciesRecord> mBattlePets = new();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
         Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new();
