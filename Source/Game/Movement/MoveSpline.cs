@@ -87,7 +87,7 @@ namespace Game.Movement
 
         void InitSpline(MoveSplineInitArgs args)
         {
-            Spline.EvaluationMode[] modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
+            EvaluationMode[] modes = new EvaluationMode[2] { EvaluationMode.Linear, EvaluationMode.Catmullrom };
             if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
                 int cyclic_point = 0;
@@ -351,7 +351,7 @@ namespace Game.Movement
         
         #region Fields
         public MoveSplineInitArgs InitArgs;
-        public Spline spline = new();
+        public Spline<int> spline = new();
         public FacingInfo facing;
         public MoveSplineFlag splineflags = new();
         public bool onTransport;
@@ -368,7 +368,7 @@ namespace Game.Movement
         public AnimTierTransition anim_tier;
         #endregion
 
-        public class CommonInitializer : IInitializer
+        public class CommonInitializer : IInitializer<int>
         {
             public CommonInitializer(float _velocity)
             {
@@ -377,20 +377,23 @@ namespace Game.Movement
             }
             public float velocityInv;
             public int time;
-            public int SetGetTime(Spline s, int i)
+
+            public int Invoke(Spline<int> s, int i)
             {
                 time += (int)(s.SegLength(i) * velocityInv);
                 return time;
             }
         }
-        public class FallInitializer : IInitializer
+
+        public class FallInitializer : IInitializer<int>
         {
             public FallInitializer(float startelevation)
             {
                 startElevation = startelevation;
             }
             float startElevation;
-            public int SetGetTime(Spline s, int i)
+
+            public int Invoke(Spline<int> s, int i)
             {
                 return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
             }
@@ -427,9 +430,9 @@ namespace Game.Movement
             NextSegment = 0x08
         }
     }
-    public interface IInitializer
+    public interface IInitializer<T>
     {
-        int SetGetTime(Spline s, int i);
+        int Invoke(Spline<T> s, int i);
     }
 
     public class SplineChainLink

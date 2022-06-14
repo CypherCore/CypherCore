@@ -126,20 +126,10 @@ namespace Game.Entities
                                 dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.Transport:
+                        case GameObjectTypes.MapObjTransport:
                         {
                             dynFlags = (GameObjectDynamicLowFlags)((int)unitDynFlags & 0xFFFF);
                             pathProgress = (ushort)((int)unitDynFlags >> 16);
-                            break;
-                        }
-                        case GameObjectTypes.MapObjTransport:
-                        {
-                            Transport transport = gameObject.ToTransport();
-                            uint transportPeriod = transport.GetTransportPeriod();
-                            if (transportPeriod != 0)
-                            {
-                                float timer = (float)(transport.GetTimer() % transportPeriod);
-                                pathProgress = (ushort)(timer / (float)transportPeriod * 65535.0f);
-                            }
                             break;
                         }
                         case GameObjectTypes.CapturePoint:
@@ -152,7 +142,7 @@ namespace Game.Entities
                             break;
                     }
 
-                    unitDynFlags = (uint)((pathProgress << 16) | (ushort)dynFlags);
+                    unitDynFlags = ((uint)pathProgress << 16) | (uint)dynFlags;
                 }
             }
 

@@ -200,4 +200,10 @@ namespace Framework.Constants
         SetTappedToChallengePlayers = 44,   // Set Tapped to Challenge Players
         Max
     }
+
+    public enum TransportMovementState
+    {
+        Moving,
+        WaitingOnPauseWaypoint
+    }
 }

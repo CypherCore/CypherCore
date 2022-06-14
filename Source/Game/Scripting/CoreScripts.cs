@@ -575,7 +575,7 @@ namespace Game.Scripting
         public virtual void OnRemovePassenger(Transport transport, Player player) { }
 
         // Called when a transport moves.
-        public virtual void OnRelocate(Transport transport, uint waypointId, uint mapId, float x, float y, float z) { }
+        public virtual void OnRelocate(Transport transport, uint mapId, float x, float y, float z) { }
 
         public virtual void OnUpdate(Transport obj, uint diff) { }
     }

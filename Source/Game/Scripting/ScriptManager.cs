@@ -863,9 +863,9 @@ namespace Game.Scripting
 
             RunScript<TransportScript>(p => p.OnUpdate(transport, diff), transport.GetScriptId());
         }
-        public void OnRelocate(Transport transport, uint waypointId, uint mapId, float x, float y, float z)
+        public void OnRelocate(Transport transport, uint mapId, float x, float y, float z)
         {
-            RunScript<TransportScript>(p => p.OnRelocate(transport, waypointId, mapId, x, y, z), transport.GetScriptId());
+            RunScript<TransportScript>(p => p.OnRelocate(transport, mapId, x, y, z), transport.GetScriptId());
         }
 
         // Achievement

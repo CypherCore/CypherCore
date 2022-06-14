@@ -44,7 +44,7 @@ namespace Game.Entities
 
             m_areaTriggerData = new AreaTriggerFieldData();
 
-            _spline = new Spline();
+            _spline = new();
         }
 
         public override void AddToWorld()
@@ -756,7 +756,7 @@ namespace Game.Entities
 
             _movementTime = 0;
 
-            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, Spline.EvaluationMode.Linear);
+            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, EvaluationMode.Linear);
             _spline.InitLengths();
 
             // should be sent in object create packets only
@@ -1078,7 +1078,7 @@ namespace Game.Entities
         public Vector3 GetTargetRollPitchYaw() { return _targetRollPitchYaw; }
 
         public bool HasSplines() { return !_spline.Empty(); }
-        public Spline GetSpline() { return _spline; }
+        public Spline<int> GetSpline() { return _spline; }
         public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
         public AreaTriggerOrbitInfo GetCircularMovementInfo() { return _orbitInfo; }
@@ -1102,7 +1102,7 @@ namespace Game.Entities
         Vector3 _rollPitchYaw;
         Vector3 _targetRollPitchYaw;
         List<Vector2> _polygonVertices;
-        Spline _spline;
+        Spline<int> _spline;
 
         bool _reachedDestination;
         int _lastSplineIndex;

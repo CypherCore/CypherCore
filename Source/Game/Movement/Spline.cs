@@ -23,7 +23,7 @@ using System.Numerics;
 
 namespace Game.Movement
 {
-    public class Spline
+    public class Spline<T>
     {
         public int GetPointCount() { return points.Length; }
         public Vector3 GetPoint(int i) { return points[i]; }
@@ -262,18 +262,18 @@ namespace Game.Movement
         }
         #endregion
 
-        void set_steps_per_segment(int newStepsPerSegment) { stepsPerSegment = newStepsPerSegment; }
+        public void set_steps_per_segment(int newStepsPerSegment) { stepsPerSegment = newStepsPerSegment; }
 
         public void ComputeIndex(float t, ref int index, ref float u)
         {
             //ASSERT(t >= 0.f && t <= 1.f);
-            int length_ = (int)(t * Length());
+            T length_ = t * (dynamic)Length();
             index = ComputeIndexInBounds(length_);
             //ASSERT(index < index_hi);
             u = (length_ - Length(index)) / (float)Length(index, index + 1);
         }
 
-        int ComputeIndexInBounds(int length_)
+        int ComputeIndexInBounds(T length_)
         {
             // Temporary disabled: causes infinite loop with t = 1.f
             /*
@@ -294,11 +294,12 @@ namespace Game.Movement
 
             int i = index_lo;
             int N = index_hi;
-            while (i + 1 < N && lengths[i + 1] < length_)
+            while (i + 1 < N && (dynamic)lengths[i + 1] < length_)
                 ++i;
 
             return i;
         }
+
         private static readonly Matrix4x4 s_catmullRomCoeffs = new(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 
         private static readonly Matrix4x4 s_Bezier3Coeffs = new(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
@@ -320,31 +321,31 @@ namespace Game.Movement
                    + vertice[2] * weights.Z + vertice[3] * weights.W;
         }
 
-        public int Length()
+        public dynamic Length()
         {
             if (lengths.Length == 0)
-                return 0;
+                return default;
 
             return lengths[index_hi];
         }
 
-        public int Length(int first, int last) { return lengths[last] - lengths[first]; }
+        public dynamic Length(int first, int last) { return lengths[last] - (dynamic)lengths[first]; }
 
-        public int Length(int Idx) { return lengths[Idx]; }
+        public dynamic Length(int Idx) { return lengths[Idx]; }
 
-        public void Set_length(int i, int length) { lengths[i] = length; }
+        public void Set_length(int i, T length) { lengths[i] = length; }
 
-        public void InitLengths(IInitializer cacher)
+        public void InitLengths(IInitializer<T> cacher)
         {
             int i = index_lo;
             Array.Resize(ref lengths, index_hi+1);
-            int prev_length;
-            int new_length;
+            T prev_length;
+            T new_length;
             while (i < index_hi)
             {
-                new_length = cacher.SetGetTime(this, i);
-                if (new_length < 0)
-                    new_length = int.MaxValue;
+                new_length = (dynamic)cacher.Invoke(this, i);
+                if ((dynamic)new_length < 0)// todo fix me this is a ulgy hack.
+                    new_length = (dynamic)(Type.GetTypeCode(typeof(T)) == TypeCode.Int32 ? int.MaxValue : double.MaxValue);
                 lengths[++i] = new_length;
 
                 prev_length = new_length;
@@ -354,18 +355,18 @@ namespace Game.Movement
         public void InitLengths()
         {
             int i = index_lo;
-            int length = 0;
+            dynamic length = default(T);
             Array.Resize(ref lengths, index_hi + 1);
             while (i < index_hi)
             {
-                length += (int)SegLength(i);
+                length += SegLength(i);
                 lengths[++i] = length;
             }
         }
 
         public bool Empty() { return index_lo == index_hi;}
 
-        int[] lengths = Array.Empty<int>();
+        T[] lengths = Array.Empty<T>();
         Vector3[] points = Array.Empty<Vector3>();
         public EvaluationMode m_mode;
         bool _cyclic;
@@ -379,14 +380,6 @@ namespace Game.Movement
 
         int index_lo;
         int index_hi;
-        public enum EvaluationMode
-        {
-            Linear,
-            Catmullrom,
-            Bezier3_Unused,
-            UninitializedMode,
-            ModesEnd
-        }
     }
 
     public class FacingInfo
@@ -395,5 +388,14 @@ namespace Game.Movement
         public ObjectGuid target;
         public float angle;
         public MonsterMoveType type;
+    }
+
+    public enum EvaluationMode
+    {
+        Linear,
+        Catmullrom,
+        Bezier3_Unused,
+        UninitializedMode,
+        ModesEnd
     }
 }

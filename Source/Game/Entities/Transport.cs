@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Maps;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -129,8 +130,6 @@ namespace Game.Entities
     {
         public Transport()
         {
-            _isMoving = true;
-
             m_updateFlag.ServerTime = true;
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
@@ -175,10 +174,7 @@ namespace Game.Entities
             }
 
             _transportInfo = tInfo;
-            _nextFrame = 0;
-            _currentFrame = tInfo.keyFrames[_nextFrame++];
-            _triggeredArrivalEvent = false;
-            _triggeredDepartureEvent = false;
+            _eventsToTrigger = new(tInfo.Events.Count, true);
 
             GameObjectOverride goOverride = GetGameObjectOverride();
             if (goOverride != null)
@@ -187,13 +183,16 @@ namespace Game.Entities
                 ReplaceAllFlags(goOverride.Flags);
             }
 
+            _pathProgress = goinfo.MoTransport.allowstopping == 0 ? Time.GetMSTime() /*might be called before world update loop begins, don't use GameTime*/ % tInfo.TotalPathTime : 0;
+            SetPathProgressForClient((float)_pathProgress / (float)tInfo.TotalPathTime);
             SetObjectScale(goinfo.size);
-            SetPeriod(tInfo.pathTime);
+            SetPeriod(tInfo.TotalPathTime);
             SetEntry(goinfo.entry);
             SetDisplayId(goinfo.displayId);
             SetGoState(goinfo.MoTransport.allowstopping == 0 ? GameObjectState.Ready : GameObjectState.Active);
             SetGoType(GameObjectTypes.MapObjTransport);
             SetGoAnimProgress(animprogress);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
             SetName(goinfo.name);
             SetLocalRotation(0.0f, 0.0f, 0.0f, 1.0f);
             SetParentRotation(Quaternion.Identity);
@@ -216,79 +215,103 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            uint positionUpdateDelay = 200;
+            TimeSpan positionUpdateDelay = TimeSpan.FromMilliseconds(200);
 
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
             else if (!AIM_Initialize())
                 Log.outError(LogFilter.Transport, "Could not initialize GameObjectAI for Transport");
 
-            if (GetKeyFrames().Count <= 1)
-                return;
+            Global.ScriptMgr.OnTransportUpdate(this, diff);
 
-            if (IsMoving() || !_pendingStop)
+            _positionChangeTimer.Update(diff);
+
+            uint cycleId = _pathProgress / GetTransportPeriod();
+            if (GetGoInfo().MoTransport.allowstopping == 0)
+                _pathProgress = GameTime.GetGameTimeMS();
+            else if (!_requestStopTimestamp.HasValue || _requestStopTimestamp > _pathProgress + diff)
                 _pathProgress += diff;
+            else
+                _pathProgress = _requestStopTimestamp.Value;
+
+            if (_pathProgress / GetTransportPeriod() != cycleId)
+            {
+                // reset cycle
+                _eventsToTrigger.SetAll(true);
+            }
+
+            SetPathProgressForClient((float)_pathProgress / (float)GetTransportPeriod());
 
             uint timer = _pathProgress % GetTransportPeriod();
-            bool justStopped = false;
 
-            // Set current waypoint
-            // Desired outcome: _currentFrame.DepartureTime < timer < _nextFrame.ArriveTime
-            // ... arrive | ... delay ... | departure
-            //      event /         event /
-            for (; ; )
+            int eventToTriggerIndex = -1;
+            for (var i = 0; i < _eventsToTrigger.Count; i++)
             {
-                if (timer >= _currentFrame.ArriveTime)
+                if (_eventsToTrigger.Get(i))
                 {
-                    if (!_triggeredArrivalEvent)
-                    {
-                        DoEventIfAny(_currentFrame, false);
-                        _triggeredArrivalEvent = true;
-                    }
+                    eventToTriggerIndex = i;
+                    break;
+                }
+            }
 
-                    if (timer < _currentFrame.DepartureTime)
+            if (eventToTriggerIndex != -1)
+            {
+                while (eventToTriggerIndex < _transportInfo.Events.Count && _transportInfo.Events[eventToTriggerIndex].Timestamp < timer)
+                {
+                    GameEvents.Trigger(_transportInfo.Events[eventToTriggerIndex].EventId, this, this);
+                    _eventsToTrigger.Set(eventToTriggerIndex, false);
+                    ++eventToTriggerIndex;
+                }
+            }
+
+            TransportMovementState moveState;
+            int legIndex;
+            Position newPosition = _transportInfo.ComputePosition(timer, out moveState, out legIndex);
+            if (newPosition != null)
+            {
+                bool justStopped = _movementState == TransportMovementState.Moving && moveState != TransportMovementState.Moving;
+                _movementState = moveState;
+
+                if (justStopped)
+                {
+                    if (_requestStopTimestamp != 0 && GetGoState() != GameObjectState.Ready)
                     {
-                        justStopped = IsMoving();
-                        SetMoving(false);
-                        if (_pendingStop && GetGoState() != GameObjectState.Ready)
-                        {
-                            SetGoState(GameObjectState.Ready);
-                            _pathProgress /= GetTransportPeriod();
-                            _pathProgress *= GetTransportPeriod();
-                            _pathProgress += _currentFrame.ArriveTime;
-                        }
-                        break;  // its a stop frame and we are waiting
+                        SetGoState(GameObjectState.Ready);
+                        SetDynamicFlag(GameObjectDynamicLowFlags.Stopped);
                     }
                 }
 
-                if (timer >= _currentFrame.DepartureTime && !_triggeredDepartureEvent)
+                if (legIndex != _currentPathLeg)
                 {
-                    DoEventIfAny(_currentFrame, true); // departure event
-                    _triggeredDepartureEvent = true;
+                    _currentPathLeg = legIndex;
+                    TeleportTransport(_transportInfo.PathLegs[legIndex].MapId, newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), newPosition.GetOrientation());
+                    return;
                 }
 
-                // not waiting anymore
-                SetMoving(true);
+                // set position
+                if (_positionChangeTimer.Passed())
+                {
+                    _positionChangeTimer.Reset(positionUpdateDelay);
+                    if (_movementState == TransportMovementState.Moving || justStopped)
+                        UpdatePosition(newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), newPosition.GetOrientation());
+                    else
+                    {
+                        /* There are four possible scenarios that trigger loading/unloading passengers:
+                          1. transport moves from inactive to active grid
+                          2. the grid that transport is currently in becomes active
+                          3. transport moves from active to inactive grid
+                          4. the grid that transport is currently in unloads
+                        */
+                        bool gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
 
-                // Enable movement
-                if (GetGoInfo().MoTransport.allowstopping != 0)
-                    SetGoState(GameObjectState.Active);
-
-                if (timer >= _currentFrame.DepartureTime && timer < _currentFrame.NextArriveTime)
-                    break;  // found current waypoint
-
-                MoveToNextWaypoint();
-
-                Global.ScriptMgr.OnRelocate(this, (uint)_currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
-
-                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID,
-                    _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
-
-                // Departure event
-                var nextframe = GetKeyFrames()[_nextFrame];
-                if (_currentFrame.IsTeleportFrame())
-                    if (TeleportTransport(nextframe.Node.ContinentID, nextframe.Node.Loc.X, nextframe.Node.Loc.Y, nextframe.Node.Loc.Z, nextframe.InitialOrientation))
-                        return;
+                        if (_staticPassengers.Empty() && gridActive) // 2.
+                            LoadStaticPassengers();
+                        else if (!_staticPassengers.Empty() && !gridActive)
+                            // 4. - if transports stopped on grid edge, some passengers can remain in active grids
+                            //      unload all static passengers otherwise passengers won't load correctly when the grid that transport is currently in becomes active
+                            UnloadStaticPassengers();
+                    }
+                }
             }
 
             // Add model to map after we are fully done with moving maps
@@ -298,49 +321,10 @@ namespace Game.Entities
                 if (m_model != null)
                     GetMap().InsertGameObjectModel(m_model);
             }
-
-            // Set position
-            _positionChangeTimer.Update(diff);
-            if (_positionChangeTimer.Passed())
-            {
-                _positionChangeTimer.Reset(positionUpdateDelay);
-                if (IsMoving())
-                {
-                    float t = !justStopped ? CalculateSegmentPos(timer * 0.001f) : 1.0f;
-                    Vector3 pos, dir;
-                    _currentFrame.Spline.Evaluate_Percent((int)_currentFrame.Index, t, out pos);
-                    _currentFrame.Spline.Evaluate_Derivative((int)_currentFrame.Index, t, out dir);
-                    UpdatePosition(pos.X, pos.Y, pos.Z, (float)Math.Atan2(dir.Y, dir.X) + MathFunctions.PI);
-                }
-                else if (justStopped)
-                    UpdatePosition(_currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z, _currentFrame.InitialOrientation);
-                else
-                {
-                    /* There are four possible scenarios that trigger loading/unloading passengers:
-                     1. transport moves from inactive to active grid
-                     2. the grid that transport is currently in becomes active
-                     3. transport moves from active to inactive grid
-                     4. the grid that transport is currently in unloads
-                     */
-                    bool gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
-
-                    if (_staticPassengers.Empty() && gridActive) // 2.
-                        LoadStaticPassengers();
-                    else if (!_staticPassengers.Empty() && !gridActive)
-                        // 4. - if transports stopped on grid edge, some passengers can remain in active grids
-                        //      unload all static passengers otherwise passengers won't load correctly when the grid that transport is currently in becomes active
-                        UnloadStaticPassengers();
-                }
-            }
-
-            Global.ScriptMgr.OnTransportUpdate(this, diff);
         }
 
         public void DelayedUpdate(uint diff)
         {
-            if (GetKeyFrames().Count <= 1)
-                return;
-
             DelayedTeleportTransport();
         }
 
@@ -362,9 +346,7 @@ namespace Game.Entities
 
         public ITransport RemovePassenger(WorldObject passenger)
         {
-            bool erased = _passengers.Remove(passenger);
-
-            if (erased || _staticPassengers.Remove(passenger))
+            if (_passengers.Remove(passenger) || _staticPassengers.Remove(passenger)) // static passenger can remove itself in case of grid unload
             {
                 passenger.SetTransport(null);
                 passenger.m_movementInfo.transport.Reset();
@@ -589,9 +571,11 @@ namespace Game.Entities
         {
             return GetGoInfo().MoTransport.SpawnMap;
         }
-        
+
         public void UpdatePosition(float x, float y, float z, float o)
         {
+            Global.ScriptMgr.OnRelocate(this, GetMapId(), x, y, z);
+
             bool newActive = GetMap().IsGridLoaded(x, y);
             Cell oldCell = new(GetPositionX(), GetPositionY());
 
@@ -648,53 +632,19 @@ namespace Game.Entities
             if (GetGoInfo().MoTransport.allowstopping == 0)
                 return;
 
-            _pendingStop = !enabled;
-        }
-
-        public void SetDelayedAddModelToMap() { _delayedAddModel = true; }
-
-        void MoveToNextWaypoint()
-        {
-            // Clear events flagging
-            _triggeredArrivalEvent = false;
-            _triggeredDepartureEvent = false;
-
-            // Set frames
-            _currentFrame = GetKeyFrames()[_nextFrame++];
-            if (_nextFrame == GetKeyFrames().Count)
-                _nextFrame = 0;
-        }
-
-        float CalculateSegmentPos(float now)
-        {
-            KeyFrame frame = _currentFrame;
-            float speed = GetGoInfo().MoTransport.moveSpeed;
-            float accel = GetGoInfo().MoTransport.accelRate;
-            float timeSinceStop = frame.TimeFrom + (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
-            float timeUntilStop = frame.TimeTo - (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
-            float segmentPos, dist;
-            float accelTime = _transportInfo.accelTime;
-            float accelDist = _transportInfo.accelDist;
-            // calculate from nearest stop, less confusing calculation...
-            if (timeSinceStop < timeUntilStop)
+            if (!enabled)
             {
-                if (timeSinceStop < accelTime)
-                    dist = 0.5f * accel * timeSinceStop * timeSinceStop;
-                else
-                    dist = accelDist + (timeSinceStop - accelTime) * speed;
-                segmentPos = dist - frame.DistSinceStop;
+                _requestStopTimestamp = (_pathProgress / GetTransportPeriod()) * GetTransportPeriod() + _transportInfo.GetNextPauseWaypointTimestamp(_pathProgress);
             }
             else
             {
-                if (timeUntilStop < _transportInfo.accelTime)
-                    dist = (0.5f * accel) * (timeUntilStop * timeUntilStop);
-                else
-                    dist = accelDist + (timeUntilStop - accelTime) * speed;
-                segmentPos = frame.DistUntilStop - dist;
+                _requestStopTimestamp = null;
+                SetGoState(GameObjectState.Active);
+                RemoveDynamicFlag(GameObjectDynamicLowFlags.Stopped);
             }
-
-            return segmentPos / frame.NextDistFromPrev;
         }
+
+        public void SetDelayedAddModelToMap() { _delayedAddModel = true; }
 
         bool TeleportTransport(uint newMapid, float x, float y, float z, float o)
         {
@@ -702,7 +652,7 @@ namespace Game.Entities
 
             if (oldMap.GetId() != newMapid)
             {
-                _delayedTeleport = true;
+                _delayedTeleport = new(newMapid, x, y, z, o);
                 UnloadStaticPassengers();
                 return true;
             }
@@ -735,22 +685,22 @@ namespace Game.Entities
 
         void DelayedTeleportTransport()
         {
-            if (!_delayedTeleport)
+            if (_delayedTeleport == null)
                 return;
 
-            var nextFrame = GetKeyFrames()[_nextFrame];
-
-            _delayedTeleport = false;
-            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.ContinentID);
+            Map newMap = Global.MapMgr.CreateBaseMap(_delayedTeleport.GetMapId());
             GetMap().RemoveFromMap(this, false);
             SetMap(newMap);
 
-            float x = nextFrame.Node.Loc.X,
-                  y = nextFrame.Node.Loc.Y,
-                  z = nextFrame.Node.Loc.Z,
-                  o = nextFrame.InitialOrientation;
+            float x = _delayedTeleport.GetPositionX(),
+                  y = _delayedTeleport.GetPositionY(),
+                  z = _delayedTeleport.GetPositionZ(),
+                  o = _delayedTeleport.GetOrientation();
 
-            foreach (WorldObject obj in _passengers.ToList())
+            _delayedTeleport = null;
+
+            List<WorldObject> passengersToTeleport = new(_passengers);
+            foreach (WorldObject obj in passengersToTeleport)
             {
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
@@ -759,7 +709,7 @@ namespace Game.Entities
                 switch (obj.GetTypeId())
                 {
                     case TypeId.Player:
-                        if (!obj.ToPlayer().TeleportTo(nextFrame.Node.ContinentID, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
+                        if (!obj.ToPlayer().TeleportTo(newMap.GetId(), destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport, newMap.GetInstanceId()))
                             RemovePassenger(obj);
                         break;
                     case TypeId.DynamicObject:
@@ -787,24 +737,15 @@ namespace Game.Entities
             }
         }
 
-        void DoEventIfAny(KeyFrame node, bool departure)
-        {
-            uint eventid = departure ? node.Node.DepartureEventID : node.Node.ArrivalEventID;
-            if (eventid != 0)
-            {
-                Log.outDebug(LogFilter.Scripts, "Taxi {0} event {1} of node {2} of {3} path", departure ? "departure" : "arrival", eventid, node.Node.NodeIndex, GetName());
-                GameEvents.Trigger(eventid, this, this);
-            }
-        }
-
         public override void BuildUpdate(Dictionary<Player, UpdateData> data_map)
         {
             var players = GetMap().GetPlayers();
             if (players.Empty())
                 return;
 
-            foreach (var pl in players)
-                BuildFieldsUpdate(pl, data_map);
+            foreach (var playerReference in players)
+                if (playerReference.IsInPhase(this))
+                    BuildFieldsUpdate(playerReference, data_map);
 
             ClearUpdateMask(true);
         }
@@ -813,35 +754,24 @@ namespace Game.Entities
 
         public ObjectGuid GetTransportGUID() { return GetGUID(); }
         public float GetTransportOrientation() { return GetOrientation(); }
-        
+
         public uint GetTransportPeriod() { return m_gameObjectData.Level; }
         public void SetPeriod(uint period) { SetLevel(period); }
         public uint GetTimer() { return _pathProgress; }
 
-        public List<KeyFrame> GetKeyFrames() { return _transportInfo.keyFrames; }
-        public TransportTemplate GetTransportTemplate() { return _transportInfo; }
-
-        //! Helpers to know if stop frame was reached
-        bool IsMoving() { return _isMoving; }
-        void SetMoving(bool val) { _isMoving = val; }
-
         TransportTemplate _transportInfo;
 
-        KeyFrame _currentFrame;
-        int _nextFrame;
+        TransportMovementState _movementState;
+        BitArray _eventsToTrigger;
+        int _currentPathLeg;
+        uint? _requestStopTimestamp;
         uint _pathProgress;
         TimeTracker _positionChangeTimer = new();
-        bool _isMoving;
-        bool _pendingStop;
-
-        //! These are needed to properly control events triggering only once for each frame
-        bool _triggeredArrivalEvent;
-        bool _triggeredDepartureEvent;
 
         HashSet<WorldObject> _passengers = new();
         HashSet<WorldObject> _staticPassengers = new();
 
         bool _delayedAddModel;
-        bool _delayedTeleport;
+        WorldLocation _delayedTeleport;
     }
 }

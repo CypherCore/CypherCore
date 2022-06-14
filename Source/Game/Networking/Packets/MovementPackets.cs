@@ -301,7 +301,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public static void WriteCreateObjectAreaTriggerSpline(Spline spline, WorldPacket data)
+        public static void WriteCreateObjectAreaTriggerSpline(Spline<int> spline, WorldPacket data)
         {
             data.WriteBits(spline.GetPoints().Length, 16);
             foreach (var point in spline.GetPoints())
@@ -425,7 +425,7 @@ namespace Game.Networking.Packets
                 movementSpline.SpellEffectExtraData = spellEffectExtraData;
             }
 
-            Spline spline = moveSpline.spline;
+            var spline = moveSpline.spline;
             Vector3[] array = spline.GetPoints();
 
             if (splineFlags.HasFlag(SplineFlag.UncompressedPath))
