@@ -458,6 +458,20 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell, Processing = PacketProcessing.Inplace)]
+        void HandleCancelModSpeedNoControlAuras(CancelModSpeedNoControlAuras cancelModSpeedNoControlAuras)
+        {
+            Unit mover = _player.GetUnitBeingMoved();
+            if (mover == null || mover.GetGUID() != cancelModSpeedNoControlAuras.TargetGUID)
+                return;
+
+            _player.RemoveAurasByType(AuraType.ModSpeedNoControl, aurApp =>
+            {
+                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
+                return !spellInfo.HasAttribute(SpellAttr0.NoAuraCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
+            });
+        }
+
+        [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell, Processing = PacketProcessing.Inplace)]
         void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell packet)
         {
             //may be better send SMSG_CANCEL_AUTO_REPEAT?

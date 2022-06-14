@@ -300,6 +300,18 @@ namespace Game.Networking.Packets
         public uint Action;
     }
 
+    class CancelModSpeedNoControlAuras : ClientPacket
+    {
+        public ObjectGuid TargetGUID;
+
+        public CancelModSpeedNoControlAuras(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TargetGUID = _worldPacket.ReadPackedGuid();
+        }
+    }
+    
     class PetCancelAura : ClientPacket
     {
         public PetCancelAura(WorldPacket packet) : base(packet) { }
