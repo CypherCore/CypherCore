@@ -805,6 +805,7 @@ namespace Game.AI
                 SmartActions.AddToStoredTargetList => Marshal.SizeOf(typeof(SmartAction.AddToStoredTargets)),
                 SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(SmartAction.BecomePersonalClone)),
                 SmartActions.TriggerGameEvent => Marshal.SizeOf(typeof(SmartAction.TriggerGameEvent)),
+                SmartActions.DoAction => Marshal.SizeOf(typeof(SmartAction.DoAction)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -2071,6 +2072,7 @@ namespace Game.AI
                 case SmartActions.TriggerRandomTimedEvent:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.AddToStoredTargetList:
+                case SmartActions.DoAction:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
                 {
@@ -3137,6 +3139,9 @@ namespace Game.AI
         public TriggerGameEvent triggerGameEvent;
 
         [FieldOffset(4)]
+        public DoAction doAction;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -3673,6 +3678,10 @@ namespace Game.AI
         {
             public uint eventId;
             public uint useSaiTargetAsGameEventSource;
+        }
+        public struct DoAction
+        {
+            public uint actionId;
         }
         public struct Raw
         {

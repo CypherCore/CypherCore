@@ -2480,6 +2480,23 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.DoAction:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target?.ToUnit();
+                        if (unitTarget != null)
+                            unitTarget.GetAI()?.DoAction((int)e.Action.doAction.actionId);
+                        else
+                        {
+                            GameObject goTarget = target?.ToGameObject();
+                            if (goTarget != null)
+                                goTarget.GetAI()?.DoAction((int)e.Action.doAction.actionId);
+                        }
+                    }
+
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;
