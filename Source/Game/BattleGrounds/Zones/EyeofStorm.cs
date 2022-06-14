@@ -453,78 +453,75 @@ namespace Game.BattleGrounds.Zones
         public override bool SetupBattleground()
         {
             // doors
-            if (!AddObject(EotSObjectTypes.DoorA, EotSObjectIds.ADoor, 2527.6f, 1596.91f, 1262.13f, -3.12414f, -0.173642f, -0.001515f, 0.98477f, -0.008594f, BattlegroundConst.RespawnImmediately)
-                || !AddObject(EotSObjectTypes.DoorH, EotSObjectIds.HDoor, 1803.21f, 1539.49f, 1261.09f, 3.14159f, 0.173648f, 0, 0.984808f, 0, BattlegroundConst.RespawnImmediately)
+            if (!AddObject(EotSObjectTypes.DoorA, EotSObjectIds.ADoorEyEntry, 2527.59716796875f, 1596.90625f, 1238.4544677734375f, 3.159139871597290039f, 0.173641681671142578f, 0.001514434814453125f, -0.98476982116699218f, 0.008638577535748481f, BattlegroundConst.RespawnImmediately)
+                || !AddObject(EotSObjectTypes.DoorH, EotSObjectIds.HDoorEyEntry, 1803.2066650390625f, 1539.486083984375f, 1238.4544677734375f, 3.13898324966430664f, 0.173647880554199218f, 0.0f, 0.984807014465332031f, 0.001244877814315259f, BattlegroundConst.RespawnImmediately)
                 // banners (alliance)
-                || !AddObject(EotSObjectTypes.ABannerFelReaverCenter, EotSObjectIds.ABanner, 2057.46f, 1735.07f, 1187.91f, -0.925024f, 0, 0, 0.446198f, -0.894934f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerFelReaverLeft, EotSObjectIds.ABanner, 2032.25f, 1729.53f, 1190.33f, 1.8675f, 0, 0, 0.803857f, 0.594823f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerFelReaverRight, EotSObjectIds.ABanner, 2092.35f, 1775.46f, 1187.08f, -0.401426f, 0, 0, 0.199368f, -0.979925f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerBloodElfCenter, EotSObjectIds.ABanner, 2047.19f, 1349.19f, 1189.0f, -1.62316f, 0, 0, 0.725374f, -0.688354f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerBloodElfLeft, EotSObjectIds.ABanner, 2074.32f, 1385.78f, 1194.72f, 0.488692f, 0, 0, 0.241922f, 0.970296f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerBloodElfRight, EotSObjectIds.ABanner, 2025.13f, 1386.12f, 1192.74f, 2.3911f, 0, 0, 0.930418f, 0.366501f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsCenter, EotSObjectIds.ABanner, 2276.8f, 1400.41f, 1196.33f, 2.44346f, 0, 0, 0.939693f, 0.34202f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsLeft, EotSObjectIds.ABanner, 2305.78f, 1404.56f, 1199.38f, 1.74533f, 0, 0, 0.766044f, 0.642788f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsRight, EotSObjectIds.ABanner, 2245.4f, 1366.41f, 1195.28f, 2.21657f, 0, 0, 0.894934f, 0.446198f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerMageTowerCenter, EotSObjectIds.ABanner, 2270.84f, 1784.08f, 1186.76f, 2.42601f, 0, 0, 0.936672f, 0.350207f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerMageTowerLeft, EotSObjectIds.ABanner, 2269.13f, 1737.7f, 1186.66f, 0.994838f, 0, 0, 0.477159f, 0.878817f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.ABannerMageTowerRight, EotSObjectIds.ABanner, 2300.86f, 1741.25f, 1187.7f, -0.785398f, 0, 0, 0.382683f, -0.92388f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerFelReaverCenter, EotSObjectIds.ABannerEyEntry, 2057.47265625f, 1735.109130859375f, 1188.065673828125f, 5.305802345275878906f, 0.0f, 0.0f, -0.46947097778320312f, 0.882947921752929687f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerFelReaverLeft, EotSObjectIds.ABannerEyEntry, 2032.248291015625f, 1729.546875f, 1191.2296142578125f, 1.797688722610473632f, 0.0f, 0.0f, 0.7826080322265625f, 0.622514784336090087f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerFelReaverRight, EotSObjectIds.ABannerEyEntry, 2092.338623046875f, 1775.4739990234375f, 1187.504150390625f, 5.811946868896484375f, 0.0f, 0.0f, -0.2334451675415039f, 0.972369968891143798f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerBloodElfCenter, EotSObjectIds.ABannerEyEntry, 2047.1910400390625f, 1349.1927490234375f, 1189.0032958984375f, 4.660029888153076171f, 0.0f, 0.0f, -0.72537422180175781f, 0.688354730606079101f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerBloodElfLeft, EotSObjectIds.ABannerEyEntry, 2074.319580078125f, 1385.779541015625f, 1194.7203369140625f, 0.488691210746765136f, 0.0f, 0.0f, 0.241921424865722656f, 0.970295846462249755f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerBloodElfRight, EotSObjectIds.ABannerEyEntry, 2025.125f, 1386.123291015625f, 1192.7354736328125f, 2.391098499298095703f, 0.0f, 0.0f, 0.930417060852050781f, 0.366502493619918823f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsCenter, EotSObjectIds.ABannerEyEntry, 2276.796875f, 1400.407958984375f, 1196.333740234375f, 2.44346022605895996f, 0.0f, 0.0f, 0.939692497253417968f, 0.34202045202255249f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsLeft, EotSObjectIds.ABannerEyEntry, 2305.776123046875f, 1404.5572509765625f, 1199.384765625f, 1.745326757431030273f, 0.0f, 0.0f, 0.766043663024902343f, 0.642788589000701904f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerDraeneiRuinsRight, EotSObjectIds.ABannerEyEntry, 2245.395751953125f, 1366.4132080078125f, 1195.27880859375f, 2.216565132141113281f, 0.0f, 0.0f, 0.894933700561523437f, 0.44619917869567871f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerMageTowerCenter, EotSObjectIds.ABannerEyEntry, 2270.8359375f, 1784.080322265625f, 1186.757080078125f, 2.426007747650146484f, 0.0f, 0.0f, 0.936672210693359375f, 0.350207358598709106f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerMageTowerLeft, EotSObjectIds.ABannerEyEntry, 2269.126708984375f, 1737.703125f, 1186.8145751953125f, 0.994837164878845214f, 0.0f, 0.0f, 0.477158546447753906f, 0.878817260265350341f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.ABannerMageTowerRight, EotSObjectIds.ABannerEyEntry, 2300.85595703125f, 1741.24658203125f, 1187.793212890625f, 5.497788906097412109f, 0.0f, 0.0f, -0.38268280029296875f, 0.923879802227020263f, BattlegroundConst.RespawnOneDay)
                 // banners (horde)
-                || !AddObject(EotSObjectTypes.HBannerFelReaverCenter, EotSObjectIds.HBanner, 2057.46f, 1735.07f, 1187.91f, -0.925024f, 0, 0, 0.446198f, -0.894934f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerFelReaverLeft, EotSObjectIds.HBanner, 2032.25f, 1729.53f, 1190.33f, 1.8675f, 0, 0, 0.803857f, 0.594823f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerFelReaverRight, EotSObjectIds.HBanner, 2092.35f, 1775.46f, 1187.08f, -0.401426f, 0, 0, 0.199368f, -0.979925f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerBloodElfCenter, EotSObjectIds.HBanner, 2047.19f, 1349.19f, 1189.0f, -1.62316f, 0, 0, 0.725374f, -0.688354f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerBloodElfLeft, EotSObjectIds.HBanner, 2074.32f, 1385.78f, 1194.72f, 0.488692f, 0, 0, 0.241922f, 0.970296f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerBloodElfRight, EotSObjectIds.HBanner, 2025.13f, 1386.12f, 1192.74f, 2.3911f, 0, 0, 0.930418f, 0.366501f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsCenter, EotSObjectIds.HBanner, 2276.8f, 1400.41f, 1196.33f, 2.44346f, 0, 0, 0.939693f, 0.34202f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsLeft, EotSObjectIds.HBanner, 2305.78f, 1404.56f, 1199.38f, 1.74533f, 0, 0, 0.766044f, 0.642788f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsRight, EotSObjectIds.HBanner, 2245.4f, 1366.41f, 1195.28f, 2.21657f, 0, 0, 0.894934f, 0.446198f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerMageTowerCenter, EotSObjectIds.HBanner, 2270.84f, 1784.08f, 1186.76f, 2.42601f, 0, 0, 0.936672f, 0.350207f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerMageTowerLeft, EotSObjectIds.HBanner, 2269.13f, 1737.7f, 1186.66f, 0.994838f, 0, 0, 0.477159f, 0.878817f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.HBannerMageTowerRight, EotSObjectIds.HBanner, 2300.86f, 1741.25f, 1187.7f, -0.785398f, 0, 0, 0.382683f, -0.92388f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerFelReaverCenter, EotSObjectIds.HBannerEyEntry, 2057.45654296875f, 1735.07470703125f, 1187.9063720703125f, 5.35816192626953125f, 0.0f, 0.0f, -0.446197509765625f, 0.894934535026550292f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerFelReaverLeft, EotSObjectIds.HBannerEyEntry, 2032.251708984375f, 1729.532958984375f, 1190.3251953125f, 1.867502212524414062f, 0.0f, 0.0f, 0.803856849670410156f, 0.594822824001312255f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerFelReaverRight, EotSObjectIds.HBannerEyEntry, 2092.354248046875f, 1775.4583740234375f, 1187.079345703125f, 5.881760597229003906f, 0.0f, 0.0f, -0.19936752319335937f, 0.979924798011779785f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerBloodElfCenter, EotSObjectIds.HBannerEyEntry, 2047.1978759765625f, 1349.1875f, 1188.5650634765625f, 4.625123500823974609f, 0.0f, 0.0f, -0.73727703094482421f, 0.67559051513671875f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerBloodElfLeft, EotSObjectIds.HBannerEyEntry, 2074.3056640625f, 1385.7725830078125f, 1194.4686279296875f, 0.471238493919372558f, 0.0f, 0.0f, 0.233445167541503906f, 0.972369968891143798f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerBloodElfRight, EotSObjectIds.HBannerEyEntry, 2025.09375f, 1386.12158203125f, 1192.6536865234375f, 2.373644113540649414f, 0.0f, 0.0f, 0.927183151245117187f, 0.37460830807685852f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsCenter, EotSObjectIds.HBannerEyEntry, 2276.798583984375f, 1400.4410400390625f, 1196.2200927734375f, 2.495818138122558593f, 0.0f, 0.0f, 0.948323249816894531f, 0.317305892705917358f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsLeft, EotSObjectIds.HBannerEyEntry, 2305.763916015625f, 1404.5972900390625f, 1199.3333740234375f, 1.640606880187988281f, 0.0f, 0.0f, 0.731352806091308593f, 0.6819993257522583f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerDraeneiRuinsRight, EotSObjectIds.HBannerEyEntry, 2245.382080078125f, 1366.454833984375f, 1195.1815185546875f, 2.373644113540649414f, 0.0f, 0.0f, 0.927183151245117187f, 0.37460830807685852f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerMageTowerCenter, EotSObjectIds.HBannerEyEntry, 2270.869873046875f, 1784.0989990234375f, 1186.4384765625f, 2.356194972991943359f, 0.0f, 0.0f, 0.923879623413085937f, 0.382683247327804565f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerMageTowerLeft, EotSObjectIds.HBannerEyEntry, 2268.59716796875f, 1737.0191650390625f, 1186.75390625f, 0.942476630210876464f, 0.0f, 0.0f, 0.453989982604980468f, 0.891006767749786376f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.HBannerMageTowerRight, EotSObjectIds.HBannerEyEntry, 2301.01904296875f, 1741.4930419921875f, 1187.48974609375f, 5.375615119934082031f, 0.0f, 0.0f, -0.4383707046508789f, 0.898794233798980712f, BattlegroundConst.RespawnOneDay)
                 // banners (natural)
-                || !AddObject(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectIds.NBanner, 2057.46f, 1735.07f, 1187.91f, -0.925024f, 0, 0, 0.446198f, -0.894934f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerFelReaverLeft, EotSObjectIds.NBanner, 2032.25f, 1729.53f, 1190.33f, 1.8675f, 0, 0, 0.803857f, 0.594823f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerFelReaverRight, EotSObjectIds.NBanner, 2092.35f, 1775.46f, 1187.08f, -0.401426f, 0, 0, 0.199368f, -0.979925f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectIds.NBanner, 2047.19f, 1349.19f, 1189.0f, -1.62316f, 0, 0, 0.725374f, -0.688354f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerBloodElfLeft, EotSObjectIds.NBanner, 2074.32f, 1385.78f, 1194.72f, 0.488692f, 0, 0, 0.241922f, 0.970296f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerBloodElfRight, EotSObjectIds.NBanner, 2025.13f, 1386.12f, 1192.74f, 2.3911f, 0, 0, 0.930418f, 0.366501f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectIds.NBanner, 2276.8f, 1400.41f, 1196.33f, 2.44346f, 0, 0, 0.939693f, 0.34202f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsLeft, EotSObjectIds.NBanner, 2305.78f, 1404.56f, 1199.38f, 1.74533f, 0, 0, 0.766044f, 0.642788f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsRight, EotSObjectIds.NBanner, 2245.4f, 1366.41f, 1195.28f, 2.21657f, 0, 0, 0.894934f, 0.446198f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectIds.NBanner, 2270.84f, 1784.08f, 1186.76f, 2.42601f, 0, 0, 0.936672f, 0.350207f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerMageTowerLeft, EotSObjectIds.NBanner, 2269.13f, 1737.7f, 1186.66f, 0.994838f, 0, 0, 0.477159f, 0.878817f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.NBannerMageTowerRight, EotSObjectIds.NBanner, 2300.86f, 1741.25f, 1187.7f, -0.785398f, 0, 0, 0.382683f, -0.92388f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectIds.NBannerEyEntry, 2057.4931640625f, 1735.111083984375f, 1187.675537109375f, 5.340708732604980468f, 0.0f, 0.0f, -0.45398998260498046f, 0.891006767749786376f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerFelReaverLeft, EotSObjectIds.NBannerEyEntry, 2032.2569580078125f, 1729.5572509765625f, 1191.0802001953125f, 1.797688722610473632f, 0.0f, 0.0f, 0.7826080322265625f, 0.622514784336090087f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerFelReaverRight, EotSObjectIds.NBannerEyEntry, 2092.395751953125f, 1775.451416015625f, 1186.965576171875f, 5.89921426773071289f, 0.0f, 0.0f, -0.19080829620361328f, 0.981627285480499267f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectIds.NBannerEyEntry, 2047.1875f, 1349.1944580078125f, 1188.5731201171875f, 4.642575740814208984f, 0.0f, 0.0f, -0.731353759765625f, 0.681998312473297119f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerBloodElfLeft, EotSObjectIds.NBannerEyEntry, 2074.3212890625f, 1385.76220703125f, 1194.362060546875f, 0.488691210746765136f, 0.0f, 0.0f, 0.241921424865722656f, 0.970295846462249755f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerBloodElfRight, EotSObjectIds.NBannerEyEntry, 2025.13720703125f, 1386.1336669921875f, 1192.5482177734375f, 2.391098499298095703f, 0.0f, 0.0f, 0.930417060852050781f, 0.366502493619918823f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectIds.NBannerEyEntry, 2276.833251953125f, 1400.4375f, 1196.146728515625f, 2.478367090225219726f, 0.0f, 0.0f, 0.94551849365234375f, 0.325568377971649169f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsLeft, EotSObjectIds.NBannerEyEntry, 2305.77783203125f, 1404.5364990234375f, 1199.246337890625f, 1.570795774459838867f, 0.0f, 0.0f, 0.707106590270996093f, 0.707106947898864746f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerDraeneiRuinsRight, EotSObjectIds.NBannerEyEntry, 2245.40966796875f, 1366.4410400390625f, 1195.1107177734375f, 2.356194972991943359f, 0.0f, 0.0f, 0.923879623413085937f, 0.382683247327804565f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectIds.NBannerEyEntry, 2270.84033203125f, 1784.1197509765625f, 1186.1473388671875f, 2.303830623626708984f, 0.0f, 0.0f, 0.913544654846191406f, 0.406738430261611938f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerMageTowerLeft, EotSObjectIds.NBannerEyEntry, 2268.46533203125f, 1736.8385009765625f, 1186.742919921875f, 0.942476630210876464f, 0.0f, 0.0f, 0.453989982604980468f, 0.891006767749786376f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.NBannerMageTowerRight, EotSObjectIds.NBannerEyEntry, 2300.9931640625f, 1741.5504150390625f, 1187.10693359375f, 5.375615119934082031f, 0.0f, 0.0f, -0.4383707046508789f, 0.898794233798980712f, BattlegroundConst.RespawnOneDay)
                 // flags
-                || !AddObject(EotSObjectTypes.FlagNetherstorm, EotSObjectIds.Flag2, 2174.782227f, 1569.054688f, 1160.361938f, -1.448624f, 0, 0, 0.662620f, -0.748956f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.FlagFelReaver, EotSObjectIds.Flag1, 2044.28f, 1729.68f, 1189.96f, -0.017453f, 0, 0, 0.008727f, -0.999962f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.FlagBloodElf, EotSObjectIds.Flag1, 2048.83f, 1393.65f, 1194.49f, 0.20944f, 0, 0, 0.104528f, 0.994522f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.FlagDraeneiRuins, EotSObjectIds.Flag1, 2286.56f, 1402.36f, 1197.11f, 3.72381f, 0, 0, 0.957926f, -0.287016f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.FlagMageTower, EotSObjectIds.Flag1, 2284.48f, 1731.23f, 1189.99f, 2.89725f, 0, 0, 0.992546f, 0.121869f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.FlagNetherstorm, EotSObjectIds.Flag2EyEntry, 2174.444580078125f, 1569.421875f, 1159.852783203125f, 4.625123500823974609f, 0.0f, 0.0f, -0.73727703094482421f, 0.67559051513671875f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.FlagFelReaver, EotSObjectIds.Flag1EyEntry, 2044.28f, 1729.68f, 1189.96f, -0.017453f, 0, 0, 0.008727f, -0.999962f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.FlagBloodElf, EotSObjectIds.Flag1EyEntry, 2048.83f, 1393.65f, 1194.49f, 0.20944f, 0, 0, 0.104528f, 0.994522f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.FlagDraeneiRuins, EotSObjectIds.Flag1EyEntry, 2286.56f, 1402.36f, 1197.11f, 3.72381f, 0, 0, 0.957926f, -0.287016f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.FlagMageTower, EotSObjectIds.Flag1EyEntry, 2284.48f, 1731.23f, 1189.99f, 2.89725f, 0, 0, 0.992546f, 0.121869f, BattlegroundConst.RespawnOneDay)
                 // tower cap
-                || !AddObject(EotSObjectTypes.TowerCapFelReaver, EotSObjectIds.FrTowerCap, 2024.600708f, 1742.819580f, 1195.157715f, 2.443461f, 0, 0, 0.939693f, 0.342020f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.TowerCapBloodElf, EotSObjectIds.BeTowerCap, 2050.493164f, 1372.235962f, 1194.563477f, 1.710423f, 0, 0, 0.754710f, 0.656059f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.TowerCapDraeneiRuins, EotSObjectIds.DrTowerCap, 2301.010498f, 1386.931641f, 1197.183472f, 1.570796f, 0, 0, 0.707107f, 0.707107f, BattlegroundConst.RespawnOneDay)
-                || !AddObject(EotSObjectTypes.TowerCapMageTower, EotSObjectIds.HuTowerCap, 2282.121582f, 1760.006958f, 1189.707153f, 1.919862f, 0, 0, 0.819152f, 0.573576f, BattlegroundConst.RespawnOneDay)
-        )
+                || !AddObject(EotSObjectTypes.TowerCapFelReaver, EotSObjectIds.FrTowerCapEyEntry, 2024.600708f, 1742.819580f, 1195.157715f, 2.443461f, 0, 0, 0.939693f, 0.342020f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.TowerCapBloodElf, EotSObjectIds.BeTowerCapEyEntry, 2050.493164f, 1372.235962f, 1194.563477f, 1.710423f, 0, 0, 0.754710f, 0.656059f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.TowerCapDraeneiRuins, EotSObjectIds.DrTowerCapEyEntry, 2301.010498f, 1386.931641f, 1197.183472f, 1.570796f, 0, 0, 0.707107f, 0.707107f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.TowerCapMageTower, EotSObjectIds.HuTowerCapEyEntry, 2282.121582f, 1760.006958f, 1189.707153f, 1.919862f, 0, 0, 0.819152f, 0.573576f, BattlegroundConst.RespawnOneDay)
+                // buffs
+                || !AddObject(EotSObjectTypes.SpeedbuffFelReaver, EotSObjectIds.SpeedBuffFelReaverEyEntry, 2046.462646484375f, 1749.1666259765625f, 1190.010498046875f, 5.410521507263183593f, 0.0f, 0.0f, -0.42261791229248046f, 0.906307935714721679f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.RegenbuffFelReaver, EotSObjectIds.RestorationBuffFelReaverEyEntry, 2046.462646484375f, 1749.1666259765625f, 1190.010498046875f, 5.410521507263183593f, 0.0f, 0.0f, -0.42261791229248046f, 0.906307935714721679f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.BerserkbuffFelReaver, EotSObjectIds.BerserkBuffFelReaverEyEntry, 2046.462646484375f, 1749.1666259765625f, 1190.010498046875f, 5.410521507263183593f, 0.0f, 0.0f, -0.42261791229248046f, 0.906307935714721679f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.SpeedbuffBloodElf, EotSObjectIds.SpeedBuffBloodElfEyEntry, 2050.46826171875f, 1372.2020263671875f, 1194.5634765625f, 1.675513744354248046f, 0.0f, 0.0f, 0.743144035339355468f, 0.669131457805633544f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.RegenbuffBloodElf, EotSObjectIds.RestorationBuffBloodElfEyEntry, 2050.46826171875f, 1372.2020263671875f, 1194.5634765625f, 1.675513744354248046f, 0.0f, 0.0f, 0.743144035339355468f, 0.669131457805633544f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.BerserkbuffBloodElf, EotSObjectIds.BerserkBuffBloodElfEyEntry, 2050.46826171875f, 1372.2020263671875f, 1194.5634765625f, 1.675513744354248046f, 0.0f, 0.0f, 0.743144035339355468f, 0.669131457805633544f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.SpeedbuffDraeneiRuins, EotSObjectIds.SpeedBuffDraeneiRuinsEyEntry, 2302.4765625f, 1391.244873046875f, 1197.7364501953125f, 1.762782454490661621f, 0.0f, 0.0f, 0.771624565124511718f, 0.636078238487243652f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.RegenbuffDraeneiRuins, EotSObjectIds.RestorationBuffDraeneiRuinsEyEntry, 2302.4765625f, 1391.244873046875f, 1197.7364501953125f, 1.762782454490661621f, 0.0f, 0.0f, 0.771624565124511718f, 0.636078238487243652f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.BerserkbuffDraeneiRuins, EotSObjectIds.BerserkBuffDraeneiRuinsEyEntry, 2302.4765625f, 1391.244873046875f, 1197.7364501953125f, 1.762782454490661621f, 0.0f, 0.0f, 0.771624565124511718f, 0.636078238487243652f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.SpeedbuffMageTower, EotSObjectIds.SpeedBuffMageTowerEyEntry, 2283.7099609375f, 1748.8699951171875f, 1189.7071533203125f, 4.782202720642089843f, 0.0f, 0.0f, -0.68199825286865234f, 0.731353819370269775f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.RegenbuffMageTower, EotSObjectIds.RestorationBuffMageTowerEyEntry, 2283.7099609375f, 1748.8699951171875f, 1189.7071533203125f, 4.782202720642089843f, 0.0f, 0.0f, -0.68199825286865234f, 0.731353819370269775f, BattlegroundConst.RespawnOneDay)
+                || !AddObject(EotSObjectTypes.BerserkbuffMageTower, EotSObjectIds.BerserkBuffMageTowerEyEntry, 2283.7099609375f, 1748.8699951171875f, 1189.7071533203125f, 4.782202720642089843f, 0.0f, 0.0f, -0.68199825286865234f, 0.731353819370269775f, BattlegroundConst.RespawnOneDay)
+                )
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn some objects. The battleground was not created.");
                 return false;
-            }
-
-            //buffs
-            for (int i = 0; i < EotSPoints.PointsMax; ++i)
-            {
-                AreaTriggerRecord at = CliDB.AreaTriggerStorage.LookupByKey(m_Points_Trigger[i]);
-                if (at == null)
-                {
-                    Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown trigger: {0}", m_Points_Trigger[i]);
-                    continue;
-                }
-                if (!AddObject(EotSObjectTypes.SpeedbuffFelReaver + i * 3, Buff_Entries[0], at.Pos.X, at.Pos.Y, at.Pos.Z, 0.907571f, 0, 0, 0.438371f, 0.898794f, BattlegroundConst.RespawnOneDay)
-                    || !AddObject(EotSObjectTypes.SpeedbuffFelReaver + i * 3 + 1, Buff_Entries[1], at.Pos.X, at.Pos.Y, at.Pos.Z, 0.907571f, 0, 0, 0.438371f, 0.898794f, BattlegroundConst.RespawnOneDay)
-                    || !AddObject(EotSObjectTypes.SpeedbuffFelReaver + i * 3 + 2, Buff_Entries[2], at.Pos.X, at.Pos.Y, at.Pos.Z, 0.907571f, 0, 0, 0.438371f, 0.898794f, BattlegroundConst.RespawnOneDay)
-        )
-                    Log.outError(LogFilter.Battleground, "BattlegroundEY: Could not spawn Speedbuff Fel Reaver.");
             }
 
             WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSGaveyardIds.MainAlliance);
@@ -1233,18 +1230,29 @@ namespace Game.BattleGrounds.Zones
 
     struct EotSObjectIds
     {
-        public const uint ADoor = 184719;           //Alliance Door
-        public const uint HDoor = 184720;          //Horde Door
-        public const uint Flag1 = 184493;           //Netherstorm Flag (Generic)
-        public const uint Flag2 = 184141;           //Netherstorm Flag (Flagstand)
-        public const uint Flag3 = 184142;           //Netherstorm Flag (Flagdrop)
-        public const uint ABanner = 184381;           //Visual Banner (Alliance)
-        public const uint HBanner = 184380;           //Visual Banner (Horde)
-        public const uint NBanner = 184382;           //Visual Banner (Neutral)
-        public const uint BeTowerCap = 184080;           //Be Tower Cap Pt
-        public const uint FrTowerCap = 184081;           //Fel Reaver Cap Pt
-        public const uint HuTowerCap = 184082;           //Human Tower Cap Pt
-        public const uint DrTowerCap = 184083;            //Draenei Tower Cap Pt
+        public const uint ADoorEyEntry = 184719;           //Alliance Door
+        public const uint HDoorEyEntry = 184720;           //Horde Door
+        public const uint Flag1EyEntry = 184493;           //Netherstorm Flag (Generic)
+        public const uint Flag2EyEntry = 208977;           //Netherstorm Flag (Flagstand)
+        public const uint ABannerEyEntry = 184381;           //Visual Banner (Alliance)
+        public const uint HBannerEyEntry = 184380;           //Visual Banner (Horde)
+        public const uint NBannerEyEntry = 184382;           //Visual Banner (Neutral)
+        public const uint BeTowerCapEyEntry = 184080;           //Be Tower Cap Pt
+        public const uint FrTowerCapEyEntry = 184081;           //Fel Reaver Cap Pt
+        public const uint HuTowerCapEyEntry = 184082;           //Human Tower Cap Pt
+        public const uint DrTowerCapEyEntry = 184083;           //Draenei Tower Cap Pt
+        public const uint SpeedBuffFelReaverEyEntry = 184970;
+        public const uint RestorationBuffFelReaverEyEntry = 184971;
+        public const uint BerserkBuffFelReaverEyEntry = 184972;
+        public const uint SpeedBuffBloodElfEyEntry = 184964;
+        public const uint RestorationBuffBloodElfEyEntry = 184965;
+        public const uint BerserkBuffBloodElfEyEntry = 184966;
+        public const uint SpeedBuffDraeneiRuinsEyEntry = 184976;
+        public const uint RestorationBuffDraeneiRuinsEyEntry = 184977;
+        public const uint BerserkBuffDraeneiRuinsEyEntry = 184978;
+        public const uint SpeedBuffMageTowerEyEntry = 184973;
+        public const uint RestorationBuffMageTowerEyEntry = 184974;
+        public const uint BerserkBuffMageTowerEyEntry = 184975;
     }
 
     struct EotSPointsTrigger
