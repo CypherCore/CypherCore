@@ -114,12 +114,12 @@ namespace Game
                     return;
                 }
 
-                if (transmogItem.ItemModifiedAppearanceID != 0 || transmogItem.SecondaryItemModifiedAppearanceID != 0)
+                if (transmogItem.ItemModifiedAppearanceID != 0 || transmogItem.SecondaryItemModifiedAppearanceID > 0)
                 {
                     if (transmogItem.ItemModifiedAppearanceID != 0 && !validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.ItemModifiedAppearanceID, false))
                         return;
 
-                    if (transmogItem.SecondaryItemModifiedAppearanceID != 0 && !validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.SecondaryItemModifiedAppearanceID, true))
+                    if (transmogItem.SecondaryItemModifiedAppearanceID > 0 && !validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.SecondaryItemModifiedAppearanceID, true))
                         return;
 
                     // add cost
