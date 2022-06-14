@@ -972,15 +972,18 @@ namespace Scripts.Spells.Druid
 
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
-            CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)target.CountPctFromMaxHealth(aurEff.GetAmount()));
-            target.CastSpell(target, SpellIds.SurvivalInstincts, args);
+            GetTarget().CastSpell(GetTarget(), SpellIds.SurvivalInstincts, true);
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SurvivalInstincts);
         }
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
+            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
