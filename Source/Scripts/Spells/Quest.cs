@@ -28,24 +28,12 @@ namespace Scripts.Spells.Quest
 {
     struct SpellIds
     {
-        //BendingShinbone
-        public const uint BendingShinbone1 = 8854;
-        public const uint BendingShinbone2 = 8855;
-
         //Thaumaturgychannel        
         public const uint ThaumaturgyChannel = 21029;
-
-        //Quest5206
-        public const uint CreateResonatingSkull = 17269;
-        public const uint CreateBoneDust = 17270;
 
         //Quest11396-11399
         public const uint ForceShieldArcanePurpleX3 = 43874;
         public const uint ScourgingCrystalController = 43878;
-
-        //Quest11587
-        public const uint SummonArcanePrisonerMale = 45446;    // Summon Arcane Prisoner - Male
-        public const uint SummonArcanePrisonerFemale = 45448;    // Summon Arcane Prisoner - Female
 
         //Quest11730
         public const uint SummonScavengebot004a8 = 46063;
@@ -79,10 +67,6 @@ namespace Scripts.Spells.Quest
         public const uint AllianceBattleStandardState = 4339;
         public const uint JumpRocketBlast = 4340;
 
-        //Redsnapperverytasty
-        public const uint FishedUpRedSnapper = 29867;
-        public const uint FishedUpMurloc = 29869;
-
         //BreakfastOfChampions
         public const uint SummonDeepJormungar = 66510;
         public const uint StormforgedMoleMachine = 66492;
@@ -101,10 +85,6 @@ namespace Scripts.Spells.Quest
         public const uint FlakCannonTrigger = 40110;
         public const uint ChooseLoc = 40056;
         public const uint AggroCheck = 40112;
-
-        //RecoverTheCargo
-        public const uint SummonLockbox = 42288;
-        public const uint SummonBurrower = 42289;
 
         //Spellzuldrakrat
         public const uint SummonGorgedLurkingBasilisk = 50928;
@@ -374,26 +354,6 @@ namespace Scripts.Spells.Quest
         bool _shouldAttack;
         uint _despawnTime;
     }
-
-    [Script] // 8856 - Bending Shinbone
-    class spell_q1846_bending_shinbone : SpellScript
-    {
-        void HandleScriptEffect(uint effIndex)
-        {
-            Item target = GetHitItem();
-            Unit caster = GetCaster();
-            if (!target && !caster.IsPlayer())
-                return;
-
-            uint spellId = RandomHelper.randChance(20) ? SpellIds.BendingShinbone1 : SpellIds.BendingShinbone2;
-            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(GetSpell()));
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
     
     [Script] // 9712 - Thaumaturgy Channel
     class spell_q2203_thaumaturgy_channel : AuraScript
@@ -414,33 +374,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
-        }
-    }
-
-    // http://www.wowhead.com/quest=5206 Marauders of Darrowshire
-    [Script] // 17271 - Test Fetid Skull
-    class spell_q5206_test_fetid_skull : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        public override bool Validate(SpellInfo spellEntry)
-        {
-            return ValidateSpellInfo(SpellIds.CreateResonatingSkull, SpellIds.CreateBoneDust);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            uint spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
-            caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -551,30 +484,6 @@ namespace Scripts.Spells.Quest
             if (target)
                 if (target.IsTypeId(TypeId.Unit))
                     target.RemoveAurasDueToSpell(SpellIds.ForceShieldArcanePurpleX3);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // http://www.wowhead.com/quest=11587 Prison Break
-    [Script] // 45449 Arcane Prisoner Rescue
-    class spell_q11587_arcane_prisoner_rescue : SpellScript
-    {
-        public override bool Validate(SpellInfo spellEntry)
-        {
-            return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            uint spellId = SpellIds.SummonArcanePrisonerMale;
-            if ((RandomHelper.Rand32() % 2) != 0)
-                spellId = SpellIds.SummonArcanePrisonerFemale;
-            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -853,30 +762,6 @@ namespace Scripts.Spells.Quest
         }
     }
 
-    [Script] // 29866 - Cast Fishing Net
-    class spell_q9452_cast_net : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.FishedUpRedSnapper, SpellIds.FishedUpMurloc);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-
-            if (RandomHelper.randChance(66))
-                caster.CastSpell(caster, SpellIds.FishedUpRedSnapper, true);
-            else
-                caster.CastSpell(null, SpellIds.FishedUpMurloc, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
     [Script]
     class spell_q12279_cast_net : SpellScript
     {
@@ -1063,30 +948,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
-        }
-    }
-
-    [Script] // 42287 - Salvage Wreckage
-    class spell_q11140salvage_wreckage : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.SummonLockbox, SpellIds.SummonBurrower);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-
-            if (RandomHelper.randChance(50))
-                caster.CastSpell(caster, SpellIds.SummonLockbox, true);
-            else
-                caster.CastSpell(null, SpellIds.SummonBurrower, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
     

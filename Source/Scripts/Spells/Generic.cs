@@ -2700,6 +2700,21 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 36553 - PetWait
+    class spell_gen_pet_wait : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            GetCaster().GetMotionMaster().Clear();
+            GetCaster().GetMotionMaster().MoveIdle();
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script]
     class spell_gen_profession_research : SpellScript
     {

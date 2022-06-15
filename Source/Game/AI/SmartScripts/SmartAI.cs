@@ -909,6 +909,7 @@ namespace Game.AI
             _followArrivedTimer = 1000;
             _followArrivedEntry = 0;
             _followCreditType = 0;
+            me.GetMotionMaster().Clear();
             me.StopMoving();
             me.GetMotionMaster().MoveIdle();
 

@@ -3896,6 +3896,8 @@ namespace Game.Achievements
             {
                 if (_criteriasByAsset[(int)type].ContainsKey(asset))
                     return _criteriasByAsset[(int)type][asset];
+
+                return new List<Criteria>();
             }
 
             return _criteriasByType.LookupByKey(type);

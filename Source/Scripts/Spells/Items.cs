@@ -2963,33 +2963,6 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_teach_language : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().GetTypeId() == TypeId.Player;
-        }
-
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.LearnGnomishBinary, SpellIds.LearnGoblinBinary);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Player caster = GetCaster().ToPlayer();
-
-            if (RandomHelper.randChance(34))
-                caster.CastSpell(caster, caster.GetTeam() == Team.Alliance ? SpellIds.LearnGnomishBinary : SpellIds.LearnGoblinBinary, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
     class spell_item_rocket_boots : SpellScript
     {
         public override bool Load()
