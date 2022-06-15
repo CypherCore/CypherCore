@@ -718,14 +718,16 @@ namespace Game.Entities
 
             Passenger.SendClearTarget();                            // SMSG_BREAK_TARGET
             Passenger.SetControlled(true, UnitState.Root);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
-            // also adds MOVEMENTFLAG_ROOT
+                                                                   // also adds MOVEMENTFLAG_ROOT
 
-            MoveSplineInit init = new(Passenger);
-            init.DisableTransportPathTransformations();
-            init.MoveTo(x, y, z, false, true);
-            init.SetFacing(o);
-            init.SetTransportEnter();
-            Passenger.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.DisableTransportPathTransformations();
+                init.MoveTo(x, y, z, false, true);
+                init.SetFacing(o);
+                init.SetTransportEnter();
+            };
+            Passenger.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
 
             foreach (var (_, threatRef) in Passenger.GetThreatManager().GetThreatenedByMeList())
                 threatRef.GetOwner().GetThreatManager().AddThreat(Target.GetBase(), threatRef.GetThreat(), null, true, true);

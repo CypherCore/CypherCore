@@ -637,33 +637,41 @@ namespace Game.Movement
             else
             {
                 // We are already close enough. We just need to turn toward the target without changing position.
-                MoveSplineInit init = new(_owner);
-                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
-                init.SetFacing(target);
-                Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
+                var initializer = (MoveSplineInit init) =>
+                {
+                    init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
+                    Unit refreshedTarget = Global.ObjAccessor.GetUnit(_owner, target.GetGUID());
+                    if (refreshedTarget != null)
+                        init.SetFacing(refreshedTarget);
+                };
+                Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
             }
         }
 
         public void MoveLand(uint id, Position pos, float? velocity = null)
         {
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(pos, false);
-            init.SetAnimation(AnimTier.Ground);
-            if (velocity.HasValue)
-                init.SetVelocity(velocity.Value);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(pos, false);
+                init.SetAnimation(AnimTier.Ground);
+                if (velocity.HasValue)
+                    init.SetVelocity(velocity.Value);
+            };
 
-            Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
         public void MoveTakeoff(uint id, Position pos, float? velocity = null)
         {
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(pos, false);
-            init.SetAnimation(AnimTier.Hover);
-            if (velocity.HasValue)
-                init.SetVelocity(velocity.Value);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(pos, false);
+                init.SetAnimation(AnimTier.Hover);
+                if (velocity.HasValue)
+                    init.SetVelocity(velocity.Value);
+            };
 
-            Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
         public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
@@ -723,15 +731,17 @@ namespace Game.Movement
             // Use a mmap raycast to get a valid destination.
             _owner.MovePositionToFirstCollision(dest, dist, _owner.GetRelativeAngle(origin) + MathF.PI);
 
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
-            init.SetParabolic(max_height, 0);
-            init.SetOrientationFixed(true);
-            init.SetVelocity(speedXY);
-            if (spellEffectExtraData != null)
-                init.SetSpellEffectExtraData(spellEffectExtraData);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+                init.SetParabolic(max_height, 0);
+                init.SetOrientationFixed(true);
+                init.SetVelocity(speedXY);
+                if (spellEffectExtraData != null)
+                    init.SetSpellEffectExtraData(spellEffectExtraData);
+            };
 
-            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, 0);
+            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, 0);
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
@@ -765,14 +775,16 @@ namespace Game.Movement
             float moveTimeHalf = (float)(speedZ / gravity);
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(x, y, z, false);
-            init.SetParabolic(max_height, 0);
-            init.SetVelocity(speedXY);
-            if (hasOrientation)
-                init.SetFacing(o);
-            if (spellEffectExtraData != null)
-                init.SetSpellEffectExtraData(spellEffectExtraData);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(x, y, z, false);
+                init.SetParabolic(max_height, 0);
+                init.SetVelocity(speedXY);
+                if (hasOrientation)
+                    init.SetFacing(o);
+                if (spellEffectExtraData != null)
+                    init.SetSpellEffectExtraData(spellEffectExtraData);
+            };
 
             uint arrivalSpellId = 0;
             ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
@@ -782,7 +794,7 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
             Add(movement);
@@ -794,17 +806,17 @@ namespace Game.Movement
             if (speedXY < 0.01f)
                 return;
 
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
-            init.SetParabolicVerticalAcceleration(gravity, 0);
-            init.SetUncompressed();
-            init.SetVelocity(speedXY);
-
-            if (hasOrientation)
-                init.SetFacing(pos.GetOrientation());
-
-            if (spellEffectExtraData != null)
-                init.SetSpellEffectExtraData(spellEffectExtraData);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
+                init.SetParabolicVerticalAcceleration(gravity, 0);
+                init.SetUncompressed();
+                init.SetVelocity(speedXY);
+                if (hasOrientation)
+                    init.SetFacing(pos.GetOrientation());
+                if (spellEffectExtraData != null)
+                    init.SetSpellEffectExtraData(spellEffectExtraData);
+            };
 
             uint arrivalSpellId = 0;
             ObjectGuid arrivalSpellTargetGuid = default;
@@ -814,7 +826,7 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            GenericMovementGenerator movement = new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
             movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
@@ -823,61 +835,63 @@ namespace Game.Movement
 
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
-            float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
-            Position pos = new(x, y, z, 0.0f);
-            float angle = pos.GetAbsoluteAngle(_owner.GetPositionX(), _owner.GetPositionY());
-
-            MoveSplineInit init = new(_owner);
-
-            // add the owner's current position as starting point as it gets removed after entering the cycle
-            init.Path().Add(new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()));
-
-            for (byte i = 0; i < stepCount; angle += step, ++i)
+            var initializer = (MoveSplineInit init) =>
             {
-                Vector3 point = new();
-                point.X = (float)(x + radius * Math.Cos(angle));
-                point.Y = (float)(y + radius * Math.Sin(angle));
+                float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
+                Position pos = new(x, y, z, 0.0f);
+                float angle = pos.GetAbsoluteAngle(_owner.GetPositionX(), _owner.GetPositionY());
+
+                // add the owner's current position as starting point as it gets removed after entering the cycle
+                init.Path().Add(new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()));
+
+                for (byte i = 0; i < stepCount; angle += step, ++i)
+                {
+                    Vector3 point = new();
+                    point.X = (float)(x + radius * Math.Cos(angle));
+                    point.Y = (float)(y + radius * Math.Sin(angle));
+
+                    if (_owner.IsFlying())
+                        point.Z = z;
+                    else
+                        point.Z = _owner.GetMapHeight(point.X, point.Y, z) + _owner.GetHoverOffset();
+
+                    init.Path().Add(point);
+                }
 
                 if (_owner.IsFlying())
-                    point.Z = z;
+                {
+                    init.SetFly();
+                    init.SetCyclic();
+                    init.SetAnimation(AnimTier.Hover);
+                }
                 else
-                    point.Z = _owner.GetMapHeight(point.X, point.Y, z) + _owner.GetHoverOffset();
+                {
+                    init.SetWalk(true);
+                    init.SetCyclic();
+                }
+            };
 
-                init.Path().Add(point);
-            }
-
-            if (_owner.IsFlying())
-            {
-                init.SetFly();
-                init.SetCyclic();
-                init.SetAnimation(AnimTier.Hover);
-            }
-            else
-            {
-                init.SetWalk(true);
-                init.SetCyclic();
-            }
-
-            Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, 0));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0));
         }
 
         void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
-            MoveSplineInit init = new(_owner);
-            if (fly)
+            var initializer = (MoveSplineInit init) =>
             {
-                init.SetFly();
-                init.SetUncompressed();
-                init.SetSmooth();
-            }
-
-            init.MovebyPath(pathPoints);
-            init.SetWalk(walk);
+                init.MovebyPath(pathPoints);
+                init.SetWalk(walk);
+                if (fly)
+                {
+                    init.SetFly();
+                    init.SetUncompressed();
+                    init.SetSmooth();
+                }
+            };
 
             // This code is not correct
             // GenericMovementGenerator does not affect UNIT_STATE_ROAMING_MOVE
             // need to call PointMovementGenerator with various pointIds
-            Add(new GenericMovementGenerator(init, MovementGeneratorType.Effect, pointId));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, pointId));
         }
 
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
@@ -925,8 +939,8 @@ namespace Game.Movement
                 return;
 
             // rooted units don't move (also setting falling+root flag causes client freezes)
-                if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
-                    return;
+            if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
+                return;
 
             _owner.SetFall(true);
 
@@ -937,11 +951,13 @@ namespace Game.Movement
                 return;
             }
 
-            MoveSplineInit init = new(_owner);
-            init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz + _owner.GetHoverOffset(), false);
-            init.SetFall();
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz + _owner.GetHoverOffset(), false);
+                init.SetFall();
+            };
 
-            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, id);
+            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id);
             movement.Priority = MovementGeneratorPriority.Highest;
             Add(movement);
         }
@@ -1031,7 +1047,7 @@ namespace Game.Movement
                 Add(new FormationMovementGenerator(leader, range, angle, point1, point2), MovementSlot.Default);
         }
 
-        public void LaunchMoveSpline(MoveSplineInit init, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
+        public void LaunchMoveSpline(Action<MoveSplineInit> initializer, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
         {
             if (IsInvalidMovementGeneratorType(type))
             {
@@ -1039,7 +1055,7 @@ namespace Game.Movement
                 return;
             }
 
-            GenericMovementGenerator movement = new(init, type, id);
+            GenericMovementGenerator movement = new(initializer, type, id);
             movement.Priority = priority;
             Add(movement);
         }
@@ -1262,7 +1278,7 @@ namespace Game.Movement
         public uint? ProgressCurveId;
         public uint? ParabolicCurveId;
     }
-    
+
     public struct ChaseRange
     {
         // this contains info that informs how we should path!

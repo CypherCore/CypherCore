@@ -234,10 +234,12 @@ namespace Game.Entities
 
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
         {
-            MoveSplineInit init = new(this);
-            init.MoveTo(x, y, z, generatePath, forceDestination);
-            init.SetVelocity(speed);
-            GetMotionMaster().LaunchMoveSpline(init, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(x, y, z, generatePath, forceDestination);
+                init.SetVelocity(speed);
+            };
+            GetMotionMaster().LaunchMoveSpline(initializer, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
         }
 
         public void KnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)

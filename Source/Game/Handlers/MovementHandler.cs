@@ -81,11 +81,10 @@ namespace Game
                 Log.outError(LogFilter.Network, "HandleMovementOpcodes: guid error");
                 return;
             }
+
             if (!movementInfo.Pos.IsPositionValid())
-            {
-                Log.outError(LogFilter.Network, "HandleMovementOpcodes: Invalid Position");
                 return;
-            }
+
 
             if (!mover.MoveSpline.Finalized())
                 return;

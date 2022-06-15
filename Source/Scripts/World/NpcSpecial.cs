@@ -2039,11 +2039,14 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            MoveSplineInit init = new(who);
-            init.DisableTransportPathTransformations();
-            init.MoveTo(x, y, z, false);
-            init.SetFacing(o);
-            who.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.DisableTransportPathTransformations();
+                init.MoveTo(x, y, z, false);
+                init.SetFacing(o);
+            };
+
+            who.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
             who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
             Creature creature = who.ToCreature();
             if (creature)

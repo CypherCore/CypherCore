@@ -1108,18 +1108,20 @@ namespace Game.Entities
                 }
             }
 
-            float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
+            var initializer = (MoveSplineInit init) =>
+            {
+                float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
 
-            MoveSplineInit init = new(this);
+                // Creatures without inhabit type air should begin falling after exiting the vehicle
+                if (IsTypeId(TypeId.Unit) && !CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight(), ref height))
+                    init.SetFall();
 
-            // Creatures without inhabit type air should begin falling after exiting the vehicle
-            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight(), ref height))
-                init.SetFall();
+                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
+                init.SetFacing(pos.GetOrientation());
+                init.SetTransportExit();
+            };
 
-            init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
-            init.SetFacing(pos.GetOrientation());
-            init.SetTransportExit();
-            GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementGeneratorPriority.Highest);
+            GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleExit, MovementGeneratorPriority.Highest);
 
             if (player != null)
                 player.ResummonPetTemporaryUnSummonedIfAny();

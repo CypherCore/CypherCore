@@ -17,12 +17,13 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Movement
 {
     class GenericMovementGenerator : MovementGenerator
     {
-        MoveSplineInit _splineInit;
+        Action<MoveSplineInit> _splineInit;
         MovementGeneratorType _type;
         uint _pointId;
         TimeTracker _duration;
@@ -30,9 +31,9 @@ namespace Game.Movement
         uint _arrivalSpellId;
         ObjectGuid _arrivalSpellTargetGuid;
 
-        public GenericMovementGenerator(MoveSplineInit splineInit, MovementGeneratorType type, uint id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
+        public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
         {
-            _splineInit = splineInit;
+            _splineInit = initializer;
             _type = type;
             _pointId = id;
             _duration = new();
@@ -57,7 +58,9 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            _duration.Reset((uint)_splineInit.Launch());
+            MoveSplineInit init = new(owner);
+            _splineInit(init);
+            _duration.Reset((uint)init.Launch());
         }
 
         public override void Reset(Unit owner)
