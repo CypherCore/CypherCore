@@ -1431,7 +1431,6 @@ namespace Scripts.World.NpcSpecial
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-            player.PlayerTalkClass.ClearMenus();
 
             switch (action)
             {
@@ -1444,7 +1443,7 @@ namespace Scripts.World.NpcSpecial
             }
 
             player.PlayerTalkClass.SendCloseGossip();
-            return true;
+            return false;
         }
     }
 
