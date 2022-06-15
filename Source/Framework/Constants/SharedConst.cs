@@ -241,6 +241,7 @@ namespace Framework.Constants
         public const float MinMeleeReach = 2.0f;
         public const float NominalMeleeRange = 5.0f;
         public const float MeleeRange = NominalMeleeRange - MinMeleeReach * 2; //center to center for players
+        public const float ExtraCellSearchRadius = 40.0f; // We need in some cases increase search radius. Allow to find creatures with huge combat reach in a different nearby cell.
         public const float InspectDistance = 28.0f;
         public const float ContactDistance = 0.5f;
         public const float InteractionDistance = 5.0f;

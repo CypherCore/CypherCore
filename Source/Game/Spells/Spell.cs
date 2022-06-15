@@ -740,9 +740,10 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
+                float extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                 var spellCone = new WorldObjectSpellConeTargetCheck(coneSrc, MathFunctions.DegToRad(coneAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
-                SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
+                SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius + extraSearchRadius);
 
                 CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
 
@@ -1644,9 +1645,11 @@ namespace Game.Spells
             var containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask == 0)
                 return;
+
+            float extraSearchRadius = range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
             var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType);
             var searcher = new WorldObjectListSearcher(m_caster, targets, check, containerTypeMask);
-            SearchTargets(searcher, containerTypeMask, m_caster, position, range);
+            SearchTargets(searcher, containerTypeMask, m_caster, position, range + extraSearchRadius);
         }
 
         void SearchChainTargets(List<WorldObject> targets, uint chainTargets, WorldObject target, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectType, SpellEffectInfo spellEffectInfo, bool isChainHeal)

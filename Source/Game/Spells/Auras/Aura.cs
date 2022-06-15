@@ -2712,6 +2712,8 @@ namespace Game.Spells
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
                 float radius = spellEffectInfo.CalcRadius(refe);
+                float extraSearchRadius = 0.0f;
+
                 SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
                 switch (spellEffectInfo.Effect)
                 {
@@ -2727,6 +2729,7 @@ namespace Game.Spells
                         break;
                     case SpellEffectName.ApplyAreaAuraEnemy:
                         selectionType = SpellTargetCheckTypes.Enemy;
+                        extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                         break;
                     case SpellEffectName.ApplyAreaAuraPet:
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
@@ -2763,7 +2766,7 @@ namespace Game.Spells
                 {
                     WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
                     UnitListSearcher searcher = new(GetUnitOwner(), units, check);
-                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius + extraSearchRadius);
 
                     // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
                     units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
