@@ -1129,8 +1129,8 @@ namespace Scripts.Spells.Paladin
         {
             int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
 
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, TimeSpan.FromSeconds(-value));
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, TimeSpan.FromSeconds(-value));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, TimeSpan.FromMilliseconds(-value));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, TimeSpan.FromMilliseconds(-value));
         }
 
         public override void Register()
