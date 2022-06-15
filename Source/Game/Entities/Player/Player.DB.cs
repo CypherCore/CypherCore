@@ -2785,7 +2785,7 @@ namespace Game.Entities
                 mapId = homebind.GetMapId();
                 instance_id = 0;
                 Relocate(homebind);
-            });                
+            });
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
@@ -3354,6 +3354,23 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
 
             PushQuests();
+
+            foreach (var transmogIllusion in CliDB.TransmogIllusionStorage.Values)
+            {
+                if (!transmogIllusion.GetFlags().HasFlag(TransmogIllusionFlags.PlayerConditionGrantsOnLogin))
+                    continue;
+
+                if (GetSession().GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))
+                    continue;
+
+                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(transmogIllusion.UnlockConditionID);
+                if (playerCondition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                        continue;
+
+                GetSession().GetCollectionMgr().AddTransmogIllusion(transmogIllusion.Id);
+            }
+
             return true;
         }
 

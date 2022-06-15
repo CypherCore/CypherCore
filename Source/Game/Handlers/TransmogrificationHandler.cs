@@ -136,20 +136,14 @@ namespace Game
                         return;
                     }
 
-                    SpellItemEnchantmentRecord illusion = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogItem.SpellItemEnchantmentID);
+                    TransmogIllusionRecord illusion = Global.DB2Mgr.GetTransmogIllusionForEnchantment((uint)transmogItem.SpellItemEnchantmentID);
                     if (illusion == null)
                     {
                         Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using invalid enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
                         return;
                     }
 
-                    if (illusion.ItemVisual == 0 || !illusion.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
-                        return;
-                    }
-
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
+                    var condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.UnlockConditionID);
                     if (condition != null)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
@@ -157,12 +151,6 @@ namespace Game
                             Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
                             return;
                         }
-                    }
-
-                    if (illusion.ScalingClassRestricted > 0 && illusion.ScalingClassRestricted != (byte)player.GetClass())
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed class enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
-                        return;
                     }
 
                     illusionItems[itemTransmogrified] = (uint)transmogItem.SpellItemEnchantmentID;

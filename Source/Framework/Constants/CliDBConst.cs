@@ -2448,4 +2448,11 @@ namespace Framework.Constants
         UnitItemOffHandIgnoreDisarmed = 9,
         UnitItemRangedIgnoreDisarmed = 10
     }
+
+    [Flags]
+    public enum TransmogIllusionFlags
+    {
+        HideUntilCollected = 0x1,
+        PlayerConditionGrantsOnLogin = 0x2,
+    }
 }

@@ -909,25 +909,30 @@ namespace Game.Entities
             }
         }
 
-        public void AddTransmogIllusion(ushort illusionId)
+        public void AddTransmogIllusion(uint transmogIllusionId)
         {
             Player owner = _owner.GetPlayer();
-            if (_transmogIllusions.Count <= illusionId)
+            if (_transmogIllusions.Count <= transmogIllusionId)
             {
                 uint numBlocks = (uint)(_transmogIllusions.Count << 2);
-                _transmogIllusions.Length = illusionId + 1;
+                _transmogIllusions.Length = (int)transmogIllusionId + 1;
                 numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
                     owner.AddIllusionBlock(0);
             }
 
-            _transmogIllusions.Set(illusionId, true);
-            int blockIndex = illusionId / 32;
-            int bitIndex = illusionId % 32;
+            _transmogIllusions.Set((int)transmogIllusionId, true);
+            uint blockIndex = transmogIllusionId / 32;
+            uint bitIndex = transmogIllusionId % 32;
 
-            owner.AddIllusionFlag(blockIndex, (uint)(1 << bitIndex));
+            owner.AddIllusionFlag((int)blockIndex, (uint)(1 << (int)bitIndex));
         }
 
+        public bool HasTransmogIllusion(uint transmogIllusionId)
+        {
+            return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
+        }
+        
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
         public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }
         public Dictionary<uint, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }

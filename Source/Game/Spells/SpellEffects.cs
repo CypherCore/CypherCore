@@ -5666,7 +5666,11 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            player.GetSession().GetCollectionMgr().AddTransmogIllusion((ushort)effectInfo.MiscValue);
+            uint illusionId = (uint)effectInfo.MiscValue;
+            if (!CliDB.TransmogIllusionStorage.ContainsKey(illusionId))
+                return;
+
+            player.GetSession().GetCollectionMgr().AddTransmogIllusion(illusionId);
         }
     }
 
