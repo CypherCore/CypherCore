@@ -310,8 +310,13 @@ namespace Game.Networking
                     return ReadDataHandlerResult.WaitingForQuery;
                 case ClientOpcodes.KeepAlive:
                     if (_worldSession != null)
+                    {
                         _worldSession.ResetTimeOutTime(true);
-                    break;
+                        return ReadDataHandlerResult.Ok;
+                    }
+
+                    Log.outError(LogFilter.Network, $"WorldSocket::ReadDataHandler: client {GetRemoteIpAddress()} sent CMSG_KEEP_ALIVE without being authenticated");
+                    return ReadDataHandlerResult.Error;
                 case ClientOpcodes.LogDisconnect:
                     break;
                 case ClientOpcodes.EnableNagle:
