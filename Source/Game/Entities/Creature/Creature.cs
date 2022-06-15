@@ -2395,7 +2395,7 @@ namespace Game.Entities
                 // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
                 SetSheath((SheathState)(cainfo.bytes2 & 0xFF));
-                ReplaceAllPvpFlags(UnitPVPStateFlags.None);
+                ReplaceAllPvpFlags((UnitPVPStateFlags)((cainfo.bytes2 >> 8) & 0xFF));
                 ReplaceAllPetFlags(UnitPetFlags.None);
                 SetShapeshiftForm(ShapeShiftForm.None);
             }
