@@ -246,7 +246,7 @@ namespace Game.Scripting
 
                 WaypointPath path = _waypointStore[entry];
                 path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, 0.0f, waitTime));
+                path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
 
                 ++count;
             }
