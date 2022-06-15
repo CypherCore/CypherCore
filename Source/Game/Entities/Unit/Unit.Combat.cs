@@ -529,9 +529,6 @@ namespace Game.Entities
             if (!extra && _lastExtraAttackSpell != 0)
                 _lastExtraAttackSpell = 0;
 
-            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.Possessed) && !HasUnitFlag2(UnitFlags2.CannotTurn))
-                SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
-
             // melee attack spell casted at main hand attack only - no normal melee dmg dealt
             if (attType == WeaponAttackType.BaseAttack && GetCurrentSpell(CurrentSpellTypes.Melee) != null && !extra)
                 m_currentSpells[CurrentSpellTypes.Melee].Cast();
