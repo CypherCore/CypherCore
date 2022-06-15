@@ -5655,6 +5655,19 @@ namespace Game.Spells
 
             playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetExperience(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage, BattlePetXpSource.SpellEffect);
         }
+
+        [SpellEffectHandler(SpellEffectName.LearnTransmogIllusion)]
+        void EffectLearnTransmogIllusion()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player player = unitTarget?.ToPlayer();
+            if (player == null)
+                return;
+
+            player.GetSession().GetCollectionMgr().AddTransmogIllusion((ushort)effectInfo.MiscValue);
+        }
     }
 
     public class DispelableAura

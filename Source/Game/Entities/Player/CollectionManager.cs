@@ -37,6 +37,7 @@ namespace Game.Entities
         BitSet _appearances;
         MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
         Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
+        BitSet _transmogIllusions;
 
         public static void LoadMountDefinitions()
         {
@@ -76,6 +77,7 @@ namespace Game.Entities
         {
             _owner = owner;
             _appearances = new BitSet(0);
+            _transmogIllusions = new BitSet(0);
         }
 
         public void LoadToys()
@@ -489,7 +491,7 @@ namespace Game.Entities
 
             foreach (uint hiddenItem in hiddenAppearanceItems)
             {
-               ItemModifiedAppearanceRecord hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
+                ItemModifiedAppearanceRecord hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
                 //ASSERT(hiddenAppearance);
                 if (_appearances.Length <= hiddenAppearance.Id)
                     _appearances.Length = (int)hiddenAppearance.Id + 1;
@@ -611,48 +613,48 @@ namespace Game.Entities
             switch (itemTemplate.GetClass())
             {
                 case ItemClass.Weapon:
-                    {
-                        if (!Convert.ToBoolean(_owner.GetPlayer().GetWeaponProficiency() & (1 << (int)itemTemplate.GetSubClass())))
-                            return false;
-                        if (itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic ||
-                            itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic2 ||
-                            itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Miscellaneous ||
-                            itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Thrown ||
-                            itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Spear ||
-                            itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.FishingPole)
-                            return false;
-                        break;
-                    }
+                {
+                    if (!Convert.ToBoolean(_owner.GetPlayer().GetWeaponProficiency() & (1 << (int)itemTemplate.GetSubClass())))
+                        return false;
+                    if (itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic ||
+                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Exotic2 ||
+                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Miscellaneous ||
+                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Thrown ||
+                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.Spear ||
+                        itemTemplate.GetSubClass() == (int)ItemSubClassWeapon.FishingPole)
+                        return false;
+                    break;
+                }
                 case ItemClass.Armor:
+                {
+                    switch (itemTemplate.GetInventoryType())
                     {
-                        switch (itemTemplate.GetInventoryType())
-                        {
-                            case InventoryType.Body:
-                            case InventoryType.Shield:
-                            case InventoryType.Cloak:
-                            case InventoryType.Tabard:
-                            case InventoryType.Holdable:
-                                break;
-                            case InventoryType.Head:
-                            case InventoryType.Shoulders:
-                            case InventoryType.Chest:
-                            case InventoryType.Waist:
-                            case InventoryType.Legs:
-                            case InventoryType.Feet:
-                            case InventoryType.Wrists:
-                            case InventoryType.Hands:
-                            case InventoryType.Robe:
-                                if ((ItemSubClassArmor)itemTemplate.GetSubClass() == ItemSubClassArmor.Miscellaneous)
-                                    return false;
-                                break;
-                            default:
+                        case InventoryType.Body:
+                        case InventoryType.Shield:
+                        case InventoryType.Cloak:
+                        case InventoryType.Tabard:
+                        case InventoryType.Holdable:
+                            break;
+                        case InventoryType.Head:
+                        case InventoryType.Shoulders:
+                        case InventoryType.Chest:
+                        case InventoryType.Waist:
+                        case InventoryType.Legs:
+                        case InventoryType.Feet:
+                        case InventoryType.Wrists:
+                        case InventoryType.Hands:
+                        case InventoryType.Robe:
+                            if ((ItemSubClassArmor)itemTemplate.GetSubClass() == ItemSubClassArmor.Miscellaneous)
                                 return false;
-                        }
-                        if (itemTemplate.GetInventoryType() != InventoryType.Cloak)
-                            if (!Convert.ToBoolean(PlayerClassByArmorSubclass[itemTemplate.GetSubClass()] & _owner.GetPlayer().GetClassMask()))
-                                return false;
-                        break;
+                            break;
+                        default:
+                            return false;
                     }
+                    if (itemTemplate.GetInventoryType() != InventoryType.Cloak)
+                        if (!Convert.ToBoolean(PlayerClassByArmorSubclass[itemTemplate.GetSubClass()] & _owner.GetPlayer().GetClassMask()))
+                            return false;
+                    break;
+                }
                 default:
                     return false;
             }
@@ -755,7 +757,7 @@ namespace Game.Entities
 
             return appearances;
         }
-        
+
         public void SetAppearanceIsFavorite(uint itemModifiedAppearanceId, bool apply)
         {
             var apperanceState = _favoriteAppearances.LookupByKey(itemModifiedAppearanceId);
@@ -845,6 +847,85 @@ namespace Game.Entities
             }
 
             return !knownPieces.Contains(0);
+        }
+
+        public void LoadTransmogIllusions()
+        {
+            Player owner = _owner.GetPlayer();
+            foreach (var blockValue in _transmogIllusions.ToBlockRange())
+                owner.AddIllusionBlock(blockValue);
+        }
+
+        public void LoadAccountTransmogIllusions(SQLResult knownTransmogIllusions)
+        {
+            uint[] blocks = new uint[7];
+
+            if (!knownTransmogIllusions.IsEmpty())
+            {
+                do
+                {
+                    ushort blobIndex = knownTransmogIllusions.Read<ushort>(0);
+                    if (blobIndex >= blocks.Length)
+                        Array.Resize(ref blocks, blobIndex + 1);
+
+                    blocks[blobIndex] = knownTransmogIllusions.Read<uint>(1);
+
+                } while (knownTransmogIllusions.NextRow());
+            }
+            
+            _transmogIllusions = new(blocks);
+
+            // Static illusions known by every player
+            ushort[] defaultIllusions =
+            {
+                3, // Lifestealing
+                13, // Crusader
+                22, // Striking
+                23, // Agility
+                34, // Hide Weapon Enchant
+                43, // Beastslayer
+                44, // Titanguard
+            };
+
+            foreach (ushort illusionId in defaultIllusions)
+                _transmogIllusions.Set(illusionId, true);
+        }
+
+        public void SaveAccountTransmogIllusions(SQLTransaction trans)
+        {
+            ushort blockIndex = 0;
+
+            foreach (var blockValue in _transmogIllusions.ToBlockRange())
+            {
+                if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
+                {
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS);
+                    stmt.AddValue(0, _owner.GetBattlenetAccountId());
+                    stmt.AddValue(1, blockIndex);
+                    stmt.AddValue(2, blockValue);
+                    trans.Append(stmt);
+                }
+                ++blockIndex;
+            }
+        }
+
+        public void AddTransmogIllusion(ushort illusionId)
+        {
+            Player owner = _owner.GetPlayer();
+            if (_transmogIllusions.Count <= illusionId)
+            {
+                uint numBlocks = (uint)(_transmogIllusions.Count << 2);
+                _transmogIllusions.Length = illusionId + 1;
+                numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
+                while (numBlocks-- != 0)
+                    owner.AddIllusionBlock(0);
+            }
+
+            _transmogIllusions.Set(illusionId, true);
+            int blockIndex = illusionId / 32;
+            int bitIndex = illusionId % 32;
+
+            owner.AddIllusionFlag(blockIndex, (uint)(1 << bitIndex));
         }
 
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
