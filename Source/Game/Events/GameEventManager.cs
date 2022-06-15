@@ -1190,11 +1190,13 @@ namespace Game
                     Global.ObjectMgr.AddCreatureToGrid(data);
 
                     // Spawn if necessary (loaded grids only)
-                    Map map = Global.MapMgr.CreateBaseMap(data.MapId);
-                    map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
-                    // We use spawn coords to spawn
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
-                        Creature.CreateCreatureFromDB(guid, map);
+                    Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
+                    {
+                        map.RemoveRespawnTime(SpawnObjectType.Creature, guid);
+                        // We use spawn coords to spawn
+                        if (map.IsGridLoaded(data.SpawnPoint))
+                            Creature.CreateCreatureFromDB(guid, map);
+                    });
                 }
             }
 
@@ -1214,20 +1216,25 @@ namespace Game
                     Global.ObjectMgr.AddGameObjectToGrid(data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
-                    Map map = Global.MapMgr.CreateBaseMap(data.MapId);
-                    map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
-                    // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.SpawnPoint))
+                    Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                     {
-                        GameObject pGameobject = GameObject.CreateGameObjectFromDB(guid, map, false);
-                        // @todo find out when it is add to map
-                        if (pGameobject)
+                        map.RemoveRespawnTime(SpawnObjectType.GameObject, guid);
+                        // We use current coords to unspawn, not spawn coords since creature can have changed grid
+                        if (map.IsGridLoaded(data.SpawnPoint))
                         {
+                            GameObject go = GameObject.CreateGameObjectFromDB(guid, map, false);
                             // @todo find out when it is add to map
-                            if (pGameobject.IsSpawnedByDefault())
-                                map.AddToMap(pGameobject);
+                            if (go)
+                            {
+                                // @todo find out when it is add to map
+                                if (go.IsSpawnedByDefault())
+                                {
+                                    if (!map.AddToMap(go))
+                                        go.Dispose();
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             }
 
