@@ -8269,8 +8269,9 @@ namespace Game.Spells
                 unit.SetInCombatWith(spell.GetCaster().ToPlayer());
 
             // if target is flagged for pvp also flag caster if a player
+            // but respect current pvp rules (buffing/healing npcs flagged for pvp only flags you if they are in combat)
             _enablePVP = (MissCondition == SpellMissInfo.None || spell.m_spellInfo.HasAttribute(SpellAttr3.PvpEnabling))
-                && unit.IsPvP() && spell.GetCaster().IsPlayer(); // need to check PvP state before spell effects, but act on it afterwards
+                && unit.IsPvP() && (unit.IsInCombat() || unit.IsCharmedOwnedByPlayerOrPlayer()) && spell.GetCaster().IsPlayer(); // need to check PvP state before spell effects, but act on it afterwards
 
             if (_spellHitTarget)
             {
