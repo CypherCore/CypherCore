@@ -180,6 +180,7 @@ namespace WorldServer
 
         static void WorldUpdateLoop()
         {
+            int minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", 1);
             uint realPrevTime = Time.GetMSTime();
 
             while (!Global.WorldMgr.IsStopped)
@@ -187,10 +188,10 @@ namespace WorldServer
                 var realCurrTime = Time.GetMSTime();
 
                 uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
-                if (diff == 0)
+                if (diff < minUpdateDiff)
                 {
                     // sleep until enough time passes that we can update all timers
-                    Thread.Sleep(1);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(minUpdateDiff - diff));
                     continue;
                 }
 
