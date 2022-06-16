@@ -395,9 +395,8 @@ namespace Game
                         }
 
                         // Log error for pooled object, but still spawn it
-                        uint poolId = Global.PoolMgr.IsPartOfAPool(SpawnObjectType.Creature, guid);
-                        if (poolId != 0)
-                            Log.outError(LogFilter.Sql, $"`game_event_creature`: game event id ({event_id}) contains creature ({guid}) which is part of a pool ({poolId}). This should be spawned in game_event_pool");
+                        if (data.poolId != 0)
+                            Log.outError(LogFilter.Sql, $"`game_event_creature`: game event id ({event_id}) contains creature ({guid}) which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
 
                         mGameEventCreatureGuids[internal_event_id].Add(guid);
 
@@ -440,9 +439,8 @@ namespace Game
                         }
 
                         // Log error for pooled object, but still spawn it
-                        uint poolId = Global.PoolMgr.IsPartOfAPool(SpawnObjectType.GameObject, guid);
-                        if (poolId != 0)
-                            Log.outError(LogFilter.Sql, $"`game_event_gameobject`: game event id ({event_id}) contains game object ({guid}) which is part of a pool ({poolId}). This should be spawned in game_event_pool");
+                        if (data.poolId != 0)
+                            Log.outError(LogFilter.Sql, $"`game_event_gameobject`: game event id ({event_id}) contains game object ({guid}) which is part of a pool ({data.poolId}). This should be spawned in game_event_pool");
 
                         mGameEventGameobjectGuids[internal_event_id].Add(guid);
 
@@ -1246,7 +1244,16 @@ namespace Game
             }
 
             foreach (var id in mGameEventPoolIds[internal_event_id])
-                Global.PoolMgr.SpawnPool(id);
+            {
+                PoolTemplateData poolTemplate = Global.PoolMgr.GetPoolTemplate(id);
+                if (poolTemplate != null)
+                {
+                    Global.MapMgr.DoForAllMapsWithMapId((uint)poolTemplate.MapId, map =>
+                    {
+                        Global.PoolMgr.SpawnPool(map.GetPoolData(), id);
+                    });
+                }
+            }
         }
 
         void GameEventUnspawn(short event_id)
@@ -1306,7 +1313,7 @@ namespace Game
                         var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
                         foreach (var go in gameobjectBounds)
                             go.AddObjectToRemoveList();
-                        
+
                     });
                 }
             }
@@ -1318,7 +1325,16 @@ namespace Game
             }
 
             foreach (var poolId in mGameEventPoolIds[internal_event_id])
-                Global.PoolMgr.DespawnPool(poolId, true);
+            {
+                PoolTemplateData poolTemplate = Global.PoolMgr.GetPoolTemplate(poolId);
+                if (poolTemplate != null)
+                {
+                    Global.MapMgr.DoForAllMapsWithMapId((uint)poolTemplate.MapId, map =>
+                    {
+                        Global.PoolMgr.DespawnPool(map.GetPoolData(), poolId, true);
+                    });
+                }
+            }
         }
 
         void ChangeEquipOrModel(short event_id, bool activate)

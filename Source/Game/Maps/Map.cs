@@ -81,6 +81,8 @@ namespace Game.Maps
 
             GetGuidSequenceGenerator(HighGuid.Transport).Set(Global.ObjectMgr.GetGenerator(HighGuid.Transport).GetNextAfterMaxUsed());
 
+            _poolData = Global.PoolMgr.InitPoolsForMap(this);
+
             Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
 
             Global.ScriptMgr.OnCreateMap(this);
@@ -2639,7 +2641,7 @@ namespace Game.Maps
                     _respawnTimes.Remove(next);
 
                     // step 2: tell pooling logic to do its thing
-                    Global.PoolMgr.UpdatePool(poolId, next.type, next.spawnId);
+                    Global.PoolMgr.UpdatePool(GetPoolData(), poolId, next.type, next.spawnId);
 
                     // step 3: get rid of the actual entry
                     RemoveRespawnTime(next.type, next.spawnId, null, true);
@@ -2731,6 +2733,10 @@ namespace Game.Maps
             SpawnGroupTemplateData spawnGroup = spawnData.spawnGroupData;
             if (!spawnGroup.flags.HasFlag(SpawnGroupFlags.System))
                 if (!IsSpawnGroupActive(spawnGroup.groupId))
+                    return false;
+
+            if (spawnData.ToSpawnData().poolId != 0)
+                if (!GetPoolData().IsSpawnedObject(type, spawnId))
                     return false;
 
             return true;
@@ -4261,6 +4267,8 @@ namespace Game.Maps
 
         public MultiPersonalPhaseTracker GetMultiPersonalPhaseTracker() { return _multiPersonalPhaseTracker; }
 
+        public SpawnedPoolData GetPoolData() { return _poolData; }
+
         #region Scripts
 
         // Put scripts in the execution queue
@@ -5217,6 +5225,7 @@ namespace Game.Maps
         Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
+        SpawnedPoolData _poolData;
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
         MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
         MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();

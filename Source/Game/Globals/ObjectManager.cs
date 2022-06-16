@@ -3426,7 +3426,7 @@ namespace Game
                 data.movementType = result.Read<byte>(14);
                 data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(16);
-                uint PoolId = result.Read<uint>(17);
+                data.poolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
                 data.unit_flags = result.Read<uint>(19);
                 data.unit_flags2 = result.Read<uint>(20);
@@ -3595,8 +3595,8 @@ namespace Game
                     DB.World.Execute(stmt);
                 }
 
-                // Add to grid if not managed by the game event or pool system
-                if (gameEvent == 0 && PoolId == 0)
+                // Add to grid if not managed by the game event
+                if (gameEvent == 0)
                     AddCreatureToGrid(data);
 
                 creatureDataStorage[guid] = data;
@@ -4326,7 +4326,7 @@ namespace Game
                 }
 
                 short gameEvent = result.Read<sbyte>(15);
-                uint PoolId = result.Read<uint>(16);
+                data.poolId = result.Read<uint>(16);
                 data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
                 data.PhaseId = result.Read<uint>(18);
                 data.PhaseGroup = result.Read<uint>(19);
@@ -4433,8 +4433,9 @@ namespace Game
                     stmt.AddValue(2, guid);
                     DB.World.Execute(stmt);
                 }
-
-                if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system
+                
+                // if not this is to be managed by GameEvent System
+                if (gameEvent == 0)
                     AddGameObjectToGrid(data);
 
                 gameObjectDataStorage[guid] = data;

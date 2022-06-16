@@ -1968,9 +1968,9 @@ namespace Game.Entities
 
                     triggerJustAppeared = true;
 
-                    uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<Creature>(GetSpawnId()) : 0;
+                    uint poolid = GetCreatureData() != null ? GetCreatureData().poolId : 0;
                     if (poolid != 0)
-                        Global.PoolMgr.UpdatePool<Creature>(poolid, GetSpawnId());
+                        Global.PoolMgr.UpdatePool<Creature>(GetMap().GetPoolData(), poolid, GetSpawnId());
                 }
                 UpdateObjectVisibility();
             }
@@ -3238,7 +3238,7 @@ namespace Game.Entities
                 if (!m_respawnCompatibilityMode)
                 {
                     // @todo pools need fixing! this is just a temporary thing, but they violate dynspawn principles
-                    if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
+                    if (data.poolId == 0)
                     {
                         Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group '{data.spawnGroupData.name}':\n{GetDebugInfo()}");
                         return false;
@@ -3253,7 +3253,7 @@ namespace Game.Entities
                 if (!m_respawnCompatibilityMode)
                 {
                     // @todo same as above
-                    if (Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) == 0)
+                    if (data.poolId == 0)
                     {
                         Log.outError(LogFilter.Unit, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress:\n{GetDebugInfo()}");
                         return false;

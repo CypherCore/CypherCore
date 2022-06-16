@@ -558,9 +558,9 @@ namespace Game.Entities
                                     GetAI().Reset();
 
                                 // respawn timer
-                                uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
+                                uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
                                 if (poolid != 0)
-                                    Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
+                                    Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
                                 else
                                     GetMap().AddToMap(this);
                             }
@@ -941,9 +941,9 @@ namespace Game.Entities
             if (goOverride != null)
                 ReplaceAllFlags(goOverride.Flags);
 
-            uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
+            uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
             if (poolid != 0)
-                Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
+                Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
             else
                 AddObjectToRemoveList();
         }

@@ -37,6 +37,7 @@ namespace Game.Maps
         public uint PhaseId;
         public uint PhaseGroup;
         public int terrainSwapMap;
+        public uint poolId;
         public int spawntimesecs;
         public List<Difficulty> SpawnDifficulties;
         public uint ScriptId;
