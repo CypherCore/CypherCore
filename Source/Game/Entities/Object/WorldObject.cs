@@ -3663,7 +3663,7 @@ namespace Game.Entities
 
         ITransport m_transport;
         Map _currMap;
-        uint instanceId;
+        public uint instanceId;
         PhaseShift _phaseShift = new();
         PhaseShift _suppressedPhaseShift = new();                   // contains phases for current area but not applied due to conditions
         int _dbPhase;

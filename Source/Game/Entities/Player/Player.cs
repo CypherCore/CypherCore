@@ -203,7 +203,7 @@ namespace Game.Entities
 
             if (position.TransportGuid.HasValue)
             {
-                Transport transport = Global.ObjAccessor.FindTransport(ObjectGuid.Create(HighGuid.Transport, position.TransportGuid.Value));
+                Transport transport = ObjectAccessor.GetTransport(this, ObjectGuid.Create(HighGuid.Transport, position.TransportGuid.Value));
                 if (transport != null)
                 {
                     transport.AddPassenger(this);

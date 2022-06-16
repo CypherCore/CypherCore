@@ -612,22 +612,14 @@ namespace Game.Entities
             {
                 var createPosition = m_createMode == PlayerCreateMode.NPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
 
-                homebind.WorldRelocate(createPosition.Loc);
-                if (createPosition.TransportGuid.HasValue)
+                if (!createPosition.TransportGuid.HasValue)
                 {
-                    Transport transport = Global.ObjAccessor.FindTransport(ObjectGuid.Create(HighGuid.Transport, createPosition.TransportGuid.Value));
-                    if (transport != null)
-                    {
-                        float orientation = homebind.GetOrientation();
-                        transport.CalculatePassengerPosition(ref homebind.posX, ref homebind.posY, ref homebind.posZ, ref orientation);
-                        homebind.SetOrientation(orientation);
-                    }
+                    homebind.WorldRelocate(createPosition.Loc);
+                    homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
+
+                    saveHomebindToDb();
+                    ok = true;
                 }
-
-                homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
-
-                saveHomebindToDb();
-                ok = true;
             }
 
             if (!ok)
@@ -2864,10 +2856,25 @@ namespace Game.Entities
                 ObjectGuid transGUID = ObjectGuid.Create(HighGuid.Transport, transguid);
 
                 Transport transport = null;
-                Transport go = Global.ObjAccessor.FindTransport(transGUID);
-                if (go)
-                    transport = go;
-
+                Map transportMap = Global.MapMgr.CreateMap(mapId, this, instanceId);
+                if (transportMap != null)
+                {
+                    Transport transportOnMap = transportMap.GetTransport(transGUID);
+                    if (transportOnMap != null)
+                    {
+                        if (transportOnMap.GetExpectedMapId() != mapId)
+                        {
+                            mapId = transportOnMap.GetExpectedMapId();
+                            instanceId = 0;
+                            transportMap = Global.MapMgr.CreateMap(mapId, this, instanceId);
+                            if (transportMap)
+                                transport = transportMap.GetTransport(transGUID);
+                        }
+                        else
+                            transport = transportOnMap;
+                    }
+                }
+                
                 if (transport)
                 {
                     float x = trans_x;

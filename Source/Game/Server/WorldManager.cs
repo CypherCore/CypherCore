@@ -1053,9 +1053,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Starting Battlefield System");
             Global.BattleFieldMgr.InitBattlefield();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Transports...");
-            Global.TransportMgr.SpawnContinentTransports();
-
             // Initialize Warden
             Log.outInfo(LogFilter.ServerLoading, "Loading Warden Checks...");
             Global.WardenCheckMgr.LoadWardenChecks();

@@ -255,6 +255,11 @@ namespace Game
             Map oldMap = player.GetMap();
             Map newMap = GetPlayer().GetTeleportDestInstanceId().HasValue ? Global.MapMgr.FindMap(loc.GetMapId(), GetPlayer().GetTeleportDestInstanceId().Value) : Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
 
+            MovementInfo.TransportInfo transportInfo = player.m_movementInfo.transport;
+            ITransport transport = player.GetTransport();
+            if (transport != null)
+                transport.RemovePassenger(player);
+
             if (player.IsInWorld)
             {
                 Log.outError(LogFilter.Network, $"Player (Name {player.GetName()}) is still in world when teleported from map {oldMap.GetId()} to new map {loc.GetMapId()}");
@@ -285,6 +290,14 @@ namespace Game
 
             if (!seamlessTeleport)
                 player.SendInitialPacketsBeforeAddToMap();
+
+            // move player between transport copies on each map
+            Transport newTransport = newMap.GetTransport(transportInfo.guid);
+            if (newTransport != null)
+            {
+                player.m_movementInfo.transport = transportInfo;
+                newTransport.AddPassenger(player);
+            }
 
             if (!player.GetMap().AddPlayerToMap(player, !seamlessTeleport))
             {

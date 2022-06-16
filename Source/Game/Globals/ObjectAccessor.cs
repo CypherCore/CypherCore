@@ -27,7 +27,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     object _lockObject = new();
 
     Dictionary<ObjectGuid, Player> _players = new();
-    Dictionary<ObjectGuid, Transport> _transports = new();
 
     ObjectAccessor() { }
 
@@ -119,14 +118,9 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetGameObject(guid);
     }
 
-    static Transport GetTransportOnMap(WorldObject u, ObjectGuid guid)
+    public static Transport GetTransport(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetTransport(guid);
-    }
-
-    Transport GetTransport(ObjectGuid guid)
-    {
-        return _transports.LookupByKey(guid);
     }
 
     static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
@@ -227,12 +221,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return PlayerNameMapHolder.Find(name);
     }
 
-    public Transport FindTransport(ObjectGuid guid)
-    {
-        lock (_lockObject)
-            return _transports.LookupByKey(guid);
-    }
-
     public void SaveAllPlayers()
     {
         lock (_lockObject)
@@ -256,11 +244,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             _players[obj.GetGUID()] = obj;
         }
     }
-    public void AddObject(Transport obj)
-    {
-        lock (_lockObject)
-            _transports[obj.GetGUID()] = obj;
-    }
 
     public void RemoveObject(Player obj)
     {
@@ -269,11 +252,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             PlayerNameMapHolder.Remove(obj);
             _players.Remove(obj.GetGUID());
         }
-    }
-    public void RemoveObject(Transport obj)
-    {
-        lock (_lockObject)
-            _transports.Remove(obj.GetGUID());
     }
 }
 

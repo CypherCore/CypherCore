@@ -83,6 +83,8 @@ namespace Game.Maps
 
             _poolData = Global.PoolMgr.InitPoolsForMap(this);
 
+            Global.TransportMgr.CreateTransportsForMap(this);
+
             Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
 
             Global.ScriptMgr.OnCreateMap(this);
@@ -408,12 +410,6 @@ namespace Game.Maps
             player.Dispose();
         }
 
-        void DeleteFromWorld(Transport transport)
-        {
-            Global.ObjAccessor.RemoveObject(transport);
-            transport.Dispose();
-        }
-
         void DeleteFromWorld(WorldObject obj)
         {
             obj.Dispose();
@@ -642,20 +638,24 @@ namespace Game.Maps
                 return false; //Should delete object
             }
 
-            obj.AddToWorld();
             _transports.Add(obj);
 
-            // Broadcast creation to players
-            foreach (Player player in GetPlayers())
+            if (obj.GetExpectedMapId() == GetId())
             {
-                if (player.GetTransport() != obj)
+                obj.AddToWorld();
+
+                // Broadcast creation to players
+                foreach (var player in GetPlayers())
                 {
-                    var data = new UpdateData(GetId());
-                    obj.BuildCreateUpdateBlockForPlayer(data, player);
-                    player.m_visibleTransports.Add(obj.GetGUID());
-                    UpdateObject packet;
-                    data.BuildPacket(out packet);
-                    player.SendPacket(packet);
+                    if (player.GetTransport() != obj && player.IsInPhase(obj))
+                    {
+                        var data = new UpdateData(GetId());
+                        obj.BuildCreateUpdateBlockForPlayer(data, player);
+                        player.m_visibleTransports.Add(obj.GetGUID());
+                        UpdateObject packet;
+                        data.BuildPacket(out packet);
+                        player.SendPacket(packet);
+                    }
                 }
             }
 
@@ -830,7 +830,7 @@ namespace Game.Maps
             for (var i = 0; i < _transports.Count; ++i)
             {
                 Transport transport = _transports[i];
-                if (!transport || !transport.IsInWorld)
+                if (!transport)
                     continue;
 
                 transport.Update(diff);
@@ -1011,19 +1011,22 @@ namespace Game.Maps
 
         public void RemoveFromMap(Transport obj, bool remove)
         {
-            obj.RemoveFromWorld();
-
-            var players = GetPlayers();
-            if (!players.Empty())
+            if (obj.IsInWorld)
             {
+                obj.RemoveFromWorld();
+
                 UpdateData data = new(GetId());
-                obj.BuildOutOfRangeUpdateBlock(data);
+                if (obj.IsDestroyedObject())
+                    obj.BuildDestroyUpdateBlock(data);
+                else
+                    obj.BuildOutOfRangeUpdateBlock(data);
+
                 UpdateObject packet;
                 data.BuildPacket(out packet);
 
-                foreach (var player in players)
+                foreach (var player in GetPlayers())
                 {
-                    if (player.GetTransport() != obj)
+                    if (player.GetTransport() != obj && player.m_visibleTransports.Contains(obj.GetGUID()))
                     {
                         player.SendPacket(packet);
                         player.m_visibleTransports.Remove(obj.GetGUID());
@@ -2270,11 +2273,11 @@ namespace Game.Maps
 
         void SendInitTransports(Player player)
         {
-            var transData = new UpdateData(player.GetMapId());
+            var transData = new UpdateData(GetId());
 
             foreach (Transport transport in _transports)
             {
-                if (transport != player.GetTransport() && player.IsInPhase(transport))
+                if (transport.IsInWorld && transport != player.GetTransport() && player.IsInPhase(transport))
                 {
                     transport.BuildCreateUpdateBlockForPlayer(transData, player);
                     player.m_visibleTransports.Add(transport.GetGUID());
@@ -2291,7 +2294,7 @@ namespace Game.Maps
             var transData = new UpdateData(player.GetMapId());
             foreach (Transport transport in _transports)
             {
-                if (transport != player.GetTransport())
+                if (player.m_visibleTransports.Contains(transport.GetGUID()) && transport != player.GetTransport())
                 {
                     transport.BuildOutOfRangeUpdateBlock(transData);
                     player.m_visibleTransports.Remove(transport.GetGUID());
@@ -2309,6 +2312,9 @@ namespace Game.Maps
             UpdateData transData = new(player.GetMapId());
             foreach (var transport in _transports)
             {
+                if (!transport.IsInWorld)
+                    continue;
+
                 var hasTransport = player.m_visibleTransports.Contains(transport.GetGUID());
                 if (player.IsInPhase(transport))
                 {
@@ -2913,15 +2919,6 @@ namespace Game.Maps
         {
             while (_farSpellCallbacks.TryDequeue(out FarSpellCallback callback))
                 callback(this);
-
-            for (var i = 0; i < _transports.Count; ++i)
-            {
-                Transport transport = _transports[i];
-                if (!transport.IsInWorld)
-                    continue;
-
-                transport.DelayedUpdate(diff);
-            }
 
             RemoveAllObjectsInRemoveList();
 
