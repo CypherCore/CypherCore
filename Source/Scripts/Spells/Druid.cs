@@ -70,8 +70,8 @@ namespace Scripts.Spells.Druid
         public const uint InnervateRank2 = 326228;
         public const uint Infusion = 37238;
         public const uint Languish = 71023;
-        public const uint LifebloomEnergize = 64372;
         public const uint LifebloomFinalHeal = 33778;
+        public const uint LunarInspirationOverride = 155627;
         public const uint Mangle = 33917;
         public const uint MoonfireDamage = 164812;
         public const uint Prowl = 5215;
@@ -680,57 +680,47 @@ namespace Scripts.Spells.Druid
     {
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.LifebloomFinalHeal, SpellIds.LifebloomEnergize);
-        }
-
-        void OnRemoveEffect(Unit target, AuraEffect aurEff, uint stack)
-        {
-            Unit caster = GetCaster();
-            if (caster != null)
-            {
-                // restore mana
-                var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
-                var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
-                if (spellPowerCost != null)
-                {
-                    CastSpellExtraArgs args1 = new(aurEff);
-                    args1.OriginalCaster = GetCasterGUID();
-                    args1.AddSpellMod(SpellValueMod.BasePoint0, (int)(spellPowerCost.Amount * stack / 2));
-                    caster.CastSpell(caster, SpellIds.LifebloomEnergize, args1);
-                }
-            }
-
-            target.CastSpell(target, SpellIds.LifebloomFinalHeal, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
+            return ValidateSpellInfo(SpellIds.LifebloomFinalHeal);
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Final heal only on duration end
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
-                return;
-
-            // final heal
-            OnRemoveEffect(GetUnitOwner(), aurEff, GetStackAmount());
-        }
-        
-        void HandleDispel(DispelInfo dispelInfo)
-        {
-            Unit target = GetUnitOwner();
-            if (target != null)
-            {
-                AuraEffect aurEff = GetEffect(1);
-                if (aurEff != null)
-                    OnRemoveEffect(target, aurEff, dispelInfo.GetRemovedCharges()); // final heal
-            }
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.EnemySpell)
+                GetCaster().CastSpell(GetUnitOwner(), SpellIds.LifebloomFinalHeal, true);
         }
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            AfterDispel.Add(new AuraDispelHandler(HandleDispel));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
         }
     }
 
+    [Script] // 155580 - Lunar Inspiration
+    class spell_dru_lunar_inspiration : AuraScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.LunarInspirationOverride);
+        }
+
+        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.LunarInspirationOverride, true);
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.LunarInspirationOverride);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] //  8921 - Moonfire
     class spell_dru_moonfire : SpellScript
     {
@@ -943,7 +933,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
