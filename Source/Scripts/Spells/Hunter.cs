@@ -41,6 +41,8 @@ namespace Scripts.Spells.Hunter
         public const uint PetLastStandTriggered = 53479;
         public const uint PetHeartOfThePhoenixTriggered = 54114;
         public const uint PetHeartOfThePhoenixDebuff = 55711;
+        public const uint PosthasteIncreaseSpeed = 118922;
+        public const uint PosthasteTalent = 109215;
         public const uint SteadyShotFocus = 77443;
         public const uint T94PGreatness = 68130;
         public const uint DraeneiGiftOfTheNaaru = 59543;
@@ -316,6 +318,29 @@ namespace Scripts.Spells.Hunter
         }
     }
 
+    [Script] // 781 - Disengage
+    class spell_hun_posthaste : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PosthasteTalent, SpellIds.PosthasteIncreaseSpeed);
+        }
+
+        void HandleAfterCast()
+        {
+            if (GetCaster().HasAura(SpellIds.PosthasteTalent))
+            {
+                GetCaster().RemoveMovementImpairingAuras(true);
+                GetCaster().CastSpell(GetCaster(), SpellIds.PosthasteIncreaseSpeed, GetSpell());
+            }
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(HandleAfterCast));
+        }
+    }
+    
     [Script] // 53480 - Roar of Sacrifice
     class spell_hun_roar_of_sacrifice : AuraScript
     {
