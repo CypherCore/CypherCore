@@ -7559,7 +7559,11 @@ namespace Game.Entities
                 item = GetUseableItemByPos(InventorySlots.Bag0, slot);
             else
                 item = GetItemByPos(InventorySlots.Bag0, slot);
+
             if (item == null || item.GetTemplate().GetClass() != ItemClass.Weapon)
+                return null;
+
+            if ((attackType == WeaponAttackType.RangedAttack) != item.GetTemplate().IsRangedWeapon())
                 return null;
 
             if (!useable)
