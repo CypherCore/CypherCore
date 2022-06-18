@@ -29,7 +29,7 @@ namespace Framework.Dynamic
         public void Reset()
         {
             _eventMap.Clear();
-            _time = 0;
+            _time = TimeSpan.Zero;
             _phase = 0;
         }
 
@@ -38,6 +38,15 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="time">Value in ms to be added to time.</param>
         public void Update(uint time)
+        {
+            Update(TimeSpan.FromMilliseconds(time));
+        }
+
+        /// <summary>
+        /// Updates the timer of the event map.
+        /// </summary>
+        /// <param name="time">Value in ms to be added to time.</param>
+        void Update(TimeSpan time)
         {
             _time += time;
         }
@@ -107,7 +116,7 @@ namespace Framework.Dynamic
             if (phase != 0 && phase <= 8)
                 eventId |= (uint)(1 << (phase + 23));
 
-            _eventMap.Add(_time + (uint)time.TotalMilliseconds, eventId);
+            _eventMap.Add(_time + time, eventId);
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace Framework.Dynamic
         /// <param name="time">Time until the event occurs as TimeSpan.</param>
         public void Repeat(TimeSpan time)
         {
-            _eventMap.Add(_time + (uint)time.TotalMilliseconds, _lastEvent);
+            _eventMap.Add(_time + time, _lastEvent);
         }
 
         /// <summary>
@@ -211,11 +220,11 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            MultiMap<uint, uint> delayed = new();
+            MultiMap<TimeSpan, uint> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
-                delayed.Add(pair.Key + (uint)delay.TotalMilliseconds, pair.Value);
+                delayed.Add(pair.Key + delay, pair.Value);
                 _eventMap.Remove(pair.Key, pair.Value);
             }
 
@@ -233,13 +242,13 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            MultiMap<uint, uint> delayed = new();
+            MultiMap<TimeSpan, uint> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
                 if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
                 {
-                    delayed.Add(pair.Key + (uint)delay.TotalMilliseconds, pair.Value);
+                    delayed.Add(pair.Key + delay, pair.Value);
                     _eventMap.Remove(pair.Key, pair.Value);
                 }
             }
@@ -289,7 +298,7 @@ namespace Framework.Dynamic
         {
             foreach (var pair in _eventMap)
                 if (eventId == (pair.Value & 0x0000FFFF))
-                    return TimeSpan.FromMilliseconds(pair.Key - _time);
+                    return pair.Key - _time;
 
             return TimeSpan.MaxValue;
         }
@@ -311,7 +320,7 @@ namespace Framework.Dynamic
         /// it can be resetted and so on. Events occur when this timer
         /// has reached their time value. Its value is changed in the Update method.
         /// </summary>
-        uint _time;
+        TimeSpan _time;
 
         /// <summary>
         /// Phase mask of the event map.
@@ -336,6 +345,6 @@ namespace Framework.Dynamic
         /// - Bit 24 - 31: Phase
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
-        SortedMultiMap<uint, uint> _eventMap = new();
+        SortedMultiMap<TimeSpan, uint> _eventMap = new();
     }
 }
