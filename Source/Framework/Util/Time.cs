@@ -141,6 +141,11 @@ public static class Time
         return hourLocal;
     }
 
+    public static long LocalTimeToUTCTime(long time)
+    {
+        return DateTimeToUnixTime(UnixTimeToDateTime(time).ToUniversalTime());
+    }
+
     public static string secsToTimeString(ulong timeInSecs, TimeFormat timeFormat = TimeFormat.FullText, bool hoursOnly = false)
     {
         ulong secs = timeInSecs % Minute;

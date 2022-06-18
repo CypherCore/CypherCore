@@ -121,6 +121,8 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
+            calendarAddEvent.EventInfo.Time = Time.LocalTimeToUTCTime(calendarAddEvent.EventInfo.Time);
+
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
             if (calendarAddEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
@@ -204,6 +206,8 @@ namespace Game
             ObjectGuid guid = GetPlayer().GetGUID();
             long oldEventTime;
 
+            calendarUpdateEvent.EventInfo.Time = Time.LocalTimeToUTCTime(calendarUpdateEvent.EventInfo.Time);
+
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
             if (calendarUpdateEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
@@ -239,6 +243,8 @@ namespace Game
         void HandleCalendarCopyEvent(CalendarCopyEvent calendarCopyEvent)
         {
             ObjectGuid guid = GetPlayer().GetGUID();
+
+            calendarCopyEvent.Date = Time.LocalTimeToUTCTime(calendarCopyEvent.Date);
 
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
