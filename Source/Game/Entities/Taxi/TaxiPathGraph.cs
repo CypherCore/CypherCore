@@ -25,59 +25,30 @@ using System.Numerics;
 
 namespace Game.Entities
 {
-    public class TaxiPathGraph : Singleton<TaxiPathGraph>
+    public class TaxiPathGraph
     {
-        EdgeWeightedDigraph m_graph;
-        List<TaxiNodesRecord> m_nodesByVertex = new();
-        Dictionary<uint, uint> m_verticesByNode = new();
+        static EdgeWeightedDigraph m_graph;
+        static List<TaxiNodesRecord> m_nodesByVertex = new();
+        static Dictionary<uint, uint> m_verticesByNode = new();
 
-        TaxiPathGraph() { }
-
-        public void Initialize()
-        {
-            if (m_graph != null)
-                return;
-
-            List<Tuple<Tuple<uint, uint>, uint>> edges = new();
-
-            // Initialize here
-            foreach (TaxiPathRecord path in CliDB.TaxiPathStorage.Values)
-            {
-                TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
-                TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
-                if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde) && to.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
-                    AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
-            }
-
-            // create graph
-            m_graph = new EdgeWeightedDigraph(m_nodesByVertex.Count);
-
-            for (int j = 0; j < edges.Count; ++j)
-            {
-                m_graph.AddEdge(new DirectedEdge(edges[j].Item1.Item1, edges[j].Item1.Item2, edges[j].Item2));
-            }
-        }
-
-        uint GetNodeIDFromVertexID(uint vertexID)
-        {
-            if (vertexID < m_nodesByVertex.Count)
-                return m_nodesByVertex[(int)vertexID].Id;
-
-            return uint.MaxValue;
-        }
-
-        uint GetVertexIDFromNodeID(TaxiNodesRecord node)
-        {
-            return m_verticesByNode.ContainsKey(node.Id) ? m_verticesByNode[node.Id] : uint.MaxValue;
-        }
-
-        void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
+        static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
         {
             if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
                 Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
         }
 
-        void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
+        static uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
+        {
+            if (!m_verticesByNode.ContainsKey(node.Id))
+            {
+                m_verticesByNode.Add(node.Id, (uint)m_nodesByVertex.Count);
+                m_nodesByVertex.Add(node);
+            }
+
+            return m_verticesByNode[node.Id];
+        }
+
+        static void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
         {
             if (from.Id != to.Id)
             {
@@ -125,7 +96,45 @@ namespace Game.Entities
             }
         }
 
-        public int GetCompleteNodeRoute(TaxiNodesRecord from, TaxiNodesRecord to, Player player, List<uint> shortestPath)
+        static uint GetVertexIDFromNodeID(TaxiNodesRecord node)
+        {
+            return m_verticesByNode.ContainsKey(node.Id) ? m_verticesByNode[node.Id] : uint.MaxValue;
+        }
+
+        static uint GetNodeIDFromVertexID(uint vertexID)
+        {
+            if (vertexID < m_nodesByVertex.Count)
+                return m_nodesByVertex[(int)vertexID].Id;
+
+            return uint.MaxValue;
+        }
+
+        public static void Initialize()
+        {
+            if (m_graph != null)
+                return;
+
+            List<Tuple<Tuple<uint, uint>, uint>> edges = new();
+
+            // Initialize here
+            foreach (TaxiPathRecord path in CliDB.TaxiPathStorage.Values)
+            {
+                TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
+                TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
+                if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde) && to.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
+                    AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
+            }
+
+            // create graph
+            m_graph = new EdgeWeightedDigraph(m_nodesByVertex.Count);
+
+            for (int j = 0; j < edges.Count; ++j)
+            {
+                m_graph.AddEdge(new DirectedEdge(edges[j].Item1.Item1, edges[j].Item1.Item2, edges[j].Item2));
+            }
+        }
+
+        public static int GetCompleteNodeRoute(TaxiNodesRecord from, TaxiNodesRecord to, Player player, List<uint> shortestPath)
         {
             /*
                 Information about node algorithm from client
@@ -172,7 +181,7 @@ namespace Game.Entities
         }
 
         //todo test me
-        public void GetReachableNodesMask(TaxiNodesRecord from, byte[] mask)
+        public static void GetReachableNodesMask(TaxiNodesRecord from, byte[] mask)
         {
             DepthFirstSearch depthFirst = new(m_graph, GetVertexIDFromNodeID(from), vertex =>
             {
@@ -180,17 +189,6 @@ namespace Game.Entities
                 if (taxiNode != null)
                     mask[(taxiNode.Id - 1) / 8] |= (byte)(1 << (int)((taxiNode.Id - 1) % 8));
             });
-        }
-
-        uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
-        {
-            if (!m_verticesByNode.ContainsKey(node.Id))
-            {
-                m_verticesByNode.Add(node.Id, (uint)m_nodesByVertex.Count);
-                m_nodesByVertex.Add(node);
-            }
-
-            return m_verticesByNode[node.Id];
         }
     }
 }

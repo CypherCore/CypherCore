@@ -73,7 +73,6 @@ public static class Global
     public static WaypointManager WaypointMgr { get { return WaypointManager.Instance; } }
     public static TransportManager TransportMgr { get { return TransportManager.Instance; } }
     public static InstanceSaveManager InstanceSaveMgr { get { return InstanceSaveManager.Instance; } }
-    public static TaxiPathGraph TaxiPathGraph { get { return TaxiPathGraph.Instance; } }
     public static ScenarioManager ScenarioMgr { get { return ScenarioManager.Instance; } }
 
     //PVP

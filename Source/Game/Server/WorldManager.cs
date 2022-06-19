@@ -443,7 +443,7 @@ namespace Game
             CliDB.LoadGameTables(_dataPath);
 
             //Load weighted graph on taxi nodes path
-            Global.TaxiPathGraph.Initialize();
+            TaxiPathGraph.Initialize();
 
             MultiMap<uint, uint> mapData = new();
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
