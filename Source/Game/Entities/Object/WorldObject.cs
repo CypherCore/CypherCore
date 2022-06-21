@@ -2510,7 +2510,10 @@ namespace Game.Entities
                 return false;
 
             // can't attack untargetable
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+                return false;
+
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
                 return false;
 
             Player playerAttacker = ToPlayer();
@@ -2521,7 +2524,7 @@ namespace Game.Entities
             }
 
             // check flags
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
                 return false;
 
             Unit unitOrOwner = unit;
@@ -2668,11 +2671,14 @@ namespace Game.Entities
                 return false;
 
             // can't assist untargetable
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
+                return false;
+
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
                 return false;
 
             // check flags for negative spells
-            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1 | UnitFlags.NonAttackable2))
+            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
                 return false;
 
             if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc))
