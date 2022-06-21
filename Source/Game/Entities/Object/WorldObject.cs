@@ -2981,9 +2981,9 @@ namespace Game.Entities
         public bool IsPermanentWorldObject() { return m_isWorldObject; }
 
         public ITransport GetTransport() { return m_transport; }
-        public T GetTransport<T>() where T : ITransport
+        public T GetTransport<T>() where T : class, ITransport
         {
-            return (T)m_transport;
+            return m_transport as T;
         }
         public float GetTransOffsetX() { return m_movementInfo.transport.pos.GetPositionX(); }
         public float GetTransOffsetY() { return m_movementInfo.transport.pos.GetPositionY(); }

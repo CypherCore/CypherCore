@@ -47,7 +47,7 @@ namespace Game.AI
         SmartEscortState _escortState;
         uint _escortNPCFlags;
         uint _escortInvokerCheckTimer;
-        WaypointPath _path;
+        WaypointPath _path = new();
         uint _currentWaypointNode;
         bool _waypointReached;
         uint _waypointPauseTimer;
@@ -132,7 +132,6 @@ namespace Game.AI
                 return false;
             }
 
-            _path = new WaypointPath();
             _path.id = path.id;
             _path.nodes.AddRange(path.nodes);
             foreach (WaypointNode waypoint in _path.nodes)
@@ -802,6 +801,7 @@ namespace Game.AI
         {
             me.SetWalk(!run);
             _run = run;
+
             foreach (var node in _path.nodes)
                 node.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
         }

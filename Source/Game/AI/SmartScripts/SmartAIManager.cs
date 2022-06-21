@@ -912,7 +912,7 @@ namespace Game.AI
 
             return true;
         }
-        
+
         bool IsEventValid(SmartScriptHolder e)
         {
             if (e.Event.type >= SmartEvents.End)
@@ -2435,7 +2435,7 @@ namespace Game.AI
         }
     }
 
-    public class SmartScriptHolder : IComparer<SmartScriptHolder>
+    public class SmartScriptHolder : IComparable<SmartScriptHolder>
     {
         public const uint DefaultPriority = uint.MaxValue;
 
@@ -2478,17 +2478,17 @@ namespace Game.AI
             return $"Entry {EntryOrGuid} SourceType {GetScriptType()} Event {EventId} Action {GetActionType()}";
         }
 
-        public int Compare(SmartScriptHolder left, SmartScriptHolder right)
+        public int CompareTo(SmartScriptHolder other)
         {
-            int result = left.Priority.CompareTo(right.Priority);
+            int result = Priority.CompareTo(other.Priority);
             if (result == 0)
-                result = left.EntryOrGuid.CompareTo(right.EntryOrGuid);
+                result = EntryOrGuid.CompareTo(other.EntryOrGuid);
             if (result == 0)
-                result = left.SourceType.CompareTo(right.SourceType);
+                result = SourceType.CompareTo(other.SourceType);
             if (result == 0)
-                result = left.EventId.CompareTo(right.EventId);
+                result = EventId.CompareTo(other.EventId);
             if (result == 0)
-                result = left.Link.CompareTo(right.Link);
+                result = Link.CompareTo(other.Link);
 
             return result;
         }

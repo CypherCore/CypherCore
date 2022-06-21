@@ -3559,7 +3559,7 @@ namespace Game.Entities
             uint _stateChangeProgress;
             List<uint> _stopFrames = new();
             bool _autoCycleBetweenStopFrames;
-            TimeTracker _positionUpdateTimer;
+            TimeTracker _positionUpdateTimer = new();
             List<WorldObject> _passengers = new();
 
             static TimeSpan PositionUpdateInterval = TimeSpan.FromMilliseconds(50);

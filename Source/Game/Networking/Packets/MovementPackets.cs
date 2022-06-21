@@ -1244,7 +1244,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            _worldPacket.WriteUInt32(Ticks);
+            Ticks = _worldPacket.ReadUInt32();
         }
     }
     

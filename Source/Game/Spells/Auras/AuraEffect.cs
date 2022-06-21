@@ -90,7 +90,7 @@ namespace Game.Spells
                 case AuraType.Transform:
                 case AuraType.ModRoot2:
                     m_canBeRecalculated = false;
-                    if (!m_spellInfo.ProcFlags)
+                    if (m_spellInfo.ProcFlags == null)
                         break;
                     amount = (int)(GetBase().GetUnitOwner().CountPctFromMaxHealth(10));
                     break;

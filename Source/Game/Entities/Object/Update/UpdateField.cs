@@ -382,7 +382,7 @@ namespace Game.Entities
 
         public void ClearChangesMask<U>(OptionalUpdateField<U> updateField) where U : new()
         {
-            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)) && updateField.HasValue())
                 ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
 

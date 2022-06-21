@@ -268,6 +268,47 @@ namespace Game
                     }
                     while (result.NextRow());
 
+                    // Now check for circular reference
+                    // All pool_ids are in pool_template
+                    foreach (var (id, poolData) in mPoolTemplate)
+                    {
+                        List<uint> checkedPools = new();
+                        var poolItr = mPoolSearchMap.LookupByKey(id);
+                        while (poolItr != 0)
+                        {
+                            if (poolData.MapId != -1)
+                            {
+                                if (mPoolTemplate[poolItr].MapId == -1)
+                                    mPoolTemplate[poolItr].MapId = poolData.MapId;
+
+                                if (mPoolTemplate[poolItr].MapId != poolData.MapId)
+                                {
+                                    Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool id ({poolItr}), skipped.");
+                                    mPoolPoolGroups[poolItr].RemoveOneRelation(id);
+                                    mPoolSearchMap.Remove(poolItr);
+                                    --count;
+                                    break;
+                                }
+                            }
+
+                            checkedPools.Add(id);
+                            if (checkedPools.Contains(poolItr))
+                            {
+                                string ss = "The pool(s) ";
+                                foreach (var itr in checkedPools)
+                                    ss += $"{itr} ";
+                                ss += $"create(s) a circular reference, which can cause the server to freeze.\nRemoving the last link between mother pool {id} and child pool {poolItr}";
+                                Log.outError(LogFilter.Sql, ss);
+                                mPoolPoolGroups[poolItr].RemoveOneRelation(id);
+                                mPoolSearchMap.Remove(poolItr);
+                                --count;
+                                break;
+                            }
+
+                            poolItr = mPoolSearchMap.LookupByKey(poolItr);
+                        }
+                    }
+
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pools in mother pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
                 }
             }

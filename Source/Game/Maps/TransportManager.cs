@@ -212,7 +212,7 @@ namespace Game.Maps
                 for (; pauseItr < pauses.Count; ++pauseItr)
                 {
                     var pausePointIndex = pathPoints.IndexOf(pauses[pauseItr]);
-                    if (pausePointIndex == -1) // last point is a "fake" spline point, its position can never be reached so transport cannot stop there
+                    if (pausePointIndex == pathPoints.Count - 1) // last point is a "fake" spline point, its position can never be reached so transport cannot stop there
                         break;
 
                     for (; eventItr < events.Count; ++eventItr)
@@ -254,10 +254,11 @@ namespace Game.Maps
                         movementTime = legTimeAccel(length1);
 
                     leg.Duration += movementTime;
-                    var segment = leg.Segments[pauseItr];
+                    TransportPathSegment segment = new();
                     segment.SegmentEndArrivalTimestamp = leg.Duration + delaySum;
                     segment.Delay = pathPoints[pausePointIndex].Delay * Time.InMilliseconds;
                     segment.DistanceFromLegStartAtEnd = splineLengthToCurrentNode;
+                    leg.Segments.Add(segment);
                     delaySum += pathPoints[pausePointIndex].Delay * Time.InMilliseconds;
                     splineLengthToPreviousNode = splineLengthToCurrentNode;
                 }
@@ -304,10 +305,11 @@ namespace Game.Maps
 
             leg.StartTimestamp = totalTime;
             leg.Duration += splineTime + delaySum;
-            var pauseSegment = leg.Segments[pauseItr];
+            TransportPathSegment pauseSegment = new();
             pauseSegment.SegmentEndArrivalTimestamp = leg.Duration;
             pauseSegment.Delay = 0;
             pauseSegment.DistanceFromLegStartAtEnd = leg.Spline.Length();
+            leg.Segments.Add(pauseSegment);
             totalTime += leg.Segments[pauseItr].SegmentEndArrivalTimestamp + leg.Segments[pauseItr].Delay;
 
             for (var i = 0; i < leg.Segments.Count; ++i)
@@ -378,13 +380,14 @@ namespace Game.Maps
         
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
         {
-            TransportAnimation animNode = new();
+            if (!_transportAnimations.ContainsKey(transportEntry))
+                _transportAnimations[transportEntry] = new();
+
+            TransportAnimation animNode = _transportAnimations[transportEntry];
             if (animNode.TotalTime < timeSeg)
                 animNode.TotalTime = timeSeg;
 
             animNode.Path[timeSeg] = node;
-
-            _transportAnimations[transportEntry] = animNode;
         }
 
         public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
@@ -531,7 +534,7 @@ namespace Game.Maps
         public List<TransportPathLeg> PathLegs = new();
         public List<TransportPathEvent> Events = new();
 
-        public List<uint> MapIds = new();
+        public HashSet<uint> MapIds = new();
         public bool InInstance;
 
         public Position ComputePosition(uint time, out TransportMovementState moveState, out int legIndex)
@@ -708,10 +711,10 @@ namespace Game.Maps
                 return null;
 
             List<uint> lKeys = Path.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time) - 1;
+            int reqIndex = lKeys.IndexOf(time);
 
             if (reqIndex != -1)
-                return Path[lKeys[reqIndex]];
+                return Path[lKeys[reqIndex - 1]];
 
             return Path.LastOrDefault().Value;
         }
