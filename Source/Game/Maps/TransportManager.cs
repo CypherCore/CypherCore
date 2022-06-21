@@ -73,6 +73,7 @@ namespace Game.Maps
                 TransportTemplate transport = new();
 
                 GeneratePath(goInfo, transport);
+                _transportTemplates[entry] = transport;
 
                 ++count;
             } while (result.NextRow());
@@ -161,10 +162,11 @@ namespace Game.Maps
                     spawn.PhaseGroup = phaseGroupId;
 
                     foreach (uint mapId in transportTemplate.MapIds)
-                        _transportsByMap[mapId].Add(spawn);
+                        _transportsByMap.Add(mapId, spawn);
 
                     _transportSpawns[guid] = spawn;
 
+                    count++;
                 } while (result.NextRow());
             }
 
@@ -554,7 +556,7 @@ namespace Game.Maps
             var segmentIndex = 0;
             double distanceMoved = 0.0;
             bool isOnPause = false;
-            for (segmentIndex = 0; segmentIndex < leg.Segments.Count; ++segmentIndex)
+            for (segmentIndex = 0; segmentIndex < leg.Segments.Count - 1; ++segmentIndex)
             {
                 var segment = leg.Segments[segmentIndex];
                 if (time < segment.SegmentEndArrivalTimestamp)

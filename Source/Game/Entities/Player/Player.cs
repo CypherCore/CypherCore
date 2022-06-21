@@ -6247,14 +6247,14 @@ namespace Game.Entities
 
         void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
         {
+            s64.Add(target.GetGUID());
+
             switch (target.GetTypeId())
             {
                 case TypeId.Unit:
-                    s64.Add(target.GetGUID());
                     v.Add(target.ToCreature());
                     break;
                 case TypeId.Player:
-                    s64.Add(target.GetGUID());
                     v.Add(target.ToPlayer());
                     break;
             }

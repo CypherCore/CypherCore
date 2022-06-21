@@ -270,7 +270,7 @@ namespace Game.Movement
             T length_ = t * (dynamic)Length();
             index = ComputeIndexInBounds(length_);
             //ASSERT(index < index_hi);
-            u = (length_ - Length(index)) / (float)Length(index, index + 1);
+            u = (float)(length_ - Length(index)) / (float)Length(index, index + 1);
         }
 
         int ComputeIndexInBounds(T length_)

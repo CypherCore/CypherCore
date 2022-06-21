@@ -70,6 +70,9 @@ namespace Game.Chat
             if (type.IsEnum)
                 type = type.GetEnumUnderlyingType();
 
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                type = Nullable.GetUnderlyingType(type);
+
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.SByte:

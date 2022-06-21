@@ -2310,7 +2310,7 @@ namespace Game.Entities
 
             WorldPacket buffer = new();
 
-            UpdateMask mask = new(191);
+            UpdateMask mask = new(194);
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
             m_unitData.WriteUpdate(buffer, mask, true, this, target);
 
