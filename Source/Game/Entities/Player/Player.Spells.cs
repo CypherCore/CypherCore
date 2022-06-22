@@ -1498,7 +1498,7 @@ namespace Game.Entities
                 foreach (ItemEffectRecord effectData in item.GetEffects())
                 {
                     // wrong triggering type
-                    if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
+                    if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                         continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);

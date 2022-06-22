@@ -716,6 +716,12 @@ namespace Game.Networking.Packets
 
         public static bool operator ==(ItemBonuses left, ItemBonuses right)
         {
+            if (ReferenceEquals(left, right))
+                return true;
+
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+                return false;
+
             if (left.Context != right.Context)
                 return false;
 
