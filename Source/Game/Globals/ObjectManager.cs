@@ -11957,7 +11957,7 @@ namespace Game
                 IndexToName.Add(entry);
             }
 
-            return entry.Id;
+            return NameToIndex[scriptName].Id;
         }
 
         public int GetSize()
