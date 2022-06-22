@@ -297,7 +297,7 @@ public static class MathFunctions
             rotation.M31 * box._center.GetAt(0) + rotation.M32 * box._center.GetAt(1) + rotation.M33 * box._center.GetAt(2) + translation.GetAt(2));
 
         for (int i = 0; i < 3; ++i)
-            box._edgeVector[i] = Vector3.Transform(box._edgeVector[i], rotation);
+            box._edgeVector[i] = Vector3.TransformNormal(box._edgeVector[i], rotation);
 
         return box;
     }

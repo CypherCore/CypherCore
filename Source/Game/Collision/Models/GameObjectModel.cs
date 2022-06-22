@@ -71,7 +71,7 @@ namespace Game.Collision
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
             AxisAlignedBox rotated_bounds = new();
             for (int i = 0; i < 8; ++i)
-                rotated_bounds.merge(Vector3.Transform(mdl_box.corner(i), iRotation));
+                rotated_bounds.merge(Vector3.TransformNormal(mdl_box.corner(i), iRotation));
 
             iBound = rotated_bounds + iPos;
             owner = modelOwner;
@@ -101,8 +101,8 @@ namespace Game.Collision
                 return false;
 
             // child bounds are defined in object space:
-            Vector3 p = Vector3.Transform((ray.Origin - iPos) * iInvScale, iInvRot);
-            Ray modRay = new Ray(p, Vector3.Transform(ray.Direction, iInvRot));
+            Vector3 p = Vector3.TransformNormal((ray.Origin - iPos) * iInvScale, iInvRot);
+            Ray modRay = new Ray(p, Vector3.TransformNormal(ray.Direction, iInvRot));
             float distance = maxDist * iInvScale;
             bool hit = iModel.IntersectRay(modRay, ref distance, stopAtFirstHit, ignoreFlags);
             if (hit)
@@ -125,13 +125,13 @@ namespace Game.Collision
                 return;
 
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.Transform((point - iPos) * iInvScale, iInvRot);
-            Vector3 zDirModel = Vector3.Transform(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
+            Vector3 pModel = Vector3.TransformNormal((point - iPos) * iInvScale, iInvRot);
+            Vector3 zDirModel = Vector3.TransformNormal(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
             float zDist;
             if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
-                float world_Z = (Vector3.Transform(modelGround, iInvRot) * iScale + iPos).Z;
+                float world_Z = (Vector3.TransformNormal(modelGround, iInvRot) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z)
                 {
                     info.ground_Z = world_Z;
@@ -152,13 +152,13 @@ namespace Game.Collision
                 return false;
 
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.Transform((point - iPos) * iInvScale, iInvRot);
-            Vector3 zDirModel = Vector3.Transform(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
+            Vector3 pModel = Vector3.TransformNormal((point - iPos) * iInvScale, iInvRot);
+            Vector3 zDirModel = Vector3.TransformNormal(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
             float zDist;
             if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
-                float world_Z = (Vector3.Transform(modelGround, iInvRot) * iScale + iPos).Z;
+                float world_Z = (Vector3.TransformNormal(modelGround, iInvRot) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z)
                 {
                     info.ground_Z = world_Z;
@@ -172,7 +172,7 @@ namespace Game.Collision
         public bool GetLiquidLevel(Vector3 point, LocationInfo info, ref float liqHeight)
         {
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.Transform((point - iPos) * iInvScale, iInvRot);
+            Vector3 pModel = Vector3.TransformNormal((point - iPos) * iInvScale, iInvRot);
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
             if (info.hitModel.GetLiquidLevel(pModel, out zDist))
@@ -210,7 +210,7 @@ namespace Game.Collision
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
             AxisAlignedBox rotated_bounds = new();
             for (int i = 0; i < 8; ++i)
-                rotated_bounds.merge(Vector3.Transform(mdl_box.corner(i), iRotation));
+                rotated_bounds.merge(Vector3.TransformNormal(mdl_box.corner(i), iRotation));
 
             iBound = rotated_bounds + iPos;
 

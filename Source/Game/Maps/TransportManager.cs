@@ -334,7 +334,10 @@ namespace Game.Maps
             List<TaxiPathNodeRecord> pathPoints = new();
             List<TaxiPathNodeRecord> pauses = new();
             List<TaxiPathNodeRecord> events = new();
-            TransportPathLeg leg = new();
+
+            transport.PathLegs.Add(new TransportPathLeg());
+
+            TransportPathLeg leg = transport.PathLegs[0];
             leg.MapId = path[0].ContinentID;
             bool prevNodeWasTeleport = false;
             uint totalTime = 0;
@@ -377,7 +380,6 @@ namespace Game.Maps
                 transport.InInstance = CliDB.MapStorage.LookupByKey(transport.MapIds.First()).Instanceable();
 
             transport.TotalPathTime = totalTime;
-            transport.PathLegs.Add(leg);
         }
         
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
@@ -579,7 +581,7 @@ namespace Game.Maps
                     (double)(time - prevSegmentTime) * 0.001,
                     (double)(pathSegment.SegmentEndArrivalTimestamp - prevSegmentTime) * 0.001,
                     segmentIndex == 0,
-                    segmentIndex == leg.Segments.Count);
+                    segmentIndex == leg.Segments.Count - 1);
 
             int splineIndex = 0;
             float splinePointProgress = 0;
@@ -602,7 +604,7 @@ namespace Game.Maps
             {
                 ++legIndex;
 
-                if (PathLegs.Count >= legIndex)
+                if (legIndex >= PathLegs.Count)
                     return null;
             }
 

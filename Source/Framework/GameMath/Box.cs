@@ -72,7 +72,7 @@ namespace Framework.GameMath
             // M^-1 * (point - _corner[0]) = point in unit cube's object space
             // compute the inverse of M
             Matrix4x4.Invert(M, out M);
-            Vector3 osPoint = Vector3.Transform(point - Corner(0), M);
+            Vector3 osPoint = Vector3.TransformNormal(point - Corner(0), M);
 
             return (osPoint.X >= 0) && (osPoint.Y >= 0) && (osPoint.Z >= 0) &&
                 (osPoint.X <= 1) && (osPoint.Y <= 1) && (osPoint.Z <= 1);

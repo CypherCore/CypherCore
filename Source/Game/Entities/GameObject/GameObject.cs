@@ -3749,7 +3749,7 @@ namespace Game.Entities
 
                     float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
 
-                    Vector3 dst = Vector3.Transform(Vector3.Lerp(prev, next, animProgress), pathRotation);//todo check this
+                    Vector3 dst = Vector3.TransformNormal(Vector3.Lerp(prev, next, animProgress), pathRotation);//todo check this
 
                     dst += _owner.GetStationaryPosition();
 
