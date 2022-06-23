@@ -841,7 +841,7 @@ namespace Game.Entities
         public void UpdateMountCapability()
         {
             var mounts = GetAuraEffectsByType(AuraType.Mounted);
-            foreach (AuraEffect aurEff in mounts)
+            foreach (AuraEffect aurEff in mounts.ToArray())
             {
                 aurEff.RecalculateAmount();
                 if (aurEff.GetAmount() == 0)
