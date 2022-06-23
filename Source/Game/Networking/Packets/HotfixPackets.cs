@@ -86,8 +86,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(VirtualRealmAddress);
             _worldPacket.WriteInt32(Hotfixes.Keys.Count);
 
-            foreach (var record in Hotfixes.Values)
-                record.ID.Write(_worldPacket);
+            foreach (var key in Hotfixes.Keys)
+                Hotfixes[key][0].ID.Write(_worldPacket);
         }
 
         public uint VirtualRealmAddress;
