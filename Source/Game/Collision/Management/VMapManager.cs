@@ -143,7 +143,7 @@ namespace Game.Collision
 
         public bool IsInLineOfSight(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
-            if (!IsLineOfSightCalcEnabled() || Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLOS))
+            if (!IsLineOfSightCalcEnabled() || Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLOS))
                 return true;
 
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
@@ -160,7 +160,7 @@ namespace Game.Collision
 
         public bool GetObjectHitPos(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
-            if (IsLineOfSightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLOS))
+            if (IsLineOfSightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLOS))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -186,7 +186,7 @@ namespace Game.Collision
 
         public float GetHeight(uint mapId, float x, float y, float z, float maxSearchDist)
         {
-            if (IsHeightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapHeight))
+            if (IsHeightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapHeight))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -209,7 +209,7 @@ namespace Game.Collision
             adtId = 0;
             rootId = 0;
             groupId = 0;
-            if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapAreaFlag))
+            if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapAreaFlag))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -227,7 +227,7 @@ namespace Game.Collision
 
         public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type, ref uint mogpFlags)
         {
-            if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLiquidStatus))
+            if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -254,7 +254,7 @@ namespace Game.Collision
         {
             var data = new AreaAndLiquidData();
 
-            if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLiquidStatus))
+            if (Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
             {
                 data.floorZ = z;
                 int adtId, rootId, groupId;
@@ -277,7 +277,7 @@ namespace Game.Collision
                         if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
                             data.liquidInfo = new(liquidType, liquidLevel);
 
-                    if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLiquidStatus))
+                    if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
                         data.areaInfo = new(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags());
                 }
             }

@@ -292,7 +292,7 @@ namespace System
         
         public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
         {
-            return Matrix4x4.CreateFromYawPitchRoll(fPAngle, fRAngle, fYAngle);
+            return Matrix4x4.CreateFromYawPitchRoll(fYAngle, fPAngle, fRAngle);
         }
 
         #region Strings

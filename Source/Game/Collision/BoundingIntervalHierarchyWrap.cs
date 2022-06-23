@@ -104,7 +104,7 @@ namespace Game.Collision
 
                 T obj = objects[idx];
                 if (obj != null)
-                    _callback.Invoke(p, obj);
+                    _callback.Invoke(p, obj as GameObjectModel);
             }
         }
     }

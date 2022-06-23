@@ -391,8 +391,8 @@ namespace Game.Maps
             if (m_uint16_V8 == null || m_uint16_V9 == null)
                 return _gridHeight;
 
-            x = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
-            y = MapConst.MapResolution * (32 - y / MapConst.SizeofGrids);
+            x = MapConst.MapResolution * (MapConst.CenterGridId - x / MapConst.SizeofGrids);
+            y = MapConst.MapResolution * (MapConst.CenterGridId - y / MapConst.SizeofGrids);
 
             int x_int = (int)x;
             int y_int = (int)y;

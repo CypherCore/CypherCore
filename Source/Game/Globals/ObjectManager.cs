@@ -8333,7 +8333,7 @@ namespace Game
 
                 TerrainSwapInfo terrainSwapInfo = _terrainSwapInfoById[terrainSwap];
                 terrainSwapInfo.Id = terrainSwap;
-                _terrainSwapInfoByMap[mapId].Add(terrainSwapInfo);
+                _terrainSwapInfoByMap.Add(mapId, terrainSwapInfo);
 
                 ++count;
             } while (result.NextRow());
@@ -8379,7 +8379,7 @@ namespace Game
 
                 PhaseInfoStruct phase = getOrCreatePhaseIfMissing(phaseId);
                 phase.Areas.Add(area);
-                _phaseInfoByArea[area].Add(new PhaseAreaInfo(phase));
+                _phaseInfoByArea.Add(area, new PhaseAreaInfo(phase));
 
                 ++count;
             } while (result.NextRow());

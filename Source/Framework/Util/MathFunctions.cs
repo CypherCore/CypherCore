@@ -85,9 +85,9 @@ public static class MathFunctions
     {
         float aa = Math.Abs(a) + 1.0f;
         if (float.IsPositiveInfinity(aa))
-            return 0.00001f;
+            return 0.0000005f;
 
-        return 0.00001f * aa;
+        return 0.0000005f * aa;
     }
 
     public static float lerp(float a, float b, float f)

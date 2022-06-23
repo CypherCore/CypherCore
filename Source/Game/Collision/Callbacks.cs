@@ -26,7 +26,6 @@ namespace Game.Collision
     public class WorkerCallback
     {
         public virtual void Invoke(Vector3 point, uint entry) { }
-        public virtual void Invoke(Vector3 point, IModel entry) { }
         public virtual void Invoke(Vector3 point, GameObjectModel obj) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
@@ -255,7 +254,7 @@ namespace Game.Collision
             _areaInfo = new AreaInfo();
         }
 
-        public override void Invoke(Vector3 p, IModel obj)
+        public override void Invoke(Vector3 p, GameObjectModel obj)
         {
             obj.IntersectPoint(p, _areaInfo, _phaseShift);
         }
