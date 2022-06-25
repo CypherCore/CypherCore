@@ -34,7 +34,7 @@ namespace Game.Maps
         public InstanceScript(InstanceMap map)
         {
             instance = map;
-            _instanceSpawnGroups = Global.ObjectMgr.GetSpawnGroupsForInstance(map.GetId());
+            _instanceSpawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(map.GetId());
         }
 
         public void SaveToDB()

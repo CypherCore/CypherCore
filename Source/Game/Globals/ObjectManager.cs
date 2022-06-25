@@ -5833,7 +5833,7 @@ namespace Game
                     return null;
             }
         }
-        public List<InstanceSpawnGroupInfo> GetSpawnGroupsForInstance(uint instanceId) { return _instanceSpawnGroupStorage.LookupByKey(instanceId); }
+        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(uint mapId) { return _instanceSpawnGroupStorage.LookupByKey(mapId); }
 
         //Player
         public void LoadPlayerInfo()
