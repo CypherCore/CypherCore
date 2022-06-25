@@ -74,6 +74,7 @@ namespace Framework.Constants
         TypeMask = 52,               // TypeMask         0              0                  true if object is type object's TypeMask matches provided TypeMask
         BattlePetCount = 53,         // SpecieId         count          ComparisonType     true if player has `count` of battle pet species
         ScenarioStep = 54,           // ScenarioStepId   0              0                  true if player is at scenario with current step equal to ScenarioStepID
+        SceneInProgress = 55,        // SceneScriptPackageId   0        0                  true if player is playing a scene with ScriptPackageId equal to given value
         Max
     }
 

@@ -411,6 +411,12 @@ namespace Game.Conditions
                     }
                     break;
                 }
+                case ConditionTypes.SceneInProgress:
+                {
+                    if (player != null)
+                        condMeets = player.GetSceneMgr().GetActiveSceneCount(ConditionValue1) > 0;
+                    break;
+                }
                 default:
                     condMeets = false;
                     break;
@@ -526,6 +532,9 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.ScenarioStep:
                     mask |= GridMapTypeMask.All;
+                    break;
+                case ConditionTypes.SceneInProgress:
+                    mask |= GridMapTypeMask.Player;
                     break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
