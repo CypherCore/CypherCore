@@ -1254,9 +1254,9 @@ namespace Game
                         return false;
                     }
 
-                    if (cond.ConditionValue2 > 2)
+                    if (cond.ConditionValue2 >= SpellConst.MaxEffects)
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing effect index ({1}) (must be 0..2), skipped", cond.ToString(), cond.ConditionValue2);
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing effect index ({cond.ConditionValue2}) (must be 0..{SpellConst.MaxEffects - 1}), skipped");
                         return false;
                     }
                     break;
