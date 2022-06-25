@@ -314,7 +314,7 @@ namespace Game.Spells
                 args.OriginalCastItemLevel = m_castItemLevel;
                 if (!m_castItemGUID.IsEmpty() && Global.SpellMgr.GetSpellInfo(effectInfo.TriggerSpell, m_caster.GetMap().GetDifficultyID()).HasAttribute(SpellAttr2.RetainItemCast))
                 {
-                    Player triggeringAuraCaster = args.TriggeringAura.GetCaster()?.ToPlayer();
+                    Player triggeringAuraCaster = m_caster?.ToPlayer();
                     if (triggeringAuraCaster != null)
                         args.CastItem = triggeringAuraCaster.GetItemByGuid(m_castItemGUID);
                 }
