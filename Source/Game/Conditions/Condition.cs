@@ -37,23 +37,100 @@ namespace Game.Conditions
         public bool Meets(ConditionSourceInfo sourceInfo)
         {
             Cypher.Assert(ConditionTarget < SharedConst.MaxConditionTargets);
+
+            Map map = sourceInfo.mConditionMap;
+            bool condMeets = false;
+            bool needsObject = false;
+            switch (ConditionType)
+            {
+                case ConditionTypes.None:
+                    condMeets = true;                                    // empty condition, always met
+                    break;
+                case ConditionTypes.ActiveEvent:
+                    condMeets = Global.GameEventMgr.IsActiveEvent((ushort)ConditionValue1);
+                    break;
+                case ConditionTypes.InstanceInfo:
+                {
+                    if (map.IsDungeon())
+                    {
+                        InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                        if (instance != null)
+                        {
+                            switch ((InstanceInfo)ConditionValue3)
+                            {
+                                case InstanceInfo.Data:
+                                    condMeets = instance.GetData(ConditionValue1) == ConditionValue2;
+                                    break;
+                                //case INSTANCE_INFO_GUID_DATA:
+                                //    condMeets = instance->GetGuidData(ConditionValue1) == ObjectGuid(uint64(ConditionValue2));
+                                //    break;
+                                case InstanceInfo.BossState:
+                                    condMeets = instance.GetBossState(ConditionValue1) == (EncounterState)ConditionValue2;
+                                    break;
+                                case InstanceInfo.Data64:
+                                    condMeets = instance.GetData64(ConditionValue1) == ConditionValue2;
+                                    break;
+                                default:
+                                    condMeets = false;
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case ConditionTypes.Mapid:
+                    condMeets = map.GetId() == ConditionValue1;
+                    break;
+                case ConditionTypes.WorldState:
+                {
+                    condMeets = ConditionValue2 == Global.WorldMgr.GetWorldState(ConditionValue1);
+                    break;
+                }
+                case ConditionTypes.RealmAchievement:
+                {
+                    var achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
+                    if (achievement != null && Global.AchievementMgr.IsRealmCompleted(achievement))
+                        condMeets = true;
+                    break;
+                }
+                case ConditionTypes.DifficultyId:
+                {
+                    condMeets = (uint)map.GetDifficultyID() == ConditionValue1;
+                    break;
+                }
+                case ConditionTypes.ScenarioStep:
+                {
+                    InstanceMap instanceMap = map.ToInstanceMap();
+                    if (instanceMap != null)
+                    {
+                        Scenario scenario = instanceMap.GetInstanceScenario();
+                        if (scenario != null)
+                        {
+                            ScenarioStepRecord step = scenario.GetStep();
+                            if (step != null)
+                                condMeets = step.Id == ConditionValue1;
+                        }
+                    }
+                    break;
+                }
+                default:
+                    needsObject = true;
+                    break;
+            }
+
             WorldObject obj = sourceInfo.mConditionTargets[ConditionTarget];
             // object not present, return false
-            if (obj == null)
+            if (needsObject && obj == null)
             {
                 Log.outDebug(LogFilter.Condition, "Condition object not found for condition (Entry: {0} Type: {1} Group: {2})", SourceEntry, SourceType, SourceGroup);
                 return false;
             }
-            bool condMeets = false;
 
             Player player = obj.ToPlayer();
             Unit unit = obj.ToUnit();
 
             switch (ConditionType)
             {
-                case ConditionTypes.None:
-                    condMeets = true;                                    // empty condition, always met
-                    break;
                 case ConditionTypes.Aura:
                     if (unit != null)
                         condMeets = unit.HasAuraEffect(ConditionValue1, (byte)ConditionValue2);
@@ -130,36 +207,6 @@ namespace Game.Conditions
                         QuestStatus status = player.GetQuestStatus(ConditionValue1);
                         condMeets = (status == QuestStatus.None);
                     }
-                    break;
-                case ConditionTypes.ActiveEvent:
-                    condMeets = Global.GameEventMgr.IsActiveEvent((ushort)ConditionValue1);
-                    break;
-                case ConditionTypes.InstanceInfo:
-                {
-                    var map = obj.GetMap();
-                    if (map.IsDungeon())
-                    {
-                        InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
-                        if (instance != null)
-                        {
-                            switch ((InstanceInfo)ConditionValue3)
-                            {
-                                case InstanceInfo.Data:
-                                    condMeets = instance.GetData(ConditionValue1) == ConditionValue2;
-                                    break;
-                                case InstanceInfo.Data64:
-                                    condMeets = instance.GetData64(ConditionValue1) == ConditionValue2;
-                                    break;
-                                case InstanceInfo.BossState:
-                                    condMeets = instance.GetBossState(ConditionValue1) == (EncounterState)ConditionValue2;
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                }
-                case ConditionTypes.Mapid:
-                    condMeets = obj.GetMapId() == ConditionValue1;
                     break;
                 case ConditionTypes.Areaid:
                     condMeets = obj.GetAreaId() == ConditionValue1;
@@ -267,9 +314,6 @@ namespace Game.Conditions
                     if (unit != null)
                         condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue2, unit.GetHealthPct(), ConditionValue1);
                     break;
-                case ConditionTypes.WorldState:
-                    condMeets = (ConditionValue2 == Global.WorldMgr.GetWorldState((WorldStates)ConditionValue1));
-                    break;
                 case ConditionTypes.PhaseId:
                     condMeets = obj.GetPhaseShift().HasPhase(ConditionValue1);
                     break;
@@ -286,13 +330,6 @@ namespace Game.Conditions
                     Creature creature = obj.ToCreature();
                     if (creature)
                         condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
-                    break;
-                }
-                case ConditionTypes.RealmAchievement:
-                {
-                    AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
-                    if (achievement != null && Global.AchievementMgr.IsRealmCompleted(achievement))
-                        condMeets = true;
                     break;
                 }
                 case ConditionTypes.InWater:
@@ -378,11 +415,6 @@ namespace Game.Conditions
                     }
                     break;
                 }
-                case ConditionTypes.DifficultyId:
-                {
-                    condMeets = (uint)obj.GetMap().GetDifficultyID() == ConditionValue1;
-                    break;
-                }
                 case ConditionTypes.Gamemaster:
                 {
                     if (player != null)
@@ -400,17 +432,6 @@ namespace Game.Conditions
                         condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, player.GetSession().GetBattlePetMgr().GetPetCount(CliDB.BattlePetSpeciesStorage.LookupByKey(ConditionValue1), player.GetGUID()), ConditionValue2);
                     break;
                 }
-                case ConditionTypes.ScenarioStep:
-                {
-                    Scenario scenario = obj.GetScenario();
-                    if (scenario != null)
-                    {
-                        ScenarioStepRecord step = scenario.GetStep();
-                        if (step != null)
-                            condMeets = step.Id == ConditionValue1;
-                    }
-                    break;
-                }
                 case ConditionTypes.SceneInProgress:
                 {
                     if (player != null)
@@ -418,7 +439,6 @@ namespace Game.Conditions
                     break;
                 }
                 default:
-                    condMeets = false;
                     break;
             }
 
@@ -620,10 +640,18 @@ namespace Game.Conditions
             mConditionTargets[0] = target0;
             mConditionTargets[1] = target1;
             mConditionTargets[2] = target2;
+            mConditionMap = target0 != null ? target0.GetMap() : null;
+            mLastFailedCondition = null;
+        }
+
+        public ConditionSourceInfo(Map map)
+        {
+            mConditionMap = map;
             mLastFailedCondition = null;
         }
         
         public WorldObject[] mConditionTargets = new WorldObject[SharedConst.MaxConditionTargets]; // an array of targets available for conditions
+        public Map mConditionMap;
         public Condition mLastFailedCondition;
     }
 }

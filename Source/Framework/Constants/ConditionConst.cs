@@ -113,6 +113,7 @@ namespace Framework.Constants
         AreatriggerClientTriggered = 30,
         TrainerSpell = 31,
         ObjectIdVisibility = 32,
+        SpawnGroup = 33,
         Max
     }
 

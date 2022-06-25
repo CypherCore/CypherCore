@@ -231,8 +231,9 @@ namespace Framework.Constants
         ManualSpawn = 0x04,
         DynamicSpawnRate = 0x08,
         EscortQuestNpc = 0x10,
+        DespawnOnConditionFailure = 0x20,
 
-        All = (System | CompatibilityMode | ManualSpawn | DynamicSpawnRate | EscortQuestNpc)
+        All = (System | CompatibilityMode | ManualSpawn | DynamicSpawnRate | EscortQuestNpc | DespawnOnConditionFailure)
     }
 
     [Flags]

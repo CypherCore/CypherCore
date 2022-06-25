@@ -740,6 +740,7 @@ namespace Game.Maps
             if (_respawnCheckTimer <= diff)
             {
                 ProcessRespawns();
+                UpdateSpawnGroupConditions();
                 _respawnCheckTimer = WorldConfig.GetUIntValue(WorldCfg.RespawnMinCheckIntervalMs);
             }
             else
@@ -2849,7 +2850,7 @@ namespace Game.Maps
             return true;
         }
 
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes)
+        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes = false)
         {
             return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
         }
@@ -2908,6 +2909,25 @@ namespace Game.Maps
 
             // either manual spawn group and toggled, or not manual spawn group and not toggled...
             return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
+        }
+
+        void UpdateSpawnGroupConditions()
+        {
+            var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
+            foreach (uint spawnGroupId in spawnGroups)
+            {
+                bool isActive = IsSpawnGroupActive(spawnGroupId);
+                bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
+                if (isActive == shouldBeActive)
+                    continue;
+
+                if (shouldBeActive)
+                    SpawnGroupSpawn(spawnGroupId);
+                else if (GetSpawnGroupData(spawnGroupId).flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
+                    SpawnGroupDespawn(spawnGroupId);
+                else
+                    SetSpawnGroupInactive(spawnGroupId);
+            }
         }
 
         public void AddFarSpellCallback(FarSpellCallback callback)

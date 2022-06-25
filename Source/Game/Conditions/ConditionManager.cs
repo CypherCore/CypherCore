@@ -23,6 +23,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Loots;
+using Game.Maps;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -171,6 +172,31 @@ namespace Game
             return (sourceType == ConditionSourceType.SmartEvent);
         }
 
+        bool CanHaveConditionType(ConditionSourceType sourceType, ConditionTypes conditionType)
+        {
+            switch (sourceType)
+            {
+                case ConditionSourceType.SpawnGroup:
+                    switch (conditionType)
+                    {
+                        case ConditionTypes.None:
+                        case ConditionTypes.ActiveEvent:
+                        case ConditionTypes.InstanceInfo:
+                        case ConditionTypes.Mapid:
+                        case ConditionTypes.WorldState:
+                        case ConditionTypes.RealmAchievement:
+                        case ConditionTypes.DifficultyId:
+                        case ConditionTypes.ScenarioStep:
+                            return true;
+                        default:
+                            return false;
+                    }
+                default:
+                    break;
+            }
+            return true;
+        }
+
         public bool IsObjectMeetingNotGroupedConditions(ConditionSourceType sourceType, uint entry, ConditionSourceInfo sourceInfo)
         {
             if (sourceType > ConditionSourceType.None && sourceType < ConditionSourceType.Max)
@@ -192,6 +218,12 @@ namespace Game
             return IsObjectMeetingNotGroupedConditions(sourceType, entry, conditionSource);
         }
 
+        public bool IsMapMeetingNotGroupedConditions(ConditionSourceType sourceType, uint entry, Map map)
+        {
+            ConditionSourceInfo conditionSource = new(map);
+            return IsObjectMeetingNotGroupedConditions(sourceType, entry, conditionSource);
+        }
+        
         public bool HasConditionsForNotGroupedEntry(ConditionSourceType sourceType, uint entry)
         {
             if (sourceType > ConditionSourceType.None && sourceType < ConditionSourceType.Max)
@@ -1230,6 +1262,21 @@ namespace Game
                     else
                     {
                         Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked type id, ignoring.");
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionSourceType.SpawnGroup:
+                {
+                    SpawnGroupTemplateData spawnGroup = Global.ObjectMgr.GetSpawnGroupData((uint)cond.SourceEntry);
+                    if (spawnGroup == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in `spawn_group_template`, ignoring.");
+                        return false;
+                    }
+                    if (spawnGroup.flags.HasAnyFlag(SpawnGroupFlags.System | SpawnGroupFlags.ManualSpawn))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} in `spawn_group_template` table cannot have SPAWNGROUP_FLAG_SYSTEM or SPAWNGROUP_FLAG_MANUAL_SPAWN flags, ignoring.");
                         return false;
                     }
                     break;

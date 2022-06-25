@@ -5639,7 +5639,10 @@ namespace Game
                 else
                 {
                     if (groupTemplate.mapId == 0xFFFFFFFF)
+                    {
                         groupTemplate.mapId = data.MapId;
+                        _spawnGroupsByMap.Add(data.MapId, groupId);
+                    }
                     else if (groupTemplate.mapId != data.MapId && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                     {
                         Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
@@ -5808,6 +5811,7 @@ namespace Game
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
         public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
         public List<SpawnMetadata> GetSpawnMetadataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
+        public List<uint> GetSpawnGroupsForMap(uint mapId) { return _spawnGroupsByMap.LookupByKey(mapId); }
         public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, ulong spawnId)
         {
             if (SpawnData.TypeHasData(type))
@@ -10794,6 +10798,7 @@ namespace Game
         List<ushort> _transportMaps = new();
         Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
         MultiMap<uint, SpawnMetadata> _spawnGroupMapStorage = new();
+        MultiMap<uint, uint> _spawnGroupsByMap = new();
         MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new();
 
         //Spells /Skills / Phases
