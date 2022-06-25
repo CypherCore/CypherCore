@@ -5327,9 +5327,15 @@ namespace Game.Entities
         }
         public void SetMoney(ulong value)
         {
-            MoneyChanged((uint)value);
+            bool loading = GetSession().PlayerLoading();
+
+            if (!loading)
+                MoneyChanged((uint)value);
+
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
-            UpdateCriteria(CriteriaType.MostMoneyOwned);
+
+            if (!loading)
+                UpdateCriteria(CriteriaType.MostMoneyOwned);
         }
 
         //Target
