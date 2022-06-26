@@ -48,6 +48,11 @@ namespace Game.Networking.Packets
             Worldstates.Add(new WorldStateInfo(variableID, (int)value));
         }
 
+        public void AddState(int variableID, int value)
+        {
+            Worldstates.Add(new WorldStateInfo((uint)variableID, value));
+        }
+
         public void AddState(WorldStates variableID, bool value)
         {
             AddState((uint)variableID, value);

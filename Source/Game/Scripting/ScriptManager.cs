@@ -1198,6 +1198,14 @@ namespace Game.Scripting
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
         }
 
+        // WorldState
+        public void OnWorldStateValueChange(WorldStateTemplate worldStateTemplate, int oldValue, int newValue, Map map)
+        {
+            Cypher.Assert(worldStateTemplate != null);
+
+            RunScript<WorldStateScript>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, newValue, map), worldStateTemplate.ScriptId);
+        }
+        
         public void ForEach<T>(Action<T> a) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();

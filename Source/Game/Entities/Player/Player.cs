@@ -2913,6 +2913,8 @@ namespace Game.Entities
             packet.AreaID = zoneid;
             packet.SubareaID = areaid;
 
+            Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap());
+
             packet.AddState(2264, 0); // SCOURGE_EVENT_WORLDSTATE_EASTERN_PLAGUELANDS
             packet.AddState(2263, 0); // SCOURGE_EVENT_WORLDSTATE_TANARIS
             packet.AddState(2262, 0); // SCOURGE_EVENT_WORLDSTATE_BURNING_STEPPES

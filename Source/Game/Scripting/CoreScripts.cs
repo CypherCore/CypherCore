@@ -843,4 +843,17 @@ namespace Game.Scripting
         // Called when a quest objective data change
         public virtual void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount) { }
     }
+
+    public class WorldStateScript : ScriptObject
+    {
+        public WorldStateScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when worldstate changes value, map is optional
+        public virtual void OnValueChange(int worldStateId, int oldValue, int newValue, Map map) { }
+    }
 }

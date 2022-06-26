@@ -889,6 +889,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Formations...");
             FormationMgr.LoadCreatureFormations();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading World State templates...");
+            Global.WorldStateMgr.LoadFromDB();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading World States...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadWorldStates();
 

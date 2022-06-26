@@ -115,4 +115,6 @@ public static class Global
     public static SupportManager SupportMgr { get { return SupportManager.Instance; } }
     public static WardenCheckManager WardenCheckMgr { get { return WardenCheckManager.Instance; } }
     public static BlackMarketManager BlackMarketMgr { get { return BlackMarketManager.Instance; } }
+
+    public static WorldStateManager WorldStateMgr { get { return WorldStateManager.Instance; } }
 }

@@ -87,6 +87,8 @@ namespace Game.Maps
 
             Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
 
+            _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
+
             Global.ScriptMgr.OnCreateMap(this);
         }
 
@@ -573,6 +575,29 @@ namespace Game.Maps
         {
             Cell cell = new(player.GetPositionX(), player.GetPositionY());
             GetMultiPersonalPhaseTracker().OnOwnerPhaseChanged(player, GetGrid(cell.GetGridX(), cell.GetGridY()), this, cell);
+        }
+
+        public int GetWorldStateValue(int worldStateId)
+        {
+            return _worldStateValues.LookupByKey(worldStateId);
+        }
+
+        public Dictionary<int, int> GetWorldStateValues() { return _worldStateValues; }
+        
+        public void SetWorldStateValue(int worldStateId, int value)
+        {
+            int oldValue = _worldStateValues.LookupByKey(worldStateId);
+            _worldStateValues[worldStateId] = value;
+
+            WorldStateTemplate worldStateTemplate = Global.WorldStateMgr.GetWorldStateTemplate(worldStateId);
+            if (worldStateTemplate != null)
+                Global.ScriptMgr.OnWorldStateValueChange(worldStateTemplate, oldValue, value, this);
+
+            // Broadcast update to all players on the map
+            UpdateWorldState updateWorldState = new();
+            updateWorldState.VariableID = (uint)worldStateId;
+            updateWorldState.Value = value;
+            SendToPlayers(updateWorldState);
         }
         
         void InitializeObject(WorldObject obj)
@@ -5257,6 +5282,8 @@ namespace Game.Maps
         Queue<FarSpellCallback> _farSpellCallbacks = new();
 
         MultiPersonalPhaseTracker _multiPersonalPhaseTracker = new();
+
+        Dictionary<int, int> _worldStateValues = new();
         #endregion
     }
 
