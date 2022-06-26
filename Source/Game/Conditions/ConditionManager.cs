@@ -2873,6 +2873,7 @@ namespace Game
                 case WorldStateExpressionFunctions.Unk35:
                 case WorldStateExpressionFunctions.Unk36:
                 case WorldStateExpressionFunctions.UiWidgetData:
+                case WorldStateExpressionFunctions.Unk38:
                 default:
                     return 0;
             }

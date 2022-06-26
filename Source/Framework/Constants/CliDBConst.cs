@@ -2352,6 +2352,7 @@ namespace Framework.Constants
         Unk35,
         Unk36,
         UiWidgetData,
+        Unk38,
 
         Max,
     }
