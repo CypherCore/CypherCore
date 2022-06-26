@@ -892,6 +892,10 @@ namespace Game.Achievements
                 return false;
             }
 
+            if (criteria.Entry.EligibilityWorldStateID != 0)
+                if (Global.WorldStateMgr.GetValue(criteria.Entry.EligibilityWorldStateID, referencePlayer.GetMap()) != criteria.Entry.EligibilityWorldStateValue)
+                    return false;
+
             return true;
         }
 
