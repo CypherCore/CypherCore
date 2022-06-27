@@ -369,11 +369,7 @@ namespace Game.BattleFields
         public const int MaxVehicleH = 5;
         public const int VehicleA = 6;
         public const int VehicleH = 7;
-        public const int WonA = 8;
-        public const int DefA = 9;
-        public const int WonH = 10;
-        public const int DefH = 11;
-        public const int Max = 12;
+        public const int Max = 8;
     }
 
     struct WGAchievements

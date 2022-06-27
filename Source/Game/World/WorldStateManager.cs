@@ -22,6 +22,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
 
 namespace Game
 {
@@ -110,6 +111,16 @@ namespace Game
                 return 0;
 
             return map.GetWorldStateValue(worldStateId);
+        }
+
+        public void SetValue(WorldStates worldStateId, int value, Map map)
+        {
+            SetValue((int)worldStateId, value, map);
+        }
+
+        public void SetValue(uint worldStateId, int value, Map map)
+        {
+            SetValue((int)worldStateId, value, map);
         }
 
         public void SetValue(int worldStateId, int value, Map map)

@@ -3466,10 +3466,6 @@ namespace Game.Entities
                         packet.AddState(4882, 0); // WORLD_STATE_HOR_WAVE_COUNT
                     }
                     break;
-                case (uint)AreaId.Wintergrasp: // Wintergrasp
-                    if (battlefield != null && battlefield.GetTypeId() == (uint)BattleFieldTypes.WinterGrasp)
-                        battlefield.FillInitialWorldStates(packet);
-                    break;
                 // Zul Aman
                 case 3805:
                     if (instance != null && mapid == 568)

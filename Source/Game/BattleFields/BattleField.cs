@@ -348,11 +348,10 @@ namespace Game.BattleFields
             if (!endByTimer)
                 SetDefenderTeam(GetAttackerTeam());
 
-            OnBattleEnd(endByTimer);
-
             // Reset battlefield timer
             m_Timer = m_NoWarBattleTime;
-            SendInitWorldStatesToAll();
+
+            OnBattleEnd(endByTimer);
         }
 
         void DoPlaySoundToAll(uint soundID)
@@ -749,6 +748,8 @@ namespace Game.BattleFields
 
         public uint GetTypeId() { return m_TypeId; }
         public uint GetZoneId() { return m_ZoneId; }
+        public uint GetMapId()  { return m_MapId; }
+        public Map GetMap()  { return m_Map; }
         public ulong GetQueueId() { return MathFunctions.MakePair64(m_BattleId | 0x20000, 0x1F100000); }
 
         // Return true if battle is start, false if battle is not started
