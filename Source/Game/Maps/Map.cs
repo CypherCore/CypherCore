@@ -583,7 +583,7 @@ namespace Game.Maps
         }
 
         public Dictionary<int, int> GetWorldStateValues() { return _worldStateValues; }
-        
+
         public void SetWorldStateValue(int worldStateId, int value)
         {
             int oldValue = _worldStateValues.LookupByKey(worldStateId);
@@ -597,7 +597,19 @@ namespace Game.Maps
             UpdateWorldState updateWorldState = new();
             updateWorldState.VariableID = (uint)worldStateId;
             updateWorldState.Value = value;
-            SendToPlayers(updateWorldState);
+            updateWorldState.Write();
+
+            foreach (var player in GetPlayers())
+            {
+                if (worldStateTemplate != null && !worldStateTemplate.AreaIds.Empty())
+                {
+                    bool isInAllowedArea = worldStateTemplate.AreaIds.Any(requiredAreaId => Global.DB2Mgr.IsInArea(player.GetAreaId(), requiredAreaId));
+                    if (!isInAllowedArea)
+                        continue;
+                }
+
+                player.SendPacket(updateWorldState);
+            }
         }
         
         void InitializeObject(WorldObject obj)

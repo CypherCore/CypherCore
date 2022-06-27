@@ -16,13 +16,14 @@
  */
 
 using Framework.Collections;
+using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using Framework.Constants;
+using System.Linq;
 
 namespace Game
 {
@@ -38,8 +39,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0   1             2       3
-            SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, ScriptName FROM world_state");
+            //                                         0   1             2       3        4
+            SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, AreaIDs, ScriptName FROM world_state");
             if (result.IsEmpty())
                 return;
 
@@ -74,7 +75,45 @@ namespace Game
                     continue;
                 }
 
-                worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(3));
+                string areaIds = result.Read<string>(3);
+                if (!worldState.MapIds.Empty())
+                {
+                    foreach (string areaIdToken in new StringArray(areaIds, ','))
+                    {
+                        if (!uint.TryParse(areaIdToken, out uint areaId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer AreaID ({areaIdToken}), area ignored");
+                            continue;
+                        }
+
+                        var areaTableEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
+                        if (areaTableEntry == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid AreaID ({areaId}), area ignored");
+                            continue;
+                        }
+
+                        if (!worldState.MapIds.Contains(areaTableEntry.ContinentID))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with AreaID ({areaId}) not on any of required maps, area ignored");
+                            continue;
+                        }
+
+                        worldState.AreaIds.Add(areaId);
+                    }
+
+                    if (!areaIds.IsEmpty() && worldState.AreaIds.Empty())
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
+                        continue;
+                    }
+                }
+                else if (!areaIds.IsEmpty())
+                {
+                    Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but is a realm wide world state, area requirement ignored");
+                }
+
+                worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
 
                 if (!worldState.MapIds.Empty())
                 {
@@ -156,13 +195,23 @@ namespace Game
             return new Dictionary<int, int>();
         }
 
-        public void FillInitialWorldStates(InitWorldStates initWorldStates, Map map)
+        public void FillInitialWorldStates(InitWorldStates initWorldStates, Map map, uint playerAreaId)
         {
             foreach (var (worldStateId, value) in _realmWorldStateValues)
                 initWorldStates.AddState(worldStateId, value);
 
             foreach (var (worldStateId, value) in map.GetWorldStateValues())
+            {
+                WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
+                if (worldStateTemplate != null && !worldStateTemplate.AreaIds.Empty())
+                {
+                    bool isInAllowedArea = worldStateTemplate.AreaIds.Any(requiredAreaId => Global.DB2Mgr.IsInArea(playerAreaId, requiredAreaId));
+                    if (!isInAllowedArea)
+                        continue;
+                }
+
                 initWorldStates.AddState(worldStateId, value);
+            }
         }
     }
 
@@ -173,5 +222,6 @@ namespace Game
         public uint ScriptId;
 
         public List<uint> MapIds = new();
+        public List<uint> AreaIds = new();
     }
 }

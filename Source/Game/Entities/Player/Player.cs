@@ -2899,21 +2899,21 @@ namespace Game.Entities
             SendPacket(worldstate);
         }
 
-        void SendInitWorldStates(uint zoneid, uint areaid)
+        void SendInitWorldStates(uint zoneId, uint areaId)
         {
             // data depends on zoneid/mapid...
             Battleground bg = GetBattleground();
             uint mapid = GetMapId();
-            OutdoorPvP pvp = Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(zoneid);
+            OutdoorPvP pvp = Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(zoneId);
             InstanceScript instance = GetInstanceScript();
-            BattleField battlefield = Global.BattleFieldMgr.GetBattlefieldToZoneId(zoneid);
+            BattleField battlefield = Global.BattleFieldMgr.GetBattlefieldToZoneId(zoneId);
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
-            packet.AreaID = zoneid;
-            packet.SubareaID = areaid;
+            packet.AreaID = zoneId;
+            packet.SubareaID = areaId;
 
-            Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap());
+            Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
 
             packet.AddState(2264, 0); // SCOURGE_EVENT_WORLDSTATE_EASTERN_PLAGUELANDS
             packet.AddState(2263, 0); // SCOURGE_EVENT_WORLDSTATE_TANARIS
@@ -2947,7 +2947,7 @@ namespace Game.Entities
             packet.AddState(17043, (uint)(10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Horde ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0)));
 
             // insert <field> <value>
-            switch (zoneid)
+            switch (zoneId)
             {
                 case 1:                                             // Dun Morogh
                 case 11:                                            // Wetlands
