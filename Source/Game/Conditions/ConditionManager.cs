@@ -1668,7 +1668,7 @@ namespace Game
                 }
                 case ConditionTypes.WorldState:
                 {
-                    if (Global.WorldMgr.GetWorldState((WorldStates)cond.ConditionValue1) == 0)
+                    if (Global.WorldStateMgr.GetWorldStateTemplate((int)cond.ConditionValue1) == null)
                     {
                         Log.outError(LogFilter.Sql, "{0} has non existing world state in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                         return false;
@@ -2772,7 +2772,7 @@ namespace Game
                 case WorldStateExpressionValueType.WorldState:
                 {
                     uint worldStateId = buffer.ReadUInt32();
-                    value = (int)Global.WorldMgr.GetWorldState(worldStateId);
+                    value = Global.WorldStateMgr.GetValue((int)worldStateId, player.GetMap());
                     break;
                 }
                 case WorldStateExpressionValueType.Function:

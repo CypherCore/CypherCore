@@ -1812,7 +1812,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.PlayersRealmWorldState: // 108
-                    if (Global.WorldMgr.GetWorldState(reqValue) != secondaryAsset)
+                    if (Global.WorldStateMgr.GetValue((int)reqValue, referencePlayer.GetMap()) != secondaryAsset)
                         return false;
                     break;
                 case ModifierTreeType.TimeBetween: // 109

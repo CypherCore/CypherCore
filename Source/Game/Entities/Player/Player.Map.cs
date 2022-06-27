@@ -247,7 +247,7 @@ namespace Game.Entities
             {
                 if (area != null)
                 {
-                    if (InBattleground() || area.HasFlag(AreaFlags.Combat) || (area.PvpCombatWorldStateID != -1 && Global.WorldMgr.GetWorldState((WorldStates)area.PvpCombatWorldStateID) != 0))
+                    if (InBattleground() || area.HasFlag(AreaFlags.Combat) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
                         pvpInfo.IsInHostileArea = true;
                     else if (IsWarModeLocalActive() || area.HasFlag(AreaFlags.Unk3))
                     {

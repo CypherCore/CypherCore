@@ -83,7 +83,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.WorldState:
                 {
-                    condMeets = ConditionValue2 == Global.WorldMgr.GetWorldState(ConditionValue1);
+                    condMeets = Global.WorldStateMgr.GetValue((int)ConditionValue1, map) == ConditionValue2;
                     break;
                 }
                 case ConditionTypes.RealmAchievement:
