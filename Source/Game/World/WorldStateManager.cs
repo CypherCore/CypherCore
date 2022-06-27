@@ -15,9 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
 using Framework.Database;
+using Game.DataStorage;
 using Game.Maps;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -34,8 +37,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0   1             2      3
-            SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapID, ScriptName FROM world_state");
+            //                                         0   1             2       3
+            SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, ScriptName FROM world_state");
             if (result.IsEmpty())
                 return;
 
@@ -45,17 +48,42 @@ namespace Game
                 WorldStateTemplate worldState = new();
                 worldState.Id = id;
                 worldState.DefaultValue = result.Read<int>(1);
-                if (!result.IsNull(2))
-                    worldState.MapId = result.Read<uint>(2);
+
+                string mapIds = result.Read<string>(2);
+                foreach (string mapIdToken in new StringArray(mapIds, ','))
+                {
+                    if (!uint.TryParse(mapIdToken, out uint mapId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
+                        continue;
+                    }
+
+                    if (!CliDB.MapStorage.ContainsKey(mapId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
+                        continue;
+                    }
+
+                    worldState.MapIds.Add(mapId);
+                }
+
+                if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
+                {
+                    Log.outError(LogFilter.Sql, "Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
+                    continue;
+                }
 
                 worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(3));
 
-                if (worldState.MapId.HasValue)
+                if (!worldState.MapIds.Empty())
                 {
-                    if (!_worldStatesByMap.ContainsKey(worldState.MapId.Value))
-                        _worldStatesByMap[worldState.MapId.Value] = new();
+                    foreach (uint mapId in worldState.MapIds)
+                    {
+                        if (!_worldStatesByMap.ContainsKey(mapId))
+                            _worldStatesByMap[mapId] = new();
 
-                    _worldStatesByMap[worldState.MapId.Value][id] = worldState.DefaultValue;
+                        _worldStatesByMap[mapId][id] = worldState.DefaultValue;
+                    }
                 }
                 else
                     _realmWorldStateValues[id] = worldState.DefaultValue;
@@ -75,10 +103,10 @@ namespace Game
         public int GetValue(int worldStateId, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
-            if (worldStateTemplate == null || !worldStateTemplate.MapId.HasValue)
+            if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
                 return _realmWorldStateValues.LookupByKey(worldStateId);
 
-            if (map.GetId() != worldStateTemplate.MapId)
+            if (!worldStateTemplate.MapIds.Contains(map.GetId()))
                 return 0;
 
             return map.GetWorldStateValue(worldStateId);
@@ -87,7 +115,7 @@ namespace Game
         public void SetValue(int worldStateId, int value, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
-            if (worldStateTemplate == null || !worldStateTemplate.MapId.HasValue)
+            if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
             {
                 int oldValue = _realmWorldStateValues.LookupByKey(worldStateId);
                 _realmWorldStateValues[worldStateId] = value;
@@ -103,7 +131,7 @@ namespace Game
                 return;
             }
 
-            if (map.GetId() != worldStateTemplate.MapId)
+            if (!worldStateTemplate.MapIds.Contains(map.GetId()))
                 return;
 
             map.SetWorldStateValue(worldStateId, value);
@@ -133,6 +161,6 @@ namespace Game
         public int DefaultValue;
         public uint ScriptId;
 
-        public uint? MapId;
+        public List<uint> MapIds = new();
     }
 }
