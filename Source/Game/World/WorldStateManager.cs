@@ -76,7 +76,7 @@ namespace Game
                 }
 
                 string areaIds = result.Read<string>(3);
-                if (!worldState.MapIds.Empty())
+                if (!areaIds.IsEmpty() && !worldState.MapIds.Empty())
                 {
                     foreach (string areaIdToken in new StringArray(areaIds, ','))
                     {

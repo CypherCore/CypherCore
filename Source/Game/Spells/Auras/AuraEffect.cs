@@ -2318,7 +2318,7 @@ namespace Game.Spells
             target.SetIgnoreMovementForces(apply);
         }
 
-        [AuraEffectHandler(AuraType.IgnoreMovementForces)]
+        [AuraEffectHandler(AuraType.DisableInertia)]
         void HandleDisableInertia(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasFlag(AuraEffectHandleModes.SendForClientMask))
