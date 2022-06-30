@@ -2905,7 +2905,6 @@ namespace Game.Entities
             Battleground bg = GetBattleground();
             uint mapid = GetMapId();
             OutdoorPvP pvp = Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(zoneId);
-            InstanceScript instance = GetInstanceScript();
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
@@ -3386,93 +3385,6 @@ namespace Game.Entities
                         packet.AddState(4294, 1);   // BG_IC_WORKSHOP_UNCONTROLLED
                         packet.AddState(4243, 1);   // unk
                         packet.AddState(4345, 1);   // unk
-                    }
-                    break;
-                // The Ruby Sanctum
-                case 4987:
-                    if (instance != null && mapid == 724)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(5049, 50); // WORLDSTATE_CORPOREALITY_MATERIAL
-                        packet.AddState(5050, 50); // WORLDSTATE_CORPOREALITY_TWILIGHT
-                        packet.AddState(5051, 0);  // WORLDSTATE_CORPOREALITY_TOGGLE
-                    }
-                    break;
-                // Icecrown Citadel
-                case 4812:
-                    if (instance != null && mapid == 631)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(4903, 0);  // WORLDSTATE_SHOW_TIMER (Blood Quickening weekly)
-                        packet.AddState(4904, 30); // WORLDSTATE_EXECUTION_TIME
-                        packet.AddState(4940, 0);  // WORLDSTATE_SHOW_ATTEMPTS
-                        packet.AddState(4941, 50); // WORLDSTATE_ATTEMPTS_REMAINING
-                        packet.AddState(4942, 50); // WORLDSTATE_ATTEMPTS_MAX
-                    }
-                    break;
-                // The Culling of Stratholme
-                case 4100:
-                    if (instance != null && mapid == 595)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(3479, 0);  // WORLDSTATE_SHOW_CRATES
-                        packet.AddState(3480, 0);  // WORLDSTATE_CRATES_REVEALED
-                        packet.AddState(3504, 0);  // WORLDSTATE_WAVE_COUNT
-                        packet.AddState(3931, 25); // WORLDSTATE_TIME_GUARDIAN
-                        packet.AddState(3932, 0);  // WORLDSTATE_TIME_GUARDIAN_SHOW
-                    }
-                    break;
-                // The Oculus
-                case 4228:
-                    if (instance != null && mapid == 578)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(3524, 0); // WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW
-                        packet.AddState(3486, 0); // WORLD_STATE_CENTRIFUGE_CONSTRUCT_AMOUNT
-                    }
-                    break;
-                // Ulduar
-                case 4273:
-                    if (instance != null && mapid == 603)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(4132, 0); // WORLDSTATE_ALGALON_TIMER_ENABLED
-                        packet.AddState(4131, 0); // WORLDSTATE_ALGALON_DESPAWN_TIMER
-                    }
-                    break;
-                case 4415: // Violet Hold
-                    if (instance != null)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(3816, 0);   // WORLD_STATE_VH_SHOW
-                        packet.AddState(3815, 100); // WORLD_STATE_VH_PRISON_STATE
-                        packet.AddState(3810, 0);   // WORLD_STATE_VH_WAVE_COUNT
-                    }
-                    break;
-                // Halls of Refection
-                case 4820:
-                    if (instance != null && mapid == 668)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(4884, 0); // WORLD_STATE_HOR_WAVES_ENABLED
-                        packet.AddState(4882, 0); // WORLD_STATE_HOR_WAVE_COUNT
-                    }
-                    break;
-                // Zul Aman
-                case 3805:
-                    if (instance != null && mapid == 568)
-                        instance.FillInitialWorldStates(packet);
-                    else
-                    {
-                        packet.AddState(3104, 0); // WORLD_STATE_ZULAMAN_TIMER_ENABLED
-                        packet.AddState(3106, 0); // WORLD_STATE_ZULAMAN_TIMER
                     }
                     break;
                 // Twin Peaks

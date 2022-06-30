@@ -599,9 +599,9 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject failed");
         }
 
-        public void DoUpdateWorldState(uint uiStateId, uint uiStateData)
-        {            
-            instance.DoOnPlayers(player => player.SendUpdateWorldState(uiStateId, uiStateData));
+        public void DoUpdateWorldState(uint worldStateId, int value)
+        {
+            Global.WorldStateMgr.SetValue(worldStateId, value, instance);
         }
 
         // Send Notify to all players in instance
@@ -917,8 +917,6 @@ namespace Game.Maps
         public void MarkAreaTriggerDone(uint id) { _activatedAreaTriggers.Add(id); }
         public void ResetAreaTriggerDone(uint id) { _activatedAreaTriggers.Remove(id); }
         public bool IsAreaTriggerDone(uint id) { return _activatedAreaTriggers.Contains(id); }
-
-        public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         public int GetEncounterCount() { return bosses.Count; }
 
