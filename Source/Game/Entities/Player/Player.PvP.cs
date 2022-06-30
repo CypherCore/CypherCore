@@ -737,23 +737,6 @@ namespace Game.Entities
             //SendPacket(packet);
         }
 
-        //Battlefields
-        void SendBattlefieldWorldStates()
-        {
-            // Send misc stuff that needs to be sent on every login, like the battle timers.
-            if (WorldConfig.GetBoolValue(WorldCfg.TolbaradEnable))
-            {
-                BattleField tb = Global.BattleFieldMgr.GetBattlefieldByBattleId(BattlefieldIds.TB);
-                if (tb != null)
-                {
-                    SendUpdateWorldState(WorldStates.BattlefieldTbFactionControlling, (uint)(tb.GetDefenderTeam() + 1));
-                    uint timer = tb.GetTimer() / 1000;
-                    SendUpdateWorldState(WorldStates.BattlefieldTbTimeBattleEnd, (uint)(tb.IsWarTime() ? (uint)(GameTime.GetGameTime() + timer) : 0));
-                    SendUpdateWorldState(WorldStates.BattlefieldTbTimeNextBattle, (uint)(!tb.IsWarTime() ? (uint)(GameTime.GetGameTime() + timer) : 0));
-                }
-            }
-        }
-
         //Arenas
         public void SetArenaTeamInfoField(byte slot, ArenaTeamInfoType type, uint value)
         {

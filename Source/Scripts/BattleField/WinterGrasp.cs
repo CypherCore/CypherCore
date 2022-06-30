@@ -261,7 +261,6 @@ namespace Game.BattleFields
                         player.GetPosition(out x, out y, out z);
                         if (5500 > x && x > 5392 && y < 2880 && y > 2800 && z < 480)
                             player.TeleportTo(571, 5349.8686f, 2838.481f, 409.240f, 0.046328f);
-                        SendInitWorldStatesTo(player);
                     }
                 }
             }
@@ -728,7 +727,6 @@ namespace Game.BattleFields
                 if (GetData(WGData.BrokenTowerAtt) > 0)
                     player.SetAuraStack(WGSpells.TowerControl, player, GetData(WGData.BrokenTowerAtt));
             }
-            SendInitWorldStatesTo(player);
         }
 
         public override void OnPlayerLeaveWar(Player player)
@@ -767,8 +765,6 @@ namespace Game.BattleFields
                 RemoveAurasFromPlayer(player);
 
             player.AddAura(m_DefenderTeam == TeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
-            // Send worldstate to player
-            SendInitWorldStatesTo(player);
         }
 
         public override uint GetData(uint data)
@@ -792,9 +788,6 @@ namespace Game.BattleFields
 
             return base.GetData(data);
         }
-
-        //todo remove
-        public override void SendInitWorldStatesToAll() { }
 
         public void BrokenWallOrTower(uint team, BfWGGameObjectBuilding building)
         {
@@ -1448,9 +1441,6 @@ namespace Game.BattleFields
                 }
             }
         }
-
-        // todo remove
-        public void FillInitialWorldStates(InitWorldStates packet) { }
 
         public void Save()
         {

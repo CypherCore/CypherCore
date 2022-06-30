@@ -2906,7 +2906,6 @@ namespace Game.Entities
             uint mapid = GetMapId();
             OutdoorPvP pvp = Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(zoneId);
             InstanceScript instance = GetInstanceScript();
-            BattleField battlefield = Global.BattleFieldMgr.GetBattlefieldToZoneId(zoneId);
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
@@ -3497,27 +3496,12 @@ namespace Game.Entities
                     if (bg && bg.GetTypeID(true) == BattlegroundTypeId.BFG)
                         bg.FillInitialWorldStates(packet);
                     break;
-                case 5389: // Tol Barad Peninsula
-                    if (WorldConfig.GetBoolValue(WorldCfg.TolbaradEnable))
-                    {
-                        packet.AddState(WorldStates.BattlefieldTbAllianceControlsShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbAllianceControlsShow));
-                        packet.AddState(WorldStates.BattlefieldTbHordeControlsShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbHordeControlsShow));
-                        packet.AddState(WorldStates.BattlefieldTbTimeNextBattleShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbTimeNextBattleShow));
-                        packet.AddState(WorldStates.BattlefieldTbAllianceAttackingShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbAllianceAttackingShow));
-                        packet.AddState(WorldStates.BattlefieldTbHordeAttackingShow, Global.WorldMgr.GetWorldState(WorldStates.BattlefieldTbHordeAttackingShow));
-                    }
-                    break;
-                case 5095: // Tol Barad
-                    if (battlefield != null && battlefield.GetTypeId() == (uint)BattleFieldTypes.TolBarad)
-                        battlefield.FillInitialWorldStates(packet);
-                    break;
                 default:
                     break;
             }
 
             SendPacket(packet);
             SendBGWeekendWorldStates();
-            SendBattlefieldWorldStates();
         }
 
         public long GetBarberShopCost(List<ChrCustomizationChoice> newCustomizations)

@@ -2983,10 +2983,6 @@ namespace Framework.Constants
         BattlefieldTbStatePreparations = 5684,
         BattlefieldTbStateBattle = 5344,
 
-        BattlefieldTbProgressShow = 5376,
-        BattlefieldTbProgress = 5377, // 0 Horde, 100 Alliance
-        BattlefieldTbProgressPercentGrey = 5378,
-
         BattlefieldTbKeepHorde = 5469,
         BattlefieldTbKeepAlliance = 5470,
 

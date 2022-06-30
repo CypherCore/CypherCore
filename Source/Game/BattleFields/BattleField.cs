@@ -468,31 +468,6 @@ namespace Game.BattleFields
                 Global.CreatureTextMgr.SendChat(stalker, (byte)id, target);
         }
 
-        public void SendInitWorldStatesTo(Player player)
-        {
-            InitWorldStates packet = new();
-            packet.MapID = m_MapId;
-            packet.AreaID = m_ZoneId;
-            packet.SubareaID = player.GetAreaId();
-            FillInitialWorldStates(packet);
-
-            player.SendPacket(packet);
-        }
-
-        public void SendUpdateWorldState(WorldStates variable, uint value, bool hidden = false)
-        {
-            SendUpdateWorldState((uint)variable, value, hidden);
-        }
-
-        public void SendUpdateWorldState(uint variable, uint value, bool hidden = false)
-        {
-            UpdateWorldState worldstate = new();
-            worldstate.VariableID = variable;
-            worldstate.Value = (int)value;
-            worldstate.Hidden = hidden;
-            BroadcastPacketToZone(worldstate);
-        }
-
         public void AddCapturePoint(BfCapturePoint cp)
         {
             if (m_capturePoints.ContainsKey(cp.GetCapturePointEntry()))
@@ -802,11 +777,6 @@ namespace Game.BattleFields
         public uint GetBattleId() { return m_BattleId; }
 
         public virtual void DoCompleteOrIncrementAchievement(uint achievement, Player player, byte incrementNumber = 1) { }
-
-        // Send all worldstate data to all player in zone.
-        public virtual void SendInitWorldStatesToAll() { }
-
-        public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         // Return if we can use mount in battlefield
         public bool CanFlyIn() { return !m_isActive; }

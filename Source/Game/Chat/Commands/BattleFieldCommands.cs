@@ -99,7 +99,6 @@ namespace Game.Chat
                 return false;
 
             bf.SetTimer(time * Time.InMilliseconds);
-            bf.SendInitWorldStatesToAll();
             if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command timer used)");
 
