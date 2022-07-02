@@ -33,6 +33,10 @@ namespace Scripts.Pets
             //SoulTrader
             public const uint EtherealOnSummon = 50052;
             public const uint EtherealPetRemoveAura = 50055;
+
+            //LichPet
+            public const uint LichOnSummon = 69735;
+            public const uint LichRemoveAura = 69736;
         }
 
         struct TextIds
@@ -63,6 +67,28 @@ namespace Scripts.Pets
                 Unit owner = me.GetOwner();
                 if (owner != null)
                     DoCast(owner, SpellIds.EtherealOnSummon);
+
+                base.JustAppeared();
+            }
+        }
+
+        [Script]
+        class npc_pet_lich : ScriptedAI
+        {
+            public npc_pet_lich(Creature creature) : base(creature) { }
+
+            public override void LeavingWorld()
+            {
+                Unit owner = me.GetOwner();
+                if (owner !=  null)
+                    DoCast(owner, SpellIds.LichRemoveAura);
+            }
+
+            public override void JustAppeared()
+            {
+                Unit owner = me.GetOwner();
+                if (owner != null)
+                    DoCast(owner, SpellIds.LichOnSummon);
 
                 base.JustAppeared();
             }

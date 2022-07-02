@@ -133,6 +133,10 @@ namespace Scripts.Spells.Generic
         // Interrupt
         public const uint GenThrowInterrupt = 32747;
 
+        // LichPet
+        public const uint LichPetAura = 69732;
+        public const uint LichPetAuraOnkill = 69731;
+
         // Genericlifebloomspells        
         public const uint HexlordMalacrass = 43422;
         public const uint TurragePaw = 52552;
@@ -357,6 +361,9 @@ namespace Scripts.Spells.Generic
         public const uint Trollbane = 161707;
         public const uint Whitemane = 161708;
         public const uint Morgaine = 161709;
+
+        // LichPet
+        public const uint LichPet = 36979;
     }
 
     struct ModelIds
@@ -964,7 +971,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // Blood Reserve - 64568
     class spell_gen_blood_reserve : AuraScript
     {
@@ -1229,7 +1236,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
     class spell_gen_clone : SpellScript
     {
@@ -1426,7 +1433,7 @@ namespace Scripts.Spells.Generic
             OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
     [Script] // 63845 - Create Lance
     class spell_gen_create_lance : SpellScript
     {
@@ -1596,7 +1603,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script]
     class spell_gen_despawn_self : SpellScript
     {
@@ -1635,7 +1642,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any));
         }
     }
-    
+
     [Script] // 70769 Divine Storm!
     class spell_gen_divine_storm_cd_reset : SpellScript
     {
@@ -1854,7 +1861,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     /*
      * There are only 3 possible flags Feign Death auras can apply: UNIT_DYNFLAG_DEAD, UnitFlags2.FeignDeath
      * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some auras can apply only 2 flags
@@ -2106,7 +2113,7 @@ namespace Scripts.Spells.Generic
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script]
     class spell_gen_interrupt : AuraScript
     {
@@ -2148,6 +2155,66 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 69732 - Lich Pet Aura
+    class spell_gen_lich_pet_aura : AuraScript
+    {
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget().IsPlayer();
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            List<TempSummon> minionList = new();
+            GetUnitOwner().GetAllMinionsByEntry(minionList, CreatureIds.LichPet);
+            foreach (Creature minion in minionList)
+                if (minion.IsAIEnabled())
+                    minion.GetAI().DoCastSelf(SpellIds.LichPetAuraOnkill);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 69735 - Lich Pet OnSummon
+    class spell_gen_lich_pet_onsummon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LichPetAura);
+        }
+
+        void HandleScriptEffect(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            target.CastSpell(target, SpellIds.LichPetAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 69736 - Lich Pet Aura Remove
+    class spell_gen_lich_pet_aura_remove : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script("spell_hexlord_lifebloom", SpellIds.HexlordMalacrass)]
     [Script("spell_tur_ragepaw_lifebloom", SpellIds.TurragePaw)]
     [Script("spell_cenarion_scout_lifebloom", SpellIds.CenarionScout)]
