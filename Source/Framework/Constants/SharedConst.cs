@@ -3028,6 +3028,9 @@ namespace Framework.Constants
         BattlefieldTbEastIntactNeutral = 5451,
         BattlefieldTbEastDamagedNeutral = 5452,
 
+        WarModeHordeBuffValue = 17042,
+        WarModeAllianceBuffValue = 17043,
+
         CurrencyResetTime = 20001,                     // Next Arena Distribution Time
         WeeklyQuestResetTime = 20002,                     // Next Weekly Quest Reset Time
         BgDailyResetTime = 20003,                     // Next Daily Bg Reset Time

@@ -140,6 +140,11 @@ namespace Game
             return _worldStateTemplates.LookupByKey(worldStateId);
         }
 
+        public int GetValue(WorldStates worldStateId, Map map)
+        {
+            return GetValue((int)worldStateId, map);
+        }
+
         public int GetValue(int worldStateId, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);

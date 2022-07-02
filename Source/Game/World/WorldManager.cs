@@ -895,6 +895,10 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading World States...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadWorldStates();
 
+            // TODO: this is temporary until custom world states are purged from old world state saved values
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, (int)GetWorldState(WorldStates.WarModeHordeBuffValue), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, (int)GetWorldState(WorldStates.WarModeAllianceBuffValue), null);
+
             Global.ObjectMgr.LoadPhases();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Conditions...");
@@ -1254,8 +1258,12 @@ namespace Game
 
         public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
         {
-            _warModeDominantFaction = team;
-            _warModeOutnumberedFactionReward = reward;
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (team == TeamId.Alliance ? reward : 0), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (team == TeamId.Horde ? reward : 0), null);
+
+            // save to db
+            SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));
+            SetWorldState(WorldStates.WarModeAllianceBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null));
         }
 
         public void DisableForcedWarModeFactionBalanceState()
@@ -2501,33 +2509,36 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            _warModeDominantFaction = TeamId.Neutral;
-            _warModeOutnumberedFactionReward = 0;
 
-            if (warModeEnabledFaction.All(val => val == 0))
-                return;
-
-            long dominantFactionCount = warModeEnabledFaction[TeamId.Alliance];
             int dominantFaction = TeamId.Alliance;
-            if (warModeEnabledFaction[TeamId.Alliance] < warModeEnabledFaction[TeamId.Horde])
+            int outnumberedFactionReward = 0;
+
+            if (warModeEnabledFaction.Any(val => val != 0))
             {
-                dominantFactionCount = warModeEnabledFaction[TeamId.Horde];
-                dominantFaction = TeamId.Horde;
+                long dominantFactionCount = warModeEnabledFaction[TeamId.Alliance];
+                if (warModeEnabledFaction[TeamId.Alliance] < warModeEnabledFaction[TeamId.Horde])
+                {
+                    dominantFactionCount = warModeEnabledFaction[TeamId.Horde];
+                    dominantFaction = TeamId.Horde;
+                }
+
+                double total = warModeEnabledFaction[TeamId.Alliance] + warModeEnabledFaction[TeamId.Horde];
+                double pct = dominantFactionCount / total;
+
+                if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms20Pct))
+                    outnumberedFactionReward = 20;
+                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms10Pct))
+                    outnumberedFactionReward = 10;
+                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms5Pct))
+                    outnumberedFactionReward = 5;
             }
 
-            double total = warModeEnabledFaction[TeamId.Alliance] + warModeEnabledFaction[TeamId.Horde];
-            double pct = dominantFactionCount / total;
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), null);
 
-            if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms20Pct))
-                _warModeOutnumberedFactionReward = 20;
-            else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms10Pct))
-                _warModeOutnumberedFactionReward = 10;
-            else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms5Pct))
-                _warModeOutnumberedFactionReward = 5;
-            else
-                return;
-
-            _warModeDominantFaction = dominantFaction;
+            // save to db
+            SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));
+            SetWorldState(WorldStates.WarModeAllianceBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null));
         }
 
         public uint GetVirtualRealmAddress()
@@ -2558,10 +2569,6 @@ namespace Game
 
         public bool IsGuidWarning() { return _guidWarn; }
         public bool IsGuidAlert() { return _guidAlert; }
-
-        // War mode balancing
-        public int GetWarModeDominantFaction() { return _warModeDominantFaction; }
-        public int GetWarModeOutnumberedFactionReward() { return _warModeOutnumberedFactionReward; }
         
         public WorldUpdateTime GetWorldUpdateTime() { return _worldUpdateTime; }
 
@@ -2638,10 +2645,6 @@ namespace Game
         bool _guidAlert;
         uint _warnDiff;
         long _warnShutdownTime;
-
-        // War mode balancing
-        int _warModeDominantFaction; // the team that has higher percentage
-        int _warModeOutnumberedFactionReward;
         #endregion
     }
 

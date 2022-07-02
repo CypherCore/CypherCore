@@ -2938,12 +2938,6 @@ namespace Game.Entities
                 packet.AddState(2491, 15); // NA_UI_GUARDS_LEFT
             }
 
-            // Horde War Mode bonus
-            packet.AddState(17042, (uint)(10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Alliance ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0)));
-
-            // Alliance War Mode bonus
-            packet.AddState(17043, (uint)(10 + (Global.WorldMgr.GetWarModeDominantFaction() == TeamId.Horde ? Global.WorldMgr.GetWarModeOutnumberedFactionReward() : 0)));
-
             // insert <field> <value>
             switch (zoneId)
             {

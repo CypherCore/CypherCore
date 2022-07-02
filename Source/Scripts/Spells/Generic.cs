@@ -4441,10 +4441,15 @@ namespace Scripts.Spells.Generic
             if (target == null)
                 return;
 
-            if (target.GetTeamId() == Global.WorldMgr.GetWarModeDominantFaction())
-                return;
-
-            amount += Global.WorldMgr.GetWarModeOutnumberedFactionReward();
+            switch (target.GetTeamId())
+            {
+                case TeamId.Alliance:
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null);
+                    break;
+                case TeamId.Horde:
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null);
+                    break;
+            }
         }
 
         public override void Register()
