@@ -118,6 +118,9 @@ namespace Scripts.World.NpcSpecial
         public const uint Gnimo = 32639;
         public const uint DrixBlackwrench = 32641;
         public const uint Mojodishu = 32642;
+
+        // BrewfestReveler2
+        public const uint BrewfestReveler = 24484;
     }
 
     struct GameobjectIds
@@ -1288,6 +1291,92 @@ namespace Scripts.World.NpcSpecial
         }
     }
 
+    [Script]
+    class npc_brewfest_reveler_2 : ScriptedAI
+    {
+        Emote[] BrewfestRandomEmote =
+        {
+            Emote.OneshotQuestion,
+            Emote.OneshotApplaud,
+            Emote.OneshotShout,
+            Emote.OneshotEatNoSheathe,
+            Emote.OneshotLaughNoSheathe
+        };
+
+        List<ObjectGuid> _revelerGuids = new();
+
+        public npc_brewfest_reveler_2(Creature creature) : base(creature) { }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), fillListTask =>
+            {
+                List<Creature> creatureList = new();
+                me.GetCreatureListWithEntryInGrid(creatureList, CreatureIds.BrewfestReveler, 5.0f);
+                foreach (Creature creature in creatureList)
+                    if (creature != me)
+                        _revelerGuids.Add(creature.GetGUID());
+
+                fillListTask.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), faceToTask =>
+                {
+                    // Turn to random brewfest reveler within set range
+                    if (!_revelerGuids.Empty())
+                    {
+                        Creature creature = ObjectAccessor.GetCreature(me, _revelerGuids.SelectRandom());
+                        if (creature != null)
+                            me.SetFacingToObject(creature);
+                    }
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(6), emoteTask =>
+                    {
+                        var nextTask = (TaskContext task) =>
+                        {
+                            // If dancing stop before next random state
+                            if (me.GetEmoteState() == Emote.StateDance)
+                                me.SetEmoteState(Emote.OneshotNone);
+
+                            // Random EVENT_EMOTE or EVENT_FACETO
+                            if (RandomHelper.randChance(50))
+                                faceToTask.Repeat(TimeSpan.FromSeconds(1));
+                            else
+                                emoteTask.Repeat(TimeSpan.FromSeconds(1));
+                        };
+
+                        // Play random emote or dance
+                        if (RandomHelper.randChance(50))
+                        {
+                            me.HandleEmoteCommand(BrewfestRandomEmote.SelectRandom());
+                            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6), nextTask);
+                        }
+                        else
+                        {
+                            me.SetEmoteState(Emote.StateDance);
+                            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), nextTask);
+                        }
+                    });
+                });
+            });
+        }
+
+        // Copied from old script. I don't know if this is 100% correct.
+        public override void ReceiveEmote(Player player, TextEmotes emote)
+        {
+            if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest))
+                return;
+
+            if (emote == TextEmotes.Dance)
+                me.CastSpell(player, SpellIds.BrewfestToast, false);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            UpdateVictim();
+
+            _scheduler.Update(diff);
+        }
+    }
+    
     [Script]
     class npc_training_dummy : NullCreatureAI
     {
