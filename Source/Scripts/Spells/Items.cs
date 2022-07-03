@@ -149,6 +149,28 @@ namespace Scripts.Spells.Items
         // MercurialShield
         public const uint MercurialShield = 26464;
 
+        //MingoFortune
+        public const uint CreateFortune1 = 40804;
+        public const uint CreateFortune2 = 40805;
+        public const uint CreateFortune3 = 40806;
+        public const uint CreateFortune4 = 40807;
+        public const uint CreateFortune5 = 40808;
+        public const uint CreateFortune6 = 40809;
+        public const uint CreateFortune7 = 40908;
+        public const uint CreateFortune8 = 40910;
+        public const uint CreateFortune9 = 40911;
+        public const uint CreateFortune10 = 40912;
+        public const uint CreateFortune11 = 40913;
+        public const uint CreateFortune12 = 40914;
+        public const uint CreateFortune13 = 40915;
+        public const uint CreateFortune14 = 40916;
+        public const uint CreateFortune15 = 40918;
+        public const uint CreateFortune16 = 40919;
+        public const uint CreateFortune17 = 40920;
+        public const uint CreateFortune18 = 40921;
+        public const uint CreateFortune19 = 40922;
+        public const uint CreateFortune20 = 40923;
+
         //Necrotictouch
         public const uint ItemNecroticTouchProc = 71879;
 
@@ -233,23 +255,20 @@ namespace Scripts.Spells.Items
         public const uint Wormholepandariaemperorsomen = 126763;
         public const uint Wormholepandariawhitepetallake = 126764;
 
-        public static uint[] WormholeTargetLocations =
-        {
-            Wormholepandariaisleofreckoning,
-            Wormholepandariakunlaiunderwater,
-            Wormholepandariasravess,
-            Wormholepandariarikkitunvillage,
-            Wormholepandariazanvesstree,
-            Wormholepandariaanglerswharf,
-            Wormholepandariacranestatue,
-            Wormholepandariaemperorsomen,
-            Wormholepandariawhitepetallake
-        };
-
         //Airriflespells
         public const uint AirRifleHoldVisual = 65582;
         public const uint AirRifleShoot = 67532;
         public const uint AirRifleShootSelf = 65577;
+
+        //CreateHeartCandy
+        public const uint CreateHeartCandy1 = 26668;
+        public const uint CreateHeartCandy2 = 26670;
+        public const uint CreateHeartCandy3 = 26671;
+        public const uint CreateHeartCandy4 = 26672;
+        public const uint CreateHeartCandy5 = 26673;
+        public const uint CreateHeartCandy6 = 26674;
+        public const uint CreateHeartCandy7 = 26675;
+        public const uint CreateHeartCandy8 = 26676;
 
         //Genericdata
         public const uint ArcaniteDragonling = 19804;
@@ -1581,37 +1600,22 @@ namespace Scripts.Spells.Items
     [Script] // 40802 Mingo's Fortune Generator
     class spell_item_mingos_fortune_generator : SpellScript
     {
+        uint[] CreateFortuneSpells =
+        {
+            SpellIds.CreateFortune1, SpellIds.CreateFortune2, SpellIds.CreateFortune3, SpellIds.CreateFortune4, SpellIds.CreateFortune5,
+            SpellIds.CreateFortune6, SpellIds.CreateFortune7, SpellIds.CreateFortune8, SpellIds.CreateFortune9, SpellIds.CreateFortune10,
+            SpellIds.CreateFortune11, SpellIds.CreateFortune12, SpellIds.CreateFortune13, SpellIds.CreateFortune14, SpellIds.CreateFortune15,
+            SpellIds.CreateFortune16, SpellIds.CreateFortune17, SpellIds.CreateFortune18, SpellIds.CreateFortune19, SpellIds.CreateFortune20
+        };
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(CreateFortuneSpells);
+        }
+
         void HandleDummy(uint effIndex)
         {
-            // Selecting one from Bloodstained Fortune item
-            uint newitemid;
-            switch (RandomHelper.URand(1, 20))
-            {
-                case 1: newitemid = 32688; break;
-                case 2: newitemid = 32689; break;
-                case 3: newitemid = 32690; break;
-                case 4: newitemid = 32691; break;
-                case 5: newitemid = 32692; break;
-                case 6: newitemid = 32693; break;
-                case 7: newitemid = 32700; break;
-                case 8: newitemid = 32701; break;
-                case 9: newitemid = 32702; break;
-                case 10: newitemid = 32703; break;
-                case 11: newitemid = 32704; break;
-                case 12: newitemid = 32705; break;
-                case 13: newitemid = 32706; break;
-                case 14: newitemid = 32707; break;
-                case 15: newitemid = 32708; break;
-                case 16: newitemid = 32709; break;
-                case 17: newitemid = 32710; break;
-                case 18: newitemid = 32711; break;
-                case 19: newitemid = 32712; break;
-                case 20: newitemid = 32713; break;
-                default:
-                    return;
-            }
-
-            CreateItem(newitemid, ItemContext.None);
+            GetCaster().CastSpell(GetCaster(), CreateFortuneSpells.SelectRandom(), true);
         }
 
         public override void Register()
@@ -2340,15 +2344,28 @@ namespace Scripts.Spells.Items
     [Script] // 126755 - Wormhole: Pandaria
     class spell_item_wormhole_pandaria : SpellScript
     {
+        uint[] WormholeTargetLocations =
+        {
+            SpellIds.Wormholepandariaisleofreckoning,
+            SpellIds. Wormholepandariakunlaiunderwater,
+            SpellIds.Wormholepandariasravess,
+            SpellIds.Wormholepandariarikkitunvillage,
+            SpellIds.Wormholepandariazanvesstree,
+            SpellIds.Wormholepandariaanglerswharf,
+            SpellIds.Wormholepandariacranestatue,
+            SpellIds.Wormholepandariaemperorsomen,
+            SpellIds.Wormholepandariawhitepetallake
+        };
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.WormholeTargetLocations);
+            return ValidateSpellInfo(WormholeTargetLocations);
         }
 
         void HandleTeleport(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            uint spellId = SpellIds.WormholeTargetLocations.SelectRandom();
+            uint spellId = WormholeTargetLocations.SelectRandom();
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
 
@@ -2424,18 +2441,26 @@ namespace Scripts.Spells.Items
         }
     }
 
-    [Script]
+    [Script] // 26678 - Create Heart Candy
     class spell_item_create_heart_candy : SpellScript
     {
+        uint[] CreateHeartCandySpells =
+        {
+            SpellIds.CreateHeartCandy1, SpellIds.CreateHeartCandy2, SpellIds.CreateHeartCandy3, SpellIds.CreateHeartCandy4,
+            SpellIds.CreateHeartCandy5, SpellIds.CreateHeartCandy6, SpellIds.CreateHeartCandy7, SpellIds.CreateHeartCandy8
+        };
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(CreateHeartCandySpells);
+        }
+        
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
-            if (target)
-            {
-                uint[] items = new uint[] { ItemIds.HeartCandy1, ItemIds.HeartCandy2, ItemIds.HeartCandy3, ItemIds.HeartCandy4, ItemIds.HeartCandy5, ItemIds.HeartCandy6, ItemIds.HeartCandy7, ItemIds.HeartCandy8 };
-                target.AddItem(items[RandomHelper.IRand(0, 7)], 1);
-            }
+            if (target != null)
+                target.CastSpell(target, CreateHeartCandySpells.SelectRandom(), true);
         }
 
         public override void Register()
