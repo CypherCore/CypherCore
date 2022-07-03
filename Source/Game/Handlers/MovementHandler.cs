@@ -584,6 +584,7 @@ namespace Game
             if (GetPlayer().GetUnitBeingMoved().GetGUID() != movementAck.Ack.Status.Guid)
                 return;
 
+            movementAck.Ack.Status.Time = AdjustClientMovementTime(movementAck.Ack.Status.Time);
             GetPlayer().m_movementInfo = movementAck.Ack.Status;
 
             MoveUpdateKnockBack updateKnockBack = new();
