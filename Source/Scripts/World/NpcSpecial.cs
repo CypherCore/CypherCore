@@ -229,14 +229,9 @@ namespace Scripts.World.NpcSpecial
         public const uint StuffingServer = 61795;
         public const uint TurkeyServer = 61796;
         public const uint SweetPotatoesServer = 61797;
-        public static Dictionary<uint, uint> ChairSpells = new()
-        {
-            { CreatureIds.TheCranberryChair, CranberryServer },
-            { CreatureIds.ThePieChair, PieServer },
-            { CreatureIds.TheStuffingChair, StuffingServer },
-            { CreatureIds.TheTurkeyChair, TurkeyServer },
-            { CreatureIds.TheSweetPotatoChair, SweetPotatoesServer },
-        };
+
+        //VoidZone
+        public const uint Consumption = 28874;
     }
 
     struct QuestConst
@@ -2081,9 +2076,18 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_bountiful_tableAI : PassiveAI
+    class npc_bountiful_table : PassiveAI
     {
-        public npc_bountiful_tableAI(Creature creature) : base(creature) { }
+        Dictionary<uint, uint> ChairSpells = new()
+        {
+            { CreatureIds.TheCranberryChair, SpellIds.CranberryServer },
+            { CreatureIds.ThePieChair, SpellIds.PieServer },
+            { CreatureIds.TheStuffingChair, SpellIds.StuffingServer },
+            { CreatureIds.TheTurkeyChair, SpellIds.TurkeyServer },
+            { CreatureIds.TheSweetPotatoChair, SpellIds.SweetPotatoesServer },
+        };
+
+        public npc_bountiful_table(Creature creature) : base(creature) { }
 
         public override void PassengerBoarded(Unit who, sbyte seatId, bool apply)
         {
@@ -2135,10 +2139,34 @@ namespace Scripts.World.NpcSpecial
             };
 
             who.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
-            who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
+            who.m_Events.AddEvent(new CastFoodSpell(who, ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
             Creature creature = who.ToCreature();
             if (creature)
                 creature.SetDisplayFromModel(0);
+        }
+    }
+
+    [Script]
+    class npc_gen_void_zone : ScriptedAI
+    {
+        public npc_gen_void_zone(Creature creature) : base(creature) { }
+
+        public override void InitializeAI()
+        {
+            me.SetReactState(ReactStates.Passive);
+        }
+
+        public override void JustAppeared()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            {
+                DoCastSelf(SpellIds.Consumption);
+            });
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
         }
     }
     
