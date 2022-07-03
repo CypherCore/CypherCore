@@ -4511,10 +4511,10 @@ namespace Scripts.Spells.Generic
             switch (target.GetTeamId())
             {
                 case TeamId.Alliance:
-                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null);
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, target.GetMap());
                     break;
                 case TeamId.Horde:
-                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null);
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, target.GetMap());
                     break;
             }
         }

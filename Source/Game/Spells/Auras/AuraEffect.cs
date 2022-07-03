@@ -4615,6 +4615,25 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.ModAlternativeDefaultLanguage)]
+        void HandleModAlternativeDefaultLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (apply)
+                target.SetUnitFlag3(UnitFlags3.AlternativeDefaultLanguage);
+            else
+            {
+                if (target.HasAuraType(GetAuraType()))
+                    return;
+
+                target.RemoveUnitFlag3(UnitFlags3.AlternativeDefaultLanguage);
+            }
+        }
+        
         [AuraEffectHandler(AuraType.Linked)]
         void HandleAuraLinked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
