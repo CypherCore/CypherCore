@@ -931,11 +931,16 @@ namespace Game.Entities
                 {
                     uint quest_id = result.Read<uint>(0);
                     uint event_id = result.Read<uint>(1);
+                    long completedTime = result.Read<long>(2);
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
                         continue;
 
-                    m_seasonalquests.Add(event_id, quest_id);
+                    if (!m_seasonalquests.ContainsKey(event_id))
+                        m_seasonalquests[event_id] = new();
+
+                    m_seasonalquests[event_id][quest_id] = completedTime;
+
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
@@ -2128,13 +2133,17 @@ namespace Game.Entities
             if (m_seasonalquests.Empty())
                 return;
 
-            foreach (var iter in m_seasonalquests)
+            foreach (var (eventId, dictionary) in m_seasonalquests)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_SEASONAL);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, iter.Value);
-                stmt.AddValue(2, iter.Key);
-                trans.Append(stmt);
+                foreach (var (questId, completedTime) in dictionary)
+                {
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_SEASONAL);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, questId);
+                    stmt.AddValue(2, eventId);
+                    stmt.AddValue(3, completedTime);
+                    trans.Append(stmt);
+                }
             }
         }
         void _SaveMonthlyQuestStatus(SQLTransaction trans)

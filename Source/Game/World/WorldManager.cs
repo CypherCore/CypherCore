@@ -2215,15 +2215,15 @@ namespace Game
             SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
-        public void ResetEventSeasonalQuests(ushort event_id)
+        public void ResetEventSeasonalQuests(ushort event_id, long eventStartTime)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
             stmt.AddValue(0, event_id);
+            stmt.AddValue(1, eventStartTime);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
-                if (session.GetPlayer())
-                    session.GetPlayer().ResetSeasonalQuestStatus(event_id);
+                session.GetPlayer()?.ResetSeasonalQuestStatus(event_id, eventStartTime);
         }
 
         void ResetRandomBG()

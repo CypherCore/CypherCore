@@ -164,7 +164,7 @@ namespace Game.Entities
         List<uint> m_timedquests = new();
         List<uint> m_weeklyquests = new();
         List<uint> m_monthlyquests = new();
-        MultiMap<uint, uint> m_seasonalquests = new();
+        Dictionary<uint, Dictionary<uint, long>> m_seasonalquests = new();
         Dictionary<uint, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();

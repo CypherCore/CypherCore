@@ -1100,7 +1100,7 @@ namespace Game
             RunSmartAIScripts(event_id, true);
 
             // check for seasonal quest reset.
-            Global.WorldMgr.ResetEventSeasonalQuests(event_id);
+            Global.WorldMgr.ResetEventSeasonalQuests(event_id, GetLastStartTime(event_id));
         }
 
         void UpdateEventNPCFlags(ushort event_id)
@@ -1676,6 +1676,21 @@ namespace Game
             }
         }
 
+        long GetLastStartTime(ushort event_id)
+        {
+            if (event_id >= mGameEvent.Length)
+                return 0;
+
+            if (mGameEvent[event_id].state != GameEventState.Normal)
+                return 0;
+
+            DateTime now = GameTime.GetSystemTime();
+            DateTime eventInitialStart = Time.UnixTimeToDateTime(mGameEvent[event_id].start);
+            TimeSpan occurence = TimeSpan.FromMinutes(mGameEvent[event_id].occurence);
+            TimeSpan durationSinceLastStart = TimeSpan.FromTicks((now - eventInitialStart).Ticks % occurence.Ticks);
+            return Time.DateTimeToUnixTime(now - durationSinceLastStart);
+        }
+        
         public bool IsHolidayActive(HolidayIds id)
         {
             if (id == HolidayIds.None)

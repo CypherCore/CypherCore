@@ -28,6 +28,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -200,22 +201,29 @@ namespace Game.Entities
 
         }
 
-        public void ResetSeasonalQuestStatus(ushort event_id)
+        public void ResetSeasonalQuestStatus(ushort event_id, long eventStartTime)
         {
+            // DB data deleted in caller
+            m_SeasonalQuestChanged = false;
+
             var eventList = m_seasonalquests.LookupByKey(event_id);
             if (eventList.Empty())
                 return;
 
-            foreach (uint questId in eventList)
+            foreach (var (questId, completedTime) in eventList.ToList())
             {
-                uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-                if (questBit != 0)
-                    SetQuestCompletedBit(questBit, false);
+                if (completedTime < eventStartTime)
+                {
+                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
+                    if (questBit != 0)
+                        SetQuestCompletedBit(questBit, false);
+
+                    eventList.Remove(questId);
+                }
             }
 
-            m_seasonalquests.Remove(event_id);
-            // DB data deleted in caller
-            m_SeasonalQuestChanged = false;
+            if (eventList.Empty())
+                m_seasonalquests.Remove(event_id);
         }
 
         public void ResetMonthlyQuestStatus()
@@ -1673,7 +1681,7 @@ namespace Game.Entities
                 return true;
 
             // if not found in cooldown list
-            return !list.Contains(qInfo.Id);
+            return !list.ContainsKey(qInfo.Id);
         }
 
         public bool SatisfyQuestExpansion(Quest qInfo, bool msg)
@@ -1864,7 +1872,7 @@ namespace Game.Entities
                 ushort eventId = qInfo.GetEventIdForQuest();
                 if (m_seasonalquests.ContainsKey(eventId))
                 {
-                    m_seasonalquests.Remove(eventId, questId);
+                    m_seasonalquests[eventId].Remove(questId);
                     m_SeasonalQuestChanged = true;
                 }
             }
@@ -3041,7 +3049,10 @@ namespace Game.Entities
             if (quest == null)
                 return;
 
-            m_seasonalquests.Add(quest.GetEventIdForQuest(), quest_id);
+            if (!m_seasonalquests.ContainsKey(quest.GetEventIdForQuest()))
+                m_seasonalquests[quest.GetEventIdForQuest()] = new();
+
+            m_seasonalquests[quest.GetEventIdForQuest()][quest_id] = GameTime.GetGameTime();
             m_SeasonalQuestChanged = true;
         }
 
