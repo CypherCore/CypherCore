@@ -87,6 +87,10 @@ namespace Scripts.Spells.Items
         public const uint SpeedOfTheVrykulHero = 71560; // +700 Haste
         public const uint StrengthOfTheTaunkaHero = 71561;  // +700 Strength
 
+        //GoblinBombDispenser
+        public const uint SummonGoblinBomb = 13258;
+        public const uint MalfunctionExplosion = 13261;
+
         //GoblinWeatherMachine
         public const uint PersonalizedWeather1 = 46740;
         public const uint PersonalizedWeather2 = 46739;
@@ -1046,6 +1050,27 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 23134 - Goblin Bomb
+    class spell_item_goblin_bomb_dispenser : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.SummonGoblinBomb, SpellIds.MalfunctionExplosion);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Item item = GetCastItem();
+            if (item != null)
+                GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(95) ? SpellIds.SummonGoblinBomb : SpellIds.MalfunctionExplosion, item);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 46203 - Goblin Weather Machine
     class spell_item_goblin_weather_machine : SpellScript
     {
