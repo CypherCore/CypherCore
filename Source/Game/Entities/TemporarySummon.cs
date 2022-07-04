@@ -193,6 +193,20 @@ namespace Game.Entities
                 if (owner.IsTypeId(TypeId.Player))
                     m_ControlledByPlayer = true;
 
+            if (owner != null && owner.IsPlayer())
+            {
+                CreatureSummonedData summonedData = Global.ObjectMgr.GetCreatureSummonedData(GetEntry());
+                if (summonedData != null)
+                {
+                    m_creatureIdVisibleToSummoner = summonedData.CreatureIDVisibleToSummoner;
+                    if (summonedData.CreatureIDVisibleToSummoner.HasValue)
+                    {
+                        CreatureTemplate creatureTemplateVisibleToSummoner = Global.ObjectMgr.GetCreatureTemplate(summonedData.CreatureIDVisibleToSummoner.Value);
+                        m_displayIdVisibleToSummoner = ObjectManager.ChooseDisplayId(creatureTemplateVisibleToSummoner, null).CreatureDisplayID;
+                    }
+                }
+            }
+
             if (m_Properties == null)
                 return;
 
@@ -367,6 +381,9 @@ namespace Game.Entities
 
         public uint GetTimer() { return m_timer; }
 
+        public uint? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
+        public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
+        
         public bool CanFollowOwner() { return m_canFollowOwner; }
         public void SetCanFollowOwner(bool can) { m_canFollowOwner = can; }
 
@@ -375,6 +392,8 @@ namespace Game.Entities
         uint m_timer;
         uint m_lifetime;
         ObjectGuid m_summonerGUID;
+        uint? m_creatureIdVisibleToSummoner;
+        uint? m_displayIdVisibleToSummoner;
         bool m_canFollowOwner;
     }
 

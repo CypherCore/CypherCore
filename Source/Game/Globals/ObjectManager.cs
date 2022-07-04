@@ -1705,6 +1705,8 @@ namespace Game
             // We load the creature models after loading but before checking
             LoadCreatureTemplateModels();
 
+            LoadCreatureSummonedData();
+
             // Checking needs to be done after loading because of the difficulty self referencing
             foreach (var template in creatureTemplateStorage.Values)
                 CheckCreatureTemplate(template);
@@ -1939,6 +1941,66 @@ namespace Game
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template models in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+        void LoadCreatureSummonedData()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0           1                            2                     3
+            SQLResult result = DB.World.Query("SELECT CreatureID, CreatureIDVisibleToSummoner, GroundMountDisplayID, FlyingMountDisplayID FROM creature_summoned_data");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature summoned data definitions. DB table `creature_summoned_data` is empty.");
+                return;
+            }
+
+            do
+            {
+                uint creatureId = result.Read<uint>(0);
+                if (GetCreatureTemplate(creatureId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {creatureId}, skipped");
+                    continue;
+                }
+
+                if (!creatureSummonedDataStorage.ContainsKey(creatureId))
+                    creatureSummonedDataStorage[creatureId] = new();
+
+                CreatureSummonedData summonedData = creatureSummonedDataStorage[creatureId];
+
+                if (!result.IsNull(1))
+                {
+                    summonedData.CreatureIDVisibleToSummoner = result.Read<uint>(1);
+                    if (GetCreatureTemplate(summonedData.CreatureIDVisibleToSummoner.Value) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {summonedData.CreatureIDVisibleToSummoner.Value} in CreatureIDVisibleToSummoner for creature {creatureId}, set to 0");
+                        summonedData.CreatureIDVisibleToSummoner = null;
+                    }
+                }
+
+                if (!result.IsNull(2))
+                {
+                    summonedData.GroundMountDisplayID = result.Read<uint>(2);
+                    if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.GroundMountDisplayID.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.GroundMountDisplayID.Value} in GroundMountDisplayID for creature {creatureId}, set to 0");
+                        summonedData.CreatureIDVisibleToSummoner = null;
+                    }
+                }
+
+                if (!result.IsNull(3))
+                {
+                    summonedData.FlyingMountDisplayID = result.Read<uint>(3);
+                    if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.FlyingMountDisplayID.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0");
+                        summonedData.GroundMountDisplayID = null;
+                    }
+                }
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureSummonedDataStorage.Count} creature summoned data definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadCreatureTemplateAddons()
         {
@@ -3893,6 +3955,10 @@ namespace Game
         public CreatureModelInfo GetCreatureModelInfo(uint modelId)
         {
             return creatureModelStorage.LookupByKey(modelId);
+        }
+        public CreatureSummonedData GetCreatureSummonedData(uint entryId)
+        {
+            return creatureSummonedDataStorage.LookupByKey(entryId);
         }
         public NpcText GetNpcText(uint textId)
         {
@@ -10818,6 +10884,7 @@ namespace Game
         //Creature
         Dictionary<uint, CreatureTemplate> creatureTemplateStorage = new();
         Dictionary<uint, CreatureModelInfo> creatureModelStorage = new();
+        Dictionary<uint, CreatureSummonedData> creatureSummonedDataStorage = new();
         Dictionary<ulong, CreatureData> creatureDataStorage = new();
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
         MultiMap<uint, uint> creatureQuestItemStorage = new();

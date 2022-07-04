@@ -37,7 +37,7 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
         {
-            data.WriteUInt32(EntryId);
+            data.WriteUInt32(GetViewerDependentEntryId(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentDynamicFlags(this, owner, receiver));
             data.WriteFloat(Scale);
         }
@@ -56,7 +56,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(EntryId);
+                    data.WriteUInt32(GetViewerDependentEntryId(this, owner, receiver));
                 }
                 if (changesMask[2])
                 {
@@ -75,6 +75,21 @@ namespace Game.Entities
             ClearChangesMask(DynamicFlags);
             ClearChangesMask(Scale);
             _changesMask.ResetAll();
+        }
+
+        uint GetViewerDependentEntryId(ObjectFieldData objectData, WorldObject obj, Player receiver)
+        {
+            uint entryId = objectData.EntryId;
+            Unit unit = obj.ToUnit();
+            if (unit != null)
+            {
+                TempSummon summon = unit.ToTempSummon();
+                if (summon != null)
+                    if (summon.GetSummonerGUID() == receiver.GetGUID() && summon.GetCreatureIdVisibleToSummoner().HasValue)
+                        entryId = summon.GetCreatureIdVisibleToSummoner().Value;
+            }
+
+            return entryId;
         }
 
         uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, WorldObject obj, Player receiver)
@@ -2217,6 +2232,18 @@ namespace Game.Entities
             if (unit.IsCreature())
             {
                 CreatureTemplate cinfo = unit.ToCreature().GetCreatureTemplate();
+                TempSummon summon = unit.ToTempSummon();
+                if (summon != null)
+                {
+                    if (summon.GetSummonerGUID() == receiver.GetGUID())
+                    {
+                        if (summon.GetCreatureIdVisibleToSummoner().HasValue)
+                            cinfo = Global.ObjectMgr.GetCreatureTemplate(summon.GetCreatureIdVisibleToSummoner().Value);
+
+                        if (summon.GetDisplayIdVisibleToSummoner().HasValue)
+                            displayId = summon.GetDisplayIdVisibleToSummoner().Value;
+                    }
+                }
 
                 // this also applies for transform auras
                 SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransformSpell(), unit.GetMap().GetDifficultyID());

@@ -410,6 +410,13 @@ namespace Game.Entities
         }
     }
 
+    public class CreatureSummonedData
+    {
+        public uint? CreatureIDVisibleToSummoner;
+        public uint? GroundMountDisplayID;
+        public uint? FlyingMountDisplayID;
+    }
+
     public class CreatureAddon
     {
         public uint path_id;
