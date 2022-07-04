@@ -117,6 +117,9 @@ namespace Scripts.Spells.Generic
         public const uint CreateToken = 50063;
         public const uint StealEssenceVisual = 50101;
 
+        //FuriousRage
+        public const uint Exhaustion = 35492;
+
         // Fishingspells
         public const uint FishingNoFishingPole = 131476;
         public const uint FishingWithPole = 131490;
@@ -381,6 +384,13 @@ namespace Scripts.Spells.Generic
 
         //VendorBarkTrigger
         public const uint SayAmphitheaterVendor = 0;
+    }
+
+    struct EmoteIds
+    {
+        //FuriousRage
+        public const uint FuriousRage = 19415;
+        public const uint Exhausted = 18368;
     }
 
     struct AchievementIds
@@ -1931,6 +1941,39 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 35491 - Furious Rage
+    class spell_gen_furious_rage : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Exhaustion) &&
+                CliDB.BroadcastTextStorage.HasRecord(EmoteIds.FuriousRage) &&
+                CliDB.BroadcastTextStorage.HasRecord(EmoteIds.Exhausted);
+        }
+
+        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.TextEmote(EmoteIds.FuriousRage, target, false);
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Unit target = GetTarget();
+            target.TextEmote(EmoteIds.Exhausted, target, false);
+            target.CastSpell(target, SpellIds.Exhaustion, true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 46642 - 5,000 Gold
     class spell_gen_5000_gold : SpellScript
     {
