@@ -1123,6 +1123,25 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 157980 - Supernova
+    class spell_mage_supernova : SpellScript
+    {
+        void HandleDamage(uint effIndex)
+        {
+            if (GetExplTargetUnit() == GetHitUnit())
+            {
+                int damage = GetHitDamage();
+                MathFunctions.AddPct(ref damage, GetEffectInfo(0).CalcValue());
+                SetHitDamage(damage);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 80353 - Time Warp
     class spell_mage_time_warp : SpellScript
     {
