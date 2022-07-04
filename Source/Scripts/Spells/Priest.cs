@@ -87,6 +87,71 @@ namespace Scripts.Spells.Priest
         public const uint GenReplenishment = 57669;
     }
 
+    [Script] // 121536 - Angelic Feather talent
+    class spell_pri_angelic_feather_trigger : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AngelicFeatherAreatrigger);
+        }
+
+        void HandleEffectDummy(uint effIndex)
+        {
+            Position destPos = GetHitDest().GetPosition();
+            float radius = GetEffectInfo().CalcRadius();
+
+            // Caster is prioritary
+            if (GetCaster().IsWithinDist2d(destPos, radius))
+            {
+                GetCaster().CastSpell(GetCaster(), SpellIds.AngelicFeatherAura, true);
+            }
+            else
+            {
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                args.CastDifficulty = GetCastDifficulty();
+                GetCaster().CastSpell(destPos, SpellIds.AngelicFeatherAreatrigger, args);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
+    class areatrigger_pri_angelic_feather : AreaTriggerAI
+    {
+        public areatrigger_pri_angelic_feather(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        // Called when the AreaTrigger has just been initialized, just before added to map
+        public override void OnInitialize()
+        {
+            Unit caster = at.GetCaster();
+            if (caster)
+            {
+                List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
+
+                if (areaTriggers.Count >= 3)
+                    areaTriggers.First().SetDuration(0);
+            }
+        }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Unit caster = at.GetCaster();
+            if (caster)
+            {
+                if (caster.IsFriendlyTo(unit))
+                {
+                    // If target already has aura, increase duration to max 130% of initial duration
+                    caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
+                    at.SetDuration(0);
+                }
+            }
+        }
+    }
+
     [Script] // 26169 - Oracle Healing Bonus
     class spell_pri_aq_3p_bonus : AuraScript
     {
@@ -213,8 +278,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 64844 - Divine Hymn
-    [Script]
+    [Script] // 64844 - Divine Hymn
     class spell_pri_divine_hymn : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
@@ -243,8 +307,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 47788 - Guardian Spirit
-    [Script]
+    [Script] // 47788 - Guardian Spirit
     class spell_pri_guardian_spirit : AuraScript
     {
         uint healPct;
@@ -368,8 +431,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 92833 - Leap of Faith
-    [Script]
+    [Script] // 92833 - Leap of Faith
     class spell_pri_leap_of_faith_effect_trigger : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -582,7 +644,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 17 - Power Word: Shield
+    [Script] // 17 - Power Word: Shield Aura
     class spell_pri_power_word_shield_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1090,8 +1152,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 15290 - Vampiric Embrace (heal)
-    [Script]
+    [Script] // 15290 - Vampiric Embrace (heal)
     class spell_pri_vampiric_embrace_target : SpellScript
     {
         void FilterTargets(List<WorldObject> unitList)
@@ -1105,8 +1166,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // 34914 - Vampiric Touch
-    [Script]
+    [Script] // 34914 - Vampiric Touch
     class spell_pri_vampiric_touch : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1150,71 +1210,6 @@ namespace Scripts.Spells.Priest
             AfterDispel.Add(new AuraDispelHandler(HandleDispel));
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 2, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 121536 - Angelic Feather talent
-    class spell_pri_angelic_feather_trigger : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.AngelicFeatherAreatrigger);
-        }
-
-        void HandleEffectDummy(uint effIndex)
-        {
-            Position destPos = GetHitDest().GetPosition();
-            float radius = GetEffectInfo().CalcRadius();
-
-            // Caster is prioritary
-            if (GetCaster().IsWithinDist2d(destPos, radius))
-            {
-                GetCaster().CastSpell(GetCaster(), SpellIds.AngelicFeatherAura, true);
-            }
-            else
-            {
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.CastDifficulty = GetCastDifficulty();
-                GetCaster().CastSpell(destPos, SpellIds.AngelicFeatherAreatrigger, args);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
-    class areatrigger_pri_angelic_feather : AreaTriggerAI
-    {
-        public areatrigger_pri_angelic_feather(AreaTrigger areatrigger) : base(areatrigger) { }
-
-        // Called when the AreaTrigger has just been initialized, just before added to map
-        public override void OnInitialize()
-        {
-            Unit caster = at.GetCaster();
-            if (caster)
-            {
-                List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
-
-                if (areaTriggers.Count >= 3)
-                    areaTriggers.First().SetDuration(0);
-            }
-        }
-
-        public override void OnUnitEnter(Unit unit)
-        {
-            Unit caster = at.GetCaster();
-            if (caster)
-            {
-                if (caster.IsFriendlyTo(unit))
-                {
-                    // If target already has aura, increase duration to max 130% of initial duration
-                    caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
-                    at.SetDuration(0);
-                }
-            }
         }
     }
 }
