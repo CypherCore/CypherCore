@@ -260,16 +260,6 @@ namespace Scripts.Spells.Items
         public const uint AirRifleShoot = 67532;
         public const uint AirRifleShootSelf = 65577;
 
-        //CreateHeartCandy
-        public const uint CreateHeartCandy1 = 26668;
-        public const uint CreateHeartCandy2 = 26670;
-        public const uint CreateHeartCandy3 = 26671;
-        public const uint CreateHeartCandy4 = 26672;
-        public const uint CreateHeartCandy5 = 26673;
-        public const uint CreateHeartCandy6 = 26674;
-        public const uint CreateHeartCandy7 = 26675;
-        public const uint CreateHeartCandy8 = 26676;
-
         //Genericdata
         public const uint ArcaniteDragonling = 19804;
         public const uint BattleChicken = 13166;
@@ -293,13 +283,6 @@ namespace Scripts.Spells.Items
         public const uint SummonPurifiedHelboarMeat = 29277;
         public const uint SummonToxicHelboarMeat = 29278;
 
-        //Reindeertransformation
-        public const uint FlyingReindeer310 = 44827;
-        public const uint FlyingReindeer280 = 44825;
-        public const uint FlyingReindeer60 = 44824;
-        public const uint Reindeer100 = 25859;
-        public const uint Reindeer60 = 25858;
-
         //Nighinvulnerability
         public const uint NighInvulnerability = 30456;
         public const uint CompleteVulnerability = 30457;
@@ -320,14 +303,6 @@ namespace Scripts.Spells.Items
 
         //Impaleleviroth
         public const uint LevirothSelfImpale = 49882;
-
-        //Brewfestmounttransformation
-        public const uint MountRam100 = 43900;
-        public const uint MountRam60 = 43899;
-        public const uint MountKodo100 = 49379;
-        public const uint MountKodo60 = 49378;
-        public const uint BrewfestMountTransform = 49357;
-        public const uint BrewfestMountTransformReverse = 52845;
 
         //Nitroboots
         public const uint NitroBoostsSuccess = 54861;
@@ -2441,34 +2416,6 @@ namespace Scripts.Spells.Items
         }
     }
 
-    [Script] // 26678 - Create Heart Candy
-    class spell_item_create_heart_candy : SpellScript
-    {
-        uint[] CreateHeartCandySpells =
-        {
-            SpellIds.CreateHeartCandy1, SpellIds.CreateHeartCandy2, SpellIds.CreateHeartCandy3, SpellIds.CreateHeartCandy4,
-            SpellIds.CreateHeartCandy5, SpellIds.CreateHeartCandy6, SpellIds.CreateHeartCandy7, SpellIds.CreateHeartCandy8
-        };
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(CreateHeartCandySpells);
-        }
-        
-        void HandleScript(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            Player target = GetHitPlayer();
-            if (target != null)
-                target.CastSpell(target, CreateHeartCandySpells.SelectRandom(), true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
     [Script]
     class spell_item_book_of_glyph_mastery : SpellScript
     {
@@ -2659,49 +2606,6 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_reindeer_transformation : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.FlyingReindeer310, SpellIds.FlyingReindeer280, SpellIds.FlyingReindeer60, SpellIds.Reindeer100, SpellIds.Reindeer60);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            if (caster.HasAuraType(AuraType.Mounted))
-            {
-                float flyspeed = caster.GetSpeedRate(UnitMoveType.Flight);
-                float speed = caster.GetSpeedRate(UnitMoveType.Run);
-
-                caster.RemoveAurasByType(AuraType.Mounted);
-                //5 different spells used depending on mounted speed and if mount can fly or not
-
-                if (flyspeed >= 4.1f)
-                    // Flying Reindeer
-                    caster.CastSpell(caster, SpellIds.FlyingReindeer310, true); //310% flying Reindeer
-                else if (flyspeed >= 3.8f)
-                    // Flying Reindeer
-                    caster.CastSpell(caster, SpellIds.FlyingReindeer280, true); //280% flying Reindeer
-                else if (flyspeed >= 1.6f)
-                    // Flying Reindeer
-                    caster.CastSpell(caster, SpellIds.FlyingReindeer60, true); //60% flying Reindeer
-                else if (speed >= 2.0f)
-                    // Reindeer
-                    caster.CastSpell(caster, SpellIds.Reindeer100, true); //100% ground Reindeer
-                else
-                    // Reindeer
-                    caster.CastSpell(caster, SpellIds.Reindeer60, true); //60% ground Reindeer
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
     class spell_item_nigh_invulnerability : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -2869,49 +2773,6 @@ namespace Scripts.Spells.Items
                     target.CastSpell(target, SpellIds.LevirothSelfImpale, true);
                     target.ResetPlayerDamageReq();
                 }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
-    class spell_item_brewfest_mount_transformation : SpellScript
-    {
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellIds.MountRam100, SpellIds.MountRam60, SpellIds.MountKodo100, SpellIds.MountKodo60);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Player caster = GetCaster().ToPlayer();
-            if (caster.HasAuraType(AuraType.Mounted))
-            {
-                caster.RemoveAurasByType(AuraType.Mounted);
-                uint spell_id;
-
-                switch (GetSpellInfo().Id)
-                {
-                    case SpellIds.BrewfestMountTransform:
-                        if (caster.GetSpeedRate(UnitMoveType.Run) >= 2.0f)
-                            spell_id = caster.GetTeam() == Team.Alliance ? SpellIds.MountRam100 : SpellIds.MountKodo100;
-                        else
-                            spell_id = caster.GetTeam() == Team.Alliance ? SpellIds.MountRam60 : SpellIds.MountKodo60;
-                        break;
-                    case SpellIds.BrewfestMountTransformReverse:
-                        if (caster.GetSpeedRate(UnitMoveType.Run) >= 2.0f)
-                            spell_id = caster.GetTeam() == Team.Horde ? SpellIds.MountRam100 : SpellIds.MountKodo100;
-                        else
-                            spell_id = caster.GetTeam() == Team.Horde ? SpellIds.MountRam60 : SpellIds.MountKodo60;
-                        break;
-                    default:
-                        return;
-                }
-                caster.CastSpell(caster, spell_id, true);
-            }
         }
 
         public override void Register()

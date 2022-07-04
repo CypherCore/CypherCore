@@ -33,6 +33,16 @@ namespace Scripts.Events.LoveIsInTheAir
         //public const uint MealParticle = 45114; // Holiday - Valentine - Romantic Picnic Meal Particle - Unused
         public const uint DrinkVisual = 45121; // Holiday - Valentine - Romantic Picnic Drink Visual
         public const uint RomanticPicnicAchiev = 45123; // Romantic Picnic Periodic = 5000
+
+        //CreateHeartCandy
+        public const uint CreateHeartCandy1 = 26668;
+        public const uint CreateHeartCandy2 = 26670;
+        public const uint CreateHeartCandy3 = 26671;
+        public const uint CreateHeartCandy4 = 26672;
+        public const uint CreateHeartCandy5 = 26673;
+        public const uint CreateHeartCandy6 = 26674;
+        public const uint CreateHeartCandy7 = 26675;
+        public const uint CreateHeartCandy8 = 26676;
     }
     
     [Script] // 45102 Romantic Picnic
@@ -92,6 +102,34 @@ namespace Scripts.Events.LoveIsInTheAir
         {
             AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
             OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 26678 - Create Heart Candy
+    class spell_item_create_heart_candy : SpellScript
+    {
+        uint[] CreateHeartCandySpells =
+        {
+            SpellIds.CreateHeartCandy1, SpellIds.CreateHeartCandy2, SpellIds.CreateHeartCandy3, SpellIds.CreateHeartCandy4,
+            SpellIds.CreateHeartCandy5, SpellIds.CreateHeartCandy6, SpellIds.CreateHeartCandy7, SpellIds.CreateHeartCandy8
+        };
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(CreateHeartCandySpells);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Player target = GetHitPlayer();
+            if (target != null)
+                target.CastSpell(target, CreateHeartCandySpells.SelectRandom(), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 }

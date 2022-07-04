@@ -37,6 +37,14 @@ namespace Scripts.Events.Brewfest
         public const uint RamFatigue = 43052;
         public const uint ExhaustedRam = 43332;
         public const uint RelayRaceTurnIn = 44501;
+
+        //Brewfestmounttransformation
+        public const uint MountRam100 = 43900;
+        public const uint MountRam60 = 43899;
+        public const uint MountKodo100 = 49379;
+        public const uint MountKodo60 = 49378;
+        public const uint BrewfestMountTransform = 49357;
+        public const uint BrewfestMountTransformReverse = 52845;
     }
 
     struct QuestIds
@@ -348,27 +356,46 @@ namespace Scripts.Events.Brewfest
         }
     }
 
+    [Script]
+    class spell_item_brewfest_mount_transformation : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.MountRam100, SpellIds.MountRam60, SpellIds.MountKodo100, SpellIds.MountKodo60);
+        }
 
+        void HandleDummy(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
+            if (caster.HasAuraType(AuraType.Mounted))
+            {
+                caster.RemoveAurasByType(AuraType.Mounted);
+                uint spell_id;
 
+                switch (GetSpellInfo().Id)
+                {
+                    case SpellIds.BrewfestMountTransform:
+                        if (caster.GetSpeedRate(UnitMoveType.Run) >= 2.0f)
+                            spell_id = caster.GetTeam() == Team.Alliance ? SpellIds.MountRam100 : SpellIds.MountKodo100;
+                        else
+                            spell_id = caster.GetTeam() == Team.Alliance ? SpellIds.MountRam60 : SpellIds.MountKodo60;
+                        break;
+                    case SpellIds.BrewfestMountTransformReverse:
+                        if (caster.GetSpeedRate(UnitMoveType.Run) >= 2.0f)
+                            spell_id = caster.GetTeam() == Team.Horde ? SpellIds.MountRam100 : SpellIds.MountKodo100;
+                        else
+                            spell_id = caster.GetTeam() == Team.Horde ? SpellIds.MountRam60 : SpellIds.MountKodo60;
+                        break;
+                    default:
+                        return;
+                }
+                caster.CastSpell(caster, spell_id, true);
+            }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
 }

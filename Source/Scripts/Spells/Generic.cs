@@ -1724,48 +1724,6 @@ namespace Scripts.Spells.Generic
         bool _handled;
     }
 
-    [Script]
-    class spell_gen_elune_candle : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.OmenHead, SpellIds.OmenChest, SpellIds.OmenHandR, SpellIds.OmenHandL, SpellIds.Normal);
-        }
-
-        void HandleScript(uint effIndex)
-        {
-            uint spellId = 0;
-
-            if (GetHitUnit().GetEntry() == CreatureIds.Omen)
-            {
-                switch (RandomHelper.URand(0, 3))
-                {
-                    case 0:
-                        spellId = SpellIds.OmenHead;
-                        break;
-                    case 1:
-                        spellId = SpellIds.OmenChest;
-                        break;
-                    case 2:
-                        spellId = SpellIds.OmenHandR;
-                        break;
-                    case 3:
-                        spellId = SpellIds.OmenHandL;
-                        break;
-                }
-            }
-            else
-                spellId = SpellIds.Normal;
-
-            GetCaster().CastSpell(GetHitUnit(), spellId, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
-        }
-    }
-
     // 50051 - Ethereal Pet Aura
     [Script]
     class spell_ethereal_pet_aura : AuraScript
