@@ -255,7 +255,6 @@ namespace Scripts.Spells.Quest
 
         //Quest12372
         public const uint WyrmrestTempleCredit = 27698;
-        public const uint WyrmrestDefender = 27629;
 
         //Quest11010 11102 11023        
         public const uint FelCannon2 = 23082;
@@ -835,22 +834,6 @@ namespace Scripts.Spells.Quest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 50287 - Azure Dragon: On Death Force Cast Wyrmrest Defender to Whisper to Controller - Random (cast from Azure Dragons and Azure Drakes on death)
-    class spell_q12372_azure_on_death_force_whisper : SpellScript
-    {
-        void HandleScript(uint effIndex)
-        {
-            Creature defender = GetHitCreature();
-            if (defender != null && defender.GetEntry() == CreatureIds.WyrmrestDefender)
-                defender.GetAI().Talk(Misc.WhisperOnHitByForceWhisper, defender.GetCharmerOrOwner());
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
