@@ -405,7 +405,7 @@ namespace Game.AI
             return IsInBounds(_boundary, who) != _negateBoundary;
         }
 
-        public bool CheckInRoom()
+        public virtual bool CheckInRoom()
         {
             if (IsInBoundary())
                 return true;
