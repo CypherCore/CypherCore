@@ -878,7 +878,7 @@ namespace Game.Maps
             return interval;
         }
 
-        bool InstanceHasScript(WorldObject obj, string scriptName)
+        public bool InstanceHasScript(WorldObject obj, string scriptName)
         {
             InstanceMap instance = obj.GetMap().ToInstanceMap();
             if (instance != null)

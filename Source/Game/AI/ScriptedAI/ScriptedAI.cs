@@ -639,6 +639,11 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
+        public void _DespawnAtEvade()
+        {
+            _DespawnAtEvade(TimeSpan.FromSeconds(30));
+        }
+
         public void _DespawnAtEvade(TimeSpan delayToRespawn, Creature who = null)
         {
             if (delayToRespawn < TimeSpan.FromSeconds(2))

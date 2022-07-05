@@ -874,7 +874,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0));
         }
 
-        void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
+        public void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
             var initializer = (MoveSplineInit init) =>
             {
