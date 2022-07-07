@@ -52,21 +52,24 @@ namespace Game
                 worldState.DefaultValue = result.Read<int>(1);
 
                 string mapIds = result.Read<string>(2);
-                foreach (string mapIdToken in new StringArray(mapIds, ','))
+                if (!mapIds.IsEmpty())
                 {
-                    if (!uint.TryParse(mapIdToken, out uint mapId))
+                    foreach (string mapIdToken in new StringArray(mapIds, ','))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
-                        continue;
-                    }
+                        if (!uint.TryParse(mapIdToken, out uint mapId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
+                            continue;
+                        }
 
-                    if (!CliDB.MapStorage.ContainsKey(mapId))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
-                        continue;
-                    }
+                        if (!CliDB.MapStorage.ContainsKey(mapId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
+                            continue;
+                        }
 
-                    worldState.MapIds.Add(mapId);
+                        worldState.MapIds.Add(mapId);
+                    }
                 }
 
                 if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
