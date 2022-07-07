@@ -585,9 +585,8 @@ namespace Game.AI
         void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
-            List<Creature> creatures = new();
-            me.GetCreatureListWithEntryInGrid(creatures, entry, maxSearchRange);
 
+            List<Creature> creatures = me.GetCreatureListWithEntryInGrid(entry, maxSearchRange);
             foreach (Creature creature in creatures)
             {
                 creature.CombatStop(true);

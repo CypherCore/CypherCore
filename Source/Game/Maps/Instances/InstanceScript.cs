@@ -447,11 +447,11 @@ namespace Game.Maps
         {
             if (string.IsNullOrEmpty(data))
             {
-                OUT_LOAD_INST_DATA_FAIL();
+                OutLoadInstDataFail();
                 return;
             }
 
-            OUT_LOAD_INST_DATA(data);
+            OutLoadInstData(data);
 
             var loadStream = new StringArguments(data);
 
@@ -461,9 +461,9 @@ namespace Game.Maps
                 ReadSaveDataMore(loadStream);
             }
             else
-                OUT_LOAD_INST_DATA_FAIL();
+                OutLoadInstDataFail();
 
-            OUT_LOAD_INST_DATA_COMPLETE();
+            OutLoadInstDataComplete();
         }
 
         bool ReadSaveDataHeaders(StringArguments data)
@@ -495,7 +495,7 @@ namespace Game.Maps
 
         public virtual string GetSaveData()
         {
-            OUT_SAVE_INST_DATA();
+            OutSaveInstData();
 
             StringBuilder saveStream = new();
 
@@ -503,7 +503,7 @@ namespace Game.Maps
             WriteSaveDataBossStates(saveStream);
             WriteSaveDataMore(saveStream);
 
-            OUT_SAVE_INST_DATA_COMPLETE();
+            OutSaveInstDataComplete();
 
             return saveStream.ToString();
         }
@@ -928,11 +928,11 @@ namespace Game.Maps
                 bosses.Add(i, new BossInfo());
         }
 
-        public void OUT_SAVE_INST_DATA() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2})", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OUT_SAVE_INST_DATA_COMPLETE() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2}) completed.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OUT_LOAD_INST_DATA(string input) { Log.outDebug(LogFilter.Scripts, "Loading Instance Data for Instance {0} (Map {1}, Instance Id {2}). Input is '{3}'", instance.GetMapName(), instance.GetId(), instance.GetInstanceId(), input); }
-        public void OUT_LOAD_INST_DATA_COMPLETE() { Log.outDebug(LogFilter.Scripts, "Instance Data Load for Instance {0} (Map {1}, Instance Id: {2}) is complete.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
-        public void OUT_LOAD_INST_DATA_FAIL() { Log.outDebug(LogFilter.Scripts, "Unable to load Instance Data for Instance {0} (Map {1}, Instance Id: {2}).", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
+        public void OutSaveInstData() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2})", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
+        public void OutSaveInstDataComplete() { Log.outDebug(LogFilter.Scripts, "Saving Instance Data for Instance {0} (Map {1}, Instance Id {2}) completed.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
+        public void OutLoadInstData(string input) { Log.outDebug(LogFilter.Scripts, "Loading Instance Data for Instance {0} (Map {1}, Instance Id {2}). Input is '{3}'", instance.GetMapName(), instance.GetId(), instance.GetInstanceId(), input); }
+        public void OutLoadInstDataComplete() { Log.outDebug(LogFilter.Scripts, "Instance Data Load for Instance {0} (Map {1}, Instance Id: {2}) is complete.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
+        public void OutLoadInstDataFail() { Log.outDebug(LogFilter.Scripts, "Unable to load Instance Data for Instance {0} (Map {1}, Instance Id: {2}).", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
 
         public virtual void ReadSaveDataMore(StringArguments data) { }
 

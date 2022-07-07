@@ -2784,20 +2784,24 @@ namespace Game.Entities
             return spellInfo.GetSpellXSpellVisualId(this);
         }
 
-        public void GetGameObjectListWithEntryInGrid(List<GameObject> gameobjectList, uint entry = 0, float maxSearchRange = 250.0f)
+        public List<GameObject> GetGameObjectListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
         {
+            List<GameObject> gameobjectList = new();
             var check = new AllGameObjectsWithEntryInRange(this, entry, maxSearchRange);
             var searcher = new GameObjectListSearcher(this, gameobjectList, check);
 
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            return gameobjectList;
         }
 
-        public void GetCreatureListWithEntryInGrid(List<Creature> creatureList, uint entry = 0, float maxSearchRange = 250.0f)
+        public List<Creature> GetCreatureListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
         {
+            List<Creature> creatureList = new();
             var check = new AllCreaturesOfEntryInRange(this, entry, maxSearchRange);
             var searcher = new CreatureListSearcher(this, creatureList, check);
 
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            return creatureList;
         }
 
         public List<Unit> GetPlayerListInGrid(float maxSearchRange, bool alive = true)

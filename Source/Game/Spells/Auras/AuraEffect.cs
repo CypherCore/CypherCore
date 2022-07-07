@@ -5725,8 +5725,7 @@ namespace Game.Spells
                 // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
                 foreach (uint summonEntry in summonedEntries)
                 {
-                    List<Creature> nearbyEntries = new();
-                    target.GetCreatureListWithEntryInGrid(nearbyEntries, summonEntry);
+                    List<Creature> nearbyEntries = target.GetCreatureListWithEntryInGrid(summonEntry);
                     foreach (var creature in nearbyEntries)
                     {
                         if (creature.GetOwner() == target)

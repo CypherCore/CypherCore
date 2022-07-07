@@ -3553,8 +3553,7 @@ namespace Game.AI
                     }
                     else if (e.Event.distance.entry != 0)
                     {
-                        List<Creature> list = new();
-                        _me.GetCreatureListWithEntryInGrid(list, e.Event.distance.entry, e.Event.distance.dist);
+                        List<Creature> list = _me.GetCreatureListWithEntryInGrid(e.Event.distance.entry, e.Event.distance.dist);
 
                         if (!list.Empty())
                             creature = list.FirstOrDefault();
@@ -3584,8 +3583,7 @@ namespace Game.AI
                     }
                     else if (e.Event.distance.entry != 0)
                     {
-                        List<GameObject> list = new();
-                        _me.GetGameObjectListWithEntryInGrid(list, e.Event.distance.entry, e.Event.distance.dist);
+                        List<GameObject> list = _me.GetGameObjectListWithEntryInGrid(e.Event.distance.entry, e.Event.distance.dist);
 
                         if (!list.Empty())
                             gameobject = list.FirstOrDefault();

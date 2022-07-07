@@ -529,8 +529,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             if (player.GetQuestStatus(QuestIds.MissingFriends) == QuestStatus.Incomplete)
             {
-                List<Creature> childrenList = new();
-                me.GetCreatureListWithEntryInGrid(childrenList, CreatureIds.CaptiveChild, SharedConst.InteractionDistance);
+                List<Creature> childrenList = me.GetCreatureListWithEntryInGrid(CreatureIds.CaptiveChild, SharedConst.InteractionDistance);
                 foreach (Creature creature in childrenList)
                 {
                     player.KilledMonsterCredit(CreatureIds.CaptiveChild, creature.GetGUID());

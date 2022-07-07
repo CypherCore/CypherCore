@@ -562,6 +562,54 @@ namespace Framework.Constants
         Min = Hated
     }
 
+    public enum FactionTemplates
+    {
+        None = 0,
+        Creature = 7,
+        EscorteeANeutralPassive = 10,
+        Monster = 14,
+        Monster2 = 16,
+        TrollBloodscalp = 28,
+        Prey = 31,
+        EscorteeHNeutralPassive = 33,
+        Friendly = 35,
+        TrollFrostmane = 37,
+        Ogre = 45,
+        OrcDragonmaw = 62,
+        HordeGeneric = 83,
+        AllianceGeneric = 84,
+        Demon = 90,
+        Elemental = 91,
+        DragonflightBlack = 103,
+        EscorteeNNeutralPassive = 113,
+        Enemy = 168,
+        EscorteeANeutralActive = 231,
+        EscorteeHNeutralActive = 232,
+        EscorteeNNeutralActive = 250,
+        EscorteeNFriendPassive = 290,
+        Titan = 415,
+        EscorteeNFriendActive = 495,
+        Ratchet = 637,
+        GoblinDarkIronBarPatron = 736,
+        DarkIronDwarves = 754,
+        EscorteeAPassive = 774,
+        EscorteeHPassive = 775,
+        UndeadScourge = 974,
+        EarthenRing = 1726,
+        AllianceGenericWg = 1732,
+        HordeGenericWg = 1735,
+        Arakkoa = 1738,
+        AshtongueDeathsworn = 1820,
+        FlayerHunter = 1840,
+        MonsterSparBuddy = 1868,
+        EscorteeNActive = 1986,
+        EscorteeHActive = 2046,
+        UndeadScourge2 = 2068,
+        UndeadScourge3 = 2084,
+        ScarletCrusade = 2089,
+        ScarletCrusade2 = 2096
+    };
+
     public enum ReputationSource
     {
         Kill,

@@ -655,8 +655,7 @@ namespace Scripts.World.NpcSpecial
 
         ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
         {
-            List<Creature> targets = new();
-            me.GetCreatureListWithEntryInGrid(targets, CreatureIds.TorchTossingTargetBunny, 60.0f);
+            List<Creature> targets = me.GetCreatureListWithEntryInGrid(CreatureIds.TorchTossingTargetBunny, 60.0f);
             targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
 
             if (!targets.Empty())
@@ -1292,8 +1291,7 @@ namespace Scripts.World.NpcSpecial
             _events.Reset();
             _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), fillListTask =>
             {
-                List<Creature> creatureList = new();
-                me.GetCreatureListWithEntryInGrid(creatureList, CreatureIds.BrewfestReveler, 5.0f);
+                List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreatureIds.BrewfestReveler, 5.0f);
                 foreach (Creature creature in creatureList)
                     if (creature != me)
                         _revelerGuids.Add(creature.GetGUID());
