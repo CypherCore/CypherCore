@@ -30,28 +30,15 @@ namespace Game.Chat
         {
             List<object> arguments = new();
             arguments.Add(handler);
+            for (var i = 1; i < parameterTypes.Length; i++)
+                arguments.Add(default);
 
-            //for each arg we need to see if its a:
-            //1: hyperlink
-            //2: Optional arg
-            //3: reg arg.
-            int index = 1;
-            while (index < parameterTypes.Length)
+            for (var i = 1; i < parameterTypes.Length; i++)
             {
-                int oldPos = args.GetCurrentPosition();
+                if (!ParseArgument(out dynamic value, parameterTypes[i], args))
+                    break;
 
-                if (ParseArgument(out dynamic value, parameterTypes[index], args))
-                    index++;
-
-                if (args.IsAtEnd() && index < parameterTypes.Length)
-                {
-                    //We found a optional arg and we dont have the correct amount of args
-                    args.SetCurrentPosition(oldPos);
-                    arguments.Add(default);
-                    index++;
-                }
-                else
-                    arguments.Add(value);
+                arguments[i] = value;
             }
 
             return arguments.ToArray();
@@ -123,7 +110,7 @@ namespace Game.Chat
                         default:
                             return false;
                     }
-                    return true;
+                    break;
                 default:
                     return false;
             }

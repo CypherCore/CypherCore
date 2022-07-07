@@ -879,7 +879,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (state == 0)
+            if (!state.HasValue)
             {
                 // reset all states
                 for (AuraStateType s = 0; s < AuraStateType.Max; ++s)

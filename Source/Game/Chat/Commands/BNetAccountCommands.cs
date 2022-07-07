@@ -28,7 +28,7 @@ namespace Game.Chat.Commands
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
         static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, bool? createGameAccount)
         {
-            if (!accountName.Contains('@'))
+            if (accountName.IsEmpty() || !accountName.Contains('@'))
             {
                 handler.SendSysMessage(CypherStrings.AccountInvalidBnetName);
                 return false;
@@ -38,7 +38,7 @@ namespace Game.Chat.Commands
             switch (Global.BNetAccountMgr.CreateBattlenetAccount(accountName, password, createGameAccount.GetValueOrDefault(true), out gameAccountName))
             {
                 case AccountOpResult.Ok:
-                    if (createGameAccount.Value)
+                    if (createGameAccount.HasValue && createGameAccount.Value)
                         handler.SendSysMessage(CypherStrings.AccountCreatedBnetWithGame, accountName, gameAccountName);
                     else
                         handler.SendSysMessage(CypherStrings.AccountCreated, accountName);

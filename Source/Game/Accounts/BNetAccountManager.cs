@@ -30,10 +30,10 @@ namespace Game
         {
             gameAccountName = "";
 
-            if (email.Length > 320)
+            if (email.IsEmpty() || email.Length > 320)
                 return AccountOpResult.NameTooLong;
 
-            if (password.Length > 16)
+            if (password.IsEmpty() || password.Length > 16)
                 return AccountOpResult.PassTooLong;
 
             if (GetId(email) != 0)
