@@ -153,7 +153,7 @@ namespace Framework.Dynamic
         /// <param name="maxTime">The maximum time until the event occurs as TimeSpan type.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
+        public void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
         {
             RescheduleEvent(eventId, RandomHelper.RandTime(minTime, maxTime), group, phase);
         }

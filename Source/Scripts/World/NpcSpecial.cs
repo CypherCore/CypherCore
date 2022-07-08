@@ -1288,7 +1288,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void Reset()
         {
-            _events.Reset();
+            _scheduler.CancelAll();
             _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), fillListTask =>
             {
                 List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreatureIds.BrewfestReveler, 5.0f);
