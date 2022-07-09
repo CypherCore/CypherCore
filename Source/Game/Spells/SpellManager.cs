@@ -2889,6 +2889,10 @@ namespace Game.Entities
                         }
                     }
                 }
+
+                // Saving to DB happens before removing from world - skip saving these auras
+                if (spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.LeaveWorld))
+                    spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
             }
 
             // addition for binary spells, omit spells triggering other spells
