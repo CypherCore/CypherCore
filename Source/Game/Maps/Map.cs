@@ -586,7 +586,14 @@ namespace Game.Maps
 
         public void SetWorldStateValue(int worldStateId, int value, bool hidden)
         {
-            int oldValue = _worldStateValues.LookupByKey(worldStateId);
+            int oldValue = 0;
+            if (!_worldStateValues.TryAdd(worldStateId, 0))
+            {
+                oldValue = _worldStateValues[worldStateId];
+                if (oldValue == value)
+                    return;
+            }
+
             _worldStateValues[worldStateId] = value;
 
             WorldStateTemplate worldStateTemplate = Global.WorldStateMgr.GetWorldStateTemplate(worldStateId);

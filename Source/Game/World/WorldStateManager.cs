@@ -175,7 +175,14 @@ namespace Game
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
             {
-                int oldValue = _realmWorldStateValues.LookupByKey(worldStateId);
+                int oldValue = 0;
+                if (!_realmWorldStateValues.TryAdd(worldStateId, 0))
+                {
+                    oldValue = _realmWorldStateValues[worldStateId];
+                    if (oldValue == value)
+                        return;
+                }
+
                 _realmWorldStateValues[worldStateId] = value;
 
                 if (worldStateTemplate != null)
