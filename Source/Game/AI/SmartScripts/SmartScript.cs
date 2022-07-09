@@ -1902,7 +1902,11 @@ namespace Game.AI
                             else
                                 player.PlayerTalkClass.ClearMenus();
 
-                            player.PlayerTalkClass.SendGossipMenu(e.Action.sendGossipMenu.gossipNpcTextId, GetBaseObject().GetGUID());
+                            uint gossipNpcTextId = e.Action.sendGossipMenu.gossipNpcTextId;
+                            if (gossipNpcTextId == 0)
+                                gossipNpcTextId = player.GetGossipTextId(e.Action.sendGossipMenu.gossipMenuId, GetBaseObject());
+
+                            player.PlayerTalkClass.SendGossipMenu(gossipNpcTextId, GetBaseObject().GetGUID());
                         }
                     }
                     break;

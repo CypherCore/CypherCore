@@ -2581,6 +2581,7 @@ namespace Game.Entities
 
             ModifyMoney(-cost);
         }
+
         public uint GetGossipTextId(WorldObject source)
         {
             if (source == null)
@@ -2588,7 +2589,8 @@ namespace Game.Entities
 
             return GetGossipTextId(GetDefaultGossipMenuForSource(source), source);
         }
-        uint GetGossipTextId(uint menuId, WorldObject source)
+        
+        public uint GetGossipTextId(uint menuId, WorldObject source)
         {
             uint textId = SharedConst.DefaultGossipMessage;
 
