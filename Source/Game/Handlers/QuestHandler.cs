@@ -356,6 +356,10 @@ namespace Game
             {
                 if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
                 {
+                    Battleground bg = _player.GetBattleground();
+                    if (bg != null)
+                        bg.HandleQuestComplete(packet.QuestID, _player);
+
                     GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
 
                     switch (obj.GetTypeId())
@@ -557,9 +561,6 @@ namespace Game
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
                 return;
             }
-            Battleground bg = GetPlayer().GetBattleground();
-            if (bg)
-                bg.HandleQuestComplete(packet.QuestID, GetPlayer());
 
             if (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
             {
