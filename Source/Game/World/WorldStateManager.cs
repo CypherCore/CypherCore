@@ -160,17 +160,17 @@ namespace Game
             return map.GetWorldStateValue(worldStateId);
         }
 
-        public void SetValue(WorldStates worldStateId, int value, Map map)
+        public void SetValue(WorldStates worldStateId, int value, bool hidden, Map map)
         {
-            SetValue((int)worldStateId, value, map);
+            SetValue((int)worldStateId, value, hidden, map);
         }
 
-        public void SetValue(uint worldStateId, int value, Map map)
+        public void SetValue(uint worldStateId, int value, bool hidden, Map map)
         {
-            SetValue((int)worldStateId, value, map);
+            SetValue((int)worldStateId, value, hidden, map);
         }
 
-        public void SetValue(int worldStateId, int value, Map map)
+        public void SetValue(int worldStateId, int value, bool hidden, Map map)
         {
             WorldStateTemplate worldStateTemplate = GetWorldStateTemplate(worldStateId);
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
@@ -185,6 +185,7 @@ namespace Game
                 UpdateWorldState updateWorldState = new();
                 updateWorldState.VariableID = (uint)worldStateId;
                 updateWorldState.Value = value;
+                updateWorldState.Hidden = hidden;
                 Global.WorldMgr.SendGlobalMessage(updateWorldState);
                 return;
             }
@@ -192,7 +193,7 @@ namespace Game
             if (!worldStateTemplate.MapIds.Contains(map.GetId()))
                 return;
 
-            map.SetWorldStateValue(worldStateId, value);
+            map.SetWorldStateValue(worldStateId, value, hidden);
         }
 
         public Dictionary<int, int> GetInitialWorldStatesForMap(Map map)

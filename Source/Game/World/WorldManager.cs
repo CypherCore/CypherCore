@@ -896,8 +896,8 @@ namespace Game
             LoadWorldStates();
 
             // TODO: this is temporary until custom world states are purged from old world state saved values
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, (int)GetWorldState(WorldStates.WarModeHordeBuffValue), null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, (int)GetWorldState(WorldStates.WarModeAllianceBuffValue), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, (int)GetWorldState(WorldStates.WarModeHordeBuffValue), false, null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, (int)GetWorldState(WorldStates.WarModeAllianceBuffValue), false, null);
 
             Global.ObjectMgr.LoadPhases();
 
@@ -1258,8 +1258,8 @@ namespace Game
 
         public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
         {
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (team == TeamId.Alliance ? reward : 0), null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (team == TeamId.Horde ? reward : 0), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (team == TeamId.Alliance ? reward : 0), false, null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (team == TeamId.Horde ? reward : 0), false, null);
 
             // save to db
             SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));
@@ -2533,8 +2533,8 @@ namespace Game
                     outnumberedFactionReward = 5;
             }
 
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), false, null);
+            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), false, null);
 
             // save to db
             SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));

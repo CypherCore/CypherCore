@@ -601,7 +601,7 @@ namespace Game.Maps
 
         public void DoUpdateWorldState(uint worldStateId, int value)
         {
-            Global.WorldStateMgr.SetValue(worldStateId, value, instance);
+            Global.WorldStateMgr.SetValue(worldStateId, value, false, instance);
         }
 
         // Send Notify to all players in instance
