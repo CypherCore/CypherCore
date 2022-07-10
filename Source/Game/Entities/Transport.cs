@@ -87,6 +87,7 @@ namespace Game.Entities
                     break;
             }
 
+            Unit unit = passenger.ToUnit();
             if (unit != null)
             {
                 Vehicle vehicle = unit.GetVehicleKit();

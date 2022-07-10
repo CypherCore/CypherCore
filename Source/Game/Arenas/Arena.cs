@@ -77,16 +77,10 @@ namespace Game.Arenas
             CheckWinConditions();
         }
 
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            packet.AddState(ArenaWorldStates.AlivePlayersGreen, GetAlivePlayersCountByTeam(Team.Horde));
-            packet.AddState(ArenaWorldStates.AlivePlayersGold, GetAlivePlayersCountByTeam(Team.Alliance));
-        }
-
         void UpdateArenaWorldState()
         {
-            UpdateWorldState(ArenaWorldStates.AlivePlayersGreen, GetAlivePlayersCountByTeam(Team.Horde));
-            UpdateWorldState(ArenaWorldStates.AlivePlayersGold, GetAlivePlayersCountByTeam(Team.Alliance));
+            UpdateWorldState(ArenaWorldStates.AlivePlayersGreen, (int)GetAlivePlayersCountByTeam(Team.Horde));
+            UpdateWorldState(ArenaWorldStates.AlivePlayersGold, (int)GetAlivePlayersCountByTeam(Team.Alliance));
         }
 
         public override void HandleKillPlayer(Player victim, Player killer)
@@ -309,7 +303,15 @@ namespace Game.Arenas
 
     struct ArenaWorldStates
     {
-        public const uint AlivePlayersGreen = 3600;
-        public const uint AlivePlayersGold = 3601;
+        public const int AlivePlayersGreen = 3600;
+        public const int AlivePlayersGold = 3601;
+        public const int ShowAlivePlayers = 3610;
+        public const int TimeRemaining = 8529;
+        public const int ShowTimeRemaining = 8524;
+        public const int GreenTeamExtraLives = 15480;
+        public const int GoldTeamExtraLives = 15481;
+        public const int ShowExtraLives = 13401;
+        public const int SoloShuffleRound = 21427;
+        public const int ShowSoloShuffleRound = 21322;
     }
 }

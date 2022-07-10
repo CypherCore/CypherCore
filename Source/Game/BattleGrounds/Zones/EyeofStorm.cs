@@ -300,8 +300,8 @@ namespace Game.BattleGrounds.Zones
                 BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
                 if (m_LastPointCaptureStatus[point] != captureStatus)
                 {
-                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, (uint)(captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0)));
-                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, (uint)(captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0)));
+                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, (int)(captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0)));
+                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, (int)(captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0)));
                     m_LastPointCaptureStatus[point] = captureStatus;
                 }
             }
@@ -320,9 +320,9 @@ namespace Game.BattleGrounds.Zones
             }
 
             if (team == TeamId.Alliance)
-                UpdateWorldState(EotSWorldStateIds.AllianceResources, score);
+                UpdateWorldState(EotSWorldStateIds.AllianceResources, (int)score);
             else
-                UpdateWorldState(EotSWorldStateIds.HordeResources, score);
+                UpdateWorldState(EotSWorldStateIds.HordeResources, (int)score);
         }
 
         public override void EndBattleground(Team winner)
@@ -342,9 +342,9 @@ namespace Game.BattleGrounds.Zones
         void UpdatePointsCount(Team team)
         {
             if (team == Team.Alliance)
-                UpdateWorldState(EotSWorldStateIds.AllianceBase, m_TeamPointsCount[TeamId.Alliance]);
+                UpdateWorldState(EotSWorldStateIds.AllianceBase, (int)m_TeamPointsCount[TeamId.Alliance]);
             else
-                UpdateWorldState(EotSWorldStateIds.HordeBase, m_TeamPointsCount[TeamId.Horde]);
+                UpdateWorldState(EotSWorldStateIds.HordeBase, (int)m_TeamPointsCount[TeamId.Horde]);
         }
 
         void UpdatePointsIcons(Team team, int Point)
@@ -638,8 +638,8 @@ namespace Game.BattleGrounds.Zones
             player.CastSpell(player, BattlegroundConst.SpellRecentlyDroppedFlag, true);
             player.CastSpell(player, EotSMisc.SpellPlayerDroppedFlag, true);
             //this does not work correctly :((it should remove flag carrier name)
-            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (uint)EotSFlagState.WaitRespawn);
-            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (uint)EotSFlagState.WaitRespawn);
+            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (int)EotSFlagState.WaitRespawn);
+            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (int)EotSFlagState.WaitRespawn);
 
             if (GetPlayerTeam(player.GetGUID()) == Team.Alliance)
                 SendBroadcastText(EotSBroadcastTexts.FlagDropped, ChatMsg.BgSystemAlliance, null);
@@ -654,12 +654,12 @@ namespace Game.BattleGrounds.Zones
 
             if (GetPlayerTeam(player.GetGUID()) == Team.Alliance)
             {
-                UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (uint)EotSFlagState.OnPlayer);
+                UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (int)EotSFlagState.OnPlayer);
                 PlaySoundToAll(EotSSoundIds.FlagPickedUpAlliance);
             }
             else
             {
-                UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (uint)EotSFlagState.OnPlayer);
+                UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (int)EotSFlagState.OnPlayer);
                 PlaySoundToAll(EotSSoundIds.FlagPickedUpHorde);
             }
 
@@ -847,54 +847,6 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            packet.AddState(EotSWorldStateIds.HordeBase, m_TeamPointsCount[TeamId.Horde]);
-            packet.AddState(EotSWorldStateIds.AllianceBase, m_TeamPointsCount[TeamId.Alliance]);
-            packet.AddState(0xAB6, 0x0);
-            packet.AddState(0xAB5, 0x0);
-            packet.AddState(0xAB4, 0x0);
-            packet.AddState(0xAB3, 0x0);
-            packet.AddState(0xAB2, 0x0);
-            packet.AddState(0xAB1, 0x0);
-            packet.AddState(0xAB0, 0x0);
-            packet.AddState(0xAAF, 0x0);
-
-            packet.AddState((EotSWorldStateIds.DraeneiRuinsHordeControl), (m_PointOwnedByTeam[EotSPoints.DraeneiRuins] == Team.Horde && m_PointState[EotSPoints.DraeneiRuins] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.DraeneiRuinsAllianceControl), (m_PointOwnedByTeam[EotSPoints.DraeneiRuins] == Team.Alliance && m_PointState[EotSPoints.DraeneiRuins] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.DraeneiRuinsUncontrol), (m_PointState[EotSPoints.DraeneiRuins] != EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.MageTowerAllianceControl), (m_PointOwnedByTeam[EotSPoints.MageTower] == Team.Alliance && m_PointState[EotSPoints.MageTower] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.MageTowerHordeControl), (m_PointOwnedByTeam[EotSPoints.MageTower] == Team.Horde && m_PointState[EotSPoints.MageTower] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.MageTowerUncontrol), (m_PointState[EotSPoints.MageTower] != EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.FelReaverHordeControl), (m_PointOwnedByTeam[EotSPoints.FelReaver] == Team.Horde && m_PointState[EotSPoints.FelReaver] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.FelReaverAllianceControl), (m_PointOwnedByTeam[EotSPoints.FelReaver] == Team.Alliance && m_PointState[EotSPoints.FelReaver] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.FelReaverUncontrol), (m_PointState[EotSPoints.FelReaver] != EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.BloodElfHordeControl), (m_PointOwnedByTeam[EotSPoints.BloodElf] == Team.Horde && m_PointState[EotSPoints.BloodElf] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.BloodElfAllianceControl), (m_PointOwnedByTeam[EotSPoints.BloodElf] == Team.Alliance && m_PointState[EotSPoints.BloodElf] == EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.BloodElfUncontrol), (m_PointState[EotSPoints.BloodElf] != EotSPointState.UnderControl));
-            packet.AddState((EotSWorldStateIds.NetherstormFlag), (m_FlagState == EotSFlagState.OnBase));
-
-            packet.AddState(0xAD2, 0x1);
-            packet.AddState(0xAD1, 0x1);
-
-            packet.AddState(EotSWorldStateIds.HordeResources, GetTeamScore(TeamId.Horde));
-            packet.AddState(EotSWorldStateIds.AllianceResources, GetTeamScore(TeamId.Alliance));
-            packet.AddState(EotSWorldStateIds.MaxResources, EotSScoreIds.MaxTeamScore);
-
-            packet.AddState(0xA05, 0x8E);
-            packet.AddState(0xAA0, 0x0);
-            packet.AddState(0xA9F, 0x0);
-            packet.AddState(0xA9E, 0x0);
-            packet.AddState(0xC0D, 0x17B);
-
-            for (byte point = 0; point < EotSPoints.PointsMax; ++point)
-            {
-                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
-                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0u));
-                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0u));
-            }
-        }
-
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             uint g_id;
@@ -950,16 +902,6 @@ namespace Game.BattleGrounds.Zones
         public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
         {
             return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? EotSMisc.ExploitTeleportLocationAlliance : EotSMisc.ExploitTeleportLocationHorde);
-        }
-
-        public override bool IsAllNodesControlledByTeam(Team team)
-        {
-            uint count = 0;
-            for (int i = 0; i < EotSPoints.PointsMax; ++i)
-                if (m_PointOwnedByTeam[i] == team && m_PointState[i] == EotSPointState.UnderControl)
-                    ++count;
-
-            return count == EotSPoints.PointsMax;
         }
 
         public override Team GetPrematureWinner()
@@ -1189,7 +1131,7 @@ namespace Game.BattleGrounds.Zones
         public const uint ProgressBarPercentGrey = 2720;                 //100 = Empty (Only Grey); 0 = Blue|Red (No Grey)
         public const uint ProgressBarStatus = 2719;                 //50 Init!; 48 ... Hordak Bere .. 33 .. 0 = Full 100% Hordacky; 100 = Full Alliance
         public const uint ProgressBarShow = 2718;                 //1 Init; 0 Druhy Send - Bez Messagu; 1 = Controlled Aliance
-        public const uint NetherstormFlag = 2757;
+        public const uint NetherstormFlag = 8863;
         //Set To 2 When Flag Is Picked Up; And To 1 If It Is Dropped
         public const uint NetherstormFlagStateAlliance = 9808;
         public const uint NetherstormFlagStateHorde = 9809;
@@ -1373,7 +1315,7 @@ namespace Game.BattleGrounds.Zones
     struct EotSScoreIds
     {
         public const uint WarningNearVictoryScore = 1400;
-        public const uint MaxTeamScore = 1600;
+        public const uint MaxTeamScore = 1500;
     }
 
     enum EotSFlagState

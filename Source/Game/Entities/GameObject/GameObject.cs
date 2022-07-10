@@ -3182,7 +3182,7 @@ namespace Game.Entities
                     packet.CapturePointInfo.CaptureTotalDuration = TimeSpan.FromMilliseconds(GetGoInfo().CapturePoint.CaptureTime);
                     packet.CapturePointInfo.CaptureTime = m_goValue.CapturePoint.AssaultTimer;
                     bg.SendPacketToAll(packet);
-                    bg.UpdateWorldState(GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
+                    bg.UpdateWorldState((int)GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
                 }
             }
         }

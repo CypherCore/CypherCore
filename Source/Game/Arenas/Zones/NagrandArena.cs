@@ -72,12 +72,6 @@ namespace Game.Arenas
             }
         }
 
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            packet.AddState(0xa11, 1);
-            base.FillInitialWorldStates(packet);
-        }
-
         public override bool SetupBattleground()
         {
             bool result = true;

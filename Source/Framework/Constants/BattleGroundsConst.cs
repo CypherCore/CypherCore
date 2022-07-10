@@ -233,16 +233,6 @@ namespace Framework.Constants
         Even = 2  // teams even: N vs N players
     }
 
-    public enum BattlegroundCriteriaId
-    {
-        ResilientVictory,
-        SaveTheDay,
-        EverythingCounts,
-        AvPerfection,
-        DefenseOfTheAncients,
-        NotEvenAScratch,
-    }
-
     public struct BattlegroundBroadcastTexts
     {
         public const uint AllianceWins = 10633;

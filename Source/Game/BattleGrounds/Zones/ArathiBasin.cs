@@ -47,7 +47,6 @@ namespace Game.BattleGrounds.Zones
                 m_lastTick[i] = 0;
                 m_HonorScoreTics[i] = 0;
                 m_ReputationScoreTics[i] = 0;
-                m_TeamScores500Disadvantage[i] = false;
             }
 
             m_HonorTics = 0;
@@ -163,14 +162,19 @@ namespace Game.BattleGrounds.Zones
                             m_TeamScores[team] = MaxTeamScore;
 
                         if (team == TeamId.Alliance)
-                            UpdateWorldState(ABWorldStates.ResourcesAlly, m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesAlly, (int)m_TeamScores[team]);
                         else
-                            UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesHorde, (int)m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
                         int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
                         if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
-                            m_TeamScores500Disadvantage[otherTeam] = true;
+                        {
+                            if (team == TeamId.Alliance)
+                                UpdateWorldState(ABWorldStates.Had500DisadvantageHorde, 1);
+                            else
+                                UpdateWorldState(ABWorldStates.Had500DisadvantageAlliance, 1);
+                        }
                     }
                 }
 
@@ -290,51 +294,49 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
         }
 
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            byte[] plusArray = { 0, 2, 3, 0, 1 };
-
-            // Node icons
-            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
-                packet.AddState(NodeIcons[node], (m_Nodes[node] == 0));
-
-            // Node occupied states
-            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
-                for (byte i = 1; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
-                    packet.AddState(NodeStates[node] + plusArray[i], ((int)m_Nodes[node] == i));
-
-            // How many bases each team owns
-            byte ally = 0, horde = 0;
-            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
-                if (m_Nodes[node] == ABNodeStatus.AllyOccupied)
-                    ++ally;
-                else if (m_Nodes[node] == ABNodeStatus.HordeOccupied)
-                    ++horde;
-
-            packet.AddState(ABWorldStates.OccupiedBasesAlly, ally);
-            packet.AddState(ABWorldStates.OccupiedBasesHorde, horde);
-
-            // Team scores
-            packet.AddState(ABWorldStates.ResourcesMax, MaxTeamScore);
-            packet.AddState(ABWorldStates.ResourcesWarning, WarningNearVictoryScore);
-            packet.AddState(ABWorldStates.ResourcesAlly, m_TeamScores[TeamId.Alliance]);
-            packet.AddState(ABWorldStates.ResourcesHorde, m_TeamScores[TeamId.Horde]);
-
-            // other unknown
-            packet.AddState(0x745, 0x2);
-        }
-
         void _SendNodeUpdate(byte node)
         {
             // Send node owner state update to refresh map icons on client
-            byte[] plusArray = { 0, 2, 3, 0, 1 };
+            int[] idPlusArray = { 0, 2, 3, 0, 1 };
+            int[] statePlusArray = { 0, 2, 0, 2, 0 };
 
             if (m_prevNodes[node] != 0)
-                UpdateWorldState(NodeStates[node] + plusArray[(int)m_prevNodes[node]], 0);
+                UpdateWorldState(NodeStates[node] + idPlusArray[(int)m_prevNodes[node]], 0);
             else
                 UpdateWorldState(NodeIcons[node], 0);
 
-            UpdateWorldState(NodeStates[node] + plusArray[(byte)m_Nodes[node]], 1);
+            UpdateWorldState(NodeStates[node] + idPlusArray[(byte)m_Nodes[node]], 1);
+
+            switch (node)
+            {
+                case ABBattlegroundNodes.NodeStables:
+                    UpdateWorldState(ABWorldStates.StablesIconNew, (int)m_Nodes[node] + statePlusArray[(int)m_Nodes[node]]);
+                    UpdateWorldState(ABWorldStates.StablesHordeControlState, m_Nodes[node] == ABNodeStatus.HordeOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.HordeContested ? 1 : 0));
+                    UpdateWorldState(ABWorldStates.StablesAllianceControlState, m_Nodes[node] == ABNodeStatus.AllyOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.AllyContested ? 1 : 0));
+                    break;
+                case ABBattlegroundNodes.NodeBlacksmith:
+                    UpdateWorldState(ABWorldStates.BlacksmithIconNew, (int)m_Nodes[node] + statePlusArray[(int)m_Nodes[node]]);
+                    UpdateWorldState(ABWorldStates.BlacksmithHordeControlState, m_Nodes[node] == ABNodeStatus.HordeOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.HordeContested ? 1 : 0));
+                    UpdateWorldState(ABWorldStates.BlacksmithAllianceControlState, m_Nodes[node] == ABNodeStatus.AllyOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.AllyContested ? 1 : 0));
+                    break;
+                case ABBattlegroundNodes.NodeFarm:
+                    UpdateWorldState(ABWorldStates.FarmIconNew, (int)m_Nodes[node] + statePlusArray[(int)m_Nodes[node]]);
+                    UpdateWorldState(ABWorldStates.FarmHordeControlState, m_Nodes[node] == ABNodeStatus.HordeOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.HordeContested ? 1 : 0));
+                    UpdateWorldState(ABWorldStates.FarmAllianceControlState, m_Nodes[node] == ABNodeStatus.AllyOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.AllyContested ? 1 : 0));
+                    break;
+                case ABBattlegroundNodes.NodeLumberMill:
+                    UpdateWorldState(ABWorldStates.LumberMillIconNew, (int)m_Nodes[node] + statePlusArray[(int)m_Nodes[node]]);
+                    UpdateWorldState(ABWorldStates.LumberMillHordeControlState, m_Nodes[node] == ABNodeStatus.HordeOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.HordeContested ? 1 : 0));
+                    UpdateWorldState(ABWorldStates.LumberMillAllianceControlState, m_Nodes[node] == ABNodeStatus.AllyOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.AllyContested ? 1 : 0));
+                    break;
+                case ABBattlegroundNodes.NodeGoldMine:
+                    UpdateWorldState(ABWorldStates.GoldMineIconNew, (int)m_Nodes[node] + statePlusArray[(int)m_Nodes[node]]);
+                    UpdateWorldState(ABWorldStates.GoldMineHordeControlState, m_Nodes[node] == ABNodeStatus.HordeOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.HordeContested ? 1 : 0));
+                    UpdateWorldState(ABWorldStates.GoldMineAllianceControlState, m_Nodes[node] == ABNodeStatus.AllyOccupied ? 2 : (m_Nodes[node] == ABNodeStatus.AllyContested ? 1 : 0));
+                    break;
+                default:
+                    break;
+            }
 
             // How many bases each team owns
             byte ally = 0, horde = 0;
@@ -581,6 +583,9 @@ namespace Game.BattleGrounds.Zones
                 }
             }
 
+            UpdateWorldState(ABWorldStates.ResourcesMax, MaxTeamScore);
+            UpdateWorldState(ABWorldStates.ResourcesWarning, WarningNearVictoryScore);
+
             return true;
         }
 
@@ -595,7 +600,6 @@ namespace Game.BattleGrounds.Zones
                 m_lastTick[i] = 0;
                 m_HonorScoreTics[i] = 0;
                 m_ReputationScoreTics[i] = 0;
-                m_TeamScores500Disadvantage[i] = false;
             }
 
             m_IsInformedNearVictory = false;
@@ -689,28 +693,6 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override bool IsAllNodesControlledByTeam(Team team)
-        {
-            uint count = 0;
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
-                if ((team == Team.Alliance && m_Nodes[i] == ABNodeStatus.AllyOccupied) ||
-                    (team == Team.Horde && m_Nodes[i] == ABNodeStatus.HordeOccupied))
-                    ++count;
-
-            return count == ABBattlegroundNodes.DynamicNodesCount;
-        }
-
-        public override bool CheckAchievementCriteriaMeet(uint criteriaId, Player player, Unit target, uint miscvalue)
-        {
-            switch ((BattlegroundCriteriaId)criteriaId)
-            {
-                case BattlegroundCriteriaId.ResilientVictory:
-                    return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()))];
-            }
-
-            return base.CheckAchievementCriteriaMeet(criteriaId, player, target, miscvalue);
-        }
-
         /// <summary>
         /// Nodes info:
         ///    0: neutral
@@ -729,8 +711,6 @@ namespace Game.BattleGrounds.Zones
         bool m_IsInformedNearVictory;
         uint m_HonorTics;
         uint m_ReputationTics;
-        // need for achievements
-        bool[] m_TeamScores500Disadvantage = new bool[SharedConst.PvpTeamsCount];
 
         //Const
         public const uint NotABBGWeekendHonorTicks = 260;
@@ -751,7 +731,7 @@ namespace Game.BattleGrounds.Zones
         public const int FlagCapturingTime = 60000;
 
         public const int WarningNearVictoryScore = 1400;
-        public const int MaxTeamScore = 1600;
+        public const int MaxTeamScore = 1500;
 
         public const uint ExploitTeleportLocationAlliance = 3705;
         public const uint ExploitTeleportLocationHorde = 3706;
@@ -800,9 +780,9 @@ namespace Game.BattleGrounds.Zones
             new Position(714.61f, 646.15f, -10.87f, 4.34f)                      // horde starting base
         };
 
-        public static uint[] NodeStates = { 1767, 1782, 1772, 1792, 1787 };
+        public static int[] NodeStates = { 1767, 1782, 1772, 1792, 1787 };
 
-        public static uint[] NodeIcons = { 1842, 1846, 1845, 1844, 1843 };
+        public static int[] NodeIcons = { 1842, 1846, 1845, 1844, 1843 };
     }
 
     class BattlegroundABScore : BattlegroundScore
@@ -854,40 +834,58 @@ namespace Game.BattleGrounds.Zones
     #region Consts
     struct ABWorldStates
     {
-        public const uint OccupiedBasesHorde = 1778;
-        public const uint OccupiedBasesAlly = 1779;
-        public const uint ResourcesAlly = 1776;
-        public const uint ResourcesHorde = 1777;
-        public const uint ResourcesMax = 1780;
-        public const uint ResourcesWarning = 1955;
-        /*
-            public const uint StableIcon                = 1842;             //Stable Map Icon (None)
-            public const uint StableStateAlience       = 1767;             //Stable Map State (Alience)
-            public const uint StableStateHorde         = 1768;             //Stable Map State (Horde)
-            public const uint StableStateConAli       = 1769;             //Stable Map State (Con Alience)
-            public const uint StableStateConHor       = 1770;             //Stable Map State (Con Horde)
-            public const uint FarmIcon                  = 1845;             //Farm Map Icon (None)
-            public const uint FarmStateAlience         = 1772;             //Farm State (Alience)
-            public const uint FarmStateHorde           = 1773;             //Farm State (Horde)
-            public const uint FarmStateConAli         = 1774;             //Farm State (Con Alience)
-            public const uint FarmStateConHor         = 1775;             //Farm State (Con Horde)
+        public const int OccupiedBasesHorde = 1778;
+        public const int OccupiedBasesAlly = 1779;
+        public const int ResourcesAlly = 1776;
+        public const int ResourcesHorde = 1777;
+        public const int ResourcesMax = 1780;
+        public const int ResourcesWarning = 1955;
 
-            public const uint BlacksmithIcon            = 1846;             //Blacksmith Map Icon (None)
-            public const uint BlacksmithStateAlience   = 1782;             //Blacksmith Map State (Alience)
-            public const uint BlacksmithStateHorde     = 1783;             //Blacksmith Map State (Horde)
-            public const uint BlacksmithStateConAli   = 1784;             //Blacksmith Map State (Con Alience)
-            public const uint BlacksmithStateConHor   = 1785;             //Blacksmith Map State (Con Horde)
-            public const uint LumbermillIcon            = 1844;             //Lumber Mill Map Icon (None)
-            public const uint LumbermillStateAlience   = 1792;             //Lumber Mill Map State (Alience)
-            public const uint LumbermillStateHorde     = 1793;             //Lumber Mill Map State (Horde)
-            public const uint LumbermillStateConAli   = 1794;             //Lumber Mill Map State (Con Alience)
-            public const uint LumbermillStateConHor   = 1795;             //Lumber Mill Map State (Con Horde)
-            public const uint GoldmineIcon              = 1843;             //Gold Mine Map Icon (None)
-            public const uint GoldmineStateAlience     = 1787;             //Gold Mine Map State (Alience)
-            public const uint GoldmineStateHorde       = 1788;             //Gold Mine Map State (Horde)
-            public const uint GoldmineStateConAli     = 1789;             //Gold Mine Map State (Con Alience
-            public const uint GoldmineStateConHor     = 1790;             //Gold Mine Map State (Con Horde)
-        */
+        public const int StableIcon = 1842;             // Stable Map Icon (None)
+        public const int StableStateAlience = 1767;             // Stable Map State (Alience)
+        public const int StableStateHorde = 1768;             // Stable Map State (Horde)
+        public const int StableStateConAli = 1769;             // Stable Map State (Con Alience)
+        public const int StableStateConHor = 1770;             // Stable Map State (Con Horde)
+        public const int FarmIcon = 1845;             // Farm Map Icon (None)
+        public const int FarmStateAlience = 1772;             // Farm State (Alience)
+        public const int FarmStateHorde = 1773;             // Farm State (Horde)
+        public const int FarmStateConAli = 1774;             // Farm State (Con Alience)
+        public const int FarmStateConHor = 1775;             // Farm State (Con Horde)
+        public const int BlacksmithIcon = 1846;             // Blacksmith Map Icon (None)
+        public const int BlacksmithStateAlience = 1782;             // Blacksmith Map State (Alience)
+        public const int BlacksmithStateHorde = 1783;             // Blacksmith Map State (Horde)
+        public const int BlacksmithStateConAli = 1784;             // Blacksmith Map State (Con Alience)
+        public const int BlacksmithStateConHor = 1785;             // Blacksmith Map State (Con Horde)
+        public const int LumbermillIcon = 1844;             // Lumber Mill Map Icon (None)
+        public const int LumbermillStateAlience = 1792;             // Lumber Mill Map State (Alience)
+        public const int LumbermillStateHorde = 1793;             // Lumber Mill Map State (Horde)
+        public const int LumbermillStateConAli = 1794;             // Lumber Mill Map State (Con Alience)
+        public const int LumbermillStateConHor = 1795;             // Lumber Mill Map State (Con Horde)
+        public const int GoldmineIcon = 1843;             // Gold Mine Map Icon (None)
+        public const int GoldmineStateAlience = 1787;             // Gold Mine Map State (Alience)
+        public const int GoldmineStateHorde = 1788;             // Gold Mine Map State (Horde)
+        public const int GoldmineStateConAli = 1789;             // Gold Mine Map State (Con Alience
+        public const int GoldmineStateConHor = 1790;             // Gold Mine Map State (Con Horde)
+
+        public const int Had500DisadvantageAlliance = 3644;
+        public const int Had500DisadvantageHorde = 3645;
+
+        public const int FarmIconNew = 8808;             // Farm Map Icon
+        public const int LumberMillIconNew = 8805;             // Lumber Mill Map Icon
+        public const int BlacksmithIconNew = 8799;             // Blacksmith Map Icon
+        public const int GoldMineIconNew = 8809;             // Gold Mine Map Icon
+        public const int StablesIconNew = 5834;             // Stable Map Icon
+
+        public const int FarmHordeControlState = 17328;
+        public const int FarmAllianceControlState = 17325;
+        public const int LumberMillHordeControlState = 17330;
+        public const int LumberMillAllianceControlState = 17326;
+        public const int BlacksmithHordeControlState = 17327;
+        public const int BlacksmithAllianceControlState = 17324;
+        public const int GoldMineHordeControlState = 17329;
+        public const int GoldMineAllianceControlState = 17323;
+        public const int StablesHordeControlState = 17331;
+        public const int StablesAllianceControlState = 17322;
     }
 
     // Note: code uses that these IDs follow each other
@@ -1005,8 +1003,6 @@ namespace Game.BattleGrounds.Zones
         public uint TextAllianceClaims;
         public uint TextHordeClaims;
     }
-
-
 
     enum ABNodeStatus
     {

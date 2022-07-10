@@ -93,12 +93,6 @@ namespace Game.Arenas
                     break;
             }
         }
-
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            packet.AddState(0xbba, 1);
-            base.FillInitialWorldStates(packet);
-        }
     }
 
     struct RuinsofLordaeronObjectTypes

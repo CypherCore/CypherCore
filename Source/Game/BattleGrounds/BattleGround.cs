@@ -635,22 +635,14 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void UpdateWorldState(uint variable, uint value, bool hidden = false)
+        public void UpdateWorldState(int worldStateId, int value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new();
-            worldstate.VariableID = variable;
-            worldstate.Value = (int)value;
-            worldstate.Hidden = hidden;
-            SendPacketToAll(worldstate);
+            Global.WorldStateMgr.SetValue(worldStateId, value, hidden, GetBgMap());
         }
 
-        public void UpdateWorldState(uint variable, bool value, bool hidden = false)
+        public void UpdateWorldState(uint worldStateId, int value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new();
-            worldstate.VariableID = variable;
-            worldstate.Value = value ? 1 : 0;
-            worldstate.Hidden = hidden;
-            SendPacketToAll(worldstate);
+            Global.WorldStateMgr.SetValue((int)worldStateId, value, hidden, GetBgMap());
         }
 
         public virtual void EndBattleground(Team winner)
@@ -957,8 +949,6 @@ namespace Game.BattleGrounds
             m_Players.Clear();
 
             PlayerScores.Clear();
-
-            ResetBGSubclass();
 
             _playerPositions.Clear();
         }
@@ -1883,12 +1873,6 @@ namespace Game.BattleGrounds
                            trigger, player.GetMapId(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
         }
 
-        public virtual bool CheckAchievementCriteriaMeet(uint criteriaId, Player source, Unit target, uint miscvalue1 = 0)
-        {
-            Log.outError(LogFilter.Battleground, "Battleground.CheckAchievementCriteriaMeet: No implementation for criteria {0}", criteriaId);
-            return false;
-        }
-
         public virtual bool SetupBattleground()
         {
             return true;
@@ -1967,10 +1951,8 @@ namespace Game.BattleGrounds
 
         public virtual void StartingEventCloseDoors() { }
         public virtual void StartingEventOpenDoors() { }
-        public virtual void ResetBGSubclass() { }                  // must be implemented in BG subclass
 
         public virtual void DestroyGate(Player player, GameObject go) { }
-        public virtual bool IsAllNodesControlledByTeam(Team team) { return false; }
 
         public BattlegroundQueueTypeId GetQueueId() { return m_queueId; }
         public uint GetInstanceID() { return m_InstanceID; }
@@ -2028,8 +2010,6 @@ namespace Game.BattleGrounds
 
         public void SetBgMap(BattlegroundMap map) { m_Map = map; }
         BattlegroundMap FindBgMap() { return m_Map; }
-
-        public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         Group GetBgRaid(Team team) { return m_BgRaids[GetTeamIndexByTeamId(team)]; }
 
