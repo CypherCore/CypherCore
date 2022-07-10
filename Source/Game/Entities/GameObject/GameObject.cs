@@ -936,7 +936,9 @@ namespace Game.Entities
 
             SendGameObjectDespawn();
 
-            SetGoState(GameObjectState.Ready);
+            if (m_goInfo.type != GameObjectTypes.Transport)
+                SetGoState(GameObjectState.Ready);
+
             GameObjectOverride goOverride = GetGameObjectOverride();
             if (goOverride != null)
                 ReplaceAllFlags(goOverride.Flags);
