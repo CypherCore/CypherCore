@@ -390,6 +390,11 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.EarthenRagePeriodic, SpellIds.EarthenRageDamage);
         }
 
+        bool CheckProc(ProcEventInfo procInfo)
+        {
+            return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().Id != SpellIds.EarthenRageDamage;
+        }
+
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -399,6 +404,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
 
