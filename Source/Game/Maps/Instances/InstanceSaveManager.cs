@@ -153,7 +153,7 @@ namespace Game.Maps
 
             // Delete invalid character_instance and group_instance references
             DB.Characters.DirectExecute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
-            DB.Characters.DirectExecute("DELETE gi.* FROM group_instance AS gi LEFT JOIN groups AS g ON gi.guid = g.guid WHERE g.guid IS NULL");
+            DB.Characters.DirectExecute("DELETE gi.* FROM group_instance AS gi LEFT JOIN `groups` AS g ON gi.guid = g.guid WHERE g.guid IS NULL");
 
             // Delete invalid instance references
             DB.Characters.DirectExecute("DELETE i.* FROM instance AS i LEFT JOIN character_instance AS ci ON i.id = ci.instance LEFT JOIN group_instance AS gi ON i.id = gi.instance WHERE ci.guid IS NULL AND gi.guid IS NULL");
