@@ -207,7 +207,7 @@ namespace Game.Entities
             m_SeasonalQuestChanged = false;
 
             var eventList = m_seasonalquests.LookupByKey(event_id);
-            if (eventList.Empty())
+            if (eventList == null)
                 return;
 
             foreach (var (questId, completedTime) in eventList.ToList())
