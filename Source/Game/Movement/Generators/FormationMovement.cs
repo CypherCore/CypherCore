@@ -167,7 +167,7 @@ namespace Game.Movement
                 To get a representative result like that we have to predict our formation leader's path
                 and apply our formation shape based on that destination.
             */
-            Position dest = target.GetPosition();
+            Position dest = new Position(target.GetPosition());
             float velocity = 0.0f;
 
             // Formation leader is moving. Predict our destination
@@ -209,7 +209,7 @@ namespace Game.Movement
             init.SetVelocity(velocity);
             init.Launch();
 
-            _lastLeaderPosition = target.GetPosition();
+            _lastLeaderPosition = new Position(target.GetPosition());
             owner.AddUnitState(UnitState.FollowFormationMove);
             RemoveFlag(MovementGeneratorFlags.Interrupted);
         }
