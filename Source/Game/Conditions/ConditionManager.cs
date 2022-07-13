@@ -2885,7 +2885,7 @@ namespace Game
                 case WorldStateExpressionFunctions.Unk35:
                 case WorldStateExpressionFunctions.Unk36:
                 case WorldStateExpressionFunctions.UiWidgetData:
-                case WorldStateExpressionFunctions.Unk38:
+                case WorldStateExpressionFunctions.TimeEventPassed:
                 default:
                     return 0;
             }
