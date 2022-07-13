@@ -2932,7 +2932,6 @@ namespace Game.Entities
             packet.AddState(3901, previousArenaSeason);
 
             SendPacket(packet);
-            SendBGWeekendWorldStates();
         }
 
         public long GetBarberShopCost(List<ChrCustomizationChoice> newCustomizations)

@@ -717,20 +717,6 @@ namespace Game.Entities
             return true;
         }
 
-        void SendBGWeekendWorldStates()
-        {
-            foreach (var bl in CliDB.BattlemasterListStorage.Values)
-            {
-                if (bl.HolidayWorldState != 0)
-                {
-                    if (Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bl.Id))
-                        SendUpdateWorldState(bl.HolidayWorldState, 1);
-                    else
-                        SendUpdateWorldState(bl.HolidayWorldState, 0);
-                }
-            }
-        }
-
         public void SendPvpRewards()
         {
             //WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);

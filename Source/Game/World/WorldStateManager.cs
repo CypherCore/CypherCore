@@ -154,7 +154,7 @@ namespace Game
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
                 return _realmWorldStateValues.LookupByKey(worldStateId);
 
-            if (!worldStateTemplate.MapIds.Contains(map.GetId()))
+            if (map == null || !worldStateTemplate.MapIds.Contains(map.GetId()))
                 return 0;
 
             return map.GetWorldStateValue(worldStateId);
@@ -197,7 +197,7 @@ namespace Game
                 return;
             }
 
-            if (!worldStateTemplate.MapIds.Contains(map.GetId()))
+            if (map == null || !worldStateTemplate.MapIds.Contains(map.GetId()))
                 return;
 
             map.SetWorldStateValue(worldStateId, value, hidden);

@@ -38,13 +38,13 @@ namespace Game
             {
                 default:
                 case GameEventState.Normal:
-                    {
-                        long currenttime = GameTime.GetGameTime();
-                        // Get the event information
-                        return mGameEvent[entry].start < currenttime
-                            && currenttime < mGameEvent[entry].end
-                            && (currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute) < mGameEvent[entry].length * Time.Minute;
-                    }
+                {
+                    long currenttime = GameTime.GetGameTime();
+                    // Get the event information
+                    return mGameEvent[entry].start < currenttime
+                        && currenttime < mGameEvent[entry].end
+                        && (currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute) < mGameEvent[entry].length * Time.Minute;
+                }
                 // if the state is conditions or nextphase, then the event should be active
                 case GameEventState.WorldConditions:
                 case GameEventState.WorldNextPhase:
@@ -55,18 +55,18 @@ namespace Game
                     return false;
                 // if inactive world event, check the prerequisite events
                 case GameEventState.WorldInactive:
+                {
+                    long currenttime = GameTime.GetGameTime();
+                    foreach (var gameEventId in mGameEvent[entry].prerequisite_events)
                     {
-                        long currenttime = GameTime.GetGameTime();
-                        foreach (var gameEventId in mGameEvent[entry].prerequisite_events)
-                        {
-                            if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) ||   // if prereq not in nextphase or finished state, then can't start this one
-                                mGameEvent[gameEventId].nextstart > currenttime)               // if not in nextphase state for long enough, can't start this one
-                                return false;
-                        }
-                        // all prerequisite events are met
-                        // but if there are no prerequisites, this can be only activated through gm command
-                        return !(mGameEvent[entry].prerequisite_events.Empty());
+                        if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) ||   // if prereq not in nextphase or finished state, then can't start this one
+                            mGameEvent[gameEventId].nextstart > currenttime)               // if not in nextphase state for long enough, can't start this one
+                            return false;
                     }
+                    // all prerequisite events are met
+                    // but if there are no prerequisites, this can be only activated through gm command
+                    return !(mGameEvent[entry].prerequisite_events.Empty());
+                }
             }
         }
 
@@ -1005,7 +1005,7 @@ namespace Game
                         // changed, save to DB the gameevent state, will be updated in next update cycle
                         SaveWorldEventStateToDB(id);
 
-                   Log.outDebug(LogFilter.Misc, "GameEvent {0} is active", id);
+                    Log.outDebug(LogFilter.Misc, "GameEvent {0} is active", id);
                     // queue for activation
                     if (!IsActiveEvent(id))
                         activate.Add(id);
@@ -1137,7 +1137,7 @@ namespace Game
                         }
                     }
                 });
-            }            
+            }
         }
 
         void UpdateBattlegroundSettings()
@@ -1342,7 +1342,7 @@ namespace Game
                 {
                     var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(tuple.Item1);
                     foreach (var creature in creatureBounds)
-                    { 
+                    {
                         if (activate)
                         {
                             tuple.Item2.equipement_id_prev = creature.GetCurrentEquipmentId();
@@ -1477,15 +1477,10 @@ namespace Game
                 BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id);
                 if (bgTypeId != BattlegroundTypeId.None)
                 {
-                    BattlemasterListRecord bl = CliDB.BattlemasterListStorage.LookupByKey(bgTypeId);
-                    if (bl != null && bl.HolidayWorldState != 0)
-                    {
-                        UpdateWorldState worldstate = new();
-                        worldstate.VariableID = bl.HolidayWorldState;
-                        worldstate.Value = Activate ? 1 : 0;
-                        //worldstate.Hidden = false;
-                        Global.WorldMgr.SendGlobalMessage(worldstate);
-                    }
+                    var bl = CliDB.BattlemasterListStorage.LookupByKey(Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
+                    if (bl != null)
+                        if (bl.HolidayWorldState != 0)
+                            Global.WorldStateMgr.SetValue(bl.HolidayWorldState, Activate ? 1 : 0, false, null);
                 }
             }
         }
