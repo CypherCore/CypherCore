@@ -92,36 +92,31 @@ namespace Game.PvP
                     TeamCastSpell(TeamId.Alliance, -(int)OutdoorPvPHPSpells.AllianceBuff);
                     TeamCastSpell(TeamId.Horde, -(int)OutdoorPvPHPSpells.HordeBuff);
                 }
-                SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_A, m_AllianceTowersControlled);
-                SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_H, m_HordeTowersControlled);
+                SetWorldState(OutdoorPvPHPWorldStates.Count_A, (int)m_AllianceTowersControlled);
+                SetWorldState(OutdoorPvPHPWorldStates.Count_H, (int)m_HordeTowersControlled);
             }
             return changed;
         }
 
         public override void SendRemoveWorldStates(Player player)
         {
-            player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Display_A, 0);
-            player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Display_H, 0);
-            player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_H, 0);
-            player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_A, 0);
+            InitWorldStates initWorldStates = new();
+            initWorldStates.MapID = player.GetMapId();
+            initWorldStates.AreaID = player.GetZoneId();
+            initWorldStates.SubareaID = player.GetAreaId();
+            initWorldStates.AddState(OutdoorPvPHPWorldStates.Display_A, 0);
+            initWorldStates.AddState(OutdoorPvPHPWorldStates.Display_H, 0);
+            initWorldStates.AddState(OutdoorPvPHPWorldStates.Count_H, 0);
+            initWorldStates.AddState(OutdoorPvPHPWorldStates.Count_A, 0);
 
             for (int i = 0; i < (int)OutdoorPvPHPTowerType.Num; ++i)
             {
-                player.SendUpdateWorldState(HPConst.Map_N[i], 0);
-                player.SendUpdateWorldState(HPConst.Map_A[i], 0);
-                player.SendUpdateWorldState(HPConst.Map_H[i], 0);
+                initWorldStates.AddState(HPConst.Map_N[i], 0);
+                initWorldStates.AddState(HPConst.Map_A[i], 0);
+                initWorldStates.AddState(HPConst.Map_H[i], 0);
             }
-        }
 
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            packet.AddState(OutdoorPvPHPWorldStates.Display_A, 1);
-            packet.AddState(OutdoorPvPHPWorldStates.Display_H, 1);
-            packet.AddState(OutdoorPvPHPWorldStates.Count_A, m_AllianceTowersControlled);
-            packet.AddState(OutdoorPvPHPWorldStates.Count_H, m_HordeTowersControlled);
-
-            foreach (var capture in m_capturePoints.Values)
-                capture.FillInitialWorldStates(packet);
+            player.SendPacket(initWorldStates);
         }
 
         public override void HandleKillImpl(Player killer, Unit killed)
@@ -207,7 +202,7 @@ namespace Game.PvP
             // send world state update
             if (field != 0)
             {
-                PvP.SendUpdateWorldState(field, 0);
+                PvP.SetWorldState((int)field, 0);
                 field = 0;
             }
             uint artkit = 21;
@@ -268,38 +263,11 @@ namespace Game.PvP
 
             // send world state update
             if (field != 0)
-                PvP.SendUpdateWorldState(field, 1);
+                PvP.SetWorldState((int)field, 1);
 
             // complete quest objective
             if (State == ObjectiveStates.Alliance || State == ObjectiveStates.Horde)
                 SendObjectiveComplete(HPConst.CreditMarker[m_TowerType], ObjectGuid.Empty);
-        }
-
-        public override void FillInitialWorldStates(InitWorldStates packet)
-        {
-            switch (State)
-            {
-                case ObjectiveStates.Alliance:
-                case ObjectiveStates.AllianceHordeChallenge:
-                    packet.AddState(HPConst.Map_N[m_TowerType], 0);
-                    packet.AddState(HPConst.Map_A[m_TowerType], 1);
-                    packet.AddState(HPConst.Map_H[m_TowerType], 0);
-                    break;
-                case ObjectiveStates.Horde:
-                case ObjectiveStates.HordeAllianceChallenge:
-                    packet.AddState(HPConst.Map_N[m_TowerType], 0);
-                    packet.AddState(HPConst.Map_A[m_TowerType], 0);
-                    packet.AddState(HPConst.Map_H[m_TowerType], 1);
-                    break;
-                case ObjectiveStates.Neutral:
-                case ObjectiveStates.NeutralAllianceChallenge:
-                case ObjectiveStates.NeutralHordeChallenge:
-                default:
-                    packet.AddState(HPConst.Map_N[m_TowerType], 1);
-                    packet.AddState(HPConst.Map_A[m_TowerType], 0);
-                    packet.AddState(HPConst.Map_H[m_TowerType], 0);
-                    break;
-            }
         }
 
         uint m_TowerType;
@@ -322,11 +290,11 @@ namespace Game.PvP
 
         public static uint[] LangCapture_H = { DefenseMessages.BrokenHillTakenHorde, DefenseMessages.OverlookTakenHorde, DefenseMessages.StadiumTakenHorde };
 
-        public static uint[] Map_N = { 0x9b5, 0x9b2, 0x9a8 };
+        public static uint[] Map_N = { 2485, 2482, 0x9a8 };
 
-        public static uint[] Map_A = { 0x9b3, 0x9b0, 0x9a7 };
+        public static uint[] Map_A = { 2483, 2480, 2471 };
 
-        public static uint[] Map_H = { 0x9b4, 0x9b1, 0x9a6 };
+        public static uint[] Map_H = { 2484, 2481, 2470 };
 
         public static uint[] TowerArtKit_A = { 65, 62, 67 };
 
@@ -386,10 +354,10 @@ namespace Game.PvP
 
     struct OutdoorPvPHPWorldStates
     {
-        public const uint Display_A = 0x9ba;
-        public const uint Display_H = 0x9b9;
+        public const int Display_A = 0x9ba;
+        public const int Display_H = 0x9b9;
 
-        public const uint Count_H = 0x9ae;
-        public const uint Count_A = 0x9ac;
+        public const int Count_H = 0x9ae;
+        public const int Count_A = 0x9ac;
     }
 }

@@ -73,20 +73,14 @@ namespace Game.PvP
             return objective_changed;
         }
 
-        public void SendUpdateWorldState(uint field, uint value)
+        public int GetWorldState(int worldStateId)
         {
-            if (m_sendUpdate)
-            {
-                for (int i = 0; i < 2; ++i)
-                {
-                    foreach (var guid in m_players[i])
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
-                            player.SendUpdateWorldState(field, value);
-                    }
-                }
-            }
+            return Global.WorldStateMgr.GetValue(worldStateId, m_map);
+        }
+
+        public void SetWorldState(int worldStateId, int value)
+        {
+            Global.WorldStateMgr.SetValue(worldStateId, value, false, m_map);
         }
 
         public virtual void HandleKill(Player killer, Unit killed)
@@ -263,8 +257,6 @@ namespace Game.PvP
                 }
             }
         }
-
-        public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         // setup stuff
         public virtual bool SetupOutdoorPvP() { return true; }
@@ -671,8 +663,6 @@ namespace Game.PvP
 
             return -1;
         }
-
-        public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         public virtual void ChangeState() { }
 
