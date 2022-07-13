@@ -2913,13 +2913,6 @@ namespace Game.Entities
 
             Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
 
-            packet.AddState(2264, 0); // SCOURGE_EVENT_WORLDSTATE_EASTERN_PLAGUELANDS
-            packet.AddState(2263, 0); // SCOURGE_EVENT_WORLDSTATE_TANARIS
-            packet.AddState(2262, 0); // SCOURGE_EVENT_WORLDSTATE_BURNING_STEPPES
-            packet.AddState(2261, 0); // SCOURGE_EVENT_WORLDSTATE_BLASTED_LANDS
-            packet.AddState(2260, 0); // SCOURGE_EVENT_WORLDSTATE_AZSHARA
-            packet.AddState(2259, 0); // SCOURGE_EVENT_WORLDSTATE_WINTERSPRING
-
             SendPacket(packet);
         }
 
