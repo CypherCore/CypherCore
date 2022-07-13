@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 public static partial class Detour
 {
@@ -177,6 +178,22 @@ public static partial class Detour
         else if (t > 1) t = 1;
         dx = p[pStart + 0] + t * pqx - pt[ptStart + 0];
         dz = p[pStart + 2] + t * pqz - pt[ptStart + 2];
+        return dx * dx + dz * dz;
+    }
+
+    public static float dtDistancePtSegSqr2D(float[] pt, int ptStart, Vector3 p, Vector3 q, ref float t)
+    {
+        float pqx = q.GetAt(0) - p.GetAt(0);
+        float pqz = q.GetAt(2) - p.GetAt(2);
+        float dx = pt[ptStart + 0] - p.GetAt(0);
+        float dz = pt[ptStart + 2] - p.GetAt(2);
+        float d = pqx * pqx + pqz * pqz;
+        t = pqx * dx + pqz * dz;
+        if (d > 0) t /= d;
+        if (t < 0) t = 0;
+        else if (t > 1) t = 1;
+        dx = p.GetAt(0) + t * pqx - pt[ptStart + 0];
+        dz = p.GetAt(2) + t * pqz - pt[ptStart + 2];
         return dx * dx + dz * dz;
     }
 

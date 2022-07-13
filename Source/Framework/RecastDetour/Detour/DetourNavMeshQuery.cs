@@ -1911,7 +1911,7 @@ public static partial class Detour
 
                 for (int i = 0; i < pathSize; ++i)
                 {
-                    float[] left = new float[3];//, right[3];
+                    float[] left = new float[3];
                     float[] right = new float[3];
                     byte fromType = 0, toType = 0;
 

@@ -29,6 +29,8 @@ namespace Framework.GameMath
 
         public Box(Vector3 min, Vector3 max)
         {
+            _center = (max + min) * 0.5f;
+
             Vector3 bounds = new Vector3(max.X - min.X, max.Y - min.Y, max.Z - min.Z);
             _edgeVector[0] = new Vector3(bounds.X, 0, 0);
             _edgeVector[1] = new Vector3(0, bounds.Y, 0);
@@ -67,12 +69,12 @@ namespace Framework.GameMath
             Vector3 v = _edgeVector[1];
             Vector3 w = _edgeVector[0];
 
-            Matrix4x4 M = new(u.X, v.X, w.X, 0.0f, u.Y, v.Y, w.Y, 0.0f, u.Z, v.Z, w.Z, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            Matrix4x4 M = new(u.X, v.X, w.X, 0.0f, u.Y, v.Y, w.Y, 0.0f, u.Z, v.Z, w.Z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
             // M^-1 * (point - _corner[0]) = point in unit cube's object space
             // compute the inverse of M
             Matrix4x4.Invert(M, out M);
-            Vector3 osPoint = Vector3.TransformNormal(point - Corner(0), M);
+            Vector3 osPoint = M.Multiply(point - Corner(0));
 
             return (osPoint.X >= 0) && (osPoint.Y >= 0) && (osPoint.Z >= 0) &&
                 (osPoint.X <= 1) && (osPoint.Y <= 1) && (osPoint.Z <= 1);

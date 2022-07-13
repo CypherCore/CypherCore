@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
+
 /**
     @typedef dtPolyRef
     @par
@@ -735,31 +737,30 @@ public static partial class Detour
             float tmin = 0;
             int pmin = 0;
             int pmax = 0;
-            float[] v = new float[0];
 
+            Vector3[] v = new Vector3[3];
             for (int i = 0; i < pd.triCount; i++)
             {
-                int trisIndex = (int)((pd.triBase + i) * 4);
+                Span<byte> tris = tile.detailTris.AsSpan().Slice((int)(pd.triBase + i) * 4);
                 const int ANY_BOUNDARY_EDGE =
                     ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 0) |
                     ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 2) |
                     ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 4);
-                if (onlyBoundary && (tile.detailTris[trisIndex + 3] & ANY_BOUNDARY_EDGE) == 0)
+                if (onlyBoundary && (tris[3] & ANY_BOUNDARY_EDGE) == 0)
                     continue;
 
-                v = new float[3];
                 for (int j = 0; j < 3; ++j)
                 {
-                    if (tile.detailTris[trisIndex + j] < poly.vertCount)
-                        v[j] = tile.verts[poly.verts[tile.detailTris[trisIndex + j]] * 3];
+                    if (tris[j] < poly.vertCount)
+                        v[j] = new(tile.verts.AsSpan(poly.verts[tris[j]] * 3));
                     else
-                        v[j] = tile.detailVerts[(pd.vertBase + (tile.detailTris[trisIndex + j] - poly.vertCount)) * 3];
+                        v[j] = new(tile.detailVerts.AsSpan((int)(pd.vertBase + (tris[j] - poly.vertCount)) * 3));
                 }
 
                 for (int k = 0, j = 2; k < 3; j = k++)
                 {
-                    if ((dtGetDetailTriEdgeFlags(tile.detailTris[trisIndex + 3], j) & (int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
-                        (onlyBoundary || tile.detailTris[trisIndex + j] < tile.detailTris[trisIndex + k]))
+                    if ((dtGetDetailTriEdgeFlags(tris[3], j) & (int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
+                        (onlyBoundary || tris[j] < tris[k]))
                     {
                         // Only looking at boundary edges and this is internal, or
                         // this is an inner edge that we will see again or have already seen.
@@ -767,7 +768,7 @@ public static partial class Detour
                     }
 
                     float t = 0;
-                    float d = dtDistancePtSegSqr2D(pos, 0, v, j, v, k, ref t);
+                    float d = dtDistancePtSegSqr2D(pos, 0, v[j], v[k], ref t);
                     if (d < dmin)
                     {
                         dmin = d;
@@ -778,7 +779,7 @@ public static partial class Detour
                 }
             }
 
-            dtVlerp(closest, 0, v, pmin, v, pmax, tmin);
+            dtVlerp(closest, 0, new float[] { v[pmin].X, v[pmin].Y, v[pmin].Z }, 0, new float[] { v[pmax].X, v[pmax].Y, v[pmax].Z }, 0, tmin);
         }
 
         public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, float height)

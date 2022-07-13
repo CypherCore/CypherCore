@@ -108,7 +108,7 @@ namespace Game.Collision
 
             iModel = model;
 
-            Matrix4x4.Invert(Extensions.fromEulerAnglesZYX(MathFunctions.PI * spawn.iRot.Y / 180.0f, MathFunctions.PI * spawn.iRot.X / 180.0f, MathFunctions.PI * spawn.iRot.Z / 180.0f), out iInvRot);
+            Extensions.fromEulerAnglesZYX(MathFunctions.PI * spawn.iRot.Y / 180.0f, MathFunctions.PI * spawn.iRot.X / 180.0f, MathFunctions.PI * spawn.iRot.Z / 180.0f).Inverse(out iInvRot);
 
             iInvScale = 1.0f / iScale;
         }
@@ -123,8 +123,8 @@ namespace Game.Collision
                 return false;
 
             // child bounds are defined in object space:
-            Vector3 p = Vector3.TransformNormal((pRay.Origin - iPos) * iInvScale, iInvRot);
-            Ray modRay = new Ray(p, Vector3.TransformNormal(pRay.Direction, iInvRot));
+            Vector3 p = iInvRot.Multiply(pRay.Origin - iPos) * iInvScale;
+            Ray modRay = new Ray(p, iInvRot.Multiply(pRay.Direction));
             float distance = pMaxDist * iInvScale;
             bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
             if (hit)
@@ -146,8 +146,8 @@ namespace Game.Collision
             if (!iBound.contains(p))
                 return;
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.TransformNormal((p - iPos) * iInvScale, iInvRot);
-            Vector3 zDirModel = Vector3.TransformNormal(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
+            Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
+            Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
             if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
             {
@@ -155,7 +155,7 @@ namespace Game.Collision
                 // Transform back to world space. Note that:
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
-                float world_Z = ((Vector3.TransformNormal(modelGround, iInvRot)) * iScale + iPos).Z;
+                float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z)
                 {
                     info.ground_Z = world_Z;
@@ -167,7 +167,7 @@ namespace Game.Collision
         public bool GetLiquidLevel(Vector3 p, LocationInfo info, ref float liqHeight)
         {
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.TransformNormal((p - iPos) * iInvScale, iInvRot);
+            Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
             if (info.hitModel.GetLiquidLevel(pModel, out zDist))
@@ -191,8 +191,8 @@ namespace Game.Collision
             if (!iBound.contains(p))
                 return false;
             // child bounds are defined in object space:
-            Vector3 pModel = Vector3.TransformNormal((p - iPos) * iInvScale, iInvRot);
-            Vector3 zDirModel = Vector3.TransformNormal(new Vector3(0.0f, 0.0f, -1.0f), iInvRot);
+            Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
+            Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
             if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
             {
@@ -200,7 +200,7 @@ namespace Game.Collision
                 // Transform back to world space. Note that:
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
-                float world_Z = (Vector3.TransformNormal(modelGround, iInvRot) * iScale + iPos).Z;
+                float world_Z = (iInvRot.Multiply(modelGround * iScale) + iPos).Z;
                 if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
                     info.ground_Z = world_Z;

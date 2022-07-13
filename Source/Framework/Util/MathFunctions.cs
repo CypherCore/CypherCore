@@ -292,13 +292,101 @@ public static class MathFunctions
         if (!box.isFinite())
             return box;
 
-        box._center = new(rotation.M11 * box._center.GetAt(0) + rotation.M12 * box._center.GetAt(1) + rotation.M13 * box._center.GetAt(2) + translation.GetAt(0),
+        Box outBox = box;
+
+        outBox._center = new(rotation.M11 * box._center.GetAt(0) + rotation.M12 * box._center.GetAt(1) + rotation.M13 * box._center.GetAt(2) + translation.GetAt(0),
             rotation.M21 * box._center.GetAt(0) + rotation.M22 * box._center.GetAt(1) + rotation.M23 * box._center.GetAt(2) + translation.GetAt(1),
             rotation.M31 * box._center.GetAt(0) + rotation.M32 * box._center.GetAt(1) + rotation.M33 * box._center.GetAt(2) + translation.GetAt(2));
 
         for (int i = 0; i < 3; ++i)
-            box._edgeVector[i] = Vector3.TransformNormal(box._edgeVector[i], rotation);
+            outBox._edgeVector[i] = rotation.Multiply(box._edgeVector[i]);
+
+        outBox._area = box._area;
+        outBox._volume = box._volume;
 
         return box;
+    }
+    public static Matrix4x4 Inverse(this Matrix4x4 elt)
+    {
+        Matrix4x4 kInverse;
+        elt.Inverse(out kInverse);
+        return kInverse;
+    }
+    public static bool Inverse(this Matrix4x4 elt, out Matrix4x4 rkInverse)
+    {
+        // Invert a 3x3 using cofactors.  This is about 8 times faster than
+        // the Numerical Recipes code which uses Gaussian elimination.
+        rkInverse = new();
+        rkInverse.M11 = elt.M22 * elt.M33 -
+                          elt.M23 * elt.M32;
+        rkInverse.M12 = elt.M13 * elt.M32 -
+                          elt.M12 * elt.M33;
+        rkInverse.M13 = elt.M12 * elt.M23 -
+                          elt.M13 * elt.M22;
+        rkInverse.M21 = elt.M23 * elt.M31 -
+                          elt.M21 * elt.M33;
+        rkInverse.M22 = elt.M11 * elt.M33 -
+                          elt.M13 * elt.M31;
+        rkInverse.M23 = elt.M13 * elt.M21 -
+                          elt.M11 * elt.M23;
+        rkInverse.M31 = elt.M21 * elt.M32 -
+                          elt.M22 * elt.M31;
+        rkInverse.M32 = elt.M12 * elt.M31 -
+                          elt.M11 * elt.M32;
+        rkInverse.M33 = elt.M11 * elt.M22 -
+                          elt.M12 * elt.M21;
+
+        float fDet =
+            elt.M11 * rkInverse.M11 +
+            elt.M12 * rkInverse.M21 +
+            elt.M13 * rkInverse.M31;
+
+        if (Math.Abs(fDet) <= float.Epsilon)
+            return false;
+
+        float fInvDet = 1.0f / fDet;
+
+        rkInverse.M11 *= fInvDet;
+        rkInverse.M12 *= fInvDet;
+        rkInverse.M13 *= fInvDet;
+        rkInverse.M21 *= fInvDet;
+        rkInverse.M22 *= fInvDet;
+        rkInverse.M23 *= fInvDet;
+        rkInverse.M31 *= fInvDet;
+        rkInverse.M32 *= fInvDet;
+        rkInverse.M33 *= fInvDet;
+
+        return true;
+    }
+
+    public static Matrix4x4 ToMatrix(this Quaternion _q)
+    {
+        // Implementation from Watt and Watt, pg 362
+        // See also http://www.flipcode.com/documents/matrfaq.html#Q54
+        Quaternion q = _q;
+        q *= 1.0f / MathF.Sqrt((q.X * q.X) + (q.Y * q.Y) + (q.Z * q.Z) + (q.W * q.W));
+
+        float xx = 2.0f * q.X * q.X;
+        float xy = 2.0f * q.X * q.Y;
+        float xz = 2.0f * q.X * q.Z;
+        float xw = 2.0f * q.X * q.W;
+
+        float yy = 2.0f * q.Y * q.Y;
+        float yz = 2.0f * q.Y * q.Z;
+        float yw = 2.0f * q.Y * q.W;
+
+        float zz = 2.0f * q.Z * q.Z;
+        float zw = 2.0f * q.Z * q.W;
+
+        return new Matrix4x4(1.0f - yy - zz, xy - zw, xz + yw, 0.0f,
+            xy + zw, 1.0f - xx - zz, yz - xw, 0.0f,
+            xz - yw, yz + xw, 1.0f - xx - yy, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    public static Vector3 Multiply(this Matrix4x4 elt, Vector3 v)
+    {
+        return new(elt.M11 * v.GetAt(0) + elt.M12 * v.GetAt(1) + elt.M13 * v.GetAt(2),
+            elt.M21 * v.GetAt(0) + elt.M22 * v.GetAt(1) + elt.M23 * v.GetAt(2),
+            elt.M31 * v.GetAt(0) + elt.M32 * v.GetAt(1) + elt.M33 * v.GetAt(2));
     }
 }

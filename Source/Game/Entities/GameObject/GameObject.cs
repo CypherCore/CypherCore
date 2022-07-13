@@ -2446,10 +2446,10 @@ namespace Game.Entities
                 float maxY = displayInfo.GeoBoxMax.Y * scale + radius;
                 float maxZ = displayInfo.GeoBoxMax.Z * scale + radius;
 
-                Quaternion worldRotation = GetLocalRotation();
+                Quaternion worldRotation = GetWorldRotation();
 
                 //Todo Test this. Needs checked.
-                var worldSpaceBox = MathFunctions.toWorldSpace(Matrix4x4.CreateFromQuaternion(worldRotation), new Vector3(GetPositionX(), GetPositionY(), GetPositionZ()), new Box(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ)));
+                var worldSpaceBox = MathFunctions.toWorldSpace(worldRotation.ToMatrix(), new Vector3(GetPositionX(), GetPositionY(), GetPositionZ()), new Box(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ)));
                 return worldSpaceBox.Contains(new Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()));
             }
 
@@ -3743,15 +3743,15 @@ namespace Game.Entities
                 TransportAnimationRecord newAnimation = _animationInfo.GetNextAnimNode(newProgress);
                 if (oldAnimation != null && newAnimation != null)
                 {
-                    Matrix4x4 pathRotation = Matrix4x4.CreateFromQuaternion(new Quaternion(_owner.m_gameObjectData.ParentRotation.GetValue().X, _owner.m_gameObjectData.ParentRotation.GetValue().Y,
-                        _owner.m_gameObjectData.ParentRotation.GetValue().Z, _owner.m_gameObjectData.ParentRotation.GetValue().W));
+                    Matrix4x4 pathRotation = new Quaternion(_owner.m_gameObjectData.ParentRotation.GetValue().X, _owner.m_gameObjectData.ParentRotation.GetValue().Y,
+                        _owner.m_gameObjectData.ParentRotation.GetValue().Z, _owner.m_gameObjectData.ParentRotation.GetValue().W).ToMatrix();
 
                     Vector3 prev = new(oldAnimation.Pos.X, oldAnimation.Pos.Y, oldAnimation.Pos.Z);
                     Vector3 next = new(newAnimation.Pos.X, newAnimation.Pos.Y, newAnimation.Pos.Z);
 
                     float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
 
-                    Vector3 dst = Vector3.TransformNormal(Vector3.Lerp(prev, next, animProgress), pathRotation);//todo check this
+                    Vector3 dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
 
                     dst += _owner.GetStationaryPosition();
 

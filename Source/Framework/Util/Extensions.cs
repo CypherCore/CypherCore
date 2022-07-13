@@ -264,7 +264,7 @@ namespace System
             //        cy*sz           cx*cz+sx*sy*sz -cz*sx+cx*sy*sz
             //       -sy              cy*sx           cx*cy
 
-            var matrix = Matrix4x4.CreateFromQuaternion(quaternion);
+            var matrix = quaternion.ToMatrix();
             if (matrix.M31 < 1.0)
             {
                 if (matrix.M31 > -1.0)
@@ -292,7 +292,19 @@ namespace System
         
         public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
         {
-            return Matrix4x4.CreateFromYawPitchRoll(fYAngle, fPAngle, fRAngle);
+            float fCos = MathF.Cos(fYAngle);
+            float fSin = MathF.Sin(fYAngle);
+            Matrix4x4 kZMat = new(fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
+            fCos = MathF.Cos(fPAngle);
+            fSin = MathF.Sin(fPAngle);
+            Matrix4x4 kYMat = new(fCos, 0.0f, fSin, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -fSin, 0.0f, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
+            fCos = MathF.Cos(fRAngle);
+            fSin = MathF.Sin(fRAngle);
+            Matrix4x4 kXMat = new(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
+            return kZMat * (kYMat * kXMat);
         }
 
         #region Strings
