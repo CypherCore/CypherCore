@@ -895,6 +895,8 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading World States...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadWorldStates();
 
+            Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
+            Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
             // TODO: this is temporary until custom world states are purged from old world state saved values
             Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, (int)GetWorldState(WorldStates.WarModeHordeBuffValue), false, null);
             Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, (int)GetWorldState(WorldStates.WarModeAllianceBuffValue), false, null);

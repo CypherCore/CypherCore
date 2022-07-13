@@ -2990,6 +2990,9 @@ namespace Framework.Constants
 
     public enum WorldStates
     {
+        CurrentPvpSeasonId = 3191,
+        PreviousPvpSeasonId = 3901,
+
         BattlefieldWgVehicleH = 3490,
         BattlefieldWgMaxVehicleH = 3491,
         BattlefieldWgVehicleA = 3680,

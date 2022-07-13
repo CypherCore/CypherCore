@@ -2920,17 +2920,6 @@ namespace Game.Entities
             packet.AddState(2260, 0); // SCOURGE_EVENT_WORLDSTATE_AZSHARA
             packet.AddState(2259, 0); // SCOURGE_EVENT_WORLDSTATE_WINTERSPRING
 
-            // ARENA_SEASON_IN_PROGRESS
-            //   7 - arena season in progress
-            //   0 - end of season
-            packet.AddState(3191, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId) : 0); // 7 Current Season - Arena season in progress
-
-            // Previous arena season id
-            uint previousArenaSeason = 0;
-            if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) && WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) > 0)
-                previousArenaSeason = WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId) - 1;// 0 - End of season
-            packet.AddState(3901, previousArenaSeason);
-
             SendPacket(packet);
         }
 

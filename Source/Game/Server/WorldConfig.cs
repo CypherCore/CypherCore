@@ -752,7 +752,7 @@ namespace Game
             Values[WorldCfg.ArenaRatingDiscardTimer] = GetDefaultValue("Arena.RatingDiscardTimer", 10 * Time.Minute * Time.InMilliseconds);
             Values[WorldCfg.ArenaRatedUpdateTimer] = GetDefaultValue("Arena.RatedUpdateTimer", 5 * Time.InMilliseconds);
             Values[WorldCfg.ArenaQueueAnnouncerEnable] = GetDefaultValue("Arena.QueueAnnouncer.Enable", false);
-            Values[WorldCfg.ArenaSeasonId] = GetDefaultValue("Arena.ArenaSeason.ID", 15);
+            Values[WorldCfg.ArenaSeasonId] = GetDefaultValue("Arena.ArenaSeason.ID", 32);
             Values[WorldCfg.ArenaStartRating] = GetDefaultValue("Arena.ArenaStartRating", 0);
             Values[WorldCfg.ArenaStartPersonalRating] = GetDefaultValue("Arena.ArenaStartPersonalRating", 1000);
             Values[WorldCfg.ArenaStartMatchmakerRating] = GetDefaultValue("Arena.ArenaStartMatchmakerRating", 1500);
@@ -762,6 +762,12 @@ namespace Game
             Values[WorldCfg.ArenaWinRatingModifier2] = GetDefaultValue("Arena.ArenaWinRatingModifier2", 24.0f);
             Values[WorldCfg.ArenaLoseRatingModifier] = GetDefaultValue("Arena.ArenaLoseRatingModifier", 24.0f);
             Values[WorldCfg.ArenaMatchmakerRatingModifier] = GetDefaultValue("Arena.ArenaMatchmakerRatingModifier", 24.0f);
+
+            if (reload)
+            {
+                Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
+                Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, GetIntValue(WorldCfg.ArenaSeasonId) - (GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
+            }
 
             Values[WorldCfg.OffhandCheckAtSpellUnlearn] = GetDefaultValue("OffhandCheckAtSpellUnlearn", true);
 
