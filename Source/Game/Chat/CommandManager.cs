@@ -383,8 +383,19 @@ namespace Game.Chat
 
         public void AddSubCommand(ChatCommandNode command)
         {
-            if (!_subCommands.TryAdd(command._name, command))
-                Log.outError(LogFilter.Commands, $"Error trying to add subcommand, Already exists Command: {_name} SubCommand: {command._name}");
+            if (command._name.IsEmpty())
+            {
+                _permission = command._permission;
+                _helpText = command._helpText;
+                _helpString = command._helpString;
+                _methodInfo = command._methodInfo;
+                parameterTypes = command.parameterTypes;
+            }
+            else
+            {
+                if (!_subCommands.TryAdd(command._name, command))
+                    Log.outError(LogFilter.Commands, $"Error trying to add subcommand, Already exists Command: {_name} SubCommand: {command._name}");
+            }
         }
 
         public bool Invoke(CommandHandler handler, StringArguments args)
