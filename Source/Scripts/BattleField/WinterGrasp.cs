@@ -60,40 +60,26 @@ namespace Game.BattleFields
                 m_vehicles[team] = new List<ObjectGuid>();
             }
 
-            m_saveTimer = 60000;
-
             // Load from db
-            if ((Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgShowTimeNextBattle) == 0) && (Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefender) == 0) && (Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]) == 0))
+            if (Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0 && Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) == 0)
             {
-                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgShowTimeNextBattle, 0);
-                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefender, RandomHelper.URand(0, 1));
-                Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_NoWarBattleTime);
+                Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
+                Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, RandomHelper.IRand(0, 1), false, m_Map);
+                Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_NoWarBattleTime / Time.InMilliseconds), false, m_Map);
             }
 
-            m_isActive = Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgShowTimeNextBattle) == 0;
-            m_DefenderTeam = Global.WorldMgr.GetWorldState(WorldStates.BattlefieldWgDefender);
+            m_isActive = Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0;
+            m_DefenderTeam = (uint)Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgDefender, m_Map);
 
-            m_Timer = Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]);
+            m_Timer = (uint)(Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) - GameTime.GetGameTime());
             if (m_isActive)
             {
                 m_isActive = false;
                 m_Timer = m_RestartAfterCrash;
             }
 
-            void loadSavedWorldState(WorldStates id)
-            {
-                Global.WorldStateMgr.SetValue(id, (int)Global.WorldMgr.GetWorldState(id), false, m_Map);
-            }
-
-            loadSavedWorldState(WorldStates.BattlefieldWgShowTimeNextBattle);
-            loadSavedWorldState(WorldStates.BattlefieldWgDefender);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam(), false, m_Map);
-            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
             Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
-            loadSavedWorldState(WorldStates.BattlefieldWgAttackedA);
-            loadSavedWorldState(WorldStates.BattlefieldWgDefendedA);
-            loadSavedWorldState(WorldStates.BattlefieldWgAttackedH);
-            loadSavedWorldState(WorldStates.BattlefieldWgDefendedH);
 
             foreach (var gy in WGConst.WGGraveYard)
             {
@@ -170,31 +156,6 @@ namespace Game.BattleFields
             return true;
         }
 
-        public override bool Update(uint diff)
-        {
-            bool m_return = base.Update(diff);
-            if (m_saveTimer <= diff)
-            {
-                void saveWorldState(WorldStates id)
-                {
-                    Global.WorldMgr.SetWorldState(id, Global.WorldStateMgr.GetValue((int)id, m_Map));
-                }
-
-                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgShowTimeNextBattle, !m_isActive);
-                Global.WorldMgr.SetWorldState(WorldStates.BattlefieldWgDefender, m_DefenderTeam);
-                Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_Timer);
-                saveWorldState(WorldStates.BattlefieldWgAttackedA);
-                saveWorldState(WorldStates.BattlefieldWgDefendedA);
-                saveWorldState(WorldStates.BattlefieldWgAttackedH);
-                saveWorldState(WorldStates.BattlefieldWgDefendedH);
-                m_saveTimer = 60 * Time.InMilliseconds;
-            }
-            else
-                m_saveTimer -= diff;
-
-            return m_return;
-        }
-
         public override void OnBattleStart()
         {
             // Spawn titan relic
@@ -211,10 +172,10 @@ namespace Game.BattleFields
                 Log.outError(LogFilter.Battlefield, "WG: Failed to spawn titan relic.");
 
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam(), false, m_Map);
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam(), false, m_Map);
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 1, false, m_Map);
-            Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
 
             // Update tower visibility and update faction
             foreach (var guid in CanonList)
@@ -316,10 +277,11 @@ namespace Game.BattleFields
                 else
                     worldStateId = GetDefenderTeam() == TeamId.Horde ? WorldStates.BattlefieldWgAttackedH : WorldStates.BattlefieldWgAttackedA;
 
-                Global.WorldStateMgr.SetValue(worldStateId, Global.WorldStateMgr.GetValue((int)worldStateId, m_Map) + 1, false, m_Map);
+                Global.WorldStateMgr.SetValueAndSaveInDb(worldStateId, Global.WorldStateMgr.GetValue((int)worldStateId, m_Map) + 1, false, m_Map);
             }
 
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeNextBattle, 1, false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 1, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 0, false, m_Map);
             Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
 
@@ -357,12 +319,6 @@ namespace Game.BattleFields
                 if (portal)
                     portal.SetRespawnTime((int)BattlegroundConst.RespawnOneDay);
             }
-
-            // Saving data
-            foreach (var obj in BuildingsInZone)
-                obj.Save();
-            foreach (var workShop in Workshops)
-                workShop.Save();
 
             foreach (var guid in m_PlayersInWar[GetDefenderTeam()])
             {
@@ -1023,7 +979,6 @@ namespace Game.BattleFields
 
         int m_tenacityTeam;
         uint m_tenacityStack;
-        uint m_saveTimer;
 
         ObjectGuid m_titansRelicGUID;
     }
@@ -1080,7 +1035,7 @@ namespace Game.BattleFields
 
                     // Update worldstate
                     _state = WGGameObjectState.AllianceIntact - ((int)_teamControl * 3);
-                    Global.WorldStateMgr.SetValue(_worldState, (int)_state, false, _wg.GetMap());
+                    Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
                 }
                 UpdateCreatureAndGo();
                 build.SetFaction(WGConst.WintergraspFaction[_teamControl]);
@@ -1106,7 +1061,7 @@ namespace Game.BattleFields
         {
             // Update worldstate
             _state = WGGameObjectState.AllianceDamage - ((int)_teamControl * 3);
-            Global.WorldStateMgr.SetValue(_worldState, (int)_state, false, _wg.GetMap());
+            Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
 
             // Send warning message
             if (_staticTowerInfo != null)                                       // tower damage + name
@@ -1137,7 +1092,7 @@ namespace Game.BattleFields
         {
             // Update worldstate
             _state = WGGameObjectState.AllianceDestroy - ((int)_teamControl * 3);
-            Global.WorldStateMgr.SetValue(_worldState, (int)_state, false, _wg.GetMap());
+            Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
 
             // Warn players
             if (_staticTowerInfo != null)
@@ -1193,8 +1148,7 @@ namespace Game.BattleFields
                     break;
             }
 
-            _state = (WGGameObjectState)Global.WorldMgr.GetWorldState(_worldState);
-            Global.WorldStateMgr.SetValue(_worldState, (int)_state, false, _wg.GetMap());
+            _state = (WGGameObjectState)Global.WorldStateMgr.GetValue((int)_worldState, _wg.GetMap());
             switch (_state)
             {
                 case WGGameObjectState.NeutralIntact:
@@ -1442,11 +1396,6 @@ namespace Game.BattleFields
             }
         }
 
-        public void Save()
-        {
-            Global.WorldMgr.SetWorldState(_worldState, (ulong)_state);
-        }
-
         public ObjectGuid GetGUID() { return _buildGUID; }
 
         // WG object
@@ -1505,7 +1454,7 @@ namespace Game.BattleFields
                 {
                     // Updating worldstate
                     _state = WGGameObjectState.AllianceIntact;
-                    Global.WorldStateMgr.SetValue(_staticInfo.WorldStateId, (int)_state, false, _wg.GetMap());
+                    Global.WorldStateMgr.SetValueAndSaveInDb(_staticInfo.WorldStateId, (int)_state, false, _wg.GetMap());
 
                     // Warning message
                     if (!init)
@@ -1525,7 +1474,7 @@ namespace Game.BattleFields
                 {
                     // Update worldstate
                     _state = WGGameObjectState.HordeIntact;
-                    Global.WorldStateMgr.SetValue(_staticInfo.WorldStateId, (int)_state, false, _wg.GetMap());
+                    Global.WorldStateMgr.SetValueAndSaveInDb(_staticInfo.WorldStateId, (int)_state, false, _wg.GetMap());
 
                     // Warning message
                     if (!init)
@@ -1554,11 +1503,6 @@ namespace Game.BattleFields
                 GiveControlTo(_wg.GetAttackerTeam(), true);
             else
                 GiveControlTo(_wg.GetDefenderTeam(), true);
-        }
-
-        public void Save()
-        {
-            Global.WorldMgr.SetWorldState(_staticInfo.WorldStateId, (uint)_state);
         }
 
         public uint GetTeamControl() { return _teamControl; }

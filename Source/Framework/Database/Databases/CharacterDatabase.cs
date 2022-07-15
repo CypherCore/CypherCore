@@ -510,8 +510,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME, "UPDATE instance_reset SET resettime = ? WHERE mapid = ? AND difficulty = ?");
             PrepareStatement(CharStatements.UPD_CHAR_ONLINE, "UPDATE characters SET online = 1 WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN, "UPDATE characters SET name = ?, at_login = ? WHERE guid = ?");
-            PrepareStatement(CharStatements.UPD_WORLDSTATE, "UPDATE worldstates SET value = ? WHERE entry = ?");
-            PrepareStatement(CharStatements.INS_WORLDSTATE, "INSERT INTO worldstates (entry, value) VALUES (?, ?)");
+            PrepareStatement(CharStatements.REP_WORLD_STATE, "REPLACE INTO world_state_value (Id, Value) VALUES (?, ?)");
+            PrepareStatement(CharStatements.REP_WORLD_VARIABLE, "REPLACE INTO world_variable (Id, Value) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID, "DELETE FROM character_instance WHERE guid = ? AND instance = ?");
             PrepareStatement(CharStatements.UPD_CHAR_INSTANCE, "UPDATE character_instance SET instance = ?, permanent = ?, extendState = ? WHERE guid = ? AND instance = ?");
             PrepareStatement(CharStatements.INS_CHAR_INSTANCE, "INSERT INTO character_instance (guid, instance, permanent, extendState) VALUES (?, ?, ?, ?)");
@@ -1157,8 +1157,8 @@ namespace Framework.Database
         UPD_GLOBAL_INSTANCE_RESETTIME,
         UPD_CHAR_ONLINE,
         UPD_CHAR_NAME_AT_LOGIN,
-        UPD_WORLDSTATE,
-        INS_WORLDSTATE,
+        REP_WORLD_STATE,
+        REP_WORLD_VARIABLE,
         DEL_CHAR_INSTANCE_BY_INSTANCE_GUID,
         UPD_CHAR_INSTANCE,
         INS_CHAR_INSTANCE,

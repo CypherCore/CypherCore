@@ -3081,15 +3081,5 @@ namespace Framework.Constants
 
         WarModeHordeBuffValue = 17042,
         WarModeAllianceBuffValue = 17043,
-
-        CurrencyResetTime = 20001,                     // Next Arena Distribution Time
-        WeeklyQuestResetTime = 20002,                     // Next Weekly Quest Reset Time
-        BgDailyResetTime = 20003,                     // Next Daily Bg Reset Time
-        CleaningFlags = 20004,                     // Cleaning Flags
-        GuildDailyResetTime = 20006,                     // Next Guild Cap Reset Time
-        MonthlyQuestResetTime = 20007,                     // Next Monthly Quest Reset Time
-        DailyQuestResetTime = 20008,                     // Next Daily Quest Reset Time
-        DailyCalendarDeletionOldEventsTime = 20009,      // Next Daily Calendar Deletions Of Old Events Time
-        GuildWeeklyResetTime = 20050,                     // Next Guild Week Reset Time
     }
 }

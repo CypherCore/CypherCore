@@ -39,6 +39,16 @@ namespace Game
 {
     public class WorldManager : Singleton<WorldManager>
     {
+        public const string NextCurrencyResetTimeVarId = "NextCurrencyResetTime";
+        public const string NextWeeklyQuestResetTimeVarId = "NextWeeklyQuestResetTime";
+        public const string NextBGRandomDailyResetTimeVarId = "NextBGRandomDailyResetTime";
+        public const string CharacterDatabaseCleaningFlagsVarId = "PersistentCharacterCleanFlags";
+        public const string NextGuildDailyResetTimeVarId = "NextGuildDailyResetTime";
+        public const string NextMonthlyQuestResetTimeVarId = "NextMonthlyQuestResetTime";
+        public const string NextDailyQuestResetTimeVarId = "NextDailyQuestResetTime";
+        public const string NextOldCalendarEventDeletionTimeVarId = "NextOldCalendarEventDeletionTime";
+        public const string NextGuildWeeklyResetTimeVarId = "NextGuildWeeklyResetTime";
+
         WorldManager()
         {
             foreach (WorldTimers timer in Enum.GetValues(typeof(WorldTimers)))
@@ -890,16 +900,13 @@ namespace Game
             FormationMgr.LoadCreatureFormations();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading World State templates...");
-            Global.WorldStateMgr.LoadFromDB();
+            Global.WorldStateMgr.LoadFromDB();                                          // must be loaded before battleground, outdoor PvP and conditions
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading World States...");              // must be loaded before Battleground, outdoor PvP and conditions
-            LoadWorldStates();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Persistend World Variables...");              // must be loaded before Battleground, outdoor PvP and conditions
+            LoadPersistentWorldVariables();
 
             Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
             Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
-            // TODO: this is temporary until custom world states are purged from old world state saved values
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, (int)GetWorldState(WorldStates.WarModeHordeBuffValue), false, null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, (int)GetWorldState(WorldStates.WarModeAllianceBuffValue), false, null);
 
             Global.ObjectMgr.LoadPhases();
 
@@ -1260,12 +1267,8 @@ namespace Game
 
         public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
         {
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (team == TeamId.Alliance ? reward : 0), false, null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (team == TeamId.Horde ? reward : 0), false, null);
-
-            // save to db
-            SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));
-            SetWorldState(WorldStates.WarModeAllianceBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null));
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeHordeBuffValue, 10 + (team == TeamId.Alliance ? reward : 0), false, null);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeAllianceBuffValue, 10 + (team == TeamId.Horde ? reward : 0), false, null);
         }
 
         public void DisableForcedWarModeFactionBalanceState()
@@ -1975,7 +1978,7 @@ namespace Game
         }
 
         void UpdateRealmCharCount(SQLResult result)
-        { 
+        {
             if (!result.IsEmpty())
             {
                 uint Id = result.Read<uint>(0);
@@ -1991,9 +1994,9 @@ namespace Game
 
         void InitQuestResetTimes()
         {
-            m_NextDailyQuestReset = GetWorldState(WorldStates.DailyQuestResetTime);
-            m_NextWeeklyQuestReset = GetWorldState(WorldStates.WeeklyQuestResetTime);
-            m_NextMonthlyQuestReset = GetWorldState(WorldStates.MonthlyQuestResetTime);
+            m_NextDailyQuestReset = GetPersistentWorldVariable(NextDailyQuestResetTimeVarId);
+            m_NextWeeklyQuestReset = GetPersistentWorldVariable(NextWeeklyQuestResetTimeVarId);
+            m_NextMonthlyQuestReset = GetPersistentWorldVariable(NextMonthlyQuestResetTimeVarId);
         }
 
         static long GetNextDailyResetTime(long t)
@@ -2001,7 +2004,7 @@ namespace Game
             return Time.GetLocalHourTimestamp(t, WorldConfig.GetUIntValue(WorldCfg.DailyQuestResetTimeHour), true);
         }
 
-        void DailyReset()
+        public void DailyReset()
         {
             // reset all saved quest status
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
@@ -2031,7 +2034,7 @@ namespace Game
             Cypher.Assert(now < next);
 
             m_NextDailyQuestReset = next;
-            SetWorldState(WorldStates.DailyQuestResetTime, (ulong)next);
+            SetPersistentWorldVariable(NextDailyQuestResetTimeVarId, (int)next);
 
             Log.outInfo(LogFilter.Misc, "Daily quests for all characters have been reset.");
         }
@@ -2048,7 +2051,7 @@ namespace Game
             return t;
         }
 
-        void ResetWeeklyQuests()
+        public void ResetWeeklyQuests()
         {
             // reset all saved quest status
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
@@ -2070,7 +2073,7 @@ namespace Game
             Cypher.Assert(now < next);
 
             m_NextWeeklyQuestReset = next;
-            SetWorldState(WorldStates.WeeklyQuestResetTime, (ulong)next);
+            SetPersistentWorldVariable(NextWeeklyQuestResetTimeVarId, (int)next);
 
             Log.outInfo(LogFilter.Misc, "Weekly quests for all characters have been reset.");
         }
@@ -2086,7 +2089,7 @@ namespace Game
             return Time.DateTimeToUnixTime(newDate);
         }
 
-        void ResetMonthlyQuests()
+        public void ResetMonthlyQuests()
         {
             // reset all saved quest status
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
@@ -2108,7 +2111,7 @@ namespace Game
             Cypher.Assert(now < next);
 
             m_NextMonthlyQuestReset = next;
-            SetWorldState(WorldStates.MonthlyQuestResetTime, (ulong)next);
+            SetPersistentWorldVariable(NextMonthlyQuestResetTimeVarId, (int)next);
 
             Log.outInfo(LogFilter.Misc, "Monthly quests for all characters have been reset.");
         }
@@ -2126,7 +2129,7 @@ namespace Game
 
         void InitRandomBGResetTime()
         {
-            long bgtime = GetWorldState(WorldStates.BgDailyResetTime);
+            long bgtime = GetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId);
             if (bgtime == 0)
                 m_NextRandomBGReset = GameTime.GetGameTime();         // game time not yet init
 
@@ -2144,14 +2147,14 @@ namespace Game
             m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
             if (bgtime == 0)
-                SetWorldState(WorldStates.BgDailyResetTime, (ulong)m_NextRandomBGReset);
+                SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)m_NextRandomBGReset);
         }
 
         void InitCalendarOldEventsDeletionTime()
         {
             long now = GameTime.GetGameTime();
             long nextDeletionTime = Time.GetLocalHourTimestamp(now, WorldConfig.GetUIntValue(WorldCfg.CalendarDeleteOldEventsHour));
-            long currentDeletionTime = GetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime);
+            long currentDeletionTime = GetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId);
 
             // If the reset time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
             // In this case we set the reset time in the past and next world update will do the reset and schedule next one in the future.
@@ -2161,12 +2164,12 @@ namespace Game
                 m_NextCalendarOldEventsDeletionTime = nextDeletionTime;
 
             if (currentDeletionTime == 0)
-                SetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime, (ulong)m_NextCalendarOldEventsDeletionTime);
+                SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)m_NextCalendarOldEventsDeletionTime);
         }
 
         void InitGuildResetTime()
         {
-            long gtime = GetWorldState(WorldStates.GuildDailyResetTime);
+            long gtime = GetPersistentWorldVariable(NextGuildDailyResetTimeVarId);
             if (gtime == 0)
                 m_NextGuildReset = GameTime.GetGameTime();         // game time not yet init
 
@@ -2180,12 +2183,12 @@ namespace Game
             m_NextGuildReset = gtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
             if (gtime == 0)
-                SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
+                SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)m_NextGuildReset);
         }
 
         void InitCurrencyResetTime()
         {
-            long currencytime = GetWorldState(WorldStates.CurrencyResetTime);
+            long currencytime = GetPersistentWorldVariable(NextCurrencyResetTimeVarId);
             if (currencytime == 0)
                 m_NextCurrencyReset = GameTime.GetGameTime();         // game time not yet init
 
@@ -2202,7 +2205,7 @@ namespace Game
             m_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day : nextWeekResetTime;
 
             if (currencytime == 0)
-                SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
+                SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)m_NextCurrencyReset);
         }
 
         void ResetCurrencyWeekCap()
@@ -2214,7 +2217,7 @@ namespace Game
                     session.GetPlayer().ResetCurrencyWeekCap();
 
             m_NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
-            SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
+            SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)m_NextCurrencyReset);
         }
 
         public void ResetEventSeasonalQuests(ushort event_id, long eventStartTime)
@@ -2240,7 +2243,7 @@ namespace Game
                     session.GetPlayer().SetRandomWinner(false);
 
             m_NextRandomBGReset += Time.Day;
-            SetWorldState(WorldStates.BgDailyResetTime, (ulong)m_NextRandomBGReset);
+            SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)m_NextRandomBGReset);
         }
 
         void CalendarDeleteOldEvents()
@@ -2248,19 +2251,19 @@ namespace Game
             Log.outInfo(LogFilter.Misc, "Calendar deletion of old events.");
 
             m_NextCalendarOldEventsDeletionTime = m_NextCalendarOldEventsDeletionTime + Time.Day;
-            SetWorldState(WorldStates.DailyCalendarDeletionOldEventsTime, (ulong)m_NextCalendarOldEventsDeletionTime);
+            SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)m_NextCalendarOldEventsDeletionTime);
             Global.CalendarMgr.DeleteOldEvents();
         }
 
         void ResetGuildCap()
         {
             m_NextGuildReset += Time.Day;
-            SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
-            ulong week = GetWorldState(WorldStates.GuildWeeklyResetTime);
+            SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)m_NextGuildReset);
+            int week = GetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId);
             week = week < 7 ? week + 1 : 1;
 
             Log.outInfo(LogFilter.Server, "Guild Daily Cap reset. Week: {0}", week == 1);
-            SetWorldState(WorldStates.GuildWeeklyResetTime, week);
+            SetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId, week);
             Global.GuildMgr.ResetTimes(week == 1);
         }
 
@@ -2306,66 +2309,35 @@ namespace Game
             return false;
         }
 
-        void LoadWorldStates()
+        public int GetPersistentWorldVariable(string var)
+        {
+            return m_worldVariables.LookupByKey(var);
+        }
+
+        public void SetPersistentWorldVariable(string var, int value)
+        {
+            m_worldVariables[var] = value;
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_WORLD_VARIABLE);
+            stmt.AddValue(0, var);
+            stmt.AddValue(1, value);
+            DB.Characters.Execute(stmt);
+        }
+
+        void LoadPersistentWorldVariables()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Characters.Query("SELECT entry, value FROM worldstates");
-
-            if (result.IsEmpty())
+            SQLResult result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
+            if (!result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 world states. DB table `worldstates` is empty!");
-                return;
+                do
+                {
+                    m_worldVariables[result.Read<string>(0)] = result.Read<int>(1);
+                } while (result.NextRow());
             }
 
-            uint count = 0;
-            do
-            {
-                m_worldstates[result.Read<uint>(0)] = result.Read<uint>(1);
-                ++count;
-            }
-            while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} world states in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
-        public void SetWorldState(WorldStates index, object value)
-        {
-            SetWorldState((uint)index, value);
-        }
-
-        public void SetWorldState(uint index, object value)
-        {
-            PreparedStatement stmt;
-
-            if (m_worldstates.ContainsKey(index))
-            {
-                if (m_worldstates[index] == Convert.ToUInt32(value))
-                    return;
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_WORLDSTATE);
-                stmt.AddValue(0, Convert.ToUInt32(value));
-                stmt.AddValue(1, index);
-            }
-            else
-            {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_WORLDSTATE);
-
-                stmt.AddValue(0, index);
-                stmt.AddValue(1, Convert.ToUInt32(value));
-            }
-            DB.Characters.Execute(stmt);
-            m_worldstates[index] = Convert.ToUInt32(value);
-        }
-
-        public uint GetWorldState(WorldStates index)
-        {
-            return GetWorldState((uint)index);
-        }
-
-        public uint GetWorldState(uint index)
-        {
-            return m_worldstates.LookupByKey(index);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {m_worldVariables.Count} world variables in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         void ProcessQueryCallbacks()
@@ -2535,12 +2507,8 @@ namespace Game
                     outnumberedFactionReward = 5;
             }
 
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), false, null);
-            Global.WorldStateMgr.SetValue(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), false, null);
-
-            // save to db
-            SetWorldState(WorldStates.WarModeHordeBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, null));
-            SetWorldState(WorldStates.WarModeAllianceBuffValue, Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, null));
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), false, null);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), false, null);
         }
 
         public uint GetVirtualRealmAddress()
@@ -2571,7 +2539,7 @@ namespace Game
 
         public bool IsGuidWarning() { return _guidWarn; }
         public bool IsGuidAlert() { return _guidAlert; }
-        
+
         public WorldUpdateTime GetWorldUpdateTime() { return _worldUpdateTime; }
 
         #region Fields
@@ -2609,7 +2577,7 @@ namespace Game
         uint m_PlayerCount;
         uint m_MaxPlayerCount;
 
-        Dictionary<uint, uint> m_worldstates = new();
+        Dictionary<string, int> m_worldVariables = new();
         uint m_playerLimit;
         AccountTypes m_allowedSecurityLevel;
         Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales

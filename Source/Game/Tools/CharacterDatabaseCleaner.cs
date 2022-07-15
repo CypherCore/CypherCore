@@ -37,12 +37,7 @@ namespace Game
 
             uint oldMSTime = Time.GetMSTime();
 
-            // check flags which clean ups are necessary
-            SQLResult result = DB.Characters.Query("SELECT value FROM worldstates WHERE entry = {0}", (uint)WorldStates.CleaningFlags);
-            if (result.IsEmpty())
-                return;
-
-            CleaningFlags flags = (CleaningFlags)result.Read<uint>(0);
+            CleaningFlags flags = (CleaningFlags)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId);
 
             // clean up
             if (flags.HasAnyFlag(CleaningFlags.AchievementProgress))
@@ -63,7 +58,7 @@ namespace Game
             // NOTE: In order to have persistentFlags be set in worldstates for the next cleanup,
             // you need to define them at least once in worldstates.
             flags &= (CleaningFlags)WorldConfig.GetIntValue(WorldCfg.PersistentCharacterCleanFlags);
-            DB.Characters.DirectExecute("UPDATE worldstates SET value = {0} WHERE entry = {1}", flags, (uint)WorldStates.CleaningFlags);
+            Global.WorldMgr.SetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId, (int)flags);
 
             Global.WorldMgr.SetCleaningFlags(flags);
 

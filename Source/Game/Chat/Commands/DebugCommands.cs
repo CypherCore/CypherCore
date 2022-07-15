@@ -799,18 +799,18 @@ namespace Game.Chat
             long now = GameTime.GetGameTime();
             if (daily)
             {
-                Global.WorldMgr.SetNextDailyQuestsResetTime(now);
-                handler.SendSysMessage("Daily quest reset scheduled for next tick.");
+                Global.WorldMgr.DailyReset();
+                handler.SendSysMessage($"Daily quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextDailyQuestResetTimeVarId)).ToShortTimeString()}");
             }
             if (weekly)
             {
-                Global.WorldMgr.SetNextWeeklyQuestsResetTime(now);
-                handler.SendSysMessage("Weekly quest reset scheduled for next tick.");
+                Global.WorldMgr.ResetWeeklyQuests();
+                handler.SendSysMessage($"Weekly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextWeeklyQuestResetTimeVarId)).ToShortTimeString()}");
             }
             if (monthly)
             {
-                Global.WorldMgr.SetNextMonthlyQuestsResetTime(now);
-                handler.SendSysMessage("Monthly quest reset scheduled for next tick.");
+                Global.WorldMgr.ResetMonthlyQuests();
+                handler.SendSysMessage($"Monthly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextMonthlyQuestResetTimeVarId)).ToShortTimeString()}");
             }
 
             return true;

@@ -136,6 +136,39 @@ namespace Game
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldStateTemplates.Count} world state templates {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+
+            oldMSTime = Time.GetMSTime();
+
+            result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
+            uint savedValueCount = 0;
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    int worldStateId = result.Read<int>(0);
+                    WorldStateTemplate worldState = _worldStateTemplates.LookupByKey(worldStateId);
+                    if (worldState == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state_value` contains a value for unknown world state {worldStateId}, ignored");
+                        continue;
+                    }
+
+                    int value = result.Read<int>(1);
+
+                    if (!worldState.MapIds.Empty())
+                    {
+                        foreach (uint mapId in worldState.MapIds)
+                            _worldStatesByMap[mapId][worldStateId] = value;
+                    }
+                    else
+                        _realmWorldStateValues[worldStateId] = value;
+
+                    ++savedValueCount;
+                }
+                while (result.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {savedValueCount} saved world state values {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public WorldStateTemplate GetWorldStateTemplate(int worldStateId)
@@ -201,6 +234,28 @@ namespace Game
                 return;
 
             map.SetWorldStateValue(worldStateId, value, hidden);
+        }
+
+        public void SaveValueInDb(int worldStateId, int value)
+        {
+            if (GetWorldStateTemplate(worldStateId) == null)
+                return;
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_WORLD_VARIABLE);
+            stmt.AddValue(0, worldStateId);
+            stmt.AddValue(1, value);
+            DB.Characters.Execute(stmt);
+        }
+
+        public void SetValueAndSaveInDb(WorldStates worldStateId, int value, bool hidden, Map map)
+        {
+            SetValueAndSaveInDb((int)worldStateId, value, hidden, map);
+        }
+
+        public void SetValueAndSaveInDb(int worldStateId, int value, bool hidden, Map map)
+        {
+            SetValue(worldStateId, value, hidden, map);
+            SaveValueInDb(worldStateId, value);
         }
 
         public Dictionary<int, int> GetInitialWorldStatesForMap(Map map)
