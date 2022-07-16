@@ -1258,14 +1258,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32((uint)Type);
-            _worldPacket.WriteUInt32(TimeLeft);
             _worldPacket.WriteUInt32(TotalTime);
+            _worldPacket.WriteUInt32(TimeLeft);
+            _worldPacket.WriteInt32((int)Type);
         }
 
-        public TimerType Type;
-        public uint TimeLeft;
         public uint TotalTime;
+        public uint TimeLeft;
+        public TimerType Type;
     }
 
     class ConversationLineStarted : ClientPacket
