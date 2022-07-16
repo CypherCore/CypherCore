@@ -168,7 +168,7 @@ namespace Game.Spells
                 if (unitCaster != null && apply_direct_bonus)
                 {
                     uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                    damage = (int)(bonus + (bonus * _variance));
+                    damage = (int)(bonus + (bonus * variance));
                     damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
                 }
 
@@ -688,7 +688,7 @@ namespace Game.Spells
             if (unitCaster != null)
             {
                 uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                damage = (int)(bonus + (bonus * _variance));
+                damage = (int)(bonus + (bonus * variance));
                 damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
             }
 
@@ -810,7 +810,7 @@ namespace Game.Spells
             else
             {
                 uint bonus = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
-                addhealth = (int)(bonus + (uint)(bonus * _variance));
+                addhealth = (int)(bonus + (uint)(bonus * variance));
             }
 
             addhealth = (int)unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal);
@@ -856,7 +856,7 @@ namespace Game.Spells
             if (unitCaster)
                 heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
 
-            heal += (uint)(heal * _variance);
+            heal += (uint)(heal * variance);
             if (unitCaster)
                 heal = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, heal, DamageEffectType.Heal);
 
@@ -877,7 +877,7 @@ namespace Game.Spells
             if (unitCaster != null)
                 unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
 
-            damage = (int)(bonus + (bonus * _variance));
+            damage = (int)(bonus + (bonus * variance));
 
             if (unitCaster != null)
                 damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);

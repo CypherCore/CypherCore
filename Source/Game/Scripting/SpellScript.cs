@@ -914,6 +914,28 @@ namespace Game.Scripting
             m_spell.damage = value;
         }
 
+        public float GetEffectVariance()
+        {
+            if (!IsInEffectHook())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectVariance was called, but function has no effect in current hook!");
+                return 0.0f;
+            }
+
+            return m_spell.variance;
+        }
+
+        public void SetEffectVariance(float variance)
+        {
+            if (!IsInEffectHook())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::SetEffectVariance was called, but function has no effect in current hook!");
+                return;
+            }
+
+            m_spell.variance = variance;
+        }
+        
         // returns: cast item if present.
         public Item GetCastItem() { return m_spell.m_CastItem; }
 

@@ -4587,7 +4587,7 @@ namespace Game.Spells
             destTarget = m_destTargets[spellEffectInfo.EffectIndex].Position;
             effectInfo = spellEffectInfo;
 
-            damage = CalculateDamage(spellEffectInfo, unitTarget, out _variance);
+            damage = CalculateDamage(spellEffectInfo, unitTarget, out variance);
 
             bool preventDefault = CallScriptEffectHandlers(spellEffectInfo.EffectIndex, mode);
 
@@ -8001,7 +8001,7 @@ namespace Game.Spells
         public WorldLocation destTarget;
         public int damage;
         public SpellMissInfo targetMissInfo;
-        float _variance;
+        public float variance;
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;
         // used in effects handlers
