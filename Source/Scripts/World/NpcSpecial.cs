@@ -1059,7 +1059,7 @@ namespace Scripts.World.NpcSpecial
                 me.RemoveUnitFlag(UnitFlags.InCombat);
                 me.SetUnitFlag(UnitFlags.Uninteractible);
                 me.SetDeathState(DeathState.JustDied);
-                me.SetDynamicFlag(UnitDynFlags.Dead);
+                me.SetUnitFlag3(UnitFlags3.FakeDead);
 
                 if (!DoctorGUID.IsEmpty())
                 {

@@ -1848,7 +1848,7 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.SetDynamicFlag(UnitDynFlags.Dead);
+            target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
             target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
 
@@ -1860,7 +1860,7 @@ namespace Scripts.Spells.Generic
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveDynamicFlag(UnitDynFlags.Dead);
+            target.RemoveUnitFlag3(UnitFlags3.FakeDead);
             target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
             target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
 
@@ -1915,7 +1915,7 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.SetDynamicFlag(UnitDynFlags.Dead);
+            target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
 
             Creature creature = target.ToCreature();
@@ -1926,7 +1926,7 @@ namespace Scripts.Spells.Generic
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveDynamicFlag(UnitDynFlags.Dead);
+            target.RemoveUnitFlag3(UnitFlags3.FakeDead);
             target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
 
             Creature creature = target.ToCreature();

@@ -1151,7 +1151,7 @@ namespace Scripts.Spells.Quest
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.SetDynamicFlag(UnitDynFlags.Dead);
+            target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
 
             Creature creature = target.ToCreature();

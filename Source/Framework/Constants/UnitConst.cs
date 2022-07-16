@@ -578,7 +578,7 @@ namespace Framework.Constants
         TrackUnit               = 0x08,
         Tapped                  = 0x10,     // Lua_UnitIsTapped
         SpecialInfo             = 0x20,
-        Dead                    = 0x40,
+        Unused                  = 0x40,     // previously UNIT_DYNFLAG_DEAD
         ReferAFriend            = 0x80
     }
 }
