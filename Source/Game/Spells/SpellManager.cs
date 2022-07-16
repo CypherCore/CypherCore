@@ -4336,6 +4336,12 @@ namespace Game.Entities
                 });
             });
 
+            // Ray of Frost (Fingers of Frost charges)
+            ApplySpellFix(new []{ 269748 }, spellInfo =>
+            {
+                spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell

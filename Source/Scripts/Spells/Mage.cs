@@ -66,6 +66,8 @@ namespace Scripts.Spells.Mage
         public const uint LivingBombPeriodic = 217694;
         public const uint ManaSurge = 37445;
         public const uint MasterOfTime = 342249;
+        public const uint RayOfFrostBonus = 208141;
+        public const uint RayOfFrostFingersOfFrost = 269748;
         public const uint Reverberate = 281482;
         public const uint RingOfFrostDummy = 91264;
         public const uint RingOfFrostFreeze = 82691;
@@ -1016,6 +1018,58 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    // 205021 - Ray of Frost
+    class spell_mage_ray_of_frost : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RayOfFrostFingersOfFrost);
+        }
+
+        void HandleOnHit()
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(caster, SpellIds.RayOfFrostFingersOfFrost, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new HitHandler(HandleOnHit));
+        }
+    }
+
+    class spell_mage_ray_of_frost_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RayOfFrostBonus, SpellIds.RayOfFrostFingersOfFrost);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                if (aurEff.GetTickNumber() > 1) // First tick should deal base damage
+                    caster.CastSpell(caster, SpellIds.RayOfFrostBonus, true);
+            }
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.RemoveAurasDueToSpell(SpellIds.RayOfFrostFingersOfFrost);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDamage));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 136511 - Ring of Frost
     class spell_mage_ring_of_frost : AuraScript
     {
