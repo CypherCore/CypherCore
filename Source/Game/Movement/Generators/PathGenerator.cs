@@ -952,7 +952,7 @@ namespace Game.Movement
                 return;
 
             // check if we even need to do anything
-            if ((_pathPoints[0] - target).LengthSquared() >= distSq)
+            if ((_pathPoints[_pathPoints.Length - 1] - target).LengthSquared() >= distSq)
                 return;
 
             int i = _pathPoints.Length - 1;

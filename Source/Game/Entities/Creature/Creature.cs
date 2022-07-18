@@ -1786,10 +1786,10 @@ namespace Game.Entities
             float maxRadius = 45.0f * aggroRate;
             float minRadius = 5.0f * aggroRate;
 
-            uint expansionMaxLevel = Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
-            uint playerLevel = player.GetLevelForTarget(this);
-            uint creatureLevel = GetLevelForTarget(player);
-            uint levelDifference = creatureLevel - playerLevel;
+            int expansionMaxLevel = (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
+            int playerLevel = (int)player.GetLevelForTarget(this);
+            int creatureLevel = (int)GetLevelForTarget(player);
+            int levelDifference = creatureLevel - playerLevel;
 
             // The aggro radius for creatures with equal level as the player is 20 yards.
             // The combatreach should not get taken into account for the distance so we drop it from the range (see Supremus as expample)

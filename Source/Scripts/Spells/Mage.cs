@@ -1018,7 +1018,7 @@ namespace Scripts.Spells.Mage
         }
     }
 
-    // 205021 - Ray of Frost
+    [Script] // 205021 - Ray of Frost
     class spell_mage_ray_of_frost : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1039,6 +1039,7 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script]
     class spell_mage_ray_of_frost_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

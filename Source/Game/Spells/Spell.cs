@@ -3372,7 +3372,7 @@ namespace Game.Spells
                 return;
 
             Unit unitCaster = m_caster.ToUnit();
-            if (unitCaster != null)
+            if (unitCaster == null)
                 return;
 
             // successful cast of the initial autorepeat spell is moved to idle state so that it is not deleted as long as autorepeat is active
