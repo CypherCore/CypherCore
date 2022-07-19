@@ -1438,7 +1438,7 @@ namespace Game.Entities
                     if (bf != null)
                         return bf;
                     else
-                        return Global.OutdoorPvPMgr.GetZoneScript(GetZoneId());
+                        return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(map, GetZoneId());
                 }
             }
 

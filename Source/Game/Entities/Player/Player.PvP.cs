@@ -765,7 +765,7 @@ namespace Game.Entities
         }
         public OutdoorPvP GetOutdoorPvP()
         {
-            return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId());
+            return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(GetMap(), GetZoneId());
         }
     }
 }

@@ -89,6 +89,8 @@ namespace Game.Maps
 
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
 
+            Global.OutdoorPvPMgr.CreateOutdoorPvPForMap(this);
+
             Global.ScriptMgr.OnCreateMap(this);
         }
 
@@ -110,6 +112,8 @@ namespace Game.Maps
 
             if (!m_scriptSchedule.Empty())
                 Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
+
+            Global.OutdoorPvPMgr.DestroyOutdoorPvPForMap(this);
 
             if (m_parentMap == this)
                 m_childTerrainMaps = null;

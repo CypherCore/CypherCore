@@ -469,7 +469,7 @@ namespace Game.Scripting
         public override bool IsDatabaseBound() { return true; }
 
         // Should return a fully valid OutdoorPvP object for the type ID.
-        public virtual OutdoorPvP GetOutdoorPvP() { return null; }
+        public virtual OutdoorPvP GetOutdoorPvP(Map map) { return null; }
     }
 
     public class WeatherScript : ScriptObject

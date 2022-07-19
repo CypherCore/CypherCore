@@ -35,10 +35,10 @@ namespace Game.PvP
     // base class for specific outdoor pvp handlers
     public class OutdoorPvP : ZoneScript
     {
-        public OutdoorPvP()
+        public OutdoorPvP(Map map)
         {
             m_TypeId = 0;
-            m_sendUpdate = true;
+            m_map = map;
             m_players[0] = new List<ObjectGuid>();
             m_players[1] = new List<ObjectGuid>();
         }
@@ -285,21 +285,10 @@ namespace Game.PvP
 
         public Map GetMap() { return m_map; }
 
-        // Hack to store map because this code is just shit
-        public void SetMapFromZone(uint zone)
-        {
-            AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(zone);
-            Cypher.Assert(areaTable != null);
-            Map map = Global.MapMgr.CreateBaseMap(areaTable.ContinentID);
-            Cypher.Assert(!map.Instanceable());
-            m_map = map;
-        }
-
         // the map of the objectives belonging to this outdoorpvp
         public Dictionary<ulong, OPvPCapturePoint> m_capturePoints = new();
         List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];
         public OutdoorPvPTypes m_TypeId;
-        bool m_sendUpdate;
 
         Map m_map;
     }

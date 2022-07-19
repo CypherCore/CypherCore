@@ -729,9 +729,9 @@ namespace Game.Scripting
         }
 
         // OutdoorPvPScript
-        public OutdoorPvP CreateOutdoorPvP(uint scriptId)
+        public OutdoorPvP CreateOutdoorPvP(uint scriptId, Map map)
         {
-            return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(), scriptId, null);
+            return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(map), scriptId, null);
         }
 
         // WeatherScript

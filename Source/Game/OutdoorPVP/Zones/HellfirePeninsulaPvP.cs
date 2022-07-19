@@ -25,7 +25,7 @@ namespace Game.PvP
 {
     class HellfirePeninsulaPvP : OutdoorPvP
     {
-        public HellfirePeninsulaPvP()
+        public HellfirePeninsulaPvP(Map map) : base(map)
         {
             m_TypeId = OutdoorPvPTypes.HellfirePeninsula;
             m_AllianceTowersControlled = 0;
@@ -36,7 +36,6 @@ namespace Game.PvP
         {
             m_AllianceTowersControlled = 0;
             m_HordeTowersControlled = 0;
-            SetMapFromZone(HPConst.BuffZones[0]);
 
             // add the zones affected by the pvp buff
             for (int i = 0; i < HPConst.BuffZones.Length; ++i)
@@ -305,9 +304,9 @@ namespace Game.PvP
     {
         public OutdoorPvP_hellfire_peninsula() : base("outdoorpvp_hp") { }
 
-        public override OutdoorPvP GetOutdoorPvP()
+        public override OutdoorPvP GetOutdoorPvP(Map map)
         {
-            return new HellfirePeninsulaPvP();
+            return new HellfirePeninsulaPvP(map);
         }
     }
 
