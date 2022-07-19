@@ -248,10 +248,9 @@ namespace Game
 
             // get the destination map entry, not the current one, this will fix homebind and reset greeting
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
-            InstanceTemplate mInstance = Global.ObjectMgr.GetInstanceTemplate(loc.GetMapId());
 
             // reset instance validity, except if going to an instance inside an instance
-            if (!player.m_InstanceValid && mInstance == null)
+            if (!player.m_InstanceValid && !mapEntry.IsDungeon())
                 player.m_InstanceValid = true;
 
             Map oldMap = player.GetMap();
@@ -375,7 +374,7 @@ namespace Game
                 }
             }
 
-            if (mInstance != null)
+            if (mapEntry.IsDungeon())
             {
                 // check if this instance has a reset time and send it to player if so
                 Difficulty diff = newMap.GetDifficultyID();

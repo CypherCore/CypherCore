@@ -5435,9 +5435,6 @@ namespace Game.Spells
                                             return SpellCastResult.TargetLockedToRaidInstance;
                                 }
                             }
-                            InstanceTemplate instance = Global.ObjectMgr.GetInstanceTemplate(mapId);
-                            if (instance == null)
-                                return SpellCastResult.TargetNotInInstance;
                             if (!target.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapId, difficulty), mapId))
                                 return SpellCastResult.BadTargets;
                         }

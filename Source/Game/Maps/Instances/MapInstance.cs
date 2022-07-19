@@ -184,12 +184,6 @@ namespace Game.Maps
                     Log.outError(LogFilter.Maps, "CreateInstance: no record for map {0}", GetId());
                     Cypher.Assert(false);
                 }
-                InstanceTemplate iTemplate = Global.ObjectMgr.GetInstanceTemplate(GetId());
-                if (iTemplate == null)
-                {
-                    Log.outError(LogFilter.Maps, "CreateInstance: no instance template for map {0}", GetId());
-                    Cypher.Assert(false);
-                }
 
                 // some instances only have one difficulty
                 Global.DB2Mgr.GetDownscaledMapDifficultyData(GetId(), ref difficulty);

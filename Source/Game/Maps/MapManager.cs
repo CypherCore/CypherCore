@@ -140,10 +140,6 @@ namespace Game.Entities
             if (!entry.IsDungeon())
                 return EnterState.CanEnter;
 
-            InstanceTemplate instance = Global.ObjectMgr.GetInstanceTemplate(mapid);
-            if (instance == null)
-                return EnterState.CannotEnterUninstancedDungeon;
-
             Difficulty targetDifficulty = player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
             MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry.Id, ref targetDifficulty);
@@ -254,16 +250,9 @@ namespace Game.Entities
             return Map.ExistMap(mapid, gx, gy) && Map.ExistVMap(mapid, gx, gy);
         }
 
-        public bool IsValidMAP(uint mapid, bool startUp)
+        public bool IsValidMAP(uint mapId)
         {
-            MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapid);
-
-            if (startUp)
-                return mEntry != null;
-            else
-                return mEntry != null && (!mEntry.IsDungeon() || Global.ObjectMgr.GetInstanceTemplate(mapid) != null);
-
-            // TODO: add check for Battlegroundtemplate
+            return CliDB.MapStorage.ContainsKey(mapId);
         }
 
         public void UnloadAll()

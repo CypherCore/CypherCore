@@ -5294,7 +5294,7 @@ namespace Game
             {
                 uint mapID = result.Read<uint>(0);
 
-                if (!Global.MapMgr.IsValidMAP(mapID, true))
+                if (!Global.MapMgr.IsValidMAP(mapID))
                 {
                     Log.outError(LogFilter.Sql, "ObjectMgr.LoadInstanceTemplate: bad mapid {0} for template!", mapID);
                     continue;
@@ -10549,8 +10549,7 @@ namespace Game
         }
         public AreaTriggerStruct GetGoBackTrigger(uint Map)
         {
-            bool useParentDbValue = false;
-            uint parentId = 0;
+            uint? parentId = null;
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(Map);
             if (mapEntry == null || mapEntry.CorpseMapID < 0)
                 return null;
@@ -10558,18 +10557,14 @@ namespace Game
             if (mapEntry.IsDungeon())
             {
                 InstanceTemplate iTemplate = GetInstanceTemplate(Map);
-
-                if (iTemplate == null)
-                    return null;
-
-                parentId = iTemplate.Parent;
-                useParentDbValue = true;
+                if (iTemplate != null)
+                    parentId = iTemplate.Parent;
             }
 
-            uint entrance_map = (uint)mapEntry.CorpseMapID;
+            uint entrance_map = parentId.GetValueOrDefault((uint)mapEntry.CorpseMapID);
             foreach (var pair in _areaTriggerStorage)
             {
-                if ((!useParentDbValue && pair.Value.target_mapId == entrance_map) || (useParentDbValue && pair.Value.target_mapId == parentId))
+                if (pair.Value.target_mapId == entrance_map)
                 {
                     AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(pair.Key);
                     if (atEntry != null && atEntry.ContinentID == Map)

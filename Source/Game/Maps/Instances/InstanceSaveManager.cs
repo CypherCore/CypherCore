@@ -696,11 +696,6 @@ namespace Game.Maps
                 return GetResetTime();
         }
 
-        InstanceTemplate GetTemplate()
-        {
-            return Global.ObjectMgr.GetInstanceTemplate(m_mapid);
-        }
-
         MapRecord GetMapEntry()
         {
             return CliDB.MapStorage.LookupByKey(m_mapid);

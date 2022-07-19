@@ -45,17 +45,17 @@ namespace Game.Maps
         
         public static bool IsValidMapCoord(uint mapid, float x, float y)
         {
-            return Global.MapMgr.IsValidMAP(mapid, false) && IsValidMapCoord(x, y);
+            return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y);
         }
 
         public static bool IsValidMapCoord(uint mapid, float x, float y, float z)
         {
-            return Global.MapMgr.IsValidMAP(mapid, false) && IsValidMapCoord(x, y, z);
+            return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y, z);
         }
 
         public static bool IsValidMapCoord(uint mapid, float x, float y, float z, float o)
         {
-            return Global.MapMgr.IsValidMAP(mapid, false) && IsValidMapCoord(x, y, z, o);
+            return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y, z, o);
         }
 
         public static bool IsValidMapCoord(uint mapid, Position pos)
