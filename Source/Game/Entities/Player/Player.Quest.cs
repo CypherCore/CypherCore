@@ -2218,11 +2218,11 @@ namespace Game.Entities
             if (questBit == 0)
                 return;
 
-            uint fieldOffset = (questBit - 1) >> 6;
+            uint fieldOffset = (questBit - 1) >> ActivePlayerData.QuestCompletedBitsPerBlock;
             if (fieldOffset >= PlayerConst.QuestsCompletedBitsSize)
                 return;
 
-            ulong flag = 1ul << (((int)questBit - 1) & 63);
+            ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
             if (completed)
                 SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
             else

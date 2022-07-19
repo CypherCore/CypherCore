@@ -3471,6 +3471,8 @@ namespace Game.Entities
     {
         public static int ExploredZonesSize;
         public static int ExploredZonesBits;
+        public static int QuestCompletedBitsSize;
+        public static int QuestCompletedBitsPerBlock;
 
         public UpdateField<bool> BackpackAutoSortDisabled = new(0, 1);
         public UpdateField<bool> BankAutoSortDisabled = new(0, 2);
@@ -3602,6 +3604,9 @@ namespace Game.Entities
         {
             ExploredZonesSize = ExploredZones.GetSize();
             ExploredZonesBits = sizeof(ulong) * 8;
+
+            QuestCompletedBitsSize = QuestCompleted.GetSize();
+            QuestCompletedBitsPerBlock = sizeof(ulong) * 8;
         }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
