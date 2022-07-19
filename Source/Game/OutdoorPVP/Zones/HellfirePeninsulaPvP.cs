@@ -42,13 +42,36 @@ namespace Game.PvP
             for (int i = 0; i < HPConst.BuffZones.Length; ++i)
                 RegisterZone(HPConst.BuffZones[i]);
 
-            AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.BrokenHill));
-
-            AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Overlook));
-
-            AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Stadium));
-
             return true;
+        }
+
+        public override void OnGameObjectCreate(GameObject go)
+        {
+            switch (go.GetEntry())
+            {
+                case 182175:
+                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.BrokenHill, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.BrokenHill]));
+                    break;
+                case 182174:
+                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Overlook, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Overlook]));
+                    break;
+                case 182173:
+                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Stadium, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Stadium]));
+                    break;
+                case 183514:
+                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.BrokenHill] = go.GetSpawnId();
+                    break;
+                case 182525:
+                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Overlook] = go.GetSpawnId();
+                    break;
+                case 183515:
+                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Stadium] = go.GetSpawnId();
+                    break;
+                default:
+                    break;
+            }
+
+            base.OnGameObjectCreate(go);
         }
 
         public override void HandlePlayerEnterZone(Player player, uint zone)
@@ -153,16 +176,19 @@ namespace Game.PvP
         // how many towers are controlled
         uint m_AllianceTowersControlled;
         uint m_HordeTowersControlled;
+        ulong[] m_towerFlagSpawnIds = new ulong[(int)OutdoorPvPHPTowerType.Num];
     }
 
     class HellfirePeninsulaCapturePoint : OPvPCapturePoint
     {
-        public HellfirePeninsulaCapturePoint(OutdoorPvP pvp, OutdoorPvPHPTowerType type) : base(pvp)
+        public HellfirePeninsulaCapturePoint(OutdoorPvP pvp, OutdoorPvPHPTowerType type, GameObject go, ulong flagSpawnId) : base(pvp)
         {
             m_TowerType = (uint)type;
+            m_flagSpawnId = flagSpawnId;
 
-            SetCapturePointData(HPConst.CapturePoints[m_TowerType].entry, HPConst.CapturePoints[m_TowerType].map, HPConst.CapturePoints[m_TowerType].pos, HPConst.CapturePoints[m_TowerType].rot);
-            AddObject(m_TowerType, HPConst.TowerFlags[m_TowerType].entry, HPConst.TowerFlags[m_TowerType].map, HPConst.TowerFlags[m_TowerType].pos, HPConst.TowerFlags[m_TowerType].rot);
+            m_capturePointSpawnId = go.GetSpawnId();
+            m_capturePoint = go;
+            SetCapturePointData(go.GetEntry());
         }
 
         public override void ChangeState()
@@ -257,7 +283,7 @@ namespace Game.PvP
             foreach (var go in bounds)
                 go.SetGoArtKit(artkit);
 
-            bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_Objects[m_TowerType]);
+            bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_flagSpawnId);
             foreach (var go in bounds)
                 go.SetGoArtKit(artkit2);
 
@@ -271,6 +297,7 @@ namespace Game.PvP
         }
 
         uint m_TowerType;
+        ulong m_flagSpawnId;
     }
 
     [Script]
@@ -310,20 +337,6 @@ namespace Game.PvP
         public static uint[] CapturePointEventEnter = { 11404, 11396, 11388 };
 
         public static uint[] CapturePointEventLeave = { 11403, 11395, 11387 };
-
-        public static go_type[] CapturePoints =
-        {
-            new go_type(182175, 530, -471.462f, 3451.09f, 34.6432f, 0.174533f, 0.0f, 0.0f, 0.087156f, 0.996195f),      // 0 - Broken Hill
-            new go_type(182174, 530, -184.889f, 3476.93f, 38.205f, -0.017453f, 0.0f, 0.0f, 0.008727f, -0.999962f),     // 1 - Overlook
-            new go_type(182173, 530, -290.016f, 3702.42f, 56.6729f, 0.034907f, 0.0f, 0.0f, 0.017452f, 0.999848f)     // 2 - Stadium
-        };
-
-        public static go_type[] TowerFlags =
-        {
-            new go_type(183514, 530, -467.078f, 3528.17f, 64.7121f, 3.14159f, 0.0f, 0.0f, 1.0f, 0.0f),  // 0 broken hill
-            new go_type(182525, 530, -187.887f, 3459.38f, 60.0403f, -3.12414f, 0.0f, 0.0f, 0.999962f, -0.008727f), // 1 overlook
-            new go_type(183515, 530, -289.610f, 3696.83f, 75.9447f, 3.12414f, 0.0f, 0.0f, 0.999962f, 0.008727f) // 2 stadium
-        };
     }
 
     struct DefenseMessages

@@ -392,7 +392,7 @@ namespace Game.PvP
             return false;
         }
 
-        public bool SetCapturePointData(uint entry, uint map, Position pos, Quaternion rot)
+        public bool SetCapturePointData(uint entry)
         {
             Log.outDebug(LogFilter.Outdoorpvp, "Creating capture point {0}", entry);
 
@@ -404,19 +404,34 @@ namespace Game.PvP
                 return false;
             }
 
-            m_capturePointSpawnId = Global.ObjectMgr.AddGameObjectData(entry, map, pos, rot, 0);
-            if (m_capturePointSpawnId == 0)
-                return false;
-
             // get the needed values from goinfo
             m_maxValue = goinfo.ControlZone.maxTime;
             m_maxSpeed = m_maxValue / (goinfo.ControlZone.minTime != 0 ? goinfo.ControlZone.minTime : 60);
             m_neutralValuePct = goinfo.ControlZone.neutralPercent;
             m_minValue = MathFunctions.CalculatePct(m_maxValue, m_neutralValuePct);
-
             return true;
         }
 
+        public bool SetCapturePointData(uint entry, uint map, Position pos, Quaternion rot)
+        {
+            Log.outDebug(LogFilter.Outdoorpvp, $"Creating capture point {entry}");
+
+            // check info existence
+            GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            if (goinfo == null || goinfo.type != GameObjectTypes.ControlZone)
+            {
+                Log.outError(LogFilter.Outdoorpvp, $"OutdoorPvP: GO {entry} is not capture point!");
+                return false;
+            }
+
+            m_capturePointSpawnId = Global.ObjectMgr.AddGameObjectData(entry, map, pos, rot, 0);
+            if (m_capturePointSpawnId == 0)
+                return false;
+
+            SetCapturePointData(entry);
+            return true;
+        }
+        
         public bool DelCreature(uint type)
         {
             if (!m_Creatures.ContainsKey(type))

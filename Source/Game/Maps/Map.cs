@@ -2969,7 +2969,7 @@ namespace Game.Maps
                 if (shouldBeActive)
                     SpawnGroupSpawn(spawnGroupId);
                 else if (GetSpawnGroupData(spawnGroupId).flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
-                    SpawnGroupDespawn(spawnGroupId);
+                    SpawnGroupDespawn(spawnGroupId, true);
                 else
                     SetSpawnGroupInactive(spawnGroupId);
             }
