@@ -945,8 +945,8 @@ namespace Game
                 // start with every map explored
                 if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
                 {
-                    for (ushort i = 0; i < PlayerConst.ExploredZonesSize; i++)
-                        pCurrChar.SetUpdateFieldValue(ref pCurrChar.m_values.ModifyValue(pCurrChar.m_activePlayerData).ModifyValue(pCurrChar.m_activePlayerData.ExploredZones, i), 0xFFFFFFFFFFFFFFFF);
+                    for (uint i = 0; i < PlayerConst.ExploredZonesSize; i++)
+                        pCurrChar.AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
                 }
 
                 //Reputations if "StartAllReputation" is enabled

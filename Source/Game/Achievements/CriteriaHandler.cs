@@ -1105,11 +1105,11 @@ namespace Game.Achievements
                         if (area.AreaBit < 0)
                             continue;
 
-                        int playerIndexOffset = (int)((uint)area.AreaBit / 64);
+                        int playerIndexOffset = (int)area.AreaBit / ActivePlayerData.ExploredZonesBits;
                         if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                             continue;
 
-                        ulong mask = 1ul << (int)((uint)area.AreaBit % 64);
+                        ulong mask = 1ul << (int)((uint)area.AreaBit % ActivePlayerData.ExploredZonesBits);
                         if (Convert.ToBoolean(referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & mask))
                         {
                             matchFound = true;
@@ -1857,11 +1857,11 @@ namespace Game.Achievements
                     if (areaTable.AreaBit <= 0)
                         break; // success
 
-                    int playerIndexOffset = areaTable.AreaBit / 64;
+                    int playerIndexOffset = areaTable.AreaBit / ActivePlayerData.ExploredZonesBits;
                     if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                         break;
 
-                    if ((referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % 64))) == 0)
+                    if ((referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % ActivePlayerData.ExploredZonesBits))) == 0)
                         return false;
                     break;
                 }

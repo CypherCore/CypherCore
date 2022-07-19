@@ -2695,9 +2695,8 @@ namespace Game.Entities
             SetXP(xp);
 
             StringArray exploredZonesStrings = new(exploredZones, ' ');
-            if (exploredZonesStrings.Length == PlayerConst.ExploredZonesSize * 2)
-                for (int i = 0; i < exploredZonesStrings.Length; ++i)
-                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
+            for (int i = 0; i < exploredZonesStrings.Length && i / 2 < ActivePlayerData.ExploredZonesSize; ++i)
+                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
 
             StringArray knownTitlesStrings = new(knownTitles, ' ');
             if ((knownTitlesStrings.Length % 2) == 0)

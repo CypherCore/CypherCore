@@ -5852,7 +5852,7 @@ namespace Game.Entities
                 return;
             }
 
-            int offset = areaEntry.AreaBit / 64;
+            int offset = areaEntry.AreaBit / ActivePlayerData.ExploredZonesBits;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 Log.outError(LogFilter.Player, "Wrong area flag {0} in map data for (X: {1} Y: {2}) point to field PLAYER_EXPLORED_ZONES_1 + {3} ( {4} must be < {5} ).",
@@ -5860,7 +5860,7 @@ namespace Game.Entities
                 return;
             }
 
-            ulong val = 1ul << (areaEntry.AreaBit % 64);
+            ulong val = 1ul << (areaEntry.AreaBit % ActivePlayerData.ExploredZonesBits);
             ulong currFields = m_activePlayerData.ExploredZones[offset];
 
             if (!Convert.ToBoolean(currFields & val))
