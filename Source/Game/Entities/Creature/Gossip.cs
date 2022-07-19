@@ -529,7 +529,7 @@ namespace Game.Misc
             offer.SuggestedPartyMembers = quest.SuggestedPlayers;
 
             for (uint i = 0; i < SharedConst.QuestEmoteCount && quest.OfferRewardEmote[i] != 0; ++i)
-                offer.Emotes.Add(new QuestDescEmote(quest.OfferRewardEmote[i], quest.OfferRewardEmoteDelay[i]));
+                offer.Emotes.Add(new QuestDescEmote((uint)quest.OfferRewardEmote[i], quest.OfferRewardEmoteDelay[i]));
 
             offer.QuestFlags[0] = (uint)quest.Flags;
             offer.QuestFlags[1] = (uint)quest.FlagsEx;

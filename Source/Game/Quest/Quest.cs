@@ -195,7 +195,7 @@ namespace Game
         {
             for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
             {
-                ushort emoteId = fields.Read<ushort>(1 + i);
+                short emoteId = fields.Read<short>(1 + i);
                 if (!CliDB.EmotesStorage.ContainsKey(emoteId))
                 {
                     Log.outError(LogFilter.Sql, "Table `quest_offer_reward` has non-existing Emote{0} ({1}) set for quest {2}. Skipped.", 1 + i, emoteId, fields.Read<uint>(0));
@@ -756,7 +756,7 @@ namespace Game
         public string RequestItemsText = "";
 
         // quest_offer_reward table
-        public uint[] OfferRewardEmote = new uint[SharedConst.QuestEmoteCount];
+        public int[] OfferRewardEmote = new int[SharedConst.QuestEmoteCount];
         public uint[] OfferRewardEmoteDelay = new uint[SharedConst.QuestEmoteCount];
         public string OfferRewardText = "";
 
