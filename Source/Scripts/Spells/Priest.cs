@@ -43,6 +43,8 @@ namespace Scripts.Spells.Priest
         public const uint DivineWrath = 40441;
         public const uint FlashHeal = 2061;
         public const uint GuardianSpiritHeal = 48153;
+        public const uint HaloDamage = 120696;
+        public const uint HaloHeal = 120692;
         public const uint Heal = 2060;
         public const uint HolyWordChastise = 88625;
         public const uint HolyWordSanctify = 34861;
@@ -351,6 +353,24 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 120517 - Halo
+    class areatrigger_pri_halo : AreaTriggerAI
+    {
+        public areatrigger_pri_halo(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                if (caster.IsValidAttackTarget(unit))
+                    caster.CastSpell(unit, SpellIds.HaloDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+                else if (caster.IsValidAssistTarget(unit))
+                    caster.CastSpell(unit, SpellIds.HaloHeal, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+            }
+        }
+    }
+    
     [Script] // 63733 - Holy Words
     class spell_pri_holy_words : AuraScript
     {
