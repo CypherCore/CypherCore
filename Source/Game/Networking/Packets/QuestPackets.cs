@@ -449,7 +449,7 @@ namespace Game.Networking.Packets
 
             foreach (QuestDescEmote emote in DescEmotes)
             {
-                _worldPacket.WriteUInt32(emote.Type);
+                _worldPacket.WriteInt32(emote.Type);
                 _worldPacket.WriteUInt32(emote.Delay);
             }
 
@@ -1125,13 +1125,13 @@ namespace Game.Networking.Packets
 
     public struct QuestDescEmote
     {
-        public QuestDescEmote(uint type = 0, uint delay = 0)
+        public QuestDescEmote(int type = 0, uint delay = 0)
         {
             Type = type;
             Delay = delay;
         }
 
-        public uint Type;
+        public int Type;
         public uint Delay;
     }
 
@@ -1149,7 +1149,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Emotes.Count);
             foreach (QuestDescEmote emote in Emotes)
             {
-                data.WriteUInt32(emote.Type);
+                data.WriteInt32(emote.Type);
                 data.WriteUInt32(emote.Delay);
             }
 

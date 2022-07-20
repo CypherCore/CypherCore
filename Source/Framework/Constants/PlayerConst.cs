@@ -39,7 +39,6 @@ namespace Framework.Constants
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 
         public const int MaxDailyQuests = 25;
-        public const int QuestsCompletedBitsSize = 1750;
 
         public static TimeSpan InfinityCooldownDelay = TimeSpan.FromSeconds(Time.Month);  // used for set "infinity cooldowns" for spells and check
         public const uint infinityCooldownDelayCheck = Time.Month / 2;

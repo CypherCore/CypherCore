@@ -2218,8 +2218,8 @@ namespace Game.Entities
             if (questBit == 0)
                 return;
 
-            uint fieldOffset = (questBit - 1) >> ActivePlayerData.QuestCompletedBitsPerBlock;
-            if (fieldOffset >= PlayerConst.QuestsCompletedBitsSize)
+            uint fieldOffset = (uint)((questBit - 1) / ActivePlayerData.QuestCompletedBitsPerBlock);
+            if (fieldOffset >= ActivePlayerData.QuestCompletedBitsSize)
                 return;
 
             ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
