@@ -4275,7 +4275,7 @@ namespace Game.Spells
                                         Battleground bg = target.ToPlayer().GetBattleground();
                                         if (bg)
                                             bg.RemovePlayerFromResurrectQueue(target.GetGUID());
-                                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(target.GetZoneId());
+                                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(target.GetMap(), target.GetZoneId());
                                         if (bf != null)
                                             bf.RemovePlayerFromResurrectQueue(target.GetGUID());
                                     }

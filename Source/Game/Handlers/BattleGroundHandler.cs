@@ -643,7 +643,7 @@ namespace Game
             if (bg != null)
                 Global.BattlegroundMgr.SendAreaSpiritHealerQuery(GetPlayer(), bg, areaSpiritHealerQuery.HealerGuid);
 
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetZoneId());
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetMap(), GetPlayer().GetZoneId());
             if (bf != null)
                 bf.SendAreaSpiritHealerQuery(GetPlayer(), areaSpiritHealerQuery.HealerGuid);
         }
@@ -662,7 +662,7 @@ namespace Game
             if (bg)
                 bg.AddPlayerToResurrectQueue(areaSpiritHealerQueue.HealerGuid, GetPlayer().GetGUID());
 
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetZoneId());
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetMap(), GetPlayer().GetZoneId());
             if (bf != null)
                 bf.AddPlayerToResurrectQueue(areaSpiritHealerQueue.HealerGuid, GetPlayer().GetGUID());
         }
@@ -673,7 +673,7 @@ namespace Game
             if (GetPlayer().IsInFlight())
                 return;
 
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetZoneId());
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetMap(), GetPlayer().GetZoneId());
             if (bf != null)
             {
                 bf.PlayerAskToLeave(_player);

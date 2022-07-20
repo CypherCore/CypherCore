@@ -715,9 +715,9 @@ namespace Game.Scripting
         }
 
         //BattlefieldScript
-        public BattleField CreateBattlefield(uint scriptId)
+        public BattleField CreateBattlefield(uint scriptId, Map map)
         {
-            return RunScriptRet<BattlefieldScript, BattleField>(p => p.GetBattlefield(), scriptId, null);
+            return RunScriptRet<BattlefieldScript, BattleField>(p => p.GetBattlefield(map), scriptId, null);
         }
 
         //BattlegroundScript

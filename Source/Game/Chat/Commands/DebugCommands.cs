@@ -691,7 +691,7 @@ namespace Game.Chat
                     nearestLoc = bg.GetClosestGraveYard(player);
                 else
                 {
-                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetZoneId());
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
                     if (bf != null)
                         nearestLoc = bf.GetClosestGraveYard(player);
                     else

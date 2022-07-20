@@ -19,11 +19,16 @@ using Framework.Database;
 using Game.Entities;
 using Game.Maps;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.BattleFields
 {
     public class BattleFieldManager : Singleton<BattleFieldManager>
     {
+        static uint[] BattlefieldIdToMapId = { 0, 571, 732 };
+        static uint[] BattlefieldIdToZoneId = { 0, 4197, 5095 }; // imitate World_PVP_Area.db2
+        static uint[] BattlefieldIdToScriptId = { 0, 0, 0 };
+
         BattleFieldManager() { }
 
         public void InitBattlefield()
@@ -43,20 +48,7 @@ namespace Game.BattleFields
                         continue;
                     }
 
-                    uint scriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
-
-                    var bf = Global.ScriptMgr.CreateBattlefield(scriptId);
-                    if (bf == null)
-                        continue;
-
-                    if (!bf.SetupBattlefield())
-                    {
-                        Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {typeId} failed.");
-                        continue;
-                    }
-
-                    _battlefieldSet.Add(bf);
-                    Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {typeId} succeeded.");
+                    BattlefieldIdToScriptId[(int)typeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
                     ++count;
 
                 } while (result.NextRow());
@@ -65,14 +57,44 @@ namespace Game.BattleFields
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battlefields in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        public void CreateBattlefieldsForMap(Map map)
+        {
+            for (uint i = 0; i < (int)BattleFieldTypes.Max; ++i)
+            {
+                if (BattlefieldIdToScriptId[i] == 0)
+                    continue;
+
+                if (BattlefieldIdToMapId[i] != map.GetId())
+                    continue;
+
+                BattleField bf = Global.ScriptMgr.CreateBattlefield(BattlefieldIdToScriptId[i], map);
+                if (bf == null)
+                    continue;
+
+                if (!bf.SetupBattlefield())
+                {
+                    Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {(BattleFieldTypes)i} on map {map.GetId()} instance id {map.GetInstanceId()} failed.");
+                    continue;
+                }
+
+                _battlefieldsByMap.Add(map, bf);
+                Log.outInfo(LogFilter.Battlefield, $"Setting up battlefield with TypeId {(BattleFieldTypes)i} on map {map.GetId()} instance id {map.GetInstanceId()} succeeded.");
+            }
+        }
+
+        public void DestroyBattlefieldsForMap(Map map)
+        {
+            _battlefieldsByMap.Remove(map);
+        }
+
         public void AddZone(uint zoneId, BattleField bf)
         {
-            _battlefieldMap[zoneId] = bf;
+            _battlefieldsByZone[(bf.GetMap(), zoneId)] = bf;
         }
 
         public void HandlePlayerEnterZone(Player player, uint zoneId)
         {
-            var bf = _battlefieldMap.LookupByKey(zoneId);
+            var bf = _battlefieldsByZone.LookupByKey((player.GetMap(), zoneId));
             if (bf == null)
                 return;
 
@@ -85,7 +107,7 @@ namespace Game.BattleFields
 
         public void HandlePlayerLeaveZone(Player player, uint zoneId)
         {
-            var bf = _battlefieldMap.LookupByKey(zoneId);
+            var bf = _battlefieldsByZone.LookupByKey((player.GetMap(), zoneId));
             if (bf == null)
                 return;
 
@@ -97,9 +119,14 @@ namespace Game.BattleFields
             Log.outDebug(LogFilter.Battlefield, "Player {0} left battlefield id {1}", player.GetGUID().ToString(), bf.GetTypeId());
         }
 
-        public BattleField GetBattlefieldToZoneId(uint zoneId)
+        public bool IsWorldPvpArea(uint zoneId)
         {
-            var bf = _battlefieldMap.LookupByKey(zoneId);
+            return BattlefieldIdToZoneId.Contains(zoneId);
+        }
+
+        public BattleField GetBattlefieldToZoneId(Map map, uint zoneId)
+        {
+            var bf = _battlefieldsByZone.LookupByKey((map, zoneId));
             if (bf == null)
             {
                 // no handle for this zone, return
@@ -112,30 +139,12 @@ namespace Game.BattleFields
             return bf;
         }
 
-        public BattleField GetBattlefieldByBattleId(uint battleId)
+        public BattleField GetBattlefieldByBattleId(Map map, uint battleId)
         {
-            foreach (var bf in _battlefieldSet)
-            {
-                if (bf.GetBattleId() == battleId)
-                    return bf;
-            }
-            return null;
-        }
-
-        public BattleField GetBattlefieldByQueueId(ulong queueId)
-        {
-            foreach (var bf in _battlefieldSet)
-                if (bf.GetQueueId() == queueId)
-                    return bf;
-
-            return null;
-        }
-
-        ZoneScript GetZoneScript(uint zoneId)
-        {
-            var bf = _battlefieldMap.LookupByKey(zoneId);
-            if (bf != null)
-                return bf;
+            var battlefields = _battlefieldsByMap.LookupByKey(map);
+            foreach (var battlefield in battlefields)
+                if (battlefield.GetBattleId() == battleId)
+                    return battlefield;
 
             return null;
         }
@@ -145,19 +154,20 @@ namespace Game.BattleFields
             _updateTimer += diff;
             if (_updateTimer > 1000)
             {
-                foreach (var bf in _battlefieldSet)
-                    if (bf.IsEnabled())
-                        bf.Update(_updateTimer);
+                foreach (var (map, battlefield) in _battlefieldsByMap)
+                    if (battlefield.IsEnabled())
+                        battlefield.Update(_updateTimer);
+
                 _updateTimer = 0;
             }
         }
 
         // contains all initiated battlefield events
         // used when initing / cleaning up
-        List<BattleField> _battlefieldSet = new();
+        MultiMap<Map, BattleField>  _battlefieldsByMap = new();
         // maps the zone ids to an battlefield event
         // used in player event handling
-        Dictionary<uint, BattleField> _battlefieldMap = new();
+        Dictionary<(Map map, uint zoneId), BattleField>  _battlefieldsByZone = new();
         // update interval
         uint _updateTimer;
     }

@@ -36,7 +36,7 @@ namespace Game.BattleFields
 
     public class BattleField : ZoneScript
     {
-        public BattleField()
+        public BattleField(Map map)
         {
             m_IsEnabled = true;
             m_DefenderTeam = TeamId.Neutral;
@@ -46,6 +46,9 @@ namespace Game.BattleFields
             m_uiKickAfkPlayersTimer = 1000;
 
             m_LastResurectTimer = 30 * Time.InMilliseconds;
+
+            m_Map = map;
+            m_MapId = map.GetId();
 
             for (byte i = 0; i < 2; ++i)
             {

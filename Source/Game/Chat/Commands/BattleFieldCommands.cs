@@ -27,7 +27,7 @@ namespace Game.Chat
         [Command("enable", RBACPermissions.CommandBfEnable)]
         static bool HandleBattlefieldEnable(CommandHandler handler, uint battleId)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 
@@ -50,7 +50,7 @@ namespace Game.Chat
         [Command("start", RBACPermissions.CommandBfStart)]
         static bool HandleBattlefieldStart(CommandHandler handler, uint battleId)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 
@@ -65,7 +65,7 @@ namespace Game.Chat
         [Command("stop", RBACPermissions.CommandBfStop)]
         static bool HandleBattlefieldEnd(CommandHandler handler, uint battleId)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 
@@ -80,7 +80,7 @@ namespace Game.Chat
         [Command("switch", RBACPermissions.CommandBfSwitch)]
         static bool HandleBattlefieldSwitch(CommandHandler handler, uint battleId)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 
@@ -94,7 +94,7 @@ namespace Game.Chat
         [Command("timer", RBACPermissions.CommandBfTimer)]
         static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, uint time)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleId);
+            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
             if (bf == null)
                 return false;
 

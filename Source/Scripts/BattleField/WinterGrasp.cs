@@ -16,25 +16,25 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Networking.Packets;
+using Game.Maps;
+using Game.Scripting;
 using Game.Spells;
 using System.Collections.Generic;
-using Game.Scripting;
-using Game.AI;
 
 namespace Game.BattleFields
 {
     class BattlefieldWG : BattleField
     {
+        public BattlefieldWG(Map map) : base(map) { }
+
         public override bool SetupBattlefield()
         {
             m_TypeId = (uint)BattleFieldTypes.WinterGrasp;                              // See enum BattlefieldTypes
             m_BattleId = BattlefieldIds.WG;
             m_ZoneId = (uint)AreaId.Wintergrasp;
-            m_MapId = WGConst.MapId;
-            m_Map = Global.MapMgr.CreateBaseMap(m_MapId);
 
             InitStalker(WGNpcs.Stalker, WGConst.WintergraspStalkerPos);
 
@@ -1149,6 +1149,26 @@ namespace Game.BattleFields
             }
 
             _state = (WGGameObjectState)Global.WorldStateMgr.GetValue((int)_worldState, _wg.GetMap());
+            if (_state == WGGameObjectState.None)
+            {
+                // set to default state based on type
+                switch (_teamControl)
+                {
+                    case TeamId.Alliance:
+                        _state = WGGameObjectState.AllianceIntact;
+                        break;
+                    case TeamId.Horde:
+                        _state = WGGameObjectState.HordeIntact;
+                        break;
+                    case TeamId.Neutral:
+                        _state = WGGameObjectState.NeutralIntact;
+                        break;
+                    default:
+                        break;
+                }
+                Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
+            }
+
             switch (_state)
             {
                 case WGGameObjectState.NeutralIntact:
@@ -1556,9 +1576,9 @@ namespace Game.BattleFields
     {
         public Battlefield_wintergrasp() : base("battlefield_wg") { }
 
-        public override BattleField GetBattlefield()
+        public override BattleField GetBattlefield(Map map)
         {
-            return new BattlefieldWG();
+            return new BattlefieldWG(map);
         }
     }
 
@@ -1572,7 +1592,7 @@ namespace Game.BattleFields
             if (!killer || !killer.IsPlayer())
                 return;
 
-            BattlefieldWG wintergrasp = (BattlefieldWG)Global.BattleFieldMgr.GetBattlefieldByBattleId(BattlefieldIds.WG);
+            BattlefieldWG wintergrasp = (BattlefieldWG)Global.BattleFieldMgr.GetBattlefieldByBattleId(killer.GetMap(), BattlefieldIds.WG);
             if (wintergrasp == null)
                 return;
 

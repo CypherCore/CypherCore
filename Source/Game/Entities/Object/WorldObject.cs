@@ -1434,7 +1434,7 @@ namespace Game.Entities
                     return (ZoneScript)instanceMap.GetInstanceScript();
                 else if (!map.IsBattlegroundOrArena())
                 {
-                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(map, GetZoneId());
                     if (bf != null)
                         return bf;
                     else

@@ -4018,7 +4018,7 @@ namespace Game.Entities
                 ClosestGrave = bg.GetClosestGraveYard(this);
             else
             {
-                BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
+                BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
                 if (bf != null)
                     ClosestGrave = bf.GetClosestGraveYard(this);
                 else
