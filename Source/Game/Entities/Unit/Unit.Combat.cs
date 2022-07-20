@@ -250,6 +250,9 @@ namespace Game.Entities
                     return;
             }
 
+            if (!extraAttacksTargets.ContainsKey(targetGUID))
+                extraAttacksTargets[targetGUID] = 0;
+
             extraAttacksTargets[targetGUID] += count;
         }
 

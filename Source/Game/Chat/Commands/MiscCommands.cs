@@ -2124,7 +2124,7 @@ namespace Game.Chat
 
             if (args[0] == '[')                                        // [name] manual form
             {
-                string itemName = args.NextString("]");
+                string itemName = args.NextString("]").Substring(1);
 
                 if (!string.IsNullOrEmpty(itemName))
                 {

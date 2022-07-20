@@ -730,7 +730,7 @@ public static partial class Detour
 
         void closestPointOnDetailEdges(bool onlyBoundary, dtMeshTile tile, dtPoly poly, float[] pos, float[] closest)
         {
-            uint ip = (uint)tile.polys.ToList().IndexOf(poly);
+            int ip = Array.IndexOf(tile.polys, poly);
             dtPolyDetail pd = tile.detailMeshes[ip];
 
             float dmin = float.MaxValue;
@@ -789,7 +789,7 @@ public static partial class Detour
             if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                 return false;
 
-            uint ip = (uint)Array.IndexOf(tile.polys, poly);
+            int ip = Array.IndexOf(tile.polys, poly);
             dtPolyDetail pd = tile.detailMeshes[ip];
 
             float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
@@ -849,7 +849,6 @@ public static partial class Detour
 
         public void closestPointOnPoly(dtPolyRef polyRef, float[] pos, float[] closest, ref bool posOverPoly)
         {
-
             dtMeshTile tile = new();
             dtPoly poly = new();
             getTileAndPolyByRefUnsafe(polyRef, ref tile, ref poly);

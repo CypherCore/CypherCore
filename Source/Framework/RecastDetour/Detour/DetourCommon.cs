@@ -3,7 +3,6 @@ using System.Numerics;
 
 public static partial class Detour
 {
-
     /**
     @defgroup detour Detour
 
