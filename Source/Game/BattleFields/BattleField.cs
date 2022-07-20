@@ -95,7 +95,6 @@ namespace Game.BattleFields
                 if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()))
                 {
                     m_PlayersInWar[player.GetTeamId()].Remove(player.GetGUID());
-                    player.GetSession().SendBfLeaveMessage(GetQueueId(), GetState(), player.GetZoneId() == GetZoneId());
                     Group group = player.GetGroup();
                     if (group) // Remove the player from the raid group
                         group.RemoveMember(player.GetGUID());
@@ -209,7 +208,7 @@ namespace Game.BattleFields
                 return;
 
             if (m_PlayersInQueue[player.GetTeamId()].Count <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player.GetTeamId())].Count >= m_MinPlayer)
-                player.GetSession().SendBfInvitePlayerToQueue(GetQueueId(), GetState());
+                PlayerAcceptInviteToQueue(player);
         }
 
         void InvitePlayersInQueueToWar()
@@ -282,7 +281,7 @@ namespace Game.BattleFields
 
             m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
             m_InvitedPlayers[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + m_TimeForAcceptInvite;
-            player.GetSession().SendBfInvitePlayerToWar(GetQueueId(), m_ZoneId, m_TimeForAcceptInvite);
+            PlayerAcceptInviteToWar(player);
         }
 
         public void InitStalker(uint entry, Position pos)
@@ -369,8 +368,6 @@ namespace Game.BattleFields
         {
             // Add player in queue
             m_PlayersInQueue[player.GetTeamId()].Add(player.GetGUID());
-            // Send notification
-            player.GetSession().SendBfQueueInviteResponse(GetQueueId(), m_ZoneId, GetState());
         }
 
         // Called in WorldSession:HandleBfExitRequest
@@ -396,7 +393,6 @@ namespace Game.BattleFields
 
             if (AddOrSetPlayerToCorrectBfGroup(player))
             {
-                player.GetSession().SendBfEntered(GetQueueId(), player.GetZoneId() != GetZoneId(), player.GetTeamId() == GetAttackerTeam());
                 m_PlayersInWar[player.GetTeamId()].Add(player.GetGUID());
                 m_InvitedPlayers[player.GetTeamId()].Remove(player.GetGUID());
 

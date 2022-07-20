@@ -35,17 +35,6 @@ namespace Framework.Constants
         HordeAllianceChallenge
     }
 
-    public enum BFLeaveReason
-    {
-        Close = 1,
-        //BF_LEAVE_REASON_UNK1      = 2, (not used)
-        //BF_LEAVE_REASON_UNK2      = 4, (not used)
-        Exited = 8,
-        LowLevel = 10,
-        NotWhileInRaid = 15,
-        Deserter = 16
-    }
-
     public enum BattlefieldState
     {
         Inactive = 0,

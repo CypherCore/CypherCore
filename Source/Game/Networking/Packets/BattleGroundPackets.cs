@@ -61,6 +61,20 @@ namespace Game.Networking.Packets
         public ObjectGuid HealerGuid;
     }
 
+    public class AreaSpiritHealerTime : ServerPacket
+    {
+        public AreaSpiritHealerTime() : base(ServerOpcodes.AreaSpiritHealerTime) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(HealerGuid);
+            _worldPacket.WriteUInt32(TimeLeft);
+        }
+
+        public ObjectGuid HealerGuid;
+        public uint TimeLeft;
+    }
+
     public class AreaSpiritHealerQueue : ClientPacket
     {
         public AreaSpiritHealerQueue(WorldPacket packet) : base(packet) { }
