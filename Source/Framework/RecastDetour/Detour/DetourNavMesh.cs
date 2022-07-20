@@ -782,14 +782,14 @@ public static partial class Detour
             dtVlerp(closest, 0, new float[] { v[pmin].X, v[pmin].Y, v[pmin].Z }, 0, new float[] { v[pmax].X, v[pmax].Y, v[pmax].Z }, 0, tmin);
         }
 
-        public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, float height)
+        public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, ref float height)
         {
             // Off-mesh connections do not have detail polys and getting height
             // over them does not make sense.
             if (poly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                 return false;
 
-            uint ip = (uint)tile.polys.ToList().IndexOf(poly);
+            uint ip = (uint)Array.IndexOf(tile.polys, poly);
             dtPolyDetail pd = tile.detailMeshes[ip];
 
             float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
@@ -855,7 +855,7 @@ public static partial class Detour
             getTileAndPolyByRefUnsafe(polyRef, ref tile, ref poly);
 
             dtVcopy(closest, pos);
-            if (getPolyHeight(tile, poly, pos, closest[1]))
+            if (getPolyHeight(tile, poly, pos, ref closest[1]))
             {
                 if (posOverPoly)
                     posOverPoly = true;

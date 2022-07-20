@@ -743,7 +743,7 @@ public static partial class Detour
                 return DT_SUCCESS;
             }
 
-            return m_nav.getPolyHeight(tile, poly, pos, height) ? DT_SUCCESS : DT_FAILURE | DT_INVALID_PARAM;
+            return m_nav.getPolyHeight(tile, poly, pos, ref height) ? DT_SUCCESS : DT_FAILURE | DT_INVALID_PARAM;
         }
 
         // @}

@@ -254,7 +254,7 @@ public static partial class Detour
 
         if (u >= 0.0f && v >= 0.0f && (u + v) <= denom)
         {
-            h = a[1] + (v0[1] * u + v1[1] * v) / denom;
+            h = a[aStart + 1] + (v0[1] * u + v1[1] * v) / denom;
             return true;
         }
 

@@ -207,7 +207,7 @@ namespace Game.Chat
             for (int i = 0; i < navmesh.getMaxTiles(); ++i)
             {
                 Detour.dtMeshTile tile = navmesh.getTile(i);
-                if (tile == null)
+                if (tile.header == null)
                     continue;
 
                 tileCount++;

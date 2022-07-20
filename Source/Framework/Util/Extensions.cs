@@ -241,9 +241,16 @@ namespace System
             return a;
         }
 
+        public static Vector3 direction(this Vector3 vector)
+        {
+            float lenSquared = vector.LengthSquared();
+            float invSqrt = 1.0f / MathF.Sqrt(lenSquared);
+            return new Vector3(vector.X * invSqrt, vector.Y * invSqrt, vector.Z * invSqrt);
+        }
+        
         public static Vector3 directionOrZero(this Vector3 vector)
         {
-            float mag = vector.Length();
+            float mag = vector.LengthSquared();
             if (mag < 0.0000001f)
             {
                 return Vector3.Zero;
