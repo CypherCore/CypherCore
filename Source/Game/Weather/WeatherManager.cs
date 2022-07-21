@@ -156,7 +156,7 @@ namespace Game
 
             string[] seasonName = { "spring", "summer", "fall", "winter" };
 
-            Log.outError(LogFilter.Server, "Generating a change in {0} weather for zone {1}.", seasonName[season], m_zone);
+            Log.outInfo(LogFilter.Server, "Generating a change in {0} weather for zone {1}.", seasonName[season], m_zone);
 
             if ((u < 60) && (m_intensity < 0.33333334f))                // Get fair
             {

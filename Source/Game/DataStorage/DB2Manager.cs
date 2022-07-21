@@ -2299,11 +2299,11 @@ namespace Game.DataStorage
             return true;
         }
 
-        public void Zone2MapCoordinates(uint areaId, ref float x, ref float y)
+        public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
         {
             AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
             if (areaEntry == null)
-                return;
+                return false;
 
             foreach (var assignment in _uiMapAssignmentByArea[(int)UiMapSystem.World].LookupByKey(areaId))
             {
@@ -2314,8 +2314,11 @@ namespace Game.DataStorage
                 float tmpX = (x - assignment.UiMax.X) / (assignment.UiMin.X - assignment.UiMax.X);
                 x = assignment.Region[0].X + tmpY * (assignment.Region[1].X - assignment.Region[0].X);
                 y = assignment.Region[0].Y + tmpX * (assignment.Region[1].Y - assignment.Region[0].Y);
-                break;
+
+                return true;
             }
+
+            return false;
         }
 
         public void Map2ZoneCoordinates(int areaId, ref float x, ref float y)

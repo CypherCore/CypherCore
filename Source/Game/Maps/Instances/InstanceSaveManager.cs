@@ -454,7 +454,7 @@ namespace Game.Maps
         {
             Log.outDebug(LogFilter.Maps, "InstanceSaveMgr._ResetInstance {0}, {1}", mapid, instanceId);
             Map map = Global.MapMgr.CreateBaseMap(mapid);
-            if (!map.Instanceable())
+            if (!map.IsDungeon())
                 return;
 
             var pair = m_instanceSaveById.Find(instanceId);
@@ -464,12 +464,9 @@ namespace Game.Maps
             DeleteInstanceFromDB(instanceId);                       // even if save not loaded
 
             Map iMap = ((MapInstanced)map).FindInstanceMap(instanceId);
-
-            if (iMap != null && iMap.IsDungeon())
-                ((InstanceMap)iMap).Reset(InstanceResetMethod.RespawnDelay);
-
             if (iMap != null)
             {
+                ((InstanceMap)iMap).Reset(InstanceResetMethod.RespawnDelay);
                 iMap.DeleteRespawnTimes();
                 iMap.DeleteCorpseData();
             }

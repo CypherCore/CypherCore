@@ -424,17 +424,16 @@ namespace Game.Chat.Commands
             AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
             Cypher.Assert(zoneEntry != null);
 
+            x /= 100.0f;
+            y /= 100.0f;
+
             Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
-            if (map.Instanceable())
+            if (!Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y))
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], map.GetId(), map.GetMapName());
                 return false;
             }
 
-            x /= 100.0f;
-            y /= 100.0f;
-
-            Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y);
             if (!GridDefines.IsValidMapCoord(zoneEntry.ContinentID, x, y))
             {
                 handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.ContinentID);

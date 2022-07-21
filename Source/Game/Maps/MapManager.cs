@@ -278,12 +278,11 @@ namespace Game.Entities
                 foreach (var pair in i_maps)
                 {
                     Map map = pair.Value;
-                    if (!map.Instanceable())
+                    if (!map.IsDungeon())
                         continue;
+
                     var maps = ((MapInstanced)map).GetInstancedMaps();
-                    foreach (var imap in maps)
-                        if (imap.Value.IsDungeon())
-                            ret++;
+                    ret += (uint)maps.Count;
                 }
                 return ret;
             }
@@ -297,12 +296,12 @@ namespace Game.Entities
                 foreach (var pair in i_maps)
                 {
                     Map map = pair.Value;
-                    if (!map.Instanceable())
+                    if (!map.IsDungeon())
                         continue;
+
                     var maps = ((MapInstanced)map).GetInstancedMaps();
                     foreach (var imap in maps)
-                        if (imap.Value.IsDungeon())
-                            ret += (uint)imap.Value.GetPlayers().Count;
+                        ret += (uint)imap.Value.GetPlayers().Count;
                 }
                 return ret;
             }
