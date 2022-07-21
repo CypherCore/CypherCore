@@ -2008,6 +2008,8 @@ namespace Game.Entities
 
         public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
 
+        public void SetNameplateAttachToGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NameplateAttachToGUID), guid); }
+
         public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
 
