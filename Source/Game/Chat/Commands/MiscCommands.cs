@@ -671,11 +671,11 @@ namespace Game.Chat
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
             // 63? WHY?
-            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
-            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
+            int gridX = (int)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
+            int gridY = (int)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
 
-            bool haveMap = Map.ExistMap(mapId, gridX, gridY);
-            bool haveVMap = Map.ExistVMap(mapId, gridX, gridY);
+            bool haveMap = TerrainInfo.ExistMap(mapId, gridX, gridY);
+            bool haveVMap = TerrainInfo.ExistVMap(mapId, gridX, gridY);
             bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
 
             if (haveVMap)
@@ -706,8 +706,8 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), cell.GetCellY(), obj.GetInstanceId(),
                 zoneX, zoneY, groundZ, floorZ, map.GetMinHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY()), haveMap, haveVMap, haveMMap);
 
-            LiquidData liquidStatus;
-            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out liquidStatus);
+            LiquidData liquidStatus = new();
+            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, liquidStatus);
 
             if (liquidStatus != null)
                 handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);

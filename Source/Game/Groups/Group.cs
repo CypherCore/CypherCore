@@ -2068,7 +2068,7 @@ namespace Game.Groups
                                 WorldSafeLocsEntry graveyardLocation = Global.ObjectMgr.GetClosestGraveYard(
                                     new WorldLocation(instanceEntrance.target_mapId, instanceEntrance.target_X, instanceEntrance.target_Y, instanceEntrance.target_Z),
                                     SendMsgTo.GetTeam(), null);
-                                uint zoneId = Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, graveyardLocation.Loc.GetMapId(),
+                                uint zoneId = Global.TerrainMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, graveyardLocation.Loc.GetMapId(),
                                     graveyardLocation.Loc.GetPositionX(), graveyardLocation.Loc.GetPositionY(), graveyardLocation.Loc.GetPositionZ());
 
                                 foreach (MemberSlot member in GetMemberSlots())

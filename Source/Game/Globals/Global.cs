@@ -67,6 +67,7 @@ public static class Global
     public static ArenaTeamManager ArenaTeamMgr { get { return ArenaTeamManager.Instance; } }
 
     //Maps System
+    public static TerrainManager TerrainMgr { get { return TerrainManager.Instance; } }
     public static MapManager MapMgr { get { return MapManager.Instance; } }
     public static MMapManager MMapMgr { get { return MMapManager.Instance; } }
     public static VMapManager VMapMgr { get { return VMapManager.Instance; } }

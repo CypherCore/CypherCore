@@ -40,7 +40,10 @@ namespace Game.Maps
 
         public LoadResult LoadData(string filename)
         {
+            // Unload old data if exist
             UnloadData();
+
+            // Not return error if file not found
             if (!File.Exists(filename))
                 return LoadResult.FileNotFound;
 

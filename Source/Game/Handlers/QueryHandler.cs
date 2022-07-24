@@ -241,13 +241,13 @@ namespace Game
                     if (corpseMapEntry.IsDungeon() && corpseMapEntry.CorpseMapID >= 0)
                     {
                         // if corpse map have entrance
-                        Map entranceMap = Global.MapMgr.CreateBaseMap((uint)corpseMapEntry.CorpseMapID);
-                        if (entranceMap != null)
+                        TerrainInfo entranceTerrain = Global.TerrainMgr.LoadTerrain((uint)corpseMapEntry.CorpseMapID);
+                        if (entranceTerrain != null)
                         {
                             mapID = (uint)corpseMapEntry.CorpseMapID;
                             x = corpseMapEntry.Corpse.X;
                             y = corpseMapEntry.Corpse.Y;
-                            z = entranceMap.GetHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
+                            z = entranceTerrain.GetStaticHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
                         }
                     }
                 }

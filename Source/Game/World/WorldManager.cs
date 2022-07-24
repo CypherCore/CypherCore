@@ -404,10 +404,10 @@ namespace Game
 
             Global.ObjectMgr.SetHighestGuids();
 
-            if (!Global.MapMgr.ExistMapAndVMap(0, -6240.32f, 331.033f) || !Global.MapMgr.ExistMapAndVMap(0, -8949.95f, -132.493f)
-                || !Global.MapMgr.ExistMapAndVMap(1, -618.518f, -4251.67f) || !Global.MapMgr.ExistMapAndVMap(0, 1676.35f, 1677.45f)
-                || !Global.MapMgr.ExistMapAndVMap(1, 10311.3f, 832.463f) || !Global.MapMgr.ExistMapAndVMap(1, -2917.58f, -257.98f)
-                || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!Global.MapMgr.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !Global.MapMgr.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
+            if (!TerrainManager.ExistMapAndVMap(0, -6240.32f, 331.033f) || !TerrainManager.ExistMapAndVMap(0, -8949.95f, -132.493f)
+                || !TerrainManager.ExistMapAndVMap(1, -618.518f, -4251.67f) || !TerrainManager.ExistMapAndVMap(0, 1676.35f, 1677.45f)
+                || !TerrainManager.ExistMapAndVMap(1, 10311.3f, 832.463f) || !TerrainManager.ExistMapAndVMap(1, -2917.58f, -257.98f)
+                || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!TerrainManager.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !TerrainManager.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
             {
                 Log.outError(LogFilter.ServerLoading, "Unable to load critical files - server shutting down !!!");
                 Environment.Exit(1);
@@ -467,7 +467,7 @@ namespace Game
                     mapData.Add((uint)mapEntry.CosmeticParentMapID, mapEntry.Id);
             }
 
-            Global.MapMgr.InitializeParentMapData(mapData);
+            Global.TerrainMgr.InitializeParentMapData(mapData);
 
             Global.VMapMgr.Initialize(mapData);
             Global.MMapMgr.Initialize(mapData);
@@ -1440,6 +1440,8 @@ namespace Game
             _worldUpdateTime.RecordUpdateTimeReset();
             Global.MapMgr.Update(diff);
             _worldUpdateTime.RecordUpdateTimeDuration("UpdateMapMgr");
+
+            Global.TerrainMgr.Update(diff);
 
             if (WorldConfig.GetBoolValue(WorldCfg.AutoBroadcast))
             {

@@ -615,7 +615,7 @@ namespace Game.Entities
                 if (!createPosition.TransportGuid.HasValue)
                 {
                     homebind.WorldRelocate(createPosition.Loc);
-                    homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
+                    homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
 
                     saveHomebindToDb();
                     ok = true;
@@ -631,7 +631,7 @@ namespace Game.Entities
                 Cypher.Assert(loc != null, "Missing fallback graveyard location for faction {GetTeamId()}");
 
                 homebind.WorldRelocate(loc.Loc);
-                homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
+                homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
 
                 saveHomebindToDb();
             }
@@ -3806,7 +3806,6 @@ namespace Game.Entities
                 return 0;
 
             uint zone = result.Read<ushort>(0);
-
             if (zone == 0)
             {
                 // stored zone is zero, use generic and slow zone detection
@@ -3825,7 +3824,7 @@ namespace Game.Entities
                 if (!CliDB.MapStorage.ContainsKey(map))
                     return 0;
 
-                zone = Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, map, posx, posy, posz);
+                zone = Global.TerrainMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, map, posx, posy, posz);
 
                 if (zone > 0)
                 {

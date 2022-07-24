@@ -564,37 +564,6 @@ namespace Game.Scripting
             if (record != null && record.IsBattleground())
                 ForEach<BattlegroundMapScript>(p => p.OnDestroy(map.ToBattlegroundMap()));
         }
-        public void OnLoadGridMap(Map map, GridMap gmap, uint gx, uint gy)
-        {
-            Cypher.Assert(map != null);
-            Cypher.Assert(gmap != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnLoadGridMap(map, gmap, gx, gy));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnLoadGridMap(map.ToInstanceMap(), gmap, gx, gy));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnLoadGridMap(map.ToBattlegroundMap(), gmap, gx, gy));
-
-        }
-        public void OnUnloadGridMap(Map map, GridMap gmap, uint gx, uint gy)
-        {
-            Cypher.Assert(map != null);
-            Cypher.Assert(gmap != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnUnloadGridMap(map, gmap, gx, gy));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnUnloadGridMap(map.ToInstanceMap(), gmap, gx, gy));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnUnloadGridMap(map.ToBattlegroundMap(), gmap, gx, gy));
-        }
         public void OnPlayerEnterMap(Map map, Player player)
         {
             Cypher.Assert(map != null);

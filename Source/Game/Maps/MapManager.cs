@@ -43,11 +43,6 @@ namespace Game.Entities
                 m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
         }
 
-        public void InitializeParentMapData(MultiMap<uint, uint> mapData)
-        {
-            _parentMapData = mapData;
-        }
-
         public void InitializeVisibilityDistanceInfo()
         {
             foreach (var pair in i_maps)
@@ -85,12 +80,7 @@ namespace Game.Entities
             else
                 map = new Map(mapEntry.Id, i_gridCleanUpDelay, 0, Difficulty.None);
 
-            map.DiscoverGridMapFiles();
-
             i_maps[mapEntry.Id] = map;
-
-            foreach (uint childMapId in _parentMapData[mapEntry.Id])
-                map.AddChildTerrainMap(CreateBaseMap_i(CliDB.MapStorage.LookupByKey(childMapId)));
 
             if (!mapEntry.Instanceable())
             {
@@ -238,16 +228,6 @@ namespace Game.Entities
                 map.Value.DelayedUpdate(time);
 
             i_timer.SetCurrent(0);
-        }
-
-        public bool ExistMapAndVMap(uint mapid, float x, float y)
-        {
-            GridCoord p = GridDefines.ComputeGridCoord(x, y);
-
-            uint gx = (MapConst.MaxGrids - 1) - p.X_coord;
-            uint gy = (MapConst.MaxGrids - 1) - p.Y_coord;
-
-            return Map.ExistMap(mapid, gx, gy) && Map.ExistVMap(mapid, gx, gy);
         }
 
         public bool IsValidMAP(uint mapId)
@@ -399,48 +379,6 @@ namespace Game.Entities
         {
             return i_maps.LookupByKey(mapId);
         }
-
-        public uint GetAreaId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
-        {
-            Map m = CreateBaseMap(mapid);
-            return m.GetAreaId(phaseShift, x, y, z);
-        }
-
-        public uint GetAreaId(PhaseShift phaseShift, uint mapid, Position pos)
-        {
-            return GetAreaId(phaseShift, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-        }
-        
-        public uint GetAreaId(PhaseShift phaseShift, WorldLocation loc)
-        {
-            return GetAreaId(phaseShift, loc.GetMapId(), loc);
-        }
-
-        public uint GetZoneId(PhaseShift phaseShift, uint mapid, Position pos) { return GetZoneId(phaseShift, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
-        
-        public uint GetZoneId(PhaseShift phaseShift, WorldLocation loc) { return GetZoneId(phaseShift, loc.GetMapId(), loc); }
-        
-        public uint GetZoneId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
-        {
-            Map m = CreateBaseMap(mapid);
-            return m.GetZoneId(phaseShift, x, y, z);
-        }
-
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, uint mapid, float x, float y, float z)
-        {
-            Map m = CreateBaseMap(mapid);
-            m.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, x, y, z);
-        }
-
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, uint mapid, Position pos)
-        {
-            GetZoneAndAreaId(phaseShift, out zoneid, out areaid, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-        }
-
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, WorldLocation loc)
-        {
-            GetZoneAndAreaId(phaseShift, out zoneid, out areaid, loc.GetMapId(), loc);
-        }
         
         public void DoForAllMaps(Action<Map> worker)
         {
@@ -494,8 +432,5 @@ namespace Game.Entities
         uint _nextInstanceId;
         MapUpdater m_updater;
         uint _scheduledScripts;
-
-        // parent map links
-        MultiMap<uint, uint> _parentMapData;
     }
 }

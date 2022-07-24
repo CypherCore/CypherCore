@@ -121,6 +121,7 @@ namespace WorldServer
                 WorldSocketMgr.StopNetwork();
 
                 Global.MapMgr.UnloadAll();                     // unload all grids (including locked in memory)
+                Global.TerrainMgr.UnloadAll();
                 Global.ScriptMgr.Unload();
 
                 // set server offline

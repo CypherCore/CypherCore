@@ -804,7 +804,7 @@ namespace Game
             uint MapId = location.GetMapId();
 
             // search for zone associated closest graveyard
-            uint zoneId = Global.MapMgr.GetZoneId(conditionObject ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
+            uint zoneId = Global.TerrainMgr.GetZoneId(conditionObject ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
             if (zoneId == 0)
             {
                 if (z > -500)
@@ -3647,7 +3647,7 @@ namespace Game
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
+                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -4440,7 +4440,7 @@ namespace Game
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
+                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);

@@ -3556,7 +3556,7 @@ namespace Game.Entities
             // Unit is flying, check for potential collision via vmaps
             if (path.GetPathType().HasFlag(PathType.NotUsingPath))
             {
-                col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY),
+                col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap().GetTerrain(), pos.posX, pos.posY),
                     pos.posX, pos.posY, pos.posZ + halfHeight,
                     destx, desty, destz + halfHeight,
                     out destx, out desty, out destz, -0.5f);

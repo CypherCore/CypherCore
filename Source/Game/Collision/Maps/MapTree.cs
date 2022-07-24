@@ -108,7 +108,7 @@ namespace Game.Collision
             iLoadedTiles.Clear();
         }
 
-        public LoadResult LoadMapTile(uint tileX, uint tileY, VMapManager vm)
+        public LoadResult LoadMapTile(int tileX, int tileY, VMapManager vm)
         {
             if (iTreeValues == null)
             {
@@ -183,7 +183,7 @@ namespace Game.Collision
             return result;
         }
 
-        public void UnloadMapTile(uint tileX, uint tileY, VMapManager vm)
+        public void UnloadMapTile(int tileX, int tileY, VMapManager vm)
         {
             uint tileID = PackTileID(tileX, tileY);
             if (!iLoadedTiles.ContainsKey(tileID))
@@ -233,10 +233,10 @@ namespace Game.Collision
             iLoadedTiles.Remove(tileID);
         }
         
-        static uint PackTileID(uint tileX, uint tileY) { return tileX << 16 | tileY; }
-        static void UnpackTileID(uint ID, ref uint tileX, ref uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
+        static uint PackTileID(int tileX, int tileY) { return (uint)(tileX << 16 | tileY); }
+        static void UnpackTileID(int ID, ref int tileX, ref int tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
 
-        static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
+        static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
         {
             TileFileOpenResult result = new();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
@@ -265,7 +265,7 @@ namespace Game.Collision
             return result;
         }
 
-        public static LoadResult CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
+        public static LoadResult CanLoadMap(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
         {
             string fullname = vmapPath + VMapManager.GetMapFileName(mapID);
             if (!File.Exists(fullname))
@@ -290,7 +290,7 @@ namespace Game.Collision
             return LoadResult.Success;
         }
 
-        public static string GetTileFileName(uint mapID, uint tileX, uint tileY)
+        public static string GetTileFileName(uint mapID, int tileX, int tileY)
         {
             return $"{mapID:D4}_{tileY:D2}_{tileX:D2}.vmtile";
         }

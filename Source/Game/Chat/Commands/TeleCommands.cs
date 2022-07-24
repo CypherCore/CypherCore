@@ -230,7 +230,7 @@ namespace Game.Chat
 
                 handler.SendSysMessage(CypherStrings.TeleportingTo, nameLink, handler.GetCypherString(CypherStrings.Offline), locationName);
 
-                Player.SavePositionInDB(new WorldLocation(mapId, pos), Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, new WorldLocation(mapId, pos)), player.GetGUID(), null);
+                Player.SavePositionInDB(new WorldLocation(mapId, pos), Global.TerrainMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, new WorldLocation(mapId, pos)), player.GetGUID(), null);
             }
 
             return true;

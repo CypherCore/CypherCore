@@ -205,12 +205,6 @@ namespace Game.Scripting
         // Called just before the map is destroyed.
         public virtual void OnDestroy(T map) { }
 
-        // Called when a grid map is loaded.
-        public virtual void OnLoadGridMap(T map, GridMap gmap, uint gx, uint gy) { }
-
-        // Called when a grid map is unloaded.
-        public virtual void OnUnloadGridMap(T map, GridMap gmap, uint gx, uint gy) { }
-
         // Called when a player enters the map.
         public virtual void OnPlayerEnter(T map, Player player) { }
 

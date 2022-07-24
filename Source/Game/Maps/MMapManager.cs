@@ -32,8 +32,6 @@ namespace Game
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
-            childMapData = mapData;
-
             foreach (var pair in mapData)
                 parentMapData[pair.Value] = pair.Key;
         }
@@ -82,27 +80,12 @@ namespace Game
             return true;
         }
 
-        uint PackTileID(uint x, uint y)
+        uint PackTileID(int x, int y)
         {
-            return (x << 16 | y);
+            return (uint)(x << 16 | y);
         }
 
-        public bool LoadMap(string basePath, uint mapId, uint x, uint y)
-        {
-            // make sure the mmap is loaded and ready to load tiles
-            if (!LoadMapImpl(basePath, mapId, x, y))
-                return false;
-
-            bool success = true;
-            var childMaps = childMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
-                if (!LoadMapImpl(basePath, childMapId, x, y))
-                    success = false;
-
-            return success;
-        }
-
-        bool LoadMapImpl(string basePath, uint mapId, uint x, uint y)
+        public bool LoadMap(string basePath, uint mapId, int x, int y)
         {
             // make sure the mmap is loaded and ready to load tiles
             if (!LoadMapData(basePath, mapId))
@@ -165,20 +148,6 @@ namespace Game
 
         public bool LoadMapInstance(string basePath, uint mapId, uint instanceId)
         {
-            if (!LoadMapInstanceImpl(basePath, mapId, instanceId))
-                return false;
-
-            bool success = true;
-            var childMaps = childMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
-                if (!LoadMapInstanceImpl(basePath, childMapId, instanceId))
-                    success = false;
-
-            return success;
-        }
-
-        bool LoadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
-        {
             if (!LoadMapData(basePath, mapId))
                 return false;
 
@@ -199,16 +168,7 @@ namespace Game
             return true;
         }
 
-        public bool UnloadMap(uint mapId, uint x, uint y)
-        {
-            var childMaps = childMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
-                UnloadMapImpl(childMapId, x, y);
-
-            return UnloadMapImpl(mapId, x, y);
-        }
-
-        bool UnloadMapImpl(uint mapId, uint x, uint y)
+        public bool UnloadMap(uint mapId, int x, int y)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -327,7 +287,6 @@ namespace Game
         Dictionary<uint, MMapData> loadedMMaps = new();
         uint loadedTiles;
 
-        MultiMap<uint, uint> childMapData = new();
         Dictionary<uint, uint> parentMapData = new();
     }
 

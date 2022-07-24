@@ -35,7 +35,8 @@ namespace Game.Collision
         Success,
         FileNotFound,
         VersionMismatch,
-        ReadFromFileFailed
+        ReadFromFileFailed,
+        DisabledInConfig
     }
 
     public class VMapManager : Singleton<VMapManager>
@@ -46,40 +47,15 @@ namespace Game.Collision
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
-            iChildMapData = mapData;
             foreach (var pair in mapData)
                 iParentMapData[pair.Value] = pair.Key;
         }
 
-        public VMAPLoadResult LoadMap(uint mapId, uint x, uint y)
+        public LoadResult LoadMap(uint mapId, int x, int y)
         {
-            var result = VMAPLoadResult.Ignored;
-            if (IsMapLoadingEnabled())
-            {
-                LoadResult parentLoadResult = LoadSingleMap(mapId, x, y);
-                if (parentLoadResult == LoadResult.Success || parentLoadResult == LoadResult.FileNotFound)
-                {
-                    if (parentLoadResult == LoadResult.Success)
-                        result = VMAPLoadResult.OK;
-                    // else VMAP_LOAD_RESULT_IGNORED
+            if (!IsMapLoadingEnabled())
+                return LoadResult.DisabledInConfig;
 
-                    var childMaps = iChildMapData.LookupByKey(mapId);
-                    foreach (uint childMapId in childMaps)
-                    {
-                        LoadResult childLoadResult = LoadSingleMap(childMapId, x, y);
-                        if (childLoadResult != LoadResult.Success && childLoadResult != LoadResult.FileNotFound)
-                            result = VMAPLoadResult.Error;
-                    }
-                }
-                else
-                    result = VMAPLoadResult.Error;
-            }
-
-            return result;
-        }
-
-        LoadResult LoadSingleMap(uint mapId, uint tileX, uint tileY)
-        {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree == null)
             {
@@ -94,19 +70,10 @@ namespace Game.Collision
                 instanceTree = newTree;
             }
 
-            return instanceTree.LoadMapTile(tileX, tileY, this);
+            return instanceTree.LoadMapTile(x, y, this);
         }
 
-        public void UnloadMap(uint mapId, uint x, uint y)
-        {
-            var childMaps = iChildMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
-                UnloadSingleMap(childMapId, x, y);
-
-            UnloadSingleMap(mapId, x, y);
-        }
-
-        void UnloadSingleMap(uint mapId, uint x, uint y)
+        public void UnloadMap(uint mapId, int x, int y)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -120,15 +87,6 @@ namespace Game.Collision
         }
 
         public void UnloadMap(uint mapId)
-        {
-            var childMaps = iChildMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
-                UnloadSingleMap(childMapId);
-
-            UnloadSingleMap(mapId);
-        }
-
-        void UnloadSingleMap(uint mapId)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -329,7 +287,7 @@ namespace Game.Collision
             }
         }
 
-        public LoadResult ExistsMap(uint mapId, uint x, uint y)
+        public LoadResult ExistsMap(uint mapId, int x, int y)
         {
             return StaticMapTree.CanLoadMap(VMapPath, mapId, x, y, this);
         }
@@ -367,7 +325,6 @@ namespace Game.Collision
 
         Dictionary<string, ManagedModel> iLoadedModelFiles = new();
         Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
-        MultiMap<uint, uint> iChildMapData = new();
         Dictionary<uint, uint> iParentMapData = new();
         bool _enableLineOfSightCalc;
         bool _enableHeightCalc;
