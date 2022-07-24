@@ -453,7 +453,7 @@ namespace Game.Maps
         void _ResetInstance(uint mapid, uint instanceId)
         {
             Log.outDebug(LogFilter.Maps, "InstanceSaveMgr._ResetInstance {0}, {1}", mapid, instanceId);
-            Map map = Global.MapMgr.CreateBaseMap(mapid);
+            var map = CliDB.MapStorage.LookupByKey(mapid);
             if (!map.IsDungeon())
                 return;
 
@@ -463,7 +463,7 @@ namespace Game.Maps
 
             DeleteInstanceFromDB(instanceId);                       // even if save not loaded
 
-            Map iMap = ((MapInstanced)map).FindInstanceMap(instanceId);
+            Map iMap = Global.MapMgr.FindMap(mapid, instanceId);
             if (iMap != null)
             {
                 ((InstanceMap)iMap).Reset(InstanceResetMethod.RespawnDelay);
@@ -539,27 +539,23 @@ namespace Game.Maps
             }
 
             // note: this isn't fast but it's meant to be executed very rarely
-            Map map = Global.MapMgr.CreateBaseMap(mapid);          // _not_ include difficulty
-            var instMaps = ((MapInstanced)map).GetInstancedMaps();
-            uint timeLeft;
-
-            foreach (var pair in instMaps)
+            if (mapEntry.IsDungeon())
             {
-                Map map2 = pair.Value;
-                if (!map2.IsDungeon())
-                    continue;
-
-                if (warn)
+                Global.MapMgr.DoForAllMapsWithMapId(mapid, map =>
                 {
-                    if (now >= resetTime)
-                        timeLeft = 0;
-                    else
-                        timeLeft = (uint)(resetTime - now);
+                    if (warn)
+                    {
+                        uint timeLeft;
+                        if (now >= resetTime)
+                            timeLeft = 0;
+                        else
+                            timeLeft = (uint)(resetTime - now);
 
-                    ((InstanceMap)map2).SendResetWarnings(timeLeft);
-                }
-                else
-                    ((InstanceMap)map2).Reset(InstanceResetMethod.Global);
+                        ((InstanceMap)map).SendResetWarnings(timeLeft);
+                    }
+                    else
+                        ((InstanceMap)map).Reset(InstanceResetMethod.Global);
+                });
             }
 
             // @todo delete creature/gameobject respawn times even if the maps are not loaded
@@ -582,7 +578,6 @@ namespace Game.Maps
 
             return ret;
         }
-
 
         public long GetResetTimeFor(uint mapid, Difficulty d)
         {
@@ -766,5 +761,18 @@ namespace Game.Maps
         uint m_entranceId;
         bool m_canReset;
         bool m_toDelete;
+    }
+
+    public class InstanceTemplate
+    {
+        public uint Parent;
+        public uint ScriptId;
+    }
+
+    public class InstanceBind
+    {
+        public InstanceSave save;
+        public bool perm;
+        public BindExtensionState extendState;
     }
 }

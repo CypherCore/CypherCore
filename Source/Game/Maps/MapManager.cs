@@ -17,12 +17,15 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.BattleGrounds;
 using Game.DataStorage;
+using Game.Garrisons;
 using Game.Groups;
 using Game.Maps;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -49,161 +52,202 @@ namespace Game.Entities
                 pair.Value.InitVisibilityDistance();
         }
 
-        public Map CreateBaseMap(uint id)
+        Map FindMap_i(uint mapId, uint instanceId)
         {
-            Map map = FindBaseMap(id);
-            if (map == null)
-            {
-                var entry = CliDB.MapStorage.LookupByKey(id);
-                Cypher.Assert(entry != null);
-                if (entry.ParentMapID != -1 || entry.CosmeticParentMapID != -1)
-                {
-                    CreateBaseMap((uint)(entry.ParentMapID != -1 ? entry.ParentMapID : entry.CosmeticParentMapID));
-
-                    // must have been created by parent map
-                    map = FindBaseMap(id);
-                    return map;
-                }
-
-                lock(_mapsLock)
-                    map = CreateBaseMap_i(entry);
-            }
-            Cypher.Assert(map != null);
-            return map;
+            return i_maps.LookupByKey((mapId, instanceId));
         }
 
-        Map CreateBaseMap_i(MapRecord mapEntry)
+        Map CreateWorldMap(uint mapId, uint instanceId)
         {
-            Map map;
-            if (mapEntry.Instanceable())
-                map = new MapInstanced(mapEntry.Id, i_gridCleanUpDelay);
-            else
-                map = new Map(mapEntry.Id, i_gridCleanUpDelay, 0, Difficulty.None);
+            Map map = new Map(mapId, i_gridCleanUpDelay, instanceId, Difficulty.None);
+            map.LoadRespawnTimes();
+            map.LoadCorpseData();
 
-            i_maps[mapEntry.Id] = map;
-
-            if (!mapEntry.Instanceable())
-            {
-                map.LoadRespawnTimes();
-                map.LoadCorpseData();
-            }
+            if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
+                map.LoadAllCells();
 
             return map;
         }
 
-        public Map FindBaseNonInstanceMap(uint mapId)
+        InstanceMap CreateInstance(uint mapId, uint instanceId, InstanceSave save, Difficulty difficulty, int team)
         {
-            Map map = FindBaseMap(mapId);
-            if (map != null && map.Instanceable())
-                return null;
-            return map;
-        }
-
-        public Map CreateMap(uint id, Player player, uint loginInstanceId = 0)
-        {
-            Map m = CreateBaseMap(id);
-
-            if (m != null && m.Instanceable())
-                m = ((MapInstanced)m).CreateInstanceForPlayer(id, player, loginInstanceId);
-
-            return m;
-        }
-
-        public Map FindMap(uint mapid, uint instanceId)
-        {
-            Map map = FindBaseMap(mapid);
-            if (map == null)
-                return null;
-
-            if (!map.Instanceable())
-                return instanceId == 0 ? map : null;
-
-            return ((MapInstanced)map).FindInstanceMap(instanceId);
-        }
-
-        public EnterState PlayerCannotEnter(uint mapid, Player player, bool loginCheck = false)
-        {
-            MapRecord entry = CliDB.MapStorage.LookupByKey(mapid);
+            // make sure we have a valid map id
+            var entry = CliDB.MapStorage.LookupByKey(mapId);
             if (entry == null)
-                return EnterState.CannotEnterNoEntry;
-
-            if (!entry.IsDungeon())
-                return EnterState.CanEnter;
-
-            Difficulty targetDifficulty = player.GetDifficultyID(entry);
-            // Get the highest available difficulty if current setting is higher than the instance allows
-            MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry.Id, ref targetDifficulty);
-            if (mapDiff == null)
-                return EnterState.CannotEnterDifficultyUnavailable;
-
-            //Bypass checks for GMs
-            if (player.IsGameMaster())
-                return EnterState.CanEnter;
-
-            //Other requirements
-            if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, true))
-                return EnterState.CannotEnterUnspecifiedReason;
-
-            string mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
-
-            Group group = player.GetGroup();
-            if (entry.IsRaid() && entry.Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
-                if ((!group || !group.IsRaidGroup()) && WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
-                    return EnterState.CannotEnterNotInRaid;
-
-            if (!player.IsAlive())
             {
-                if (player.HasCorpse())
-                {
-                    // let enter in ghost mode in instance that connected to inner instance with corpse
-                    uint corpseMap = player.GetCorpseLocation().GetMapId();
-                    do
-                    {
-                        if (corpseMap == mapid)
-                            break;
-
-                        InstanceTemplate corpseInstance = Global.ObjectMgr.GetInstanceTemplate(corpseMap);
-                        corpseMap = corpseInstance != null ? corpseInstance.Parent : 0;
-                    } while (corpseMap != 0);
-
-                    if (corpseMap == 0)
-                        return EnterState.CannotEnterCorpseInDifferentInstance;
-
-                    Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' has corpse in instance '{1}' and can enter.", player.GetName(), mapName);
-                }
-                else
-                    Log.outDebug(LogFilter.Maps, "Map.CanPlayerEnter - player '{0}' is dead but does not have a corpse!", player.GetName());
+                Log.outError(LogFilter.Maps, $"CreateInstance: no entry for map {mapId}");
+                //ABORT();
+                return null;
             }
 
-            //Get instance where player's group is bound & its map
-            if (!loginCheck && group)
+            // some instances only have one difficulty
+            Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
+
+            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(save != null ? "" : "new ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
+
+            InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team);
+            Cypher.Assert(map.IsDungeon());
+
+            map.LoadRespawnTimes();
+            map.LoadCorpseData();
+
+            bool load_data = save != null;
+            map.CreateInstanceData(load_data);
+            var instanceScenario = Global.ScenarioMgr.CreateInstanceScenario(map, team);
+            if (instanceScenario != null)
+                map.SetInstanceScenario(instanceScenario);
+
+            if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
+                map.LoadAllCells();
+
+            return map;
+        }
+
+        BattlegroundMap CreateBattleground(uint mapId, uint instanceId, Battleground bg)
+        {
+            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateBattleground: map bg {instanceId} for {mapId} created.");
+
+            BattlegroundMap map = new BattlegroundMap(mapId, i_gridCleanUpDelay, instanceId, Difficulty.None);
+            Cypher.Assert(map.IsBattlegroundOrArena());
+            map.SetBG(bg);
+            bg.SetBgMap(map);
+            return map;
+        }
+
+        GarrisonMap CreateGarrison(uint mapId, uint instanceId, Player owner)
+        {
+            GarrisonMap map = new GarrisonMap(mapId, i_gridCleanUpDelay, instanceId, owner.GetGUID());
+            Cypher.Assert(map.IsGarrison());
+            return map;
+        }
+
+        /// <summary>
+        /// create the instance if it's not created already
+        /// the player is not actually added to the instance(only in InstanceMap::Add)
+        /// </summary>
+        /// <param name="mapId"></param>
+        /// <param name="player"></param>
+        /// <param name="loginInstanceId"></param>
+        /// <returns>the right instance for the object, based on its InstanceId</returns>
+        public Map CreateMap(uint mapId, Player player, uint loginInstanceId = 0)
+        {
+            if (!player)
+                return null;
+
+            var entry = CliDB.MapStorage.LookupByKey(mapId);
+            if (entry == null)
+                return null;
+
+            lock (_mapsLock)
             {
-                InstanceBind boundInstance = group.GetBoundInstance(entry);
-                if (boundInstance != null && boundInstance.save != null)
+                Map map = null;
+                uint newInstanceId = 0;                       // instanceId of the resulting map
+
+                if (entry.IsBattlegroundOrArena())
                 {
-                    Map boundMap = FindMap(mapid, boundInstance.save.GetInstanceId());
-                    if (boundMap != null)
+                    // instantiate or find existing bg map for player
+                    // the instance id is set in battlegroundid
+                    newInstanceId = player.GetBattlegroundId();
+                    if (newInstanceId == 0)
+                        return null;
+
+                    map = FindMap(mapId, newInstanceId);
+                    if (!map)
                     {
-                        EnterState denyReason = boundMap.CannotEnter(player);
-                        if (denyReason != 0)
-                            return denyReason;
+                        Battleground bg = player.GetBattleground();
+                        if (bg != null)
+                            map = CreateBattleground(mapId, newInstanceId, bg);
+                        else
+                        {
+                            player.TeleportToBGEntryPoint();
+                            return null;
+                        }
                     }
                 }
-            }
-            // players are only allowed to enter 10 instances per hour
-            if (entry.IsDungeon() && (player.GetGroup() == null || (player.GetGroup() != null && !player.GetGroup().IsLFGGroup())))
-            {
-                uint instaceIdToCheck = 0;
-                InstanceSave save = player.GetInstanceSave(mapid);
-                if (save != null)
-                    instaceIdToCheck = save.GetInstanceId();
+                else if (entry.IsDungeon())
+                {
+                    InstanceBind pBind = player.GetBoundInstance(mapId, player.GetDifficultyID(entry));
+                    InstanceSave pSave = pBind != null ? pBind.save : null;
 
-                // instanceId can never be 0 - will not be found
-                if (!player.CheckInstanceCount(instaceIdToCheck) && !player.IsDead())
-                    return EnterState.CannotEnterTooManyInstances;
-            }
+                    // priority:
+                    // 1. player's permanent bind
+                    // 2. player's current instance id if this is at login
+                    // 3. group's current bind
+                    // 4. player's current bind
+                    if (pBind == null || !pBind.perm)
+                    {
+                        if (loginInstanceId != 0) // if the player has a saved instance id on login, we either use this instance or relocate him out (return null)
+                        {
+                            map = FindMap_i(mapId, loginInstanceId);
+                            if (map == null && pSave != null && pSave.GetInstanceId() == loginInstanceId)
+                                map = CreateInstance(mapId, loginInstanceId, pSave, pSave.GetDifficultyID(), player.GetTeamId());
+                            return map;
+                        }
 
-            return EnterState.CanEnter;
+                        InstanceBind groupBind = null;
+                        Group group = player.GetGroup();
+                        // use the player's difficulty setting (it may not be the same as the group's)
+                        if (group != null)
+                        {
+                            groupBind = group.GetBoundInstance(entry);
+                            if (groupBind != null)
+                            {
+                                // solo saves should be reset when entering a group's instance
+                                player.UnbindInstance(mapId, player.GetDifficultyID(entry));
+                                pSave = groupBind.save;
+                            }
+                        }
+                    }
+                    if (pSave != null)
+                    {
+                        // solo/perm/group
+                        newInstanceId = pSave.GetInstanceId();
+                        map = FindMap_i(mapId, newInstanceId);
+                        // it is possible that the save exists but the map doesn't
+                        if (!map)
+                            map = CreateInstance(mapId, newInstanceId, pSave, pSave.GetDifficultyID(), player.GetTeamId());
+                    }
+                    else
+                    {
+                        Difficulty diff = player.GetGroup() ? player.GetGroup().GetDifficultyID(entry) : player.GetDifficultyID(entry);
+
+                        // if no instanceId via group members or instance saves is found
+                        // the instance will be created for the first time
+                        newInstanceId = GenerateInstanceId();
+
+                        //Seems it is now possible, but I do not know if it should be allowed
+                        //ASSERT(!FindInstanceMap(NewInstanceId));
+                        map = FindMap_i(mapId, newInstanceId);
+                        if (!map)
+                            map = CreateInstance(mapId, newInstanceId, null, diff, player.GetTeamId());
+                    }
+                }
+                else if (entry.IsGarrison())
+                {
+                    newInstanceId = (uint)player.GetGUID().GetCounter();
+                    map = FindMap_i(mapId, newInstanceId);
+                    if (!map)
+                        map = CreateGarrison(mapId, newInstanceId, player);
+                }
+                else
+                {
+                    newInstanceId = 0;
+                    map = FindMap_i(mapId, newInstanceId);
+                    if (!map)
+                        map = CreateWorldMap(mapId, newInstanceId);
+                }
+
+                if (map)
+                    i_maps[(map.GetId(), map.GetInstanceId())] = map;
+
+                return map;
+            }
+        }
+
+        public Map FindMap(uint mapId, uint instanceId)
+        {
+            lock (_mapsLock)
+                return FindMap_i(mapId, instanceId);
         }
 
         public void Update(uint diff)
@@ -213,8 +257,16 @@ namespace Game.Entities
                 return;
 
             var time = (uint)i_timer.GetCurrent();
-            foreach (var map in i_maps.Values)
+            foreach (var (key, map) in i_maps)
             {
+                if (map.CanUnload(diff))
+                {
+                    if (DestroyMap(map))
+                        i_maps.Remove(key);
+
+                    continue;
+                }
+
                 if (m_updater != null)
                     m_updater.ScheduleUpdate(map, (uint)i_timer.GetCurrent());
                 else
@@ -228,6 +280,23 @@ namespace Game.Entities
                 map.Value.DelayedUpdate(time);
 
             i_timer.SetCurrent(0);
+        }
+
+        bool DestroyMap(Map map)
+        {
+            map.RemoveAllPlayers();
+            if (map.HavePlayers())
+                return false;
+
+            map.UnloadAll();
+
+            // Free up the instance id and allow it to be reused for bgs and arenas (other instances are handled in the InstanceSaveMgr)
+            if (map.IsBattlegroundOrArena())
+                FreeInstanceId(map.GetInstanceId());
+
+            // erase map
+            map.Dispose();
+            return true;
         }
 
         public bool IsValidMAP(uint mapId)
@@ -253,38 +322,13 @@ namespace Game.Entities
         public uint GetNumInstances()
         {
             lock (_mapsLock)
-            {
-                uint ret = 0;
-                foreach (var pair in i_maps)
-                {
-                    Map map = pair.Value;
-                    if (!map.IsDungeon())
-                        continue;
-
-                    var maps = ((MapInstanced)map).GetInstancedMaps();
-                    ret += (uint)maps.Count;
-                }
-                return ret;
-            }
+                return (uint)i_maps.Count(pair => pair.Value.IsDungeon());
         }
 
         public uint GetNumPlayersInInstances()
         {
             lock (_mapsLock)
-            {
-                uint ret = 0;
-                foreach (var pair in i_maps)
-                {
-                    Map map = pair.Value;
-                    if (!map.IsDungeon())
-                        continue;
-
-                    var maps = ((MapInstanced)map).GetInstancedMaps();
-                    foreach (var imap in maps)
-                        ret += (uint)imap.Value.GetPlayers().Count;
-                }
-                return ret;
-            }
+                return (uint)i_maps.Sum(pair => pair.Value.IsDungeon() ? pair.Value.GetPlayers().Count : 0);
         }
 
         public void InitInstanceIds()
@@ -375,27 +419,12 @@ namespace Game.Entities
 
         public void SetNextInstanceId(uint nextInstanceId) { _nextInstanceId = nextInstanceId; }
 
-        Map FindBaseMap(uint mapId)
-        {
-            return i_maps.LookupByKey(mapId);
-        }
-        
         public void DoForAllMaps(Action<Map> worker)
         {
             lock (_mapsLock)
             {
-                foreach (var map in i_maps.Values)
-                {
-                    MapInstanced mapInstanced = map.ToMapInstanced();
-                    if (mapInstanced)
-                    {
-                        var instances = mapInstanced.GetInstancedMaps();
-                        foreach (var instance in instances.Values)
-                            worker(instance);
-                    }
-                    else
-                        worker(map);
-                }
+                foreach (var (_, map) in i_maps)
+                    worker(map);
             }
         }
 
@@ -403,19 +432,9 @@ namespace Game.Entities
         {
             lock (_mapsLock)
             {
-                var map = i_maps.LookupByKey(mapId);
-                if (map != null)
-                {
-                    MapInstanced mapInstanced = map.ToMapInstanced();
-                    if (mapInstanced)
-                    {
-                        var instances = mapInstanced.GetInstancedMaps();
-                        foreach (var instance in instances)
-                            worker(instance.Value);
-                    }
-                    else
-                        worker(map);
-                }
+                var list = i_maps.Where(pair => pair.Key.mapId == mapId && pair.Key.instanceId >= 0);
+                foreach (var (_, map) in list)
+                    worker(map);
             }
         }
 
@@ -424,7 +443,7 @@ namespace Game.Entities
         public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
         public bool IsScriptScheduled() { return _scheduledScripts > 0; }
 
-        Dictionary<uint, Map> i_maps = new();
+        Dictionary<(uint mapId, uint instanceId), Map> i_maps = new();
         IntervalTimer i_timer = new();
         object _mapsLock= new();
         uint i_gridCleanUpDelay;

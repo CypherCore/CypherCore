@@ -1776,7 +1776,7 @@ namespace Game.Entities
 
                 // Check enter rights before map getting to avoid creating instance copy for player
                 // this check not dependent from map instance copy and same for all instance copies of selected map
-                if (Global.MapMgr.PlayerCannotEnter(mapid, this, false) != 0)
+                if (Map.PlayerCannotEnter(mapid, this, false) != 0)
                     return false;
 
                 // Seamless teleport can happen only if cosmetic maps match

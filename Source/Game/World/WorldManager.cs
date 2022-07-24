@@ -1116,19 +1116,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
             Global.ObjectMgr.LoadPhaseNames();
-
-            // Preload all cells, if required for the base maps
-            if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
-            {
-                Global.MapMgr.DoForAllMaps(map =>
-                {
-                    if (!map.Instanceable())
-                    {
-                        Log.outInfo(LogFilter.ServerLoading, "Pre-loading base map data for map {0}", map.GetId());
-                        map.LoadAllCells();
-                    }
-                });
-            }
         }
 
         public void LoadConfigSettings(bool reload = false)

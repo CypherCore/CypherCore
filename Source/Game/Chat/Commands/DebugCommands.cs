@@ -575,19 +575,24 @@ namespace Game.Chat
         [Command("loadcells", RBACPermissions.CommandDebug, true)]
         static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint? mapId, uint? tileX, uint? tileY)
         {
-            Map map = null;
             if (mapId.HasValue)
-                map = Global.MapMgr.FindBaseNonInstanceMap(mapId.Value);
-            else
             {
-                Player player = handler.GetPlayer();
-                if (player != null)
-                {
-                    // Fallback to player's map if no map has been specified
-                    map = player.GetMap();
-                }
+                Global.MapMgr.DoForAllMapsWithMapId(mapId.Value, map => HandleDebugLoadCellsCommandHelper(handler, map, tileX, tileY));
+                return true;
             }
 
+            Player player = handler.GetPlayer();
+            if (player != null)
+            {
+                // Fallback to player's map if no map has been specified
+                return HandleDebugLoadCellsCommandHelper(handler, player.GetMap(), tileX, tileY);
+            }
+
+            return false;
+        }
+
+        static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, uint? tileX, uint? tileY)
+        {
             if (!map)
                 return false;
 

@@ -146,10 +146,11 @@ namespace Game.Maps
         TerrainInfo _parentTerrain;
         List<TerrainInfo> _childTerrain = new();
 
-        object _loadMutex = new();
+        object _loadLock = new();
         GridMap[][] _gridMap = new GridMap[MapConst.MaxGrids][];
         ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
+        BitSet _loadedGrids = new(MapConst.MaxGrids * MapConst.MaxGrids);
         BitSet _gridFileExists = new(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
 
         static TimeSpan CleanupInterval = TimeSpan.FromMinutes(1);
@@ -187,9 +188,9 @@ namespace Game.Maps
                 {
                     var build = reader.ReadUInt32();
                     byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
-                    for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
-                        for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
-                            _gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = tilesData[(int)(gx * MapConst.MaxGrids + gy)] == 49; // char of 1
+                    for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
+                        for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
+                            _gridFileExists[GetBitsetIndex(gx, gy)] = tilesData[GetBitsetIndex(gx, gy)] == 49; // char of 1
 
                     return;
                 }
@@ -197,7 +198,7 @@ namespace Game.Maps
 
             for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
                 for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
-                    _gridFileExists[gx * MapConst.MaxGrids + gy] = ExistMap(GetId(), gx, gy, false);
+                    _gridFileExists[GetBitsetIndex(gx, gy)] = ExistMap(GetId(), gx, gy, false);
         }
 
         public static bool ExistMap(uint mapid, int gx, int gy, bool log = true)
@@ -264,7 +265,7 @@ namespace Game.Maps
         public bool HasChildTerrainGridFile(uint mapId, int gx, int gy)
         {
             var childMap = _childTerrain.Find(childTerrain => childTerrain.GetId() == mapId);
-            return childMap != null && childMap._gridFileExists[gx * MapConst.MaxGrids + gy];
+            return childMap != null && childMap._gridFileExists[GetBitsetIndex(gx, gy)];
         }
 
         public void AddChildTerrain(TerrainInfo childTerrain)
@@ -278,8 +279,8 @@ namespace Game.Maps
             if (++_referenceCountFromMap[gx][gy] != 1)    // check if already loaded
                 return;
 
-            //std::lock_guard < std::mutex > lock (_loadMutex) ;
-            LoadMapAndVMapImpl(gx, gy);
+            lock(_loadLock)
+                LoadMapAndVMapImpl(gx, gy);
         }
 
         public void LoadMapAndVMapImpl(int gx, int gy)
@@ -290,6 +291,8 @@ namespace Game.Maps
 
             foreach (TerrainInfo childTerrain in _childTerrain)
                 childTerrain.LoadMapAndVMapImpl(gx, gy);
+
+            _loadedGrids[GetBitsetIndex(gx, gy)] = true;
         }
 
         public void LoadMap(int gx, int gy)
@@ -297,7 +300,7 @@ namespace Game.Maps
             if (_gridMap[gx][gy] != null)
                 return;
 
-            if (!_gridFileExists[gx * MapConst.MaxGrids + gy])
+            if (!_gridFileExists[GetBitsetIndex(gx, gy)])
                 return;
 
             // map file name
@@ -310,7 +313,7 @@ namespace Game.Maps
             if (gridMapLoadResult == LoadResult.Success)
                 _gridMap[gx][gy] = gridMap;
             else
-                _gridFileExists[gx * MapConst.MaxGrids + gy] = false;
+                _gridFileExists[GetBitsetIndex(gx, gy)] = false;
 
             if (gridMapLoadResult == LoadResult.ReadFromFileFailed)
                 Log.outError(LogFilter.Maps, $"Error loading map file: {fileName}");
@@ -328,7 +331,8 @@ namespace Game.Maps
                 case LoadResult.Success:
                     Log.outDebug(LogFilter.Maps, $"VMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
                     break;
-                default:
+                case LoadResult.VersionMismatch:
+                case LoadResult.ReadFromFileFailed:
                     Log.outError(LogFilter.Maps, $"Could not load VMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
                     break;
                 case LoadResult.DisabledInConfig:
@@ -363,6 +367,8 @@ namespace Game.Maps
 
             foreach (var childTerrain in _childTerrain)
                 childTerrain.UnloadMapImpl(gx, gy);
+
+            _loadedGrids[GetBitsetIndex(gx, gy)] = false;
         }
 
         public GridMap GetGrid(uint mapId, float x, float y, bool loadIfMissing = true)
@@ -372,10 +378,10 @@ namespace Game.Maps
             int gy = (int)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
 
             // ensure GridMap is loaded
-            if (_gridMap[gx][gy] == null && loadIfMissing)
+            if (_loadedGrids[GetBitsetIndex(gx, gy)] && loadIfMissing)
             {
-                //std::lock_guard < std::mutex > lock (_loadMutex) ;
-                LoadMapAndVMapImpl(gx, gy);
+                lock(_loadLock)
+                    LoadMapAndVMapImpl(gx, gy);
             }
 
             GridMap grid = _gridMap[gx][gy];
@@ -398,7 +404,7 @@ namespace Game.Maps
             // delete those GridMap objects which have refcount = 0
             for (int x = 0; x < MapConst.MaxGrids; ++x)
                 for (int y = 0; y < MapConst.MaxGrids; ++y)
-                    if (_gridMap[x][y] != null && _referenceCountFromMap[x][y] == 0)
+                    if (_loadedGrids[GetBitsetIndex(x, y)] && _referenceCountFromMap[x][y] == 0)
                         UnloadMapImpl(x, y);
 
             _cleanupTimer.Reset(CleanupInterval);
@@ -889,5 +895,7 @@ namespace Game.Maps
         }
 
         public uint GetId() { return _mapId; }
+
+        static int GetBitsetIndex(int gx, int gy) { return gx * MapConst.MaxGrids + gy; }
     }
 }

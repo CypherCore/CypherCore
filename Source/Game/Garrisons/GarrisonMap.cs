@@ -24,8 +24,7 @@ namespace Game.Garrisons
 {
     class GarrisonMap : Map
     {
-        public GarrisonMap(uint id, long expiry, uint instanceId, Map parent, ObjectGuid owner)
-            : base(id, expiry, instanceId, Difficulty.Normal, parent)
+        public GarrisonMap(uint id, long expiry, uint instanceId, ObjectGuid owner) : base(id, expiry, instanceId, Difficulty.Normal)
         {
             _owner = owner;
             InitVisibilityDistance();

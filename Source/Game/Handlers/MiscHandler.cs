@@ -274,7 +274,7 @@ namespace Game
             bool teleported = false;
             if (player.GetMapId() != at.target_mapId)
             {
-                EnterState denyReason = Global.MapMgr.PlayerCannotEnter(at.target_mapId, player, false);
+                EnterState denyReason = Map.PlayerCannotEnter(at.target_mapId, player, false);
                 if (denyReason != 0)
                 {
                     bool reviveAtTrigger = false; // should we revive the player if he is trying to enter the correct instance?

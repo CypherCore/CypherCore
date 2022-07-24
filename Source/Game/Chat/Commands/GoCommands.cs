@@ -205,8 +205,8 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            Map map = Global.MapMgr.CreateBaseMap(mapId);
-            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -352,8 +352,8 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            Map map = Global.MapMgr.CreateBaseMap(mapId);
-            z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
+            z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
             return true;
@@ -398,8 +398,8 @@ namespace Game.Chat.Commands
                     handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);
                     return false;
                 }
-                Map map = Global.MapMgr.CreateBaseMap(mapId);
-                z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+                TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
+                z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
             }
 
             return DoTeleport(handler, new Position(x, y, z.Value, o.Value), mapId);
@@ -427,10 +427,10 @@ namespace Game.Chat.Commands
             x /= 100.0f;
             y /= 100.0f;
 
-            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
+            TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(zoneEntry.ContinentID);
             if (!Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y))
             {
-                handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], map.GetId(), map.GetMapName());
+                handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], terrain.GetId(), terrain.GetMapName());
                 return false;
             }
 
@@ -446,7 +446,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;

@@ -72,27 +72,17 @@ namespace Game.Chat.Commands
                     bool liveFound = false;
 
                     // Get map (only support base map from console)
-                    Map thisMap;
+                    Map thisMap = null;
                     if (handler.GetSession() != null)
                         thisMap = handler.GetSession().GetPlayer().GetMap();
-                    else
-                        thisMap = Global.MapMgr.FindBaseNonInstanceMap(mapId);
 
                     // If map found, try to find active version of this creature
                     if (thisMap)
                     {
                         var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
-                        if (!creBounds.Empty())
-                        {
-                            foreach (var creature in creBounds)
-                            {
-                                if (handler.GetSession())
-                                    handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
-                                else
-                                    handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
-                            }
-                            liveFound = true;
-                        }
+                        foreach (var creature in creBounds)
+                            handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+                        liveFound = !creBounds.Empty();
                     }
 
                     if (!liveFound)
@@ -422,27 +412,17 @@ namespace Game.Chat.Commands
                     bool liveFound = false;
 
                     // Get map (only support base map from console)
-                    Map thisMap;
+                    Map thisMap = null;
                     if (handler.GetSession() != null)
                         thisMap = handler.GetSession().GetPlayer().GetMap();
-                    else
-                        thisMap = Global.MapMgr.FindBaseNonInstanceMap(mapId);
 
                     // If map found, try to find active version of this object
                     if (thisMap)
                     {
                         var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
-                        if (!goBounds.Empty())
-                        {
-                            foreach (var go in goBounds)
-                            {
-                                if (handler.GetSession())
-                                    handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID(), go.IsSpawned() ? "*" : " ");
-                                else
-                                    handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, go.GetGUID(), go.IsSpawned() ? "*" : " ");
-                            }
-                            liveFound = true;
-                        }
+                        foreach (var go in goBounds)
+                            handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
+                        liveFound = !goBounds.Empty();
                     }
 
                     if (!liveFound)
