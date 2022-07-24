@@ -212,7 +212,8 @@ namespace Game.Groups
             member.guid = ObjectGuid.Create(HighGuid.Player, guidLow);
 
             // skip non-existed member
-            if (!Global.CharacterCacheStorage.GetCharacterNameAndClassByGUID(member.guid, out member.name, out member._class))
+            var character = Global.CharacterCacheStorage.GetCharacterCacheByGuid(member.guid);
+            if (character == null)
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidLow);
@@ -220,6 +221,9 @@ namespace Game.Groups
                 return;
             }
 
+            member.name = character.Name;
+            member.race = character.RaceId;
+            member._class = (byte)character.ClassId;
             member.group = subgroup;
             member.flags = (GroupMemberFlags)memberFlags;
             member.roles = roles;
