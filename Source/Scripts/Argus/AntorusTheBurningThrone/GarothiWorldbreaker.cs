@@ -377,9 +377,8 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                         break;
                     case EventIds.SurgingFel:
                     {
-                        var guids = _surgingFelDummyGuids;
-                        guids.Remove(_lastSurgingFelDummyGuid);
-                        _lastSurgingFelDummyGuid = guids.SelectRandom();
+                        _surgingFelDummyGuids.Remove(_lastSurgingFelDummyGuid);
+                        _lastSurgingFelDummyGuid = _surgingFelDummyGuids.SelectRandom();
                         Creature dummy = ObjectAccessor.GetCreature(me, _lastSurgingFelDummyGuid);
                         if (dummy)
                             dummy.CastSpell(dummy, SpellIds.SurgingFelAreaTrigger);
@@ -404,7 +403,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         uint _lastCanonEntry;
         bool _castEradication;
         ObjectGuid _lastSurgingFelDummyGuid;
-        List<ObjectGuid> _surgingFelDummyGuids;
+        List<ObjectGuid> _surgingFelDummyGuids = new();
 
         void CleanupEncounter()
         {

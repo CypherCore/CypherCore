@@ -639,7 +639,7 @@ namespace Game
             {
                 StringBuilder uiWorldMapAreaIdSwaps = new();
                 foreach (var uiWorldMapAreaIdSwap in phaseShift.UiMapPhaseIds)
-                    uiWorldMapAreaIdSwaps.Append(uiWorldMapAreaIdSwap.Key + ',' + ' ');
+                    uiWorldMapAreaIdSwaps.AppendFormat($"{uiWorldMapAreaIdSwap.Key}, ");
 
                 chat.SendSysMessage(CypherStrings.PhaseshiftUiWorldMapAreaSwaps, uiWorldMapAreaIdSwaps.ToString());
             }

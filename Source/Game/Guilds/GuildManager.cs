@@ -502,7 +502,6 @@ namespace Game
 
         public List<GuildReward> GetGuildRewards() { return guildRewards; }
 
-
         uint NextGuildId;
         Dictionary<ulong, Guild> GuildStore = new();
         List<GuildReward> guildRewards = new();
