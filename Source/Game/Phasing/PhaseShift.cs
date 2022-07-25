@@ -161,7 +161,13 @@ namespace Game
             {
                 ObjectGuid ownerGuid = PersonalGuid;
                 ObjectGuid otherPersonalGuid = other.PersonalGuid;
-                return Phases.Intersect(other.Phases, (myPhase, otherPhase) => !myPhase.Value.Flags.HasAnyFlag(excludePhasesWithFlag) && (!myPhase.Value.Flags.HasFlag(PhaseFlags.Personal) || ownerGuid == otherPersonalGuid)).Any();
+                return Phases.Intersect(other.Phases, (myPhase, otherPhase) =>
+                {
+                    if (myPhase.Key != otherPhase.Key)
+                        return false;
+
+                    return !myPhase.Value.Flags.HasAnyFlag(excludePhasesWithFlag) && (!myPhase.Value.Flags.HasFlag(PhaseFlags.Personal) || ownerGuid == otherPersonalGuid);
+                }).Any();
             }
 
             var checkInversePhaseShift = new Func<PhaseShift, PhaseShift, bool>((phaseShift, excludedPhaseShift) =>

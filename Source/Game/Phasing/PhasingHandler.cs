@@ -618,9 +618,9 @@ namespace Game
                     phases.Append("   ");
                     phases.Append($"{pair.Key} ({Global.ObjectMgr.GetPhaseName(pair.Key)})'");
                     if (pair.Value.Flags.HasFlag(PhaseFlags.Cosmetic))
-                        phases.Append(' ' + '(' + cosmetic + ')');
+                        phases.Append($" ({cosmetic})");
                     if (pair.Value.Flags.HasFlag(PhaseFlags.Personal))
-                        phases.Append(' ' + '(' + personal + ')');
+                        phases.Append($" ({personal})");
                 }
 
                 chat.SendSysMessage(CypherStrings.PhaseshiftPhases, phases.ToString());

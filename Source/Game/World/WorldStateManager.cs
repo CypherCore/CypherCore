@@ -74,7 +74,7 @@ namespace Game
 
                 if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
                 {
-                    Log.outError(LogFilter.Sql, "Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
+                    Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
                     continue;
                 }
 

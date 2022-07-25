@@ -85,7 +85,7 @@ namespace Game.Chat
         [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]
         static bool HandleGameObjectDespawnGroup(CommandHandler handler, string[] opts)
         {
-            if (opts.Empty())
+            if (opts == null || opts.Empty())
                 return false;
 
             bool deleteRespawnTimes = false;
