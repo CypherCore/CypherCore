@@ -126,8 +126,8 @@ namespace Game.Conditions
                 return false;
             }
 
-            Player player = obj.ToPlayer();
-            Unit unit = obj.ToUnit();
+            Player player = obj?.ToPlayer();
+            Unit unit = obj?.ToUnit();
 
             switch (ConditionType)
             {

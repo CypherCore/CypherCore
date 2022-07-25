@@ -179,7 +179,7 @@ namespace Game.Maps
         {
             string tileListName = $"{Global.WorldMgr.GetDataPath()}/maps/{GetId():D4}.tilelist";
             // tile list is optional
-            /*if (File.Exists(tileListName))
+            if (File.Exists(tileListName))
             {
                 using var reader = new BinaryReader(new FileStream(tileListName, FileMode.Open, FileAccess.Read));
                 var mapMagic = reader.ReadUInt32();
@@ -187,14 +187,15 @@ namespace Game.Maps
                 if (mapMagic == MapConst.MapMagic && versionMagic == MapConst.MapVersionMagic)
                 {
                     var build = reader.ReadUInt32();
-                    bool[] tilesData = reader.ReadArray<bool>(MapConst.MaxGrids * MapConst.MaxGrids);
+                    byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
+                    Array.Reverse(tilesData);
                     for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
                         for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
                             _gridFileExists[GetBitsetIndex(gx, gy)] = tilesData[GetBitsetIndex(gx, gy)] == 49; // char of 1
 
                     return;
                 }
-            }*/
+            }
 
             for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
                 for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
