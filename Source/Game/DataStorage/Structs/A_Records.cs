@@ -147,9 +147,6 @@ namespace Game.DataStorage
 
         public bool IsSanctuary()
         {
-            if (ContinentID == 609)
-                return true;
-
             return HasFlag(AreaFlags.Sanctuary);
         }
 

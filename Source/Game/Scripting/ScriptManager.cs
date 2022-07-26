@@ -59,6 +59,9 @@ namespace Game.Scripting
             //Load Scripts.dll
             LoadScripts();
 
+            // MapScripts
+            Global.MapMgr.AddSC_BuiltInScripts();
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 

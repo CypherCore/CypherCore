@@ -22,6 +22,7 @@ using Game.DataStorage;
 using Game.Garrisons;
 using Game.Groups;
 using Game.Maps;
+using Game.Scripting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -232,6 +233,9 @@ namespace Game.Entities
                 else
                 {
                     newInstanceId = 0;
+                    if (entry.IsSplitByFaction())
+                        newInstanceId = (uint)player.GetTeamId();
+
                     map = FindMap_i(mapId, newInstanceId);
                     if (!map)
                         map = CreateWorldMap(mapId, newInstanceId);
@@ -356,7 +360,7 @@ namespace Game.Entities
         }
 
         public uint GenerateInstanceId()
-        {  
+        {
             if (_nextInstanceId == 0xFFFFFFFF)
             {
                 Log.outError(LogFilter.Maps, "Instance ID overflow!! Can't continue, shutting down server. ");
@@ -438,6 +442,13 @@ namespace Game.Entities
             }
         }
 
+        public void AddSC_BuiltInScripts()
+        {
+            foreach (var (_, mapEntry) in CliDB.MapStorage)
+                if (mapEntry.IsWorldMap() && mapEntry.IsSplitByFaction())
+                    new SplitByFactionMapScript($"world_map_set_faction_worldstates_{mapEntry.Id}", mapEntry.Id);
+        }
+
         public void IncreaseScheduledScriptsCount() { ++_scheduledScripts; }
         public void DecreaseScheduledScriptCount() { --_scheduledScripts; }
         public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
@@ -445,11 +456,23 @@ namespace Game.Entities
 
         Dictionary<(uint mapId, uint instanceId), Map> i_maps = new();
         IntervalTimer i_timer = new();
-        object _mapsLock= new();
+        object _mapsLock = new();
         uint i_gridCleanUpDelay;
         BitSet _freeInstanceIds;
         uint _nextInstanceId;
         MapUpdater m_updater;
         uint _scheduledScripts;
+    }
+
+    // hack to allow conditions to access what faction owns the map (these worldstates should not be set on these maps)
+    class SplitByFactionMapScript : WorldMapScript
+    {
+        public SplitByFactionMapScript(string name, uint mapId) : base(name, mapId) { }
+
+        public override void OnCreate(Map map)
+        {
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, map.GetInstanceId() == TeamId.Alliance ? 1 : 0, false, map);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, map.GetInstanceId() == TeamId.Horde ? 1 : 0, false, map);
+        }
     }
 }

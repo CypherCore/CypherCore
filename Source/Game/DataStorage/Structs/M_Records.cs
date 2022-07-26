@@ -86,11 +86,27 @@ namespace Game.DataStorage
 
         public bool IsContinent()
         {
-            return Id == 0 || Id == 1 || Id == 530 || Id == 571 || Id == 870 || Id == 1116 || Id == 1220;
+            switch (Id)
+            {
+                case 0:
+                case 1:
+                case 530:
+                case 571:
+                case 870:
+                case 1116:
+                case 1220:
+                case 1642:
+                case 1643:
+                case 2222:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public bool IsDynamicDifficultyMap() { return (Flags[0] & MapFlags.CanToggleDifficulty) != 0; }
         public bool IsGarrison() { return (Flags[0] & MapFlags.Garrison) != 0; }
+        public bool IsSplitByFaction() { return Id == 609 || Id == 2175; }
     }
 
     public sealed class MapChallengeModeRecord
