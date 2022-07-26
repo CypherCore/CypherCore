@@ -29,9 +29,11 @@ namespace Game
 {
     public class WorldStateManager : Singleton<WorldStateManager>
     {
+        static int AnyMap = -1;
+
         Dictionary<int, WorldStateTemplate> _worldStateTemplates = new();
         Dictionary<int, int> _realmWorldStateValues = new();
-        Dictionary<uint, Dictionary<int, int>> _worldStatesByMap = new();
+        Dictionary<int, Dictionary<int, int>> _worldStatesByMap = new();
 
         WorldStateManager() { }
 
@@ -56,13 +58,13 @@ namespace Game
                 {
                     foreach (string mapIdToken in new StringArray(mapIds, ','))
                     {
-                        if (!uint.TryParse(mapIdToken, out uint mapId))
+                        if (!int.TryParse(mapIdToken, out int mapId))
                         {
                             Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
                             continue;
                         }
 
-                        if (!CliDB.MapStorage.ContainsKey(mapId))
+                        if (!CliDB.MapStorage.ContainsKey(mapId) && mapId != AnyMap)
                         {
                             Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
                             continue;
@@ -120,7 +122,7 @@ namespace Game
 
                 if (!worldState.MapIds.Empty())
                 {
-                    foreach (uint mapId in worldState.MapIds)
+                    foreach (int mapId in worldState.MapIds)
                     {
                         if (!_worldStatesByMap.ContainsKey(mapId))
                             _worldStatesByMap[mapId] = new();
@@ -157,8 +159,13 @@ namespace Game
 
                     if (!worldState.MapIds.Empty())
                     {
-                        foreach (uint mapId in worldState.MapIds)
+                        foreach (int mapId in worldState.MapIds)
+                        {
+                            if (!_worldStatesByMap.ContainsKey(mapId))
+                                _worldStatesByMap[mapId] = new();
+
                             _worldStatesByMap[mapId][worldStateId] = value;
+                        }
                     }
                     else
                         _realmWorldStateValues[worldStateId] = value;
@@ -187,7 +194,7 @@ namespace Game
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
                 return _realmWorldStateValues.LookupByKey(worldStateId);
 
-            if (map == null || !worldStateTemplate.MapIds.Contains(map.GetId()))
+            if (map == null || (!worldStateTemplate.MapIds.Contains((int)map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
                 return 0;
 
             return map.GetWorldStateValue(worldStateId);
@@ -230,7 +237,7 @@ namespace Game
                 return;
             }
 
-            if (map == null || !worldStateTemplate.MapIds.Contains(map.GetId()))
+            if (map == null || (!worldStateTemplate.MapIds.Contains((int)map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
                 return;
 
             map.SetWorldStateValue(worldStateId, value, hidden);
@@ -260,10 +267,21 @@ namespace Game
 
         public Dictionary<int, int> GetInitialWorldStatesForMap(Map map)
         {
-            if (_worldStatesByMap.TryGetValue(map.GetId(), out Dictionary<int, int> initialValues))
-                return initialValues;
+            Dictionary<int, int> initialValues = new();
 
-            return new Dictionary<int, int>();
+            if (_worldStatesByMap.TryGetValue((int)map.GetId(), out Dictionary<int, int> valuesTemplate))
+            {
+                foreach (var (key, value) in valuesTemplate)
+                    initialValues.Add(key, value);
+            }
+
+            if (_worldStatesByMap.TryGetValue(AnyMap, out valuesTemplate))
+            {
+                foreach (var (key, value) in valuesTemplate)
+                    initialValues.Add(key, value);
+            }
+
+            return initialValues;
         }
 
         public void FillInitialWorldStates(InitWorldStates initWorldStates, Map map, uint playerAreaId)
@@ -292,7 +310,7 @@ namespace Game
         public int DefaultValue;
         public uint ScriptId;
 
-        public List<uint> MapIds = new();
+        public List<int> MapIds = new();
         public List<uint> AreaIds = new();
     }
 }
