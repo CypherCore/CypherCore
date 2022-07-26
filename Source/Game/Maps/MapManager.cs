@@ -151,7 +151,7 @@ namespace Game.Entities
                     if (newInstanceId == 0)
                         return null;
 
-                    map = FindMap(mapId, newInstanceId);
+                    map = FindMap_i(mapId, newInstanceId);
                     if (!map)
                     {
                         Battleground bg = player.GetBattleground();
