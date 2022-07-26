@@ -790,6 +790,9 @@ namespace Game.Maps
                 if (encounter.creditType == type && encounter.creditEntry == creditEntry)
                 {
                     completedEncounters |= (1u << encounter.dbcEntry.Bit);
+                    if (encounter.dbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
+
                     if (encounter.lastEncounterDungeon != 0)
                     {
                         dungeonId = encounter.lastEncounterDungeon;
@@ -813,6 +816,19 @@ namespace Game.Maps
                             return;
                         }
                 }
+            }
+        }
+
+        public void SetCompletedEncountersMask(uint newMask)
+        {
+            completedEncounters = newMask;
+
+            var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
+            if (encounters != null)
+            {
+                foreach (DungeonEncounter encounter in encounters)
+                    if ((completedEncounters & (1 << encounter.dbcEntry.Bit)) != 0 && encounter.dbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
             }
         }
 
@@ -902,8 +918,6 @@ namespace Game.Maps
         public List<AreaBoundary> GetBossBoundary(uint id) { return id < bosses.Count ? bosses[id].boundary : null; }
 
         public virtual bool CheckRequiredBosses(uint bossId, Player player = null) { return true; }
-
-        public void SetCompletedEncountersMask(uint newMask) { completedEncounters = newMask; }
 
         public uint GetCompletedEncounterMask() { return completedEncounters; }
 
