@@ -283,6 +283,8 @@ namespace Game.Movement
 
         public void SetOrientationFixed(bool enable) { args.flags.SetUnsetFlag(SplineFlag.OrientationFixed, enable); }
 
+        public void SetUnlimitedSpeed() { args.flags.SetUnsetFlag(SplineFlag.UnlimitedSpeed, true); }
+
         public void MovebyPath(Vector3[] controls, int path_offset = 0)
         {
             args.path_Idx_offset = path_offset;

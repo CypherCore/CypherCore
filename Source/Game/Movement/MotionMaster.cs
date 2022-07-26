@@ -812,6 +812,7 @@ namespace Game.Movement
                 init.SetParabolicVerticalAcceleration(gravity, 0);
                 init.SetUncompressed();
                 init.SetVelocity(speedXY);
+                init.SetUnlimitedSpeed();
                 if (hasOrientation)
                     init.SetFacing(pos.GetOrientation());
                 if (spellEffectExtraData != null)
