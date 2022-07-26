@@ -4755,14 +4755,15 @@ namespace Game.Maps
     {
         public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam) : base(id, expiry, InstanceId, spawnMode)
         {
-            scriptTeam = instanceTeam;
-
             //lets initialize visibility distance for dungeons
             InitVisibilityDistance();
 
             // the timer is started by default, and stopped when the first player joins
             // this make sure it gets unloaded if for some reason no player joins
             m_unloadTimer = (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
+
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == TeamId.Alliance ? 1 : 0, false, this);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == TeamId.Horde ? 1 : 0, false, this);
         }
 
         public override void InitVisibilityDistance()
@@ -5179,9 +5180,16 @@ namespace Game.Maps
             return mapDiff != null ? mapDiff.GetRaidDuration() : 0;
         }
 
-        public int GetTeamIdInInstance() { return scriptTeam; }
-
-        public Team GetTeamInInstance() { return scriptTeam == TeamId.Alliance ? Team.Alliance : Team.Horde; }
+        public int GetTeamIdInInstance()
+        {
+            if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceAlliance, this) != 0)
+                return TeamId.Alliance;
+            if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceHorde, this) != 0)
+                return TeamId.Horde;
+            return TeamId.Neutral;
+        }
+        
+        public Team GetTeamInInstance() { return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde; }
 
         public uint GetScriptId()
         {
@@ -5203,7 +5211,6 @@ namespace Game.Maps
 
         InstanceScript i_data;
         uint i_script_id;
-        int scriptTeam;
         InstanceScenario i_scenario;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;

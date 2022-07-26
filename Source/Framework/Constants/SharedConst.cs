@@ -2994,6 +2994,9 @@ namespace Framework.Constants
         CurrentPvpSeasonId = 3191,
         PreviousPvpSeasonId = 3901,
 
+        TeamInInstanceAlliance = 4485,
+        TeamInInstanceHorde = 4486,
+
         BattlefieldWgVehicleH = 3490,
         BattlefieldWgMaxVehicleH = 3491,
         BattlefieldWgVehicleA = 3680,
