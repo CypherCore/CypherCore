@@ -565,7 +565,7 @@ namespace Game.Conditions
 
         public bool IsLoaded()
         {
-            return ConditionType > ConditionTypes.None || ReferenceId != 0;
+            return ConditionType > ConditionTypes.None || ReferenceId != 0 || ScriptId != 0;
         }
 
         public uint GetMaxAvailableConditionTargets()
