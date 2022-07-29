@@ -517,6 +517,9 @@ namespace Game.Scripting
         // where function is SpellCastResult function()
         public List<CheckCastHandler> OnCheckCast = new();
 
+        // example: int32 CalcCastTime(int32 castTime) override { return 1500; }
+        public virtual int CalcCastTime(int castTime) { return castTime; }
+
         // where function is void function(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
         public List<OnCalculateResistAbsorbHandler> OnCalculateResistAbsorb = new();
 
