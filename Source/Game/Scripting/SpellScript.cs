@@ -1038,6 +1038,7 @@ namespace Game.Scripting
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
         public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref float critChance);
         public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
+        public delegate void AuraEffectAbsorbHealDelegate(AuraEffect aura, HealInfo healInfo, ref uint absorbAmount);
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
         public delegate bool AuraCheckProcDelegate(ProcEventInfo info);
         public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
@@ -1201,6 +1202,21 @@ namespace Game.Scripting
             }
 
             AuraEffectAbsorbDelegate pEffectHandlerScript;
+        }
+        public class EffectAbsorbHealHandler : EffectBase
+        {
+            public EffectAbsorbHealHandler(AuraEffectAbsorbHealDelegate _pEffectHandlerScript, byte _effIndex)
+                : base(_effIndex, AuraType.SchoolHealAbsorb)
+            {
+                pEffectHandlerScript = _pEffectHandlerScript;
+            }
+
+            public void Call(AuraEffect aurEff, HealInfo healInfo, ref uint absorbAmount)
+            {
+                pEffectHandlerScript(aurEff, healInfo, ref absorbAmount);
+            }
+
+            AuraEffectAbsorbHealDelegate pEffectHandlerScript;
         }
         public class EffectManaShieldHandler : EffectBase
         {
@@ -1543,10 +1559,20 @@ namespace Game.Scripting
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
         public List<EffectAbsorbHandler> OnEffectAbsorb = new();
 
+        // executed when absorb aura effect is going to reduce damage
+        // example: OnEffectAbsorbHeal += AuraEffectAbsorbHealFn(class::function, EffectIndexSpecifier);
+        // where function is: void function (AuraEffect const* aurEff, HealInfo& healInfo, uint32& absorbAmount);
+        public List<EffectAbsorbHealHandler> OnEffectAbsorbHeal = new();
+
         // executed after absorb aura effect reduced damage to target - absorbAmount is real amount absorbed by aura
         // example: AfterEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
         public List<EffectAbsorbHandler> AfterEffectAbsorb = new();
+
+        // executed after absorb aura effect reduced heal to target - absorbAmount is real amount absorbed by aura
+        // example: AfterEffectAbsorbHeal += AuraEffectAbsorbHealFn(class::function, EffectIndexSpecifier);
+        // where function is: void function (AuraEffect* aurEff, HealInfo& healInfo, uint32& absorbAmount);
+        public List<EffectAbsorbHealHandler> AfterEffectAbsorbHeal = new();
 
         // executed when mana shield aura effect is going to reduce damage
         // example: OnEffectManaShield += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);

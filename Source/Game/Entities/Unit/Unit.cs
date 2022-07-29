@@ -3593,57 +3593,53 @@ namespace Game.Entities
             if (healInfo.GetHeal() == 0)
                 return;
 
-            // Need remove expired auras after
-            bool existExpired = false;
-
             // absorb without mana cost
             var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
-            for (var i = 0; i < vHealAbsorb.Count; ++i)
+            for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
             {
-                var eff = vHealAbsorb[i];
-                if (healInfo.GetHeal() <= 0)
-                    break;
-
-                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)healInfo.GetSpellInfo().SchoolMask))
+                AuraEffect absorbAurEff = vHealAbsorb[i];
+                // Check if aura was removed during iteration - we don't need to work on such auras
+                AuraApplication aurApp = absorbAurEff.GetBase().GetApplicationOfTarget(healInfo.GetTarget().GetGUID());
+                if (aurApp == null)
                     continue;
 
-                // Max Amount can be absorbed by this aura
-                int currentAbsorb = eff.GetAmount();
-
-                // Found empty aura (impossible but..)
-                if (currentAbsorb <= 0)
-                {
-                    existExpired = true;
+                if ((absorbAurEff.GetMiscValue() & (int)healInfo.GetSchoolMask()) == 0)
                     continue;
-                }
+
+                // get amount which can be still absorbed by the aura
+                int currentAbsorb = absorbAurEff.GetAmount();
+                // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+                if (currentAbsorb < 0)
+                    currentAbsorb = 0;
+
+                uint tempAbsorb = (uint)currentAbsorb;
+
+                bool defaultPrevented = false;
+
+                absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, healInfo, ref tempAbsorb, ref defaultPrevented);
+                currentAbsorb = (int)tempAbsorb;
+
+                if (defaultPrevented)
+                    continue;
 
                 // currentAbsorb - damage can be absorbed by shield
-                // If need absorb less damage
                 currentAbsorb = (int)Math.Min(healInfo.GetHeal(), currentAbsorb);
 
                 healInfo.AbsorbHeal((uint)currentAbsorb);
 
-                // Reduce shield amount
-                eff.ChangeAmount(eff.GetAmount() - currentAbsorb);
-                // Need remove it later
-                if (eff.GetAmount() <= 0)
-                    existExpired = true;
-            }
+                tempAbsorb = (uint)currentAbsorb;
+                absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, healInfo, ref tempAbsorb);
 
-            // Remove all expired absorb auras
-            if (existExpired)
-            {
-                for (var i = 0; i < vHealAbsorb.Count;)
+                // Reduce shield amount
+                absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                // Check if our aura is using amount to count damage
+                if (absorbAurEff.GetAmount() >= 0)
                 {
-                    AuraEffect auraEff = vHealAbsorb[i];
-                    ++i;
-                    if (auraEff.GetAmount() <= 0)
-                    {
-                        uint removedAuras = healInfo.GetTarget().m_removedAurasCount;
-                        auraEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
-                        if (removedAuras + 1 < healInfo.GetTarget().m_removedAurasCount)
-                            i = 0;
-                    }
+                    // Reduce shield amount
+                    absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                    // Aura cannot absorb anything more - remove it
+                    if (absorbAurEff.GetAmount() <= 0)
+                        absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
                 }
             }
         }

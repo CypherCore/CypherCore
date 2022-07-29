@@ -287,7 +287,7 @@ namespace Game.Spells
                     // When sending EstimatedPoints all effects (at least up to the last one that uses GetEstimatedAmount) must have proper value in packet
                     foreach (AuraEffect effect in GetBase().GetAuraEffects())
                         if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
-                            auraData.EstimatedPoints[(int)effect.GetEffIndex()] = effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount());
+                            auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
                 }
             }
         }
@@ -542,7 +542,6 @@ namespace Game.Spells
                     if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
                         value &= ~(1u << (int)spellEffectInfo.EffectIndex);
                 }
-
                 
                 if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
                     addUnit = false;
@@ -2142,6 +2141,20 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        {
+            foreach (var auraScript in m_loadedScripts)
+            {
+                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
+                foreach (var eff in auraScript.OnEffectAbsorbHeal)
+                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        eff.Call(aurEff, healInfo, ref absorbAmount);
+
+                defaultPrevented = auraScript._IsDefaultActionPrevented();
+                auraScript._FinishScriptCall();
+            }
+        }
+        
         public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             foreach (var auraScript in m_loadedScripts)
@@ -2156,6 +2169,19 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount)
+        {
+            foreach (var auraScript in m_loadedScripts)
+            {
+                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
+                foreach (var eff in auraScript.AfterEffectAbsorbHeal)
+                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        eff.Call(aurEff, healInfo, ref absorbAmount);
+
+                auraScript._FinishScriptCall();
+            }
+        }
+        
         public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)
