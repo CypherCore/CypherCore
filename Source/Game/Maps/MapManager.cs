@@ -181,7 +181,10 @@ namespace Game.Entities
                         {
                             map = FindMap_i(mapId, loginInstanceId);
                             if (map == null && pSave != null && pSave.GetInstanceId() == loginInstanceId)
+                            {
                                 map = CreateInstance(mapId, loginInstanceId, pSave, pSave.GetDifficultyID(), player.GetTeamId());
+                                i_maps[(map.GetId(), map.GetInstanceId())] = map;
+                            }
                             return map;
                         }
 
