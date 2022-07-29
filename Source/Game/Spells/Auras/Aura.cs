@@ -400,7 +400,17 @@ namespace Game.Spells
                     _effects[spellEffectInfo.EffectIndex] = new AuraEffect(this, spellEffectInfo, baseAmount != null ? baseAmount[spellEffectInfo.EffectIndex] : null, caster);
             }
         }
-        
+
+        public virtual void Dispose()
+        {
+            // unload scripts
+            foreach (var itr in m_loadedScripts.ToList())
+                itr._Unload();
+
+            Cypher.Assert(m_applications.Empty());
+            _DeleteRemovedApplications();
+        }
+
         public Unit GetCaster()
         {
             if (m_owner.GetGUID() == m_casterGuid)
@@ -2141,20 +2151,6 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
-        {
-            foreach (var auraScript in m_loadedScripts)
-            {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
-                foreach (var eff in auraScript.OnEffectAbsorbHeal)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, healInfo, ref absorbAmount);
-
-                defaultPrevented = auraScript._IsDefaultActionPrevented();
-                auraScript._FinishScriptCall();
-            }
-        }
-        
         public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             foreach (var auraScript in m_loadedScripts)
@@ -2165,6 +2161,20 @@ namespace Game.Spells
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
 
+                auraScript._FinishScriptCall();
+            }
+        }
+
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        {
+            foreach (var auraScript in m_loadedScripts)
+            {
+                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
+                foreach (var eff in auraScript.OnEffectAbsorbHeal)
+                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        eff.Call(aurEff, healInfo, ref absorbAmount);
+
+                defaultPrevented = auraScript._IsDefaultActionPrevented();
                 auraScript._FinishScriptCall();
             }
         }

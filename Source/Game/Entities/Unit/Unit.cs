@@ -3593,6 +3593,9 @@ namespace Game.Entities
             if (healInfo.GetHeal() == 0)
                 return;
 
+            // Need remove expired auras after
+            bool existExpired = false;
+
             // absorb without mana cost
             var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
             for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
@@ -3603,7 +3606,7 @@ namespace Game.Entities
                 if (aurApp == null)
                     continue;
 
-                if ((absorbAurEff.GetMiscValue() & (int)healInfo.GetSchoolMask()) == 0)
+                if ((absorbAurEff.GetMiscValue() & (int)healInfo.GetSpellInfo().GetSchoolMask()) == 0)
                     continue;
 
                 // get amount which can be still absorbed by the aura
@@ -3623,6 +3626,7 @@ namespace Game.Entities
                     continue;
 
                 // currentAbsorb - damage can be absorbed by shield
+                // If need absorb less damage
                 currentAbsorb = (int)Math.Min(healInfo.GetHeal(), currentAbsorb);
 
                 healInfo.AbsorbHeal((uint)currentAbsorb);
@@ -3630,16 +3634,31 @@ namespace Game.Entities
                 tempAbsorb = (uint)currentAbsorb;
                 absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, healInfo, ref tempAbsorb);
 
-                // Reduce shield amount
-                absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
-                // Check if our aura is using amount to count damage
+                // Check if our aura is using amount to count heal
                 if (absorbAurEff.GetAmount() >= 0)
                 {
                     // Reduce shield amount
                     absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
                     // Aura cannot absorb anything more - remove it
                     if (absorbAurEff.GetAmount() <= 0)
-                        absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                        existExpired = true;
+                }
+            }
+
+            // Remove all expired absorb auras
+            if (existExpired)
+            {
+                for (var i = 0; i < vHealAbsorb.Count;)
+                {
+                    AuraEffect auraEff = vHealAbsorb[i];
+                    ++i;
+                    if (auraEff.GetAmount() <= 0)
+                    {
+                        uint removedAuras = healInfo.GetTarget().m_removedAurasCount;
+                        auraEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                        if (removedAuras + 1 < healInfo.GetTarget().m_removedAurasCount)
+                            i = 0;
+                    }
                 }
             }
         }

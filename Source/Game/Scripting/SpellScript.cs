@@ -1559,15 +1559,15 @@ namespace Game.Scripting
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
         public List<EffectAbsorbHandler> OnEffectAbsorb = new();
 
-        // executed when absorb aura effect is going to reduce damage
-        // example: OnEffectAbsorbHeal += AuraEffectAbsorbHealFn(class::function, EffectIndexSpecifier);
-        // where function is: void function (AuraEffect const* aurEff, HealInfo& healInfo, uint32& absorbAmount);
-        public List<EffectAbsorbHealHandler> OnEffectAbsorbHeal = new();
-
         // executed after absorb aura effect reduced damage to target - absorbAmount is real amount absorbed by aura
         // example: AfterEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
         public List<EffectAbsorbHandler> AfterEffectAbsorb = new();
+
+        // executed when absorb aura effect is going to reduce damage
+        // example: OnEffectAbsorbHeal += AuraEffectAbsorbHealFn(class::function, EffectIndexSpecifier);
+        // where function is: void function (AuraEffect const* aurEff, HealInfo& healInfo, uint32& absorbAmount);
+        public List<EffectAbsorbHealHandler> OnEffectAbsorbHeal = new();
 
         // executed after absorb aura effect reduced heal to target - absorbAmount is real amount absorbed by aura
         // example: AfterEffectAbsorbHeal += AuraEffectAbsorbHealFn(class::function, EffectIndexSpecifier);
