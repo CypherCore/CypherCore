@@ -1780,7 +1780,8 @@ namespace Game.Entities
         {
             while (!m_removedAuras.Empty())
             {
-                m_removedAuras.Remove(m_removedAuras.First());
+                m_removedAuras.First().Dispose();
+                m_removedAuras.RemoveAt(0);
             }
 
             m_removedAurasCount = 0;

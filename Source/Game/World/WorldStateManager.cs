@@ -64,7 +64,7 @@ namespace Game
                             continue;
                         }
 
-                        if (!CliDB.MapStorage.ContainsKey(mapId) && mapId != AnyMap)
+                        if (mapId != AnyMap && !CliDB.MapStorage.ContainsKey(mapId))
                         {
                             Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
                             continue;
