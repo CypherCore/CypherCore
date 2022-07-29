@@ -2540,10 +2540,10 @@ namespace Game.Spells
                     m_caster.ToCreature().SetSpellFocus(this, null);
             }
 
+            CallScriptOnPrecastHandler();
+
             // set timer base at cast time
             ReSetTimer();
-
-            CallScriptOnPrecastHandler();
 
             Log.outDebug(LogFilter.Spells, "Spell.prepare: spell id {0} source {1} caster {2} customCastFlags {3} mask {4}", m_spellInfo.Id, m_caster.GetEntry(), m_originalCaster != null ? (int)m_originalCaster.GetEntry() : -1, _triggeredCastFlags, m_targets.GetTargetMask());
 
