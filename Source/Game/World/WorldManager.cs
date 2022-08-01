@@ -236,6 +236,7 @@ namespace Game
                         decrease_session = false;
 
                     m_sessionsByBnetGuid.Remove(old.GetBattlenetAccountGUID(), old);
+                    old.Dispose();
                 }
             }
 

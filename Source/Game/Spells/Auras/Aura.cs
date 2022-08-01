@@ -517,27 +517,26 @@ namespace Game.Spells
             // mark all auras as ready to remove
             foreach (var app in m_applications)
             {
-                var existing = targets.FirstOrDefault(p => p.Key == app.Value.GetTarget());
                 // not found in current area - remove the aura
-                if (existing.Key == null)
+                if (!targets.TryGetValue(app.Value.GetTarget(), out uint existing))
                     targetsToRemove.Add(app.Value.GetTarget());
                 else
                 {
                     // needs readding - remove now, will be applied in next update cycle
                     // (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
-                    if (!CanBeAppliedOn(existing.Key))
+                    if (!CanBeAppliedOn(app.Value.GetTarget()))
                     {
                         targetsToRemove.Add(app.Value.GetTarget());
                         continue;
                     }
 
                     // needs to add/remove effects from application, don't remove from map so it gets updated
-                    if (app.Value.GetEffectMask() != existing.Value)
+                    if (app.Value.GetEffectMask() != existing)
                         continue;
 
                     // nothing to do - aura already applied
                     // remove from auras to register list
-                    targets.Remove(existing.Key);
+                    targets.Remove(app.Value.GetTarget());
                 }
             }
             // register auras for units
