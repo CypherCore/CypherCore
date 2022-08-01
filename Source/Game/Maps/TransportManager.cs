@@ -315,10 +315,7 @@ namespace Game.Maps
             totalTime += leg.Segments[pauseItr].SegmentEndArrivalTimestamp + leg.Segments[pauseItr].Delay;
 
             for (var i = 0; i < leg.Segments.Count; ++i)
-            {
-                var segment = leg.Segments[i];
-                segment.SegmentEndArrivalTimestamp += leg.StartTimestamp;
-            }
+                leg.Segments[i].SegmentEndArrivalTimestamp += leg.StartTimestamp;
         }
 
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
@@ -506,7 +503,7 @@ namespace Game.Maps
         Dictionary<ulong, TransportSpawn> _transportSpawns = new();
     }
 
-    public struct TransportPathSegment
+    public class TransportPathSegment
     {
         public uint SegmentEndArrivalTimestamp;
         public uint Delay;

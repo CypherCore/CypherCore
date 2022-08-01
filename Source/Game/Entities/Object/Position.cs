@@ -216,8 +216,8 @@ namespace Game.Entities
         }
         public float GetExactDist2dSq(Position pos)
         {
-            float dx = posX - pos.posX;
-            float dy = posY - pos.posY;
+            float dx = pos.posX - posX;
+            float dy = pos.posY - posY;
 
             return dx * dx + dy * dy;
         }
