@@ -1491,7 +1491,7 @@ namespace Game.Networking.Packets
         public AuraDataInfo AuraData;
     }
 
-    public struct TargetLocation
+    public class TargetLocation
     {
         public ObjectGuid Transport;
         public Position Location;
@@ -1533,11 +1533,11 @@ namespace Game.Networking.Packets
             Unit = data.ReadPackedGuid();
             Item = data.ReadPackedGuid();
 
-            if (SrcLocation.HasValue)
-                SrcLocation.Value.Read(data);
+            if (SrcLocation != null)
+                SrcLocation.Read(data);
 
-            if (DstLocation.HasValue)
-                DstLocation.Value.Read(data);
+            if (DstLocation != null)
+                DstLocation.Read(data);
 
             if (hasOrientation)
                 Orientation = data.ReadFloat();
@@ -1551,8 +1551,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBits((uint)Flags, 26);
-            data.WriteBit(SrcLocation.HasValue);
-            data.WriteBit(DstLocation.HasValue);
+            data.WriteBit(SrcLocation != null);
+            data.WriteBit(DstLocation != null);
             data.WriteBit(Orientation.HasValue);
             data.WriteBit(MapID.HasValue);
             data.WriteBits(Name.GetByteCount(), 7);
@@ -1561,11 +1561,11 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Unit);
             data.WritePackedGuid(Item);
 
-            if (SrcLocation.HasValue)
-                SrcLocation.Value.Write(data);
+            if (SrcLocation != null)
+                SrcLocation.Write(data);
 
-            if (DstLocation.HasValue)
-                DstLocation.Value.Write(data);
+            if (DstLocation != null)
+                DstLocation.Write(data);
 
             if (Orientation.HasValue)
                 data.WriteFloat(Orientation.Value);
@@ -1579,8 +1579,8 @@ namespace Game.Networking.Packets
         public SpellCastTargetFlags Flags;
         public ObjectGuid Unit;
         public ObjectGuid Item;
-        public TargetLocation? SrcLocation;
-        public TargetLocation? DstLocation;
+        public TargetLocation SrcLocation;
+        public TargetLocation DstLocation;
         public float? Orientation;
         public int? MapID;
         public string Name = "";

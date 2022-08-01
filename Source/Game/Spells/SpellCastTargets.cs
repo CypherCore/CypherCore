@@ -42,30 +42,30 @@ namespace Game.Spells
             m_src = new SpellDestination();
             m_dst = new SpellDestination();
 
-            if (spellCastRequest.Target.SrcLocation.HasValue)
+            if (spellCastRequest.Target.SrcLocation != null)
             {
-                m_src.TransportGUID = spellCastRequest.Target.SrcLocation.Value.Transport;
+                m_src.TransportGUID = spellCastRequest.Target.SrcLocation.Transport;
                 Position pos;
                 if (!m_src.TransportGUID.IsEmpty())
                     pos = m_src.TransportOffset;
                 else
                     pos = m_src.Position;
 
-                pos.Relocate(spellCastRequest.Target.SrcLocation.Value.Location);
+                pos.Relocate(spellCastRequest.Target.SrcLocation.Location);
                 if (spellCastRequest.Target.Orientation.HasValue)
                     pos.SetOrientation(spellCastRequest.Target.Orientation.Value);
             }
 
-            if (spellCastRequest.Target.DstLocation.HasValue)
+            if (spellCastRequest.Target.DstLocation != null)
             {
-                m_dst.TransportGUID = spellCastRequest.Target.DstLocation.Value.Transport;
+                m_dst.TransportGUID = spellCastRequest.Target.DstLocation.Transport;
                 Position pos;
                 if (!m_dst.TransportGUID.IsEmpty())
                     pos = m_dst.TransportOffset;
                 else
                     pos = m_dst.Position;
 
-                pos.Relocate(spellCastRequest.Target.DstLocation.Value.Location);
+                pos.Relocate(spellCastRequest.Target.DstLocation.Location);
                 if (spellCastRequest.Target.Orientation.HasValue)
                     pos.SetOrientation(spellCastRequest.Target.Orientation.Value);
             }
