@@ -438,6 +438,16 @@ namespace Game.Conditions
                         condMeets = player.GetSceneMgr().GetActiveSceneCount(ConditionValue1) > 0;
                     break;
                 }
+                case ConditionTypes.PlayerCondition:
+                {
+                    if (player != null)
+                    {
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(ConditionValue1);
+                        if (playerCondition != null)
+                            condMeets = ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -554,6 +564,9 @@ namespace Game.Conditions
                     mask |= GridMapTypeMask.All;
                     break;
                 case ConditionTypes.SceneInProgress:
+                    mask |= GridMapTypeMask.Player;
+                    break;
+                case ConditionTypes.PlayerCondition:
                     mask |= GridMapTypeMask.Player;
                     break;
                 default:

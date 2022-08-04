@@ -1823,6 +1823,15 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionTypes.PlayerCondition:
+                {
+                    if (!CliDB.PlayerConditionStorage.ContainsKey(cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing PlayerConditionId in value1 ({cond.ConditionValue1}), skipped.");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionType in `condition` table, ignoring.");
                     return false;
@@ -3055,8 +3064,9 @@ namespace Game
             new ConditionTypeInfo("Object Entry or Guid", true, true,  true),
             new ConditionTypeInfo("Object TypeMask",      true, false, false),
             new ConditionTypeInfo("BattlePet Species Learned", true, true,  true),
-            new ConditionTypeInfo("On Scenario Step",          true, false, false),
-            new ConditionTypeInfo("Scene In Progress",         true, false, false)
+            new ConditionTypeInfo("On Scenario Step",     true, false, false),
+            new ConditionTypeInfo("Scene In Progress",    true, false, false),
+            new ConditionTypeInfo("Player Condition",     true, false, false)
         };
 
         public struct ConditionTypeInfo
