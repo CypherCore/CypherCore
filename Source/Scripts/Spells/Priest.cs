@@ -60,6 +60,10 @@ namespace Scripts.Spells.Priest
         public const uint Penance = 47540;
         public const uint PenanceChannelDamage = 47758;
         public const uint PenanceChannelHealing = 47757;
+        public const uint PenanceDamage = 47666;
+        public const uint SPELL_PRIEST_PENANCE_HEALING = 47750;
+        public const uint PowerOfTheDarkSide = 198069;
+        public const uint PowerOfTheDarkSideTint = 225795;
         public const uint PowerWordShield = 17;
         public const uint PowerWordSolaceEnergize = 129253;
         public const uint PrayerOfMendingAura = 41635;
@@ -579,6 +583,114 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 47758 - Penance (Channel Damage), 47757 - Penance (Channel Healing)
+    class spell_pri_penance_channeled : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
+        }
+
+        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.RemoveAura(SpellIds.PowerOfTheDarkSide);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 198069 - Power of the Dark Side
+    class spell_pri_power_of_the_dark_side : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerOfTheDarkSideTint);
+        }
+
+        void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(caster, SpellIds.PowerOfTheDarkSideTint, true);
+        }
+
+        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.RemoveAura(SpellIds.PowerOfTheDarkSideTint);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 47666 - Penance (Damage)
+    class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
+        }
+
+        void HandleLaunchTarget(uint effIndex)
+        {
+            AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
+            if (powerOfTheDarkSide != null)
+            {
+                PreventHitDefaultEffect(effIndex);
+
+                float damageBonus = GetCaster().SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), (uint)GetEffectValue(), DamageEffectType.SpellDirect, GetEffectInfo());
+                float value = damageBonus + damageBonus * GetEffectVariance();
+                value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
+                value = GetHitUnit().SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), (uint)value, DamageEffectType.SpellDirect);
+                SetHitDamage((int)value);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 47750 - Penance (Healing)
+    class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
+        }
+
+        void HandleLaunchTarget(uint effIndex)
+        {
+            AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
+            if (powerOfTheDarkSide != null)
+            {
+                PreventHitDefaultEffect(effIndex);
+
+                float healingBonus = GetCaster().SpellHealingBonusDone(GetHitUnit(), GetSpellInfo(), (uint)GetEffectValue(), DamageEffectType.Heal, GetEffectInfo());
+                float value = healingBonus + healingBonus * GetEffectVariance();
+                value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
+                value = GetHitUnit().SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), (uint)value, DamageEffectType.Heal);
+                SetHitHeal((int)value);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Heal));
+        }
+    }
+    
     [Script] // 194509 - Power Word: Radiance
     class spell_pri_power_word_radiance : SpellScript
     {
