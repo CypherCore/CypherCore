@@ -74,6 +74,7 @@ namespace Scripts.Spells.Priest
         public const uint ShadowMendPeriodicDummy = 187464;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
+        public const uint SinsOfTheMany = 280398;
         public const uint Smite = 585;
         public const uint SpiritOfRedemption = 27827;
         public const uint StrengthOfSoul = 197535;
@@ -191,7 +192,9 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.AtonementHeal) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany)
+            && spellInfo.GetEffects().Count > 1
+            && Global.SpellMgr.GetSpellInfo(SpellIds.SinsOfTheMany, Difficulty.None).GetEffects().Count > 2;
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -227,11 +230,27 @@ namespace Scripts.Spells.Priest
         public void AddAtonementTarget(ObjectGuid target)
         {
             _appliedAtonements.Add(target);
+
+            UpdateSinsOfTheManyValue();
         }
 
         public void RemoveAtonementTarget(ObjectGuid target)
         {
             _appliedAtonements.Remove(target);
+
+            UpdateSinsOfTheManyValue();
+        }
+
+        void UpdateSinsOfTheManyValue()
+        {
+            float[] damageByStack = { 12.0f, 12.0f, 10.0f, 8.0f, 7.0f, 6.0f, 5.0f, 5.0f, 4.0f, 4.0f, 3.0f };
+
+            foreach (uint effectIndex in new[] { 0, 1, 2 })
+            {
+                AuraEffect sinOfTheMany = GetTarget().GetAuraEffect(SpellIds.SinsOfTheMany, effectIndex);
+                if (sinOfTheMany != null)
+                    sinOfTheMany.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, damageByStack.Length - 1)]);
+            }
         }
     }
 
@@ -925,6 +944,31 @@ namespace Scripts.Spells.Priest
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
             AfterCast.Add(new CastHandler(HandleAfterCast));
+        }
+    }
+
+    [Script] // 280391 - Sins of the Many
+    class spell_pri_sins_of_the_many : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SinsOfTheMany);
+        }
+
+        void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.SinsOfTheMany, true);
+        }
+
+        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.SinsOfTheMany);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
     
