@@ -465,7 +465,7 @@ namespace Game.Combat
                 oldVictimRef = null;
 
             // in 99% of cases - we won't need to actually look at anything beyond the first element
-            ThreatReference highest = _sortedThreatList.Max();
+            ThreatReference highest = _sortedThreatList.First();
             // if the highest reference is offline, the entire list is offline, and we indicate this
             if (!highest.IsAvailable())
                 return null;

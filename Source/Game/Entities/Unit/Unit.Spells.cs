@@ -3392,12 +3392,12 @@ namespace Game.Entities
             // this may be a dead loop if some events on aura remove will continiously apply aura on remove
             // we want to have all auras removed, so use your brain when linking events
             for (int counter = 0; !m_appliedAuras.Empty() || !m_ownedAuras.Empty(); counter++)
-            {
-                while (!m_appliedAuras.Empty())
-                    _UnapplyAura(m_appliedAuras.First(), AuraRemoveMode.Default);
+            {                
+                foreach (var aurAppIter in GetAppliedAuras())
+                    _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
-                while (!m_ownedAuras.Empty())
-                    RemoveOwnedAura(m_ownedAuras.First());
+                foreach (var aurIter in GetOwnedAuras())
+                    RemoveOwnedAura(aurIter);
 
                 const int maxIteration = 50;
                 // give this loop a few tries, if there are still auras then log as much information as possible
@@ -3608,6 +3608,10 @@ namespace Game.Entities
         // removes aura application from lists and unapplies effects
         public void _UnapplyAura(KeyValuePair<uint, AuraApplication> pair, AuraRemoveMode removeMode)
         {
+            //Check if aura was already removed, if so just return.
+            if (!m_appliedAuras.Remove(pair))
+                return;
+
             AuraApplication aurApp = pair.Value;
             Cypher.Assert(aurApp != null);
             Cypher.Assert(!aurApp.HasRemoveMode());
@@ -3623,8 +3627,6 @@ namespace Game.Entities
             ++m_removedAurasCount;
 
             Unit caster = aura.GetCaster();
-
-            m_appliedAuras.Remove(pair);
 
             if (aura.GetSpellInfo().HasAnyAuraInterruptFlag())
             {

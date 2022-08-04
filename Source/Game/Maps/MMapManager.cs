@@ -278,7 +278,7 @@ namespace Game
             if (mmap == null)
                 return null;
 
-            return mmap.navMeshQueries[instanceId];
+            return mmap.navMeshQueries.LookupByKey(instanceId);
         }
 
         public uint GetLoadedTilesCount() { return loadedTiles; }
