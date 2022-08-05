@@ -176,6 +176,9 @@ namespace Game.DungeonFinding
             // Initialize Dungeon map with data from dbcs
             foreach (var dungeon in CliDB.LFGDungeonsStorage.Values)
             {
+                if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeon.MapID, dungeon.DifficultyID) == null)
+                    continue;
+
                 switch (dungeon.TypeID)
                 {
                     case LfgType.Dungeon:
