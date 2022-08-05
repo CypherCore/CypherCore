@@ -149,7 +149,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (minion.HasUnitTypeMask(UnitTypeMask.Guardian))
+                if (minion.HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
 
