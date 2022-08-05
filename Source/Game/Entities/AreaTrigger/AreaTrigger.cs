@@ -749,7 +749,7 @@ namespace Game.Entities
             InitSplines(rotatedPoints, timeToTarget);
         }
 
-        void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
+        public void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
         {
             if (splinePoints.Count < 2)
                 return;
