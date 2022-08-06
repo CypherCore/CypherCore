@@ -6712,7 +6712,7 @@ namespace Game.Entities
         //new
         public uint DoRandomRoll(uint minimum, uint maximum)
         {
-            Cypher.Assert(maximum <= 10000);
+            Cypher.Assert(maximum <= 1000000);
 
             uint roll = RandomHelper.URand(minimum, maximum);
 

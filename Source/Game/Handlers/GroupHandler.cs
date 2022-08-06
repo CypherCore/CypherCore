@@ -421,7 +421,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RandomRoll)]
         void HandleRandomRoll(RandomRollClient packet)
         {
-            if (packet.Min > packet.Max || packet.Max > 10000)                // < 32768 for urand call
+            if (packet.Min > packet.Max || packet.Max > 1000000)                // < 32768 for urand call
                 return;
 
             GetPlayer().DoRandomRoll(packet.Min, packet.Max);
