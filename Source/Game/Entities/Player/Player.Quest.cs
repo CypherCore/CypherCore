@@ -2403,10 +2403,17 @@ namespace Game.Entities
                             SetQuestObjectiveData(objective, newProgress);
                             if (addCount > 0 && !objective.Flags.HasAnyFlag(QuestObjectiveFlags.HideCreditMsg))
                             {
-                                if (objectiveType != QuestObjectiveType.PlayerKills)
-                                    SendQuestUpdateAddCredit(quest, victimGuid, objective, (uint)newProgress);
-                                else
-                                    SendQuestUpdateAddPlayer(quest, (uint)newProgress);
+                                switch (objectiveType)
+                                {
+                                    case QuestObjectiveType.Item:
+                                        break;
+                                    case QuestObjectiveType.PlayerKills:
+                                        SendQuestUpdateAddPlayer(quest, (uint)newProgress);
+                                        break;
+                                    default:
+                                        SendQuestUpdateAddCredit(quest, victimGuid, objective, (uint)newProgress);
+                                        break;
+                                }
                             }
 
                             objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
