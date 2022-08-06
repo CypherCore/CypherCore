@@ -2528,7 +2528,7 @@ namespace Game.Entities
             //packet.IsBonusRoll;
             //packet.IsEncounterLoot;
 
-            if (broadcast && GetGroup())
+            if (broadcast && GetGroup() && !item.GetTemplate().HasFlag(ItemFlags3.DontReportLootLogToParty))
                 GetGroup().BroadcastPacket(packet, true);
             else
                 SendPacket(packet);
