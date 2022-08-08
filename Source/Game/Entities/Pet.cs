@@ -335,12 +335,12 @@ namespace Game.Entities
             if (owner.IsPlayer() && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
                 owner.ToPlayer().SetLastPetNumber(petInfo.PetNumber);
 
+            var session = owner.GetSession();
+            var lastSaveTime = petInfo.LastSaveTime;
+            var specializationId = petInfo.SpecializationId;
             owner.GetSession().AddQueryHolderCallback(DB.Characters.DelayQueryHolder(new PetLoadQueryHolder(ownerid, petInfo.PetNumber)))
                 .AfterComplete(holder =>
                 {
-                    var session = owner.GetSession();
-                    var lastSaveTime = petInfo.LastSaveTime;
-                    var specializationId = petInfo.SpecializationId;
                     if (session.GetPlayer() != owner || owner.GetPet() != this)
                         return;
 

@@ -1186,9 +1186,10 @@ namespace Game
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
             stmt.AddValue(0, checkCharacterNameAvailability.Name);
 
+            var sequenceIndex = checkCharacterNameAvailability.SequenceIndex;
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
             {
-                SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, !result.IsEmpty() ? ResponseCodes.CharCreateNameInUse : ResponseCodes.Success));
+                SendPacket(new CheckCharacterNameAvailabilityResult(sequenceIndex, !result.IsEmpty() ? ResponseCodes.CharCreateNameInUse : ResponseCodes.Success));
             }));
         }
 

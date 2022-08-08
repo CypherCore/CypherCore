@@ -1485,17 +1485,19 @@ namespace Game.Spells
                             if (player.IsImmunedToSpellEffect(m_spellInfo, spellEffectInfo, null))
                                 return;
 
+                            var spell = this;
+                            var targetGuid = rafTarget.GetGUID();
                             rafTarget.GetMap().AddFarSpellCallback(map =>
                             {
-                                Player player = Global.ObjAccessor.GetPlayer(map, rafTarget.GetGUID());
+                                Player player = Global.ObjAccessor.GetPlayer(map, targetGuid);
                                 if (player == null)
                                     return;
 
                                 // check immunity again in case it changed during update
-                                if (player.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, null))
+                                if (player.IsImmunedToSpellEffect(spell.GetSpellInfo(), spellEffectInfo, null))
                                     return;
 
-                                HandleEffects(player, null, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+                                spell.HandleEffects(player, null, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
                             });
                         }
                     }

@@ -131,9 +131,10 @@ namespace Game
             SQLTransaction trans = new();
             if (auctionHouse.BuyCommodity(trans, _player, (uint)confirmCommoditiesPurchase.ItemID, confirmCommoditiesPurchase.Quantity, throttle.DelayUntilNext))
             {
+                var buyerGuid = _player.GetGUID();
                 AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
                 {
-                    if (GetPlayer() && GetPlayer().GetGUID() == _player.GetGUID())
+                    if (GetPlayer() && GetPlayer().GetGUID() == buyerGuid)
                     {
                         if (success)
                         {
@@ -766,9 +767,10 @@ namespace Game
             auctionHouse.AddAuction(trans, auction);
             _player.SaveInventoryAndGoldToDB(trans);
 
+            var auctionPlayerGuid = _player.GetGUID();
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
-                if (GetPlayer() && GetPlayer().GetGUID() == _player.GetGUID())
+                if (GetPlayer() && GetPlayer().GetGUID() == auctionPlayerGuid)
                 {
                     if (success)
                     {
@@ -912,9 +914,11 @@ namespace Game
 
             auctionHouse.AddAuction(trans, auction);
             _player.SaveInventoryAndGoldToDB(trans);
+
+            var auctionPlayerGuid = _player.GetGUID();
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
-    {
-                if (GetPlayer() && GetPlayer().GetGUID() == _player.GetGUID())
+            {
+                if (GetPlayer() && GetPlayer().GetGUID() == auctionPlayerGuid)
                 {
                     if (success)
                     {

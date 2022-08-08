@@ -305,26 +305,35 @@ namespace Game.Spells
             if (effectInfo.Effect == SpellEffectName.TriggerSpell)
                 delay = TimeSpan.FromMilliseconds(effectInfo.MiscValue);
 
+            var caster = m_caster;
+            var originalCaster = m_originalCasterGUID;
+            var castItemGuid = m_castItemGUID;
+            var originalCastId = m_castId;
+            var triggerSpell = effectInfo.TriggerSpell;
+            var effect = effectInfo.Effect;
+            var value = damage;
+            var itemLevel = m_castItemLevel;
+
             m_caster.m_Events.AddEventAtOffset(() =>
             {
                 // original caster guid only for GO cast
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.SetOriginalCaster(m_originalCasterGUID);
-                args.OriginalCastId = m_castId;
-                args.OriginalCastItemLevel = m_castItemLevel;
-                if (!m_castItemGUID.IsEmpty() && Global.SpellMgr.GetSpellInfo(effectInfo.TriggerSpell, m_caster.GetMap().GetDifficultyID()).HasAttribute(SpellAttr2.RetainItemCast))
+                args.SetOriginalCaster(originalCaster);
+                args.OriginalCastId = originalCastId;
+                args.OriginalCastItemLevel = itemLevel;
+                if (!castItemGuid.IsEmpty() && Global.SpellMgr.GetSpellInfo(triggerSpell, caster.GetMap().GetDifficultyID()).HasAttribute(SpellAttr2.RetainItemCast))
                 {
-                    Player triggeringAuraCaster = m_caster?.ToPlayer();
+                    Player triggeringAuraCaster = caster?.ToPlayer();
                     if (triggeringAuraCaster != null)
-                        args.CastItem = triggeringAuraCaster.GetItemByGuid(m_castItemGUID);
+                        args.CastItem = triggeringAuraCaster.GetItemByGuid(castItemGuid);
                 }
 
                 // set basepoints for trigger with value effect
-                if (effectInfo.Effect == SpellEffectName.TriggerSpellWithValue)
+                if (effect == SpellEffectName.TriggerSpellWithValue)
                     for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
+                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, value);
 
-                m_caster.CastSpell(targets, effectInfo.TriggerSpell, args);
+                caster.CastSpell(targets, triggerSpell, args);
             }, delay);
         }
 
