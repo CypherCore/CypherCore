@@ -659,7 +659,7 @@ namespace Game.Entities
 
         void UpdateOrientation(float orientation)
         {
-            Orientation = orientation;
+            SetOrientation(orientation);
             if (IsVehicle())
                 GetVehicleKit().RelocatePassengers();
         }

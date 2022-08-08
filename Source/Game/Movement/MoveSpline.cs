@@ -172,7 +172,7 @@ namespace Game.Movement
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);
-                    orientation = (float)Math.Atan2(hermite.Y, hermite.X);
+                    orientation = (float)MathF.Atan2(hermite.Y, hermite.X);
                 }
 
                 if (splineflags.HasFlag(SplineFlag.Backward))

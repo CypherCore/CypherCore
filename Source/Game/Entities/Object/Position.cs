@@ -35,7 +35,7 @@ namespace Game.Entities
             posX = x;
             posY = y;
             posZ = z;
-            Orientation = o;
+            Orientation = NormalizeOrientation(o);
         }
 
         public Position(Vector3 vector)
