@@ -2148,6 +2148,7 @@ namespace Game.Maps
                 { // if yes, respawn will be handled by (external) pooling logic, just delete the respawn time
                     // step 1: remove entry from maps to avoid it being reachable by outside logic
                     _respawnTimes.Remove(next);
+                    GetRespawnMapForType(next.type).Remove(next.spawnId);
 
                     // step 2: tell pooling logic to do its thing
                     Global.PoolMgr.UpdatePool(GetPoolData(), poolId, next.type, next.spawnId);
@@ -2160,6 +2161,7 @@ namespace Game.Maps
                 { // ok, respawn
                   // step 1: remove entry from maps to avoid it being reachable by outside logic
                     _respawnTimes.Remove(next);
+                    GetRespawnMapForType(next.type).Remove(next.spawnId);
 
                     // step 2: do the respawn, which involves external logic
                     DoRespawn(next.type, next.spawnId, next.gridId);
