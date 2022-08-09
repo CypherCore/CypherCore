@@ -163,7 +163,7 @@ namespace Game.Movement
                 if (facing.type == MonsterMoveType.FacingAngle)
                     orientation = facing.angle;
                 else if (facing.type == MonsterMoveType.FacingSpot)
-                    orientation = (float)Math.Atan2(facing.f.Y - c.Y, facing.f.X - c.X);
+                    orientation = MathF.Atan2(facing.f.Y - c.Y, facing.f.X - c.X);
                 //nothing to do for MoveSplineFlag.Final_Target flag
             }
             else
@@ -172,11 +172,11 @@ namespace Game.Movement
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);
-                    orientation = (float)MathF.Atan2(hermite.Y, hermite.X);
+                    orientation = MathF.Atan2(hermite.Y, hermite.X);
                 }
 
                 if (splineflags.HasFlag(SplineFlag.Backward))
-                    orientation -= (float)Math.PI;
+                    orientation -= MathF.PI;
             }
 
             return new Vector4(c.X, c.Y, c.Z, orientation);

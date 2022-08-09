@@ -283,7 +283,7 @@ namespace System
                 else
                 {
                     // WARNING.  Not unique.  ZA - XA = -atan2(r01,r02)
-                    z = -(float)MathF.Atan2(matrix.M12, matrix.M13);
+                    z = -MathF.Atan2(matrix.M12, matrix.M13);
                     y = MathFunctions.PiOver2;
                     x = 0.0f;
                 }
@@ -291,7 +291,7 @@ namespace System
             else
             {
                 // WARNING.  Not unique.  ZA + XA = atan2(-r01,-r02)
-                z = (float)MathF.Atan2(-matrix.M12, -matrix.M13);
+                z = MathF.Atan2(-matrix.M12, -matrix.M13);
                 y = -MathFunctions.PiOver2;
                 x = 0.0f;
             }
