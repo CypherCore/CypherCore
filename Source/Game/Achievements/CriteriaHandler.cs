@@ -3553,7 +3553,7 @@ namespace Game.Achievements
         MultiMap<CriteriaType, Criteria> _criteriasByType = new();
         MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
-        MultiMap<CriteriaType, Criteria> _scenarioCriteriasByType = new();
+        MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
         MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
@@ -3562,7 +3562,10 @@ namespace Game.Achievements
         CriteriaManager()
         {
             for (var i = 0; i < (int)CriteriaType.Count; ++i)
+            {
                 _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
+                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
+            }
         }
 
         public void LoadCriteriaModifiersTree()
@@ -3702,6 +3705,7 @@ namespace Game.Achievements
 
                 _criteria[criteria.Id] = criteria;
 
+                List<uint> scenarioIds = new();
                 foreach (CriteriaTree tree in treeList)
                 {
                     tree.Criteria = criteria;
@@ -3717,7 +3721,10 @@ namespace Game.Achievements
                             criteria.FlagsCu |= CriteriaFlagsCu.Player;
                     }
                     else if (tree.ScenarioStep != null)
+                    {
                         criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
+                        scenarioIds.Add(tree.ScenarioStep.ScenarioID);
+                    }
                     else if (tree.QuestObjective != null)
                         criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
                 }
@@ -3761,7 +3768,8 @@ namespace Game.Achievements
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Scenario))
                 {
                     ++scenarioCriterias;
-                    _scenarioCriteriasByType.Add(criteriaEntry.Type, criteria);
+                    foreach (uint scenarioId in scenarioIds)
+                        _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
                 }
 
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
@@ -3907,14 +3915,14 @@ namespace Game.Achievements
             return _criteriasByType.LookupByKey(type);
         }
 
+        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
+        {
+            return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
+        }
+        
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
             return _guildCriteriasByType.LookupByKey(type);
-        }
-
-        public List<Criteria> GetScenarioCriteriaByType(CriteriaType type)
-        {
-            return _scenarioCriteriasByType.LookupByKey(type);
         }
 
         public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)

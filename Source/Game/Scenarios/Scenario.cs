@@ -346,7 +346,7 @@ namespace Game.Scenarios
 
         public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
-            return Global.CriteriaMgr.GetScenarioCriteriaByType(type);
+            return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, _data.Entry.Id);
         }
 
         void SendBootPlayer(Player player)
