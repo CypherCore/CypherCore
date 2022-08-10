@@ -3037,7 +3037,7 @@ namespace Game.Spells
                 {
                     m_spellState = SpellState.Casting;
                     // GameObjects shouldn't cast channeled spells
-                    m_caster.ToUnit().AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
+                    m_caster.ToUnit()?.AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
                 }
             }
 
