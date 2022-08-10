@@ -254,8 +254,8 @@ namespace Framework.Constants
     public enum ResetFailedReason
     {
         Failed = 0,  // "Cannot reset %s.  There are players still inside the instance."
-        Zoning = 1, // "Cannot reset %s.  There are players in your party attempting to zone into an instance."
-        Offline = 2 // "Cannot reset %s.  There are players offline in your party."
+        Offline = 1, // "Cannot reset %s.  There are players offline in your party."
+        Zoning = 2   // "Cannot reset %s.  There are players in your party attempting to zone into an instance."
     }
 
     public enum ActivateTaxiReply
