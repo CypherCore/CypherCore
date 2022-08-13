@@ -272,6 +272,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
+            _worldPacket.WriteBit(Unused925.HasValue);
             _worldPacket.FlushBits();
 
             if (EuropaTicketSystemStatus.HasValue)
@@ -290,6 +291,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(GameRuleUnknown1);
             _worldPacket.WriteInt32(GameRuleValues.Count);
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+
+            if (Unused925.HasValue)
+                _worldPacket.WriteInt32(Unused925.Value);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
@@ -329,6 +333,7 @@ namespace Game.Networking.Packets
         public int GameRuleUnknown1;
         public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket = 50;
+        public int? Unused925;
     }
 
     public class MOTD : ServerPacket
