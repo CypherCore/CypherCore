@@ -53,7 +53,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(ClubsPresenceUpdateTimer);
             _worldPacket.WriteUInt32(HiddenUIClubsPresenceUpdateTimer);
 
-            _worldPacket.WriteInt32(GameRuleUnknown1);
+            _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
 
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
@@ -160,7 +160,7 @@ namespace Game.Networking.Packets
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public uint KioskSessionMinutes;
-        public int GameRuleUnknown1;
+        public int ActiveSeason; // Currently active Classic season
         public short MaxPlayerNameQueriesPerPacket = 50;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
@@ -272,7 +272,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
-            _worldPacket.WriteBit(Unused925.HasValue);
+            _worldPacket.WriteBit(LaunchETA.HasValue);
             _worldPacket.FlushBits();
 
             if (EuropaTicketSystemStatus.HasValue)
@@ -288,12 +288,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ActiveClassTrialBoostType);
             _worldPacket.WriteInt32(MinimumExpansionLevel);
             _worldPacket.WriteInt32(MaximumExpansionLevel);
-            _worldPacket.WriteInt32(GameRuleUnknown1);
+            _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
 
-            if (Unused925.HasValue)
-                _worldPacket.WriteInt32(Unused925.Value);
+            if (LaunchETA.HasValue)
+                _worldPacket.WriteInt32(LaunchETA.Value);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
@@ -330,10 +330,10 @@ namespace Game.Networking.Packets
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
         public uint KioskSessionMinutes;
-        public int GameRuleUnknown1;
+        public int ActiveSeason; // Currently active Classic season
         public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket = 50;
-        public int? Unused925;
+        public int? LaunchETA;
     }
 
     public class MOTD : ServerPacket
