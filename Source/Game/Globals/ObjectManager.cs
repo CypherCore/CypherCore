@@ -652,6 +652,47 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+        public void LoadGossipMenuFriendshipFactions()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _gossipMenuAddonStorage.Clear();
+
+            //                                         0       1
+            SQLResult result = DB.World.Query("SELECT MenuID, FriendshipFactionID FROM gossip_menu_addon");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_addon IDs. DB table `gossip_menu_addon` is empty!");
+                return;
+            }
+
+            do
+            {
+                uint menuID = result.Read<uint>(0);
+                GossipMenuAddon addon = new();
+                addon.FriendshipFactionID = result.Read<int>(1);
+
+                var faction = CliDB.FactionStorage.LookupByKey(addon.FriendshipFactionID);
+                if (faction != null)
+                {
+                    if (!CliDB.FriendshipReputationStorage.ContainsKey(faction.FriendshipRepID))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using FriendshipFactionID {addon.FriendshipFactionID} referencing non-existing FriendshipRepID {faction.FriendshipRepID}");
+                        addon.FriendshipFactionID = 0;
+                    }
+                }
+                else
+                {
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing FriendshipFactionID {addon.FriendshipFactionID}");
+                    addon.FriendshipFactionID = 0;
+                }
+
+                _gossipMenuAddonStorage[menuID] = addon;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuAddonStorage.Count} gossip_menu_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public void LoadPointsOfInterest()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -701,6 +742,10 @@ namespace Game
         public List<GossipMenuItems> GetGossipMenuItemsMapBounds(uint uiMenuId)
         {
             return gossipMenuItemsStorage.LookupByKey(uiMenuId);
+        }
+        public GossipMenuAddon GetGossipMenuAddon(uint menuId)
+        {
+            return _gossipMenuAddonStorage.LookupByKey(menuId);
         }
         public PointOfInterest GetPointOfInterest(uint id)
         {
@@ -10778,8 +10823,9 @@ namespace Game
         Dictionary<uint, SkillTiersEntry> _skillTiers = new();
 
         //Gossip
-        MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
         MultiMap<uint, GossipMenus> gossipMenusStorage = new();
+        MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
+        Dictionary<uint, GossipMenuAddon> _gossipMenuAddonStorage = new();
         Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature

@@ -249,7 +249,12 @@ namespace Game.Misc
 
             GossipMessagePkt packet = new();
             packet.GossipGUID = objectGUID;
-            packet.GossipID = (int)_gossipMenu.GetMenuId();
+            packet.GossipID = _gossipMenu.GetMenuId();
+
+            GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(packet.GossipID);
+            if (addon != null)
+                packet.FriendshipFactionID = addon.FriendshipFactionID;
+
             NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
             if (text != null)
                 packet.TextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
@@ -745,6 +750,11 @@ namespace Game.Misc
         public string BoxText;
         public uint BoxBroadcastTextId;
         public List<Condition> Conditions = new();
+    }
+
+    public class GossipMenuAddon
+    {
+        public int FriendshipFactionID;
     }
 
     public class PointOfInterest

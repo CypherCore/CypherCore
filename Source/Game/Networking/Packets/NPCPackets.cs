@@ -50,7 +50,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GossipGUID);
-            _worldPacket.WriteInt32(GossipID);
+            _worldPacket.WriteUInt32(GossipID);
             _worldPacket.WriteInt32(FriendshipFactionID);
             _worldPacket.WriteInt32(TextID);
 
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GossipGUID;
         public List<ClientGossipText> GossipText = new();
         public int TextID;
-        public int GossipID;
+        public uint GossipID;
     }
 
     public class GossipSelectOption : ClientPacket

@@ -885,6 +885,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu options...");
             Global.ObjectMgr.LoadGossipMenuItems();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu friendship factions...");
+            Global.ObjectMgr.LoadGossipMenuFriendshipFactions();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature trainers...");
             Global.ObjectMgr.LoadCreatureTrainers();                         // must be after LoadGossipMenuItems
 
