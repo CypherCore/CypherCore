@@ -355,9 +355,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         }
     }
 
-    class go_direbrew_mole_machineAI : GameObjectAI
+    class go_direbrew_mole_machine : GameObjectAI
     {
-        public go_direbrew_mole_machineAI(GameObject go) : base(go) { }
+        public go_direbrew_mole_machine(GameObject go) : base(go) { }
 
         public override void Reset()
         {

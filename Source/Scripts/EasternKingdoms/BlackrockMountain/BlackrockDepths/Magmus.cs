@@ -100,12 +100,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
     }
 
     [Script]
-    class npc_ironhand_guardianAI : ScriptedAI
+    class npc_ironhand_guardian : ScriptedAI
     {
         InstanceScript _instance;
         bool _active;
 
-        public npc_ironhand_guardianAI(Creature creature) : base(creature)
+        public npc_ironhand_guardian(Creature creature) : base(creature)
         {
             _instance = me.GetInstanceScript();
             _active = false;
