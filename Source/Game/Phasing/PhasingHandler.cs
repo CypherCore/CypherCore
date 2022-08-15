@@ -268,19 +268,19 @@ namespace Game
             obj.GetPhaseShift().UiMapPhaseIds.Clear();
             obj.GetSuppressedPhaseShift().VisibleMapIds.Clear();
 
-            foreach (var pair in Global.ObjectMgr.GetTerrainSwaps())
+            foreach (var (mapId, visibleMapInfo) in Global.ObjectMgr.GetTerrainSwaps())
             {
-                if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Value.Id, srcInfo))
+                if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, visibleMapInfo.Id, srcInfo))
                 {
-                    if (pair.Key == obj.GetMapId())
-                        phaseShift.AddVisibleMapId(pair.Value.Id, pair.Value);
+                    if (mapId == obj.GetMapId())
+                        phaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
 
                     // ui map is visible on all maps
-                    foreach (uint uiMapPhaseId in pair.Value.UiMapPhaseIDs)
+                    foreach (uint uiMapPhaseId in visibleMapInfo.UiMapPhaseIDs)
                         phaseShift.AddUiMapPhaseId(uiMapPhaseId);
                 }
-                else
-                    suppressedPhaseShift.AddVisibleMapId(pair.Value.Id, pair.Value);
+                else if(mapId == obj.GetMapId())
+                    suppressedPhaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
             }
 
             UpdateVisibilityIfNeeded(obj, false, true);
