@@ -286,7 +286,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         }
     }
 
-    [Script]
     class boss_moroes_guest : ScriptedAI
     {
         InstanceScript instance;
