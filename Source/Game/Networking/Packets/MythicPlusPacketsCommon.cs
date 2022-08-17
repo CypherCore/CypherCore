@@ -41,14 +41,14 @@ namespace Game.Networking.Packets
 
     public class DungeonScoreSummary
     {
-        public float CurrentSeasonScore;
-        public float LifetimeBestSeasonScore;
+        public float OverallScoreCurrentSeason;
+        public float LadderScoreCurrentSeason;
         public List<DungeonScoreMapSummary> Runs = new();
 
         public void Write(WorldPacket data)
         {
-            data.WriteFloat(CurrentSeasonScore);
-            data.WriteFloat(LifetimeBestSeasonScore);
+            data.WriteFloat(OverallScoreCurrentSeason);
+            data.WriteFloat(LadderScoreCurrentSeason);
             data.WriteInt32(Runs.Count);
             foreach (var dungeonScoreMapSummary in Runs)
                 dungeonScoreMapSummary.Write(data);
@@ -152,23 +152,23 @@ namespace Game.Networking.Packets
     public class DungeonScoreSeasonData
     {
         public int Season;
-        public List<DungeonScoreMapData> Maps = new();
-        public List<DungeonScoreMapData> Maps2 = new();
+        public List<DungeonScoreMapData> SeasonMaps = new();
+        public List<DungeonScoreMapData> LadderMaps = new();
         public float SeasonScore;
-        public float SeasonScore2 = 0.0f;
+        public float LadderScore = 0.0f;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Season);
-            data.WriteInt32(Maps.Count);
-            data.WriteInt32(Maps2.Count);
+            data.WriteInt32(SeasonMaps.Count);
+            data.WriteInt32(LadderMaps.Count);
             data.WriteFloat(SeasonScore);
-            data.WriteFloat(SeasonScore2);
+            data.WriteFloat(LadderScore);
 
-            foreach (var map in Maps)
+            foreach (var map in SeasonMaps)
                 map.Write(data);
 
-            foreach (var map in Maps2)
+            foreach (var map in LadderMaps)
                 map.Write(data);
         }
     }
