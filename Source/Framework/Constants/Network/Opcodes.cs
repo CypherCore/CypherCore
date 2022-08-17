@@ -878,6 +878,7 @@ namespace Framework.Constants
         AuctionableTokenSellConfirmRequired = 0x27c5,
         AuctionClosedNotification = 0x26e7,
         AuctionCommandResult = 0x26e4,
+        AuctionDisablePostingBeforeMaintenance = 0x287F,
         AuctionFavoriteList = 0x285f,
         AuctionGetCommodityQuoteResult = 0x2856,
         AuctionHelloResponse = 0x26e2,

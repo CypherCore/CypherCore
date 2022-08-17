@@ -107,6 +107,7 @@ namespace Game.Groups
 
             m_guid = ObjectGuid.Create(HighGuid.Party, Global.GroupMgr.GenerateGroupId());
             m_leaderGuid = leaderGuid;
+            m_leaderFactionGroup = Player.GetFactionGroupForRace(leader.GetRace());
             m_leaderName = leader.GetName();
             leader.SetPlayerFlag(PlayerFlags.GroupLeader);
 
@@ -182,9 +183,12 @@ namespace Game.Groups
             m_leaderGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(0));
 
             // group leader not exist
-            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(m_leaderGuid, out m_leaderName))
+            var leader = Global.CharacterCacheStorage.GetCharacterCacheByGuid(m_leaderGuid);
+            if (leader == null)
                 return;
 
+            m_leaderFactionGroup = Player.GetFactionGroupForRace(leader.RaceId);
+            m_leaderName = leader.Name;
             m_lootMethod = (LootMethod)field.Read<byte>(1);
             m_looterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(2));
             m_lootThreshold = (ItemQuality)field.Read<byte>(3);
@@ -338,6 +342,7 @@ namespace Game.Groups
                 return false;
 
             m_leaderGuid = player.GetGUID();
+            m_leaderFactionGroup = Player.GetFactionGroupForRace(player.GetRace());
             m_leaderName = player.GetName();
             return true;
         }
@@ -736,6 +741,7 @@ namespace Game.Groups
 
             newLeader.SetPlayerFlag(PlayerFlags.GroupLeader);
             m_leaderGuid = newLeader.GetGUID();
+            m_leaderFactionGroup = Player.GetFactionGroupForRace(newLeader.GetRace());
             m_leaderName = newLeader.GetName();
             ToggleGroupMemberFlag(slot, GroupMemberFlags.Assistant, false);
 
@@ -1455,6 +1461,7 @@ namespace Game.Groups
 
             partyUpdate.PartyGUID = m_guid;
             partyUpdate.LeaderGUID = m_leaderGuid;
+            partyUpdate.LeaderFactionGroup = m_leaderFactionGroup;
 
             partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory);
 
@@ -1474,9 +1481,7 @@ namespace Game.Groups
                 playerInfos.Name = member.name;
                 playerInfos.Class = member._class;
 
-                ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey((uint)member.race);
-                FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                playerInfos.FactionGroup = raceFaction.FactionGroup;
+                playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.race);
 
                 playerInfos.Status = GroupMemberOnlineStatus.Offline;
                 if (memberPlayer && memberPlayer.GetSession() && !memberPlayer.GetSession().PlayerLogout())
@@ -2744,6 +2749,7 @@ namespace Game.Groups
         GroupRefManager m_memberMgr = new();
         List<Player> m_invitees = new();
         ObjectGuid m_leaderGuid;
+        byte m_leaderFactionGroup;
         string m_leaderName;
         GroupFlags m_groupFlags;
         GroupCategory m_groupCategory;

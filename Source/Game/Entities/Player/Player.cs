@@ -2947,6 +2947,19 @@ namespace Game.Entities
         uint GetChampioningFaction() { return m_ChampioningFaction; }
         public void SetChampioningFaction(uint faction) { m_ChampioningFaction = faction; }
 
+        public static byte GetFactionGroupForRace(Race race)
+        {
+            var rEntry = CliDB.ChrRacesStorage.LookupByKey((uint)race);
+            if (rEntry != null)
+            {
+                var faction = CliDB.FactionTemplateStorage.LookupByKey(rEntry.FactionID);
+                if (faction != null)
+                    return faction.FactionGroup;
+            }
+
+            return 1;
+        }
+
         public void SetFactionForRace(Race race)
         {
             m_team = TeamForRace(race);
@@ -5125,7 +5138,7 @@ namespace Game.Entities
             // SMSG_WORLD_SERVER_INFO
             WorldServerInfo worldServerInfo = new();
             worldServerInfo.InstanceGroupSize = GetMap().GetMapDifficulty().MaxPlayers;         // @todo
-            worldServerInfo.IsTournamentRealm = 0;             // @todo
+            worldServerInfo.IsTournamentRealm = false;             // @todo
             worldServerInfo.RestrictedAccountMaxLevel = null; // @todo
             worldServerInfo.RestrictedAccountMaxMoney = null; // @todo
             worldServerInfo.DifficultyID = (uint)GetMap().GetDifficultyID();

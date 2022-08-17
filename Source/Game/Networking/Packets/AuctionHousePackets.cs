@@ -303,6 +303,7 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid Auctioneer;
         public uint AuctionID;
+        public int ItemID;
         public AddOnInfo? TaintedBy;
 
         public AuctionRemoveItem(WorldPacket packet) : base(packet) { }
@@ -311,6 +312,7 @@ namespace Game.Networking.Packets
         {
             Auctioneer = _worldPacket.ReadPackedGuid();
             AuctionID = _worldPacket.ReadUInt32();
+            ItemID = _worldPacket.ReadInt32();
 
             if (_worldPacket.HasBit())
             {
@@ -525,6 +527,7 @@ namespace Game.Networking.Packets
     class AuctionHelloResponse : ServerPacket
     {
         public ObjectGuid Guid;
+        public uint DeliveryDelay;
         public bool OpenForBusiness = true;
 
         public AuctionHelloResponse() : base(ServerOpcodes.AuctionHelloResponse) { }
@@ -532,6 +535,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
+            _worldPacket.WriteUInt32(DeliveryDelay);
             _worldPacket.WriteBit(OpenForBusiness);
             _worldPacket.FlushBits();
         }

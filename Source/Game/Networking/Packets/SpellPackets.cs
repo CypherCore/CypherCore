@@ -1350,6 +1350,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32((uint)Flags);
             data.WriteUInt32(PlayerContentTuningID);
             data.WriteUInt32(TargetContentTuningID);
+            data.WriteInt32(Unused927);
             data.WriteBits(TuningType, 4);
             data.FlushBits();
         }
@@ -1365,6 +1366,7 @@ namespace Game.Networking.Packets
         public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling;
         public uint PlayerContentTuningID;
         public uint TargetContentTuningID;
+        public int Unused927;
 
         public enum ContentTuningType
         {        

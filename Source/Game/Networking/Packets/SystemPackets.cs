@@ -57,6 +57,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(GameRuleValues.Count);
 
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+            _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
 
             foreach (GameRuleValuePair gameRuleValue in GameRuleValues)
                 gameRuleValue.Write(_worldPacket);
@@ -162,6 +163,7 @@ namespace Game.Networking.Packets
         public uint KioskSessionMinutes;
         public int ActiveSeason; // Currently active Classic season
         public short MaxPlayerNameQueriesPerPacket = 50;
+        public short PlayerNameQueryTelemetryInterval = 600;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -291,6 +293,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+            _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
 
             if (LaunchETA.HasValue)
                 _worldPacket.WriteInt32(LaunchETA.Value);
@@ -333,6 +336,7 @@ namespace Game.Networking.Packets
         public int ActiveSeason; // Currently active Classic season
         public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket = 50;
+        public short PlayerNameQueryTelemetryInterval = 600;
         public int? LaunchETA;
     }
 

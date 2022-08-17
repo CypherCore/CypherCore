@@ -400,10 +400,11 @@ namespace Game.Entities
         public UpdateField<byte> ItemAppearanceModID = new(0, 17);
         public UpdateField<ItemModList> Modifiers = new(0, 18);
         public UpdateField<uint> DynamicFlags2 = new(0, 19);
-        public UpdateFieldArray<int> SpellCharges = new(5, 20, 21);
-        public UpdateFieldArray<ItemEnchantment> Enchantment = new(13, 26, 27);
+        public UpdateField<ushort> DEBUGItemLevel = new(0, 20);
+        public UpdateFieldArray<int> SpellCharges = new(5, 21, 22);
+        public UpdateFieldArray<ItemEnchantment> Enchantment = new(13, 27, 28);
 
-        public ItemData() : base(0, TypeId.Item, 40) { }
+        public ItemData() : base(0, TypeId.Item, 41) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
@@ -448,6 +449,7 @@ namespace Game.Entities
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteUInt32(DynamicFlags2);
+                data.WriteUInt16(DEBUGItemLevel);
             }
             for (int i = 0; i < ArtifactPowers.Size(); ++i)
             {
@@ -462,7 +464,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new(40, new uint[] { 0xFC04E4FFu, 0x000000FFu });
+            UpdateMask allowedMaskForTarget = new(41, new uint[] { 0xF804E4FFu, 0x000001FFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -470,12 +472,12 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget.OR(new UpdateMask(40, new uint[] { 0x03FB1B00u, 0x00000000u }));
+                allowedMaskForTarget.OR(new UpdateMask(41, new uint[] { 0x07FB1B00u, 0x00000000u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new(40, new[] { 0xFC04E4FFu, 0x000000FFu });
+            UpdateMask allowedMaskForTarget = new(41, new[] { 0xF804E4FFu, 0x000001FFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -598,26 +600,30 @@ namespace Game.Entities
                 {
                     data.WriteUInt32(DynamicFlags2);
                 }
+                if (changesMask[20])
+                {
+                    data.WriteUInt16(DEBUGItemLevel);
+                }
                 if (changesMask[18])
                 {
                     ((ItemModList)Modifiers).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
             }
-            if (changesMask[20])
+            if (changesMask[21])
             {
                 for (int i = 0; i < 5; ++i)
                 {
-                    if (changesMask[21 + i])
+                    if (changesMask[22 + i])
                     {
                         data.WriteInt32(SpellCharges[i]);
                     }
                 }
             }
-            if (changesMask[26])
+            if (changesMask[27])
             {
                 for (int i = 0; i < 13; ++i)
                 {
-                    if (changesMask[27 + i])
+                    if (changesMask[28 + i])
                     {
                         Enchantment[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
@@ -646,6 +652,7 @@ namespace Game.Entities
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(Modifiers);
             ClearChangesMask(DynamicFlags2);
+            ClearChangesMask(DEBUGItemLevel);
             ClearChangesMask(SpellCharges);
             ClearChangesMask(Enchantment);
             _changesMask.ResetAll();

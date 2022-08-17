@@ -745,6 +745,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WriteInt32(SequenceNum);
             _worldPacket.WritePackedGuid(LeaderGUID);
+            _worldPacket.WriteUInt8(LeaderFactionGroup);
             _worldPacket.WriteInt32(PlayerList.Count);
             _worldPacket.WriteBit(LfgInfos.HasValue);
             _worldPacket.WriteBit(LootSettings.HasValue);
@@ -770,6 +771,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid PartyGUID;
         public ObjectGuid LeaderGUID;
+        public byte LeaderFactionGroup;
 
         public int MyIndex;
         public int SequenceNum;
