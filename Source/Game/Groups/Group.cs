@@ -1479,7 +1479,6 @@ namespace Game.Groups
 
                 playerInfos.GUID = member.guid;
                 playerInfos.Name = member.name;
-                playerInfos.Class = member._class;
 
                 playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.race);
 
