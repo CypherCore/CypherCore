@@ -1072,7 +1072,7 @@ namespace Game.Networking.Packets
         public DungeonScoreSummary DungeonScore = new();
     }
 
-    class PartyPlayerInfo
+    struct PartyPlayerInfo
     {
         public void Write(WorldPacket data)
         {
@@ -1082,10 +1082,10 @@ namespace Game.Networking.Packets
             data.WriteBit(VoiceChatSilenced);
             data.WriteBit(FromSocialQueue);
             data.WritePackedGuid(GUID);
-            data.WriteUInt8((byte)Status);
             data.WriteUInt8(Subgroup);
             data.WriteUInt8(Flags);
             data.WriteUInt8(RolesAssigned);
+            data.WriteUInt8(Class);
             data.WriteUInt8(FactionGroup);
             data.WriteString(Name);
             if (!VoiceStateID.IsEmpty())
@@ -1095,14 +1095,14 @@ namespace Game.Networking.Packets
         public ObjectGuid GUID;
         public string Name;
         public string VoiceStateID;   // same as bgs.protocol.club.v1.MemberVoiceState.id
-        public GroupMemberOnlineStatus Status;
+        public byte Class;
         public byte Subgroup;
         public byte Flags;
         public byte RolesAssigned;
         public byte FactionGroup;
         public bool FromSocialQueue;
         public bool VoiceChatSilenced;
-        public bool Connected = true;
+        public bool Connected;
     }
 
     struct PartyLFGInfo
