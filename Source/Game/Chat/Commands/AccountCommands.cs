@@ -87,7 +87,7 @@ namespace Game.Chat
         }
 
         [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, string email)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, OptionalArg<string> email)
         {
             if (accountName.Contains("@"))
             {
@@ -95,7 +95,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email);
+            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email.ValueOr(""));
             switch (result)
             {
                 case AccountOpResult.Ok:

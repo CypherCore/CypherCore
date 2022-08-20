@@ -733,10 +733,10 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
-        static bool HandleHelpCommand(CommandHandler handler, string cmd)
+        static bool HandleHelpCommand(CommandHandler handler, OptionalArg<string> cmd)
         {
-            ChatCommandNode.SendCommandHelpFor(handler, cmd);
-            if (cmd.IsEmpty())
+            ChatCommandNode.SendCommandHelpFor(handler, cmd.ValueOr(""));
+            if (!cmd.HasValue)
                 ChatCommandNode.SendCommandHelpFor(handler, "help");
 
             return true;

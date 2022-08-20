@@ -220,6 +220,7 @@ namespace Game.Chat
 
             if (cmd != null)
             { /* if we matched a command at some point, invoke it */
+                handler._sentErrorMessage = false;
                 if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, new StringArguments(oldTail)))
                 { /* invocation succeeded, log this */
                     if (!handler.IsConsole())
@@ -403,8 +404,12 @@ namespace Game.Chat
             if (parameterTypes.Contains(typeof(StringArguments)))//Old system, can remove once all commands are changed.
                 return (bool)_methodInfo.Invoke(null, new object[] { handler, args });
             else
-                return (bool)_methodInfo.Invoke(null, CommandArgs.Parse(handler, parameterTypes, args));
+            {
+                if (CommandArgs.Parse(out dynamic[] parseArgs, handler, parameterTypes, args))
+                    return (bool)_methodInfo.Invoke(null, parseArgs);
 
+                return false;
+            }
         }
     }
 

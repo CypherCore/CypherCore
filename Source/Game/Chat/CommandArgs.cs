@@ -26,39 +26,41 @@ namespace Game.Chat
 {
     class CommandArgs
     {
-        public static object[] Parse(CommandHandler handler, Type[] parameterTypes, StringArguments args)
+        public static bool Parse(out dynamic[] parsedArgs, CommandHandler handler, Type[] parameterTypes, StringArguments args)
         {
-            List<object> arguments = new();
-            arguments.Add(handler);
-            for (var i = 1; i < parameterTypes.Length; i++)
-                arguments.Add(default);
+            parsedArgs = new dynamic[parameterTypes.Length];
+            parsedArgs[0] = handler;
 
             for (var i = 1; i < parameterTypes.Length; i++)
             {
                 if (!ParseArgument(out dynamic value, parameterTypes[i], args))
-                    break;
+                    return false;
 
-                arguments[i] = value;
+                parsedArgs[i] = value;
             }
 
-            return arguments.ToArray();
+            return true;
         }
 
-        static bool ParseArgument(out dynamic value, Type type, StringArguments args)
+        static bool ParseArgument(out dynamic value, Type type, StringArguments args, bool IsOptional = false)
         {
             value = default;
 
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(OptionalArg<>))
+                return ParseArgument(out value, type.GetGenericArguments()[0], args, true);
+
+            //todo remove me when all commands to changed to OptionalArg<T>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return ParseArgument(out value, Nullable.GetUnderlyingType(type), args, true);
+
             if (args.IsAtEnd())
-                return false;
+                return IsOptional;
 
             if (Hyperlink.TryParse(out value, type, args))
                 return true;
 
             if (type.IsEnum)
                 type = type.GetEnumUnderlyingType();
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                type = Nullable.GetUnderlyingType(type);
 
             switch (Type.GetTypeCode(type))
             {
@@ -256,6 +258,55 @@ namespace Game.Chat
             }
 
             return null;
+        }
+    }
+
+    struct OptionalArg<T>
+    {
+        private bool _hasValue;
+        public T Value;
+
+        public OptionalArg(T value)
+        {
+            Value = value;
+            _hasValue = true;
+        }
+
+        public bool HasValue
+        {
+            get { return _hasValue; }
+        }
+
+        public void Set(T value)
+        {
+            Value = value;
+            _hasValue = true;
+        }
+
+        public void Clear()
+        {
+            _hasValue = false;
+            Value = default;
+        }
+
+        public T ValueOr(T otherValue)
+        {
+            return HasValue ? Value : otherValue;
+        }
+
+        public static explicit operator T(OptionalArg<T> optional)
+        {
+            return optional.Value;
+        }
+
+        public static implicit operator OptionalArg<T>(T value)
+        {
+            return new OptionalArg<T>(value);
+        }
+
+        public Type GetValueType()
+        {
+            return typeof(T);
         }
     }
 }
