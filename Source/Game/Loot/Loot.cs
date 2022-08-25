@@ -309,30 +309,6 @@ namespace Game.Loots
             questItemList = PlayerNonQuestNonFFAConditionalItems.LookupByKey(plguid);
             if (questItemList.Empty())
                 FillNonQuestNonFFAConditionalLoot(player, presentAtLooting);
-
-            // if not auto-processed player will have to come and pick it up manually
-            if (!presentAtLooting)
-                return;
-
-            // Process currency items
-            uint max_slot = GetMaxSlotInLootFor(player);
-            LootItem item;
-            int itemsSize = items.Count;
-            for (byte i = 0; i < max_slot; ++i)
-            {
-                if (i < items.Count)
-                    item = items[i];
-                else
-                    item = quest_items[i - itemsSize];
-
-                if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player))
-                {
-                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
-                    if (proto != null)
-                        if (proto.IsCurrencyToken())
-                            player.StoreLootItem(i, this);
-                }
-            }
         }
 
         List<NotNormalLootItem> FillFFALoot(Player player)
