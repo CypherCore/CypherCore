@@ -1133,16 +1133,17 @@ namespace Framework.Constants
         CantUseItem = 99, // You Can'T Use That Item.
         CantBeObliterated = 100,// You Can'T Obliterate That Item
         GuildBankConjuredItem = 101,// You Cannot Store Conjured Items In The Guild Bank
-        BagFull6 = 102,// That Bag Is Full.
-        CantBeScrapped = 103,// You Can'T Scrap That Item
-        BagFull7 = 104,// That Bag Is Full.
-        NotInPetBattle = 105,// You Cannot Do That While In A Pet Battle
-        BagFull8 = 106,// That Bag Is Full.
-        CantDoThatRightNow = 107,// You Can'T Do That Right Now.
-        CantDoThatRightNow2 = 108,// You Can'T Do That Right Now.
-        NotInNpe = 109,// Not Available During The Tutorial
-        ItemCooldown = 110,// Item Is Not Ready Yet.
-        NotInRatedBattleground = 111,// You can't do that in a rated battleground.
+        BagFull6 = 102,// That bag is full.
+        BagFull7 = 103,// That bag is full.
+        CantBeScrapped = 104,// You can't scrap that item
+        BagFull8 = 105,// That bag is full.
+        NotInPetBattle = 106,// You cannot do that while in a pet battle
+        BagFull9 = 107,// That bag is full.
+        CantDoThatRightNow = 108,// You can't do that right now.
+        CantDoThatRightNow2 = 109,// You can't do that right now.
+        NotInNPE = 110,// Not available during the tutorial
+        ItemCooldown = 111,// Item is not ready yet.
+        NotInRatedBattleground = 112,// You can't do that in a rated battleground.
     }
 
     public enum BuyResult

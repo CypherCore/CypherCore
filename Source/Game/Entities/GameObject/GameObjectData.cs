@@ -762,6 +762,7 @@ namespace Game.Entities
             public uint LargeAOI;                                // 7 Large AOI, enum { false, true, }; Default: false
             public uint UseGarrisonOwnerGuildColors;             // 8 Use Garrison Owner Guild Colors, enum { false, true, }; Default: false
             public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Allowunfriendlycrossfactionpartymemberstocollaborateonaritual;// 10 Allow unfriendly cross faction party members to collaborate on a ritual, enum { false, true, }; Default: false
         }
 
         public struct trap
@@ -989,6 +990,7 @@ namespace Game.Entities
             public uint Unused2;                                 // 1 Unused, int, Min value: 1, Max value: 65535, Default value: 60
             public uint areaID;                                  // 2 areaID, References: AreaTable, NoValue = 0
             public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Preventmeetingstonefromtargetinganunfriendlypartymemberoutsideofinstances;// 4 Prevent meeting stone from targeting an unfriendly party member outside of instances, enum { false, true, }; Default: false
         }
 
         public struct flagstand
@@ -1277,12 +1279,13 @@ namespace Game.Entities
 
         public struct uilink
         {
-            public uint UILinkType;                              // 0 UI Link Type, enum { Adventure Journal, Obliterum Forge, Scrapping Machine}; Default: Adventure Journal
+            public uint UILinkType;                              // 0 UI Link Type, enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction }; Default: Adventure Journal
             public uint allowMounted;                            // 1 allowMounted, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 2 Gigantic AOI, enum { false, true, }; Default: false
             public uint spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
         }
 
         public struct keystonereceptacle
