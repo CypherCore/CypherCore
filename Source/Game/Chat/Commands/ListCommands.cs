@@ -578,7 +578,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("name", RBACPermissions.CommandListAuras)]
-            static bool HandleListAurasByNameCommand(CommandHandler handler, string namePart)
+            static bool HandleListAurasByNameCommand(CommandHandler handler, Tail namePart)
             {
                 return ListAurasCommand(handler, null, namePart);
             }

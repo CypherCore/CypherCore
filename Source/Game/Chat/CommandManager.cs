@@ -114,14 +114,17 @@ namespace Game.Chat
 
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
             {
-                CommandAttribute commandAttribute = method.GetCustomAttribute<CommandAttribute>(false);
-                if (commandAttribute == null)
+                var commandAttributes = method.GetCustomAttributes<CommandAttribute>(false).ToArray();
+                if (commandAttributes.Length == 0)
                     continue;
 
-                if (commandAttribute.GetType() == typeof(CommandNonGroupAttribute))
-                    continue;
+                foreach (var commandAttribute in commandAttributes)
+                {
+                    if (commandAttribute.GetType() == typeof(CommandNonGroupAttribute))
+                        continue;
 
-                command.AddSubCommand(new ChatCommandNode(commandAttribute, method));
+                    command.AddSubCommand(new ChatCommandNode(commandAttribute, method));
+                }
             }
         }
 
@@ -161,7 +164,7 @@ namespace Game.Chat
         public SortedDictionary<string, ChatCommandNode> _subCommands = new();
 
         MethodInfo _methodInfo;
-        Type[] parameterTypes;
+        ParameterInfo[] parameters;
 
         public ChatCommandNode(CommandAttribute attribute)
         {
@@ -173,7 +176,7 @@ namespace Game.Chat
         public ChatCommandNode(CommandAttribute attribute, MethodInfo methodInfo) : this(attribute)
         {
             _methodInfo = methodInfo;
-            parameterTypes = (from parameter in methodInfo.GetParameters() select parameter.ParameterType).ToArray();
+            parameters = methodInfo.GetParameters();
         }
 
         public static bool TryExecuteCommand(CommandHandler handler, string cmdStr)
@@ -221,7 +224,7 @@ namespace Game.Chat
             if (cmd != null)
             { /* if we matched a command at some point, invoke it */
                 handler._sentErrorMessage = false;
-                if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, new StringArguments(oldTail)))
+                if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, oldTail))
                 { /* invocation succeeded, log this */
                     if (!handler.IsConsole())
                         LogCommandUsage(handler.GetSession(), (uint)cmd._permission.RequiredPermission, cmdStr);
@@ -283,7 +286,12 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.AvailableCmds);
                 foreach (var (name, command) in map)
+                {
+                    if (!command.IsVisible(handler))
+                        continue;
+
                     handler.SendSysMessage(command.HasVisibleSubCommands(handler) ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, name);
+                }
             }
             else
                 handler.SendSysMessage(CypherStrings.CmdInvalid, cmdStr);
@@ -390,7 +398,7 @@ namespace Game.Chat
                 _helpText = command._helpText;
                 _helpString = command._helpString;
                 _methodInfo = command._methodInfo;
-                parameterTypes = command.parameterTypes;
+                parameters = command.parameters;
             }
             else
             {
@@ -399,13 +407,13 @@ namespace Game.Chat
             }
         }
 
-        public bool Invoke(CommandHandler handler, StringArguments args)
+        public bool Invoke(CommandHandler handler, string args)
         {
-            if (parameterTypes.Contains(typeof(StringArguments)))//Old system, can remove once all commands are changed.
-                return (bool)_methodInfo.Invoke(null, new object[] { handler, args });
+            if (parameters.Any(p => p.ParameterType == typeof(StringArguments)))//Old system, can remove once all commands are changed.
+                return (bool)_methodInfo.Invoke(null, new object[] { handler, new StringArguments(args) });
             else
             {
-                if (CommandArgs.Parse(out dynamic[] parseArgs, handler, parameterTypes, args))
+                if (CommandArgs.Parse(out dynamic[] parseArgs, handler, parameters, args))
                     return (bool)_methodInfo.Invoke(null, parseArgs);
 
                 return false;

@@ -156,7 +156,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage("----------------------------------------------------");
                 do
                 {
-                    handler.SendSysMessage("| {10:0} | {1} | {2} |", accountList.Read<uint>(0), accountList.Read<string>(1), formatDisplayName(accountList.Read<string>(1)));
+                    handler.SendSysMessage("| {0,10} | {1,16} | {2,16} |", accountList.Read<uint>(0), accountList.Read<string>(1), formatDisplayName(accountList.Read<string>(1)));
                 } while (accountList.NextRow());
                 handler.SendSysMessage("----------------------------------------------------");
             }

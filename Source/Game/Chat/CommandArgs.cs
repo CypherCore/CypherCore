@@ -15,25 +15,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Constants;
-using Framework.IO;
-using Game.Entities;
-using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Game.Chat
 {
     class CommandArgs
     {
-        public static bool Parse(out dynamic[] parsedArgs, CommandHandler handler, Type[] parameterTypes, StringArguments args)
+        static Dictionary<Type, Func<CommandArguments, ParseStringResult>> Parsers = new()
         {
-            parsedArgs = new dynamic[parameterTypes.Length];
+            { typeof(sbyte), args => args.NextSByte() },
+            { typeof(short), args => args.NextInt16() },
+            { typeof(int), args => args.NextInt32() },
+            { typeof(long), args => args.NextInt64() },
+            { typeof(byte), args => args.NextByte() },
+            { typeof(ushort), args => args.NextUInt16() },
+            { typeof(uint), args => args.NextUInt32() },
+            { typeof(ulong), args => args.NextUInt64() },
+            { typeof(float), args => args.NextSingle() },
+            { typeof(string), args => args.NextString() },
+            { typeof(bool), args => args.NextBoolean() },
+            { typeof(PlayerIdentifier), args => PlayerIdentifier.ParseFromString(args) },
+            { typeof(AccountIdentifier), args => AccountIdentifier.ParseFromString(args) },
+            { typeof(Tail), args => Tail.ParseFromString(args) },
+        };
+
+        public static bool Parse(out dynamic[] parsedArgs, CommandHandler handler, ParameterInfo[] parameterInfos, string tailCmd)
+        {
+            parsedArgs = new dynamic[parameterInfos.Length];
             parsedArgs[0] = handler;
 
-            for (var i = 1; i < parameterTypes.Length; i++)
+            CommandArguments args = new CommandArguments(tailCmd);
+
+            for (var i = 1; i < parameterInfos.Length; i++)
             {
-                if (!ParseArgument(out dynamic value, parameterTypes[i], args))
+                if (!ParseArgument(out dynamic value, parameterInfos[i], args))
                     return false;
 
                 parsedArgs[i] = value;
@@ -42,271 +59,339 @@ namespace Game.Chat
             return true;
         }
 
-        static bool ParseArgument(out dynamic value, Type type, StringArguments args, bool IsOptional = false)
+        static bool ParseArgument(out dynamic value, ParameterInfo parameterInfo, CommandArguments args)
         {
-            value = default;
+            var parameterType = parameterInfo.ParameterType;
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(OptionalArg<>))
-                return ParseArgument(out value, type.GetGenericArguments()[0], args, true);
-
-            //todo remove me when all commands to changed to OptionalArg<T>
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return ParseArgument(out value, Nullable.GetUnderlyingType(type), args, true);
-
-            if (args.IsAtEnd())
-                return IsOptional;
-
-            if (Hyperlink.TryParse(out value, type, args))
+            if (Hyperlink.TryParse(out value, parameterType, args))
                 return true;
 
-            if (type.IsEnum)
-                type = type.GetEnumUnderlyingType();
+            bool isOptional = false;
 
-            switch (Type.GetTypeCode(type))
+            var optionalArgAttribute = parameterInfo.GetCustomAttribute<OptionalArgAttribute>(true);
+            if (optionalArgAttribute != null)
+                isOptional = true;
+
+            if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                case TypeCode.SByte:
-                    value = args.NextSByte();
-                    break;
-                case TypeCode.Int16:
-                    value = args.NextInt16();
-                    break;
-                case TypeCode.Int32:
-                    value = args.NextInt32();
-                    break;
-                case TypeCode.Int64:
-                    value = args.NextInt64();
-                    break;
-                case TypeCode.Byte:
-                    value = args.NextByte();
-                    break;
-                case TypeCode.UInt16:
-                    value = args.NextUInt16();
-                    break;
-                case TypeCode.UInt32:
-                    value = args.NextUInt32();
-                    break;
-                case TypeCode.UInt64:
-                    value = args.NextUInt64();
-                    break;
-                case TypeCode.Single:
-                    value = args.NextSingle();
-                    break;
-                case TypeCode.String:
-                    value = args.NextString();
-                    break;
-                case TypeCode.Boolean:
-                    value = args.NextBoolean();
-                    break;
-                case TypeCode.Char:
-                    value = args.NextChar();
-                    break;
-                case TypeCode.Object:
-                    switch (type.Name)
-                    {
-                        case nameof(PlayerIdentifier):
-                            value = PlayerIdentifier.ParseFromString(args.NextString());
-                            break;
-                        case nameof(AccountIdentifier):
-                            value = AccountIdentifier.ParseFromString(args.NextString());
-                            break;
-                        default:
-                            return false;
-                    }
-                    break;
-                default:
-                    return false;
+                parameterType = Nullable.GetUnderlyingType(parameterType);
+                isOptional = true;
             }
 
+            if (parameterType.IsEnum)
+                parameterType = parameterType.GetEnumUnderlyingType();
+
+            var pos = args.GetCurrentPosition();
+
+            var result = Parsers[parameterType](args);
+            if (result != ParseResult.Ok)
+            {
+                if (!isOptional)
+                    return false;
+                else
+                    args.SetCurrentPosition(pos);
+            }
+
+            value = result.GetValue();
             return true;
         }
     }
 
-    class PlayerIdentifier
+    public enum ParseResult
     {
-        string _name;
-        ObjectGuid _guid;
-        Player _player;
+        Ok,
+        Error,
+        EndOfString
+    }
 
-        public PlayerIdentifier(string name, ObjectGuid guid)
+    public struct ParseStringResult
+    {
+        ParseResult result;
+        dynamic value;
+
+        public ParseStringResult(ParseResult _result, dynamic _value = default)
         {
-            _name = name;
-            _guid = guid;
+            result = _result;
+            value = _value;
         }
 
-        public PlayerIdentifier(Player player)
+        public dynamic GetValue() { return value; }
+
+        public static implicit operator ParseResult(ParseStringResult stringResult)
         {
-            _name = player.GetName();
-            _guid = player.GetGUID();
-            _player = player;
+            return stringResult.result;
         }
 
-        public string GetName() { return _name; }
-        public ObjectGuid GetGUID() { return _guid; }
-        public bool IsConnected() { return _player != null; }
-        public Player GetConnectedPlayer() { return _player; }
-        
-        public static PlayerIdentifier FromTarget(CommandHandler handler)
+        public static implicit operator string(ParseStringResult stringResult)
         {
-            Player player = handler.GetPlayer();
-            if (player != null)
-            {
-                Player target = player.GetSelectedPlayer();
-                if (target != null)
-                    return new PlayerIdentifier(target);
-            }
-
-            return null;
-        }
-
-        public static PlayerIdentifier FromSelf(CommandHandler handler)
-        {
-            Player player = handler.GetPlayer();
-            if (player != null)
-                return new PlayerIdentifier(player);
-
-            return null;
-        }
-
-        public static PlayerIdentifier FromTargetOrSelf(CommandHandler handler)
-        {
-            PlayerIdentifier fromTarget = FromTarget(handler);
-            if (fromTarget != null)
-                return fromTarget;
-            else
-                return FromSelf(handler);
-        }
-
-        public static PlayerIdentifier ParseFromString(string arg)
-        {
-            ulong guid = 0;
-            string name;
-            if (!Hyperlink.TryParse(out name, arg) || !ulong.TryParse(arg, out guid))
-                name = arg;
-
-            if (!name.IsEmpty())
-            {
-                ObjectManager.NormalizePlayerName(ref name);
-                var player = Global.ObjAccessor.FindPlayerByName(name);
-                if (player != null)
-                    return new PlayerIdentifier(player);
-                else
-                {
-                    var objectGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
-                    if (objectGuid.IsEmpty())
-                        return new PlayerIdentifier(name, objectGuid);
-                }
-            }
-            else if (guid != 0)
-            {
-                var player = Global.ObjAccessor.FindPlayerByLowGUID(guid);
-                if (player != null)
-                    return new PlayerIdentifier(player);
-            }
-
-            return null;
+            return stringResult.value;
         }
     }
 
-    class AccountIdentifier
+    public sealed class CommandArguments
     {
-        uint _id;
-        string _name;
-        WorldSession _session;
+        static ParseStringResult ErrorResult = new(ParseResult.Error);
+        static ParseStringResult EndOfStringResult = new(ParseResult.EndOfString);
 
-        public AccountIdentifier(WorldSession session)
+        public CommandArguments(string args)
         {
-            _id = session.GetAccountId();
-            _name = session.GetAccountName();
-            _session = session;
+            if (!args.IsEmpty())
+                activestring = args.TrimStart(' ');
+            activeposition = -1;
         }
 
-        public uint GetID() { return _id; }
-        public string GetName() { return _name; }
-        public bool IsConnected() { return _session != null; }
-        public WorldSession GetConnectedSession() { return _session; }
-
-        public static AccountIdentifier ParseFromString(string arg)
+        public CommandArguments(CommandArguments args)
         {
-            // try parsing as account name
-            var session = Global.WorldMgr.FindSession(Global.AccountMgr.GetId(arg));
-            if (session != null) // account with name exists, we are done
-                return new AccountIdentifier(session);
-
-            // try parsing as account id
-            if (uint.TryParse(arg, out uint id))
-                return null;
-
-            session = Global.WorldMgr.FindSession(id);
-            if (session != null)
-                return new AccountIdentifier(session);
-
-            return null;
+            activestring = args.activestring;
+            activeposition = args.activeposition;
+            Current = args.Current;
         }
 
-        public static AccountIdentifier FromTarget(CommandHandler handler)
+        public bool Empty()
         {
-            Player player = handler.GetPlayer();
-            if (player != null)
+            return activestring.IsEmpty();
+        }
+
+        public void MoveToNextChar(char c)
+        {
+            for (var i = activeposition; i < activestring.Length; ++i)
+                if (activestring[i] == c)
+                    break;
+        }
+
+        public ParseStringResult NextString(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return new ParseStringResult(ParseResult.EndOfString, "");
+
+            if (System.Text.RegularExpressions.Regex.IsMatch(Current, @"^[a-zA-Z]+$"))
+                return new ParseStringResult(ParseResult.Ok, Current);
+
+            return new ParseStringResult(ParseResult.Error, "");
+        }
+
+        public ParseStringResult NextBoolean(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            bool value;
+            if (bool.TryParse(Current, out value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            if ((Current == "1") || Current.Equals("y", StringComparison.OrdinalIgnoreCase) || Current.Equals("on", StringComparison.OrdinalIgnoreCase) || Current.Equals("yes", StringComparison.OrdinalIgnoreCase) || Current.Equals("true", StringComparison.OrdinalIgnoreCase))
+                return new ParseStringResult(ParseResult.Ok, true);
+            if ((Current == "0") || Current.Equals("n", StringComparison.OrdinalIgnoreCase) || Current.Equals("off", StringComparison.OrdinalIgnoreCase) || Current.Equals("no", StringComparison.OrdinalIgnoreCase) || Current.Equals("false", StringComparison.OrdinalIgnoreCase))
+                return new ParseStringResult(ParseResult.Ok, false);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextChar(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (char.TryParse(Current, out char value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextByte(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (byte.TryParse(Current, out byte value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextSByte(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (sbyte.TryParse(Current, out sbyte value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextUInt16(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (ushort.TryParse(Current, out ushort value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextInt16(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (short.TryParse(Current, out short value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextUInt32(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (uint.TryParse(Current, out uint value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextInt32(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (int.TryParse(Current, out int value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextUInt64(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (ulong.TryParse(Current, out ulong value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextInt64(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (long.TryParse(Current, out long value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextSingle(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (float.TryParse(Current, out float value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextDouble(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (double.TryParse(Current, out double value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public ParseStringResult NextDecimal(string delimiters = " ")
+        {
+            if (!MoveNext(delimiters))
+                return EndOfStringResult;
+
+            if (decimal.TryParse(Current, out decimal value))
+                return new ParseStringResult(ParseResult.Ok, value);
+
+            return ErrorResult;
+        }
+
+        public void AlignToNextChar()
+        {
+            while (activeposition < activestring.Length && activestring[activeposition] != ' ')
+                activeposition++;
+        }
+
+        public char this[int index]
+        {
+            get { return activestring[index]; }
+        }
+
+        public string GetString()
+        {
+            return activestring;
+        }
+
+        public void Reset()
+        {
+            activeposition = -1;
+            Current = null;
+        }
+
+        public bool IsAtEnd()
+        {
+            return activestring.IsEmpty() || activeposition == activestring.Length;
+        }
+
+        public int GetCurrentPosition()
+        {
+            return activeposition;
+        }
+
+        public void SetCurrentPosition(int currentPosition)
+        {
+            activeposition = currentPosition;
+        }
+
+        bool MoveNext(string delimiters)
+        {
+            //the stringtotokenize was never set:
+            if (activestring == null)
+                return false;
+
+            //all tokens have already been extracted:
+            if (activeposition == activestring.Length)
+                return false;
+
+            //bypass delimiters:
+            activeposition++;
+            while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) > -1)
             {
-                Player target = player.GetSelectedPlayer();
-                if (target != null)
-                {
-                    WorldSession session = target.GetSession();
-                    if (session != null)
-                        return new AccountIdentifier(session);
-                }
+                activeposition++;
             }
 
-            return null;
-        }
-    }
+            //only delimiters were left, so return null:
+            if (activeposition == activestring.Length)
+                return false;
 
-    struct OptionalArg<T>
-    {
-        private bool _hasValue;
-        public T Value;
+            //get starting position of string to return:
+            int startingposition = activeposition;
 
-        public OptionalArg(T value)
-        {
-            Value = value;
-            _hasValue = true;
-        }
+            //read until next delimiter:
+            do
+            {
+                activeposition++;
+            } while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) == -1);
 
-        public bool HasValue
-        {
-            get { return _hasValue; }
+            Current = activestring.Substring(startingposition, activeposition - startingposition);
+            return true;
         }
 
-        public void Set(T value)
-        {
-            Value = value;
-            _hasValue = true;
-        }
-
-        public void Clear()
-        {
-            _hasValue = false;
-            Value = default;
-        }
-
-        public T ValueOr(T otherValue)
-        {
-            return HasValue ? Value : otherValue;
-        }
-
-        public static explicit operator T(OptionalArg<T> optional)
-        {
-            return optional.Value;
-        }
-
-        public static implicit operator OptionalArg<T>(T value)
-        {
-            return new OptionalArg<T>(value);
-        }
-
-        public Type GetValueType()
-        {
-            return typeof(T);
-        }
+        private string activestring;
+        private int activeposition;
+        private string Current;
     }
 }

@@ -283,7 +283,7 @@ namespace Game.Chat
         }
 
         [Command("say", RBACPermissions.CommandNpcSay)]
-        static bool HandleNpcSayCommand(CommandHandler handler, string text)
+        static bool HandleNpcSayCommand(CommandHandler handler, Tail text)
         {
             if (text.IsEmpty())
                 return false;
@@ -298,7 +298,7 @@ namespace Game.Chat
             creature.Say(text, Language.Universal);
 
             // make some emotes
-            switch (text.LastOrDefault())
+            switch (((string)text).LastOrDefault())
             {
                 case '?':
                     creature.HandleEmoteCommand(Emote.OneshotQuestion);
@@ -480,7 +480,7 @@ namespace Game.Chat
         }
 
         [Command("textemote", RBACPermissions.CommandNpcTextemote)]
-        static bool HandleNpcTextEmoteCommand(CommandHandler handler, string text)
+        static bool HandleNpcTextEmoteCommand(CommandHandler handler, Tail text)
         {
             Creature creature = handler.GetSelectedCreature();
             if (!creature)
@@ -495,7 +495,7 @@ namespace Game.Chat
         }
 
         [Command("whisper", RBACPermissions.CommandNpcWhisper)]
-        static bool HandleNpcWhisperCommand(CommandHandler handler, string recv, string text)
+        static bool HandleNpcWhisperCommand(CommandHandler handler, string recv, Tail text)
         {
             if (text.IsEmpty())
             {
@@ -520,7 +520,7 @@ namespace Game.Chat
         }
 
         [Command("yell", RBACPermissions.CommandNpcYell)]
-        static bool HandleNpcYellCommand(CommandHandler handler, string text)
+        static bool HandleNpcYellCommand(CommandHandler handler, Tail text)
         {
             if (text.IsEmpty())
                 return false;
@@ -625,7 +625,7 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcAddItem)]
-            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, uint? mc, uint? it, uint? ec, string bonusListIds)
+            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, uint? mc, uint? it, uint? ec, [OptionalArg] string bonusListIds)
             {
                 if (itemId == 0)
                 {
@@ -740,7 +740,7 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandNpcAddTemp)]
-            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, string lootStr, uint id)
+            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, [OptionalArg] string lootStr, uint id)
             {
                 bool loot = false;
                 if (!lootStr.IsEmpty())

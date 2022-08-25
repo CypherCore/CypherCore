@@ -28,7 +28,7 @@ namespace Game.Chat
     class MessageCommands
     {
         [CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
-        static bool HandleNameAnnounceCommand(CommandHandler handler, string message)
+        static bool HandleNameAnnounceCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -43,7 +43,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
-        static bool HandleGMNameAnnounceCommand(CommandHandler handler, string message)
+        static bool HandleGMNameAnnounceCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -58,7 +58,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
-        static bool HandleAnnounceCommand(CommandHandler handler, string message)
+        static bool HandleAnnounceCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -68,7 +68,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
-        static bool HandleGMAnnounceCommand(CommandHandler handler, string message)
+        static bool HandleGMAnnounceCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -78,7 +78,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
-        static bool HandleNotifyCommand(CommandHandler handler, string message)
+        static bool HandleNotifyCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -92,7 +92,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
-        static bool HandleGMNotifyCommand(CommandHandler handler, string message)
+        static bool HandleGMNotifyCommand(CommandHandler handler, Tail message)
         {
             if (message.IsEmpty())
                 return false;
@@ -106,7 +106,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
-        static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg)
+        static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg, [OptionalArg] string playerNameArg)
         {
             if (!operationArg.HasValue)
             {
@@ -118,6 +118,7 @@ namespace Game.Chat
             {
                 handler.GetSession().GetPlayer().SetAcceptWhispers(true);
                 handler.SendSysMessage(CypherStrings.CommandWhisperon);
+                return true;
             }
             else
             {
@@ -125,9 +126,33 @@ namespace Game.Chat
                 handler.GetSession().GetPlayer().ClearWhisperWhiteList();
                 handler.GetSession().GetPlayer().SetAcceptWhispers(false);
                 handler.SendSysMessage(CypherStrings.CommandWhisperoff);
+                return true;
             }
 
-            return true;
+            //todo fix me
+            /*if (operationArg->holds_alternative < EXACT_SEQUENCE("remove") > ())
+            {
+                if (!playerNameArg)
+                    return false;
+
+                if (normalizePlayerName(*playerNameArg))
+                {
+                    if (Player * player = ObjectAccessor::FindPlayerByName(*playerNameArg))
+                    {
+                        handler->GetSession()->GetPlayer()->RemoveFromWhisperWhiteList(player->GetGUID());
+                        handler->PSendSysMessage(LANG_COMMAND_WHISPEROFFPLAYER, playerNameArg->c_str());
+                        return true;
+                    }
+                    else
+                    {
+                        handler->PSendSysMessage(LANG_PLAYER_NOT_FOUND, playerNameArg->c_str());
+                        handler->SetSentErrorMessage(true);
+                        return false;
+                    }
+                }
+            }
+            handler.SendSysMessage(CypherStrings.UseBol);
+            return false;*/
         }        
     }
 

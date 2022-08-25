@@ -15,12 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Constants;
-using Framework.IO;
-using Game.DataStorage;
-using Game.Spells;
 using System;
-using System.Collections.Generic;
 
 namespace Game.Chat
 {
@@ -39,7 +34,7 @@ namespace Game.Chat
             return true;
         }
 
-        public static bool TryParse(out dynamic value, Type type, StringArguments args)
+        public static bool TryParse(out dynamic value, Type type, CommandArguments args)
         {
             value = default;
 
@@ -77,10 +72,10 @@ namespace Game.Chat
                     switch (type.Name)
                     {
                         case nameof(PlayerIdentifier):
-                            value = PlayerIdentifier.ParseFromString(args.NextString());
+                            value = PlayerIdentifier.ParseFromString(args);
                             break;
                         case nameof(AccountIdentifier):
-                            value = AccountIdentifier.ParseFromString(args.NextString());
+                            value = AccountIdentifier.ParseFromString(args);
                             break;
                         default:
                             return false;

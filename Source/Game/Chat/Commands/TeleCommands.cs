@@ -333,14 +333,16 @@ namespace Game.Chat
                 }
 
                 [Command("name", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, string name)
+                static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, Tail name)
                 {
+                    string normalizedName = name;
+
                     if (player == null)
                         return false;
 
-                    DB.World.EscapeString(ref name);
+                    DB.World.EscapeString(ref normalizedName);
 
-                    SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.name FROM creature c INNER JOIN creature_template ct ON c.id = ct.entry WHERE ct.name LIKE '{name}'");
+                    SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.name FROM creature c INNER JOIN creature_template ct ON c.id = ct.entry WHERE ct.name LIKE '{normalizedName}'");
                     if (result.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);

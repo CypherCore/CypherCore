@@ -149,7 +149,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("recipes", CypherStrings.CommandLearnAllRecipesHelp, RBACPermissions.CommandLearnAllRecipes)]
-            static bool HandleLearnAllRecipesCommand(CommandHandler handler, string namePart)
+            static bool HandleLearnAllRecipesCommand(CommandHandler handler, Tail namePart)
             {
                 //  Learns all recipes of specified profession and sets skill to max
                 //  Example: .learn all_recipes enchanting

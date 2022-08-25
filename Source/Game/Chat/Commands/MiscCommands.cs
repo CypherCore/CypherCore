@@ -733,10 +733,10 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
-        static bool HandleHelpCommand(CommandHandler handler, OptionalArg<string> cmd)
+        static bool HandleHelpCommand(CommandHandler handler, Tail cmd)
         {
-            ChatCommandNode.SendCommandHelpFor(handler, cmd.ValueOr(""));
-            if (!cmd.HasValue)
+            ChatCommandNode.SendCommandHelpFor(handler, cmd);
+            if (cmd.IsEmpty())
                 ChatCommandNode.SendCommandHelpFor(handler, "help");
 
             return true;
@@ -835,7 +835,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, string teamArg)
+        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, [OptionalArg] string teamArg)
         {
             Team team;
             if (teamArg.IsEmpty())
@@ -1005,10 +1005,11 @@ namespace Game.Chat
 
         // mute player for the specified duration
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool HandleMuteCommand(CommandHandler handler, PlayerIdentifier player, uint muteTime, string muteReason)
+        static bool HandleMuteCommand(CommandHandler handler, PlayerIdentifier player, uint muteTime, Tail muteReason)
         {
+            string muteReasonStr = muteReason;
             if (muteReason.IsEmpty())
-                muteReason = handler.GetCypherString(CypherStrings.NoReason);
+                muteReasonStr = handler.GetCypherString(CypherStrings.NoReason);
 
             if (player == null)
                 player = PlayerIdentifier.FromTarget(handler);
@@ -1053,7 +1054,7 @@ namespace Game.Chat
                 stmt.AddValue(0, -(muteTime * Time.Minute));
             }
 
-            stmt.AddValue(1, muteReason);
+            stmt.AddValue(1, muteReasonStr);
             stmt.AddValue(2, muteBy);
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
@@ -1062,21 +1063,21 @@ namespace Game.Chat
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, muteTime);
             stmt.AddValue(2, muteBy);
-            stmt.AddValue(3, muteReason);
+            stmt.AddValue(3, muteReasonStr);
             DB.Login.Execute(stmt);
 
             string nameLink = handler.PlayerLink(player.GetName());
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
-                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReason);
+                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
             if (target)
             {
-                target.SendSysMessage(CypherStrings.YourChatDisabled, muteTime, muteBy, muteReason);
-                handler.SendSysMessage(CypherStrings.YouDisableChat, nameLink, muteTime, muteReason);
+                target.SendSysMessage(CypherStrings.YourChatDisabled, muteTime, muteBy, muteReasonStr);
+                handler.SendSysMessage(CypherStrings.YouDisableChat, nameLink, muteTime, muteReasonStr);
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.CommandDisableChatDelayed, nameLink, muteTime, muteReason);
+                handler.SendSysMessage(CypherStrings.CommandDisableChatDelayed, nameLink, muteTime, muteReasonStr);
             }
 
             return true;
@@ -1119,7 +1120,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
-        static bool HandleNearGraveCommand(CommandHandler handler, string teamArg)
+        static bool HandleNearGraveCommand(CommandHandler handler, [OptionalArg] string teamArg)
         {
             Team team;
             if (teamArg.IsEmpty())
@@ -1890,7 +1891,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
-        static bool HandleUnFreezeCommand(CommandHandler handler, string targetNameArg)
+        static bool HandleUnFreezeCommand(CommandHandler handler, [OptionalArg] string targetNameArg)
         {
             string name = "";
             Player player;
@@ -2267,7 +2268,7 @@ namespace Game.Chat
         }
 
         [Command("set", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemSetCommand(CommandHandler handler, uint itemSetId, string bonuses, string context)
+        static bool HandleAddItemSetCommand(CommandHandler handler, uint itemSetId, [OptionalArg] string bonuses, byte? context)
         {
             // prevent generation all items with itemset field value '0'
             if (itemSetId == 0)
@@ -2290,8 +2291,8 @@ namespace Game.Chat
             }
 
             ItemContext itemContext = ItemContext.None;
-            if (!context.IsEmpty())
-                itemContext = context.ToEnum<ItemContext>();
+            if (context.HasValue)
+                itemContext = (ItemContext)context;
 
             Player player = handler.GetSession().GetPlayer();
             Player playerTarget = handler.GetSelectedPlayer();

@@ -87,7 +87,7 @@ namespace Game.Chat
         }
 
         [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, OptionalArg<string> email)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg]string email)
         {
             if (accountName.Contains("@"))
             {
@@ -95,7 +95,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email.ValueOr(""));
+            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -221,7 +221,7 @@ namespace Game.Chat
         }
 
         [Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
-        static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, string confirmEmail)
+        static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, [OptionalArg] string confirmEmail)
         {
             // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
             uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
@@ -441,7 +441,7 @@ namespace Game.Chat
         class AccountSetCommands
         {
             [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
-            static bool HandleAccountSetAddonCommand(CommandHandler handler, string accountName, byte expansion)
+            static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
             {
                 uint accountId;
                 if (!accountName.IsEmpty())
@@ -486,12 +486,6 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetGmLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int realmId = -1)
-            {
-                return HandleAccountSetSecLevelCommand(handler, accountName, securityLevel, realmId);
-            }
-
             [Command("password", CypherStrings.CommandAccSetPasswordHelp, RBACPermissions.CommandAccountSetPassword, true)]
             static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string confirmPassword)
             {
@@ -534,7 +528,8 @@ namespace Game.Chat
             }
 
             [Command("seclevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, string accountName, byte securityLevel, int? realmId)
+            [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
+            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, [OptionalArg] string accountName, byte securityLevel, int? realmId)
             {
                 uint accountId;
                 if (!accountName.IsEmpty())
@@ -698,7 +693,5 @@ namespace Game.Chat
                 }
             }
         }
-
-
     }
 }

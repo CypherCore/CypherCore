@@ -77,7 +77,7 @@ namespace Game.Chat
 
         //rename characters
         [Command("rename", RBACPermissions.CommandCharacterRename, true)]
-        static bool HandleCharacterRenameCommand(CommandHandler handler, PlayerIdentifier player, string newName)
+        static bool HandleCharacterRenameCommand(CommandHandler handler, PlayerIdentifier player, [OptionalArg] string newName)
         {
             if (player == null && !newName.IsEmpty())
                 return false;
@@ -469,7 +469,7 @@ namespace Game.Chat
             }
 
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
-            static bool HandleCharacterDeletedListCommand(CommandHandler handler, string needle)
+            static bool HandleCharacterDeletedListCommand(CommandHandler handler, [OptionalArg] string needle)
             {
                 List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, needle))
@@ -488,7 +488,7 @@ namespace Game.Chat
             }
 
             [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
-            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, string newCharName, AccountIdentifier newAccount)
+            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, [OptionalArg] string newCharName, AccountIdentifier newAccount)
             {
                 List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, needle))
@@ -725,7 +725,7 @@ namespace Game.Chat
     class PdumpCommand
     {
         [Command("copy", RBACPermissions.CommandPdumpCopy, true)]
-        static bool HandlePDumpCopyCommand(CommandHandler handler, string playerName, string accountName, string characterName, ulong? characterGUID)
+        static bool HandlePDumpCopyCommand(CommandHandler handler, PlayerIdentifier player, AccountIdentifier account, [OptionalArg] string characterName, ulong? characterGUID)
         {
             /*
             std::string name;
@@ -771,7 +771,7 @@ namespace Game.Chat
         }
 
         [Command("load", RBACPermissions.CommandPdumpLoad, true)]
-        static bool HandlePDumpLoadCommand(CommandHandler handler, string fileName, string accountName, string characterName, ulong? characterGuid)
+        static bool HandlePDumpLoadCommand(CommandHandler handler, string fileName, AccountIdentifier account, [OptionalArg] string characterName, ulong? characterGuid)
         {
             /*
             if (!AccountMgr.normalizeString(accountName))
