@@ -92,7 +92,7 @@ namespace Game
                     loot = creature.loot;
                 }
 
-                player.StoreLootItem((byte)(req.LootListID - 1), loot, aeResult);
+                player.StoreLootItem(lguid, (byte)(req.LootListID - 1), loot, aeResult);
 
                 // If player is removing the last LootItem, delete the empty container.
                 if (loot.IsLooted() && lguid.IsItem())
@@ -230,8 +230,8 @@ namespace Game
                 loot.gold = 0;
 
                 // Delete the money loot record from the DB
-                if (!loot.containerID.IsEmpty())
-                    Global.LootItemStorage.RemoveStoredMoneyForContainer(loot.containerID.GetCounter());
+                if (guid.IsItem() && loot.loot_type == LootType.Corpse)
+                    Global.LootItemStorage.RemoveStoredMoneyForContainer(guid.GetCounter());
 
                 // Delete container if empty
                 if (loot.IsLooted() && guid.IsItem())

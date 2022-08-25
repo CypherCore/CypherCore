@@ -171,7 +171,6 @@ namespace Game.Loots
             unlootedCount = 0;
             loot_type = LootType.None;
             maxDuplicates = 1;
-            containerID = ObjectGuid.Empty;
         }
 
         // Inserts the item into the loot (called by LootTemplate processors)
@@ -851,8 +850,6 @@ namespace Game.Loots
         ObjectGuid lootOwnerGUID;
         public LootType loot_type;                                     // required for achievement system
         public byte maxDuplicates;                                    // Max amount of items with the same entry that can drop (default is 1; on 25 man raid mode 3)
-
-        public ObjectGuid containerID;
 
         List<ObjectGuid> PlayersLooting = new();
         MultiMap<ObjectGuid, NotNormalLootItem> PlayerQuestItems = new();

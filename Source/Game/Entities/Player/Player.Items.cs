@@ -5976,7 +5976,7 @@ namespace Game.Entities
         //Loot
         public ObjectGuid GetLootGUID() { return m_playerData.LootTargetGUID; }
         public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }
-        public void StoreLootItem(byte lootSlot, Loot loot, AELootResult aeResult = null)
+        public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
             LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem);
             if (item == null || item.is_looted)
@@ -6064,8 +6064,8 @@ namespace Game.Entities
                     aeResult.Add(newitem, item.count, loot.loot_type);
 
                 // LootItem is being removed (looted) from the container, delete it from the DB.
-                if (!loot.containerID.IsEmpty())
-                    Global.LootItemStorage.RemoveStoredLootItemForContainer(loot.containerID.GetCounter(), item.itemid, item.count, item.itemIndex);
+                if (lootWorldObjectGuid.IsItem() && loot.loot_type == LootType.Corpse)
+                    Global.LootItemStorage.RemoveStoredLootItemForContainer(lootWorldObjectGuid.GetCounter(), item.itemid, item.count, item.itemIndex);
 
                 ApplyItemLootedSpell(newitem, true);
             }
@@ -6279,9 +6279,6 @@ namespace Game.Entities
 
                 loot = item.loot;
 
-                // Store container id
-                loot.containerID = item.GetGUID();
-
                 // If item doesn't already have loot, attempt to load it. If that
                 // fails then this is first time opening, generate loot
                 if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
@@ -6307,7 +6304,7 @@ namespace Game.Entities
                             // Force save the loot and money items that were just rolled
                             //  Also saves the container item ID in Loot struct (not to DB)
                             if (loot.gold > 0 || loot.unlootedCount > 0)
-                                Global.LootItemStorage.AddNewStoredLoot(loot, this);
+                                Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, this);
 
                             break;
                     }

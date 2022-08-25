@@ -100,10 +100,10 @@ namespace Game.Loots
         public bool LoadStoredLoot(Item item, Player player)
         {
             Loot loot = item.loot;
-            if (!_lootItemStorage.ContainsKey(loot.containerID.GetCounter()))
+            if (!_lootItemStorage.ContainsKey(item.GetGUID().GetCounter()))
                 return false;
 
-            var container = _lootItemStorage[loot.containerID.GetCounter()];
+            var container = _lootItemStorage[item.GetGUID().GetCounter()];
             loot.gold = container.GetMoney();
 
             LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
@@ -177,26 +177,26 @@ namespace Game.Loots
             _lootItemStorage[containerId].RemoveItem(itemId, count, itemIndex);
         }
 
-        public void AddNewStoredLoot(Loot loot, Player player)
+        public void AddNewStoredLoot(ulong containerId, Loot loot, Player player)
         {
             // Saves the money and item loot associated with an openable item to the DB
             if (loot.IsLooted()) // no money and no loot
                 return;
             
-            if (_lootItemStorage.ContainsKey(loot.containerID.GetCounter()))
+            if (_lootItemStorage.ContainsKey(containerId))
             {
-                Log.outError(LogFilter.Misc, $"Trying to store item loot by player: {player.GetGUID()} for container id: {loot.containerID.GetCounter()} that is already in storage!");
+                Log.outError(LogFilter.Misc, $"Trying to store item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
                 return;
             }
 
-            StoredLootContainer container = new(loot.containerID.GetCounter());
+            StoredLootContainer container = new(containerId);
 
             SQLTransaction trans = new();
             if (loot.gold != 0)
                 container.AddMoney(loot.gold, trans);
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
-            stmt.AddValue(0, loot.containerID.GetCounter());
+            stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
             foreach (LootItem li in loot.items)
@@ -219,7 +219,7 @@ namespace Game.Loots
 
             DB.Characters.CommitTransaction(trans);
 
-            _lootItemStorage.TryAdd(loot.containerID.GetCounter(), container);
+            _lootItemStorage.TryAdd(containerId, container);
         }
 
         ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new();
