@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Game.Chat
@@ -164,7 +165,7 @@ namespace Game.Chat
             if (!MoveNext(delimiters))
                 return new ParseStringResult(ParseResult.EndOfString, "");
 
-            if (System.Text.RegularExpressions.Regex.IsMatch(Current, @"^[a-zA-Z]+$"))
+            if (Current.Any(c => char.IsLetter(c)))
                 return new ParseStringResult(ParseResult.Ok, Current);
 
             return new ParseStringResult(ParseResult.Error, "");
