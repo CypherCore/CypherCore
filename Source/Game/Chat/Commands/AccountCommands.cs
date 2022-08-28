@@ -95,7 +95,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email);
+            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email ?? "");
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -105,7 +105,7 @@ namespace Game.Chat
                         Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) created Account {4} (Email: '{5}')",
                             handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                             handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(),
-                            accountName, email);
+                            accountName, email ?? "");
                     }
                     break;
                 case AccountOpResult.NameTooLong:

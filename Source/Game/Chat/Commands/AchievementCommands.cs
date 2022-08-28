@@ -27,12 +27,8 @@ namespace Game.Chat.Commands
     class AchievementCommand
     {
         [Command("add", CypherStrings.CommandAchievementAddHelp, RBACPermissions.CommandAchievementAdd)]
-        static bool HandleAchievementAddCommand(CommandHandler handler, uint achievemntId)
+        static bool HandleAchievementAddCommand(CommandHandler handler, AchievementRecord achievementEntry)
         {
-            AchievementRecord achievementEntry = CliDB.AchievementStorage.LookupByKey(achievemntId);
-            if (achievementEntry == null)
-                return false;
-
             Player target = handler.GetSelectedPlayer();
             if (!target)
             {

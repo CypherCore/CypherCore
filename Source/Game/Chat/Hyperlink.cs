@@ -15,33 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using System;
 
 namespace Game.Chat
 {
     class Hyperlink
     {
-        public static bool TryParse(out string value, string arg)
+        public static ChatCommandResult TryParse(out dynamic value, Type type, CommandHandler handler, string arg)
         {
-            value = null;
+            value = default;
 
             HyperlinkInfo info = ParseHyperlink(arg);
             // invalid hyperlinks cannot be consumed
             if (info == null)
-                return false;
+                return default;
 
-            value = info.Data;
-            return true;
-        }
-
-        public static bool TryParse(out dynamic value, Type type, CommandArguments args)
-        {
-            value = default;
-
-            HyperlinkInfo info = ParseHyperlink(args.GetString());
-            // invalid hyperlinks cannot be consumed
-            if (info == null)
-                return false;
+            ChatCommandResult errorResult = ChatCommandResult.FromErrorMessage(handler.GetCypherString(CypherStrings.CmdparserLinkdataInvalid));
 
             // store value
             switch (Type.GetTypeCode(type))
@@ -49,42 +39,34 @@ namespace Game.Chat
                 case TypeCode.UInt32:
                 {
                     if (!uint.TryParse(info.Data, out uint tempValue))
-                        return false;
+                        return errorResult;
 
                     value = tempValue;
-                    return true;
+                    break;
                 }
                 case TypeCode.UInt64:
                 {
                     if (!ulong.TryParse(info.Data, out ulong tempValue))
-                        return false;
+                        return errorResult;
 
                     value = tempValue;
-                    return true;
+                    break;
                 }
                 case TypeCode.String:
                 {
                     value = info.Data;
-                    return true;
+                    break;
                 }
-                case TypeCode.Object:
-                {
-                    switch (type.Name)
-                    {
-                        case nameof(PlayerIdentifier):
-                            value = PlayerIdentifier.ParseFromString(args);
-                            break;
-                        case nameof(AccountIdentifier):
-                            value = AccountIdentifier.ParseFromString(args);
-                            break;
-                        default:
-                            return false;
-                    }
-                    return true;
-                }
+                default:
+                    return errorResult;
             }
 
-            return false;
+            // finally, skip any potential delimiters
+            var (token, next) = CommandArgs.Tokenize(info.Tail);
+            if (token.IsEmpty()) /* empty token = first character is delimiter, skip past it */
+                return new ChatCommandResult(next);
+            else
+                return new ChatCommandResult(info.Tail);
         }
 
         public static bool CheckAllLinks(string str)
@@ -123,7 +105,7 @@ namespace Game.Chat
                         return false;
 
                     // tag is fine, find the next one
-                    pos = str.Length - info.next.Length;
+                    pos = str.Length - info.Tail.Length;
                 }
             }
 
@@ -204,16 +186,16 @@ namespace Game.Chat
 
     class HyperlinkInfo
     {
-        public HyperlinkInfo(string n = null, uint c = 0, string tag = null, string data = null, string text = null)
+        public HyperlinkInfo(string t = null, uint c = 0, string tag = null, string data = null, string text = null)
         {
-            next = n;
+            Tail = t;
             color = new(c);
             Tag = tag;
             Data = data;
             Text = text;
         }
 
-        public string next;
+        public string Tail;
         public HyperlinkColor color;
         public string Tag;
         public string Data;

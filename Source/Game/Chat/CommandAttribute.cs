@@ -79,4 +79,15 @@ namespace Game.Chat
 
     [AttributeUsage(AttributeTargets.Parameter)]
     public class OptionalArgAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class VariantArgAttribute : Attribute
+    {
+        public Type[] Types { get; set; }
+
+        public VariantArgAttribute(params Type[] types)
+        {
+            Types = types;
+        }
+    }
 }

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using Game.Entities;
 using System;
 
@@ -26,11 +27,7 @@ namespace Game.Chat
         ObjectGuid _guid;
         Player _player;
 
-        public PlayerIdentifier(string name, ObjectGuid guid)
-        {
-            _name = name;
-            _guid = guid;
-        }
+        public PlayerIdentifier() { }
 
         public PlayerIdentifier(Player player)
         {
@@ -75,40 +72,37 @@ namespace Game.Chat
                 return FromSelf(handler);
         }
 
-        public static ParseStringResult ParseFromString(CommandArguments args)
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
         {
-            var result = args.NextString();
-            if (result != ParseResult.Ok)
-                return new ParseStringResult(ParseResult.Error);
+            ChatCommandResult next = CommandArgs.TryConsume(out dynamic tempVal, typeof(ulong), handler, args);
+            if (!next.IsSuccessful())
+                next = CommandArgs.TryConsume(out tempVal, typeof(string), handler, args);
+            if (!next.IsSuccessful())
+                return next;
 
-            string arg = result.GetValue();
-
-            ulong guid = 0;
-            string name;
-            if (!Hyperlink.TryParse(out name, arg) || !ulong.TryParse(arg, out guid))
-                name = arg;
-
-            if (!name.IsEmpty())
+            if (tempVal is ulong)
             {
-                ObjectManager.NormalizePlayerName(ref name);
-                var player = Global.ObjAccessor.FindPlayerByName(name);
-                if (player != null)
-                    return new ParseStringResult(ParseResult.Ok, new PlayerIdentifier(player));
+                _guid = ObjectGuid.Create(HighGuid.Player, tempVal);
+                if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())))
+                    _name = _player.GetName();
                 else
-                {
-                    var objectGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
-                    if (objectGuid.IsEmpty())
-                        return new ParseStringResult(ParseResult.Ok, new PlayerIdentifier(name, objectGuid));
-                }
+                    if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharGuidNoExist, _guid.ToString()));
+                return next;
             }
-            else if (guid != 0)
+            else
             {
-                var player = Global.ObjAccessor.FindPlayerByLowGUID(guid);
-                if (player != null)
-                    return new ParseStringResult(ParseResult.Ok, new PlayerIdentifier(player));
-            }
+                _name = tempVal;
 
-            return new ParseStringResult(ParseResult.Error);
+                if (!ObjectManager.NormalizePlayerName(ref _name))
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameInvalid, _name));
+
+                if ((_player = Global.ObjAccessor.FindPlayerByName(_name)))
+                    _guid = _player.GetGUID();
+                else if ((_guid = Global.CharacterCacheStorage.GetCharacterGuidByName(_name)).IsEmpty())
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameNoExist, _name));
+                return next;
+            }
         }
     }
 
@@ -118,6 +112,7 @@ namespace Game.Chat
         string _name;
         WorldSession _session;
 
+        public AccountIdentifier() { }
         public AccountIdentifier(WorldSession session)
         {
             _id = session.GetAccountId();
@@ -130,26 +125,29 @@ namespace Game.Chat
         public bool IsConnected() { return _session != null; }
         public WorldSession GetConnectedSession() { return _session; }
 
-        public static ParseStringResult ParseFromString(CommandArguments args)
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
         {
-            var result = args.NextString();
-            if (result != ParseResult.Ok)
-                return new ParseStringResult(ParseResult.Error);
+            ChatCommandResult next = CommandArgs.TryConsume(out dynamic text, typeof(string), handler, args);
+            if (!next.IsSuccessful())
+                return next;
 
-            // try parsing as account name
-            var session = Global.WorldMgr.FindSession(Global.AccountMgr.GetId(result.GetValue()));
-            if (session != null) // account with name exists, we are done
-                return new ParseStringResult(ParseResult.Ok, new AccountIdentifier(session));
+            // first try parsing as account name
+            _name = text;
+            _id = Global.AccountMgr.GetId(_name);
+            _session = Global.WorldMgr.FindSession(_id);
+            if (_id != 0) // account with name exists, we are done
+                return next;
 
-            // try parsing as account id
-            if (!uint.TryParse(result.GetValue(), out uint id))
-                return new ParseStringResult(ParseResult.Error);
+            // try parsing as account id instead
+            if (uint.TryParse(text, out uint id))
+                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountNameNoExist, _name));
+            _id = id;
+            _session = Global.WorldMgr.FindSession(_id);
 
-            session = Global.WorldMgr.FindSession(id);
-            if (session != null)
-                return new ParseStringResult(ParseResult.Ok, new AccountIdentifier(session));
-
-            return new ParseStringResult(ParseResult.Error);
+            if (Global.AccountMgr.GetName(_id, out _name))
+                return next;
+            else
+                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountIdNoExist, _id));
         }
 
         public static AccountIdentifier FromTarget(CommandHandler handler)
@@ -174,11 +172,6 @@ namespace Game.Chat
     {
         string str;
 
-        public Tail(CommandArguments args)
-        {
-            str = args.NextString("").GetValue();
-        }
-
         public bool IsEmpty() { return str.IsEmpty(); }
 
         public static implicit operator string(Tail tail)
@@ -186,9 +179,10 @@ namespace Game.Chat
             return tail.str;
         }
 
-        public static ParseStringResult ParseFromString(CommandArguments args)
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
         {
-            return new ParseStringResult(ParseResult.Ok, new Tail(args));
+            str = args;
+            return new ChatCommandResult(str);
         }
     }
 }

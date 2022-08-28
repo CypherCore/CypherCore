@@ -442,7 +442,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("respawns", RBACPermissions.CommandListRespawns)]
-        static bool HandleListRespawnsCommand(CommandHandler handler, uint range)
+        static bool HandleListRespawnsCommand(CommandHandler handler, uint? range)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
@@ -454,8 +454,8 @@ namespace Game.Chat.Commands
             string zoneName = GetZoneName(zoneId, locale);
             for (SpawnObjectType type = 0; type < SpawnObjectType.NumSpawnTypes; type++)
             {
-                if (range != 0)
-                    handler.SendSysMessage(CypherStrings.ListRespawnsRange, type, range);
+                if (range.HasValue)
+                    handler.SendSysMessage(CypherStrings.ListRespawnsRange, type, range.Value);
                 else
                     handler.SendSysMessage(CypherStrings.ListRespawnsZone, type, zoneName, zoneId);
 
@@ -473,9 +473,9 @@ namespace Game.Chat.Commands
                     if (edata != null)
                     {
                         respawnZoneId = map.GetZoneId(PhasingHandler.EmptyPhaseShift, edata.SpawnPoint);
-                        if (range != 0)
+                        if (range.HasValue)
                         {
-                            if (!player.IsInDist(edata.SpawnPoint, range))
+                            if (!player.IsInDist(edata.SpawnPoint, range.Value))
                                 continue;
                         }
                         else
@@ -615,9 +615,9 @@ namespace Game.Chat.Commands
                         aura.GetCasterGUID().ToString());
                 }
 
-                for (ushort i = 0; i < (int)AuraType.Total; ++i)
+                for (AuraType auraType = 0; auraType < AuraType.Total; ++auraType)
                 {
-                    var auraList = unit.GetAuraEffectsByType((AuraType)i);
+                    var auraList = unit.GetAuraEffectsByType(auraType);
                     if (auraList.Empty())
                         continue;
 
@@ -631,7 +631,7 @@ namespace Game.Chat.Commands
                         if (!sizeLogged)
                         {
                             sizeLogged = true;
-                            handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, i);
+                            handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, auraType);
                         }
 
                         handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());

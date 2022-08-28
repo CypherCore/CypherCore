@@ -417,9 +417,9 @@ namespace Game.Chat
             return searcher.GetTarget();
         }
 
-        public string PlayerLink(string name, bool console = false)
+        public string PlayerLink(string name)
         {
-            return console ? name : "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r";
+            return _session != null ? "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r" : name;
         }
         public virtual string GetNameLink()
         {
@@ -622,8 +622,9 @@ namespace Game.Chat
         }
 
         public bool HasSentErrorMessage() { return _sentErrorMessage; }
+        public void SetSentErrorMessage(bool val) { _sentErrorMessage = val; }
 
-        internal bool _sentErrorMessage;
+        bool _sentErrorMessage;
         WorldSession _session;
     }
 
@@ -739,8 +740,7 @@ namespace Game.Chat
 
         public override void SendSysMessage(string str, bool escapeCharacters)
         {
-            _sentErrorMessage = true;
-
+            SetSentErrorMessage(true);
             Log.outInfo(LogFilter.Server, str);
         }
 
@@ -798,8 +798,7 @@ namespace Game.Chat
 
         public override void SendSysMessage(string str, bool escapeCharacters)
         {
-            _sentErrorMessage = true;
-
+            SetSentErrorMessage(true);
             _reportToRA(str);
         }
 

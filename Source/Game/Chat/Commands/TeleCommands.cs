@@ -31,9 +31,8 @@ namespace Game.Chat
     class TeleCommands
     {
         [Command("", RBACPermissions.CommandTele)]
-        static bool HandleTeleCommand(CommandHandler handler, string name)
+        static bool HandleTeleCommand(CommandHandler handler, GameTele tele)
         {
-            var tele = Global.ObjectMgr.GetGameTele(name);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -71,7 +70,7 @@ namespace Game.Chat
             if (player == null)
                 return false;
 
-            if (Global.ObjectMgr.GetGameTele(name) != null)
+            if (Global.ObjectMgr.GetGameTeleExactName(name) != null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTpAlreadyexist);
                 return false;
@@ -100,9 +99,8 @@ namespace Game.Chat
         }
 
         [Command("del", RBACPermissions.CommandTeleDel, true)]
-        static bool HandleTeleDelCommand(CommandHandler handler, string name)
+        static bool HandleTeleDelCommand(CommandHandler handler, GameTele tele)
         {
-            var tele = Global.ObjectMgr.GetGameTele(name);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -115,9 +113,8 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandTeleGroup)]
-        static bool HandleTeleGroupCommand(CommandHandler handler, string name)
+        static bool HandleTeleGroupCommand(CommandHandler handler, GameTele tele)
         {
-            var tele = Global.ObjectMgr.GetGameTele(name);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -240,7 +237,7 @@ namespace Game.Chat
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
-            static bool HandleTeleNameCommand(CommandHandler handler, PlayerIdentifier player, string where)
+            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg(typeof(GameTele), typeof(string))] object where)
             {
                 if (player == null)
                     player = PlayerIdentifier.FromTargetOrSelf(handler);
@@ -249,7 +246,7 @@ namespace Game.Chat
 
                 Player target = player.GetConnectedPlayer();
 
-                if (where.Equals("home", StringComparison.OrdinalIgnoreCase))    // References target's homebind
+                if (where is string && where.Equals("$home"))    // References target's homebind
                 {
                     if (target)
                         target.TeleportTo(target.GetHomebind());
@@ -272,10 +269,7 @@ namespace Game.Chat
                 }
 
                 // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-                GameTele tele = Global.ObjectMgr.GetGameTele(where);
-                if (tele == null)
-                    return false;
-
+                GameTele tele = where as GameTele;
                 return DoNameTeleport(handler, player, tele.mapId, new Position(tele.posX, tele.posY, tele.posZ, tele.orientation), tele.name);
             }
 

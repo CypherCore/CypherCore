@@ -223,7 +223,7 @@ namespace Game.Chat
 
             if (cmd != null)
             { /* if we matched a command at some point, invoke it */
-                handler._sentErrorMessage = false;
+                handler.SetSentErrorMessage(false);
                 if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, oldTail))
                 { /* invocation succeeded, log this */
                     if (!handler.IsConsole())
@@ -413,10 +413,20 @@ namespace Game.Chat
                 return (bool)_methodInfo.Invoke(null, new object[] { handler, new StringArguments(args) });
             else
             {
-                if (CommandArgs.Parse(out dynamic[] parseArgs, handler, parameters, args))
+                var parseArgs = new dynamic[parameters.Length];
+                parseArgs[0] = handler;
+                var result = CommandArgs.ConsumeFromOffset(parseArgs, 1, parameters, handler, args);
+                if (result.IsSuccessful())
                     return (bool)_methodInfo.Invoke(null, parseArgs);
-
-                return false;
+                else
+                {
+                    if (result.HasErrorMessage())
+                    {
+                        handler.SendSysMessage(result.GetErrorMessage());
+                        handler.SetSentErrorMessage(true);
+                    }
+                    return false;
+                }
             }
         }
     }

@@ -115,7 +115,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGobjectInfo)]
-        static bool HandleGameObjectInfoCommand(CommandHandler handler, string isGuid, uint data)
+        static bool HandleGameObjectInfoCommand(CommandHandler handler, [OptionalArg] string isGuid, ulong data)
         {
             GameObject thisGO = null;
             GameObjectData spawnData = null;
@@ -137,7 +137,7 @@ namespace Game.Chat
             }
             else
             {
-                entry = data;
+                entry = (uint)data;
             }
 
             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);

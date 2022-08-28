@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
+using Game.DataStorage;
+using Game.Entities;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,375 +28,344 @@ namespace Game.Chat
 {
     class CommandArgs
     {
-        static Dictionary<Type, Func<CommandArguments, ParseStringResult>> Parsers = new()
+        public static ChatCommandResult ConsumeFromOffset(dynamic[] tuple, int offset, ParameterInfo[] parameterInfos, CommandHandler handler, string args)
         {
-            { typeof(sbyte), args => args.NextSByte() },
-            { typeof(short), args => args.NextInt16() },
-            { typeof(int), args => args.NextInt32() },
-            { typeof(long), args => args.NextInt64() },
-            { typeof(byte), args => args.NextByte() },
-            { typeof(ushort), args => args.NextUInt16() },
-            { typeof(uint), args => args.NextUInt32() },
-            { typeof(ulong), args => args.NextUInt64() },
-            { typeof(float), args => args.NextSingle() },
-            { typeof(string), args => args.NextString() },
-            { typeof(bool), args => args.NextBoolean() },
-            { typeof(PlayerIdentifier), args => PlayerIdentifier.ParseFromString(args) },
-            { typeof(AccountIdentifier), args => AccountIdentifier.ParseFromString(args) },
-            { typeof(Tail), args => Tail.ParseFromString(args) },
-        };
-
-        public static bool Parse(out dynamic[] parsedArgs, CommandHandler handler, ParameterInfo[] parameterInfos, string tailCmd)
-        {
-            parsedArgs = new dynamic[parameterInfos.Length];
-            parsedArgs[0] = handler;
-
-            CommandArguments args = new CommandArguments(tailCmd);
-
-            for (var i = 1; i < parameterInfos.Length; i++)
-            {
-                if (!ParseArgument(out dynamic value, parameterInfos[i], args))
-                    return false;
-
-                parsedArgs[i] = value;
-            }
-
-            return true;
+            if (offset < tuple.Length)
+                return TryConsumeTo(tuple, offset, parameterInfos, handler, args);
+            else if (!args.IsEmpty()) /* the entire string must be consumed */
+                return default;
+            else
+                return new ChatCommandResult(args);
         }
 
-        static bool ParseArgument(out dynamic value, ParameterInfo parameterInfo, CommandArguments args)
+        static ChatCommandResult TryConsumeTo(dynamic[] tuple, int offset, ParameterInfo[] parameterInfos, CommandHandler handler, string args)
         {
-            var parameterType = parameterInfo.ParameterType;
-
-            if (Hyperlink.TryParse(out value, parameterType, args))
-                return true;
-
-            bool isOptional = false;
-
-            var optionalArgAttribute = parameterInfo.GetCustomAttribute<OptionalArgAttribute>(true);
-            if (optionalArgAttribute != null)
-                isOptional = true;
-
-            if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            var optionalArgAttribute = parameterInfos[offset].GetCustomAttribute<OptionalArgAttribute>(true);
+            if (optionalArgAttribute != null || parameterInfos[offset].ParameterType.IsGenericType && parameterInfos[offset].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                parameterType = Nullable.GetUnderlyingType(parameterType);
-                isOptional = true;
-            }
+                // try with the argument
+                Type myArg = Nullable.GetUnderlyingType(parameterInfos[offset].ParameterType) ?? parameterInfos[offset].ParameterType;
 
-            if (parameterType.IsEnum)
-                parameterType = parameterType.GetEnumUnderlyingType();
+                ChatCommandResult result1 = TryConsume(out tuple[offset], myArg, handler, args);
+                if (result1.IsSuccessful())
+                    if ((result1 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, result1)).IsSuccessful())
+                        return result1;
 
-            var pos = args.GetCurrentPosition();
-
-            var result = Parsers[parameterType](args);
-            if (result != ParseResult.Ok)
-            {
-                if (!isOptional)
-                    return false;
+                // try again omitting the argument
+                tuple[offset] = default;
+                ChatCommandResult result2 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, args);
+                if (result2.IsSuccessful())
+                    return result2;
+                if (result1.HasErrorMessage() && result2.HasErrorMessage())
+                {
+                    return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} \"{result2.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} \"{result1.GetErrorMessage()}\"");
+                }
+                else if (result1.HasErrorMessage())
+                    return result1;
                 else
-                    args.SetCurrentPosition(pos);
+                    return result2;
+            }
+            else
+            {
+                ChatCommandResult next;
+
+                var variantArgAttribute = parameterInfos[offset].GetCustomAttribute<VariantArgAttribute>(true);
+                if (variantArgAttribute != null)
+                    next = TryConsumeVariant(out tuple[offset], variantArgAttribute.Types, handler, args);
+                else
+                    next = TryConsume(out tuple[offset], parameterInfos[offset].ParameterType, handler, args);
+
+                if (next.IsSuccessful())
+                    return ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, next);
+                else
+                    return next;
+            }
+        }
+
+        public static ChatCommandResult TryConsume(out dynamic val, Type type, CommandHandler handler, string args)
+        {
+            val = default;
+
+            var hyperlinkResult = Hyperlink.TryParse(out val, type, handler, args);
+            if (hyperlinkResult.IsSuccessful())
+                return hyperlinkResult;
+
+            if (type.IsEnum)
+                type = type.GetEnumUnderlyingType();
+
+            var (token, tail) = Tokenize(args);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.SByte:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (sbyte.TryParse(token, out sbyte tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Int16:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (short.TryParse(token, out short tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Int32:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (int.TryParse(token, out int tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Int64:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (long.TryParse(token, out long tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Byte:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (byte.TryParse(token, out byte tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.UInt16:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (ushort.TryParse(token, out ushort tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.UInt32:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (uint.TryParse(token, out uint tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.UInt64:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (ulong.TryParse(token, out ulong tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Single:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (float.TryParse(token, out float tempValue))
+                        val = tempValue;
+                    else
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    if (!float.IsFinite(val))
+                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.String:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    val = token;
+                    return new ChatCommandResult(tail);
+                }
+                case TypeCode.Object:
+                {
+                    switch (type.Name)
+                    {
+                        case nameof(Tail):
+                            val = new Tail();
+                            return val.TryConsume(handler, args);
+                        case nameof(PlayerIdentifier):
+                            val = new PlayerIdentifier();
+                            return val.TryConsume(handler, args);
+                        case nameof(AccountIdentifier):
+                            val = new AccountIdentifier();
+                            return val.TryConsume(handler, args);
+                        case nameof(AchievementRecord):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful() || (val = CliDB.AchievementStorage.LookupByKey((uint)tempVal)) != null)
+                                return result;
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAchievementNoExist, tempVal));
+                        }
+                        case nameof(CurrencyTypesRecord):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful() || (val = CliDB.CurrencyTypesStorage.LookupByKey((uint)tempVal)) != null)
+                                return result;
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCurrencyNoExist, tempVal));
+                        }
+                        case nameof(GameTele):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful())
+                                result = TryConsume(out tempVal, typeof(string), handler, args);
+
+                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetGameTele(tempVal)) != null)
+                                return result;
+                            if (tempVal is uint)
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserGameTeleIdNoExist, tempVal));
+                            else
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserGameTeleNoExist, tempVal));
+                        }
+                        case nameof(ItemTemplate):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetItemTemplate(tempVal)))
+                                return result;
+
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserItemNoExist, tempVal));
+                        }
+                        case nameof(SpellInfo):
+                        {
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful() || (val = Global.SpellMgr.GetSpellInfo(tempVal, Difficulty.None)) != null)
+                                return result;
+
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserSpellNoExist, tempVal));
+                        }
+                    }
+                    break;
+                }
             }
 
-            value = result.GetValue();
-            return true;
+            return default;
+        }
+
+        public static ChatCommandResult TryConsumeVariant(out dynamic val, Type[] types, CommandHandler handler, string args)
+        {
+            ChatCommandResult result = TryAtIndex(out val, types, 0, handler, args);
+            if (result.HasErrorMessage() && (result.GetErrorMessage().IndexOf('\n') != -1))
+                return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} {result.GetErrorMessage()}");
+            return result;
+        }
+
+        static ChatCommandResult TryAtIndex(out dynamic val, Type[] types, int index, CommandHandler handler, string args)
+        {
+            val = default;
+
+            if (index < types.Length)
+            {
+                ChatCommandResult thisResult = TryConsume(out val, types[index], handler, args);
+                if (thisResult.IsSuccessful())
+                    return thisResult;
+                else
+                {
+                    ChatCommandResult nestedResult = TryAtIndex(out val, types, index+1, handler, args);
+                    if (nestedResult.IsSuccessful() || !thisResult.HasErrorMessage())
+                        return nestedResult;
+                    if (!nestedResult.HasErrorMessage())
+                        return thisResult;
+                    if (nestedResult.GetErrorMessage().StartsWith("\""))
+                        return ChatCommandResult.FromErrorMessage($"\"{thisResult.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} {nestedResult.GetErrorMessage()}");
+                    else
+                        return ChatCommandResult.FromErrorMessage($"\"{thisResult.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} \"{nestedResult.GetErrorMessage()}\"");
+                }
+            }
+            else
+                return default;
+        }
+
+        public static (string token, string tail) Tokenize(string args)
+        {
+            (string token, string tail) result = new ("", "");
+            int delimPos = args.IndexOf(' ');
+            if (delimPos != -1)
+            {
+                result.token = args.Substring(0, delimPos);
+                int tailPos = args.FindFirstNotOf(" ", delimPos);
+                if (tailPos != -1)
+                    result.tail = args.Substring(tailPos);
+            }
+            else
+                result.token = args;
+
+            return result;
         }
     }
 
-    public enum ParseResult
+    public struct ChatCommandResult
     {
-        Ok,
-        Error,
-        EndOfString
-    }
-
-    public struct ParseStringResult
-    {
-        ParseResult result;
+        bool result;
         dynamic value;
+        string errorMessage;
 
-        public ParseStringResult(ParseResult _result, dynamic _value = default)
+        public ChatCommandResult(string _value = "")
         {
-            result = _result;
+            result = true;
             value = _value;
+            errorMessage = null;
         }
 
-        public dynamic GetValue() { return value; }
+        public bool IsSuccessful() { return result; }
 
-        public static implicit operator ParseResult(ParseStringResult stringResult)
+        public bool HasErrorMessage() { return !errorMessage.IsEmpty(); }
+
+        public string GetErrorMessage() { return errorMessage; }
+
+        public void SetErrorMessage(string _value) 
         {
-            return stringResult.result;
+            result = false;
+            errorMessage = _value;
         }
 
-        public static implicit operator string(ParseStringResult stringResult)
+        public static ChatCommandResult FromErrorMessage(string str)
+        {
+            var result = new ChatCommandResult();
+            result.SetErrorMessage(str);
+            return result;
+        }
+
+        public static implicit operator string(ChatCommandResult stringResult)
         {
             return stringResult.value;
         }
-    }
-
-    public sealed class CommandArguments
-    {
-        static ParseStringResult ErrorResult = new(ParseResult.Error);
-        static ParseStringResult EndOfStringResult = new(ParseResult.EndOfString);
-
-        public CommandArguments(string args)
-        {
-            if (!args.IsEmpty())
-                activestring = args.TrimStart(' ');
-            activeposition = -1;
-        }
-
-        public CommandArguments(CommandArguments args)
-        {
-            activestring = args.activestring;
-            activeposition = args.activeposition;
-            Current = args.Current;
-        }
-
-        public bool Empty()
-        {
-            return activestring.IsEmpty();
-        }
-
-        public void MoveToNextChar(char c)
-        {
-            for (var i = activeposition; i < activestring.Length; ++i)
-                if (activestring[i] == c)
-                    break;
-        }
-
-        public ParseStringResult NextString(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return new ParseStringResult(ParseResult.EndOfString, "");
-
-            if (Current.Any(c => char.IsLetter(c)))
-                return new ParseStringResult(ParseResult.Ok, Current);
-
-            return new ParseStringResult(ParseResult.Error, "");
-        }
-
-        public ParseStringResult NextBoolean(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            bool value;
-            if (bool.TryParse(Current, out value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            if ((Current == "1") || Current.Equals("y", StringComparison.OrdinalIgnoreCase) || Current.Equals("on", StringComparison.OrdinalIgnoreCase) || Current.Equals("yes", StringComparison.OrdinalIgnoreCase) || Current.Equals("true", StringComparison.OrdinalIgnoreCase))
-                return new ParseStringResult(ParseResult.Ok, true);
-            if ((Current == "0") || Current.Equals("n", StringComparison.OrdinalIgnoreCase) || Current.Equals("off", StringComparison.OrdinalIgnoreCase) || Current.Equals("no", StringComparison.OrdinalIgnoreCase) || Current.Equals("false", StringComparison.OrdinalIgnoreCase))
-                return new ParseStringResult(ParseResult.Ok, false);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextChar(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (char.TryParse(Current, out char value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextByte(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (byte.TryParse(Current, out byte value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextSByte(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (sbyte.TryParse(Current, out sbyte value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextUInt16(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (ushort.TryParse(Current, out ushort value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextInt16(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (short.TryParse(Current, out short value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextUInt32(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (uint.TryParse(Current, out uint value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextInt32(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (int.TryParse(Current, out int value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextUInt64(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (ulong.TryParse(Current, out ulong value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextInt64(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (long.TryParse(Current, out long value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextSingle(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (float.TryParse(Current, out float value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextDouble(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (double.TryParse(Current, out double value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public ParseStringResult NextDecimal(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return EndOfStringResult;
-
-            if (decimal.TryParse(Current, out decimal value))
-                return new ParseStringResult(ParseResult.Ok, value);
-
-            return ErrorResult;
-        }
-
-        public void AlignToNextChar()
-        {
-            while (activeposition < activestring.Length && activestring[activeposition] != ' ')
-                activeposition++;
-        }
-
-        public char this[int index]
-        {
-            get { return activestring[index]; }
-        }
-
-        public string GetString()
-        {
-            return activestring;
-        }
-
-        public void Reset()
-        {
-            activeposition = -1;
-            Current = null;
-        }
-
-        public bool IsAtEnd()
-        {
-            return activestring.IsEmpty() || activeposition == activestring.Length;
-        }
-
-        public int GetCurrentPosition()
-        {
-            return activeposition;
-        }
-
-        public void SetCurrentPosition(int currentPosition)
-        {
-            activeposition = currentPosition;
-        }
-
-        bool MoveNext(string delimiters)
-        {
-            //the stringtotokenize was never set:
-            if (activestring == null)
-                return false;
-
-            //all tokens have already been extracted:
-            if (activeposition == activestring.Length)
-                return false;
-
-            //bypass delimiters:
-            activeposition++;
-            while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) > -1)
-            {
-                activeposition++;
-            }
-
-            //only delimiters were left, so return null:
-            if (activeposition == activestring.Length)
-                return false;
-
-            //get starting position of string to return:
-            int startingposition = activeposition;
-
-            //read until next delimiter:
-            do
-            {
-                activeposition++;
-            } while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) == -1);
-
-            Current = activestring.Substring(startingposition, activeposition - startingposition);
-            return true;
-        }
-
-        private string activestring;
-        private int activeposition;
-        private string Current;
     }
 }

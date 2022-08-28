@@ -453,7 +453,7 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebug)]
-        static bool HandleDebugInstanceSpawns(CommandHandler handler, string optArg)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg(typeof(uint), typeof(string))] object optArg)
         {
             Player player = handler.GetPlayer();
             if (player == null)
@@ -461,10 +461,10 @@ namespace Game.Chat
 
             bool explain = false;
             uint groupID = 0;
-            if (optArg.Equals("explain", StringComparison.OrdinalIgnoreCase))
+            if (optArg is string && (optArg as string).Equals("explain", StringComparison.OrdinalIgnoreCase))
                 explain = true;
             else
-                groupID = uint.Parse(optArg);
+                groupID = (uint)optArg;
 
             if (groupID != 0 && Global.ObjectMgr.GetSpawnGroupData(groupID) == null)
             {
@@ -783,6 +783,36 @@ namespace Game.Chat
                 handler.SendSysMessage($"Target creature's PhaseGroup in DB: {Math.Abs(target.GetDBPhase())}");
 
             PhasingHandler.PrintToChat(handler, target);
+            return true;
+        }
+
+        [Command("pvp warmode", RBACPermissions.CommandDebug, true)]
+        static bool HandleDebugWarModeBalanceCommand(CommandHandler handler, string command, int? rewardValue)
+        {
+            // USAGE: .debug pvp fb <alliance|horde|neutral|off> [pct]
+            // neutral     Sets faction balance off.
+            // alliance    Set faction balance to alliance.
+            // horde       Set faction balance to horde.
+            // off         Reset the faction balance and use the calculated value of it
+            switch (command)
+            {
+                case "alliance":
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue.GetValueOrDefault(0));
+                    break;
+                case "horde":
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue.GetValueOrDefault(0));
+                    break;
+                case "neutral":
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
+                    break;
+                case "off":
+                    Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
+                    break;
+                default:
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+            }
+
             return true;
         }
 

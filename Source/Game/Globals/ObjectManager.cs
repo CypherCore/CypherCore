@@ -5766,7 +5766,30 @@ namespace Game
         }
         public GameTele GetGameTele(string name)
         {
-            return gameTeleStorage.Values.FirstOrDefault(p => p.nameLow == name.ToLower());
+            name = name.ToLower();
+
+            // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
+            GameTele alt = null;
+            foreach (var (_, tele) in gameTeleStorage)
+            {
+                if (tele.nameLow == name)
+                    return tele;
+                else if (alt == null && tele.nameLow.Contains(name))
+                    alt = tele;
+            }
+
+            return alt;
+        }
+        public GameTele GetGameTeleExactName(string name)
+        {
+            name = name.ToLower();
+            foreach (var (_, tele) in gameTeleStorage)
+            {
+                if (tele.nameLow == name)
+                    return tele;
+            }
+
+            return null;
         }
         public bool AddGameTele(GameTele tele)
         {
