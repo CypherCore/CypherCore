@@ -165,9 +165,9 @@ namespace Game.Loots
 
     public class Loot
     {
-        public Loot(uint _gold = 0)
+        public Loot()
         {
-            gold = _gold;
+            gold = 0;
             unlootedCount = 0;
             loot_type = LootType.None;
             maxDuplicates = 1;

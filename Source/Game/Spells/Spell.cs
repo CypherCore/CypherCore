@@ -5187,7 +5187,8 @@ namespace Game.Spells
                             return SpellCastResult.TargetUnskinnable;
 
                         Creature creature = m_targets.GetUnitTarget().ToCreature();
-                        if (!creature.IsCritter() && !creature.loot.IsLooted())
+                        Loot loot = creature.GetLootForPlayer(m_caster.ToPlayer());
+                        if (loot != null && !loot.IsLooted())
                             return SpellCastResult.TargetNotLooted;
 
                         SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();

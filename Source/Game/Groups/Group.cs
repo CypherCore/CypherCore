@@ -112,7 +112,7 @@ namespace Game.Groups
             leader.SetPlayerFlag(PlayerFlags.GroupLeader);
 
             if (IsBGGroup() || IsBFGroup())
-            { 
+            {
                 m_groupFlags = GroupFlags.MaskBgRaid;
                 m_groupCategory = GroupCategory.Instance;
             }
@@ -992,7 +992,7 @@ namespace Game.Groups
 
             return true;
         }
-        
+
         public void GroupLoot(Loot loot, WorldObject lootedObject)
         {
             byte itemSlot = 0;
@@ -2525,7 +2525,7 @@ namespace Game.Groups
         {
             return GetMemberFlags(guid).HasAnyFlag(GroupMemberFlags.Assistant);
         }
-        
+
         public ObjectGuid GetMemberGUID(string name)
         {
             foreach (var member in m_memberSlots)
@@ -2778,7 +2778,7 @@ namespace Game.Groups
         RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
         uint m_activeMarkers;
 
-        public static implicit operator bool (Group group)
+        public static implicit operator bool(Group group)
         {
             return group != null;
         }

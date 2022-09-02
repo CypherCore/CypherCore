@@ -90,7 +90,7 @@ namespace Game.Entities
         // vendor items
         List<VendorItemCount> m_vendorItemCounts = new();
 
-        public Loot loot = new();
+        public Loot loot;
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting corpse
         ObjectGuid m_lootRecipient;

@@ -160,7 +160,7 @@ namespace Game.Entities
                 SetDeathState(DeathState.Dead);
                 RemoveAllAuras();
                 //DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-                loot.Clear();
+                loot = null;
                 uint respawnDelay = m_respawnDelay;
                 CreatureAI ai = GetAI();
                 if (ai != null)
@@ -255,10 +255,6 @@ namespace Game.Entities
 
             if (cInfo == null)
                 cInfo = normalInfo;
-
-            // Initialize loot duplicate count depending on raid difficulty
-            if (GetMap().Is25ManRaid())
-                loot.maxDuplicates = 3;
 
             SetEntry(entry);                                        // normal entry always
             m_creatureInfo = cInfo;                                 // map mode related always
@@ -511,7 +507,7 @@ namespace Game.Entities
                     if (IsEngaged())
                         AIUpdateTick(diff);
 
-                    if (m_groupLootTimer != 0 && !lootingGroupLowGUID.IsEmpty())
+                    if (loot != null && m_groupLootTimer != 0 && !lootingGroupLowGUID.IsEmpty())
                     {
                         if (m_groupLootTimer <= diff)
                         {
@@ -1941,7 +1937,7 @@ namespace Game.Entities
                     Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
                     m_respawnTime = 0;
                     ResetPickPocketRefillTimer();
-                    loot.Clear();
+                    loot = null;
 
                     if (m_originalEntry != GetEntry())
                         UpdateEntry(m_originalEntry);
@@ -2578,7 +2574,7 @@ namespace Game.Entities
         
         public void AllLootRemovedFromCorpse()
         {
-            if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
+            if ((loot == null || loot.loot_type != LootType.Skinning) && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
                 if (LootStorage.Skinning.HaveLootFor(GetCreatureTemplate().SkinLootId))
                     SetUnitFlag(UnitFlags.Skinnable);
 
@@ -2591,7 +2587,7 @@ namespace Game.Entities
             float decayRate = m_ignoreCorpseDecayRatio ? 1.0f : WorldConfig.GetFloatValue(WorldCfg.RateCorpseDecayLooted);
 
             // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
-            if (loot.loot_type == LootType.Skinning)
+            if (loot != null && loot.loot_type == LootType.Skinning)
                 m_corpseRemoveTime = now;
             else
                 m_corpseRemoveTime = now + (uint)(m_corpseDelay * decayRate);
@@ -3279,8 +3275,6 @@ namespace Game.Entities
 
             // checked at creature_template loading
             DefaultMovementType = (MovementGeneratorType)data.movementType;
-
-            loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), data.Id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;

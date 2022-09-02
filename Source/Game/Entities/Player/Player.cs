@@ -3085,8 +3085,8 @@ namespace Game.Entities
             if (HasPendingBind())
                 return false;
 
-            Loot loot = creature.loot;
-            if (loot.IsLooted()) // nothing to loot or everything looted.
+            Loot loot = creature.GetLootForPlayer(this);
+            if (loot == null || loot.IsLooted()) // nothing to loot or everything looted.
                 return false;
             if (!loot.HasItemForAll() && !loot.HasItemFor(this)) // no loot in creature for this player
                 return false;

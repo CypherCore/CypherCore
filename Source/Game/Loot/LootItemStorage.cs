@@ -99,7 +99,7 @@ namespace Game.Loots
 
         public bool LoadStoredLoot(Item item, Player player)
         {
-            Loot loot = item.loot;
+            Loot loot = item.GetLootForPlayer(player);
             if (!_lootItemStorage.ContainsKey(item.GetGUID().GetCounter()))
                 return false;
 

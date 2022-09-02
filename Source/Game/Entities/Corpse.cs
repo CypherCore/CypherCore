@@ -38,7 +38,7 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
-            m_corpseData = new CorpseData();
+            m_corpseData = new();
 
             m_time = GameTime.GetGameTime();
         }
@@ -323,9 +323,11 @@ namespace Game.Entities
         public CellCoord GetCellCoord() { return _cellCoord; }
         public void SetCellCoord(CellCoord cellCoord) { _cellCoord = cellCoord; }
 
+        public override Loot GetLootForPlayer(Player player)  { return loot; }
+        
         public CorpseData m_corpseData;
 
-        public Loot loot = new();
+        public Loot loot;
         public Player lootRecipient;
 
         CorpseType m_type;

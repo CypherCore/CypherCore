@@ -772,23 +772,16 @@ namespace Game.Entities
                     }
                 }
                 else
-                {
                     player.SendPacket(partyKillLog);
-
-                    if (creature != null)
-                    {
-                        LootList lootList = new();
-                        lootList.Owner = creature.GetGUID();
-                        lootList.LootObj = creature.loot.GetGUID();
-                        player.SendMessageToSet(lootList, true);
-                    }
-                }
 
                 if (creature)
                 {
+                    creature.loot = new Loot();
                     Loot loot = creature.loot;
+                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, creature.GetMapId(), 0, creature.GetMap().GenerateLowGuid(HighGuid.LootObject)));
+                    if (creature.GetMap().Is25ManRaid())
+                        loot.maxDuplicates = 3;
 
-                    loot.Clear();
                     uint lootid = creature.GetCreatureTemplate().LootId;
                     if (lootid != 0)
                         loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
@@ -806,6 +799,13 @@ namespace Game.Entities
                         // Update round robin looter only if the creature had loot
                         if (!loot.Empty())
                             group.UpdateLooterGuid(creature);
+                    }
+                    else
+                    {
+                        LootList lootList = new();
+                        lootList.Owner = creature.GetGUID();
+                        lootList.LootObj = creature.loot.GetGUID();
+                        player.SendMessageToSet(lootList, true);
                     }
                 }
 
@@ -907,7 +907,7 @@ namespace Game.Entities
                 if (!creature.IsPet())
                 {
                     // must be after setDeathState which resets dynamic flags
-                    if (!creature.loot.IsLooted())
+                    if (creature.loot != null && !creature.loot.IsLooted())
                         creature.SetDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();

@@ -43,8 +43,6 @@ namespace Game.Entities
             uState = ItemUpdateState.New;
             uQueuePos = -1;
             m_lastPlayedTimeUpdate = GameTime.GetGameTime();
-
-            loot = new Loot();
         }
 
         public virtual bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
@@ -386,7 +384,7 @@ namespace Game.Entities
                     }
 
                     // Delete the items if this is a container
-                    if (!loot.IsLooted())
+                    if (loot != null && !loot.IsLooted())
                         Global.LootItemStorage.RemoveStoredLootForContainer(GetGUID().GetCounter());
 
                     Dispose();
@@ -689,7 +687,7 @@ namespace Game.Entities
             DeleteFromDB(trans, GetGUID().GetCounter());
 
             // Delete the items if this is a container
-            if (!loot.IsLooted())
+            if (loot != null && !loot.IsLooted())
                 Global.LootItemStorage.RemoveStoredLootForContainer(GetGUID().GetCounter());
         }
 
@@ -2667,6 +2665,8 @@ namespace Game.Entities
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
         public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
+        
+        public override Loot GetLootForPlayer(Player player)  { return loot; }
 
         //Static
         public static bool ItemCanGoIntoBag(ItemTemplate pProto, ItemTemplate pBagProto)

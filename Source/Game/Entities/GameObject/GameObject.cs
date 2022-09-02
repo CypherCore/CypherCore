@@ -373,10 +373,6 @@ namespace Game.Entities
             LastUsedScriptID = GetGoInfo().ScriptId;
             AIM_Initialize();
 
-            // Initialize loot duplicate count depending on raid difficulty
-            if (map.Is25ManRaid())
-                loot.maxDuplicates = 3;
-
             if (spawnid != 0)
                 m_spawnId = spawnid;
 
@@ -701,7 +697,7 @@ namespace Game.Entities
                             }
                             break;
                         case GameObjectTypes.Chest:
-                            if (m_groupLootTimer != 0)
+                            if (loot != null && m_groupLootTimer != 0)
                             {
                                 if (m_groupLootTimer <= diff)
                                 {
@@ -805,7 +801,7 @@ namespace Game.Entities
                             return;
                     }
 
-                    loot.Clear();
+                    loot = null;
 
                     // Do not delete chests or goobers that are not consumed on loot, while still allowing them to despawn when they expire if summoned
                     bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
@@ -3314,7 +3310,9 @@ namespace Game.Entities
         uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
 
         bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
-
+        
+        public  override  Loot GetLootForPlayer(Player player)   { return loot; }
+        
         public override uint GetLevelForTarget(WorldObject target)
         {
             Unit owner = GetOwner();
@@ -3441,7 +3439,7 @@ namespace Game.Entities
         Dictionary<uint, ObjectGuid> ChairListSlots = new();
         List<ObjectGuid> m_SkillupList = new();
 
-        public Loot loot = new();
+        public Loot loot;
 
         public GameObjectModel m_model;
 

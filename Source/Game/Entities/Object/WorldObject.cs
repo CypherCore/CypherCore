@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
+using Game.Loots;
 using Game.Maps;
 using Game.Movement;
 using Game.Networking;
@@ -28,7 +29,6 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -779,6 +779,8 @@ namespace Game.Entities
             return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: { GetName()}";
         }
 
+        public virtual Loot GetLootForPlayer(Player player) { return null; }
+        
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
         public abstract void BuildValuesUpdate(WorldPacket data, Player target);
 

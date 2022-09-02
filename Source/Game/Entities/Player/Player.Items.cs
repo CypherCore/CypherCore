@@ -6105,9 +6105,23 @@ namespace Game.Entities
             // Now we must make bones lootable, and send player loot
             bones.SetCorpseDynamicFlag(CorpseDynFlags.Lootable);
 
-            // We store the level of our player in the gold field
-            // We retrieve this information at Player.SendLoot()
-            bones.loot.gold = GetLevel();
+            bones.loot = new Loot();
+            bones.loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), 0, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+
+            // For AV Achievement
+            Battleground bg = GetBattleground();
+            if (bg != null)
+            {
+                if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
+                    bones.loot.FillLoot(1, LootStorage.Creature, this, true);
+            }
+            // For wintergrasp Quests
+            else if (GetZoneId() == (uint)AreaId.Wintergrasp)
+                bones.loot.FillLoot(1, LootStorage.Creature, this, true);
+
+            // It may need a better formula
+            // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
+            bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow((float)GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             bones.lootRecipient = looterPlr;
             looterPlr.SendLoot(bones.GetGUID(), LootType.Insignia);
         }
@@ -6168,12 +6182,12 @@ namespace Game.Entities
                     return;
                 }
 
-                loot = go.loot;
+                loot = go.GetLootForPlayer(this);
 
                 // loot was generated and respawntime has passed since then, allow to recreate loot
                 // to avoid bugs, this rule covers spawned gameobjects only
                 // Don't allow to regenerate chest loot inside instances and raids, to avoid exploits with duplicate boss loot being given for some encounters
-                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && !go.GetMap().Instanceable() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
+                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && (loot == null || loot.IsLooted()) && !go.GetMap().Instanceable() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
                     go.SetLootState(LootState.Ready);
 
                 if (go.GetLootState() == LootState.Ready)
@@ -6188,6 +6202,13 @@ namespace Game.Entities
                             return;
                         }
                     }
+
+                    loot = new Loot();
+                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, go.GetMapId(), 0, go.GetMap().GenerateLowGuid(HighGuid.LootObject)));
+                    if (go.GetMap().Is25ManRaid())
+                        loot.maxDuplicates = 3;
+
+                    go.loot = loot;
 
                     if (lootid != 0)
                     {
@@ -6204,7 +6225,7 @@ namespace Game.Entities
                         go.SetLootGenerationTime();
 
                         // get next RR player (for next loot)
-                        if (groupRules)
+                        if (groupRules && !loot.Empty())
                             group.UpdateLooterGuid(go);
                     }
 
@@ -6277,14 +6298,16 @@ namespace Game.Entities
 
                 permission = PermissionTypes.Owner;
 
-                loot = item.loot;
+                loot = item.GetLootForPlayer(this);
 
                 // If item doesn't already have loot, attempt to load it. If that
                 // fails then this is first time opening, generate loot
                 if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
                 {
                     item.m_lootGenerated = true;
-                    loot.Clear();
+                    loot = new Loot();
+                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), 0, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+                    item.loot = loot;
 
                     switch (loot_type)
                     {
@@ -6320,29 +6343,9 @@ namespace Game.Entities
                     return;
                 }
 
-                loot = bones.loot;
+                loot = bones.GetLootForPlayer(this);
 
-                if (loot.loot_type == LootType.None)
-                {
-                    uint pLevel = bones.loot.gold;
-                    bones.loot.Clear();
-
-                    // For AV Achievement
-                    Battleground bg = GetBattleground();
-                    if (bg)
-                    {
-                        if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
-                            loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
-                    }
-                    else if (GetZoneId() == (uint)AreaId.Wintergrasp)
-                        loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
-
-                    // It may need a better formula
-                    // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-                    bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow(pLevel / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
-                }
-
-                if (bones.lootRecipient != this)
+                if (bones.lootRecipient != null && bones.lootRecipient != this)
                     permission = PermissionTypes.None;
                 else
                     permission = PermissionTypes.Owner;
@@ -6364,7 +6367,7 @@ namespace Game.Entities
                     return;
                 }
 
-                loot = creature.loot;
+                loot = creature.GetLootForPlayer(this);
 
                 if (loot_type == LootType.Pickpocketing)
                 {
@@ -6491,7 +6494,8 @@ namespace Game.Entities
             }
 
             // need know merged fishing/corpse loot type for achievements
-            loot.loot_type = loot_type;
+            if (loot != null)
+                loot.loot_type = loot_type;
 
             if (permission != PermissionTypes.None)
             {
@@ -6532,7 +6536,7 @@ namespace Game.Entities
                     SetUnitFlag(UnitFlags.Looting);
             }
             else
-                SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
+                SendLootError(loot != null ? loot.GetGUID() : ObjectGuid.Empty, guid, LootError.DidntKill);
         }
 
         public void SendLootError(ObjectGuid lootObj, ObjectGuid owner, LootError error)
