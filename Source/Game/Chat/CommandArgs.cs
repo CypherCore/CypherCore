@@ -93,7 +93,7 @@ namespace Game.Chat
             if (type.IsEnum)
                 type = type.GetEnumUnderlyingType();
 
-            var (token, tail) = Tokenize(args);
+            var (token, tail) = args.Tokenize();
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.SByte:
@@ -271,6 +271,14 @@ namespace Game.Chat
 
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserSpellNoExist, tempVal));
                         }
+                        case nameof(Quest):
+                        {
+                            ChatCommandResult result =  TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetQuestTemplate(tempVal)))
+                                return result;
+                            
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserQuestNoExist, tempVal));
+                        }
                     }
                     break;
                 }
@@ -311,23 +319,6 @@ namespace Game.Chat
             }
             else
                 return default;
-        }
-
-        public static (string token, string tail) Tokenize(string args)
-        {
-            (string token, string tail) result = new ("", "");
-            int delimPos = args.IndexOf(' ');
-            if (delimPos != -1)
-            {
-                result.token = args.Substring(0, delimPos);
-                int tailPos = args.FindFirstNotOf(" ", delimPos);
-                if (tailPos != -1)
-                    result.tail = args.Substring(tailPos);
-            }
-            else
-                result.token = args;
-
-            return result;
         }
     }
 

@@ -62,7 +62,7 @@ namespace Game.Chat
             }
 
             // finally, skip any potential delimiters
-            var (token, next) = CommandArgs.Tokenize(info.Tail);
+            var (token, next) = info.Tail.Tokenize();
             if (token.IsEmpty()) /* empty token = first character is delimiter, skip past it */
                 return new ChatCommandResult(next);
             else
