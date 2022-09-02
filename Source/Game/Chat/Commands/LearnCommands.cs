@@ -246,12 +246,12 @@ namespace Game.Chat.Commands
             {
                 uint classmask = player.GetClassMask();
 
-                foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
-                {
-                    // wrong skill
-                    if (skillLine.SkillLine != skillId)
-                        continue;
+                var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
+                if (skillLineAbilities == null)
+                    return;
 
+                foreach (var skillLine in skillLineAbilities)
+                {
                     // not high rank
                     if (skillLine.SupercedesSpell != 0)
                         continue;

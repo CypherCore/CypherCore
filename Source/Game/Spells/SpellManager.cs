@@ -1799,11 +1799,12 @@ namespace Game.Entities
                     if (creatureFamily.SkillLine[j] == 0)
                         continue;
 
-                    foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
-                    {
-                        if (skillLine.SkillLine != creatureFamily.SkillLine[j])
-                            continue;
+                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill((uint)creatureFamily.SkillLine[j]);
+                    if (skillLineAbilities == null)
+                        continue;
 
+                    foreach (var skillLine in skillLineAbilities)
+                    {
                         if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
                             continue;
 
