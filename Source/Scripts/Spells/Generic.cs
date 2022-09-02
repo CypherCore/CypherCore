@@ -318,6 +318,12 @@ namespace Scripts.Spells.Generic
         // DefenderOfAzerothData
         public const uint DeathGateTeleportStormwind = 316999;
         public const uint DeathGateTeleportOrgrimmar = 317000;
+
+        // AncestralCallSpells
+        public const uint RictusOfTheLaughingSkull = 274739;
+        public const uint ZealOfTheBurningBlade = 274740;
+        public const uint FerocityOfTheFrostwolf = 274741;
+        public const uint MightOfTheBlackrock = 274742;
     }
 
     struct CreatureIds
@@ -4730,6 +4736,30 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
+    class spell_gen_ancestral_call : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.RictusOfTheLaughingSkull, SpellIds.ZealOfTheBurningBlade, SpellIds.FerocityOfTheFrostwolf, SpellIds.MightOfTheBlackrock);
+        }
+
+        static uint[] AncestralCallBuffs = { SpellIds.RictusOfTheLaughingSkull, SpellIds.ZealOfTheBurningBlade, SpellIds.FerocityOfTheFrostwolf, SpellIds.MightOfTheBlackrock };
+
+        void HandleOnCast()
+        {
+            Unit caster = GetCaster();
+            uint spellId = AncestralCallBuffs.SelectRandom();
+
+            caster.CastSpell(caster, spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnCast.Add(new CastHandler(HandleOnCast));
         }
     }
     
