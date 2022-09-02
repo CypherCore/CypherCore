@@ -166,22 +166,6 @@ namespace Game.PvP
             return false;
         }
 
-        public void HandleGossipOption(Player player, Creature creature, uint gossipid)
-        {
-            OutdoorPvP pvp = player.GetOutdoorPvP();
-            if (pvp != null && pvp.HasPlayer(player))
-                pvp.HandleGossipOption(player, creature, gossipid);
-        }
-
-        public bool CanTalkTo(Player player, Creature creature, GossipMenuItems gso)
-        {
-            OutdoorPvP pvp = player.GetOutdoorPvP();
-            if (pvp != null && pvp.HasPlayer(player))
-                return pvp.CanTalkTo(player, creature, gso);
-
-            return false;
-        }
-
         public void HandleDropFlag(Player player, uint spellId)
         {
             OutdoorPvP pvp = player.GetOutdoorPvP();

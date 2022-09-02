@@ -2369,10 +2369,6 @@ namespace Game.Entities
                         case GossipOption.Transmogrifier:
                         case GossipOption.Mailbox:
                             break;                                  // no checks
-                        case GossipOption.Outdoorpvp:
-                            if (!Global.OutdoorPvPMgr.CanTalkTo(this, creature, menuItems))
-                                canTalk = false;
-                            break;
                         default:
                             Log.outError(LogFilter.Sql, "Creature entry {0} have unknown gossip option {1} for menu {2}", creature.GetEntry(), menuItems.OptionType, menuItems.MenuId);
                             canTalk = false;
@@ -2510,9 +2506,6 @@ namespace Game.Entities
 
                     break;
                 }
-                case GossipOption.Outdoorpvp:
-                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), gossipListId);
-                    break;
                 case GossipOption.Spirithealer:
                     if (IsDead())
                         source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));

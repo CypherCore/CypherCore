@@ -140,24 +140,6 @@ namespace Game.PvP
             return false;
         }
 
-        public virtual bool HandleGossipOption(Player player, Creature creature, uint id)
-        {
-            foreach (var pair in m_capturePoints)
-                if (pair.Value.HandleGossipOption(player, creature, id))
-                    return true;
-
-            return false;
-        }
-
-        public virtual bool CanTalkTo(Player player, Creature c, GossipMenuItems gso)
-        {
-            foreach (var pair in m_capturePoints)
-                if (pair.Value.CanTalkTo(player, c, gso))
-                    return true;
-
-            return false;
-        }
-
         public virtual bool HandleDropFlag(Player player, uint id)
         {
             foreach (var pair in m_capturePoints)
@@ -523,16 +505,6 @@ namespace Game.PvP
         {
             if (!player.IsOutdoorPvPActive())
                 return false;
-            return false;
-        }
-
-        public virtual bool HandleGossipOption(Player player, Creature creature, uint id)
-        {
-            return false;
-        }
-
-        public virtual bool CanTalkTo(Player player, Creature c, GossipMenuItems gso)
-        {
             return false;
         }
 
