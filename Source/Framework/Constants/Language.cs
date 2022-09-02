@@ -866,7 +866,8 @@ namespace Framework.Constants
         RbacEmailRequired = 881,
         //                                    = 882, PinfoChrMapWithArea
         Account = 883,
-        // Room For In-Game Strings             884-999 Not Used
+        QuestObjectiveNotfound = 884,
+        // Room For In-Game Strings             885-999 Not Used
 
         // Level 4 (Cli Only Commands)
         CommandExit = 1000,
@@ -1050,6 +1051,7 @@ namespace Framework.Constants
         CmdparserSpellNoExist = 1514,
         CmdparserExactSeqMismatch = 1515,
         CmdparserCurrencyNoExist = 1516,
+        CmdparserQuestNoExist = 1517,
 
         // 1516-1998 - Free
         DebugAreatriggerLeft = 1999,
