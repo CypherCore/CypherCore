@@ -75,14 +75,17 @@ namespace Framework.Constants
         Pickpocketing = 2,
         Fishing = 3,
         Disenchanting = 4,
-        // Ignored Always By Client
+        Item = 5,
         Skinning = 6,
-        Prospecting = 7,
-        Milling = 8,
+        GatheringNode = 8,
+        Chest = 9,
+        CorpsePersonal = 14,
 
         Fishinghole = 20,                       // Unsupported By Client, Sending Fishing Instead
         Insignia = 21,                        // Unsupported By Client, Sending Corpse Instead
-        FishingJunk = 22 // unsupported by client, sending LOOT_FISHING instead
+        FishingJunk = 22, // unsupported by client, sending LOOT_FISHING instead
+        Prospecting = 23,
+        Milling = 24
     }
 
     public enum LootItemType

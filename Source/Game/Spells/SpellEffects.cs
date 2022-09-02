@@ -1349,7 +1349,7 @@ namespace Game.Spells
             }
 
             if (gameObjTarget != null)
-                SendLoot(guid, LootType.Skinning);
+                SendLoot(guid, LootType.Chest);
             else if (itemTarget != null)
             {
                 itemTarget.SetItemFlag(ItemFieldFlags.Unlocked);

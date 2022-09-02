@@ -445,6 +445,24 @@ namespace Framework.Constants
         {
             return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
         }
+
+        public static LootType GetLootTypeForClient(LootType lootType)
+        {
+            switch (lootType)
+            {
+                case LootType.Prospecting:
+                case LootType.Milling:
+                    return LootType.Disenchanting;
+                case LootType.Insignia:
+                    return LootType.Skinning;
+                case LootType.Fishinghole:
+                case LootType.FishingJunk:
+                    return LootType.Fishing;
+                default:
+                    break;
+            }
+            return lootType;
+        }
     }
 
     public enum Locale

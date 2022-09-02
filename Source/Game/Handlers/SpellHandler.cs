@@ -194,7 +194,7 @@ namespace Game
                     .WithCallback(result => HandleOpenWrappedItemCallback(item.GetPos(), item.GetGUID(), result)));
             }
             else
-                player.SendLoot(item.GetGUID(), LootType.Corpse);
+                player.SendLoot(item.GetGUID(), LootType.Item);
         }
 
         void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)

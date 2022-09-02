@@ -6057,14 +6057,14 @@ namespace Game.Entities
                 {
                     SendNewItem(newitem, item.count, false, false, true);
                     UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
-                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (ulong)loot.loot_type);
+                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (uint)SharedConst.GetLootTypeForClient(loot.loot_type));
                     UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
                 }
                 else
-                    aeResult.Add(newitem, item.count, loot.loot_type);
+                    aeResult.Add(newitem, item.count, SharedConst.GetLootTypeForClient(loot.loot_type));
 
                 // LootItem is being removed (looted) from the container, delete it from the DB.
-                if (lootWorldObjectGuid.IsItem() && loot.loot_type == LootType.Corpse)
+                if (loot.loot_type == LootType.Item)
                     Global.LootItemStorage.RemoveStoredLootItemForContainer(lootWorldObjectGuid.GetCounter(), item.itemid, item.count, item.itemIndex);
 
                 ApplyItemLootedSpell(newitem, true);
@@ -6158,19 +6158,19 @@ namespace Game.Entities
                     if (!go)
                         return true;
 
-                    if (lootType == LootType.Skinning)
+                    switch (lootType)
                     {
-                        // Disarm Trap
-                        if (!go.IsWithinDistInMap(this, 20.0f))
-                            return true;
-                    }
-                    else
-                    {
-                        if (lootType != LootType.Fishinghole && ((lootType != LootType.Fishing && lootType != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID()) && !go.IsWithinDistInMap(this))
-                            return true;
-
-                        if (lootType == LootType.Corpse && go.GetRespawnTime() != 0 && go.IsSpawnedByDefault())
-                            return true;
+                        case LootType.Fishing:
+                        case LootType.FishingJunk:
+                            if (go.GetOwnerGUID() != GetGUID())
+                                return true;
+                            break;
+                        case LootType.Fishinghole:
+                            break;
+                        default:
+                            if (!go.IsWithinDistInMap(this))
+                                return true;
+                            break;
                     }
 
                     return false;
@@ -6480,19 +6480,6 @@ namespace Game.Entities
                 }
             }
 
-            // LOOT_INSIGNIA and LOOT_FISHINGHOLE unsupported by client
-            switch (loot_type)
-            {
-                case LootType.Insignia:
-                    loot_type = LootType.Skinning;
-                    break;
-                case LootType.Fishinghole:
-                case LootType.FishingJunk:
-                    loot_type = LootType.Fishing;
-                    break;
-                default: break;
-            }
-
             // need know merged fishing/corpse loot type for achievements
             if (loot != null)
                 loot.loot_type = loot_type;
@@ -6515,14 +6502,14 @@ namespace Game.Entities
                     }
                 }
 
-                if (!aeLooting)
+                if (!guid.IsItem() && !aeLooting)
                     SetLootGUID(guid);
 
                 LootResponse packet = new();
                 packet.Owner = guid;
                 packet.LootObj = loot.GetGUID();
                 packet.LootMethod = _lootMethod;
-                packet.AcquireReason = (byte)loot_type;
+                packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot_type);
                 packet.Acquired = true; // false == No Loot (this too^^)
                 packet.AELooting = aeLooting;
                 loot.BuildLootResponse(packet, this, permission);

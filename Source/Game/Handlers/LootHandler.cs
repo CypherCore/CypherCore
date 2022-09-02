@@ -257,7 +257,7 @@ namespace Game
                 loot.gold = 0;
 
                 // Delete the money loot record from the DB
-                if (guid.IsItem() && loot.loot_type == LootType.Corpse)
+                if (loot.loot_type == LootType.Item)
                     Global.LootItemStorage.RemoveStoredMoneyForContainer(guid.GetCounter());
 
                 // Delete container if empty
