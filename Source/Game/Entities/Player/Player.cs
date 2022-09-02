@@ -2367,6 +2367,7 @@ namespace Game.Entities
                         case GossipOption.Tabarddesigner:
                         case GossipOption.Auctioneer:
                         case GossipOption.Transmogrifier:
+                        case GossipOption.Mailbox:
                             break;                                  // no checks
                         case GossipOption.Outdoorpvp:
                             if (!Global.OutdoorPvPMgr.CanTalkTo(this, creature, menuItems))
@@ -2576,6 +2577,9 @@ namespace Game.Entities
                 }
                 case GossipOption.Transmogrifier:
                     GetSession().SendOpenTransmogrifier(guid);
+                    break;
+                case GossipOption.Mailbox:
+                    GetSession().SendShowMailBox(guid);
                     break;
             }
 

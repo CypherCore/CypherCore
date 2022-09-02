@@ -84,6 +84,14 @@ public class Log
         return logLevel != LogLevel.Disabled && logLevel <= level;
     }
 
+    public static void outLog(LogFilter type, LogLevel level, string text, params object[] args)
+    {
+        if (!ShouldLog(type, level))
+            return;
+
+        outMessage(type, level, text, args);
+    }
+
     public static void outInfo(LogFilter type, string text, params object[] args)
     {
         if (!ShouldLog(type, LogLevel.Info))
@@ -374,7 +382,7 @@ enum AppenderFlags
     PrefixLogFilterType = 0x04,
 }
 
-enum LogLevel
+public enum LogLevel
 {
     Disabled = 0,
     Trace = 1,
