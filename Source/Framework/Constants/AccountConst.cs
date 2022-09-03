@@ -754,6 +754,7 @@ namespace Framework.Constants
         CommandPdumpCopy = 880,
         CommandReloadVehicleTemplate = 881,
         CommandReloadSpellScriptNames = 882,
+        CommandQuestObjectiveComplete = 883,
         // Custom Permissions 1000+
         Max
     }
