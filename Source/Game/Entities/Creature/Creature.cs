@@ -3283,6 +3283,8 @@ namespace Game.Entities
 
         public bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
 
+        public override Loot GetLootForPlayer(Player player) { return loot; }
+        
         public LootModes GetLootMode() { return m_LootMode; }
         public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
         public void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
