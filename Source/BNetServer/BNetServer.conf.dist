@@ -22,10 +22,15 @@ BattlenetPort = 1119
 #    LoginREST.LocalAddress
 #        Description: IP address sent to clients connecting from inside the network where bnetserver runs
 #
+#    LoginREST.TicketDuration
+#        Description: Determines how long the login ticket is valid (in seconds)
+#                     When using client -launcherlogin feature it is recommended to set it to a high value (like a week)
+#
 
 LoginREST.Port = 8081
 LoginREST.ExternalAddress=127.0.0.1
 LoginREST.LocalAddress=127.0.0.1
+LoginREST.TicketDuration=3600
 
 #
 #    BindIP

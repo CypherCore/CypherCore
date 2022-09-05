@@ -253,10 +253,10 @@ namespace Framework.Constants
         CommandGmList = 375,
         CommandGmVisible = 376,
         CommandGo = 377,
-        //                                                       = 378, // DEPRECATED: DON'T REUSE
-        //                                                       = 379, // DEPRECATED: DON'T REUSE
-        //                                                       = 380, // DEPRECATED: DON'T REUSE
-        //                                                       = 381, // DEPRECATED: DON'T REUSE
+        CommandAccount2Fa = 378,
+        CommandAccount2FaSetup = 379,
+        CommandAccount2FaRemove = 380,
+        CommandAccountSet2Fa = 381,
         //                                                       = 382, // DEPRECATED: DON'T REUSE
         //                                                       = 383, // DEPRECATED: DON'T REUSE
         //                                                       = 384, // DEPRECATED: DON'T REUSE

@@ -68,6 +68,130 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("2fa remove", CypherStrings.CommandAcc2faRemoveHelp, RBACPermissions.CommandAccount2FaRemove)]
+        static bool HandleAccount2FARemoveCommand(CommandHandler handler, uint? token)
+        {
+            /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
+            if (!masterKey.IsAvailable())
+            {
+                handler.SendSysMessage(CypherStrings.TwoFACommandsNotSetup);
+                return false;
+            }
+
+            uint accountId = handler.GetSession().GetAccountId();
+            byte[] secret;
+            { // get current TOTP secret
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOTP_SECRET);
+                stmt.AddValue(0, accountId);
+                SQLResult result = DB.Login.Query(stmt);
+
+                if (result.IsEmpty())
+                {
+                    Log.outError(LogFilter.Misc, $"Account {accountId} not found in login database when processing .account 2fa setup command.");
+                    handler.SendSysMessage(CypherStrings.UnknownError);
+                    return false;
+                }
+
+                if (result.IsNull(0))
+                { // 2FA not enabled
+                    handler.SendSysMessage(CypherStrings.TwoFANotSetup);
+                    return false;
+                }
+
+                secret = result.Read<byte[]>(0);
+            }
+
+            if (token.HasValue)
+            {
+                if (masterKey.IsValid())
+                {
+                    bool success = AES.Decrypt(secret, masterKey.GetValue());
+                    if (!success)
+                    {
+                        Log.outError(LogFilter.Misc, $"Account {accountId} has invalid ciphertext in TOTP token.");
+                        handler.SendSysMessage(CypherStrings.UnknownError);
+                        return false;
+                    }
+                }
+
+                if (TOTP.ValidateToken(secret, token.Value))
+                {
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_TOTP_SECRET);
+                    stmt.AddNull(0);
+                    stmt.AddValue(1, accountId);
+                    DB.Login.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.TwoFARemoveComplete);
+                    return true;
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.TwoFAInvalidToken);
+            }
+
+            handler.SendSysMessage(CypherStrings.TwoFARemoveNeedToken);*/
+            return false;
+        }
+
+        [Command("2fa setup", CypherStrings.CommandAcc2faSetupHelp, RBACPermissions.CommandAccount2FaSetup)]
+        static bool HandleAccount2FASetupCommand(CommandHandler handler, uint? token)
+        {
+            /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
+            if (!masterKey.IsAvailable())
+            {
+                handler.SendSysMessage(CypherStrings.TwoFACommandsNotSetup);
+                return false;
+            }
+
+            uint accountId = handler.GetSession().GetAccountId();
+
+            { // check if 2FA already enabled
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOTP_SECRET);
+                stmt.AddValue(0, accountId);
+                SQLResult result = DB.Login.Query(stmt);
+
+                if (result.IsEmpty())
+                {
+                    Log.outError(LogFilter.Misc, $"Account {accountId} not found in login database when processing .account 2fa setup command.");
+                    handler.SendSysMessage(CypherStrings.UnknownError);
+                    return false;
+                }
+
+                if (!result.IsNull(0))
+                {
+                    handler.SendSysMessage(CypherStrings.TwoFAAlreadySetup);
+                    return false;
+                }
+            }
+
+            // store random suggested secrets
+            Dictionary<uint, byte[]> suggestions = new();
+            var pair = suggestions.TryAdd(accountId, new byte[20]); // std::vector 1-argument size_t constructor invokes resize
+            if (pair) // no suggestion yet, generate random secret
+                suggestions[accountId] = new byte[0].GenerateRandomKey(20);
+
+            if (!pair && token.HasValue) // suggestion already existed and token specified - validate
+            {
+                if (TOTP.ValidateToken(suggestions[accountId], token.Value))
+                {
+                    if (masterKey.IsValid())
+                        AES.Encrypt(suggestions[accountId], masterKey.GetValue());
+
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_TOTP_SECRET);
+                    stmt.AddValue(0, suggestions[accountId]);
+                    stmt.AddValue(1, accountId);
+                    DB.Login.Execute(stmt);
+                    suggestions.Remove(accountId);
+                    handler.SendSysMessage(CypherStrings.TwoFASetupComplete);
+                    return true;
+                }
+                else
+                    handler.SendSysMessage(CypherStrings.TwoFAInvalidToken);
+            }
+
+            // new suggestion, or no token specified, output TOTP parameters
+            handler.SendSysMessage(CypherStrings.TwoFASecretSuggestion, suggestions[accountId].ToBase32());*/
+            return false;
+        }
+
         [Command("addon", CypherStrings.CommandAccAddonHelp, RBACPermissions.CommandAccountAddon)]
         static bool HandleAccountAddonCommand(CommandHandler handler, byte expansion)
         {
@@ -440,6 +564,60 @@ namespace Game.Chat
         [CommandGroup("set")]
         class AccountSetCommands
         {
+            [Command("2fa", CypherStrings.CommandAccSet2faHelp, RBACPermissions.CommandAccountSet2Fa, true)]
+            static bool HandleAccountSet2FACommand(CommandHandler handler, string accountName, string secret)
+            {                
+                /*uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                if (targetAccountId == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    return false;
+                }
+
+                if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
+                    return false;
+
+                PreparedStatement stmt;
+                if (secret == "off")
+                {
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_TOTP_SECRET);
+                    stmt.AddNull(0);
+                    stmt.AddValue(1, targetAccountId);
+                    DB.Login.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.TwoFARemoveComplete);
+                    return true;
+                }
+
+                var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
+                if (!masterKey.IsAvailable())
+                {
+                    handler.SendSysMessage(CypherStrings.TwoFACommandsNotSetup);
+                    return false;
+                }
+
+                var decoded = secret.FromBase32();
+                if (decoded == null)
+                {
+                    handler.SendSysMessage(CypherStrings.TwoFASecretInvalid);
+                    return false;
+                }
+                if (128 < (decoded.Length + 12 + 12))
+                {
+                    handler.SendSysMessage(CypherStrings.TwoFASecretTooLong);
+                    return false;
+                }
+
+                if (masterKey.IsValid())
+                    AES.Encrypt(decoded, masterKey.GetValue());
+
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_TOTP_SECRET);
+                stmt.AddValue(0, decoded);
+                stmt.AddValue(1, targetAccountId);
+                DB.Login.Execute(stmt);
+                handler.SendSysMessage(CypherStrings.TwoFASecretSetComplete, accountName);*/
+                return true;
+            }
+
             [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
             static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
             {
