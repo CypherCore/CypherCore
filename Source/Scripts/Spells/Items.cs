@@ -140,6 +140,9 @@ namespace Scripts.Spells.Items
         public const uint InvigorationEnergyHero = 71887;
         public const uint InvigorationManaHero = 71888;
 
+        //HourglassSand
+        public const uint BroodAfflictionBronze = 23170;
+
         //Makeawish
         public const uint MrPinchysBlessing = 33053;
         public const uint SummonMightyMrPinchy = 33057;
@@ -307,6 +310,10 @@ namespace Scripts.Spells.Items
 
         //Impaleleviroth
         public const uint LevirothSelfImpale = 49882;
+
+        //LifegivingGem
+        public const uint GiftOfLife1 = 23782;
+        public const uint GiftOfLife2 = 23783;
 
         //Nitroboots
         public const uint NitroBoostsSuccess = 54861;
@@ -1479,6 +1486,25 @@ namespace Scripts.Spells.Items
         uint _rpSpellId;
     }
 
+    [Script] // 23645 - Hourglass Sand
+    class spell_item_hourglass_sand : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BroodAfflictionBronze);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().RemoveAurasDueToSpell(SpellIds.BroodAfflictionBronze);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 40971 - Bonus Healing (Crystal Spire of Karabor)
     class spell_item_crystal_spire_of_karabor : AuraScript
     {
@@ -2806,6 +2832,27 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 23725 - Gift of Life
+    class spell_item_lifegiving_gem : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GiftOfLife1, SpellIds.GiftOfLife2);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            caster.CastSpell(caster, SpellIds.GiftOfLife1, true);
+            caster.CastSpell(caster, SpellIds.GiftOfLife2, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script]
     class spell_item_nitro_boosts : SpellScript
     {

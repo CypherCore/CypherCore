@@ -161,6 +161,18 @@ namespace Scripts.Spells.Quest
         public const uint TameElderSpringpaw1 = 30103;
         public const uint TameMistbat1 = 30104;
 
+        //TributeSpells
+        public const uint GromsTrollTribute = 24101;
+        public const uint GromsTaurenTribute = 24102;
+        public const uint GromsUndeadTribute = 24103;
+        public const uint GromsOrcTribute = 24104;
+        public const uint GromsBloodelfTribute = 69530;
+        public const uint UthersHumanTribute = 24105;
+        public const uint UthersGnomeTribute = 24106;
+        public const uint UthersDwarfTribute = 24107;
+        public const uint UthersNightelfTribute = 24108;
+        public const uint UthersDraeneiTribute = 69533;
+
         //Escapefromsilverbrook
         public const uint SummonWorgen = 48681;
 
@@ -1375,6 +1387,47 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
+
+    // 24194 - Uther's Tribute
+    [Script] // 24195 - Grom's Tribute
+    class spell_quest_uther_grom_tribute : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GromsTrollTribute, SpellIds.GromsTaurenTribute, SpellIds.GromsUndeadTribute, SpellIds.GromsOrcTribute, SpellIds.GromsBloodelfTribute,
+                  SpellIds.UthersHumanTribute, SpellIds.UthersGnomeTribute, SpellIds.UthersDwarfTribute, SpellIds.UthersNightelfTribute, SpellIds.UthersDraeneiTribute);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
+            if (!caster)
+                return;
+
+            uint spell = caster.GetRace() switch
+            {
+                Race.Troll => SpellIds.GromsTrollTribute,
+                Race.Tauren => SpellIds.GromsTaurenTribute,
+                Race.Undead => SpellIds.GromsUndeadTribute,
+                Race.Orc => SpellIds.GromsOrcTribute,
+                Race.BloodElf => SpellIds.GromsBloodelfTribute,
+                Race.Human => SpellIds.UthersHumanTribute,
+                Race.Gnome => SpellIds.UthersGnomeTribute,
+                Race.Dwarf => SpellIds.UthersDwarfTribute,
+                Race.NightElf => SpellIds.UthersNightelfTribute,
+                Race.Draenei => SpellIds.UthersDraeneiTribute,
+                _ => 0
+            };
+
+            if (spell != 0)
+                caster.CastSpell(caster, spell);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
     
     [Script] // 48682 - Escape from Silverbrook - Periodic Dummy
     class spell_q12308_escape_from_silverbrook : SpellScript
@@ -1394,7 +1447,6 @@ namespace Scripts.Spells.Quest
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-
     
     [Script] // 48681 - Summon Silverbrook Worgen
     class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
