@@ -3240,7 +3240,9 @@ namespace Game.Entities
                 38762, // Force of Neltharaku
                 51122, // Fierce Lightning Stike
                 71848, // Toxic Wasteling Find Target
-                36146  // Chains of Naberius
+                36146, // Chains of Naberius
+                33711, // Murmur's Touch
+                38794  // Murmur's Touch
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 1;
@@ -3313,16 +3315,6 @@ namespace Game.Entities
             ApplySpellFix(new[] { 50312 }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 15;
-            });
-
-            // Murmur's Touch
-            ApplySpellFix(new[] { 33711, 38794 }, spellInfo =>
-            {
-                spellInfo.MaxAffectedTargets = 1;
-                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
-                {
-                    spellEffectInfo.TriggerSpell = 33760;
-                });
             });
 
             // Fingers of Frost

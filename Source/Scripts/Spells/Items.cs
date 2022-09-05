@@ -518,6 +518,19 @@ namespace Scripts.Spells.Items
         public const uint Ashbringer12 = 8928;                             // "Kill Them All!"
     }
 
+    struct ModelIds
+    {
+        //DireBrew
+        public const uint ClassClothMale = 25229;
+        public const uint ClassClothFemale = 25233;
+        public const uint ClassLeatherMale = 25230;
+        public const uint ClassLeatherFemale = 25234;
+        public const uint ClassMailMale = 25231;
+        public const uint ClassMailFemale = 25235;
+        public const uint ClassPlateMale = 25232;
+        public const uint ClassPlateFemale = 25236;
+    }
+
     // 23074 Arcanite Dragonling
     // 23133 Gnomish Battle Chicken
     // 23076 Mechanical Dragonling
@@ -1222,6 +1235,35 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 51010 - Dire Brew
+    class spell_item_dire_brew : AuraScript
+    {
+        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+
+            uint model = 0;
+            var gender = target.GetGender();
+            var chrClass = CliDB.ChrClassesStorage.LookupByKey(target.GetClass());
+            if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Plate)) != 0)
+                model = gender == Gender.Male ? ModelIds.ClassPlateMale : ModelIds.ClassPlateFemale;
+            else if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Mail)) != 0)
+                model = gender == Gender.Male ? ModelIds.ClassMailMale : ModelIds.ClassMailFemale;
+            else if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Leather)) != 0)
+                model = gender == Gender.Male ? ModelIds.ClassLeatherMale : ModelIds.ClassLeatherFemale;
+            else if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Cloth)) != 0)
+                model = gender == Gender.Male ? ModelIds.ClassClothMale : ModelIds.ClassClothFemale;
+
+            if (model != 0)
+                target.SetDisplayId(model);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
         }
     }
     
