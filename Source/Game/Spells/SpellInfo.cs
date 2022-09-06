@@ -2480,7 +2480,13 @@ namespace Game.Spells
             {
                 target.ApplySpellImmune(Id, SpellImmunity.State, auraType, apply);
                 if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
-                    target.RemoveAurasByType(auraType);
+                {
+                    target.RemoveAurasByType(auraType, aurApp =>
+                    {
+                        // if the aura has SPELL_ATTR0_NO_IMMUNITIES, then it cannot be removed by immunity
+                        return !aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities);
+                    });
+                }
             }
 
             foreach (SpellEffectName effectType in immuneInfo.SpellEffectImmune)
