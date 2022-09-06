@@ -726,41 +726,6 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_aura_service_uniform : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ServiceUniform);
-        }
-
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // Apply model goblin
-            Unit target = GetTarget();
-            if (target.IsTypeId(TypeId.Player))
-            {
-                if (target.GetNativeGender() == Gender.Male)
-                    target.SetDisplayId(ModelIds.GoblinMale);
-                else
-                    target.SetDisplayId(ModelIds.GoblinFemale);
-            }
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit target = GetTarget();
-            if (target.IsTypeId(TypeId.Player))
-                target.RestoreDisplayId();
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
-        }
-    }
-
-    [Script]
     class spell_gen_av_drekthar_presence : AuraScript
     {
         bool CheckAreaTarget(Unit target)

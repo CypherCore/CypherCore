@@ -43,8 +43,21 @@ namespace Scripts.Events.LoveIsInTheAir
         public const uint CreateHeartCandy6 = 26674;
         public const uint CreateHeartCandy7 = 26675;
         public const uint CreateHeartCandy8 = 26676;
+
+        //SomethingStinks
+        public const uint HeavilyPerfumed = 71507;
+
+        //PilferingPerfume
+        public const uint ServiceUniform = 71450;
     }
-    
+
+    struct ModelIds
+    {
+        //PilferingPerfume
+        public const uint GoblinMale = 31002;
+        public const uint GoblinFemale = 31003;
+    }
+
     [Script] // 45102 Romantic Picnic
     class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
@@ -106,7 +119,7 @@ namespace Scripts.Events.LoveIsInTheAir
     }
 
     [Script] // 26678 - Create Heart Candy
-    class spell_item_create_heart_candy : SpellScript
+    class spell_love_is_in_the_air_create_heart_candy : SpellScript
     {
         uint[] CreateHeartCandySpells =
         {
@@ -130,6 +143,151 @@ namespace Scripts.Events.LoveIsInTheAir
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 70192 - Fragrant Air Analysis
+    class spell_love_is_in_the_air_fragrant_air_analysis : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 71507 - Heavily Perfumed
+    class spell_love_is_in_the_air_heavily_perfumed : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), (uint)GetEffectInfo(0).CalcValue());
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 71508 - Recently Analyzed
+    class spell_love_is_in_the_air_recently_analyzed : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.HeavilyPerfumed);
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 69438 - Sample Satisfaction
+    class spell_love_is_in_the_air_sample_satisfaction : AuraScript
+    {
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            if (RandomHelper.randChance(30))
+                Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 71450 - Crown Parcel Service Uniform
+    class spell_love_is_in_the_air_service_uniform : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            if (target.IsPlayer())
+            {
+                if (target.GetNativeGender() == Gender.Male)
+                    target.SetDisplayId(ModelIds.GoblinMale);
+                else
+                    target.SetDisplayId(ModelIds.GoblinFemale);
+            }
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(0).CalcValue());
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
+        }
+    }
+
+    // 71522 - Crown Chemical Co. Supplies
+    [Script] // 71539 - Crown Chemical Co. Supplies
+    class spell_love_is_in_the_air_cancel_service_uniform : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ServiceUniform);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 68529 - Perfume Immune
+    [Script] // 68530 - Cologne Immune
+    class spell_love_is_in_the_air_perfume_cologne_immune : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), (uint)spellInfo.GetEffect(1).CalcValue());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
 }
