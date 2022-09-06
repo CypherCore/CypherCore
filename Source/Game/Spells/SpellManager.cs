@@ -3240,7 +3240,8 @@ namespace Game.Entities
             });
 
             ApplySpellFix(new[] {
-                36384  // Skartax Purple Beam
+                36384, // Skartax Purple Beam
+                47731  // Critter
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 2;
