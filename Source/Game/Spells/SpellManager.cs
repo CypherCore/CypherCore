@@ -3087,15 +3087,6 @@ namespace Game.Entities
                         spellEffectInfo.ApplyAuraName = AuraType.PeriodicTriggerSpell;
                     });
                 });
-
-                // Lich Pet
-                ApplySpellFix(new [] { 70050 }, spellInfo =>
-                {
-                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
-                    {
-                        spellEffectInfo.TriggerSpell = 70049;
-                    });
-                });
             }
 
             // Allows those to crit

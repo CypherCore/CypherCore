@@ -136,10 +136,6 @@ namespace Scripts.Spells.Generic
         // Interrupt
         public const uint GenThrowInterrupt = 32747;
 
-        // LichPet
-        public const uint LichPetAura = 69732;
-        public const uint LichPetAuraOnkill = 69731;
-
         // Genericlifebloomspells        
         public const uint HexlordMalacrass = 43422;
         public const uint TurragePaw = 52552;
@@ -370,9 +366,6 @@ namespace Scripts.Spells.Generic
         public const uint Trollbane = 161707;
         public const uint Whitemane = 161708;
         public const uint Morgaine = 161709;
-
-        // LichPet
-        public const uint LichPet = 36979;
     }
 
     struct ModelIds
@@ -2159,66 +2152,6 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 69732 - Lich Pet Aura
-    class spell_gen_lich_pet_aura : AuraScript
-    {
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetProcTarget().IsPlayer();
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            List<TempSummon> minionList = new();
-            GetUnitOwner().GetAllMinionsByEntry(minionList, CreatureIds.LichPet);
-            foreach (Creature minion in minionList)
-                if (minion.IsAIEnabled())
-                    minion.GetAI().DoCastSelf(SpellIds.LichPetAuraOnkill);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
-    [Script] // 69735 - Lich Pet OnSummon
-    class spell_gen_lich_pet_onsummon : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.LichPetAura);
-        }
-
-        void HandleScriptEffect(uint effIndex)
-        {
-            Unit target = GetHitUnit();
-            target.CastSpell(target, SpellIds.LichPetAura, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // 69736 - Lich Pet Aura Remove
-    class spell_gen_lich_pet_aura_remove : SpellScript
-    {
-        void HandleScriptEffect(uint effIndex)
-        {
-            GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
     
