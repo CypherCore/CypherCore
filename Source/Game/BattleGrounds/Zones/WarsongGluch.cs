@@ -107,6 +107,7 @@ namespace Game.BattleGrounds.Zones
                     _flagSpellForceTimer += (int)diff;
                     if (_flagDebuffState == 0 && _flagSpellForceTimer >= 10 * Time.Minute * Time.InMilliseconds)  //10 minutes
                     {
+                        // Apply Stage 1 (Focused Assault)
                         Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                         if (player)
                             player.CastSpell(player, WSGSpellId.FocusedAssault, true);
@@ -119,6 +120,7 @@ namespace Game.BattleGrounds.Zones
                     }
                     else if (_flagDebuffState == 1 && _flagSpellForceTimer >= 900000) //15 minutes
                     {
+                        // Apply Stage 2 (Brutal Assault)
                         Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                         if (player)
                         {
@@ -135,8 +137,12 @@ namespace Game.BattleGrounds.Zones
                         _flagDebuffState = 2;
                     }
                 }
-                else
+                else if ((_flagState[TeamId.Alliance] == WSGFlagState.OnBase || _flagState[TeamId.Alliance] == WSGFlagState.WaitRespawn) &&
+                 (_flagState[TeamId.Horde] == WSGFlagState.OnBase || _flagState[TeamId.Horde] == WSGFlagState.WaitRespawn))
                 {
+                    // Both flags are in base or awaiting respawn.
+                    // Remove assault debuffs, reset timers
+
                     Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                     if (player)
                     {
@@ -438,6 +444,11 @@ namespace Game.BattleGrounds.Zones
                 player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.SilverwingFlagPicked);
                 if (_flagState[1] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
+
+                if (_flagDebuffState == 1)
+                    player.CastSpell(player, WSGSpellId.FocusedAssault, true);
+                else if (_flagDebuffState == 2)
+                    player.CastSpell(player, WSGSpellId.BrutalAssault, true);
             }
 
             //horde flag picked up from base
@@ -455,6 +466,11 @@ namespace Game.BattleGrounds.Zones
                 player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.WarsongFlagPicked);
                 if (_flagState[0] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
+
+                if (_flagDebuffState == 1)
+                    player.CastSpell(player, WSGSpellId.FocusedAssault, true);
+                else if (_flagDebuffState == 2)
+                    player.CastSpell(player, WSGSpellId.BrutalAssault, true);
             }
 
             //Alliance flag on ground(not in base) (returned or picked up again from ground!)
