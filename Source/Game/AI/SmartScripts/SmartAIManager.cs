@@ -634,7 +634,8 @@ namespace Game.AI
                 SmartEvents.OnSpellCast => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
-                _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
+                SmartEvents.OnDespawn => 0,
+            _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
             int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
@@ -1296,6 +1297,7 @@ namespace Game.AI
                     case SmartEvents.JustCreated:
                     case SmartEvents.FollowCompleted:
                     case SmartEvents.OnSpellclick:
+                    case SmartEvents.OnDespawn:
                     case SmartEvents.SceneStart:
                     case SmartEvents.SceneCancel:
                     case SmartEvents.SceneComplete:
@@ -2425,6 +2427,7 @@ namespace Game.AI
                 SmartEvents.OnSpellCast => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
                 _ => 0,
             };
 

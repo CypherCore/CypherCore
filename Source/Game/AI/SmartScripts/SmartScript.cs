@@ -3211,6 +3211,7 @@ namespace Game.AI
                 case SmartEvents.JustCreated:
                 case SmartEvents.FollowCompleted:
                 case SmartEvents.OnSpellclick:
+                case SmartEvents.OnDespawn:
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                     break;
                 case SmartEvents.GossipHello:

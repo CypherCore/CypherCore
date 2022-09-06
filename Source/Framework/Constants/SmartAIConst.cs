@@ -240,8 +240,9 @@ namespace Framework.Constants
         OnSpellCast = 83,      // SpellID, CooldownMin, CooldownMax
         OnSpellFailed = 84,      // SpellID, CooldownMin, CooldownMax
         OnSpellStart = 85,      // SpellID, CooldownMin, CooldownMax
+        OnDespawn = 86,      // NONE
 
-        End = 86
+        End
     }
 
     public enum SmartActions

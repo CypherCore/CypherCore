@@ -518,7 +518,7 @@ namespace Game.AI
         public virtual void JustExitedCombat() { }
 
         // Called when the unit is about to be removed from the world (despawn, grid unload, corpse disappearing, player logging out etc.)
-        public virtual void LeavingWorld() { }
+        public virtual void OnDespawn() { }
 
         // Called at any Damage to any victim (before damage apply)
         public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType) { }

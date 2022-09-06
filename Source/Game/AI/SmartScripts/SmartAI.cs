@@ -726,6 +726,11 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.CorpseRemoved, null, (uint)respawnDelay);
         }
 
+        public override void OnDespawn()
+        {
+            GetScript().ProcessEventsFor(SmartEvents.OnDespawn);
+        }
+
         public override void PassengerBoarded(Unit passenger, sbyte seatId, bool apply)
         {
             GetScript().ProcessEventsFor(apply ? SmartEvents.PassengerBoarded : SmartEvents.PassengerRemoved, passenger, (uint)seatId, 0, apply);

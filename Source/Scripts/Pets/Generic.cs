@@ -53,7 +53,7 @@ namespace Scripts.Pets
         {
             public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }
 
-            public override void LeavingWorld()
+            public override void OnDespawn()
             {
                 Unit owner = me.GetOwner();
                 if (owner != null)
@@ -77,7 +77,7 @@ namespace Scripts.Pets
         {
             public npc_pet_lich(Creature creature) : base(creature) { }
 
-            public override void LeavingWorld()
+            public override void OnDespawn()
             {
                 Unit owner = me.GetOwner();
                 if (owner !=  null)
