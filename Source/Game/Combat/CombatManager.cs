@@ -113,7 +113,7 @@ namespace Game.Combat
             return null;
         }
 
-        public bool SetInCombatWith(Unit who)
+        public bool SetInCombatWith(Unit who, bool suppressPvpSecond = false)
         {
             // Are we already in combat? If yes, refresh pvp combat
             var pvpRefe = _pvpRefs.LookupByKey(who.GetGUID());
@@ -126,13 +126,18 @@ namespace Game.Combat
                 return true;
 
             // Otherwise, check validity...
-            if (!CombatManager.CanBeginCombat(_owner, who))
+            if (!CanBeginCombat(_owner, who))
                 return false;
 
             // ...then create new reference
             CombatReference refe;
             if (_owner.IsControlledByPlayer() && who.IsControlledByPlayer())
-                refe = new PvPCombatReference(_owner, who);
+            {
+                PvPCombatReference refPvp = new PvPCombatReference(_owner, who);
+                if (suppressPvpSecond)
+                    refPvp.SuppressFor(who);
+                refe = refPvp;
+            }
             else
                 refe = new CombatReference(_owner, who);
 
