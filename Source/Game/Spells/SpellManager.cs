@@ -3286,18 +3286,13 @@ namespace Game.Entities
                 spellInfo.MaxAffectedTargets = 5;
             });
 
-            // Curse of the Plaguebringer - Noth (H)
-            ApplySpellFix(new[] { 54835 }, spellInfo =>
-            {
-                spellInfo.MaxAffectedTargets = 8;
-            });
-
             ApplySpellFix(new[] {
                 40827, // Sinful Beam
                 40859, // Sinister Beam
                 40860, // Vile Beam
                 40861, // Wicked Beam
-                54098  // Poison Bolt Volly - Faerlina (H)
+                54098, // Poison Bolt Volly - Faerlina (H)
+                54835  // Curse of the Plaguebringer - Noth (H)
             }, spellInfo =>
             {
                 spellInfo.MaxAffectedTargets = 10;
