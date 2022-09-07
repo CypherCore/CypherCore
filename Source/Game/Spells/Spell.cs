@@ -7181,6 +7181,9 @@ namespace Game.Spells
 
             PrepareTargetProcessing();
 
+            foreach (TargetInfo  target in m_UniqueTargetInfo)
+                PreprocessSpellLaunch(target);
+
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 float multiplier = 1.0f;
@@ -7200,7 +7203,7 @@ namespace Game.Spells
             FinishTargetProcessing();
         }
 
-        void DoEffectOnLaunchTarget(TargetInfo targetInfo, float multiplier, SpellEffectInfo spellEffectInfo)
+        void PreprocessSpellLaunch(TargetInfo targetInfo)
         {
             Unit targetUnit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
             if (targetUnit == null)
@@ -7218,6 +7221,30 @@ namespace Game.Spells
             else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
                 unit = m_caster.ToUnit();
             if (unit == null)
+                return;
+
+            float critChance = m_spellValue.CriticalChance;
+            if (m_originalCaster)
+            {
+                if (critChance == 0)
+                    critChance = m_originalCaster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
+                critChance = unit.SpellCritChanceTaken(m_originalCaster, this, null, m_spellSchoolMask, critChance, m_attackType);
+            }
+
+            targetInfo.IsCrit = RandomHelper.randChance(critChance);
+        }
+
+        void DoEffectOnLaunchTarget(TargetInfo targetInfo, float multiplier, SpellEffectInfo spellEffectInfo)
+        {
+            Unit unit = null;
+            // In case spell hit target, do all effect on that target
+            if (targetInfo.MissCondition == SpellMissInfo.None)
+                unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
+            // In case spell reflect from target, do all effect on caster (if hit)
+            else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
+                unit = m_caster.ToUnit();
+
+            if (!unit)
                 return;
 
             m_damage = 0;
@@ -7252,16 +7279,6 @@ namespace Game.Spells
 
             targetInfo.Damage += m_damage;
             targetInfo.Healing += m_healing;
-
-            float critChance = m_spellValue.CriticalChance;
-            if (m_originalCaster != null)
-            {
-                if (critChance == 0)
-                    critChance = m_originalCaster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
-                critChance = unit.SpellCritChanceTaken(m_originalCaster, this, null, m_spellSchoolMask, critChance, m_attackType);
-            }
-
-            targetInfo.IsCrit = RandomHelper.randChance(critChance);
         }
 
         SpellCastResult CanOpenLock(SpellEffectInfo effect, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
