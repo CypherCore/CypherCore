@@ -66,7 +66,7 @@ namespace BNetServer.Networking
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
 
-            if (request.AttributeKey == "Command_RealmListRequest_v1")
+            if (request.AttributeKey.Contains("Command_RealmListRequest_v1"))
             {
                 Global.RealmMgr.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;

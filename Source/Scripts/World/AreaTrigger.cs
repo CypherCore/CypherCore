@@ -37,9 +37,6 @@ namespace Scripts.World.Areatriggers
         public const uint TeleATo = 37387;
         public const uint TeleHTo = 37389;
 
-        //Stormwright Shelf
-        public const uint CreateTruePowerOfTheTempest = 53067;
-
         //Sholazar Waygate
         public const uint SholazarToUngoroTeleport = 52056;
         public const uint UngoroToSholazarTeleport = 52057;
@@ -59,9 +56,6 @@ namespace Scripts.World.Areatriggers
         //Legion Teleporter
         public const uint GainingAccessA = 10589;
         public const uint GainingAccessH = 10604;
-
-        //Stormwright Shelf
-        public const uint StrengthOfTheTempest = 12741;
 
         //Scent Larkorwi
         public const uint ScentOfLarkorwi = 4291;
@@ -184,20 +178,6 @@ namespace Scripts.World.Areatriggers
                 return false;
             }
             return false;
-        }
-    }
-
-    [Script]
-    class AreaTrigger_at_stormwright_shelf : AreaTriggerScript
-    {
-        public AreaTrigger_at_stormwright_shelf() : base("at_stormwright_shelf") { }
-
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
-        {
-            if (!player.IsDead() && player.GetQuestStatus(QuestIds.StrengthOfTheTempest) == QuestStatus.Incomplete)
-                player.CastSpell(player, SpellIds.CreateTruePowerOfTheTempest, false);
-
-            return true;
         }
     }
 
