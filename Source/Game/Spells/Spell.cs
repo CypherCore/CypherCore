@@ -1852,12 +1852,7 @@ namespace Game.Spells
 
             // Calculate hit result
             WorldObject caster = m_originalCaster ? m_originalCaster : m_caster;
-            Unit unitCaster = m_caster.ToUnit();
             targetInfo.MissCondition = caster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
-
-            // This will only cause combat - the target will engage once the projectile hits (in DoAllEffectOnTarget)
-            if (m_originalCaster != null && targetInfo.MissCondition != SpellMissInfo.Evade && !m_originalCaster.IsFriendlyTo(target) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || target.IsEngaged()))
-                m_originalCaster.SetInCombatWith(target, true);
 
             // Spell have speed - need calculate incoming time
             // Incoming time is zero for self casts. At least I think so.
@@ -1891,15 +1886,6 @@ namespace Game.Spells
                 }
 
                 targetInfo.TimeDelay += (ulong)Math.Floor(hitDelay * 1000.0f);
-
-                if (unitCaster != null && targetInfo.MissCondition != SpellMissInfo.Evade)
-                {
-                    bool enterCombat = !caster.IsFriendlyTo(target) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || target.IsEngaged());
-                    bool enablePVP = targetInfo.IsPVPEnabling();
-
-                    if (enterCombat || enablePVP)
-                        target.m_Events.AddEvent(new ProcImpactDelayed(target, m_originalCasterGUID, enterCombat, enablePVP), target.m_Events.CalculateTime(TimeSpan.FromMilliseconds(targetInfo.TimeDelay)));
-                }
             }
             else
                 targetInfo.TimeDelay = 0L;
@@ -1908,7 +1894,7 @@ namespace Game.Spells
             if (targetInfo.MissCondition == SpellMissInfo.Reflect)
             {
                 // Calculate reflected spell result on caster (shouldn't be able to reflect gameobject spells)
-                Cypher.Assert(unitCaster != null);
+                Unit unitCaster = m_caster.ToUnit();
                 targetInfo.ReflectResult = unitCaster.SpellHitResult(unitCaster, m_spellInfo, false); // can't reflect twice
 
                 // Proc spell reflect aura when missile hits the original target
@@ -7216,10 +7202,18 @@ namespace Game.Spells
 
         void DoEffectOnLaunchTarget(TargetInfo targetInfo, float multiplier, SpellEffectInfo spellEffectInfo)
         {
+            Unit targetUnit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
+            if (targetUnit == null)
+                return;
+
+            // This will only cause combat - the target will engage once the projectile hits (in Spell::TargetInfo::PreprocessTarget)
+            if (m_originalCaster && targetInfo.MissCondition != SpellMissInfo.Evade && !m_originalCaster.IsFriendlyTo(targetUnit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || targetUnit.IsEngaged()))
+                m_originalCaster.SetInCombatWith(targetUnit, true);
+
             Unit unit = null;
             // In case spell hit target, do all effect on that target
             if (targetInfo.MissCondition == SpellMissInfo.None)
-                unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
+                unit = targetUnit;
             // In case spell reflect from target, do all effect on caster (if hit)
             else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
                 unit = m_caster.ToUnit();
@@ -8274,9 +8268,8 @@ namespace Game.Spells
             else if (MissCondition == SpellMissInfo.Reflect && ReflectResult == SpellMissInfo.None)
                 _spellHitTarget = spell.GetCaster().ToUnit();
 
-            // Ensure that a player target is put in combat by a taunt, even if they result immune clientside
-            if ((MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2) && spell.GetCaster().IsPlayer() && unit.IsPlayer() && spell.GetCaster().IsValidAttackTarget(unit, spell.GetSpellInfo()))
-                unit.SetInCombatWith(spell.GetCaster().ToPlayer());
+            if (spell.GetOriginalCaster() && MissCondition != SpellMissInfo.Evade && !spell.GetOriginalCaster().IsFriendlyTo(unit) && (!spell.m_spellInfo.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (spell.m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
+                unit.SetInCombatWith(spell.GetOriginalCaster());
 
             // if target is flagged for pvp also flag caster if a player
             // but respect current pvp rules (buffing/healing npcs flagged for pvp only flags you if they are in combat)
@@ -8614,8 +8607,6 @@ namespace Game.Spells
             spell.CallScriptAfterHitHandlers();
             spell.spellAura = null;
         }
-
-        public bool IsPVPEnabling() { return _enablePVP; }
     }
 
     public class GOTargetInfo : TargetInfoBase
@@ -9111,41 +9102,6 @@ namespace Game.Spells
         public Spell GetSpell() { return m_Spell; }
 
         Spell m_Spell;
-    }
-
-    class ProcImpactDelayed : BasicEvent
-    {
-        Unit _owner;
-        ObjectGuid _casterGUID;
-        bool _enterCombat;
-        bool _enablePVP;
-
-        public ProcImpactDelayed(Unit owner, ObjectGuid casterGUID, bool enterCombat, bool enablePVP)
-        {
-            _owner = owner;
-            _casterGUID = casterGUID;
-            _enterCombat = enterCombat;
-            _enablePVP = enablePVP;
-        }
-
-        public override bool Execute(ulong e_time, uint p_time)
-        {
-            if (_owner == null)
-                return true;
-
-            Unit caster = Global.ObjAccessor.GetUnit(_owner, _casterGUID);
-            if (caster == null)
-                return true;
-
-            // This will only cause combat - the target will engage once the projectile hits (in DoAllEffectOnTarget)
-            if (_enterCombat)
-                _owner.SetInCombatWith(caster);
-
-            if (_enablePVP && caster.ToPlayer())
-                caster.ToPlayer().UpdatePvP(true);
-
-            return true;
-        }
     }
     
     class ProcReflectDelayed : BasicEvent
