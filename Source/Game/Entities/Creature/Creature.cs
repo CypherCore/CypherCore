@@ -2511,7 +2511,7 @@ namespace Game.Entities
                 else
                     SetDisableGravity(true);
 
-                if (!HasAuraType(AuraType.Hover))
+                if (!HasAuraType(AuraType.Hover) && GetMovementTemplate().Ground != CreatureGroundMovementType.Hover)
                     SetHover(false);
             }
             else
