@@ -256,7 +256,7 @@ namespace Scripts.Spells.Priest
 
             foreach (uint effectIndex in new[] { 0, 1, 2 })
             {
-                AuraEffect sinOfTheMany = GetTarget().GetAuraEffect(SpellIds.SinsOfTheMany, effectIndex);
+                AuraEffect sinOfTheMany = GetUnitOwner().GetAuraEffect(SpellIds.SinsOfTheMany, effectIndex);
                 if (sinOfTheMany != null)
                     sinOfTheMany.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, damageByStack.Length - 1)]);
             }
