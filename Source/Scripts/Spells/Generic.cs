@@ -2153,6 +2153,77 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    /* 9204 - Hate to Zero(Melee)
+     * 20538 - Hate to Zero(AoE)
+     * 26569 - Hate to Zero(AoE)
+     * 26637 - Hate to Zero(AoE, Unique)
+     * 37326 - Hate to Zero(AoE)
+     * 40410 - Hate to Zero(Should be added, AoE)
+     * 40467 - Hate to Zero(Should be added, AoE)
+     * 41582 - Hate to Zero(Should be added, Melee) */
+    [Script]
+    class spell_gen_hate_to_zero : SpellScript
+    {
+        void HandleDummy(uint effIndex)
+        {
+            if (GetCaster().CanHaveThreatList())
+                GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -100);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // This spell is used by both player and creature, but currently works only if used by player
+    [Script] // 63984 - Hate to Zero
+    class spell_gen_hate_to_zero_caster_target : SpellScript
+    {
+        void HandleDummy(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+                if (target.CanHaveThreatList())
+                    target.GetThreatManager().ModifyThreatByPercent(GetCaster(), -100);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 19707 - Hate to 50%
+    class spell_gen_hate_to_50 : SpellScript
+    {
+        void HandleDummy(uint effIndex)
+        {
+            if (GetCaster().CanHaveThreatList())
+                GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -50);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 26886 - Hate to 75%
+    class spell_gen_hate_to_75 : SpellScript
+    {
+        void HandleDummy(uint effIndex)
+        {
+            if (GetCaster().CanHaveThreatList())
+                GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -25);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
     [Script]
     class spell_gen_interrupt : AuraScript
     {
