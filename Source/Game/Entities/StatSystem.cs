@@ -1362,6 +1362,7 @@ namespace Game.Entities
 
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);        // bonus armor from auras and items
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            value *= GetTotalAuraMultiplier(AuraType.ModBonusArmorPct);
 
             SetArmor((int)value, (int)(value - baseValue));
 

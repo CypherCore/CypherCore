@@ -3225,7 +3225,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBonusArmor)]
-        void HandleModStatBonusArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        void HandleModBonusArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3233,6 +3233,15 @@ namespace Game.Spells
             aurApp.GetTarget().HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetAmount(), apply);
         }
 
+        [AuraEffectHandler(AuraType.ModBonusArmorPct)]
+        void HandleModBonusArmorPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            aurApp.GetTarget().UpdateArmor();
+        }
+        
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
         void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
