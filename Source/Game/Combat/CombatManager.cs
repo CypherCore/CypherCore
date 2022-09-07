@@ -83,10 +83,18 @@ namespace Game.Combat
             }
         }
 
+        public bool HasPvECombat()
+        {
+            foreach (var (_, refe) in _pveRefs)
+                if (!refe.IsSuppressedFor(_owner))
+                    return true;
+            return false;
+        }
+        
         public bool HasPvECombatWithPlayers()
         {
             foreach (var reference in _pveRefs)
-                if (reference.Value.GetOther(_owner).IsPlayer())
+                if (!reference.Value.IsSuppressedFor(_owner) && reference.Value.GetOther(_owner).IsPlayer())
                     return true;
 
             return false;
@@ -103,8 +111,9 @@ namespace Game.Combat
 
         public Unit GetAnyTarget()
         {
-            if (!_pveRefs.Empty())
-                return _pveRefs.First().Value.GetOther(_owner);
+            foreach (var pair in _pveRefs)
+                if (!pair.Value.IsSuppressedFor(_owner))
+                    return pair.Value.GetOther(_owner);
 
             foreach (var pair in _pvpRefs)
                 if (!pair.Value.IsSuppressedFor(_owner))
@@ -113,17 +122,23 @@ namespace Game.Combat
             return null;
         }
 
-        public bool SetInCombatWith(Unit who, bool suppressPvpSecond = false)
+        public bool SetInCombatWith(Unit who, bool addSecondUnitSuppressed = false)
         {
             // Are we already in combat? If yes, refresh pvp combat
-            var pvpRefe = _pvpRefs.LookupByKey(who.GetGUID());
-            if (pvpRefe != null)
+            var existingPvpRef = _pvpRefs.LookupByKey(who.GetGUID());
+            if (existingPvpRef != null)
             {
-                pvpRefe.Refresh();
+                existingPvpRef.RefreshTimer();
+                existingPvpRef.Refresh();
                 return true;
             }
-            else if (_pveRefs.ContainsKey(who.GetGUID()))
+
+            var existingPveRef = _pveRefs.LookupByKey(who.GetGUID());
+            if (existingPveRef != null)
+            {
+                existingPveRef.Refresh();
                 return true;
+            }
 
             // Otherwise, check validity...
             if (!CanBeginCombat(_owner, who))
@@ -132,14 +147,12 @@ namespace Game.Combat
             // ...then create new reference
             CombatReference refe;
             if (_owner.IsControlledByPlayer() && who.IsControlledByPlayer())
-            {
-                PvPCombatReference refPvp = new PvPCombatReference(_owner, who);
-                if (suppressPvpSecond)
-                    refPvp.SuppressFor(who);
-                refe = refPvp;
-            }
+                refe = new PvPCombatReference(_owner, who);
             else
                 refe = new CombatReference(_owner, who);
+
+            if (addSecondUnitSuppressed)
+                refe.Suppress(who);
 
             // ...and insert it into both managers
             PutReference(who.GetGUID(), refe);
@@ -324,12 +337,9 @@ namespace Game.Combat
             return true;
         }
 
-
-        Unit GetOwner() { return _owner; }
+        public Unit GetOwner() { return _owner; }
 
         public bool HasCombat() { return HasPvECombat() || HasPvPCombat(); }
-
-        public bool HasPvECombat() { return !_pveRefs.Empty(); }
 
         public Dictionary<ObjectGuid, CombatReference> GetPvECombatRefs() { return _pveRefs; }
 
@@ -347,6 +357,9 @@ namespace Game.Combat
         public Unit first;
         public Unit second;
         public bool _isPvP;
+        
+        bool _suppressFirst;
+        bool _suppressSecond;
 
         public CombatReference(Unit a, Unit b, bool pvp = false)
         {
@@ -386,31 +399,8 @@ namespace Game.Combat
             }
         }
 
-        public Unit GetOther(Unit me) { return (first == me) ? second : first; }
-    }
-
-    public class PvPCombatReference : CombatReference
-    {
-        public static uint PVP_COMBAT_TIMEOUT = 5 * Time.InMilliseconds;
-
-        uint _combatTimer = PVP_COMBAT_TIMEOUT;
-        bool _suppressFirst = false;
-        bool _suppressSecond = false;
-
-        public PvPCombatReference(Unit first, Unit second) : base(first, second, true) { }
-
-        public bool Update(uint tdiff)
-        {
-            if (_combatTimer <= tdiff)
-                return false;
-            _combatTimer -= tdiff;
-            return true;
-        }
-
         public void Refresh()
         {
-            _combatTimer = PVP_COMBAT_TIMEOUT;
-
             bool needFirstAI = false, needSecondAI = false;
             if (_suppressFirst)
             {
@@ -450,6 +440,31 @@ namespace Game.Combat
                 _suppressFirst = true;
             else
                 _suppressSecond = true;
+        }
+
+        public Unit GetOther(Unit me) { return (first == me) ? second : first; }
+    }
+
+    public class PvPCombatReference : CombatReference
+    {
+        public static uint PVP_COMBAT_TIMEOUT = 5 * Time.InMilliseconds;
+
+        uint _combatTimer = PVP_COMBAT_TIMEOUT;
+
+
+        public PvPCombatReference(Unit first, Unit second) : base(first, second, true) { }
+
+        public bool Update(uint tdiff)
+        {
+            if (_combatTimer <= tdiff)
+                return false;
+            _combatTimer -= tdiff;
+            return true;
+        }
+
+        public void RefreshTimer()
+        {
+            _combatTimer = PVP_COMBAT_TIMEOUT;
         }
     }
 }
