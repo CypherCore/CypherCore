@@ -18,6 +18,8 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Networking.Packets;
+using Game.DataStorage;
+using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -486,6 +488,12 @@ namespace Game.BattleGrounds.Zones
                     PlaySoundToAll(WSGSound.FlagReturned);
                     UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
                     _bothFlagsKept = false;
+
+                    // Check Horde flag if it is in capture zone; if so, capture it
+                    Player hordeFlagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(TeamId.Horde));
+                    if (hordeFlagCarrier != null)
+                        if (hordeFlagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(3646)))
+                            EventPlayerCapturedFlag(hordeFlagCarrier);
                 }
                 else
                 {
@@ -518,6 +526,12 @@ namespace Game.BattleGrounds.Zones
                     PlaySoundToAll(WSGSound.FlagReturned);
                     UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
                     _bothFlagsKept = false;
+
+                    // Check Alliance flag if it is in capture zone; if so, capture it
+                    Player allianceFlagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(TeamId.Alliance));
+                    if (allianceFlagCarrier != null)
+                        if (allianceFlagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(3647)))
+                            EventPlayerCapturedFlag(allianceFlagCarrier);
                 }
                 else
                 {
