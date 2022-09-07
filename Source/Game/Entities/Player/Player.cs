@@ -3116,7 +3116,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
             // players are immune to taunt (the aura and the spell effect).
             if (spellEffectInfo.IsAura(AuraType.ModTaunt))
@@ -3125,7 +3125,7 @@ namespace Game.Entities
             if (spellEffectInfo.IsEffect(SpellEffectName.AttackMe))
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
         }
 
         void RegenerateAll()

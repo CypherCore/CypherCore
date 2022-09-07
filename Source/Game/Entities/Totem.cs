@@ -144,7 +144,7 @@ namespace Game.Entities
             AddObjectToRemoveList();
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
             // immune to all positive spells, except of stoneclaw totem absorb and sentry totem bind sight
             // totems positive spells have unit_caster target
@@ -165,7 +165,7 @@ namespace Game.Entities
                     break;
             }
 
-            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
         }
 
         public uint GetSpell(byte slot = 0) { return m_spells[slot]; }

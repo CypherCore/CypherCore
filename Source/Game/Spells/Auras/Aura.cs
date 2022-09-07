@@ -189,7 +189,7 @@ namespace Game.Spells
             SetNeedClientUpdate();
         }
 
-        public void UpdateApplyEffectMask(uint newEffMask)
+        public void UpdateApplyEffectMask(uint newEffMask, bool canHandleNewEffects)
         {
             if (_effectsToApply == newEffMask)
                 return;
@@ -204,20 +204,23 @@ namespace Game.Spells
                 return;
             }
 
+            // update real effects only if they were applied already
             for (uint i = 0; i < SpellConst.MaxEffects; ++i)
             {
-                // update real effects only if they were applied already
-                if ((_effectMask & (1 << (int)i)) == 0)
-                    continue;
-
-                if ((removeEffMask & (1 << (int)i)) != 0)
+                if (HasEffect(i) && (removeEffMask & (1 << (int)i)) != 0)
                     _HandleEffect(i, false);
-
-                if ((addEffMask & (1 << (int)i)) != 0)
-                    _HandleEffect(i, true);
             }
 
             _effectsToApply = newEffMask;
+
+            if (canHandleNewEffects)
+            {
+                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                {
+                    if ((addEffMask & (1 << (int)i)) != 0)
+                        _HandleEffect(i, true);
+                }
+            }
         }
 
         public void SetNeedClientUpdate()
@@ -499,7 +502,7 @@ namespace Game.Spells
             }
         }
 
-        void UpdateTargetMap(Unit caster, bool apply = true)
+        public void UpdateTargetMap(Unit caster, bool apply = true)
         {
             if (IsRemoved())
                 return;
@@ -524,11 +527,18 @@ namespace Game.Spells
                 {
                     // needs readding - remove now, will be applied in next update cycle
                     // (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
-                    if (!CanBeAppliedOn(app.Value.GetTarget()))
+                    if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), caster, true) || !CanBeAppliedOn(app.Value.GetTarget()))
                     {
                         targetsToRemove.Add(app.Value.GetTarget());
                         continue;
                     }
+
+                    // check target immunities (for existing targets)
+                    foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
+                        if (app.Value.GetTarget().IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster, true))
+                            existing &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+
+                    targets[app.Value.GetTarget()] = existing;
 
                     // needs to add/remove effects from application, don't remove from map so it gets updated
                     if (app.Value.GetEffectMask() != existing)
@@ -542,18 +552,19 @@ namespace Game.Spells
             // register auras for units
             foreach (var unit in targets.Keys.ToList())
             {
-                var value = targets[unit];
-
                 bool addUnit = true;
                 // check target immunities
-                foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
+                AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
+                if (aurApp == null)
                 {
-                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
-                        value &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    // check target immunities (for new targets)
+                    foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
+                        if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
+                            targets[unit] &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+
+                    if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
+                        addUnit = false;
                 }
-                
-                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
-                    addUnit = false;
 
                 if (addUnit && !unit.IsHighestExclusiveAura(this, true))
                     addUnit = false;
@@ -596,14 +607,13 @@ namespace Game.Spells
                             unit.GetName(), unit.IsInWorld ? (int)unit.GetMap().GetId() : -1);
                     }
 
-                    AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
                     if (aurApp != null)
                     {
-                        // aura is already applied, this means we need to update effects of current application
-                        unit._UnapplyAura(aurApp, AuraRemoveMode.Default);
+                        aurApp.UpdateApplyEffectMask(targets[unit], true); // aura is already applied, this means we need to update effects of current application
+                        targets.Remove(unit);
                     }
-
-                    unit._CreateAuraApplication(this, value);
+                    else
+                        unit._CreateAuraApplication(this, targets[unit]);
                 }
             }
 
@@ -2550,7 +2560,7 @@ namespace Game.Spells
                 {
                     AuraApplication aurApp = foundAura.GetApplicationOfTarget(unit.GetGUID());
                     if (aurApp != null)
-                        aurApp.UpdateApplyEffectMask(effMask);
+                        aurApp.UpdateApplyEffectMask(effMask, false);
                 }
 
                 return foundAura;

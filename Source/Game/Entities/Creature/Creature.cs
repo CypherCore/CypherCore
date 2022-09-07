@@ -2075,12 +2075,12 @@ namespace Game.Entities
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
             if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && spellEffectInfo.IsEffect(SpellEffectName.Heal))
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
         }
 
         public bool IsElite()

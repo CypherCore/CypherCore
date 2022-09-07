@@ -2439,13 +2439,23 @@ namespace Game.Spells
                     if (Convert.ToBoolean(mechanicImmunity & (1 << (int)i)))
                         target.ApplySpellImmune(Id, SpellImmunity.Mechanic, i, apply);
 
-                if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
+                if (HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 {
                     // exception for purely snare mechanic (eg. hands of freedom)!
-                    if (mechanicImmunity == (1 << (int)Mechanics.Snare))
-                        target.RemoveMovementImpairingAuras(false);
-                    else
+                    if (apply)
                         target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id);
+                    else
+                    {
+                        target.RemoveAppliedAuras(aurApp =>
+                        {
+                            Aura aura = aurApp.GetBase();
+                            if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & mechanicImmunity) != 0)
+                                aura.UpdateTargetMap(aura.GetCaster());
+
+                            // only update targets, don't remove anything
+                            return false;
+                        });
+                    }
                 }
             }
 
