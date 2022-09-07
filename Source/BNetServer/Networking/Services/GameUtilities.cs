@@ -23,13 +23,25 @@ namespace BNetServer.Networking
 
             Bgs.Protocol.Attribute command = null;
             Dictionary<string, Variant> Params = new();
+            string removeSuffix(string str)
+            {
+                var pos = str.LastIndexOf('_');
+                if (pos != -1)
+                    return str.Substring(0, pos);
+
+                return str;
+            }
 
             for (int i = 0; i < request.Attribute.Count; ++i)
             {
                 Bgs.Protocol.Attribute attr = request.Attribute[i];
-                Params[attr.Name] = attr.Value;
                 if (attr.Name.Contains("Command_"))
+                { 
                     command = attr;
+                    Params[removeSuffix(attr.Name)] = attr.Value;
+                }
+                else
+                    Params[attr.Name] = attr.Value;
             }
 
             if (command == null)
@@ -38,12 +50,12 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.RpcMalformedRequest;
             }
 
-            return command.Name switch
+            return removeSuffix(command.Name) switch
             {
-                "Command_RealmListTicketRequest_v1_b9" => GetRealmListTicket(Params, response),
-                "Command_LastCharPlayedRequest_v1_b9" => GetLastCharPlayed(Params, response),
-                "Command_RealmListRequest_v1_b9" => GetRealmList(Params, response),
-                "Command_RealmJoinRequest_v1_b9" => JoinRealm(Params, response),
+                "Command_RealmListTicketRequest_v1" => GetRealmListTicket(Params, response),
+                "Command_LastCharPlayedRequest_v1" => GetLastCharPlayed(Params, response),
+                "Command_RealmListRequest_v1" => GetRealmList(Params, response),
+                "Command_RealmJoinRequest_v1" => JoinRealm(Params, response),
                 _ => BattlenetRpcErrorCode.RpcNotImplemented
             };
         }
@@ -54,7 +66,7 @@ namespace BNetServer.Networking
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
 
-            if (request.AttributeKey == "Command_RealmListRequest_v1_b9")
+            if (request.AttributeKey == "Command_RealmListRequest_v1")
             {
                 Global.RealmMgr.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
@@ -115,7 +127,7 @@ namespace BNetServer.Networking
 
         BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
         {
-            Variant subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1_b9");
+            Variant subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1");
             if (subRegion != null)
             {
                 var lastPlayerChar = gameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
@@ -162,7 +174,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.UserServerBadWowAccount;
 
             string subRegionId = "";
-            Variant subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
+            Variant subRegion = Params.LookupByKey("Command_RealmListRequest_v1");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
 

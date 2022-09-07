@@ -32,13 +32,25 @@ namespace Game
         {
             Bgs.Protocol.Attribute command = null;
             Dictionary<string, Bgs.Protocol.Variant> Params = new();
+            string removeSuffix(string str)
+            {
+                var pos = str.IndexOf('_');
+                if (pos != -1)
+                    return str.Substring(0, pos);
+
+                return str;
+            }
 
             for (int i = 0; i < request.Attribute.Count; ++i)
             {
                 Bgs.Protocol.Attribute attr = request.Attribute[i];
-                Params[attr.Name] = attr.Value;
                 if (attr.Name.Contains("Command_"))
+                {
                     command = attr;
+                    Params[removeSuffix(attr.Name)] = attr.Value;
+                }
+                else
+                    Params[attr.Name] = attr.Value;
             }
 
             if (command == null)
@@ -47,18 +59,18 @@ namespace Game
                 return BattlenetRpcErrorCode.RpcMalformedRequest;
             }
 
-            if (command.Name == "Command_RealmListRequest_v1_b9")
-                return HandleRealmListRequest(Params, response);
-            else if (command.Name == "Command_RealmJoinRequest_v1_b9")
-                return HandleRealmJoinRequest(Params, response);
-
-            return BattlenetRpcErrorCode.RpcNotImplemented;
+            return removeSuffix(command.Name) switch
+            {
+                "Command_RealmListRequest_v1" => HandleRealmListRequest(Params, response),
+                "Command_RealmJoinRequest_v1" => HandleRealmJoinRequest(Params, response),
+                _ => BattlenetRpcErrorCode.RpcNotImplemented
+            };
         }
 
         [Service(OriginalHash.GameUtilitiesService, 10)]
         BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
-            if (request.AttributeKey == "Command_RealmListRequest_v1_b9")
+            if (request.AttributeKey == "Command_RealmListRequest_v1")
             {
                 Global.RealmMgr.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
@@ -70,7 +82,7 @@ namespace Game
         BattlenetRpcErrorCode HandleRealmListRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
         {
             string subRegionId = "";
-            var subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
+            var subRegion = Params.LookupByKey("Command_RealmListRequest_v1");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
 
