@@ -26,7 +26,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Scripts.Spells.Items
 {
@@ -442,6 +441,13 @@ namespace Scripts.Spells.Items
 
         //TauntFlag
         public const uint EmotePlantsFlag = 28008;
+
+        //Feast
+        public const uint GreatFeast = 31843;
+        public const uint TextFishFeast = 31844;
+        public const uint TextGiganticFeast = 31846;
+        public const uint SmallFeast = 31845;
+        public const uint BountifulFeast = 35153;
     }
 
     struct FactionIds
@@ -1357,6 +1363,37 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script("spell_item_great_feast", TextIds.GreatFeast)]
+    [Script("spell_item_fish_feast", TextIds.TextFishFeast)]
+    [Script("spell_item_gigantic_feast", TextIds.TextGiganticFeast)]
+    [Script("spell_item_small_feast", TextIds.SmallFeast)]
+    [Script("spell_item_bountiful_feast", TextIds.BountifulFeast)]
+    class spell_item_feast : SpellScript
+    {
+        uint _text;
+
+        public spell_item_feast(uint text)
+        {
+            _text = text;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return CliDB.BroadcastTextStorage.ContainsKey(_text);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            caster.TextEmote(_text, caster, false);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     // http://www.wowhead.com/item=47499 Flask of the North
     [Script] // 67019 Flask of the North
     class spell_item_flask_of_the_north : SpellScript

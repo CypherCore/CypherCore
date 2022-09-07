@@ -117,6 +117,24 @@ namespace Scripts.Spells.Generic
         public const uint CreateToken = 50063;
         public const uint StealEssenceVisual = 50101;
 
+        // Feast
+        public const uint GreatFeast = 57337;
+        public const uint FishFeast = 57397;
+        public const uint GiganticFeast = 58466;
+        public const uint SmallFeast = 58475;
+        public const uint BountifulFeast = 66477;
+
+        public const uint FeastFood = 45548;
+        public const uint FeastDrink = 57073;
+        public const uint BountifulFeastDrink = 66041;
+        public const uint BountifulFeastFood = 66478;
+
+        public const uint GreatFeastRefreshment = 57338;
+        public const uint FishFeastRefreshment = 57398;
+        public const uint GiganticFeastRefreshment = 58467;
+        public const uint SmallFeastRefreshment = 58477;
+        public const uint BountifulFeastRefreshment = 66622;
+
         //FuriousRage
         public const uint Exhaustion = 35492;
 
@@ -1794,6 +1812,62 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    /* 57337 - Great Feast
+   57397 - Fish Feast
+   58466 - Gigantic Feast
+   58475 - Small Feast
+   66477 - Bountiful Feast */
+    [Script]
+    class spell_gen_feast : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FeastFood, SpellIds.FeastDrink, SpellIds.BountifulFeastDrink, SpellIds.BountifulFeastFood, SpellIds.GreatFeastRefreshment,
+                SpellIds.FishFeastRefreshment, SpellIds.GiganticFeastRefreshment, SpellIds.SmallFeastRefreshment, SpellIds.BountifulFeastRefreshment);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+
+            switch (GetSpellInfo().Id)
+            {
+                case SpellIds.GreatFeast:
+                    target.CastSpell(target, SpellIds.FeastFood);
+                    target.CastSpell(target, SpellIds.FeastDrink);
+                    target.CastSpell(target, SpellIds.GreatFeastRefreshment);
+                    break;
+                case SpellIds.FishFeast:
+                    target.CastSpell(target, SpellIds.FeastFood);
+                    target.CastSpell(target, SpellIds.FeastDrink);
+                    target.CastSpell(target, SpellIds.FishFeastRefreshment);
+                    break;
+                case SpellIds.GiganticFeast:
+                    target.CastSpell(target, SpellIds.FeastFood);
+                    target.CastSpell(target, SpellIds.FeastDrink);
+                    target.CastSpell(target, SpellIds.GiganticFeastRefreshment);
+                    break;
+                case SpellIds.SmallFeast:
+                    target.CastSpell(target, SpellIds.FeastFood);
+                    target.CastSpell(target, SpellIds.FeastDrink);
+                    target.CastSpell(target, SpellIds.SmallFeastRefreshment);
+                    break;
+                case SpellIds.BountifulFeast:
+                    target.CastSpell(target, SpellIds.BountifulFeastRefreshment);
+                    target.CastSpell(target, SpellIds.BountifulFeastDrink);
+                    target.CastSpell(target, SpellIds.BountifulFeastFood);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
     /*
      * There are only 3 possible flags Feign Death auras can apply: UNIT_DYNFLAG_DEAD, UnitFlags2.FeignDeath
      * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some auras can apply only 2 flags
@@ -1937,7 +2011,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 46642 - 5,000 Gold
     class spell_gen_5000_gold : SpellScript
     {
@@ -2119,7 +2193,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script("spell_hexlord_lifebloom", SpellIds.HexlordMalacrass)]
     [Script("spell_tur_ragepaw_lifebloom", SpellIds.TurragePaw)]
     [Script("spell_cenarion_scout_lifebloom", SpellIds.CenarionScout)]
@@ -2559,7 +2633,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script("spell_item_soul_harvesters_charm")]
     [Script("spell_item_commendation_of_kaelthas")]
     [Script("spell_item_corpse_tongue_coin")]
@@ -2686,7 +2760,7 @@ namespace Scripts.Spells.Generic
             OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
     class spell_gen_profession_research : SpellScript
     {
@@ -3615,7 +3689,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
     class spell_gen_eject_all_passengers : SpellScript
     {
@@ -3690,7 +3764,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
     class spell_gen_gm_freeze : AuraScript
     {
@@ -4315,7 +4389,7 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {
@@ -4660,7 +4734,7 @@ namespace Scripts.Spells.Generic
             OnCast.Add(new CastHandler(HandleOnCast));
         }
     }
-    
+
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
     {
