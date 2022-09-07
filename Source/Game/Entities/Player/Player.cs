@@ -4570,13 +4570,11 @@ namespace Game.Entities
             if (enabled)
             {
                 SetPlayerFlag(PlayerFlags.WarModeDesired);
-                TogglePvpTalents(true);
                 SetPvP(true);
             }
             else
             {
                 RemovePlayerFlag(PlayerFlags.WarModeDesired);
-                TogglePvpTalents(false);
                 SetPvP(false);
             }
 

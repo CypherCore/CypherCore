@@ -307,7 +307,7 @@ namespace Game.Entities
                     if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 
-                    LearnSpell(specSpell.SpellID, false);
+                    LearnSpell(specSpell.SpellID, true);
                     if (specSpell.OverridesSpellID != 0)
                         AddOverrideSpell(specSpell.OverridesSpellID, specSpell.SpellID);
                 }

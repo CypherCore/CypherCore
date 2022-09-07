@@ -86,13 +86,17 @@ namespace Game.Entities
                 return false;
             }
 
-            if (spec == GetActiveTalentGroup() && talent.OverridesSpellID != 0)
-                AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
-
             if (GetTalentMap(spec).ContainsKey(talent.Id))
                 GetTalentMap(spec)[talent.Id] = PlayerSpellState.Unchanged;
             else
                 GetTalentMap(spec)[talent.Id] = learning ? PlayerSpellState.New : PlayerSpellState.Unchanged;
+
+            if (spec == GetActiveTalentGroup())
+            {
+                LearnSpell(talent.SpellID, true);
+                if (talent.OverridesSpellID != 0)
+                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+            }
 
             if (learning)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeTalent);
@@ -210,8 +214,6 @@ namespace Game.Entities
 
             if (!AddTalent(talentInfo, GetActiveTalentGroup(), true))
                 return TalentLearnResult.FailedUnknown;
-
-            LearnSpell(spellid, false);
 
             Log.outDebug(LogFilter.Misc, "Player.LearnTalent: TalentID: {0} Spell: {1} Group: {2}", talentId, spellid, GetActiveTalentGroup());
 
@@ -367,7 +369,7 @@ namespace Game.Entities
 
                 if (HasTalent(talentInfo.Id, GetActiveTalentGroup()))
                 {
-                    LearnSpell(talentInfo.SpellID, false);      // add the talent to the PlayerSpellMap
+                    LearnSpell(talentInfo.SpellID, true);      // add the talent to the PlayerSpellMap
                     if (talentInfo.OverridesSpellID != 0)
                         AddOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
                 }
@@ -393,7 +395,7 @@ namespace Game.Entities
                 {
                     uint mastery = spec.MasterySpellID[i];
                     if (mastery != 0)
-                        LearnSpell(mastery, false);
+                        LearnSpell(mastery, true);
                 }
             }
 
@@ -733,12 +735,14 @@ namespace Game.Entities
                 return false;
             }
 
-            if (HasPvpRulesEnabled())
-                LearnSpell(talent.SpellID, false);
+            if (activeTalentGroup == GetActiveTalentGroup() && HasAuraType(AuraType.PvpTalents))
+            {
+                LearnSpell(talent.SpellID, true);
 
-            // Move this to toggle ?
-            if (talent.OverridesSpellID != 0)
-                AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+                // Move this to toggle ?
+                if (talent.OverridesSpellID != 0)
+                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+            }
 
             GetPvpTalentMap(activeTalentGroup)[slot] = talent.Id;
 
@@ -775,9 +779,17 @@ namespace Game.Entities
                 if (pvpTalentInfo != null)
                 {
                     if (enable)
+                    {
                         LearnSpell(pvpTalentInfo.SpellID, false);
+                        if (pvpTalentInfo.OverridesSpellID != 0)
+                            AddOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
+                    }
                     else
+                    {
+                        if (pvpTalentInfo.OverridesSpellID != 0)
+                            RemoveOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
                         RemoveSpell(pvpTalentInfo.SpellID, true);
+                    }
                 }
             }
         }
