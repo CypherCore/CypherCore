@@ -252,6 +252,8 @@ namespace Game.BattleGrounds.Zones
 
             SetDroppedFlagGUID(ObjectGuid.Empty, GetTeamIndexByTeamId(team));
             _bothFlagsKept = false;
+            // Check opposing flag if it is in capture zone; if so, capture it
+            HandleFlagRoomCapturePoint(team == Team.Alliance ? TeamId.Horde : TeamId.Alliance);
         }
 
         void EventPlayerCapturedFlag(Player player)
@@ -339,6 +341,14 @@ namespace Game.BattleGrounds.Zones
             {
                 _flagsTimer[GetTeamIndexByTeamId(team)] = WSGTimerOrScore.FlagRespawnTime;
             }
+        }
+
+        void HandleFlagRoomCapturePoint(int team)
+        {
+            Player flagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(team));
+            uint areaTrigger = team == TeamId.Alliance ? 3647 : 3646u;
+            if (flagCarrier != null && flagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(areaTrigger)))
+                EventPlayerCapturedFlag(flagCarrier);
         }
 
         public override void EventPlayerDroppedFlag(Player player)
@@ -489,11 +499,7 @@ namespace Game.BattleGrounds.Zones
                     UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
                     _bothFlagsKept = false;
 
-                    // Check Horde flag if it is in capture zone; if so, capture it
-                    Player hordeFlagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(TeamId.Horde));
-                    if (hordeFlagCarrier != null)
-                        if (hordeFlagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(3646)))
-                            EventPlayerCapturedFlag(hordeFlagCarrier);
+                    HandleFlagRoomCapturePoint(TeamId.Horde); // Check Horde flag if it is in capture zone; if so, capture it
                 }
                 else
                 {
@@ -527,11 +533,7 @@ namespace Game.BattleGrounds.Zones
                     UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
                     _bothFlagsKept = false;
 
-                    // Check Alliance flag if it is in capture zone; if so, capture it
-                    Player allianceFlagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(TeamId.Alliance));
-                    if (allianceFlagCarrier != null)
-                        if (allianceFlagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(3647)))
-                            EventPlayerCapturedFlag(allianceFlagCarrier);
+                    HandleFlagRoomCapturePoint(TeamId.Alliance); // Check Alliance flag if it is in capture zone; if so, capture it
                 }
                 else
                 {
