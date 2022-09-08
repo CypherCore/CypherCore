@@ -86,7 +86,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             switch (action)
             {
                 case eTradeskill.GossipActionInfoDef + 1:
-                    player.AddGossipItem(GossipOptionIcon.None, MiscConst.GossipItemTeach2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 11);
+                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 11);
                     player.SendGossipMenu(2606, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 11:
@@ -94,7 +94,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
                     player.CastSpell(player, SpellIds.LearnSmelt, false);
                     break;
                 case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionIcon.None, MiscConst.GossipItemTeach3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 22);
+                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 22);
                     player.SendGossipMenu(2604, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 22:
@@ -109,10 +109,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
         public override bool OnGossipHello(Player player)
         {
             if (player.GetQuestRewardStatus(QuestIds.SpectralChalice) && player.GetSkillValue(SkillType.Mining) >= MiscConst.DataSkillpointMin && !player.HasSpell(SpellIds.SmeltDarkIron))
-                player.AddGossipItem(GossipOptionIcon.None, MiscConst.GossipItemTeach1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
             if (!player.GetQuestRewardStatus(QuestIds.SpectralChalice) && player.GetSkillValue(SkillType.Mining) >= MiscConst.DataSkillpointMin)
-                player.AddGossipItem(GossipOptionIcon.None, MiscConst.GossipItemTribute, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTribute, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
 
             player.SendGossipMenu(player.GetGossipTextId(me), me.GetGUID());
             return true;

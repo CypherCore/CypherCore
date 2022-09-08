@@ -57,14 +57,14 @@ namespace Game.Scripting
 
         public static void ClearGossipMenuFor(Player player) { player.PlayerTalkClass.ClearMenus(); }
         // Using provided text, not from DB
-        public static void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action)
+        public static void AddGossipItemFor(Player player, GossipOptionNpc optionNpc, string text, uint sender, uint action)
         {
-            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, "", 0);
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, optionNpc, text, sender, action, "", 0);
         }
         // Using provided texts, not from DB
-        public static void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        public static void AddGossipItemFor(Player player, GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
         {
-            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, popupText, popupMoney, coded);
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, optionNpc, text, sender, action, popupText, popupMoney, coded);
         }
         // Uses gossip item info from DB
         public static void AddGossipItemFor(Player player, uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)

@@ -29,7 +29,7 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
-        public uint AddMenuItem(int menuItemId, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
+        public uint AddMenuItem(int menuItemId, GossipOptionNpc optionNpc, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
@@ -51,11 +51,11 @@ namespace Game.Misc
 
             GossipMenuItem menuItem = new();
 
-            menuItem.MenuItemIcon = (byte)icon;
+            menuItem.OptionNpc = optionNpc;
             menuItem.Message = message;
             menuItem.IsCoded = coded;
             menuItem.Sender = sender;
-            menuItem.OptionType = action;
+            menuItem.Action = action;
             menuItem.BoxMessage = boxMessage;
             menuItem.BoxMoney = boxMoney;
 
@@ -124,7 +124,7 @@ namespace Game.Misc
                 }
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                uint newOptionId = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
+                uint newOptionId = AddMenuItem(-1, item.OptionNpc, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
                 AddGossipMenuItemData(newOptionId, item.ActionMenuId, item.ActionPoiId);
             }
         }
@@ -150,7 +150,7 @@ namespace Game.Misc
         public uint GetMenuItemAction(uint menuItemId)
         {
             if (_menuItems.ContainsKey(menuItemId))
-                return _menuItems.LookupByKey(menuItemId).OptionType;
+                return _menuItems.LookupByKey(menuItemId).Action;
             else
                 return 0;
         }
@@ -161,15 +161,6 @@ namespace Game.Misc
                 return _menuItems.LookupByKey(menuItemId).IsCoded;
             else
                 return false;
-        }
-
-        public bool HasMenuItemType(uint optionType)
-        {
-            foreach (var menuItemPair in _menuItems)
-                if (menuItemPair.Value.OptionType == optionType)
-                    return true;
-
-            return false;
         }
 
         public void ClearMenu()
@@ -264,7 +255,7 @@ namespace Game.Misc
                 ClientGossipOptions opt = new();
                 GossipMenuItem item = pair.Value;
                 opt.ClientOption = (int)pair.Key;
-                opt.OptionNPC = item.MenuItemIcon;
+                opt.OptionNPC = item.OptionNpc;
                 opt.OptionFlags = (byte)(item.IsCoded ? 1 : 0);     // makes pop up box password
                 opt.OptionCost = (int)item.BoxMoney;     // money required to open menu, 2.0.3
                 opt.OptionLanguage = item.Language;
@@ -701,11 +692,11 @@ namespace Game.Misc
 
     public class GossipMenuItem
     {
-        public byte MenuItemIcon;
+        public GossipOptionNpc OptionNpc;
         public bool IsCoded;
         public string Message;
         public uint Sender;
-        public uint OptionType;
+        public uint Action;
         public string BoxMessage;
         public uint BoxMoney;
         public uint Language;
@@ -737,10 +728,9 @@ namespace Game.Misc
     {
         public uint MenuId;
         public uint OptionId;
-        public GossipOptionIcon OptionIcon;
+        public GossipOptionNpc OptionNpc;
         public string OptionText;
         public uint OptionBroadcastTextId;
-        public GossipOption OptionType;
         public NPCFlags OptionNpcFlag;
         public uint Language;
         public uint ActionMenuId;

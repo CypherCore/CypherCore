@@ -97,18 +97,12 @@ namespace Game
             if (!unit.CanResetTalents(_player))
                 return;
 
-            if (!_player.PlayerTalkClass.GetGossipMenu().HasMenuItemType((uint)GossipOption.Unlearntalents))
-                return;
-
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             if (!GetPlayer().ResetTalents())
-            {
-                GetPlayer().SendRespecWipeConfirm(ObjectGuid.Empty, 0);
                 return;
-            }
 
             GetPlayer().SendTalentsInfoData();
             unit.CastSpell(GetPlayer(), 14867, true);                  //spell: "Untalent Visual Effect"

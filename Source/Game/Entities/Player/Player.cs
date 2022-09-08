@@ -2326,60 +2326,90 @@ namespace Game.Entities
                     if (!menuItems.OptionNpcFlag.HasAnyFlag(npcflags))
                         continue;
 
-                    switch (menuItems.OptionType)
+                    switch (menuItems.OptionNpc)
                     {
-                        case GossipOption.Armorer:
-                            canTalk = false;                       // added in special mode
-                            break;
-                        case GossipOption.Spirithealer:
-                            if (!IsDead())
-                                canTalk = false;
-                            break;
-                        case GossipOption.Learndualspec:
-                            canTalk = false;
-                            break;
-                        case GossipOption.Unlearntalents:
-                            if (!creature.CanResetTalents(this))
-                                canTalk = false;
-                            break;
-                        case GossipOption.Taxivendor:
+                        case GossipOptionNpc.TaxiNode:
                             if (GetSession().SendLearnNewTaxiNode(creature))
                                 return;
                             break;
-                        case GossipOption.Battlefield:
+                        case GossipOptionNpc.SpiritHealer:
+                            if (!IsDead())
+                                canTalk = false;
+                            break;
+                        case GossipOptionNpc.BattleMaster:
                             if (!creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
-                        case GossipOption.Stablepet:
+                        case GossipOptionNpc.TalentMaster:
+                        case GossipOptionNpc.SpecializationMaster:
+                        case GossipOptionNpc.GlyphMaster:
+                            if (!creature.CanResetTalents(this))
+                                canTalk = false;
+                            break;
+                        case GossipOptionNpc.StableMaster:
+                        case GossipOptionNpc.PetSpecializationMaster:
                             if (GetClass() != Class.Hunter)
                                 canTalk = false;
                             break;
-                        case GossipOption.Questgiver:
-                            canTalk = false;
+                        case GossipOptionNpc.DisableXPGain:
+                            if (HasPlayerFlag(PlayerFlags.NoXPGain))
+                                canTalk = false;
                             break;
-                        case GossipOption.Gossip:
-                        case GossipOption.Vendor:
-                        case GossipOption.Trainer:
-                        case GossipOption.Spiritguide:
-                        case GossipOption.Innkeeper:
-                        case GossipOption.Banker:
-                        case GossipOption.Petitioner:
-                        case GossipOption.Tabarddesigner:
-                        case GossipOption.Auctioneer:
-                        case GossipOption.Transmogrifier:
-                        case GossipOption.Mailbox:
-                            break;                                  // no checks
+                        case GossipOptionNpc.EnableXPGain:
+                            if (!HasPlayerFlag(PlayerFlags.NoXPGain))
+                                canTalk = false;
+                            break;
+                        case GossipOptionNpc.None:
+                        case GossipOptionNpc.Vendor:
+                        case GossipOptionNpc.Trainer:
+                        case GossipOptionNpc.Binder:
+                        case GossipOptionNpc.Banker:
+                        case GossipOptionNpc.PetitionVendor:
+                        case GossipOptionNpc.TabardVendor:
+                        case GossipOptionNpc.Auctioneer:
+                        case GossipOptionNpc.Mailbox:
+                        case GossipOptionNpc.Transmogrify:
+                            break;                                         // No checks
+                        case GossipOptionNpc.CemeterySelect:
+                            canTalk = false;                               // Deprecated
+                            break;
+                        case GossipOptionNpc.GuildBanker:
+                        case GossipOptionNpc.SpellClick:
+                        case GossipOptionNpc.WorldPVPQueue:
+                        case GossipOptionNpc.LFGDungeon:
+                        case GossipOptionNpc.ArtifactRespec:
+                        case GossipOptionNpc.QueueScenario:
+                        case GossipOptionNpc.GarrisonArchitect:
+                        case GossipOptionNpc.GarrisonMission:
+                        case GossipOptionNpc.ShipmentCrafter:
+                        case GossipOptionNpc.GarrisonTradeskill:
+                        case GossipOptionNpc.GarrisonRecruitment:
+                        case GossipOptionNpc.AdventureMap:
+                        case GossipOptionNpc.GarrisonTalent:
+                        case GossipOptionNpc.ContributionCollector:
+                        case GossipOptionNpc.AzeriteRespec:
+                        case GossipOptionNpc.IslandsMission:
+                        case GossipOptionNpc.UIItemInteraction:
+                        case GossipOptionNpc.WorldMap:
+                        case GossipOptionNpc.Soulbind:
+                        case GossipOptionNpc.ChromieTime:
+                        case GossipOptionNpc.CovenantPreview:
+                        case GossipOptionNpc.RuneforgeLegendaryCrafting:
+                        case GossipOptionNpc.NewPlayerGuide:
+                        case GossipOptionNpc.RuneforgeLegendaryUpgrade:
+                        case GossipOptionNpc.CovenantRenown:
+                            break;                                         // NYI
                         default:
-                            Log.outError(LogFilter.Sql, "Creature entry {0} have unknown gossip option {1} for menu {2}", creature.GetEntry(), menuItems.OptionType, menuItems.MenuId);
+                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {menuItems.OptionNpc} for menu {menuItems.MenuId}.");
                             canTalk = false;
                             break;
                     }
                 }
                 else if (go != null)
                 {
-                    switch (menuItems.OptionType)
+                    switch (menuItems.OptionNpc)
                     {
-                        case GossipOption.Gossip:
+                        case GossipOptionNpc.None:
                             if (go.GetGoType() != GameObjectTypes.QuestGiver && go.GetGoType() != GameObjectTypes.Goober)
                                 canTalk = false;
                             break;
@@ -2426,7 +2456,7 @@ namespace Game.Entities
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionNpc, strOptionText, 0, (uint)menuItems.OptionNpc, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
                     menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId);
                 }
             }
@@ -2467,12 +2497,12 @@ namespace Game.Entities
             if (item == null)
                 return;
 
-            uint gossipOptionType = item.OptionType;
+            GossipOptionNpc gossipOptionNpc = item.OptionNpc;
             ObjectGuid guid = source.GetGUID();
 
             if (source.IsTypeId(TypeId.GameObject))
             {
-                if (gossipOptionType > (int)GossipOption.Questgiver)
+                if (gossipOptionNpc != GossipOptionNpc.None)
                 {
                     Log.outError(LogFilter.Player, "Player guid {0} request invalid gossip option for GameObject entry {1}", GetGUID().ToString(), source.GetEntry());
                     return;
@@ -2491,9 +2521,9 @@ namespace Game.Entities
                 return;
             }
 
-            switch ((GossipOption)gossipOptionType)
+            switch (gossipOptionNpc)
             {
-                case GossipOption.Gossip:
+                case GossipOptionNpc.None:
                 {
                     if (menuItemData.GossipActionPoi != 0)
                         PlayerTalkClass.SendPointOfInterest(menuItemData.GossipActionPoi);
@@ -2506,56 +2536,36 @@ namespace Game.Entities
 
                     break;
                 }
-                case GossipOption.Spirithealer:
-                    if (IsDead())
-                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));
-                    break;
-                case GossipOption.Questgiver:
-                    PrepareQuestMenu(guid);
-                    SendPreparedQuest(source);
-                    break;
-                case GossipOption.Vendor:
-                case GossipOption.Armorer:
+                case GossipOptionNpc.Vendor:
                     GetSession().SendListInventory(guid);
                     break;
-                case GossipOption.Stablepet:
-                    GetSession().SendStablePet(guid);
-                    break;
-                case GossipOption.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, gossipListId));
-                    break;
-                case GossipOption.Learndualspec:
-                    break;
-                case GossipOption.Unlearntalents:
-                    PlayerTalkClass.SendCloseGossip();
-                    SendRespecWipeConfirm(guid, GetNextResetTalentsCost());
-                    break;
-                case GossipOption.Taxivendor:
+                case GossipOptionNpc.TaxiNode:
                     GetSession().SendTaxiMenu(source.ToCreature());
                     break;
-                case GossipOption.Innkeeper:
+                case GossipOptionNpc.Trainer:
+                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, gossipListId));
+                    break;
+                case GossipOptionNpc.SpiritHealer:
+                    if (IsDead())
+                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCaster(GetGUID()));
+                    break;
+                case GossipOptionNpc.Binder:
                     PlayerTalkClass.SendCloseGossip();
                     SetBindPoint(guid);
                     break;
-                case GossipOption.Banker:
+                case GossipOptionNpc.Banker:
                     GetSession().SendShowBank(guid);
                     break;
-                case GossipOption.Petitioner:
+                case GossipOptionNpc.PetitionVendor:
                     PlayerTalkClass.SendCloseGossip();
                     GetSession().SendPetitionShowList(guid);
                     break;
-                case GossipOption.Tabarddesigner:
+                case GossipOptionNpc.TabardVendor:
                     PlayerTalkClass.SendCloseGossip();
                     GetSession().SendTabardVendorActivate(guid);
                     break;
-                case GossipOption.Auctioneer:
-                    GetSession().SendAuctionHello(guid, source.ToCreature());
-                    break;
-                case GossipOption.Spiritguide:
-                    PrepareGossipMenu(source);
-                    SendPreparedGossip(source);
-                    break;
-                case GossipOption.Battlefield:
+                case GossipOptionNpc.BattleMaster:
                 {
                     BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
 
@@ -2568,11 +2578,43 @@ namespace Game.Entities
                     Global.BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
                     break;
                 }
-                case GossipOption.Transmogrifier:
+                case GossipOptionNpc.Auctioneer:
+                    GetSession().SendAuctionHello(guid, source.ToCreature());
+                    break;
+                case GossipOptionNpc.TalentMaster:
+                    PlayerTalkClass.SendCloseGossip();
+                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
+                    break;
+                case GossipOptionNpc.StableMaster:
+                    GetSession().SendStablePet(guid);
+                    break;
+                case GossipOptionNpc.PetSpecializationMaster:
+                    PlayerTalkClass.SendCloseGossip();
+                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
+                    break;
+                case GossipOptionNpc.DisableXPGain:
+                    PlayerTalkClass.SendCloseGossip();
+                    SetPlayerFlag(PlayerFlags.NoXPGain);
+                    break;
+                case GossipOptionNpc.EnableXPGain:
+                    PlayerTalkClass.SendCloseGossip();
+                    RemovePlayerFlag(PlayerFlags.NoXPGain);
+                    break;
+                case GossipOptionNpc.Mailbox:
+                    GetSession().SendShowMailBox(guid);
+                    break;
+                case GossipOptionNpc.SpecializationMaster:
+                    PlayerTalkClass.SendCloseGossip();
+                    SendRespecWipeConfirm(guid, 0, SpecResetType.Specialization);
+                    break;
+                case GossipOptionNpc.GlyphMaster:
+                    PlayerTalkClass.SendCloseGossip();
+                    SendRespecWipeConfirm(guid, 0, SpecResetType.Glyphs);
+                    break;
+                case GossipOptionNpc.Transmogrify:
                     GetSession().SendOpenTransmogrifier(guid);
                     break;
-                case GossipOption.Mailbox:
-                    GetSession().SendShowMailBox(guid);
+                default:
                     break;
             }
 
@@ -7345,9 +7387,9 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void AddGossipItem(GossipOptionIcon icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
+        public void AddGossipItem(GossipOptionNpc icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
         public void AddGossipItem(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
-        public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionIcon icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
+        public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionNpc icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)
         public void SendGossipMenu(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }

@@ -1476,45 +1476,6 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_experience : ScriptedAI
-    {
-        public npc_experience(Creature creature) : base(creature) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
-            {
-                player.AddGossipItem(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
-            }
-            else // currently gaining XP
-            {
-                player.AddGossipItem(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
-            }
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:// XP ON selected
-                    player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
-                    player.SetPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
-                    break;
-            }
-
-            player.PlayerTalkClass.SendCloseGossip();
-            return false;
-        }
-    }
-
-    [Script]
     class npc_spring_rabbit : ScriptedAI
     {
         public npc_spring_rabbit(Creature creature) : base(creature)

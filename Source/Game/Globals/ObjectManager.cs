@@ -579,8 +579,8 @@ namespace Game
 
             gossipMenuItemsStorage.Clear();
 
-            //                                         0       1         2           3           4                      5           6              7         8             9            10        11        12       13
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionIcon, OptionText, OptionBroadcastTextID, OptionType, OptionNpcFlag, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
+            //                                         0       1         2           3           4                      5              6         7             8            9         10        11       12
+            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionNpc, OptionText, OptionBroadcastTextID, OptionNpcFlag, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
                 "FROM gossip_menu_option ORDER BY MenuID, OptionID");
 
             if (result.IsEmpty())
@@ -595,23 +595,22 @@ namespace Game
 
                 gMenuItem.MenuId = result.Read<uint>(0);
                 gMenuItem.OptionId = result.Read<uint>(1);
-                gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<byte>(2);
+                gMenuItem.OptionNpc = (GossipOptionNpc)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
-                gMenuItem.OptionType = (GossipOption)result.Read<uint>(5);
-                gMenuItem.OptionNpcFlag = (NPCFlags)result.Read<ulong>(6);
-                gMenuItem.Language = result.Read<uint>(7);
-                gMenuItem.ActionMenuId = result.Read<uint>(8);
-                gMenuItem.ActionPoiId = result.Read<uint>(9);
-                gMenuItem.BoxCoded = result.Read<bool>(10);
-                gMenuItem.BoxMoney = result.Read<uint>(11);
-                gMenuItem.BoxText = result.Read<string>(12);
-                gMenuItem.BoxBroadcastTextId = result.Read<uint>(13);
+                gMenuItem.OptionNpcFlag = (NPCFlags)result.Read<ulong>(5);
+                gMenuItem.Language = result.Read<uint>(6);
+                gMenuItem.ActionMenuId = result.Read<uint>(7);
+                gMenuItem.ActionPoiId = result.Read<uint>(8);
+                gMenuItem.BoxCoded = result.Read<bool>(9);
+                gMenuItem.BoxMoney = result.Read<uint>(10);
+                gMenuItem.BoxText = result.Read<string>(11);
+                gMenuItem.BoxBroadcastTextId = result.Read<uint>(12);
 
-                if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
+                if (gMenuItem.OptionNpc >= GossipOptionNpc.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
-                    gMenuItem.OptionIcon = GossipOptionIcon.None;
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} has unknown NPC option id {gMenuItem.OptionNpc}. Replacing with GossipOptionNpc.None");
+                    gMenuItem.OptionNpc = GossipOptionNpc.None;
                 }
 
                 if (gMenuItem.OptionBroadcastTextId != 0)
@@ -623,18 +622,25 @@ namespace Game
                     }
                 }
 
-                if (gMenuItem.OptionType >= GossipOption.Max)
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has unknown option id {gMenuItem.OptionType}. Option will not be used");
-
                 if (gMenuItem.Language != 0 && !CliDB.LanguagesStorage.ContainsKey(gMenuItem.Language))
                 {
                     Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing Language {gMenuItem.Language}, ignoring");
                     gMenuItem.Language = 0;
                 }
 
-                if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
+                if (gMenuItem.ActionMenuId != 0 && gMenuItem.OptionNpc != GossipOptionNpc.None)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                    gMenuItem.ActionMenuId = 0;
+                }
+
+                if (gMenuItem.ActionPoiId != 0)
+                {
+                    if (gMenuItem.OptionNpc != GossipOptionNpc.None)
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                    else if (GetPointOfInterest(gMenuItem.ActionPoiId) == null)
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing ActionPoiID {gMenuItem.ActionPoiId}, ignoring");
+
                     gMenuItem.ActionPoiId = 0;
                 }
 
@@ -4493,7 +4499,7 @@ namespace Game
                     stmt.AddValue(2, guid);
                     DB.World.Execute(stmt);
                 }
-                
+
                 // if not this is to be managed by GameEvent System
                 if (gameEvent == 0)
                     AddGameObjectToGrid(data);

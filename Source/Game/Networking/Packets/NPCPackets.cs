@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
             foreach (ClientGossipOptions options in GossipOptions)
             {
                 _worldPacket.WriteInt32(options.ClientOption);
-                _worldPacket.WriteUInt8(options.OptionNPC);
+                _worldPacket.WriteUInt8((byte)options.OptionNPC);
                 _worldPacket.WriteUInt8(options.OptionFlags);
                 _worldPacket.WriteInt32(options.OptionCost);
                 _worldPacket.WriteUInt32(options.OptionLanguage);
@@ -345,7 +345,7 @@ namespace Game.Networking.Packets
     public class ClientGossipOptions
     {
         public int ClientOption;
-        public byte OptionNPC;
+        public GossipOptionNpc OptionNPC;
         public byte OptionFlags;
         public int OptionCost;
         public uint OptionLanguage;

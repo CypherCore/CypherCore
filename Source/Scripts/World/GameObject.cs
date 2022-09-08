@@ -471,7 +471,7 @@ namespace Scripts.World.GameObjects
             QuestStatus status = player.GetQuestStatus(QuestIds.DoingYourDuty);
             if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
             {
-                player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionNpc.None, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
                 player.SendGossipMenu(GossipConst.GossipOuthouseVacant, me.GetGUID());
             }
             else

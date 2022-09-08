@@ -642,12 +642,12 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendRespecWipeConfirm(ObjectGuid guid, uint cost)
+        public void SendRespecWipeConfirm(ObjectGuid guid, uint cost, SpecResetType respecType)
         {
             RespecWipeConfirm respecWipeConfirm = new();
             respecWipeConfirm.RespecMaster = guid;
             respecWipeConfirm.Cost = cost;
-            respecWipeConfirm.RespecType = SpecResetType.Talents;
+            respecWipeConfirm.RespecType = respecType;
             SendPacket(respecWipeConfirm);
         }
 

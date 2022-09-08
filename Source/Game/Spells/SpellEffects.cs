@@ -1956,7 +1956,7 @@ namespace Game.Spells
 
             ObjectGuid guid = m_caster.GetGUID();
             if (!guid.IsEmpty()) // the trainer is the caster
-                unitTarget.ToPlayer().SendRespecWipeConfirm(guid, unitTarget.ToPlayer().GetNextResetTalentsCost());
+                unitTarget.ToPlayer().SendRespecWipeConfirm(guid, unitTarget.ToPlayer().GetNextResetTalentsCost(), SpecResetType.Talents);
         }
 
         [SpellEffectHandler(SpellEffectName.TeleportUnitsFaceCaster)]
