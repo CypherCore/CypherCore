@@ -6172,7 +6172,7 @@ namespace Game.Entities
             SetBoundingRadius(scale * SharedConst.DefaultPlayerBoundingRadius);
             SetCombatReach(scale * SharedConst.DefaultPlayerCombatReach);
             if (IsInWorld)
-                SendMovementSetCollisionHeight(scale * GetCollisionHeight(), UpdateCollisionHeightReason.Scale);
+                SendMovementSetCollisionHeight(GetCollisionHeight(), UpdateCollisionHeightReason.Scale);
         }
 
         public bool HasRaceChanged() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.HasRaceChanged); }

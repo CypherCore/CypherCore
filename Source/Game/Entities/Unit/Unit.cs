@@ -874,7 +874,7 @@ namespace Game.Entities
                     {
                         var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
                         var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                        float collisionHeight = scaleMod * (mountModelData.MountHeight + modelData.CollisionHeight * modelData.ModelScale * displayInfo.CreatureModelScale * 0.5f);
+                        float collisionHeight = scaleMod * ((mountModelData.MountHeight * mountDisplayInfo.CreatureModelScale) + (modelData.CollisionHeight * modelData.ModelScale * displayInfo.CreatureModelScale * 0.5f));
                         return collisionHeight == 0.0f ? MapConst.DefaultCollesionHeight : collisionHeight;
                     }
                 }
