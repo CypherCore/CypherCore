@@ -1272,7 +1272,7 @@ namespace Game.Groups
                             if (msg == InventoryResult.Ok)
                             {
                                 item.is_looted = true;
-                                roll.GetLoot().NotifyItemRemoved(roll.itemSlot);
+                                roll.GetLoot().NotifyItemRemoved(roll.itemSlot, allowedMap);
                                 roll.GetLoot().unlootedCount--;
                                 player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                             }
@@ -1338,7 +1338,7 @@ namespace Game.Groups
                                 if (msg == InventoryResult.Ok)
                                 {
                                     item.is_looted = true;
-                                    roll.GetLoot().NotifyItemRemoved(roll.itemSlot);
+                                    roll.GetLoot().NotifyItemRemoved(roll.itemSlot, allowedMap);
                                     roll.GetLoot().unlootedCount--;
                                     player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                                 }
@@ -1352,7 +1352,7 @@ namespace Game.Groups
                             else if (rollVote == RollType.Disenchant)
                             {
                                 item.is_looted = true;
-                                roll.GetLoot().NotifyItemRemoved(roll.itemSlot);
+                                roll.GetLoot().NotifyItemRemoved(roll.itemSlot, allowedMap);
                                 roll.GetLoot().unlootedCount--;
                                 player.UpdateCriteria(CriteriaType.CastSpell, 13262); // Disenchant
 
@@ -1364,7 +1364,7 @@ namespace Game.Groups
                                     player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, ItemContext.None, true);
                                 else // If the player's inventory is full, send the disenchant result in a mail.
                                 {
-                                    Loot loot = new();
+                                    Loot loot = new(allowedMap, roll.GetLoot().GetOwnerGUID(), LootType.Disenchanting);
                                     loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
 
                                     uint max_slot = loot.GetMaxSlotInLootFor(player);

@@ -207,7 +207,7 @@ namespace Game
                 if (loot == null)
                     continue;
 
-                loot.NotifyMoneyRemoved();
+                loot.NotifyMoneyRemoved(player.GetMap());
                 if (shareMoney && player.GetGroup() != null)      //item, pickpocket and players can be looted only single player
                 {
 
@@ -578,7 +578,7 @@ namespace Game
                 item.count = 0;
                 item.is_looted = true;
 
-                loot.NotifyItemRemoved(slotid);
+                loot.NotifyItemRemoved(slotid, GetPlayer().GetMap());
                 --loot.unlootedCount;
             }
 

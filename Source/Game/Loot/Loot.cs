@@ -23,6 +23,7 @@ using Game.Groups;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using Game.Maps;
 
 namespace Game.Loots
 {
@@ -165,16 +166,17 @@ namespace Game.Loots
 
     public class Loot
     {
-        public Loot()
+        public Loot(Map map, ObjectGuid owner, LootType type)
         {
-            gold = 0;
-            unlootedCount = 0;
-            loot_type = LootType.None;
+            loot_type = type;
             maxDuplicates = 1;
+            _guid = map ? ObjectGuid.Create(HighGuid.LootObject, map.GetId(), 0, map.GenerateLowGuid(HighGuid.LootObject)) : ObjectGuid.Empty;
+            _owner = owner;
+            _itemContext = ItemContext.None;
         }
 
         // Inserts the item into the loot (called by LootTemplate processors)
-        public void AddItem(LootStoreItem item)
+        public void AddItem(LootStoreItem item, Player player)
         {
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
             if (proto == null)
@@ -202,23 +204,19 @@ namespace Game.Loots
 
                 // In some cases, a dropped item should be visible/lootable only for some players in group
                 bool canSeeItemInLootWindow = false;
-                Player player = Global.ObjAccessor.FindPlayer(lootOwnerGUID);
-                if (player != null)
+                Group group = player.GetGroup();
+                if (group != null)
                 {
-                    Group group = player.GetGroup();
-                    if (group != null)
+                    for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
                     {
-                        for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                        {
-                            Player member = itr.GetSource();
-                            if (member != null)
-                                if (generatedLoot.AllowedForPlayer(member))
-                                    canSeeItemInLootWindow = true;
-                        }
+                        Player member = itr.GetSource();
+                        if (member != null)
+                            if (generatedLoot.AllowedForPlayer(member))
+                                canSeeItemInLootWindow = true;
                     }
-                    else if (generatedLoot.AllowedForPlayer(player))
-                        canSeeItemInLootWindow = true;
                 }
+                else if (generatedLoot.AllowedForPlayer(player))
+                    canSeeItemInLootWindow = true;
 
                 if (!canSeeItemInLootWindow)
                     continue;
@@ -250,8 +248,6 @@ namespace Game.Loots
             if (lootOwner == null)
                 return false;
 
-            lootOwnerGUID = lootOwner.GetGUID();
-
             LootTemplate tab = store.GetLootFor(lootId);
             if (tab == null)
             {
@@ -262,7 +258,7 @@ namespace Game.Loots
 
             _itemContext = context;
 
-            tab.Process(this, store.IsRatesAllowed(), (byte)lootMode);          // Processing is done there, callback via Loot.AddItem()
+            tab.Process(this, store.IsRatesAllowed(), (byte)lootMode, 0, lootOwner);          // Processing is done there, callback via Loot.AddItem()
 
             // Setting access rights for group loot case
             Group group = lootOwner.GetGroup();
@@ -396,34 +392,21 @@ namespace Game.Loots
             return ql;
         }
 
-        public void NotifyItemRemoved(byte lootIndex)
+        public void NotifyItemRemoved(byte lootIndex, Map map)
         {
             // notify all players that are looting this that the item was removed
             // convert the index to the slot the player sees
             for (int i = 0; i < PlayersLooting.Count; ++i)
             {
-                Player player = Global.ObjAccessor.FindPlayer(PlayersLooting[i]);
+                Player player = Global.ObjAccessor.GetPlayer(map, PlayersLooting[i]);
                 if (player != null)
-                    player.SendNotifyLootItemRemoved(GetGUID(), lootIndex);
+                    player.SendNotifyLootItemRemoved(GetGUID(), GetOwnerGUID(), lootIndex);
                 else
                     PlayersLooting.RemoveAt(i);
             }
         }
 
-        public void NotifyMoneyRemoved()
-        {
-            // notify all players that are looting this that the money was removed
-            for (var i = 0; i < PlayersLooting.Count; ++i)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(PlayersLooting[i]);
-                if (player != null)
-                    player.SendNotifyLootMoneyRemoved(GetGUID());
-                else
-                    PlayersLooting.RemoveAt(i);
-            }
-        }
-
-        public void NotifyQuestItemRemoved(byte questIndex)
+        public void NotifyQuestItemRemoved(byte questIndex, Map map)
         {
             // when a free for all questitem is looted
             // all players will get notified of it being removed
@@ -431,7 +414,7 @@ namespace Game.Loots
             // bit inefficient but isn't called often
             for (var i = 0; i < PlayersLooting.Count; ++i)
             {
-                Player player = Global.ObjAccessor.FindPlayer(PlayersLooting[i]);
+                Player player = Global.ObjAccessor.GetPlayer(map, PlayersLooting[i]);
                 if (player)
                 {
                     var pql = PlayerQuestItems.LookupByKey(player.GetGUID());
@@ -443,9 +426,22 @@ namespace Game.Loots
                                 break;
 
                         if (j < pql.Count)
-                            player.SendNotifyLootItemRemoved(GetGUID(), (byte)(items.Count + j));
+                            player.SendNotifyLootItemRemoved(GetGUID(), GetOwnerGUID(), (byte)(items.Count + j));
                     }
                 }
+                else
+                    PlayersLooting.RemoveAt(i);
+            }
+        }
+
+        public void NotifyMoneyRemoved(Map map)
+        {
+            // notify all players that are looting this that the money was removed
+            for (var i = 0; i < PlayersLooting.Count; ++i)
+            {
+                Player player = Global.ObjAccessor.GetPlayer(map, PlayersLooting[i]);
+                if (player != null)
+                    player.SendNotifyLootMoneyRemoved(GetGUID());
                 else
                     PlayersLooting.RemoveAt(i);
             }
@@ -835,9 +831,9 @@ namespace Game.Loots
         public void AddLooter(ObjectGuid guid) { PlayersLooting.Add(guid); }
         public void RemoveLooter(ObjectGuid guid) { PlayersLooting.Remove(guid); }
 
-        public ObjectGuid GetGUID() { return _GUID; }
-        public void SetGUID(ObjectGuid guid) { _GUID = guid; }
-
+        public ObjectGuid GetGUID() { return _guid; }
+        public ObjectGuid GetOwnerGUID() { return _owner; }
+        
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerQuestItems() { return PlayerQuestItems; }
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
@@ -847,7 +843,6 @@ namespace Game.Loots
         public uint gold;
         public byte unlootedCount;
         public ObjectGuid roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
-        ObjectGuid lootOwnerGUID;
         public LootType loot_type;                                     // required for achievement system
         public byte maxDuplicates;                                    // Max amount of items with the same entry that can drop (default is 1; on 25 man raid mode 3)
 
@@ -860,7 +855,8 @@ namespace Game.Loots
         LootValidatorRefManager i_LootValidatorRefManager = new();
 
         // Loot GUID
-        ObjectGuid _GUID;
+        ObjectGuid _guid;
+        ObjectGuid _owner;                                              // The WorldObject that holds this loot
         ItemContext _itemContext;
     }
 

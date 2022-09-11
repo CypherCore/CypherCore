@@ -776,9 +776,8 @@ namespace Game.Entities
 
                 if (creature)
                 {
-                    creature.loot = new Loot();
+                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse);
                     Loot loot = creature.loot;
-                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, creature.GetMapId(), 0, creature.GetMap().GenerateLowGuid(HighGuid.LootObject)));
                     if (creature.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;
 

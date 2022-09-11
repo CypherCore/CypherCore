@@ -5896,7 +5896,7 @@ namespace Game.Entities
         public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
         void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
         {
-            Loot loot = new();
+            Loot loot = new(null, ObjectGuid.Empty, LootType.None);
             loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
 
             uint max_slot = loot.GetMaxSlotInLootFor(this);
@@ -6015,9 +6015,9 @@ namespace Game.Entities
                     qitem.is_looted = true;
                     //freeforall is 1 if everyone's supposed to get the quest item.
                     if (item.freeforall || loot.GetPlayerQuestItems().Count == 1)
-                        SendNotifyLootItemRemoved(loot.GetGUID(), lootSlot);
+                        SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
                     else
-                        loot.NotifyQuestItemRemoved(qitem.index);
+                        loot.NotifyQuestItemRemoved(qitem.index, GetMap());
                 }
                 else
                 {
@@ -6025,14 +6025,14 @@ namespace Game.Entities
                     {
                         //freeforall case, notify only one player of the removal
                         ffaitem.is_looted = true;
-                        SendNotifyLootItemRemoved(loot.GetGUID(), lootSlot);
+                        SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
                     }
                     else
                     {
                         //not freeforall, notify everyone
                         if (conditem != null)
                             conditem.is_looted = true;
-                        loot.NotifyItemRemoved(lootSlot);
+                        loot.NotifyItemRemoved(lootSlot, GetMap());
                     }
                 }
 
@@ -6105,8 +6105,7 @@ namespace Game.Entities
             // Now we must make bones lootable, and send player loot
             bones.SetCorpseDynamicFlag(CorpseDynFlags.Lootable);
 
-            bones.loot = new Loot();
-            bones.loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), 0, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+            bones.loot = new Loot(GetMap(), bones.GetGUID(), LootType.Insignia);
 
             // For AV Achievement
             Battleground bg = GetBattleground();
@@ -6203,8 +6202,7 @@ namespace Game.Entities
                         }
                     }
 
-                    loot = new Loot();
-                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, go.GetMapId(), 0, go.GetMap().GenerateLowGuid(HighGuid.LootObject)));
+                    loot = new Loot(GetMap(), guid, loot_type);
                     if (go.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;
 
@@ -6305,8 +6303,7 @@ namespace Game.Entities
                 if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
                 {
                     item.m_lootGenerated = true;
-                    loot = new Loot();
-                    loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), 0, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+                    loot = new Loot(GetMap(), guid, loot_type);
                     item.loot = loot;
 
                     switch (loot_type)
@@ -6480,10 +6477,6 @@ namespace Game.Entities
                 }
             }
 
-            // need know merged fishing/corpse loot type for achievements
-            if (loot != null)
-                loot.loot_type = loot_type;
-
             if (permission != PermissionTypes.None)
             {
                 LootMethod _lootMethod = LootMethod.FreeForAll;
@@ -6543,11 +6536,11 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendNotifyLootItemRemoved(ObjectGuid lootObj, byte lootSlot)
+        public void SendNotifyLootItemRemoved(ObjectGuid lootObj, ObjectGuid owner, byte lootSlot)
         {
             LootRemoved packet = new();
-            packet.Owner = GetLootWorldObjectGUID(lootObj);
             packet.LootObj = lootObj;
+            packet.Owner = owner;
             packet.LootListID = (byte)(lootSlot + 1);
             SendPacket(packet);
         }

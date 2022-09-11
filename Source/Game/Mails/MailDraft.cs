@@ -60,7 +60,7 @@ namespace Game.Mails
             if (m_mailTemplateId == 123)
                 m_money = 1000000;
 
-            Loot mailLoot = new();
+            Loot mailLoot = new(null, ObjectGuid.Empty, LootType.None);
 
             // can be empty
             mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
