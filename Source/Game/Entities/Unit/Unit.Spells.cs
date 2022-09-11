@@ -2802,11 +2802,13 @@ namespace Game.Entities
 
             return count;
         }
+
         public Aura GetAuraOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             var aurApp = GetAuraApplicationOfRankedSpell(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
+
         AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
@@ -2872,10 +2874,10 @@ namespace Game.Entities
                 case SpellAuraInterruptFlags.ActionDelayed:
                     if (interruptSource != null)
                     {
-                        if (interruptSource.HasAttribute(SpellAttr1.AllowWhileStealthed) && auraSpellInfo.HasAura(AuraType.ModStealth))
+                        if (interruptSource.HasAttribute(SpellAttr1.AllowWhileStealthed) && auraSpellInfo.Dispel == DispelType.Stealth)
                             return true;
 
-                        if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) && auraSpellInfo.HasAura(AuraType.ModInvisibility))
+                        if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) && auraSpellInfo.Dispel == DispelType.Invisibility)
                             return true;
                     }
                     break;
@@ -2885,6 +2887,7 @@ namespace Game.Entities
 
             return false;
         }
+
         bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
         {
             return false;
