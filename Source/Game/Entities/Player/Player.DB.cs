@@ -366,9 +366,8 @@ namespace Game.Entities
                     SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, race, GetClass());
                     if (rcEntry == null)
                     {
-                        Log.outError(LogFilter.Player, "Character: {0}(GUID: {1} Race: {2} Class: {3}) has skill {4} not allowed for his race/class combination",
-                            GetName(), GetGUID().ToString(), race, GetClass(), skill);
-                        mSkillStatus.Add(skill, new SkillStatusData(0, SkillState.Deleted));
+                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}, Race: {race}, Class: {GetClass()}) has forbidden skill {skill} for his race/class combination");
+                        mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Deleted));
                         continue;
                     }
 
