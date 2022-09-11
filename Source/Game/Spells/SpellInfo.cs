@@ -1039,9 +1039,11 @@ namespace Game.Spells
 
                         if (HasAttribute(SpellCustomAttributes.PickPocket))
                         {
-                            if (unitTarget.IsTypeId(TypeId.Player))
+                            Creature targetCreature = unitTarget.ToCreature();
+                            if (targetCreature == null)
                                 return SpellCastResult.BadTargets;
-                            else if ((unitTarget.GetCreatureTypeMask() & (uint)CreatureType.MaskHumanoidOrUndead) == 0)
+
+                            if (!Loots.LootStorage.Pickpocketing.HaveLootFor(targetCreature.GetCreatureTemplate().PickPocketId))
                                 return SpellCastResult.TargetNoPockets;
                         }
 

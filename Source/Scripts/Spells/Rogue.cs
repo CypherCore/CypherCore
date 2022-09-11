@@ -271,7 +271,7 @@ namespace Scripts.Spells.Rogue
         void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty() || GetCaster().GetVehicleBase())
-                FinishCast( SpellCastResult.OutOfRange);
+                FinishCast(SpellCastResult.OutOfRange);
         }
 
         void HandleDummy(uint effIndex)
@@ -369,6 +369,23 @@ namespace Scripts.Spells.Rogue
         }
     }
 
+    [Script]
+    class spell_rog_pickpocket : SpellScript
+    {
+        SpellCastResult CheckCast()
+        {
+            if (!GetExplTargetUnit() || !GetCaster().IsValidAttackTarget(GetExplTargetUnit(), GetSpellInfo()))
+                return SpellCastResult.BadTargets;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+        }
+    }
+    
     [Script] // 79096 - Restless Blades
     class spell_rog_restless_blades : AuraScript
     {

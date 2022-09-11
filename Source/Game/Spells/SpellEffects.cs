@@ -1912,13 +1912,7 @@ namespace Game.Spells
             if (!m_caster.IsTypeId(TypeId.Player))
                 return;
 
-            // victim must be creature and attackable
-            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit) || m_caster.IsFriendlyTo(unitTarget))
-                return;
-
-            // victim have to be alive and humanoid or undead
-            if (unitTarget.IsAlive() && (unitTarget.GetCreatureTypeMask() & (uint)CreatureType.MaskHumanoidOrUndead) != 0)
-                m_caster.ToPlayer().SendLoot(unitTarget.GetGUID(), LootType.Pickpocketing);
+            m_caster.ToPlayer().SendLoot(unitTarget.GetGUID(), LootType.Pickpocketing);
         }
 
         [SpellEffectHandler(SpellEffectName.AddFarsight)]

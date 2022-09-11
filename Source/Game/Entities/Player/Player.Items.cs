@@ -6371,7 +6371,7 @@ namespace Game.Entities
 
                 if (loot_type == LootType.Pickpocketing)
                 {
-                    if (loot.loot_type != LootType.Pickpocketing)
+                    if (loot == null || loot.loot_type != LootType.Pickpocketing)
                     {
                         if (creature.CanGeneratePickPocketLoot())
                         {
