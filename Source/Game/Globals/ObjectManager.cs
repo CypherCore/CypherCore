@@ -637,11 +637,15 @@ namespace Game
                 if (gMenuItem.ActionPoiId != 0)
                 {
                     if (gMenuItem.OptionNpc != GossipOptionNpc.None)
+                    {
                         Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                        gMenuItem.ActionPoiId = 0;
+                    }
                     else if (GetPointOfInterest(gMenuItem.ActionPoiId) == null)
+                    {
                         Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing ActionPoiID {gMenuItem.ActionPoiId}, ignoring");
-
-                    gMenuItem.ActionPoiId = 0;
+                        gMenuItem.ActionPoiId = 0;
+                    }
                 }
 
                 if (gMenuItem.BoxBroadcastTextId != 0)
