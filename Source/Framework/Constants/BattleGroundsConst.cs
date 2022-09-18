@@ -25,14 +25,14 @@ namespace Framework.Constants
         //RemindInterval                 = 10000,               // Ms
         public const uint InvitationRemindTime = 20000;         // Ms
         public const uint InviteAcceptWaitTime = 90000;         // Ms
-        public const uint AutocloseBattleground = 120000;        // Ms
+        public const uint AutocloseBattleground = 120000;       // Ms
         public const uint MaxOfflineTime = 300;                 // Secs
         public const uint RespawnOneDay = 86400;                // Secs
         public const uint RespawnImmediately = 0;               // Secs
         public const uint BuffRespawnTime = 180;                // Secs
         public const uint BattlegroundCountdownMax = 120;       // Secs
         public const uint ArenaCountdownMax = 60;               // Secs
-        public const uint PlayerPositionUpdateInterval = 5;     // secs
+        public const uint PlayerPositionUpdateInterval = 5000;  // Ms
 
         //EventIds
         public const int EventIdFirst = 0;
