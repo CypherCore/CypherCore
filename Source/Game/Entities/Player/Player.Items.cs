@@ -2404,7 +2404,7 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (HasLootWorldObjectGUID(bagItem.GetGUID()))
+                            if (GetLootByWorldObjectGUID(bagItem.GetGUID()) != null)
                             {
                                 GetSession().DoLootReleaseAll();
                                 released = true;                    // so we don't need to look at dstBag
@@ -2422,7 +2422,7 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (HasLootWorldObjectGUID(bagItem.GetGUID()))
+                            if (GetLootByWorldObjectGUID(bagItem.GetGUID()) != null)
                             {
                                 GetSession().DoLootReleaseAll();
                                 break;
@@ -4096,25 +4096,12 @@ namespace Game.Entities
             }
         }
 
-        public ObjectGuid GetLootWorldObjectGUID(ObjectGuid lootObjectGuid)
+        public Loot GetLootByWorldObjectGUID(ObjectGuid lootWorldObjectGuid)
         {
-            if (!m_AELootView.ContainsKey(lootObjectGuid))
-                return ObjectGuid.Empty;
+            if (m_AELootView.TryGetValue(lootWorldObjectGuid, out Loot lootView))
+                return lootView;
 
-            return m_AELootView[lootObjectGuid];
-        }
-
-        public void RemoveAELootedWorldObject(ObjectGuid lootWorldObjectGuid)
-        {
-            var itr = m_AELootView.FirstOrDefault(pair => pair.Value == lootWorldObjectGuid);
-
-            if (itr.Key != ObjectGuid.Empty)
-                m_AELootView.Remove(itr.Key);
-        }
-
-        public bool HasLootWorldObjectGUID(ObjectGuid lootWorldObjectGuid)
-        {
-            return m_AELootView.Any(lootView => lootView.Value == lootWorldObjectGuid);
+            return null;
         }
 
         //Inventory
@@ -6073,7 +6060,7 @@ namespace Game.Entities
                 SendEquipError(msg, null, null, item.itemid);
         }
 
-        public Dictionary<ObjectGuid, ObjectGuid> GetAELootView() { return m_AELootView; }
+        public Dictionary<ObjectGuid, Loot> GetAELootView() { return m_AELootView; }
 
         /// <summary>
         /// if in a Battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
@@ -6210,8 +6197,6 @@ namespace Game.Entities
 
                     if (lootid != 0)
                     {
-                        loot.Clear();
-
                         Group group = GetGroup();
                         bool groupRules = (group && go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0);
 
@@ -6373,8 +6358,9 @@ namespace Game.Entities
                         if (creature.CanGeneratePickPocketLoot())
                         {
                             creature.StartPickPocketRefillTimer();
-                            loot.Clear();
 
+                            loot = new Loot(GetMap(), creature.GetGUID(), LootType.Pickpocketing);
+                            creature.loot = loot;
                             uint lootid = creature.GetCreatureTemplate().PickPocketId;
                             if (lootid != 0)
                                 loot.FillLoot(lootid, LootStorage.Pickpocketing, this, true);
@@ -6510,7 +6496,7 @@ namespace Game.Entities
 
                 // add 'this' player as one of the players that are looting 'loot'
                 loot.AddLooter(GetGUID());
-                m_AELootView[loot.GetGUID()] = guid;
+                m_AELootView[loot.GetGUID()] = loot;
 
                 if (loot_type == LootType.Corpse && !guid.IsItem())
                     SetUnitFlag(UnitFlags.Looting);

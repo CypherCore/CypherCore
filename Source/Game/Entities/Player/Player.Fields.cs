@@ -22,6 +22,7 @@ using Game.Chat;
 using Game.DataStorage;
 using Game.Garrisons;
 using Game.Groups;
+using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
@@ -238,7 +239,7 @@ namespace Game.Entities
 
         SceneMgr m_sceneMgr;
 
-        Dictionary<ObjectGuid /*LootObject*/, ObjectGuid /*WorldObject*/> m_AELootView = new();
+        Dictionary<ObjectGuid, Loot> m_AELootView = new();
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];

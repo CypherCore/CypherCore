@@ -39,8 +39,14 @@ namespace Game
             // @todo Implement looting by LootObject guid
             foreach (LootRequest req in packet.Loot)
             {
-                Loot loot = null;
-                ObjectGuid lguid = player.GetLootWorldObjectGUID(req.Object);
+                Loot loot = player.GetAELootView().LookupByKey(req.Object);
+                if (loot == null)
+                {
+                    player.SendLootRelease(ObjectGuid.Empty);
+                    continue;
+                }
+
+                ObjectGuid lguid = loot.GetOwnerGUID();
 
                 if (lguid.IsGameObject())
                 {
@@ -52,33 +58,8 @@ namespace Game
                         player.SendLootRelease(lguid);
                         continue;
                     }
-
-                    loot = go.GetLootForPlayer(player);
                 }
-                else if (lguid.IsItem())
-                {
-                    Item pItem = player.GetItemByGuid(lguid);
-
-                    if (!pItem)
-                    {
-                        player.SendLootRelease(lguid);
-                        continue;
-                    }
-
-                    loot = pItem.GetLootForPlayer(player);
-                }
-                else if (lguid.IsCorpse())
-                {
-                    Corpse bones = ObjectAccessor.GetCorpse(player, lguid);
-                    if (!bones)
-                    {
-                        player.SendLootRelease(lguid);
-                        continue;
-                    }
-
-                    loot = bones.GetLootForPlayer(player);
-                }
-                else
+                else if (lguid.IsCreatureOrVehicle())
                 {
                     Creature creature = player.GetMap().GetCreature(lguid);
                     if (creature == null)
@@ -92,26 +73,13 @@ namespace Game
                         player.SendLootError(req.Object, lguid, LootError.TooFar);
                         continue;
                     }
-
-                    loot = creature.GetLootForPlayer(player);
-                    if (creature.IsAlive() != (loot != null && loot.loot_type == LootType.Pickpocketing))
-                    {
-                        player.SendLootError(req.Object, lguid, LootError.DidntKill);
-                        continue;
-                    }
-                }
-
-                if (loot == null)
-                {
-                    player.SendLootRelease(lguid);
-                    continue;
                 }
 
                 player.StoreLootItem(lguid, (byte)(req.LootListID - 1), loot, aeResult);
 
                 // If player is removing the last LootItem, delete the empty container.
                 if (loot.IsLooted() && lguid.IsItem())
-                    player.GetSession().DoLootRelease(lguid);
+                    player.GetSession().DoLootRelease(loot);
             }
 
             if (aeResult != null)
@@ -135,82 +103,13 @@ namespace Game
 
             foreach (var lootView in player.GetAELootView())
             {
-                ObjectGuid guid = lootView.Value;
-                Loot loot = null;
-                bool shareMoney = true;
-
-                switch (guid.GetHigh())
-                {
-                    case HighGuid.GameObject:
-                        {
-                            GameObject go = player.GetMap().GetGameObject(guid);
-
-                            // do not check distance for GO if player is the owner of it (ex. fishing bobber)
-                            if (go && (go.GetOwnerGUID() == player.GetGUID() || go.IsWithinDistInMap(player)))
-                                loot = go.GetLootForPlayer(player);
-
-                        break;
-                        }
-                    case HighGuid.Corpse:                               // remove insignia ONLY in BG
-                        {
-                            Corpse bones = ObjectAccessor.GetCorpse(player, guid);
-
-                            if (bones && bones.IsWithinDistInMap(player, SharedConst.InteractionDistance))
-                            {
-                                loot = bones.GetLootForPlayer(player);
-                            shareMoney = false;
-                            }
-
-                            break;
-                        }
-                    case HighGuid.Item:
-                        {
-                            Item item = player.GetItemByGuid(guid);
-                            if (item)
-                            {
-                                loot = item.GetLootForPlayer(player);
-                            shareMoney = false;
-                            }
-                            break;
-                        }
-                    case HighGuid.Creature:
-                    case HighGuid.Vehicle:
-                    {
-                        Creature creature = player.GetMap().GetCreature(guid);
-                        if (creature == null)
-                        {
-                            player.SendLootError(lootView.Key, guid, LootError.NoLoot);
-                            continue;
-                        }
-
-                        if (!creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
-                        {
-                            player.SendLootError(lootView.Key, guid, LootError.TooFar);
-                            continue;
-                        }
-
-                        loot = creature.GetLootForPlayer(player);
-                        if (creature.IsAlive() != (loot != null && loot.loot_type == LootType.Pickpocketing))
-                        {
-                            player.SendLootError(lootView.Key, guid, LootError.DidntKill);
-                            continue;
-                        }
-
-                        if (loot != null && loot.loot_type != LootType.Corpse)
-                            shareMoney = false;
-                        break;
-                    }
-                    default:
-                        continue;                                         // unlootable type
-                }
-
-                if (loot == null)
-                    continue;
+                Loot loot = lootView.Value;
+                ObjectGuid guid = loot.GetOwnerGUID();
+                bool shareMoney = loot.loot_type == LootType.Corpse;
 
                 loot.NotifyMoneyRemoved(player.GetMap());
                 if (shareMoney && player.GetGroup() != null)      //item, pickpocket and players can be looted only single player
                 {
-
                     Group group = player.GetGroup();
 
                     List<Player> playersNear = new();
@@ -262,7 +161,7 @@ namespace Game
 
                 // Delete container if empty
                 if (loot.IsLooted() && guid.IsItem())
-                    player.GetSession().DoLootRelease(guid);
+                    player.GetSession().DoLootRelease(loot);
             }
         }
 
@@ -335,20 +234,21 @@ namespace Game
         {
             // cheaters can modify lguid to prevent correct apply loot release code and re-loot
             // use internal stored guid
-            if (GetPlayer().HasLootWorldObjectGUID(packet.Unit))
-                DoLootRelease(packet.Unit);
+            Loot loot = GetPlayer().GetLootByWorldObjectGUID(packet.Unit);
+            if (loot != null)
+                DoLootRelease(loot);
         }
 
-        public void DoLootRelease(ObjectGuid lguid)
+        public void DoLootRelease(Loot loot)
         {
+            ObjectGuid lguid = loot.GetOwnerGUID();
             Player player = GetPlayer();
-            Loot loot;
 
             if (player.GetLootGUID() == lguid)
                 player.SetLootGUID(ObjectGuid.Empty);
 
             player.SendLootRelease(lguid);
-            player.RemoveAELootedWorldObject(lguid);
+            player.GetAELootView().Remove(loot.GetGUID());
 
             if (player.GetAELootView().Empty())
                 player.RemoveUnitFlag(UnitFlags.Looting);
@@ -363,8 +263,6 @@ namespace Game
                 // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
                 if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
                     return;
-
-                loot = go.GetLootForPlayer(player);
 
                 if (go.GetGoType() == GameObjectTypes.Door)
                 {
@@ -402,11 +300,9 @@ namespace Game
                 if (!corpse || !corpse.IsWithinDistInMap(player, SharedConst.InteractionDistance))
                     return;
 
-                loot = corpse.GetLootForPlayer(player);
-
-                if (loot != null && loot.IsLooted())
+                if (loot.IsLooted())
                 {
-                    loot.Clear();
+                    corpse.loot = null;
                     corpse.RemoveCorpseDynamicFlag(CorpseDynFlags.Lootable);
                 }
             }
@@ -418,10 +314,8 @@ namespace Game
 
                 ItemTemplate proto = pItem.GetTemplate();
 
-                loot = pItem.GetLootForPlayer(player);
-
                 // destroy only 5 items from stack in case prospecting and milling
-                if (loot != null && (loot.loot_type == LootType.Prospecting || loot.loot_type == LootType.Milling))
+                if (loot.loot_type == LootType.Prospecting || loot.loot_type == LootType.Milling)
                 {
                     pItem.m_lootGenerated = false;
                     pItem.loot = null;
@@ -437,7 +331,7 @@ namespace Game
                 else
                 {
                     // Only delete item if no loot or money (unlooted loot is saved to db) or if it isn't an openable item
-                    if ((loot != null && loot.IsLooted()) || !proto.HasFlag(ItemFlags.HasLoot))
+                    if (loot.IsLooted() || !proto.HasFlag(ItemFlags.HasLoot))
                         player.DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
                 }
                 return;                                             // item can be looted only single player
@@ -451,11 +345,10 @@ namespace Game
                 if (!creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                     return;
 
-                loot = creature.GetLootForPlayer(player);
                 if (creature.IsAlive() != (loot != null && loot.loot_type == LootType.Pickpocketing))
                     return;
 
-                if (loot == null || loot.IsLooted())
+                if (loot.IsLooted())
                 {
                     creature.RemoveDynamicFlag(UnitDynFlags.Lootable);
 
@@ -484,15 +377,14 @@ namespace Game
             }
 
             //Player is not looking at loot list, he doesn't need to see updates on the loot list
-            if (loot != null)
-                loot.RemoveLooter(player.GetGUID());
+            loot.RemoveLooter(player.GetGUID());
         }
 
         public void DoLootReleaseAll()
         {
-            Dictionary<ObjectGuid, ObjectGuid> lootView = _player.GetAELootView();
-            foreach (var lootPair in lootView)
-                DoLootRelease(lootPair.Value);
+            Dictionary<ObjectGuid, Loot> lootView = _player.GetAELootView();
+            foreach (var (_, loot) in lootView)
+                DoLootRelease(loot);
         }
 
         [WorldPacketHandler(ClientOpcodes.MasterLootItem)]
@@ -516,31 +408,13 @@ namespace Game
 
             foreach (LootRequest req in masterLootItem.Loot)
             {
-                Loot loot = null;
-                ObjectGuid lootguid = _player.GetLootWorldObjectGUID(req.Object);
+                Loot loot = _player.GetAELootView().LookupByKey(req.Object);
 
                 if (!_player.IsInRaidWith(target) || !_player.IsInMap(target))
                 {
                     _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterOther);
                     Log.outInfo(LogFilter.Cheat, $"MasterLootItem: Player {GetPlayer().GetName()} tried to give an item to ineligible player {target.GetName()} !");
                     return;
-                }
-
-                if (GetPlayer().GetLootGUID().IsCreatureOrVehicle())
-                {
-                    Creature creature = GetPlayer().GetMap().GetCreature(lootguid);
-                    if (!creature)
-                        return;
-
-                    loot = creature.GetLootForPlayer(_player);
-                }
-                else if (GetPlayer().GetLootGUID().IsGameObject())
-                {
-                    GameObject go = GetPlayer().GetMap().GetGameObject(lootguid);
-                    if (!go)
-                        return;
-
-                    loot = go.GetLootForPlayer(_player);
                 }
 
                 if (loot == null)

@@ -815,6 +815,13 @@ namespace Game.Loots
 
             PlayerNonQuestNonFFAConditionalItems.Clear();
 
+            foreach (ObjectGuid playerGuid in PlayersLooting)
+            {
+                Player player = Global.ObjAccessor.FindConnectedPlayer(playerGuid);
+                if (player != null)
+                    player.GetSession().DoLootRelease(this);
+            }
+
             PlayersLooting.Clear();
             items.Clear();
             quest_items.Clear();
