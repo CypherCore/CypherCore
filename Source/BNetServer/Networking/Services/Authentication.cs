@@ -42,7 +42,7 @@ namespace BNetServer.Networking
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
             ChallengeExternalRequest externalChallenge = new();
-            externalChallenge.PayloadType = "web_auth_url";            
+            externalChallenge.PayloadType = "web_auth_url";
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
@@ -162,6 +162,30 @@ namespace BNetServer.Networking
             authed = true;
 
             SendRequest((uint)OriginalHash.AuthenticationListener, 5, logonResult);
+            return BattlenetRpcErrorCode.Ok;
+        }
+
+        [Service(OriginalHash.AuthenticationService, 8)]
+        BattlenetRpcErrorCode HandleGenerateWebCredentials(GenerateWebCredentialsRequest request, GenerateWebCredentialsResponse response)
+        {
+            if (!authed)
+                return BattlenetRpcErrorCode.Denied;
+
+            if (request.Program != 0x576F57)
+            {
+                Log.outDebug(LogFilter.Session, $"[Battlenet::HandleGenerateWebCredentials] {GetClientInfo()} attempted to generate web cretentials with game other than WoW (using {(request.Program >> 24) & 0xFF}{(request.Program >> 16) & 0xFF}{(request.Program >> 8) & 0xFF}{request.Program & 0xFF})!");
+                return BattlenetRpcErrorCode.BadProgram;
+            }
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID);
+            stmt.AddValue(0, accountInfo.Id);
+
+            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(result =>
+            {
+                // just send existing credentials back (not the best but it works for now with them being stored in db)
+                response.WebCredentials = ByteString.CopyFromUtf8(result.Read<string>(0));
+            }));
+
             return BattlenetRpcErrorCode.Ok;
         }
     }

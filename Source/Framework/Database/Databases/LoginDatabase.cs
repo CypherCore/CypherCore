@@ -114,6 +114,7 @@ namespace Framework.Database
 
             PrepareStatement(LoginStatements.SelBnetAuthentication, "SELECT ba.id, ba.sha_pass_hash, ba.failed_logins, ba.LoginTicket, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id WHERE email = ?");
             PrepareStatement(LoginStatements.UpdBnetAuthentication, "UPDATE battlenet_accounts SET LoginTicket = ?, LoginTicketExpiry = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID, "SELECT LoginTicket FROM battlenet_accounts WHERE id = ?");
             PrepareStatement(LoginStatements.SelBnetAccountInfo, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo +
                 " FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account a ON ba.id = a.battlenet_account" +
                 " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID = -1 WHERE ba.LoginTicket = ? ORDER BY a.id");
@@ -264,6 +265,7 @@ namespace Framework.Database
 
         SelBnetAuthentication,
         UpdBnetAuthentication,
+        SEL_BNET_EXISTING_AUTHENTICATION_BY_ID,
         SelBnetAccountInfo,
         UpdBnetLastLoginInfo,
         UPD_BNET_GAME_ACCOUNT_LOGIN_INFO,
