@@ -869,7 +869,6 @@ namespace Game
             if (group)
             {
                 group.SendUpdate();
-                group.ResetMaxEnchantingLevel();
                 if (group.GetLeaderGUID() == pCurrChar.GetGUID())
                     group.StopLeaderOfflineTimer();
             }

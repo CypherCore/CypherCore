@@ -385,26 +385,6 @@ namespace Game
             group.SendUpdate();
         }
 
-        [WorldPacketHandler(ClientOpcodes.LootRoll)]
-        void HandleLootRoll(LootRoll packet)
-        {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
-                return;
-
-            group.CountRollVote(GetPlayer().GetGUID(), packet.LootObj, (byte)(packet.LootListID - 1), packet.RollType);
-
-            switch (packet.RollType)
-            {
-                case RollType.Need:
-                    GetPlayer().UpdateCriteria(CriteriaType.RollAnyNeed, 1);
-                    break;
-                case RollType.Greed:
-                    GetPlayer().UpdateCriteria(CriteriaType.RollAnyGreed, 1);
-                    break;
-            }
-        }
-
         [WorldPacketHandler(ClientOpcodes.MinimapPing)]
         void HandleMinimapPing(MinimapPingClient packet)
         {

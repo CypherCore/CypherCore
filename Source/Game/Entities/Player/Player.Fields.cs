@@ -240,6 +240,7 @@ namespace Game.Entities
         SceneMgr m_sceneMgr;
 
         Dictionary<ObjectGuid, Loot> m_AELootView = new();
+        List<LootRoll> m_lootRolls = new();                                     // loot rolls waiting for answer
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];

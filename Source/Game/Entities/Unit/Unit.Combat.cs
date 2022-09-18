@@ -752,7 +752,6 @@ namespace Game.Entities
 
                 Player looter = player;
                 var group = player.GetGroup();
-                bool hasLooterGuid = false;
                 if (group)
                 {
                     group.BroadcastPacket(partyKillLog, group.GetMemberGroup(player.GetGUID()) != 0);
@@ -764,10 +763,7 @@ namespace Game.Entities
                         {
                             looter = Global.ObjAccessor.FindPlayer(group.GetLooterGuid());
                             if (looter)
-                            {
-                                hasLooterGuid = true;
                                 creature.SetLootRecipient(looter);   // update creature loot recipient to the allowed looter.
-                            }
                         }
                     }
                 }
@@ -777,7 +773,7 @@ namespace Game.Entities
                 // Generate loot before updating looter
                 if (creature)
                 {
-                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse, group != null ? group.GetLootMethod() : LootMethod.FreeForAll);
+                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse, group);
                     Loot loot = creature.loot;
                     if (creature.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;
@@ -789,24 +785,11 @@ namespace Game.Entities
                     if (creature.GetLootMode() > 0)
                         loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
-                    if (group)
-                    {
-                        if (hasLooterGuid)
-                            group.SendLooter(creature, looter);
-                        else
-                            group.SendLooter(creature, null);
+                    loot.NotifyLootList(creature.GetMap());
 
-                        // Update round robin looter only if the creature had loot
-                        if (!loot.Empty())
-                            group.UpdateLooterGuid(creature);
-                    }
-                    else
-                    {
-                        LootList lootList = new();
-                        lootList.Owner = creature.GetGUID();
-                        lootList.LootObj = creature.loot.GetGUID();
-                        player.SendMessageToSet(lootList, true);
-                    }
+                    // Update round robin looter only if the creature had loot
+                    if (group != null && !loot.Empty())
+                        group.UpdateLooterGuid(creature);
                 }
 
                 player.RewardPlayerAndGroupAtKill(victim, false);

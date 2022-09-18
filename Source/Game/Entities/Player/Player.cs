@@ -757,6 +757,7 @@ namespace Game.Entities
                 UnsummonPetTemporaryIfAny();
                 ClearComboPoints();
                 GetSession().DoLootReleaseAll();
+                m_lootRolls.Clear();
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }
@@ -3140,7 +3141,15 @@ namespace Game.Entities
                 case LootMethod.MasterLoot:
                 case LootMethod.FreeForAll:
                     return true;
+                case LootMethod.RoundRobin:
+                    // may only loot if the player is the loot roundrobin player
+                    // or if there are free/quest/conditional item for the player
+                    if (loot.roundRobinPlayer.IsEmpty() || loot.roundRobinPlayer == GetGUID())
+                        return true;
+
+                    return loot.HasItemFor(this);
                 case LootMethod.GroupLoot:
+                case LootMethod.NeedBeforeGreed:
                     // may only loot if the player is the loot roundrobin player
                     // or item over threshold (so roll(s) can be launched)
                     // or if there are free/quest/conditional item for the player

@@ -17,16 +17,14 @@
 
 namespace Framework.Constants
 {
-    public enum RollType
+    public enum RollVote
     {
         Pass = 0,
         Need = 1,
         Greed = 2,
         Disenchant = 3,
         NotEmitedYet = 4,
-        NotValid = 5,
-
-        MaxTypes = 4,
+        NotValid = 5
     }
 
     public enum RollMask
@@ -43,8 +41,10 @@ namespace Framework.Constants
     public enum LootMethod
     {
         FreeForAll = 0,
+        RoundRobin = 1,
         MasterLoot = 2,
         GroupLoot = 3,
+        NeedBeforeGreed = 4,
         PersonalLoot = 5
     }
 
@@ -64,6 +64,7 @@ namespace Framework.Constants
         Group = 1,
         Master = 2,
         Restricted = 3,
+        RoundRobin = 4,
         Owner = 5,
         None = 6
     }

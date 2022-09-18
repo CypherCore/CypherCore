@@ -507,20 +507,9 @@ namespace Game.Entities
                     if (IsEngaged())
                         AIUpdateTick(diff);
 
-                    if (loot != null && m_groupLootTimer != 0 && !lootingGroupLowGUID.IsEmpty())
-                    {
-                        if (m_groupLootTimer <= diff)
-                        {
-                            Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
-                            if (group)
-                                group.EndRoll(loot, GetMap());
+                    loot?.Update();
 
-                            m_groupLootTimer = 0;
-                            lootingGroupLowGUID.Clear();
-                        }
-                        else m_groupLootTimer -= diff;
-                    }
-                    else if (m_corpseRemoveTime <= GameTime.GetGameTime())
+                    if (m_corpseRemoveTime <= GameTime.GetGameTime())
                     {
                         RemoveCorpse(false);
                         Log.outDebug(LogFilter.Unit, "Removing corpse... {0} ", GetEntry());

@@ -92,6 +92,13 @@ namespace Game.Entities
             return true;
         }
 
+        public override void Update(uint diff)
+        {
+            base.Update(diff);
+            
+            loot?.Update();
+        }
+
         public void SaveToDB()
         {
             // prevent DB data inconsistence problems and duplicates

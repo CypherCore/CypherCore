@@ -362,22 +362,14 @@ namespace Game
                     if (player.GetGUID() == loot.roundRobinPlayer)
                     {
                         loot.roundRobinPlayer.Clear();
-
-                        Group group = player.GetGroup();
-                        if (group)
-                        {
-                            if (group.GetLootMethod() != LootMethod.MasterLoot)
-                                group.SendLooter(creature, null);
-                        }
-                        // force dynflag update to update looter and lootable info
-                        creature.m_values.ModifyValue(creature.m_objectData).ModifyValue(creature.m_objectData.DynamicFlags);
-                        creature.ForceUpdateFieldChange();
+                        loot.NotifyLootList(creature.GetMap());
                     }
+
+                    // force dynflag update to update looter and lootable info
+                    creature.m_values.ModifyValue(creature.m_objectData).ModifyValue(creature.m_objectData.DynamicFlags);
+                    creature.ForceUpdateFieldChange();
                 }
             }
-
-            //Player is not looking at loot list, he doesn't need to see updates on the loot list
-            loot.RemoveLooter(player.GetGUID());
         }
 
         public void DoLootReleaseAll()
@@ -464,6 +456,16 @@ namespace Game
                 target.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
                 target.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
             }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.LootRoll)]
+        void HandleLootRoll(LootRollPacket packet)
+        {
+            LootRoll lootRoll = GetPlayer().GetLootRoll(packet.LootObj, (byte)(packet.LootListID - 1));
+            if (lootRoll == null)
+                return;
+
+            lootRoll.PlayerVote(GetPlayer(), packet.RollType);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetLootSpecialization)]

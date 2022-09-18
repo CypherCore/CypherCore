@@ -71,7 +71,8 @@ namespace Game.Entities
                 if (state == LfgState.FinishedDungeon)
                     return PartyResult.PartyLfgBootDungeonComplete;
 
-                if (grp.IsRollLootActive())
+                Player player = Global.ObjAccessor.FindConnectedPlayer(guidMember);
+                if (!player.m_lootRolls.Empty())
                     return PartyResult.PartyLfgBootLootRolls;
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.

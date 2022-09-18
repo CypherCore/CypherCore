@@ -188,20 +188,20 @@ namespace Game.Networking.Packets
         public ObjectGuid LootObj;
     }
 
-    class LootRoll : ClientPacket
+    class LootRollPacket : ClientPacket
     {
-        public LootRoll(WorldPacket packet) : base(packet) { }
+        public LootRollPacket(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             LootObj = _worldPacket.ReadPackedGuid();
             LootListID = _worldPacket.ReadUInt8();
-            RollType = (RollType)_worldPacket.ReadUInt8();
+            RollType = (RollVote)_worldPacket.ReadUInt8();
         }
 
         public ObjectGuid LootObj;
         public byte LootListID;
-        public RollType RollType;
+        public RollVote RollType;
     }
 
     class LootReleaseResponse : ServerPacket
@@ -303,7 +303,7 @@ namespace Game.Networking.Packets
         public ObjectGuid LootObj;
         public ObjectGuid Player;
         public int Roll;             // Roll value can be negative, it means that it is an "offspec" roll but only during roll selection broadcast (not when sending the result)
-        public RollType RollType;
+        public RollVote RollType;
         public LootItemData Item = new();
         public bool Autopassed;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
     }
@@ -326,7 +326,7 @@ namespace Game.Networking.Packets
         public ObjectGuid LootObj;
         public ObjectGuid Winner;
         public int Roll;
-        public RollType RollType;
+        public RollVote RollType;
         public LootItemData Item = new();
         public bool MainSpec;
     }

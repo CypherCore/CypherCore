@@ -50,7 +50,7 @@ namespace Game.Loots
                     LootItem lootItem = new();
                     lootItem.itemid = result.Read<uint>(1);
                     lootItem.count = result.Read<byte>(2);
-                    lootItem.itemIndex = result.Read<uint>(3);
+                    lootItem.LootListId = result.Read<uint>(3);
                     lootItem.follow_loot_rules = result.Read<bool>(4);
                     lootItem.freeforall = result.Read<bool>(5);
                     lootItem.is_blocked = result.Read<bool>(6);
@@ -114,7 +114,7 @@ namespace Game.Loots
                     LootItem li = new();
                     li.itemid = id;
                     li.count = (byte)storedItem.Count;
-                    li.itemIndex = storedItem.ItemIndex;
+                    li.LootListId = storedItem.ItemIndex;
                     li.follow_loot_rules = storedItem.FollowRules;
                     li.freeforall = storedItem.FFA;
                     li.is_blocked = storedItem.Blocked;
@@ -244,7 +244,7 @@ namespace Game.Loots
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, lootItem.itemid);
             stmt.AddValue(2, lootItem.count);
-            stmt.AddValue(3, lootItem.itemIndex);
+            stmt.AddValue(3, lootItem.LootListId);
             stmt.AddValue(4, lootItem.follow_loot_rules);
             stmt.AddValue(5, lootItem.freeforall);
             stmt.AddValue(6, lootItem.is_blocked);
@@ -325,7 +325,7 @@ namespace Game.Loots
         {
             ItemId = lootItem.itemid;
             Count = lootItem.count;
-            ItemIndex = lootItem.itemIndex;
+            ItemIndex = lootItem.LootListId;
             FollowRules = lootItem.follow_loot_rules;
             FFA = lootItem.freeforall;
             Blocked = lootItem.is_blocked;

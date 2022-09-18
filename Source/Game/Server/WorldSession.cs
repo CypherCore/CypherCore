@@ -193,7 +193,6 @@ namespace Game
                 if (group != null)
                 {
                     group.SendUpdate();
-                    group.ResetMaxEnchantingLevel();
                     if (group.GetLeaderGUID() == _player.GetGUID())
                         group.StartLeaderOfflineTimer();
                 }

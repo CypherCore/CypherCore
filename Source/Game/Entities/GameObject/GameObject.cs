@@ -697,20 +697,7 @@ namespace Game.Entities
                             }
                             break;
                         case GameObjectTypes.Chest:
-                            if (loot != null && m_groupLootTimer != 0)
-                            {
-                                if (m_groupLootTimer <= diff)
-                                {
-                                    Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
-                                    if (group)
-                                        group.EndRoll(loot, GetMap());
-
-                                    m_groupLootTimer = 0;
-                                    lootingGroupLowGUID.Clear();
-                                }
-                                else
-                                    m_groupLootTimer -= diff;
-                            }
+                            loot?.Update();
 
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
                             if (GetGoInfo().Chest.consumable == 0 && GameTime.GetGameTime() >= m_restockTime)
@@ -3423,8 +3410,6 @@ namespace Game.Entities
         ObjectGuid m_lootRecipientGroup;
         LootModes m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
         uint m_lootGenerationTime;
-        public uint m_groupLootTimer;                            // (msecs)timer used for group loot
-        public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
         long m_packedRotation;
         Quaternion m_localRotation;
         public Position StationaryPosition { get; set; }
