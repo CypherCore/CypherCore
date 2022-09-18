@@ -2393,7 +2393,7 @@ namespace Game.Entities
 
             // if player is moving bags and is looting an item inside this bag
             // release the loot
-            if (!GetLootGUID().IsEmpty())
+            if (!GetAELootView().Empty())
             {
                 bool released = false;
                 if (IsBagPos(src))
@@ -2404,9 +2404,9 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (bagItem.GetGUID() == GetLootGUID())
+                            if (HasLootWorldObjectGUID(bagItem.GetGUID()))
                             {
-                                GetSession().DoLootRelease(GetLootGUID());
+                                GetSession().DoLootReleaseAll();
                                 released = true;                    // so we don't need to look at dstBag
                                 break;
                             }
@@ -2422,9 +2422,9 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (bagItem.GetGUID() == GetLootGUID())
+                            if (HasLootWorldObjectGUID(bagItem.GetGUID()))
                             {
-                                GetSession().DoLootRelease(GetLootGUID());
+                                GetSession().DoLootReleaseAll();
                                 break;
                             }
                         }

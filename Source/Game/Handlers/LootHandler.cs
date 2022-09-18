@@ -350,7 +350,8 @@ namespace Game
             player.SendLootRelease(lguid);
             player.RemoveAELootedWorldObject(lguid);
 
-            player.RemoveUnitFlag(UnitFlags.Looting);
+            if (player.GetAELootView().Empty())
+                player.RemoveUnitFlag(UnitFlags.Looting);
 
             if (!player.IsInWorld)
                 return;
