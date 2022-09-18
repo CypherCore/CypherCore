@@ -3133,7 +3133,7 @@ namespace Game.Entities
             else if (thisGroup != creature.GetLootRecipientGroup())
                 return false;
 
-            switch (thisGroup.GetLootMethod())
+            switch (loot.GetLootMethod())
             {
                 case LootMethod.PersonalLoot:// @todo implement personal loot (http://wow.gamepedia.com/Loot#Personal_Loot)
                     return false;

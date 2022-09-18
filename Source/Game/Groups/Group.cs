@@ -967,7 +967,7 @@ namespace Game.Groups
             lootList.Owner = creature.GetGUID();
             lootList.LootObj = creature.loot.GetGUID();
 
-            if (GetLootMethod() == LootMethod.MasterLoot && creature.loot.HasOverThresholdItem())
+            if (creature.loot.GetLootMethod() == LootMethod.MasterLoot && creature.loot.HasOverThresholdItem())
                 lootList.Master = GetMasterLooterGuid();
 
             if (groupLooter)
@@ -1364,7 +1364,7 @@ namespace Game.Groups
                                     player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, ItemContext.None, true);
                                 else // If the player's inventory is full, send the disenchant result in a mail.
                                 {
-                                    Loot loot = new(allowedMap, roll.GetLoot().GetOwnerGUID(), LootType.Disenchanting);
+                                    Loot loot = new(allowedMap, roll.GetLoot().GetOwnerGUID(), LootType.Disenchanting, roll.GetLoot().GetLootMethod());
                                     loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
 
                                     uint max_slot = loot.GetMaxSlotInLootFor(player);

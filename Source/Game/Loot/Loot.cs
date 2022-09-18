@@ -166,13 +166,14 @@ namespace Game.Loots
 
     public class Loot
     {
-        public Loot(Map map, ObjectGuid owner, LootType type)
+        public Loot(Map map, ObjectGuid owner, LootType type, LootMethod lootMethod)
         {
             loot_type = type;
             maxDuplicates = 1;
             _guid = map ? ObjectGuid.Create(HighGuid.LootObject, map.GetId(), 0, map.GenerateLowGuid(HighGuid.LootObject)) : ObjectGuid.Empty;
             _owner = owner;
             _itemContext = ItemContext.None;
+            _lootMethod = lootMethod;
         }
 
         // Inserts the item into the loot (called by LootTemplate processors)
@@ -338,8 +339,7 @@ namespace Game.Loots
             {
                 LootItem item = quest_items[i];
 
-                if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot
-                    && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
+                if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((GetLootMethod() == LootMethod.MasterLoot && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || GetLootMethod() != LootMethod.MasterLoot))))
                 {
                     ql.Add(new NotNormalLootItem(i));
 
@@ -349,7 +349,7 @@ namespace Game.Loots
                     // increase once if one looter only, looter-times if free for all
                     if (item.freeforall || !item.is_blocked)
                         ++unlootedCount;
-                    if (!player.GetGroup() || player.GetGroup().GetLootMethod() != LootMethod.GroupLoot)
+                    if (!player.GetGroup() || GetLootMethod() != LootMethod.GroupLoot)
                         item.is_blocked = true;
 
                     if (items.Count + ql.Count == SharedConst.MaxNRLootItems)
@@ -840,6 +840,7 @@ namespace Game.Loots
 
         public ObjectGuid GetGUID() { return _guid; }
         public ObjectGuid GetOwnerGUID() { return _owner; }
+        public LootMethod GetLootMethod() { return _lootMethod; }
         
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerQuestItems() { return PlayerQuestItems; }
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
@@ -865,6 +866,7 @@ namespace Game.Loots
         ObjectGuid _guid;
         ObjectGuid _owner;                                              // The WorldObject that holds this loot
         ItemContext _itemContext;
+        LootMethod _lootMethod;
     }
 
     public class AELootResult

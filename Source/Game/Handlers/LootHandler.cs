@@ -392,7 +392,7 @@ namespace Game
         {
             AELootResult aeResult = new();
 
-            if (GetPlayer().GetGroup() == null || GetPlayer().GetGroup().GetLooterGuid() != GetPlayer().GetGUID() || GetPlayer().GetGroup().GetLootMethod() != LootMethod.MasterLoot)
+            if (GetPlayer().GetGroup() == null || GetPlayer().GetGroup().GetLooterGuid() != GetPlayer().GetGUID())
             {
                 GetPlayer().SendLootError(ObjectGuid.Empty, ObjectGuid.Empty, LootError.DidntKill);
                 return;
@@ -417,7 +417,7 @@ namespace Game
                     return;
                 }
 
-                if (loot == null)
+                if (loot == null || loot.GetLootMethod() != LootMethod.MasterLoot)
                     return;
 
                 byte slotid = (byte)(req.LootListID - 1);

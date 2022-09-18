@@ -774,9 +774,10 @@ namespace Game.Entities
                 else
                     player.SendPacket(partyKillLog);
 
+                // Generate loot before updating looter
                 if (creature)
                 {
-                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse);
+                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse, group != null ? group.GetLootMethod() : LootMethod.FreeForAll);
                     Loot loot = creature.loot;
                     if (creature.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;

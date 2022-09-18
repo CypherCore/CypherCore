@@ -5883,7 +5883,7 @@ namespace Game.Entities
         public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
         void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
         {
-            Loot loot = new(null, ObjectGuid.Empty, LootType.None);
+            Loot loot = new(null, ObjectGuid.Empty, LootType.None, LootMethod.FreeForAll);
             loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
 
             uint max_slot = loot.GetMaxSlotInLootFor(this);
@@ -6092,7 +6092,7 @@ namespace Game.Entities
             // Now we must make bones lootable, and send player loot
             bones.SetCorpseDynamicFlag(CorpseDynFlags.Lootable);
 
-            bones.loot = new Loot(GetMap(), bones.GetGUID(), LootType.Insignia);
+            bones.loot = new Loot(GetMap(), bones.GetGUID(), LootType.Insignia, looterPlr.GetGroup() != null ? looterPlr.GetGroup().GetLootMethod() : LootMethod.FreeForAll);
 
             // For AV Achievement
             Battleground bg = GetBattleground();
@@ -6189,7 +6189,10 @@ namespace Game.Entities
                         }
                     }
 
-                    loot = new Loot(GetMap(), guid, loot_type);
+                    Group group = GetGroup();
+                    bool groupRules = (group != null && go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0);
+
+                    loot = new Loot(GetMap(), guid, loot_type, groupRules ? group.GetLootMethod() : LootMethod.FreeForAll);
                     if (go.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;
 
@@ -6197,9 +6200,6 @@ namespace Game.Entities
 
                     if (lootid != 0)
                     {
-                        Group group = GetGroup();
-                        bool groupRules = (group && go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0);
-
                         // check current RR player and get next if necessary
                         if (groupRules)
                             group.UpdateLooterGuid(go, true);
@@ -6226,22 +6226,18 @@ namespace Game.Entities
 
                     if (go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0)
                     {
-                        var group = GetGroup();
-                        if (group)
+                        switch (group.GetLootMethod())
                         {
-                            switch (group.GetLootMethod())
-                            {
-                                case LootMethod.GroupLoot:
-                                    // GroupLoot: rolls items over threshold. Items with quality < threshold, round robin
-                                    group.GroupLoot(loot, go);
-                                    break;
-                                case LootMethod.MasterLoot:
-                                    group.MasterLoot(loot, go);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+                            case LootMethod.GroupLoot:
+                                // GroupLoot: rolls items over threshold. Items with quality < threshold, round robin
+                                group.GroupLoot(loot, go);
+                                break;
+                            case LootMethod.MasterLoot:
+                                group.MasterLoot(loot, go);
+                                break;
+                            default:
+                                break;
+                        }                        
                     }
 
                     go.SetLootState(LootState.Activated, this);
@@ -6252,10 +6248,10 @@ namespace Game.Entities
                     Group group = GetGroup();
                     if (group)
                     {
-                        switch (group.GetLootMethod())
+                        switch (loot.GetLootMethod())
                         {
                             case LootMethod.MasterLoot:
-                                permission = PermissionTypes.Master;
+                                permission = group.GetMasterLooterGuid() == GetGUID() ? PermissionTypes.Master : PermissionTypes.Restricted;
                                 break;
                             case LootMethod.FreeForAll:
                                 permission = PermissionTypes.All;
@@ -6288,7 +6284,7 @@ namespace Game.Entities
                 if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
                 {
                     item.m_lootGenerated = true;
-                    loot = new Loot(GetMap(), guid, loot_type);
+                    loot = new Loot(GetMap(), guid, loot_type, LootMethod.FreeForAll);
                     item.loot = loot;
 
                     switch (loot_type)
@@ -6359,7 +6355,7 @@ namespace Game.Entities
                         {
                             creature.StartPickPocketRefillTimer();
 
-                            loot = new Loot(GetMap(), creature.GetGUID(), LootType.Pickpocketing);
+                            loot = new Loot(GetMap(), creature.GetGUID(), LootType.Pickpocketing, LootMethod.FreeForAll);
                             creature.loot = loot;
                             uint lootid = creature.GetCreatureTemplate().PickPocketId;
                             if (lootid != 0)
@@ -6402,7 +6398,7 @@ namespace Game.Entities
                         Group group = creature.GetLootRecipientGroup();
                         if (group)
                         {
-                            switch (group.GetLootMethod())
+                            switch (loot.GetLootMethod())
                             {
                                 case LootMethod.GroupLoot:
                                     // GroupLoot: rolls items over threshold. Items with quality < threshold, round robin
@@ -6439,7 +6435,7 @@ namespace Game.Entities
                             Group group = GetGroup();
                             if (group == creature.GetLootRecipientGroup())
                             {
-                                switch (group.GetLootMethod())
+                                switch (loot.GetLootMethod())
                                 {
                                     case LootMethod.MasterLoot:
                                         permission = PermissionTypes.Master;
@@ -6465,29 +6461,13 @@ namespace Game.Entities
 
             if (permission != PermissionTypes.None)
             {
-                LootMethod _lootMethod = LootMethod.FreeForAll;
-                Group group = GetGroup();
-                if (group)
-                {
-                    Creature creature = GetMap().GetCreature(guid);
-                    if (creature)
-                    {
-                        Player recipient = creature.GetLootRecipient();
-                        if (recipient)
-                        {
-                            if (group == recipient.GetGroup())
-                                _lootMethod = group.GetLootMethod();
-                        }
-                    }
-                }
-
                 if (!guid.IsItem() && !aeLooting)
                     SetLootGUID(guid);
 
                 LootResponse packet = new();
                 packet.Owner = guid;
                 packet.LootObj = loot.GetGUID();
-                packet.LootMethod = _lootMethod;
+                packet.LootMethod = loot.GetLootMethod();
                 packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot_type);
                 packet.Acquired = true; // false == No Loot (this too^^)
                 packet.AELooting = aeLooting;
