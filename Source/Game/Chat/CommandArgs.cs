@@ -215,6 +215,25 @@ namespace Game.Chat
                     val = token;
                     return new ChatCommandResult(tail);
                 }
+                case TypeCode.Boolean:
+                {
+                    if (token.IsEmpty())
+                        return default;
+
+                    if (bool.TryParse(token, out bool tempValue))
+                        val = tempValue;
+                    else
+                    {
+                        if ((token == "1") || token.Equals("y", StringComparison.OrdinalIgnoreCase) || token.Equals("on", StringComparison.OrdinalIgnoreCase) || token.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            val = true;
+                        else if ((token == "0") || token.Equals("n", StringComparison.OrdinalIgnoreCase) || token.Equals("off", StringComparison.OrdinalIgnoreCase) || token.Equals("no", StringComparison.OrdinalIgnoreCase))
+                            val = false;
+                        else
+                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserStringValueInvalid, token, Type.GetTypeCode(type)));
+                    }
+
+                    return new ChatCommandResult(tail);
+                }
                 case TypeCode.Object:
                 {
                     switch (type.Name)
