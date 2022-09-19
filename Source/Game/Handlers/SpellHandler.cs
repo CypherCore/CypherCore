@@ -20,10 +20,10 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Guilds;
+using Game.Loots;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -190,11 +190,30 @@ namespace Game
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
+
+                var pos = item.GetPos();
+                var itemGuid = item.GetGUID();
                 _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt)
-                    .WithCallback(result => HandleOpenWrappedItemCallback(item.GetPos(), item.GetGUID(), result)));
+                    .WithCallback(result => HandleOpenWrappedItemCallback(pos, itemGuid, result)));
             }
             else
+            {
+                // If item doesn't already have loot, attempt to load it. If that
+                // fails then this is first time opening, generate loot
+                if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, player))
+                {
+                    Loot loot = new(player.GetMap(), item.GetGUID(), LootType.Item, null);
+                    item.loot = loot;
+                    loot.GenerateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
+                    loot.FillLoot(item.GetEntry(), LootStorage.Items, player, true, loot.gold != 0);
+
+                    // Force save the loot and money items that were just rolled
+                    //  Also saves the container item ID in Loot struct (not to DB)
+                    if (loot.gold > 0 || loot.unlootedCount > 0)
+                        Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, player);
+                }
                 player.SendLoot(item.GetGUID(), LootType.Item);
+            }
         }
 
         void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)

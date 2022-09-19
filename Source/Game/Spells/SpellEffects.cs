@@ -1225,24 +1225,65 @@ namespace Game.Spells
                         return;
 
                     case GameObjectTypes.SpellFocus:
+                    {
                         // triggering linked GO
                         uint trapEntry = gameObjTarget.GetGoInfo().SpellFocus.linkedTrap;
                         if (trapEntry != 0)
                             gameObjTarget.TriggeringLinkedGameObject(trapEntry, player);
                         return;
+                    }
                     case GameObjectTypes.Chest:
+                    {
                         // @todo possible must be moved to loot release (in different from linked triggering)
-                        if (gameObjTarget.GetGoInfo().Chest.triggeredEvent != 0)
+                        var bg = player.GetBattleground();
+                        if (bg != null)
                         {
-                            Log.outDebug(LogFilter.Spells, "Chest ScriptStart id {0} for GO {1}", gameObjTarget.GetGoInfo().Chest.triggeredEvent, gameObjTarget.GetSpawnId());
-                            player.GetMap().ScriptsStart(ScriptsType.Event, gameObjTarget.GetGoInfo().Chest.triggeredEvent, player, gameObjTarget);
+                            if (!bg.CanActivateGO((int)gameObjTarget.GetEntry(), (uint)bg.GetPlayerTeam(player.GetGUID())))
+                            {
+                                player.SendLootRelease(guid);
+                                return;
+                            }
                         }
 
-                        // triggering linked GO
-                        uint _trapEntry = gameObjTarget.GetGoInfo().Chest.linkedTrap;
-                        if (_trapEntry != 0)
-                            gameObjTarget.TriggeringLinkedGameObject(_trapEntry, player);
+                        if (gameObjTarget.GetLootState() == LootState.Ready)
+                        {
+                            uint lootId = gameObjTarget.GetGoInfo().GetLootId();
+                            if (lootId != 0)
+                            {
+                                gameObjTarget.SetLootGenerationTime();
+
+                                Group group = player.GetGroup();
+                                bool groupRules = group != null && gameObjTarget.GetGoInfo().Chest.usegrouplootrules != 0;
+
+                                Loot loot = new(gameObjTarget.GetMap(), guid, loottype, groupRules ? group : null);
+                                gameObjTarget.loot = loot;
+
+                                loot.FillLoot(lootId, LootStorage.Gameobject, player, !groupRules, false, gameObjTarget.GetLootMode(), gameObjTarget.GetMap().GetDifficultyLootItemContext());
+
+                                if (gameObjTarget.GetLootMode() > 0)
+                                {
+                                    var addon = gameObjTarget.GetTemplateAddon();
+                                    if (addon != null)
+                                        loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
+                                }
+                            }
+
+                            /// @todo possible must be moved to loot release (in different from linked triggering)
+                            if (gameObjTarget.GetGoInfo().Chest.triggeredEvent != 0)
+                            {
+                                Log.outDebug(LogFilter.Spells, $"Chest ScriptStart id {gameObjTarget.GetGoInfo().Chest.triggeredEvent} for GO {gameObjTarget.GetSpawnId()}");
+                                GameEvents.Trigger(gameObjTarget.GetGoInfo().Chest.triggeredEvent, player, gameObjTarget);
+                            }
+
+                            // triggering linked GO
+                            uint trapEntry = gameObjTarget.GetGoInfo().Chest.linkedTrap;
+                            if (trapEntry != 0)
+                                gameObjTarget.TriggeringLinkedGameObject(trapEntry, player);
+
+                            gameObjTarget.SetLootState(LootState.Activated, player);
+                        }
                         break;
+                    }
                     // Don't return, let loots been taken
                     default:
                         break;
@@ -1909,10 +1950,37 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (!m_caster.IsTypeId(TypeId.Player))
+            Player player = m_caster.ToPlayer();
+            if (player == null)
                 return;
 
-            m_caster.ToPlayer().SendLoot(unitTarget.GetGUID(), LootType.Pickpocketing);
+            Creature creature = unitTarget?.ToCreature();
+            if (creature == null)
+                return;
+
+            if (creature.CanGeneratePickPocketLoot())
+            {
+                creature.StartPickPocketRefillTimer();
+
+                creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
+                uint lootid = creature.GetCreatureTemplate().PickPocketId;
+                if (lootid != 0)
+                    creature.loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
+
+                // Generate extra money for pick pocket loot
+                uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
+                uint b = RandomHelper.URand(0, player.GetLevel() / 2);
+                creature.loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+            }
+            else if (creature.loot != null)
+            {
+                if (creature.loot.loot_type == LootType.Pickpocketing && creature.loot.IsLooted())
+                    player.SendLootError(creature.loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
+
+                return;
+            }
+
+            player.SendLoot(unitTarget.GetGUID(), LootType.Pickpocketing);
         }
 
         [SpellEffectHandler(SpellEffectName.AddFarsight)]
@@ -3170,6 +3238,8 @@ namespace Game.Spells
             if (caster != null)
             {
                 caster.UpdateCraftSkill(m_spellInfo);
+                itemTarget.loot = new Loot(caster.GetMap(), itemTarget.GetGUID(), LootType.Disenchanting, null);
+                itemTarget.loot.FillLoot(itemTarget.GetDisenchantLoot(caster).Id, LootStorage.Disenchant, caster, true);
                 caster.SendLoot(itemTarget.GetGUID(), LootType.Disenchanting);
             }
 
@@ -3543,6 +3613,9 @@ namespace Game.Spells
 
             creature.RemoveUnitFlag(UnitFlags.Skinnable);
             creature.SetDynamicFlag(UnitDynFlags.Lootable);
+            creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
+            creature.loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
+            creature.SetLootRecipient(player, false);
             player.SendLoot(creature.GetGUID(), LootType.Skinning);
 
             if (skill == SkillType.Skinning)
@@ -4254,6 +4327,8 @@ namespace Game.Spells
                 player.UpdateGatherSkill(SkillType.Jewelcrafting, SkillValue, reqSkillValue);
             }
 
+            itemTarget.loot = new Loot(player.GetMap(), itemTarget.GetGUID(), LootType.Prospecting, null);
+            itemTarget.loot.FillLoot(itemTarget.GetEntry(), LootStorage.Prospecting, player, true);
             player.SendLoot(itemTarget.GetGUID(), LootType.Prospecting);
         }
 
@@ -4280,6 +4355,8 @@ namespace Game.Spells
                 player.UpdateGatherSkill(SkillType.Inscription, SkillValue, reqSkillValue);
             }
 
+            itemTarget.loot = new Loot(player.GetMap(), itemTarget.GetGUID(), LootType.Milling, null);
+            itemTarget.loot.FillLoot(itemTarget.GetEntry(), LootStorage.Milling, player, true);
             player.SendLoot(itemTarget.GetGUID(), LootType.Milling);
         }
 

@@ -480,6 +480,8 @@ namespace Game.Entities
                             // If there is no restock timer, or if the restock timer passed, the chest becomes ready to loot
                             m_restockTime = 0;
                             m_lootState = LootState.Ready;
+                            loot = null;
+                            m_personalLoot.Clear();
                             AddToObjectUpdateIfNeeded();
                             break;
                         default:
@@ -699,11 +701,16 @@ namespace Game.Entities
                         case GameObjectTypes.Chest:
                             loot?.Update();
 
+                            foreach (var (_, loot) in m_personalLoot)
+                                loot.Update();
+
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
-                            if (GetGoInfo().Chest.consumable == 0 && GameTime.GetGameTime() >= m_restockTime)
+                            if (GetGoInfo().Chest.consumable == 0 && GetGoInfo().Chest.chestRestockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
                             {
                                 m_restockTime = 0;
                                 m_lootState = LootState.Ready;
+                                loot = null;
+                                m_personalLoot.Clear();
                                 AddToObjectUpdateIfNeeded();
                             }
                             break;
@@ -789,6 +796,7 @@ namespace Game.Entities
                     }
 
                     loot = null;
+                    m_personalLoot.Clear();
 
                     // Do not delete chests or goobers that are not consumed on loot, while still allowing them to despawn when they expire if summoned
                     bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
@@ -940,44 +948,48 @@ namespace Game.Entities
             SendMessageToSet(packet, true);
         }
 
-        public void GetFishLoot(Loot fishloot, Player loot_owner)
+        public Loot GetFishLoot(Player lootOwner)
         {
-            fishloot.Clear();
-
             uint zone, subzone;
             uint defaultzone = 1;
             GetZoneAndAreaId(out zone, out subzone);
 
+            Loot fishLoot = new(GetMap(), GetGUID(), LootType.Fishing, null);
+
             // if subzone loot exist use it
-            fishloot.FillLoot(subzone, LootStorage.Fishing, loot_owner, true, true);
-            if (fishloot.Empty())
+            fishLoot.FillLoot(subzone, LootStorage.Fishing, lootOwner, true, true);
+            if (fishLoot.Empty())
             {
                 //subzone no result,use zone loot
-                fishloot.FillLoot(zone, LootStorage.Fishing, loot_owner, true);
+                fishLoot.FillLoot(zone, LootStorage.Fishing, lootOwner, true);
                 //use zone 1 as default, somewhere fishing got nothing,becase subzone and zone not set, like Off the coast of Storm Peaks.
-                if (fishloot.Empty())
-                    fishloot.FillLoot(defaultzone, LootStorage.Fishing, loot_owner, true, true);
+                if (fishLoot.Empty())
+                    fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true);
             }
+
+            return fishLoot;
         }
 
-        public void GetFishLootJunk(Loot fishloot, Player loot_owner)
+        public Loot GetFishLootJunk(Player lootOwner)
         {
-            fishloot.Clear();
-
             uint zone, subzone;
             uint defaultzone = 1;
             GetZoneAndAreaId(out zone, out subzone);
 
+            Loot fishLoot = new(GetMap(), GetGUID(), LootType.FishingJunk, null);
+
             // if subzone loot exist use it
-            fishloot.FillLoot(subzone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
-            if (fishloot.Empty())  //use this becase if zone or subzone has normal mask drop, then fishloot.FillLoot return true.
+            fishLoot.FillLoot(subzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+            if (fishLoot.Empty())  //use this becase if zone or subzone has normal mask drop, then fishloot.FillLoot return true.
             {
                 //use zone loot
-                fishloot.FillLoot(zone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
-                if (fishloot.Empty())
+                fishLoot.FillLoot(zone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+                if (fishLoot.Empty())
                     //use zone 1 as default
-                    fishloot.FillLoot(defaultzone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
+                    fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
             }
+
+            return fishLoot;
         }
 
         public void SaveToDB()
@@ -1886,10 +1898,16 @@ namespace Game.Entities
                                     SetLootState(LootState.JustDeactivated);
                                 }
                                 else
+                                {
+                                    loot = GetFishLoot(player);
                                     player.SendLoot(GetGUID(), LootType.Fishing);
+                                }
                             }
                             else// If fishing skill is too low, send junk loot.
+                            {
+                                loot = GetFishLootJunk(player);
                                 player.SendLoot(GetGUID(), LootType.FishingJunk);
+                            }
                             break;
                         }
                         case LootState.JustDeactivated:                   // nothing to do, will be deleted at next update
@@ -2098,6 +2116,10 @@ namespace Game.Entities
                         return;
 
                     Player player = user.ToPlayer();
+
+                    Loot loot = new Loot(GetMap(), GetGUID(), LootType.Fishinghole, null);
+                    loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true);
+                    m_personalLoot[player.GetGUID()] = loot;
 
                     player.SendLoot(GetGUID(), LootType.Fishinghole);
                     player.UpdateCriteria(CriteriaType.CatchFishInFishingHole, GetGoInfo().entry);
@@ -2814,7 +2836,16 @@ namespace Game.Entities
             return true;
         }
 
+        public override Loot GetLootForPlayer(Player player)
+        {
+            if (m_personalLoot.Empty())
+                return loot;
+
+            return m_personalLoot.LookupByKey(player.GetGUID());
+        }
+        
         public void SetLinkedTrap(GameObject linkedTrap) { m_linkedTrap = linkedTrap.GetGUID(); }
+
         public GameObject GetLinkedTrap()
         {
             return ObjectAccessor.GetGameObject(this, m_linkedTrap);
@@ -3298,8 +3329,6 @@ namespace Game.Entities
 
         bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
         
-        public  override  Loot GetLootForPlayer(Player player)   { return loot; }
-        
         public override uint GetLevelForTarget(WorldObject target)
         {
             Unit owner = GetOwner();
@@ -3425,6 +3454,7 @@ namespace Game.Entities
         List<ObjectGuid> m_SkillupList = new();
 
         public Loot loot;
+        Dictionary<ObjectGuid, Loot> m_personalLoot = new();
 
         public GameObjectModel m_model;
 

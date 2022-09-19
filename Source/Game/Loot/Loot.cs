@@ -762,7 +762,8 @@ namespace Game.Loots
             Group group = lootOwner.GetGroup();
             if (!personal && group != null)
             {
-                roundRobinPlayer = lootOwner.GetGUID();
+                if (loot_type == LootType.Corpse)
+                    roundRobinPlayer = lootOwner.GetGUID();
 
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {

@@ -6109,95 +6109,13 @@ namespace Game.Entities
             if (guid.IsGameObject())
             {
                 GameObject go = GetMap().GetGameObject(guid);
-                bool shouldLootRelease(GameObject go, LootType lootType)
-                {
-                    // not check distance for GO in case owned GO (fishing bobber case, for example)
-                    // And permit out of range GO with no owner in case fishing hole
-                    if (!go)
-                        return true;
-
-                    switch (lootType)
-                    {
-                        case LootType.Fishing:
-                        case LootType.FishingJunk:
-                            if (go.GetOwnerGUID() != GetGUID())
-                                return true;
-                            break;
-                        case LootType.Fishinghole:
-                            break;
-                        default:
-                            if (!go.IsWithinDistInMap(this))
-                                return true;
-                            break;
-                    }
-
-                    return false;
-                }
-
-                if (shouldLootRelease(go, loot_type))
+                if (go == null)
                 {
                     SendLootRelease(guid);
                     return;
                 }
 
                 loot = go.GetLootForPlayer(this);
-
-                // loot was generated and respawntime has passed since then, allow to recreate loot
-                // to avoid bugs, this rule covers spawned gameobjects only
-                // Don't allow to regenerate chest loot inside instances and raids, to avoid exploits with duplicate boss loot being given for some encounters
-                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && (loot == null || loot.IsLooted()) && !go.GetMap().Instanceable() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
-                    go.SetLootState(LootState.Ready);
-
-                if (go.GetLootState() == LootState.Ready)
-                {
-                    uint lootid = go.GetGoInfo().GetLootId();
-                    Battleground bg = GetBattleground();
-                    if (bg)
-                    {
-                        if (!bg.CanActivateGO((int)go.GetEntry(), (uint)bg.GetPlayerTeam(GetGUID())))
-                        {
-                            SendLootRelease(guid);
-                            return;
-                        }
-                    }
-
-                    Group group = GetGroup();
-                    bool groupRules = (group != null && go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0);
-
-                    loot = new Loot(GetMap(), guid, loot_type, groupRules ? group : null);
-                    if (go.GetMap().Is25ManRaid())
-                        loot.maxDuplicates = 3;
-
-                    go.loot = loot;
-
-                    if (lootid != 0)
-                    {
-                        // check current RR player and get next if necessary
-                        if (groupRules)
-                            group.UpdateLooterGuid(go, true);
-
-                        loot.FillLoot(lootid, LootStorage.Gameobject, this, !groupRules, false, go.GetLootMode(), GetMap().GetDifficultyLootItemContext());
-                        go.SetLootGenerationTime();
-
-                        // get next RR player (for next loot)
-                        if (groupRules && !loot.Empty())
-                            group.UpdateLooterGuid(go);
-                    }
-
-                    if (go.GetLootMode() > 0)
-                    {
-                        GameObjectTemplateAddon addon = go.GetTemplateAddon();
-                        if (addon != null)
-                            loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
-                    }
-
-                    if (loot_type == LootType.Fishing)
-                        go.GetFishLoot(loot, this);
-                    else if (loot_type == LootType.FishingJunk)
-                        go.GetFishLootJunk(loot, this);
-
-                    go.SetLootState(LootState.Activated, this);
-                }
             }
             else if (guid.IsItem())
             {
@@ -6210,44 +6128,11 @@ namespace Game.Entities
                 }
 
                 loot = item.GetLootForPlayer(this);
-
-                // If item doesn't already have loot, attempt to load it. If that
-                // fails then this is first time opening, generate loot
-                if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
-                {
-                    item.m_lootGenerated = true;
-                    loot = new Loot(GetMap(), guid, loot_type, null);
-                    item.loot = loot;
-
-                    switch (loot_type)
-                    {
-                        case LootType.Disenchanting:
-                            loot.FillLoot(item.GetDisenchantLoot(this).Id, LootStorage.Disenchant, this, true);
-                            break;
-                        case LootType.Prospecting:
-                            loot.FillLoot(item.GetEntry(), LootStorage.Prospecting, this, true);
-                            break;
-                        case LootType.Milling:
-                            loot.FillLoot(item.GetEntry(), LootStorage.Milling, this, true);
-                            break;
-                        default:
-                            loot.GenerateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
-                            loot.FillLoot(item.GetEntry(), LootStorage.Items, this, true, loot.gold != 0);
-
-                            // Force save the loot and money items that were just rolled
-                            //  Also saves the container item ID in Loot struct (not to DB)
-                            if (loot.gold > 0 || loot.unlootedCount > 0)
-                                Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, this);
-
-                            break;
-                    }
-                }
             }
             else if (guid.IsCorpse())                          // remove insignia
             {
                 Corpse bones = ObjectAccessor.GetCorpse(this, guid);
-
-                if (bones == null || !(loot_type == LootType.Corpse || loot_type == LootType.Insignia) || bones.GetCorpseType() != CorpseType.Bones)
+                if (bones == null)
                 {
                     SendLootRelease(guid);
                     return;
@@ -6260,77 +6145,13 @@ namespace Game.Entities
                 Creature creature = GetMap().GetCreature(guid);
 
                 // must be in range and creature must be alive for pickpocket and must be dead for another loot
-                if (creature == null || creature.IsAlive() != (loot_type == LootType.Pickpocketing) || (!aeLooting && !creature.IsWithinDistInMap(this, SharedConst.InteractionDistance)))
-                {
-                    SendLootRelease(guid);
-                    return;
-                }
-
-                if (loot_type == LootType.Pickpocketing && IsFriendlyTo(creature))
+                if (creature == null)
                 {
                     SendLootRelease(guid);
                     return;
                 }
 
                 loot = creature.GetLootForPlayer(this);
-
-                if (loot_type == LootType.Pickpocketing)
-                {
-                    if (loot == null || loot.loot_type != LootType.Pickpocketing)
-                    {
-                        if (creature.CanGeneratePickPocketLoot())
-                        {
-                            creature.StartPickPocketRefillTimer();
-
-                            loot = new Loot(GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
-                            creature.loot = loot;
-                            uint lootid = creature.GetCreatureTemplate().PickPocketId;
-                            if (lootid != 0)
-                                loot.FillLoot(lootid, LootStorage.Pickpocketing, this, true);
-
-                            // Generate extra money for pick pocket loot
-                            uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
-                            uint b = RandomHelper.URand(0, GetLevel() / 2);
-                            loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
-                        }
-                        else
-                        {
-                            SendLootError(loot.GetGUID(), guid, LootError.AlreadPickPocketed);
-                            return;
-                        }
-                    }
-                }
-                else
-                {
-                    // exploit fix
-                    if (!creature.HasDynamicFlag(UnitDynFlags.Lootable))
-                    {
-                        SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
-                        return;
-                    }
-
-                    // the player whose group may loot the corpse
-                    Player recipient = creature.GetLootRecipient();
-                    Group recipientGroup = creature.GetLootRecipientGroup();
-                    if (!recipient && !recipientGroup)
-                    {
-                        SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
-                        return;
-                    }
-
-                    if (loot.loot_type == LootType.Skinning)
-                    {
-                        loot_type = LootType.Skinning;
-                    }
-                    else if (loot_type == LootType.Skinning)
-                    {
-                        loot.Clear();
-                        loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, this, true);
-
-                        // Set new loot recipient
-                        creature.SetLootRecipient(this, false);
-                    }
-                }
             }
 
 

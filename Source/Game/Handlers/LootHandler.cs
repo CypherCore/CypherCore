@@ -177,6 +177,11 @@ namespace Game
 
             public bool Invoke(Creature creature)
             {
+                return IsValidAELootTarget(creature);
+            }
+
+            public bool IsValidLootTarget(Creature creature)
+            {
                 if (creature.IsAlive())
                     return false;
 
@@ -187,6 +192,14 @@ namespace Game
                     return false;
 
                 return _looter.IsAllowedToLoot(creature);
+            }
+
+            bool IsValidAELootTarget(Creature creature)
+            {
+                if (creature.GetGUID() == _mainLootTarget)
+                    return false;
+
+                return IsValidLootTarget(creature);
             }
 
             Player _looter;
@@ -200,6 +213,14 @@ namespace Game
             if (!GetPlayer().IsAlive() || !packet.Unit.IsCreatureOrVehicle())
                 return;
 
+            Creature lootTarget = ObjectAccessor.GetCreature(GetPlayer(), packet.Unit);
+            if (!lootTarget)
+                return;
+
+            AELootCreatureCheck check = new(_player, packet.Unit);
+            if (!check.IsValidLootTarget(lootTarget))
+                return;
+
             // interrupt cast
             if (GetPlayer().IsNonMeleeSpellCast(false))
                 GetPlayer().InterruptNonMeleeSpells(false);
@@ -207,7 +228,6 @@ namespace Game
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
 
             List<Creature> corpses = new();
-            AELootCreatureCheck check = new(_player, packet.Unit);
             CreatureListSearcher searcher = new(_player, corpses, check);
             Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
 
@@ -247,6 +267,8 @@ namespace Game
             if (player.GetLootGUID() == lguid)
                 player.SetLootGUID(ObjectGuid.Empty);
 
+            //Player is not looking at loot list, he doesn't need to see updates on the loot list
+            loot.RemoveLooter(player.GetGUID());
             player.SendLootRelease(lguid);
             player.GetAELootView().Remove(loot.GetGUID());
 
@@ -264,12 +286,7 @@ namespace Game
                 if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
                     return;
 
-                if (go.GetGoType() == GameObjectTypes.Door)
-                {
-                    // locked doors are opened with spelleffect openlock, prevent remove its as looted
-                    go.UseDoorOrButton();
-                }
-                else if (loot.IsLooted() || go.GetGoType() == GameObjectTypes.FishingNode)
+                if (loot.IsLooted() || go.GetGoType() == GameObjectTypes.FishingNode || go.GetGoType() == GameObjectTypes.FishingHole)
                 {
                     if (go.GetGoType() == GameObjectTypes.FishingHole)
                     {                                               // The fishing hole used once more
@@ -288,10 +305,6 @@ namespace Game
                 {
                     // not fully looted object
                     go.SetLootState(LootState.Activated, player);
-
-                    // if the round robin player release, reset it.
-                    if (player.GetGUID() == loot.roundRobinPlayer)
-                        loot.roundRobinPlayer.Clear();
                 }
             }
             else if (lguid.IsCorpse())        // ONLY remove insignia at BG
@@ -340,12 +353,6 @@ namespace Game
             {
                 Creature creature = player.GetMap().GetCreature(lguid);
                 if (creature == null)
-                    return;
-
-                if (!creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
-                    return;
-
-                if (creature.IsAlive() != (loot != null && loot.loot_type == LootType.Pickpocketing))
                     return;
 
                 if (loot.IsLooted())
