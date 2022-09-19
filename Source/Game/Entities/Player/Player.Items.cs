@@ -6082,7 +6082,7 @@ namespace Game.Entities
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
             bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow((float)GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             bones.lootRecipient = looterPlr;
-            looterPlr.SendLoot(bones.GetGUID(), LootType.Insignia);
+            looterPlr.SendLoot(bones.loot);
         }
 
         public void SendLootRelease(ObjectGuid guid)
@@ -6098,71 +6098,21 @@ namespace Game.Entities
             SendPacket(new LootReleaseAll());
         }
 
-        public void SendLoot(ObjectGuid guid, LootType loot_type, bool aeLooting = false)
+        public void SendLoot(Loot loot, bool aeLooting = false)
         {
             if (!GetLootGUID().IsEmpty() && !aeLooting)
                 Session.DoLootReleaseAll();
 
-            Loot loot;
+            Log.outDebug(LogFilter.Loot, $"Player::SendLoot: Player: '{GetName()}' ({GetGUID()}), Loot: {loot.GetOwnerGUID()}");
 
-            Log.outDebug(LogFilter.Loot, "Player.SendLoot");
-            if (guid.IsGameObject())
-            {
-                GameObject go = GetMap().GetGameObject(guid);
-                if (go == null)
-                {
-                    SendLootRelease(guid);
-                    return;
-                }
-
-                loot = go.GetLootForPlayer(this);
-            }
-            else if (guid.IsItem())
-            {
-                Item item = GetItemByGuid(guid);
-
-                if (item == null)
-                {
-                    SendLootRelease(guid);
-                    return;
-                }
-
-                loot = item.GetLootForPlayer(this);
-            }
-            else if (guid.IsCorpse())                          // remove insignia
-            {
-                Corpse bones = ObjectAccessor.GetCorpse(this, guid);
-                if (bones == null)
-                {
-                    SendLootRelease(guid);
-                    return;
-                }
-
-                loot = bones.GetLootForPlayer(this);
-            }
-            else
-            {
-                Creature creature = GetMap().GetCreature(guid);
-
-                // must be in range and creature must be alive for pickpocket and must be dead for another loot
-                if (creature == null)
-                {
-                    SendLootRelease(guid);
-                    return;
-                }
-
-                loot = creature.GetLootForPlayer(this);
-            }
-
-
-            if (!guid.IsItem() && !aeLooting)
-                SetLootGUID(guid);
+            if (!loot.GetOwnerGUID().IsItem() && !aeLooting)
+                SetLootGUID(loot.GetOwnerGUID());
 
             LootResponse packet = new();
-            packet.Owner = guid;
+            packet.Owner = loot.GetOwnerGUID();
             packet.LootObj = loot.GetGUID();
             packet.LootMethod = loot.GetLootMethod();
-            packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot_type);
+            packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot.loot_type);
             packet.Acquired = true; // false == No Loot (this too^^)
             packet.AELooting = aeLooting;
             loot.BuildLootResponse(packet, this);
@@ -6172,7 +6122,7 @@ namespace Game.Entities
             loot.OnLootOpened(GetMap(), GetGUID());
             m_AELootView[loot.GetGUID()] = loot;
 
-            if (loot_type == LootType.Corpse && !guid.IsItem())
+            if (loot.loot_type == LootType.Corpse && !loot.GetOwnerGUID().IsItem())
                 SetUnitFlag(UnitFlags.Looting);
         }
 

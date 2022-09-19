@@ -234,7 +234,7 @@ namespace Game
             if (!corpses.Empty())
                 SendPacket(new AELootTargets((uint)corpses.Count + 1));
 
-            GetPlayer().SendLoot(packet.Unit, LootType.Corpse);
+            GetPlayer().SendLoot(lootTarget.GetLootForPlayer(GetPlayer()));
 
             if (!corpses.Empty())
             {
@@ -243,7 +243,7 @@ namespace Game
 
                 foreach (Creature creature in corpses)
                 {
-                    GetPlayer().SendLoot(creature.GetGUID(), LootType.Corpse, true);
+                    GetPlayer().SendLoot(creature.GetLootForPlayer(GetPlayer()), true);
                     SendPacket(new AELootTargetsAck());
                 }
             }

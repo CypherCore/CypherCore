@@ -1900,13 +1900,13 @@ namespace Game.Entities
                                 else
                                 {
                                     loot = GetFishLoot(player);
-                                    player.SendLoot(GetGUID(), LootType.Fishing);
+                                    player.SendLoot(loot);
                                 }
                             }
                             else// If fishing skill is too low, send junk loot.
                             {
                                 loot = GetFishLootJunk(player);
-                                player.SendLoot(GetGUID(), LootType.FishingJunk);
+                                player.SendLoot(loot);
                             }
                             break;
                         }
@@ -2121,7 +2121,7 @@ namespace Game.Entities
                     loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true);
                     m_personalLoot[player.GetGUID()] = loot;
 
-                    player.SendLoot(GetGUID(), LootType.Fishinghole);
+                    player.SendLoot(loot);
                     player.UpdateCriteria(CriteriaType.CatchFishInFishingHole, GetGoInfo().entry);
                     return;
                 }

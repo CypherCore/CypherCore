@@ -1245,6 +1245,7 @@ namespace Game.Spells
                             }
                         }
 
+                        Loot loot = null;
                         if (gameObjTarget.GetLootState() == LootState.Ready)
                         {
                             uint lootId = gameObjTarget.GetGoInfo().GetLootId();
@@ -1255,7 +1256,7 @@ namespace Game.Spells
                                 Group group = player.GetGroup();
                                 bool groupRules = group != null && gameObjTarget.GetGoInfo().Chest.usegrouplootrules != 0;
 
-                                Loot loot = new(gameObjTarget.GetMap(), guid, loottype, groupRules ? group : null);
+                                loot = new(gameObjTarget.GetMap(), guid, loottype, groupRules ? group : null);
                                 gameObjTarget.loot = loot;
 
                                 loot.FillLoot(lootId, LootStorage.Gameobject, player, !groupRules, false, gameObjTarget.GetLootMode(), gameObjTarget.GetMap().GetDifficultyLootItemContext());
@@ -1282,16 +1283,18 @@ namespace Game.Spells
 
                             gameObjTarget.SetLootState(LootState.Activated, player);
                         }
+                        else
+                            loot = gameObjTarget.GetLootForPlayer(player);
+
+                        // Send loot
+                        if (loot != null)
+                            player.SendLoot(loot);
                         break;
                     }
-                    // Don't return, let loots been taken
                     default:
                         break;
                 }
             }
-
-            // Send loot
-            player.SendLoot(guid, loottype);
         }
 
         [SpellEffectHandler(SpellEffectName.OpenLock)]
@@ -1980,7 +1983,7 @@ namespace Game.Spells
                 return;
             }
 
-            player.SendLoot(unitTarget.GetGUID(), LootType.Pickpocketing);
+            player.SendLoot(creature.loot);
         }
 
         [SpellEffectHandler(SpellEffectName.AddFarsight)]
@@ -3240,7 +3243,7 @@ namespace Game.Spells
                 caster.UpdateCraftSkill(m_spellInfo);
                 itemTarget.loot = new Loot(caster.GetMap(), itemTarget.GetGUID(), LootType.Disenchanting, null);
                 itemTarget.loot.FillLoot(itemTarget.GetDisenchantLoot(caster).Id, LootStorage.Disenchant, caster, true);
-                caster.SendLoot(itemTarget.GetGUID(), LootType.Disenchanting);
+                caster.SendLoot(itemTarget.loot);
             }
 
             // item will be removed at disenchanting end
@@ -3616,7 +3619,7 @@ namespace Game.Spells
             creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
             creature.loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
             creature.SetLootRecipient(player, false);
-            player.SendLoot(creature.GetGUID(), LootType.Skinning);
+            player.SendLoot(creature.loot);
 
             if (skill == SkillType.Skinning)
             {
@@ -4329,7 +4332,7 @@ namespace Game.Spells
 
             itemTarget.loot = new Loot(player.GetMap(), itemTarget.GetGUID(), LootType.Prospecting, null);
             itemTarget.loot.FillLoot(itemTarget.GetEntry(), LootStorage.Prospecting, player, true);
-            player.SendLoot(itemTarget.GetGUID(), LootType.Prospecting);
+            player.SendLoot(itemTarget.loot);
         }
 
         [SpellEffectHandler(SpellEffectName.Milling)]
@@ -4357,7 +4360,7 @@ namespace Game.Spells
 
             itemTarget.loot = new Loot(player.GetMap(), itemTarget.GetGUID(), LootType.Milling, null);
             itemTarget.loot.FillLoot(itemTarget.GetEntry(), LootStorage.Milling, player, true);
-            player.SendLoot(itemTarget.GetGUID(), LootType.Milling);
+            player.SendLoot(itemTarget.loot);
         }
 
         [SpellEffectHandler(SpellEffectName.Skill)]

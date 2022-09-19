@@ -212,7 +212,10 @@ namespace Game
                     if (loot.gold > 0 || loot.unlootedCount > 0)
                         Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, player);
                 }
-                player.SendLoot(item.GetGUID(), LootType.Item);
+                if (item.loot != null)
+                    player.SendLoot(item.loot);
+                else
+                    player.SendLootError(ObjectGuid.Empty, item.GetGUID(), LootError.NoLoot);
             }
         }
 

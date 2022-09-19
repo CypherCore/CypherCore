@@ -99,11 +99,12 @@ namespace Game.Loots
 
         public bool LoadStoredLoot(Item item, Player player)
         {
-            Loot loot = item.GetLootForPlayer(player);
             if (!_lootItemStorage.ContainsKey(item.GetGUID().GetCounter()))
                 return false;
 
             var container = _lootItemStorage[item.GetGUID().GetCounter()];
+
+            Loot loot = new(player.GetMap(), item.GetGUID(), LootType.Item, null);
             loot.gold = container.GetMoney();
 
             LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
@@ -141,6 +142,7 @@ namespace Game.Loots
             }
 
             // Mark the item if it has loot so it won't be generated again on open
+            item.loot = loot;
             item.m_lootGenerated = true;
             return true;
         }
