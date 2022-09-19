@@ -477,7 +477,7 @@ namespace Game.Entities
                     DurabilityRepair(item.GetPos(), false, 0.0f);
             }
         }
-        
+
         public void DurabilityRepair(ushort pos, bool takeCost, float discountMod)
         {
             Item item = GetItemByPos(pos);
@@ -4107,14 +4107,14 @@ namespace Game.Entities
         {
             return m_lootRolls.Find(roll => roll.IsLootItem(lootObjectGuid, lootListId));
         }
-        
+
         public void AddLootRoll(LootRoll roll) { m_lootRolls.Add(roll); }
 
         public void RemoveLootRoll(LootRoll roll)
         {
             m_lootRolls.Remove(roll);
         }
-        
+
         //Inventory
         public bool IsInventoryPos(ushort pos)
         {
@@ -5956,7 +5956,7 @@ namespace Game.Entities
         public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }
         public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
-            LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem);
+            LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem ffaItem);
             if (item == null || item.is_looted)
             {
                 SendEquipError(InventoryResult.LootGone);
@@ -5969,8 +5969,7 @@ namespace Game.Entities
                 return;
             }
 
-            // questitems use the blocked field for other purposes
-            if (qitem == null && item.is_blocked)
+            if (item.is_blocked)
             {
                 SendLootReleaseAll();
                 return;
@@ -5988,31 +5987,14 @@ namespace Game.Entities
             if (msg == InventoryResult.Ok)
             {
                 Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
-                if (qitem != null)
+                if (ffaItem != null)
                 {
-                    qitem.is_looted = true;
-                    //freeforall is 1 if everyone's supposed to get the quest item.
-                    if (item.freeforall || loot.GetPlayerQuestItems().Count == 1)
-                        SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
-                    else
-                        loot.NotifyQuestItemRemoved(qitem.index, GetMap());
+                    //freeforall case, notify only one player of the removal
+                    ffaItem.is_looted = true;
+                    SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
                 }
-                else
-                {
-                    if (ffaitem != null)
-                    {
-                        //freeforall case, notify only one player of the removal
-                        ffaitem.is_looted = true;
-                        SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
-                    }
-                    else
-                    {
-                        //not freeforall, notify everyone
-                        if (conditem != null)
-                            conditem.is_looted = true;
-                        loot.NotifyItemRemoved(lootSlot, GetMap());
-                    }
-                }
+                else    //not freeforall, notify everyone
+                    loot.NotifyItemRemoved(lootSlot, GetMap());
 
                 //if only one person is supposed to loot the item, then set it to looted
                 if (!item.freeforall)
@@ -6122,7 +6104,6 @@ namespace Game.Entities
                 Session.DoLootReleaseAll();
 
             Loot loot;
-            PermissionTypes permission = PermissionTypes.All;
 
             Log.outDebug(LogFilter.Loot, "Player.SendLoot");
             if (guid.IsGameObject())
@@ -6217,31 +6198,6 @@ namespace Game.Entities
 
                     go.SetLootState(LootState.Activated, this);
                 }
-
-                if (go.GetLootState() == LootState.Activated)
-                {
-                    Group group = GetGroup();
-                    if (group)
-                    {
-                        switch (loot.GetLootMethod())
-                        {
-                            case LootMethod.MasterLoot:
-                                permission = group.GetMasterLooterGuid() == GetGUID() ? PermissionTypes.Master : PermissionTypes.Restricted;
-                                break;
-                            case LootMethod.RoundRobin:
-                                permission = PermissionTypes.RoundRobin;
-                                break;
-                            case LootMethod.FreeForAll:
-                                permission = PermissionTypes.All;
-                                break;
-                            default:
-                                permission = PermissionTypes.Group;
-                                break;
-                        }
-                    }
-                    else
-                        permission = PermissionTypes.All;
-                }
             }
             else if (guid.IsItem())
             {
@@ -6252,8 +6208,6 @@ namespace Game.Entities
                     SendLootRelease(guid);
                     return;
                 }
-
-                permission = PermissionTypes.Owner;
 
                 loot = item.GetLootForPlayer(this);
 
@@ -6300,11 +6254,6 @@ namespace Game.Entities
                 }
 
                 loot = bones.GetLootForPlayer(this);
-
-                if (bones.lootRecipient != null && bones.lootRecipient != this)
-                    permission = PermissionTypes.None;
-                else
-                    permission = PermissionTypes.Owner;
             }
             else
             {
@@ -6343,7 +6292,6 @@ namespace Game.Entities
                             uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
                             uint b = RandomHelper.URand(0, GetLevel() / 2);
                             loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
-                            permission = PermissionTypes.Owner;
                         }
                         else
                         {
@@ -6373,76 +6321,38 @@ namespace Game.Entities
                     if (loot.loot_type == LootType.Skinning)
                     {
                         loot_type = LootType.Skinning;
-                        permission = creature.GetLootRecipientGUID() == GetGUID() ? PermissionTypes.Owner : PermissionTypes.None;
                     }
                     else if (loot_type == LootType.Skinning)
                     {
                         loot.Clear();
                         loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, this, true);
-                        permission = PermissionTypes.Owner;
 
                         // Set new loot recipient
                         creature.SetLootRecipient(this, false);
                     }
-                    // set group rights only for loot_type != LOOT_SKINNING
-                    else
-                    {
-                        if (creature.GetLootRecipientGroup())
-                        {
-                            Group group = GetGroup();
-                            if (group == creature.GetLootRecipientGroup())
-                            {
-                                switch (loot.GetLootMethod())
-                                {
-                                    case LootMethod.MasterLoot:
-                                        permission = PermissionTypes.Master;
-                                        break;
-                                    case LootMethod.FreeForAll:
-                                        permission = PermissionTypes.All;
-                                        break;
-                                    case LootMethod.RoundRobin:
-                                        permission = PermissionTypes.RoundRobin;
-                                        break;
-                                    default:
-                                        permission = PermissionTypes.Group;
-                                        break;
-                                }
-                            }
-                            else
-                                permission = PermissionTypes.None;
-                        }
-                        else if (creature.GetLootRecipient() == this)
-                            permission = PermissionTypes.Owner;
-                        else
-                            permission = PermissionTypes.None;
-                    }
                 }
             }
 
-            if (permission != PermissionTypes.None)
-            {
-                if (!guid.IsItem() && !aeLooting)
-                    SetLootGUID(guid);
 
-                LootResponse packet = new();
-                packet.Owner = guid;
-                packet.LootObj = loot.GetGUID();
-                packet.LootMethod = loot.GetLootMethod();
-                packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot_type);
-                packet.Acquired = true; // false == No Loot (this too^^)
-                packet.AELooting = aeLooting;
-                loot.BuildLootResponse(packet, this, permission);
-                SendPacket(packet);
+            if (!guid.IsItem() && !aeLooting)
+                SetLootGUID(guid);
 
-                // add 'this' player as one of the players that are looting 'loot'
-                loot.OnLootOpened(GetMap(), GetGUID());
-                m_AELootView[loot.GetGUID()] = loot;
+            LootResponse packet = new();
+            packet.Owner = guid;
+            packet.LootObj = loot.GetGUID();
+            packet.LootMethod = loot.GetLootMethod();
+            packet.AcquireReason = (byte)SharedConst.GetLootTypeForClient(loot_type);
+            packet.Acquired = true; // false == No Loot (this too^^)
+            packet.AELooting = aeLooting;
+            loot.BuildLootResponse(packet, this);
+            SendPacket(packet);
 
-                if (loot_type == LootType.Corpse && !guid.IsItem())
-                    SetUnitFlag(UnitFlags.Looting);
-            }
-            else
-                SendLootError(loot != null ? loot.GetGUID() : ObjectGuid.Empty, guid, LootError.DidntKill);
+            // add 'this' player as one of the players that are looting 'loot'
+            loot.OnLootOpened(GetMap(), GetGUID());
+            m_AELootView[loot.GetGUID()] = loot;
+
+            if (loot_type == LootType.Corpse && !guid.IsItem())
+                SetUnitFlag(UnitFlags.Looting);
         }
 
         public void SendLootError(ObjectGuid lootObj, ObjectGuid owner, LootError error)
@@ -6462,12 +6372,12 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendNotifyLootItemRemoved(ObjectGuid lootObj, ObjectGuid owner, byte lootSlot)
+        public void SendNotifyLootItemRemoved(ObjectGuid lootObj, ObjectGuid owner, byte lootListId)
         {
             LootRemoved packet = new();
             packet.LootObj = lootObj;
             packet.Owner = owner;
-            packet.LootListID = (byte)(lootSlot + 1);
+            packet.LootListID = lootListId;
             SendPacket(packet);
         }
 

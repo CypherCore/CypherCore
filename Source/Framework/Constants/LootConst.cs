@@ -58,17 +58,6 @@ namespace Framework.Constants
         JunkFish = 0x8000
     }
 
-    public enum PermissionTypes
-    {
-        All = 0,
-        Group = 1,
-        Master = 2,
-        Restricted = 3,
-        RoundRobin = 4,
-        Owner = 5,
-        None = 6
-    }
-
     public enum LootType
     {
         None = 0,

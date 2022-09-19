@@ -108,6 +108,73 @@ namespace Game.Loots
             allowedGUIDs.Add(player.GetGUID());
         }
 
+        public LootSlotType? GetUiTypeForPlayer(Player player, Loot loot)
+        {
+            if (is_looted)
+                return null;
+
+            if (!allowedGUIDs.Contains(player.GetGUID()))
+                return null;
+
+            if (freeforall)
+            {
+                var ffaItems = loot.GetPlayerFFAItems().LookupByKey(player.GetGUID());
+                if (ffaItems != null)
+                {
+                    var ffaItemItr = ffaItems.Find(ffaItem => ffaItem.LootListId == LootListId);
+                    if (ffaItemItr != null && !ffaItemItr.is_looted)
+                        return loot.GetLootMethod() == LootMethod.FreeForAll ? LootSlotType.Owner : LootSlotType.AllowLoot;
+                }
+                return null;
+            }
+
+            if (needs_quest && !follow_loot_rules)
+                return loot.GetLootMethod() == LootMethod.FreeForAll ? LootSlotType.Owner : LootSlotType.AllowLoot;
+
+            switch (loot.GetLootMethod())
+            {
+                case LootMethod.FreeForAll:
+                    return LootSlotType.Owner;
+                case LootMethod.RoundRobin:
+                    if (!loot.roundRobinPlayer.IsEmpty() && loot.roundRobinPlayer != player.GetGUID())
+                        return null;
+
+                    return LootSlotType.AllowLoot;
+                case LootMethod.MasterLoot:
+                    if (is_underthreshold)
+                    {
+                        if (!loot.roundRobinPlayer.IsEmpty() && loot.roundRobinPlayer != player.GetGUID())
+                            return null;
+
+                        return LootSlotType.AllowLoot;
+                    }
+
+                    return loot.GetLootMasterGUID() == player.GetGUID() ? LootSlotType.Master : LootSlotType.Locked;
+                case LootMethod.GroupLoot:
+                case LootMethod.NeedBeforeGreed:
+                    if (is_underthreshold)
+                        if (!loot.roundRobinPlayer.IsEmpty() && loot.roundRobinPlayer != player.GetGUID())
+                            return null;
+
+                    if (is_blocked)
+                        return LootSlotType.RollOngoing;
+
+                    if (rollWinnerGUID.IsEmpty()) // all passed
+                        return LootSlotType.AllowLoot;
+
+                    if (rollWinnerGUID == player.GetGUID())
+                        return LootSlotType.Owner;
+
+                    return null;
+                case LootMethod.PersonalLoot:
+                    return LootSlotType.Owner;
+                default:
+                    break;
+            }
+
+            return null;
+        }
+
         public List<ObjectGuid> GetAllowedLooters() { return allowedGUIDs; }
 
         public uint itemid;
@@ -130,18 +197,18 @@ namespace Game.Loots
 
     public class NotNormalLootItem
     {
-        public byte index;                                          // position in quest_items or items;
+        public byte LootListId;                                          // position in quest_items or items;
         public bool is_looted;
 
         public NotNormalLootItem()
         {
-            index = 0;
+            LootListId = 0;
             is_looted = false;
         }
 
         public NotNormalLootItem(byte _index, bool _islooted = false)
         {
-            index = _index;
+            LootListId = _index;
             is_looted = _islooted;
         }
     }
@@ -167,7 +234,6 @@ namespace Game.Loots
         bool m_isStarted;
         LootItem m_lootItem;
         Loot m_loot;
-        uint m_lootListId;
         RollMask m_voteMask;
         DateTime m_endTime = DateTime.MinValue;
 
@@ -347,7 +413,7 @@ namespace Game.Loots
         void FillPacket(LootItemData lootItem)
         {
             lootItem.Quantity = m_lootItem.count;
-            lootItem.LootListID = (byte)(m_lootListId + 1);
+            lootItem.LootListID = (byte)m_lootItem.LootListId;
             lootItem.CanTradeToTapList = m_lootItem.allowedGUIDs.Count > 1;
             lootItem.Loot = new(m_lootItem);
         }
@@ -367,7 +433,6 @@ namespace Game.Loots
                 m_lootItem = loot.items[(int)lootListId];
 
                 m_loot = loot;
-                m_lootListId = lootListId;
                 m_lootItem.is_blocked = true;                          // block the item while rolling
 
                 uint playerCount = 0;
@@ -469,7 +534,7 @@ namespace Game.Loots
 
         public bool IsLootItem(ObjectGuid lootObject, uint lootListId)
         {
-            return m_loot.GetGUID() == lootObject && m_lootListId == lootListId;
+            return m_loot.GetGUID() == lootObject && m_lootItem.LootListId == lootListId;
         }
 
         /**
@@ -560,8 +625,7 @@ namespace Game.Loots
                         loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
                         if (!loot.AutoStore(player, ItemConst.NullBag, ItemConst.NullSlot, true))
                         {
-                            uint maxSlot = loot.GetMaxSlotInLootFor(player);
-                            for (uint i = 0; i < maxSlot; ++i)
+                            for (uint i = 0; i < loot.items.Count; ++i)
                             {
                                 LootItem disenchantLoot = loot.LootItemInSlot(i, player);
                                 if (disenchantLoot != null)
@@ -572,7 +636,7 @@ namespace Game.Loots
                             m_loot.NotifyItemRemoved((byte)m_lootItem.LootListId, m_map);
                     }
                     else
-                        player.StoreLootItem(m_loot.GetOwnerGUID(), (byte)m_lootListId, m_loot);
+                        player.StoreLootItem(m_loot.GetOwnerGUID(), (byte)m_lootItem.LootListId, m_loot);
                 }
             }
             m_isStarted = false;
@@ -593,7 +657,7 @@ namespace Game.Loots
         }
 
         // Inserts the item into the loot (called by LootTemplate processors)
-        public void AddItem(LootStoreItem item, Player player)
+        public void AddItem(LootStoreItem item)
         {
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
             if (proto == null)
@@ -602,68 +666,36 @@ namespace Game.Loots
             uint count = RandomHelper.URand(item.mincount, item.maxcount);
             uint stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
 
-            List<LootItem> lootItems = item.needs_quest ? quest_items : items;
-            uint limit = (uint)(item.needs_quest ? SharedConst.MaxNRQuestItems : SharedConst.MaxNRLootItems);
-
-            for (uint i = 0; i < stacks && lootItems.Count < limit; ++i)
+            for (uint i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
             {
                 LootItem generatedLoot = new(item);
                 generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
-                generatedLoot.LootListId = (uint)lootItems.Count;
+                generatedLoot.LootListId = (uint)items.Count;
                 if (_itemContext != 0)
                 {
                     List<uint> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
                     generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
-                lootItems.Add(generatedLoot);
+
+                items.Add(generatedLoot);
                 count -= proto.GetMaxStackSize();
-
-                // In some cases, a dropped item should be visible/lootable only for some players in group
-                bool canSeeItemInLootWindow = false;
-                Group group = player.GetGroup();
-                if (group != null)
-                {
-                    for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                    {
-                        Player member = itr.GetSource();
-                        if (member != null)
-                            if (generatedLoot.AllowedForPlayer(member))
-                                canSeeItemInLootWindow = true;
-                    }
-                }
-                else if (generatedLoot.AllowedForPlayer(player))
-                    canSeeItemInLootWindow = true;
-
-                if (!canSeeItemInLootWindow)
-                    continue;
-
-                // non-conditional one-player only items are counted here,
-                // free for all items are counted in FillFFALoot(),
-                // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
-                if (!item.needs_quest && item.conditions.Empty() && !proto.HasFlag(ItemFlags.MultiDrop))
-                    ++unlootedCount;
             }
         }
 
         public bool AutoStore(Player player, byte bag, byte slot, bool broadcast, bool createdByPlayer = false)
         {
             bool allLooted = true;
-            uint max_slot = GetMaxSlotInLootFor(player);
-            for (uint i = 0; i < max_slot; ++i)
+            for (uint i = 0; i < items.Count; ++i)
             {
-                NotNormalLootItem qitem = null;
-                NotNormalLootItem ffaitem = null;
-                NotNormalLootItem conditem = null;
-
-                LootItem lootItem = LootItemInSlot(i, player, out qitem, out ffaitem, out conditem);
+                LootItem lootItem = LootItemInSlot(i, player, out NotNormalLootItem ffaitem);
                 if (lootItem == null || lootItem.is_looted)
                     continue;
 
                 if (!lootItem.AllowedForPlayer(player))
                     continue;
 
-                if (qitem == null && lootItem.is_blocked)
+                if (lootItem.is_blocked)
                     continue;
 
                 // dont allow protected item to be looted by someone else
@@ -683,12 +715,8 @@ namespace Game.Loots
                     continue;
                 }
 
-                if (qitem != null)
-                    qitem.is_looted = true;
-                else if (ffaitem != null)
+                if (ffaitem != null)
                     ffaitem.is_looted = true;
-                else if (conditem != null)
-                    conditem.is_looted = true;
 
                 if (!lootItem.freeforall)
                     lootItem.is_looted = true;
@@ -703,14 +731,10 @@ namespace Game.Loots
             return allLooted;
         }
 
-        public LootItem GetItemInSlot(uint lootSlot)
+        public LootItem GetItemInSlot(uint lootListId)
         {
-            if (lootSlot < items.Count)
-                return items[(int)lootSlot];
-
-            lootSlot -= (uint)items.Count;
-            if (lootSlot < quest_items.Count)
-                return quest_items[(int)lootSlot];
+            if (lootListId < items.Count)
+                return items[(int)lootListId];
 
             return null;
         }
@@ -732,7 +756,7 @@ namespace Game.Loots
 
             _itemContext = context;
 
-            tab.Process(this, store.IsRatesAllowed(), (byte)lootMode, 0, lootOwner);          // Processing is done there, callback via Loot.AddItem()
+            tab.Process(this, store.IsRatesAllowed(), (byte)lootMode, 0);          // Processing is done there, callback via Loot.AddItem()
 
             // Setting access rights for group loot case
             Group group = lootOwner.GetGroup();
@@ -748,8 +772,11 @@ namespace Game.Loots
                             FillNotNormalLootFor(player);
                 }
 
-                void processLootItem(LootItem item)
+                foreach (LootItem item in items)
                 {
+                    if (!item.follow_loot_rules || item.freeforall)
+                        continue;
+
                     ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
                     if (proto != null)
                     {
@@ -771,22 +798,6 @@ namespace Game.Loots
                             }
                         }
                     }
-                };
-
-                foreach (LootItem item in items)
-                {
-                    if (item.freeforall)
-                        continue;
-
-                    processLootItem(item);
-                }
-
-                foreach (LootItem item in quest_items)
-                {
-                    if (!item.follow_loot_rules)
-                        continue;
-
-                    processLootItem(item);
                 }
             }
             // ... for personal loot
@@ -808,142 +819,43 @@ namespace Game.Loots
             ObjectGuid plguid = player.GetGUID();
             _allowedLooters.Add(plguid);
 
-            var questItemList = PlayerQuestItems.LookupByKey(plguid);
-            if (questItemList.Empty())
-                FillQuestLoot(player);
+            List<NotNormalLootItem> ffaItems = new();
 
-            questItemList = PlayerFFAItems.LookupByKey(plguid);
-            if (questItemList.Empty())
-                FillFFALoot(player);
-
-            questItemList = PlayerNonQuestNonFFAConditionalItems.LookupByKey(plguid);
-            if (questItemList.Empty())
-                FillNonQuestNonFFAConditionalLoot(player);
-        }
-
-        List<NotNormalLootItem> FillFFALoot(Player player)
-        {
-            List<NotNormalLootItem> ql = new();
-
-            for (byte i = 0; i < items.Count; ++i)
+            foreach (LootItem  item in items)
             {
-                LootItem item = items[i];
-                if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player))
+                if (!item.AllowedForPlayer(player))
+                    continue;
+
+                if (item.freeforall)
                 {
-                    ql.Add(new NotNormalLootItem(i));
+                    ffaItems.Add(new NotNormalLootItem((byte)item.LootListId));
+                    ++unlootedCount;
+                }
+
+                else if (!item.is_counted)
+                {
+                    item.is_counted = true;
                     ++unlootedCount;
                 }
             }
-            if (ql.Empty())
-                return null;
 
-
-            PlayerFFAItems[player.GetGUID()] = ql;
-            return ql;
+            if (!ffaItems.Empty())
+                PlayerFFAItems[player.GetGUID()] = ffaItems;
         }
 
-        List<NotNormalLootItem> FillQuestLoot(Player player)
-        {
-            if (items.Count == SharedConst.MaxNRLootItems)
-                return null;
-
-            List<NotNormalLootItem> ql = new();
-
-            for (byte i = 0; i < quest_items.Count; ++i)
-            {
-                LootItem item = quest_items[i];
-
-                if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((GetLootMethod() == LootMethod.MasterLoot && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || GetLootMethod() != LootMethod.MasterLoot))))
-                {
-                    item.AddAllowedLooter(player);
-
-                    ql.Add(new NotNormalLootItem(i));
-
-                    // quest items get blocked when they first appear in a
-                    // player's quest vector
-                    //
-                    // increase once if one looter only, looter-times if free for all
-                    if (item.freeforall || !item.is_blocked)
-                        ++unlootedCount;
-                    if (!player.GetGroup() || GetLootMethod() != LootMethod.GroupLoot && GetLootMethod() != LootMethod.RoundRobin)
-                        item.is_blocked = true;
-
-                    if (items.Count + ql.Count == SharedConst.MaxNRLootItems)
-                        break;
-                }
-            }
-            if (ql.Empty())
-                return null;
-
-            PlayerQuestItems[player.GetGUID()] = ql;
-            return ql;
-        }
-
-        List<NotNormalLootItem> FillNonQuestNonFFAConditionalLoot(Player player)
-        {
-            List<NotNormalLootItem> ql = new();
-
-            for (byte i = 0; i < items.Count; ++i)
-            {
-                LootItem item = items[i];
-                if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player))
-                {
-                    item.AddAllowedLooter(player);
-                    if (!item.conditions.Empty())
-                    {
-                        ql.Add(new NotNormalLootItem(i));
-                        if (!item.is_counted)
-                        {
-                            ++unlootedCount;
-                            item.is_counted = true;
-                        }
-                    }
-                }
-            }
-            if (ql.Empty())
-                return null;
-
-            PlayerNonQuestNonFFAConditionalItems[player.GetGUID()] = ql;
-            return ql;
-        }
-
-        public void NotifyItemRemoved(byte lootIndex, Map map)
+        public void NotifyItemRemoved(byte lootListId, Map map)
         {
             // notify all players that are looting this that the item was removed
             // convert the index to the slot the player sees
             for (int i = 0; i < PlayersLooting.Count; ++i)
             {
-                Player player = Global.ObjAccessor.GetPlayer(map, PlayersLooting[i]);
-                if (player != null)
-                    player.SendNotifyLootItemRemoved(GetGUID(), GetOwnerGUID(), lootIndex);
-                else
-                    PlayersLooting.RemoveAt(i);
-            }
-        }
+                LootItem item = items[lootListId];
+                if (!item.GetAllowedLooters().Contains(PlayersLooting[i]))
+                    continue;
 
-        public void NotifyQuestItemRemoved(byte questIndex, Map map)
-        {
-            // when a free for all questitem is looted
-            // all players will get notified of it being removed
-            // (other questitems can be looted by each group member)
-            // bit inefficient but isn't called often
-            for (var i = 0; i < PlayersLooting.Count; ++i)
-            {
                 Player player = Global.ObjAccessor.GetPlayer(map, PlayersLooting[i]);
                 if (player)
-                {
-                    var pql = PlayerQuestItems.LookupByKey(player.GetGUID());
-                    if (!pql.Empty())
-                    {
-                        byte j;
-                        for (j = 0; j < pql.Count; ++j)
-                            if (pql[j].index == questIndex)
-                                break;
-
-                        if (j < pql.Count)
-                            player.SendNotifyLootItemRemoved(GetGUID(), GetOwnerGUID(), (byte)(items.Count + j));
-                    }
-                }
+                    player.SendNotifyLootItemRemoved(GetGUID(), GetOwnerGUID(), lootListId);
                 else
                     PlayersLooting.RemoveAt(i);
             }
@@ -979,22 +891,9 @@ namespace Game.Loots
                             maxEnchantingSkill = Math.Max(maxEnchantingSkill, allowedLooter.GetSkillValue(SkillType.Enchanting));
                     }
 
-                    uint lootListId = 0;
-                    for (; lootListId < items.Count; ++lootListId)
+                    for (uint lootListId = 0; lootListId < items.Count; ++lootListId)
                     {
                         LootItem item = items[(int)lootListId];
-                        if (!item.is_blocked)
-                            continue;
-
-                        LootRoll lootRoll = new();
-                        var inserted = _rolls.TryAdd(lootListId, lootRoll);
-                        if (!lootRoll.TryToStart(map, this, lootListId, maxEnchantingSkill))
-                            _rolls.Remove(lootListId);
-                    }
-
-                    for (; lootListId - items.Count < quest_items.Count; ++lootListId)
-                    {
-                        LootItem item = quest_items[(int)lootListId - items.Count];
                         if (!item.is_blocked)
                             continue;
 
@@ -1036,66 +935,27 @@ namespace Game.Loots
 
         public LootItem LootItemInSlot(uint lootSlot, Player player)
         {
-            return LootItemInSlot(lootSlot, player, out _, out _, out _);
+            return LootItemInSlot(lootSlot, player, out _);
         }
-        public LootItem LootItemInSlot(uint lootSlot, Player player, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem)
+        public LootItem LootItemInSlot(uint lootListId, Player player, out NotNormalLootItem ffaItem)
         {
-            qitem = null;
-            ffaitem = null;
-            conditem = null;
+            ffaItem = null;
 
-            LootItem item = null;
-            bool is_looted = true;
-            if (lootSlot >= items.Count)
+            LootItem item = items[(int)lootListId];
+            bool is_looted = item.is_looted;
+
+            if (item.freeforall)
             {
-                int questSlot = (int)(lootSlot - items.Count);
-                var questItems = PlayerQuestItems.LookupByKey(player.GetGUID());
-                if (!questItems.Empty())
+                var itemList = PlayerFFAItems.LookupByKey(player.GetGUID());
+                if (itemList != null)
                 {
-                    NotNormalLootItem qitem2 = questItems[questSlot];
-                    if (qitem2 != null)
+                    foreach (NotNormalLootItem  notNormalLootItem in itemList)
                     {
-                        qitem = qitem2;
-                        item = quest_items[qitem2.index];
-                        is_looted = qitem2.is_looted;
-                    }
-                }
-            }
-            else
-            {
-                item = items[(int)lootSlot];
-                is_looted = item.is_looted;
-                if (item.freeforall)
-                {
-                    var questItemList = PlayerFFAItems.LookupByKey(player.GetGUID());
-                    if (!questItemList.Empty())
-                    {
-                        foreach (var c in questItemList)
+                        if (notNormalLootItem.LootListId == lootListId)
                         {
-                            if (c.index == lootSlot)
-                            {
-                                NotNormalLootItem ffaitem2 = c;
-                                ffaitem = ffaitem2;
-                                is_looted = ffaitem2.is_looted;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else if (!item.conditions.Empty())
-                {
-                    var questItemList = PlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID());
-                    if (!questItemList.Empty())
-                    {
-                        foreach (var iter in questItemList)
-                        {
-                            if (iter.index == lootSlot)
-                            {
-                                NotNormalLootItem conditem2 = iter;
-                                conditem = conditem2;
-                                is_looted = conditem2.is_looted;
-                                break;
-                            }
+                            is_looted = notNormalLootItem.is_looted;
+                            ffaItem = notNormalLootItem;
+                            break;
                         }
                     }
                 }
@@ -1107,12 +967,6 @@ namespace Game.Loots
             return item;
         }
 
-        public uint GetMaxSlotInLootFor(Player player)
-        {
-            var questItemList = PlayerQuestItems.LookupByKey(player.GetGUID());
-            return (uint)(items.Count + questItemList.Count);
-        }
-
         // return true if there is any item that is lootable for any player (not quest item, FFA or conditional)
         public bool HasItemForAll()
         {
@@ -1121,7 +975,7 @@ namespace Game.Loots
                 return true;
 
             foreach (LootItem item in items)
-                if (!item.is_looted && !item.freeforall && item.conditions.Empty())
+                if (!item.is_looted && item.follow_loot_rules && !item.freeforall && item.conditions.Empty())
                     return true;
 
             return false;
@@ -1130,40 +984,17 @@ namespace Game.Loots
         // return true if there is any FFA, quest or conditional item for the player.
         public bool HasItemFor(Player player)
         {
-            var lootPlayerQuestItems = GetPlayerQuestItems();
-            var q_list = lootPlayerQuestItems.LookupByKey(player.GetGUID());
-            if (!q_list.Empty())
-            {
-                foreach (var qi in q_list)
-                {
-                    LootItem item = quest_items[qi.index];
-                    if (!qi.is_looted && !item.is_looted)
-                        return true;
-                }
-            }
+            // quest items
+            foreach (LootItem lootItem in items)
+                if (!lootItem.is_looted && !lootItem.follow_loot_rules && lootItem.GetAllowedLooters().Contains(player.GetGUID()))
+                    return true;
 
-            var lootPlayerFFAItems = GetPlayerFFAItems();
-            var ffa_list = lootPlayerFFAItems.LookupByKey(player.GetGUID());
-            if (!ffa_list.Empty())
+            var ffaItems = GetPlayerFFAItems().LookupByKey(player.GetGUID());
+            if (ffaItems != null)
             {
-                foreach (var fi in ffa_list)
-                {
-                    LootItem item = items[fi.index];
-                    if (!fi.is_looted && !item.is_looted)
-                        return true;
-                }
-            }
-
-            var lootPlayerNonQuestNonFFAConditionalItems = GetPlayerNonQuestNonFFAConditionalItems();
-            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID());
-            if (!conditional_list.Empty())
-            {
-                foreach (var ci in conditional_list)
-                {
-                    LootItem item = items[ci.index];
-                    if (!ci.is_looted && !item.is_looted)
-                        return true;
-                }
+                bool hasFfaItem = ffaItems.Any(ffaItem => !ffaItem.is_looted);
+                if (hasFfaItem)
+                    return true;
             }
 
             return false;
@@ -1181,230 +1012,28 @@ namespace Game.Loots
             return false;
         }
 
-        public void BuildLootResponse(LootResponse packet, Player viewer, PermissionTypes permission)
+        public void BuildLootResponse(LootResponse packet, Player viewer)
         {
-            if (permission == PermissionTypes.None)
-                return;
-
             packet.Coins = gold;
 
-            switch (permission)
+            foreach (LootItem item in items)
             {
-                case PermissionTypes.Group:
-                case PermissionTypes.Master:
-                case PermissionTypes.Restricted:
-                {
-                    // if you are not the round-robin group looter, you can only see
-                    // blocked rolled items and quest items, and !ffa items
-                    for (byte i = 0; i < items.Count; ++i)
-                    {
-                        if (!items[i].is_looted && !items[i].freeforall && items[i].conditions.Empty() && items[i].AllowedForPlayer(viewer))
-                        {
-                            LootSlotType slot_type;
+                var uiType = item.GetUiTypeForPlayer(viewer, this);
+                if (!uiType.HasValue)
+                    continue;
 
-                            if (items[i].is_blocked) // for ML & restricted is_blocked = !is_underthreshold
-                            {
-                                switch (permission)
-                                {
-                                    case PermissionTypes.Group:
-                                        slot_type = LootSlotType.RollOngoing;
-                                        break;
-                                    case PermissionTypes.Master:
-                                    {
-                                        if (viewer.GetGroup() && viewer.GetGroup().GetMasterLooterGuid() == viewer.GetGUID())
-                                            slot_type = LootSlotType.Master;
-                                        else
-                                            slot_type = LootSlotType.Locked;
-                                        break;
-                                    }
-                                    case PermissionTypes.Restricted:
-                                        slot_type = LootSlotType.Locked;
-                                        break;
-                                    default:
-                                        continue;
-                                }
-                            }
-                            else if (roundRobinPlayer.IsEmpty() || viewer.GetGUID() == roundRobinPlayer || !items[i].is_underthreshold)
-                            {
-                                // no round robin owner or he has released the loot
-                                // or it IS the round robin group owner
-                                // => item is lootable
-                                slot_type = LootSlotType.AllowLoot;
-                            }
-                            else if (!items[i].rollWinnerGUID.IsEmpty())
-                            {
-                                if (items[i].rollWinnerGUID == viewer.GetGUID())
-                                    slot_type = LootSlotType.Owner;
-                                else
-                                    continue;
-                            }
-                            else
-                                // item shall not be displayed.
-                                continue;
-
-                            LootItemData lootItem = new();
-                            lootItem.LootListID = (byte)(i + 1);
-                            lootItem.UIType = slot_type;
-                            lootItem.Quantity = items[i].count;
-                            lootItem.Loot = new ItemInstance(items[i]);
-                            packet.Items.Add(lootItem);
-                        }
-                    }
-                    break;
-                }
-                case PermissionTypes.RoundRobin:
-                {
-                    for (var i = 0; i < items.Count; ++i)
-                    {
-                        if (!items[i].is_looted && !items[i].freeforall && items[i].conditions.Empty() && items[i].AllowedForPlayer(viewer))
-                        {
-                            if (!roundRobinPlayer.IsEmpty() && viewer.GetGUID() != roundRobinPlayer)
-                                // item shall not be displayed.
-                                continue;
-
-                            LootItemData lootItem = new();
-                            lootItem.LootListID = (byte)(i + 1);
-                            lootItem.UIType = LootSlotType.AllowLoot;
-                            lootItem.Quantity = items[i].count;
-                            lootItem.Loot = new(items[i]);
-                            packet.Items.Add(lootItem);
-                        }
-                    }
-                    break;
-                }
-                case PermissionTypes.All:
-                case PermissionTypes.Owner:
-                {
-                    for (byte i = 0; i < items.Count; ++i)
-                    {
-                        if (!items[i].is_looted && !items[i].freeforall && items[i].conditions.Empty() && items[i].AllowedForPlayer(viewer))
-                        {
-                            LootItemData lootItem = new();
-                            lootItem.LootListID = (byte)(i + 1);
-                            lootItem.UIType = (permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot);
-                            lootItem.Quantity = items[i].count;
-                            lootItem.Loot = new ItemInstance(items[i]);
-                            packet.Items.Add(lootItem);
-                        }
-                    }
-                    break;
-                }
-                default:
-                    return;
-            }
-
-            LootSlotType slotType = permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot;
-            var lootPlayerQuestItems = GetPlayerQuestItems();
-            var q_list = lootPlayerQuestItems.LookupByKey(viewer.GetGUID());
-            if (!q_list.Empty())
-            {
-                for (var i = 0; i < q_list.Count; ++i)
-                {
-                    NotNormalLootItem qi = q_list[i];
-                    LootItem item = quest_items[qi.index];
-                    if (!qi.is_looted && !item.is_looted)
-                    {
-                        LootItemData lootItem = new();
-                        lootItem.LootListID = (byte)(items.Count + i + 1);
-                        lootItem.Quantity = item.count;
-                        lootItem.Loot = new ItemInstance(item);
-
-                        switch (permission)
-                        {
-                            case PermissionTypes.Master:
-                                lootItem.UIType = LootSlotType.Master;
-                                break;
-                            case PermissionTypes.Restricted:
-                                lootItem.UIType = item.is_blocked ? LootSlotType.Locked : LootSlotType.AllowLoot;
-                                break;
-                            case PermissionTypes.Group:
-                            case PermissionTypes.RoundRobin:
-                                if (!item.is_blocked)
-                                    lootItem.UIType = LootSlotType.AllowLoot;
-                                else
-                                    lootItem.UIType = LootSlotType.RollOngoing;
-                                break;
-                            default:
-                                lootItem.UIType = slotType;
-                                break;
-                        }
-
-                        packet.Items.Add(lootItem);
-                    }
-                }
-            }
-
-            var lootPlayerFFAItems = GetPlayerFFAItems();
-            var ffa_list = lootPlayerFFAItems.LookupByKey(viewer.GetGUID());
-            if (!ffa_list.Empty())
-            {
-                foreach (var fi in ffa_list)
-                {
-                    LootItem item = items[fi.index];
-                    if (!fi.is_looted && !item.is_looted)
-                    {
-                        LootItemData lootItem = new();
-                        lootItem.LootListID = (byte)(fi.index + 1);
-                        lootItem.UIType = slotType;
-                        lootItem.Quantity = item.count;
-                        lootItem.Loot = new ItemInstance(item);
-                        packet.Items.Add(lootItem);
-                    }
-                }
-            }
-
-            var lootPlayerNonQuestNonFFAConditionalItems = GetPlayerNonQuestNonFFAConditionalItems();
-            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(viewer.GetGUID());
-            if (!conditional_list.Empty())
-            {
-                foreach (var ci in conditional_list)
-                {
-                    LootItem item = items[ci.index];
-                    if (!ci.is_looted && !item.is_looted)
-                    {
-                        LootItemData lootItem = new();
-                        lootItem.LootListID = (byte)(ci.index + 1);
-                        lootItem.Quantity = item.count;
-                        lootItem.Loot = new ItemInstance(item);
-
-                        if (item.follow_loot_rules)
-                        {
-                            switch (permission)
-                            {
-                                case PermissionTypes.Master:
-                                    lootItem.UIType = LootSlotType.Master;
-                                    break;
-                                case PermissionTypes.Restricted:
-                                    lootItem.UIType = item.is_blocked ? LootSlotType.Locked : LootSlotType.AllowLoot;
-                                    break;
-                                case PermissionTypes.Group:
-                                case PermissionTypes.RoundRobin:
-                                    if (!item.is_blocked)
-                                        lootItem.UIType = LootSlotType.AllowLoot;
-                                    else
-                                        lootItem.UIType = LootSlotType.RollOngoing;
-                                    break;
-                                default:
-                                    lootItem.UIType = slotType;
-                                    break;
-                            }
-                        }
-                        else
-                            lootItem.UIType = slotType;
-
-                        packet.Items.Add(lootItem);
-                    }
-                }
+                LootItemData lootItem = new();
+                lootItem.LootListID = (byte)item.LootListId;
+                lootItem.UIType = uiType.Value;
+                lootItem.Quantity = item.count;
+                lootItem.Loot = new(item);
+                packet.Items.Add(lootItem);
             }
         }
 
         public void Clear()
         {
-            PlayerQuestItems.Clear();
-
             PlayerFFAItems.Clear();
-
-            PlayerNonQuestNonFFAConditionalItems.Clear();
 
             foreach (ObjectGuid playerGuid in PlayersLooting)
             {
@@ -1415,7 +1044,6 @@ namespace Game.Loots
 
             PlayersLooting.Clear();
             items.Clear();
-            quest_items.Clear();
             gold = 0;
             unlootedCount = 0;
             roundRobinPlayer = ObjectGuid.Empty;
@@ -1458,12 +1086,9 @@ namespace Game.Loots
 
         public ObjectGuid GetLootMasterGUID() { return _lootMaster; }
 
-        public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerQuestItems() { return PlayerQuestItems; }
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
-        public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
 
         public List<LootItem> items = new();
-        public List<LootItem> quest_items = new();
         public uint gold;
         public byte unlootedCount;
         public ObjectGuid roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
@@ -1471,9 +1096,7 @@ namespace Game.Loots
         public byte maxDuplicates;                                    // Max amount of items with the same entry that can drop (default is 1; on 25 man raid mode 3)
 
         List<ObjectGuid> PlayersLooting = new();
-        MultiMap<ObjectGuid, NotNormalLootItem> PlayerQuestItems = new();
         MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new();
-        MultiMap<ObjectGuid, NotNormalLootItem> PlayerNonQuestNonFFAConditionalItems = new();
 
         // Loot GUID
         ObjectGuid _guid;

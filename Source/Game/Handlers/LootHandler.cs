@@ -75,7 +75,7 @@ namespace Game
                     }
                 }
 
-                player.StoreLootItem(lguid, (byte)(req.LootListID - 1), loot, aeResult);
+                player.StoreLootItem(lguid, req.LootListID, loot, aeResult);
 
                 // If player is removing the last LootItem, delete the empty container.
                 if (loot.IsLooted() && lguid.IsItem())
@@ -412,14 +412,13 @@ namespace Game
                 if (loot == null || loot.GetLootMethod() != LootMethod.MasterLoot)
                     return;
 
-                byte slotid = (byte)(req.LootListID - 1);
-                if (slotid >= loot.items.Count + loot.quest_items.Count)
+                if (req.LootListID >= loot.items.Count)
                 {
-                    Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {slotid}, size {loot.items.Count})");
+                    Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {req.LootListID}, size {loot.items.Count})");
                     return;
                 }
 
-                LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
+                LootItem item = loot.items[req.LootListID];
 
                 List<ItemPosCount> dest = new();
                 InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
@@ -445,7 +444,7 @@ namespace Game
                 item.count = 0;
                 item.is_looted = true;
 
-                loot.NotifyItemRemoved(slotid, GetPlayer().GetMap());
+                loot.NotifyItemRemoved(req.LootListID, GetPlayer().GetMap());
                 --loot.unlootedCount;
             }
 
@@ -461,7 +460,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LootRoll)]
         void HandleLootRoll(LootRollPacket packet)
         {
-            LootRoll lootRoll = GetPlayer().GetLootRoll(packet.LootObj, (byte)(packet.LootListID - 1));
+            LootRoll lootRoll = GetPlayer().GetLootRoll(packet.LootObj, packet.LootListID);
             if (lootRoll == null)
                 return;
 

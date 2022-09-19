@@ -3138,7 +3138,6 @@ namespace Game.Entities
             {
                 case LootMethod.PersonalLoot:// @todo implement personal loot (http://wow.gamepedia.com/Loot#Personal_Loot)
                     return false;
-                case LootMethod.MasterLoot:
                 case LootMethod.FreeForAll:
                     return true;
                 case LootMethod.RoundRobin:
@@ -3148,10 +3147,11 @@ namespace Game.Entities
                         return true;
 
                     return loot.HasItemFor(this);
+                case LootMethod.MasterLoot:
                 case LootMethod.GroupLoot:
                 case LootMethod.NeedBeforeGreed:
                     // may only loot if the player is the loot roundrobin player
-                    // or item over threshold (so roll(s) can be launched)
+                    // or item over threshold (so roll(s) can be launched or to preview master looted items)
                     // or if there are free/quest/conditional item for the player
                     if (loot.roundRobinPlayer.IsEmpty() || loot.roundRobinPlayer == GetGUID())
                         return true;

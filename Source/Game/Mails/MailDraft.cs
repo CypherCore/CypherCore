@@ -65,8 +65,7 @@ namespace Game.Mails
             // can be empty
             mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
 
-            uint max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
-            for (uint i = 0; m_items.Count < SharedConst.MaxMailItems && i < max_slot; ++i)
+            for (uint i = 0; m_items.Count < SharedConst.MaxMailItems && i < mailLoot.items.Count; ++i)
             {
                 LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
                 if (lootitem != null)

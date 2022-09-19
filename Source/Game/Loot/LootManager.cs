@@ -707,7 +707,7 @@ namespace Game.Loots
                 Entries.Add(item);
         }
 
-        public void Process(Loot loot, bool rate, ushort lootMode, byte groupId, Player player)
+        public void Process(Loot loot, bool rate, ushort lootMode, byte groupId)
         {
             if (groupId != 0)                                            // Group reference uses own processing of the group
             {
@@ -717,7 +717,7 @@ namespace Game.Loots
                 if (Groups[groupId - 1] == null)
                     return;
 
-                Groups[groupId - 1].Process(loot, lootMode, player);
+                Groups[groupId - 1].Process(loot, lootMode);
                 return;
             }
 
@@ -738,17 +738,17 @@ namespace Game.Loots
 
                     uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
                     for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
-                        Referenced.Process(loot, rate, lootMode, item.groupid, player);
+                        Referenced.Process(loot, rate, lootMode, item.groupid);
                 }
                 else                                                    // Plain entries (not a reference, not grouped)
-                    loot.AddItem(item, player);                                // Chance is already checked, just add
+                    loot.AddItem(item);                                // Chance is already checked, just add
             }
 
             // Now processing groups
             foreach (var group in Groups.Values)
             {
                 if (group != null)
-                    group.Process(loot, lootMode, player);
+                    group.Process(loot, lootMode);
             }
         }
         public void CopyConditions(List<Condition> conditions)
@@ -971,11 +971,11 @@ namespace Game.Loots
                 return false;
             }
 
-            public void Process(Loot loot, ushort lootMode, Player player)
+            public void Process(Loot loot, ushort lootMode)
             {
                 LootStoreItem item = Roll(loot, lootMode);
                 if (item != null)
-                    loot.AddItem(item, player);
+                    loot.AddItem(item);
             }
             float RawTotalChance()
             {

@@ -340,11 +340,6 @@ namespace Game.Chat
                 foreach (LootItem item in loot.items)
                     if (!item.is_looted)
                         _ShowLootEntry(handler, item.itemid, item.count);
-
-                handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel, "Quest items", loot.quest_items.Count);
-                foreach (LootItem item in loot.quest_items)
-                    if (!item.is_looted)
-                        _ShowLootEntry(handler, item.itemid, item.count);
             }
             else
             {
@@ -353,22 +348,10 @@ namespace Game.Chat
                     if (!item.is_looted && !item.freeforall && item.conditions.Empty())
                         _ShowLootEntry(handler, item.itemid, item.count);
 
-                if (!loot.GetPlayerQuestItems().Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "Per-player quest items");
-                    _IterateNotNormalLootMap(handler, loot.GetPlayerQuestItems(), loot.quest_items);
-                }
-
                 if (!loot.GetPlayerFFAItems().Empty())
                 {
                     handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "FFA items per allowed player");
                     _IterateNotNormalLootMap(handler, loot.GetPlayerFFAItems(), loot.items);
-                }
-
-                if (!loot.GetPlayerNonQuestNonFFAConditionalItems().Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel2, "Per-player conditional items");
-                    _IterateNotNormalLootMap(handler, loot.GetPlayerNonQuestNonFFAConditionalItems(), loot.items);
                 }
             }
 
@@ -565,7 +548,7 @@ namespace Game.Chat
 
                 foreach (var it in list)
                 {
-                    LootItem item = items[it.index];
+                    LootItem item = items[it.LootListId];
                     if (!it.is_looted && !item.is_looted)
                         _ShowLootEntry(handler, item.itemid, item.count, true);
                 }

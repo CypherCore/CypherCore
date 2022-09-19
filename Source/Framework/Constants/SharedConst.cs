@@ -79,7 +79,6 @@ namespace Framework.Constants
         /// Loot Const
         /// </summary>
         public const int MaxNRLootItems = 18;
-        public const int MaxNRQuestItems = 32;
         public const int PlayerCorpseLootEntry = 1;
 
         /// <summary>
