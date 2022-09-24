@@ -1363,6 +1363,15 @@ namespace Game.Entities
                         return false;
                     }
                     break;
+                case ActionButtonType.Companion:
+                {
+                    if (GetSession().GetBattlePetMgr().GetPet(ObjectGuid.Create(HighGuid.BattlePet, action)) == null)
+                    {
+                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Companion action {action} not added into button {button} for player {GetName()} ({GetGUID()}): companion does not exist");
+                        return false;
+                    }
+                    break;
+                }
                 case ActionButtonType.Mount:
                     var mount = CliDB.MountStorage.LookupByKey(action);
                     if (mount == null)

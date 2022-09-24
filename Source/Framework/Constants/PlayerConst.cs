@@ -330,6 +330,7 @@ namespace Framework.Constants
         Dropdown = 0x30,
         Macro = 0x40,
         CMacro = C | Macro,
+        Companion = 0x50,
         Mount = 0x60,
         Item = 0x80
     }
