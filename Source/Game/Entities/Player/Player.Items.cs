@@ -1222,6 +1222,10 @@ namespace Game.Entities
         bool StoreNewItemInBestSlots(uint titem_id, uint titem_amount)
         {
             Log.outDebug(LogFilter.Player, "STORAGE: Creating initial item, itemId = {0}, count = {1}", titem_id, titem_amount);
+
+            ItemContext itemContext = ItemContext.NewCharacter;
+            var bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(titem_id, itemContext);
+
             InventoryResult msg;
             // attempt equip by one
             while (titem_amount > 0)
@@ -1230,7 +1234,8 @@ namespace Game.Entities
                 if (msg != InventoryResult.Ok)
                     break;
 
-                EquipNewItem(eDest, titem_id, ItemContext.None, true);
+                Item item = EquipNewItem(eDest, titem_id, itemContext, true);
+                item.SetBonuses(bonusListIDs);
                 AutoUnequipOffhandIfNeed();
                 titem_amount--;
             }
@@ -1244,7 +1249,7 @@ namespace Game.Entities
             msg = CanStoreNewItem(InventorySlots.Bag0, ItemConst.NullSlot, sDest, titem_id, titem_amount);
             if (msg == InventoryResult.Ok)
             {
-                StoreNewItem(sDest, titem_id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(titem_id));
+                StoreNewItem(sDest, titem_id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(titem_id), null, itemContext, bonusListIDs);
                 return true;                                        // stored
             }
 
