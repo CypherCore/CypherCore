@@ -62,6 +62,8 @@ namespace Scripts.Spells.Druid
         public const uint FormsTrinketNone = 37344;
         public const uint FormsTrinketTree = 37342;
         public const uint GalacticGuardianAura = 213708;
+        public const uint GlyphOfStars = 114301;
+        public const uint GlyphOfStarsVisual = 114302;
         public const uint GoreProc = 93622;
         public const uint IdolOfFeralShadows = 34241;
         public const uint IdolOfWorship = 60774;
@@ -541,6 +543,33 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    [Script] // 24858 - Moonkin Form
+    class spell_dru_glyph_of_stars : AuraScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.GlyphOfStars, SpellIds.GlyphOfStarsVisual);
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(SpellIds.GlyphOfStars))
+                target.CastSpell(target, SpellIds.GlyphOfStarsVisual, true);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.GlyphOfStarsVisual);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 210706 - Gore
     class spell_dru_gore : AuraScript
     {
