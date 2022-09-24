@@ -19,7 +19,7 @@ using Framework.Threading;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -30,20 +30,64 @@ namespace Framework.Database
     {
         public MySqlConnection GetConnection()
         {
-            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0");
-        }
-
-        public MySqlConnection GetConnectionNoDatabase()
-        {
-            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Allow User Variables=True;Pooling=true;");
+            return new MySqlConnection($"Server={Host};Port={PortOrSocket};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0");
         }
 
         public string Host;
-        public string Port;
+        public string PortOrSocket;
+        public bool UseSSL;
         public string Username;
         public string Password;
         public string Database;
         public int Poolsize;
+    }
+
+    public struct DBVersion
+    {
+        public int Major { get; }
+        public int Minor { get; }
+        public int Build { get; }
+        public bool IsMariaDB { get; }
+
+        public DBVersion(int major, int minor, int build, bool isMariaDB)
+        {
+            Major = major;
+            Minor = minor;
+            Build = build;
+            IsMariaDB = isMariaDB;
+        }
+
+        public static DBVersion Parse(string versionString)
+        {
+            int start = 0;
+            int index = versionString.IndexOf('.', start);
+
+            string val = versionString.Substring(start, index - start).Trim();
+            int major = Convert.ToInt32(val, System.Globalization.NumberFormatInfo.InvariantInfo);
+
+            start = index + 1;
+            index = versionString.IndexOf('.', start);
+
+            val = versionString.Substring(start, index - start).Trim();
+            int minor = Convert.ToInt32(val, System.Globalization.NumberFormatInfo.InvariantInfo);
+
+            start = index + 1;
+            int i = start;
+            while (i < versionString.Length && Char.IsDigit(versionString, i))
+                i++;
+            val = versionString.Substring(start, i - start).Trim();
+            int build = Convert.ToInt32(val, System.Globalization.NumberFormatInfo.InvariantInfo);
+
+            return new DBVersion(major, minor, build, versionString.Contains("Maria"));
+        }
+
+        public bool IsAtLeast(int majorNum, int minorNum, int buildNum)
+        {
+            if (Major > majorNum) return true;
+            if (Major == majorNum && Minor > minorNum) return true;
+            if (Major == majorNum && Minor == minorNum && Build >= buildNum) return true;
+            return false;
+        }
     }
 
     public abstract class MySqlBase<T>
@@ -54,6 +98,8 @@ namespace Framework.Database
         MySqlConnectionInfo _connectionInfo;
         DatabaseUpdater<T> _updater;
         DatabaseWorker<T> _worker;
+
+        DBVersion version;
 
         public MySqlErrorCode Initialize(MySqlConnectionInfo connectionInfo)
         {
@@ -66,9 +112,9 @@ namespace Framework.Database
                 using (var connection = _connectionInfo.GetConnection())
                 {
                     connection.Open();
-                    Log.outInfo(LogFilter.SqlDriver, $"Connected to MySQL(ver: {connection.ServerVersion}) Database: {_connectionInfo.Database}");
-                    //Connection is good lets set some default values to help with updates.
-                    Apply($"SET GLOBAL max_allowed_packet=1073741824;");
+
+                    version = DBVersion.Parse(connection.ServerVersion);
+                    Log.outInfo(LogFilter.SqlDriver, $"Connected to DB: {_connectionInfo.Database} Server: {(version.IsMariaDB ? "MariaDB" : "MySQL")} Ver: {connection.ServerVersion}");
                     return MySqlErrorCode.None;
                 }
             }
@@ -196,51 +242,85 @@ namespace Framework.Database
             return new PreparedStatement(_preparedQueries[statement]);
         }
 
-        public bool Apply(string sql)
+        public void ApplyFile(string path, bool useDatabase = true)
         {
-            try
-            {
-                using (var Connection = _connectionInfo.GetConnectionNoDatabase())
-                {
-                    Connection.Open();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
-                    {
-                        cmd.CommandText = sql;
-                        cmd.ExecuteNonQuery();
-                        return true;
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                HandleMySQLException(ex, sql);
-                return false;
-            }
-        }
+            // CLI Client connection info
+            string args = $"-h{_connectionInfo.Host} ";
+            args += $"-u{_connectionInfo.Username} ";
 
-        public bool ApplyFile(string path)
-        {
-            try
-            {
-                string query = File.ReadAllText(path);
-                if (query.IsEmpty())
-                    return false;
+            if (!_connectionInfo.Password.IsEmpty())
+                args += $"-p{_connectionInfo.Password} ";
 
-                using (var connection = _connectionInfo.GetConnection())
-                {
-                    connection.Open();
-                    using (MySqlCommand cmd = connection.CreateCommand())
-                    {
-                        cmd.CommandText = query;
-                        cmd.ExecuteNonQuery();
-                        return true;
-                    }
-                }
-            }
-            catch (MySqlException ex)
+            // Check if we want to connect through ip or socket (Unix only)
+            if (OperatingSystem.IsWindows())
             {
-                HandleMySQLException(ex, path);
-                return false;
+                if (_connectionInfo.Host == ".")
+                    args += "--protocol=PIPE ";
+                else
+                    args += $"-P{_connectionInfo.PortOrSocket} ";
+            }
+            else
+            {
+                if (!char.IsDigit(_connectionInfo.PortOrSocket[0]))
+                {
+                    // We can't check if host == "." here, because it is named localhost if socket option is enabled
+                    args += "-P0 ";
+                    args += "--protocol=SOCKET ";
+                    args += $"-S{_connectionInfo.PortOrSocket} ";
+                }
+                else
+                    // generic case
+                    args += $"-P{_connectionInfo.PortOrSocket} ";
+            }
+
+            // Set the default charset to utf8
+            args += "--default-character-set=utf8 ";
+
+            // Set max allowed packet to 1 GB
+            args += "--max-allowed-packet=1GB ";
+
+            if (!version.IsMariaDB && version.IsAtLeast(8, 0, 0))
+            {
+                if (_connectionInfo.UseSSL)
+                    args += "--ssl-mode=REQUIRED ";
+            }
+            else
+            {
+                if (_connectionInfo.UseSSL)
+                    args += "--ssl ";
+            }
+
+            // Execute sql file
+            args += "-e ";
+            args += "\"BEGIN; SOURCE \"" + path + "\"; COMMIT;\" ";
+
+            // Database
+            if (useDatabase && !_connectionInfo.Database.IsEmpty())
+                args += _connectionInfo.Database;
+
+            // Invokes a mysql process which doesn't leak credentials to logs
+            Process process = new();
+            process.StartInfo = new(DBUpdaterUtil.GetMySQLExecutable());
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.Arguments = args;
+
+            process.Start();
+            Log.outInfo(LogFilter.SqlUpdates, process.StandardOutput.ReadToEnd());
+            Log.outError(LogFilter.SqlUpdates, process.StandardError.ReadToEnd());
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Applying of file \'{path}\' to database \'{GetDatabaseName()}\' failed!" +
+                    " If you are a user, please pull the latest revision from the repository. " +
+                    "Also make sure you have not applied any of the databases with your sql client. " +
+                    "You cannot use auto-update system and import sql files from CYpherCore repository with your sql client. " +
+                    "If you are a developer, please fix your sql query.");
+
+                throw new Exception("update failed");
             }
         }
 

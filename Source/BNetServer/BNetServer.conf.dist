@@ -103,14 +103,23 @@ AllowLoggingIPAddressesInDatabase = 1
 # MYSQL SETTINGS
 #
 #    LoginDatabaseInfo
-#        Description: Database connection settings for the realm server.
-#        Example:     "hostname;port;username;password;database"
+#        Description: Database connection settings for the realm server.    
+#        Example:
+#					  DatabaseInfo.Host = hostname OR . for named-pipes/unit_sockets.
+#					  DatabaseInfo.Port = port_number OR some_number (named_pipes) OR path to unix socket (unix_sockets)
+#					  DatabaseInfo.Username = "username"
+#					  DatabaseInfo.Password = "password"
+#					  DatabaseInfo.Database = "auth"
+#					  DatabaseInfo.SSL = false
+#
+#		 Note: When using NamedPipes on windows you must set "enable-named-pipe" to [mysqld] section my.ini.
 
 LoginDatabaseInfo.Host = "127.0.0.1"
 LoginDatabaseInfo.Port = "3306"
 LoginDatabaseInfo.Username = "username"
 LoginDatabaseInfo.Password = "password"
 LoginDatabaseInfo.Database = "auth"
+LoginDatabaseInfo.SSL = false
 
 #
 #    DBQueryWorkerInterval
@@ -118,6 +127,17 @@ LoginDatabaseInfo.Database = "auth"
 #        Default:    1000
 
 DBQueryWorkerInterval = 1000
+
+#
+#    MySQLExecutable
+#        Description: The path to your MySQL CLI binary.
+#                     If the path is left empty, built-in path from cmake is used.
+#        Example:     "C:/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe"
+#                     "mysql.exe"
+#                     "/usr/bin/mysql"
+#        Default:     ""
+
+MySQLExecutable = ""
 
 #
 ###################################################################################################

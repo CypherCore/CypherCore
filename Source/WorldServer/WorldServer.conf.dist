@@ -34,31 +34,45 @@ LogsDir = "Logs"
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
-#        Description: Database connection settings for the world server.
+#	 HotfixDatabaseInfo
+#        Description: Database connection settings for the world server.     
+#        Example:
+#					  DatabaseInfo.Host = hostname OR . for named-pipes/unit_sockets.
+#					  DatabaseInfo.Port = port_number OR some_number (named_pipes) OR path to unix socket (unix_sockets)
+#					  DatabaseInfo.Username = "username"
+#					  DatabaseInfo.Password = "password"
+#					  DatabaseInfo.Database = "auth"
+#					  DatabaseInfo.SSL = false
+#
+#		 Note: When using NamedPipes on windows you must set "enable-named-pipe" to [mysqld] section my.ini.
 
 LoginDatabaseInfo.Host = "127.0.0.1"
 LoginDatabaseInfo.Port = "3306"
 LoginDatabaseInfo.Username = "username"
 LoginDatabaseInfo.Password = "password"
 LoginDatabaseInfo.Database = "auth"
+LoginDatabaseInfo.SSL = false
 
 CharacterDatabaseInfo.Host = "127.0.0.1"
 CharacterDatabaseInfo.Port = "3306"
 CharacterDatabaseInfo.Username = "username"
 CharacterDatabaseInfo.Password = "password"
 CharacterDatabaseInfo.Database = "characters"
+CharacterDatabaseInfo.SSL = false
 
 WorldDatabaseInfo.Host = "127.0.0.1"
 WorldDatabaseInfo.Port = "3306"
 WorldDatabaseInfo.Username = "username"
 WorldDatabaseInfo.Password = "password"
 WorldDatabaseInfo.Database = "world"
+WorldDatabaseInfo.SSL = false
 
 HotfixDatabaseInfo.Host = "127.0.0.1"
 HotfixDatabaseInfo.Port = "3306"
 HotfixDatabaseInfo.Username = "username"
 HotfixDatabaseInfo.Password = "password"
 HotfixDatabaseInfo.Database = "hotfixes"
+HotfixDatabaseInfo.SSL = false
 
 #
 #    WorldServerPort
@@ -92,6 +106,16 @@ BindIP = "0.0.0.0"
 #        Default:     2
 
 ThreadPool = 2
+
+#
+#    MySQLExecutable
+#        Description: The path to your MySQL CLI binary.
+#        Example:     "C:/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe"
+#                     "mysql.exe"
+#                     "/usr/bin/mysql"
+#        Default:     ""
+
+MySQLExecutable = ""
 
 #
 ###################################################################################################

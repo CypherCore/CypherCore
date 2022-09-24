@@ -38,6 +38,9 @@ namespace Framework.Database
             if (!result.IsEmpty() && !result.IsEmpty())
                 return true;
 
+            if (!DBUpdaterUtil.CheckExecutable())
+                return false;
+
             Log.outInfo(LogFilter.SqlUpdates, $"Database {_database.GetDatabaseName()} is empty, auto populating it...");
 
             string path = GetSourceDirectory();
@@ -67,7 +70,14 @@ namespace Framework.Database
 
             // Update database
             Log.outInfo(LogFilter.SqlUpdates, $"Applying \'{fileName}\'...");
-            _database.ApplyFile(path + fileName);
+            try
+            {
+                ApplyFile(path + fileName);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             Log.outInfo(LogFilter.SqlUpdates, $"Done Applying \'{fileName}\'");
             return true;
@@ -75,13 +85,16 @@ namespace Framework.Database
 
         public bool Update()
         {
+            if (!DBUpdaterUtil.CheckExecutable())
+                return false;
+
             Log.outInfo(LogFilter.SqlUpdates, $"Updating {_database.GetDatabaseName()} database...");
 
             string sourceDirectory = GetSourceDirectory();
 
             if (!Directory.Exists(sourceDirectory))
             {
-                Log.outError(LogFilter.SqlUpdates, $"DBUpdater: Given source directory {sourceDirectory} does not exist, skipped!");
+                Log.outError(LogFilter.SqlUpdates, $"DBUpdater: The given source directory {sourceDirectory} does not exist, change the path to the directory where your sql directory exists (for example c:\\source\\cyphercore). Shutting down.");
                 return false;
             }
 
@@ -255,11 +268,20 @@ namespace Framework.Database
             uint oldMSTime = Time.GetMSTime();
 
             // Update database
-            if (!_database.ApplyFile(path))
-                Log.outError(LogFilter.Sql, $"Update: {path} Failed. You need to apply it manually");
+            ApplyFile(path);
 
             // Return time the query took to apply
             return Time.GetMSTimeDiffToNow(oldMSTime);
+        }
+
+        void ApplyFile(string path)
+        {
+            _database.ApplyFile(path);
+        }
+        
+        void Apply(string query)
+        {
+            _database.Execute(query);
         }
 
         void UpdateEntry(AppliedFileEntry entry, uint speed)
@@ -267,7 +289,7 @@ namespace Framework.Database
             string update = $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {speed})";
 
             // Update database
-            _database.Execute(update);
+            Apply(update);
         }
 
         void RenameEntry(string from, string to)
@@ -277,7 +299,7 @@ namespace Framework.Database
                 string update = $"DELETE FROM `updates` WHERE `name`=\"{to}\"";
 
                 // Update database
-                _database.Execute(update);
+                Apply(update);
             }
 
             // Rename
@@ -285,7 +307,7 @@ namespace Framework.Database
                 string update = $"UPDATE `updates` SET `name`=\"{to}\" WHERE `name`=\"{from}\"";
 
                 // Update database
-                _database.Execute(update);
+                Apply(update);
             }
         }
 
@@ -307,7 +329,7 @@ namespace Framework.Database
             update += ")";
 
             // Update database
-            _database.Execute(update);
+            Apply(update);
         }
 
         void UpdateState(string name, State state)
@@ -315,7 +337,7 @@ namespace Framework.Database
             string update = $"UPDATE `updates` SET `state`=\'{state}\' WHERE `name`=\"{name}\"";
 
             // Update database
-            _database.Execute(update);
+            Apply(update);
         }
 
         List<FileEntry> GetFileList()
@@ -425,7 +447,7 @@ namespace Framework.Database
     {
         public FileEntry(string _path, State _state)
         {
-            path = _path;
+            path = _path.Replace(@"\", @"/");
             state = _state;
         }
 
@@ -455,5 +477,29 @@ namespace Framework.Database
     {
         Apply,
         Rehash
+    }
+
+    static class DBUpdaterUtil
+    {
+        static string mysqlExecutablePath;
+
+        public static string GetMySQLExecutable()
+        {
+            return mysqlExecutablePath;
+        }
+
+        public static bool CheckExecutable()
+        {
+            string mysqlExePath = ConfigMgr.GetDefaultValue("MySQLExecutable", "");
+            if (mysqlExePath.IsEmpty() || !File.Exists(mysqlExePath))
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Didn't find any executable MySQL binary at \'{mysqlExePath}\' or in path, correct the path in the *.conf (\"MySQLExecutable\").");
+                return false;
+            }
+
+            // Correct the path to the cli
+            mysqlExecutablePath = mysqlExePath;
+            return true;
+        }
     }
 }

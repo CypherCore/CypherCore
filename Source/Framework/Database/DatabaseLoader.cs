@@ -19,6 +19,7 @@ using Framework.Configuration;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Framework.Database
 {
@@ -38,10 +39,11 @@ namespace Framework.Database
                 MySqlConnectionInfo connectionObject = new()
                 {
                     Host = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
-                    Port = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
+                    PortOrSocket = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
                     Username = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Username", ""),
                     Password = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Password", ""),
-                    Database = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Database", "")
+                    Database = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Database", ""),
+                    UseSSL = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.SSL", false)
                 };
 
                 var error = database.Initialize(connectionObject);
@@ -50,17 +52,9 @@ namespace Framework.Database
                     // Database does not exist
                     if (error == MySqlErrorCode.UnknownDatabase && updatesEnabled && _autoSetup)
                     {
-                        Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
-
-                        string answer = Console.ReadLine();
-                        if (string.IsNullOrEmpty(answer) || answer[0] != 'y')
-                            return false;
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
-                        string sqlString = $"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
                         // Try to create the database and connect again if auto setup is enabled
-                        if (database.Apply(sqlString) && database.Initialize(connectionObject) == MySqlErrorCode.None)
-                            error = MySqlErrorCode.None;
+                        if (CreateDatabase(connectionObject, database))
+                            error = database.Initialize(connectionObject);
                     }
 
                     // If the error wasn't handled quit
@@ -69,9 +63,8 @@ namespace Framework.Database
                         Log.outError(LogFilter.ServerLoading, $"\nDatabase {connectionObject.Database} NOT opened. There were errors opening the MySQL connections. Check your SQLErrors for specific errors.");
                         return false;
                     }
-
-                    Log.outInfo(LogFilter.ServerLoading, "Done.");
                 }
+
                 return true;
             });
 
@@ -104,6 +97,47 @@ namespace Framework.Database
                 database.LoadPreparedStatements();
                 return true;
             });
+        }
+
+        public bool CreateDatabase<T>(MySqlConnectionInfo connectionObject, MySqlBase<T> database)
+        {
+            Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
+
+            string answer = Console.ReadLine();
+            if (!answer.IsEmpty() && answer[0] != 'y')
+                return false;
+
+            Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
+
+            // Path of temp file
+            string temp = "create_table.sql";
+
+            // Create temporary query to use external MySQL CLi
+            try
+            {
+                using BinaryWriter binaryWriter = new(File.Open(temp, FileMode.Create, FileAccess.Write));
+                binaryWriter.Write($"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
+            }
+            catch (Exception)
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Failed to create temporary query file \"{temp}\"!");
+                return false;
+            }
+
+            try
+            {
+                database.ApplyFile(temp, false);
+            }
+            catch (Exception)
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Failed to create database {database.GetDatabaseName()}! Does the user (named in *.conf) have `CREATE`, `ALTER`, `DROP`, `INSERT` and `DELETE` privileges on the MySQL server?");
+                File.Delete(temp);
+                return false;
+            }
+
+            Log.outInfo(LogFilter.SqlUpdates, "Done.");
+            File.Delete(temp);
+            return true;
         }
 
         public bool Load()
