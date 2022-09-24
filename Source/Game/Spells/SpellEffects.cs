@@ -4909,7 +4909,7 @@ namespace Game.Spells
 
                 //! Action button data is unverified when it's set so it can be "hacked"
                 //! to contain invalid spells, so filter here.
-                uint spell_id = ab.GetAction();
+                uint spell_id = (uint)ab.GetAction();
                 if (spell_id == 0)
                     continue;
 

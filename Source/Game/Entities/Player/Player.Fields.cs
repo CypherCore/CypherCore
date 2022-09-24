@@ -413,8 +413,10 @@ namespace Game.Entities
             uState = ActionButtonUpdateState.New;
         }
 
-        public ActionButtonType GetButtonType() { return (ActionButtonType)((packedData & 0xFFFFFFFF00000000) >> 56); }
-        public uint GetAction() { return (uint)(packedData & 0x00000000FFFFFFFF); }
+        public ActionButtonType GetButtonType() { return (ActionButtonType)((packedData & 0xFF00000000000000) >> 56); }
+
+        public ulong GetAction() { return (packedData & 0x00FFFFFFFFFFFFFF); }
+
         public void SetActionAndType(ulong action, ActionButtonType type)
         {
             ulong newData = action | ((ulong)type << 56);

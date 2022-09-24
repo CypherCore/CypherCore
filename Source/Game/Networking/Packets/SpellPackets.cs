@@ -160,10 +160,10 @@ namespace Game.Networking.Packets
             Index = _worldPacket.ReadUInt8();
         }
 
-        public uint GetButtonAction() { return (uint)(Action & 0x00000000FFFFFFFF); }
-        public uint GetButtonType() { return (uint)((Action & 0xFFFFFFFF00000000) >> 56); }
+        public uint GetButtonAction() { return (uint)(Action & 0x00FFFFFFFFFFFFFF); }
+        public uint GetButtonType() { return (uint)((Action & 0xFF00000000000000) >> 56); }
 
-        public ulong Action; // two packed public uint (action and type)
+        public ulong Action; // two packed values (action and type)
         public byte Index;
     }
 

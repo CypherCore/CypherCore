@@ -113,7 +113,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetActionButton)]
         void HandleSetActionButton(SetActionButton packet)
         {
-            uint action = packet.GetButtonAction();
+            ulong action = packet.GetButtonAction();
             uint type = packet.GetButtonType();
 
             if (packet.Action == 0)

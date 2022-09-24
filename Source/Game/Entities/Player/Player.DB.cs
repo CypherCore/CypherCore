@@ -676,7 +676,7 @@ namespace Game.Entities
                 do
                 {
                     byte button = result.Read<byte>(0);
-                    uint action = result.Read<uint>(1);
+                    ulong action = result.Read<ulong>(1);
                     byte type = result.Read<byte>(2);
 
                     ActionButton ab = AddActionButton(button, action, type);
@@ -684,7 +684,7 @@ namespace Game.Entities
                         ab.uState = ActionButtonUpdateState.UnChanged;
                     else
                     {
-                        Log.outError(LogFilter.Player, "  ...at loading, and will deleted in DB also");
+                        Log.outError(LogFilter.Player, $"Player::_LoadActions: Player '{GetName()}' ({GetGUID()}) has an invalid action button (Button: {button}, Action: {action}, Type: {type}). It will be deleted at next save. This can be due to a player changing their talents.");
 
                         // Will deleted in DB at next save (it can create data until save but marked as deleted)
                         m_actionButtons[button] = new ActionButton();
