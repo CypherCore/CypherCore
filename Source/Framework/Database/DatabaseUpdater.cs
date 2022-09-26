@@ -152,7 +152,7 @@ namespace Framework.Database
                     if (hashIter != null)
                     {
                         // Check if the original file was removed if not we've got a problem.
-                        var renameFile = availableFiles.FirstOrDefault(p => p.GetFileName() == hashIter.Name);
+                        var renameFile = availableFiles.Find(p => p.GetFileName() == hashIter.Name);
                         if (renameFile != null)
                         {
                             Log.outWarn(LogFilter.SqlUpdates, $"Seems like update \"{availableQuery.GetFileName()}\" \'{hash.Substring(0, 7)}\' was renamed, but the old file is still there! " +
@@ -340,9 +340,9 @@ namespace Framework.Database
             Apply(update);
         }
 
-        SortedSet<FileEntry> GetFileList()
+        List<FileEntry> GetFileList()
         {
-            SortedSet<FileEntry> fileList = new();
+            List<FileEntry> fileList = new();
 
             SQLResult result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
             if (result.IsEmpty())
@@ -398,17 +398,17 @@ namespace Framework.Database
                 directory = queue.Dequeue();
                 try
                 {
-                    foreach (string subDir in Directory.GetDirectories(directory))
+                    foreach (string subDir in Directory.GetDirectories(directory).OrderBy(p => p))
                     {
                         queue.Enqueue(subDir);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex);
+                    Log.outFatal(LogFilter.SqlUpdates, $"DBUpdater: {directory} Exception: {ex}");
                 }
 
-                string[] files = Directory.GetFiles(directory, "*.sql");
+                string[] files = Directory.GetFiles(directory, "*.sql").OrderBy(p => p).ToArray();
                 for (int i = 0; i < files.Length; i++)
                 {
                     yield return new FileEntry(files[i], state);
