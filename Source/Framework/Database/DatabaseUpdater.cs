@@ -152,7 +152,7 @@ namespace Framework.Database
                     if (hashIter != null)
                     {
                         // Check if the original file was removed if not we've got a problem.
-                        var renameFile = availableFiles.Find(p => p.GetFileName() == hashIter.Name);
+                        var renameFile = availableFiles.FirstOrDefault(p => p.GetFileName() == hashIter.Name);
                         if (renameFile != null)
                         {
                             Log.outWarn(LogFilter.SqlUpdates, $"Seems like update \"{availableQuery.GetFileName()}\" \'{hash.Substring(0, 7)}\' was renamed, but the old file is still there! " +
@@ -340,9 +340,9 @@ namespace Framework.Database
             Apply(update);
         }
 
-        List<FileEntry> GetFileList()
+        SortedSet<FileEntry> GetFileList()
         {
-            List<FileEntry> fileList = new();
+            SortedSet<FileEntry> fileList = new();
 
             SQLResult result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
             if (result.IsEmpty())
@@ -361,7 +361,8 @@ namespace Framework.Database
                 }
 
                 State state = result.Read<string>(1).ToEnum<State>();
-                fileList.AddRange(GetFilesFromDirectory(path, state));
+                foreach (var file in GetFilesFromDirectory(path, state))
+                    fileList.Add(file);
 
                 Log.outDebug(LogFilter.SqlUpdates, $"Added applied file \"{path}\" from remote.");
 
