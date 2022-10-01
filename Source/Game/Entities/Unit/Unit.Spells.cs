@@ -1295,10 +1295,13 @@ namespace Game.Entities
                         continue;
 
                     SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID());
+                    if (requireImmunityPurgesEffectAttribute)
+                        if (immuneSpellInfo == null || !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
+                            continue;
+
                     // Consider the school immune if any of these conditions are not satisfied.
                     // In case of no immuneSpellInfo, ignore that condition and check only the other conditions
-                    if ((immuneSpellInfo != null && !immuneSpellInfo.IsPositive() && (!requireImmunityPurgesEffectAttribute || immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect)))
-                        || !spellInfo.IsPositive() || caster == null || !IsFriendlyTo(caster))
+                    if ((immuneSpellInfo != null && !immuneSpellInfo.IsPositive()) || !spellInfo.IsPositive() || caster == null || !IsFriendlyTo(caster))
                         if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                             schoolImmunityMask |= pair.Key;
                 }
