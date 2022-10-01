@@ -5699,13 +5699,18 @@ namespace Game
             uint count = 0;
             do
             {
-                ushort instanceMapId = result.Read<ushort>(0);
                 uint spawnGroupId = result.Read<uint>(3);
-
                 var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
                 if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                 {
                     Log.outError(LogFilter.Sql, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
+                    continue;
+                }
+
+                ushort instanceMapId = result.Read<ushort>(0);
+                if (spawnGroupTemplate.mapId != instanceMapId)
+                {
+                    Log.outError(LogFilter.Sql, $"Instance spawn group {spawnGroupId} specified for instance {instanceMapId} has spawns on a different map {spawnGroupTemplate.mapId}. Skipped.");
                     continue;
                 }
 

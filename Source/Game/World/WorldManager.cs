@@ -631,9 +631,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Group Templates...");
             Global.ObjectMgr.LoadSpawnGroupTemplates();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading instance spawn groups...");
-            Global.ObjectMgr.LoadInstanceSpawnGroups();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Data...");
             Global.ObjectMgr.LoadCreatures();
 
@@ -657,6 +654,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Group Data...");
             Global.ObjectMgr.LoadSpawnGroups();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading instance spawn groups...");
+            Global.ObjectMgr.LoadInstanceSpawnGroups();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Addon Data...");
             Global.ObjectMgr.LoadGameObjectAddons();                          // must be after LoadGameObjects()
