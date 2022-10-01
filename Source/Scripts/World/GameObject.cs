@@ -261,7 +261,6 @@ namespace Scripts.World.GameObjects
 
         //Bellhourlymisc
         public const uint GameEventHourlyBells = 73;
-        public const uint EventRingBell = 1;
     }
 
     [Script]
@@ -823,6 +822,10 @@ namespace Scripts.World.GameObjects
                 int _rings = localTm.Hour % 12;
                 if (_rings == 0) // 00:00 and 12:00
                     _rings = 12;
+
+                // Dwarf hourly horn should only play a single time, each time the next hour begins.
+                if (_soundId == SoundIds.BellTolldwarfgnome)
+                    _rings = 1;
 
                 for (var i = 0; i < _rings; ++i)
                     _scheduler.Schedule(TimeSpan.FromSeconds(i * 4 + 1), task => me.PlayDirectSound(_soundId));
