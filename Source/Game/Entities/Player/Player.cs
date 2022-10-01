@@ -1778,7 +1778,10 @@ namespace Game.Entities
             else
             {
                 if (GetClass() == Class.Deathknight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
+                {
+                    SendTransferAborted(mapid, TransferAbortReason.UniqueMessage, 1);
                     return false;
+                }
 
                 // far teleport to another map
                 Map oldmap = IsInWorld ? GetMap() : null;
