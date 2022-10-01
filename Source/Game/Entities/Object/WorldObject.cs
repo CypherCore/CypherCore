@@ -977,6 +977,26 @@ namespace Game.Entities
             if (GetTypeId() == TypeId.Player)
                 return;
 
+            Creature creature = ToCreature();
+            if (creature != null)
+            {
+                creature.RemoveUnitFlag2(UnitFlags2.LargeAoi | UnitFlags2.GiganticAoi | UnitFlags2.InfiniteAoi);
+                switch (type)
+                {
+                    case VisibilityDistanceType.Large:
+                        creature.SetUnitFlag2(UnitFlags2.LargeAoi);
+                        break;
+                    case VisibilityDistanceType.Gigantic:
+                        creature.SetUnitFlag2(UnitFlags2.GiganticAoi);
+                        break;
+                    case VisibilityDistanceType.Infinite:
+                        creature.SetUnitFlag2(UnitFlags2.InfiniteAoi);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             m_visibilityDistanceOverride = SharedConst.VisibilityDistances[(int)type];
         }
 

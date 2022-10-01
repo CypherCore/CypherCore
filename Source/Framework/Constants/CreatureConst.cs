@@ -131,7 +131,7 @@ namespace Framework.Constants
             MirrorImage | ForceMovement | DisarmOffhand |
             DisablePredStats | AllowChangingTalents | DisarmRanged |
             /* UNIT_FLAG2_REGENERATE_POWER | */ RestrictPartyInteraction |
-            PreventSpellClick | InteractWhileHostile | /* UNIT_FLAG2_CANNOT_TURN | */
+            PreventSpellClick | InteractWhileHostile | /* Unk2 | */
             /* UNIT_FLAG2_PLAY_DEATH_ANIM | */ AllowCheatSpells | SuppressHighlightWhenTargetedOrMousedOver |
             TreatAsRaidUnitForHelpfulSpells | LargeAoi | GiganticAoi | NoActions |
             AiWillOnlySwimIfTargetSwims | DontGenerateCombatLogWhenEngagedWithNpcs | AttackerIgnoresMinimumRanges |
