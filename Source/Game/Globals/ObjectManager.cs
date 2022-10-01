@@ -5699,6 +5699,7 @@ namespace Game
             uint count = 0;
             do
             {
+                ushort instanceMapId = result.Read<ushort>(0);
                 uint spawnGroupId = result.Read<uint>(3);
                 var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
                 if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
@@ -5707,7 +5708,6 @@ namespace Game
                     continue;
                 }
 
-                ushort instanceMapId = result.Read<ushort>(0);
                 if (spawnGroupTemplate.mapId != instanceMapId)
                 {
                     Log.outError(LogFilter.Sql, $"Instance spawn group {spawnGroupId} specified for instance {instanceMapId} has spawns on a different map {spawnGroupTemplate.mapId}. Skipped.");

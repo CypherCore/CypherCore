@@ -544,7 +544,7 @@ namespace Game.Chat.Commands
         class GoCommandGameobject
         {
             [Command("", RBACPermissions.CommandGo)]
-            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, uint spawnId)
+            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, ulong spawnId)
             {
                 GameObjectData spawnpoint = Global.ObjectMgr.GetGameObjectData(spawnId);
                 if (spawnpoint == null)
