@@ -4680,14 +4680,14 @@ namespace Game.Entities
                 if (CanEnableWarModeInArea())
                 {
                     RemovePlayerFlag(PlayerFlags.WarModeActive);
-                    RemoveAurasDueToSpell(auraOutside);
                     CastSpell(this, auraInside, true);
+                    RemoveAurasDueToSpell(auraOutside);
                 }
                 else
                 {
                     SetPlayerFlag(PlayerFlags.WarModeActive);
-                    RemoveAurasDueToSpell(auraInside);
                     CastSpell(this, auraOutside, true);
+                    RemoveAurasDueToSpell(auraInside);
                 }
                 SetWarModeLocal(true);
                 SetPvpFlag(UnitPVPStateFlags.PvP);
