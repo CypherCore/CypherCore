@@ -134,7 +134,7 @@ namespace Framework.Constants
             PreventSpellClick | InteractWhileHostile | /* UNIT_FLAG2_CANNOT_TURN | */
             /* UNIT_FLAG2_PLAY_DEATH_ANIM | */ AllowCheatSpells | SuppressHighlightWhenTargetedOrMousedOver |
             TreatAsRaidUnitForHelpfulSpells | LargeAoi | GiganticAoi | NoActions |
-            AiWillOnlySwimIfTargetSwims | DontGenerateCombatLogWhenEngagedWithNpcs | UntargetableByClient | AttackerIgnoresMinimumRanges |
+            AiWillOnlySwimIfTargetSwims | DontGenerateCombatLogWhenEngagedWithNpcs | AttackerIgnoresMinimumRanges |
             UninteractibleIfHostile | Unsued11 | InfiniteAoi | Unused13),
 
         Allowed = (0xFFFFFFFF & ~Disallowed)
