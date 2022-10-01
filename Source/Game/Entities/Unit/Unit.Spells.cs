@@ -766,7 +766,7 @@ namespace Game.Entities
 
             bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
             bool canParry = !spellInfo.HasAttribute(SpellAttr7.NoAttackParry);
-            bool canBlock = spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked);
+            bool canBlock = true;
 
             // if victim is casting or cc'd it can't avoid attacks
             if (victim.IsNonMeleeSpellCast(false, false, true) || victim.HasUnitState(UnitState.Controlled))
@@ -776,7 +776,7 @@ namespace Game.Entities
                 canBlock = false;
             }
 
-            // Ranged attacks can only miss, resist and deflect
+            // Ranged attacks can only miss, resist and deflect and get blocked
             if (attType == WeaponAttackType.RangedAttack)
             {
                 canParry = false;
@@ -790,7 +790,6 @@ namespace Game.Entities
                     if (roll < tmp)
                         return SpellMissInfo.Deflect;
                 }
-                return SpellMissInfo.None;
             }
 
             // Check for attack from behind
@@ -1800,25 +1799,6 @@ namespace Game.Entities
             return (uint)crit_bonus;
         }
 
-        bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
-        {
-            // These spells can't be blocked
-            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.NoActiveDefense) || spellProto.HasAttribute(SpellAttr3.AlwaysHit)))
-                return false;
-
-            // Can't block when casting/controlled
-            if (victim.IsNonMeleeSpellCast(false) || victim.HasUnitState(UnitState.Controlled))
-                return false;
-
-            if (victim.HasAuraType(AuraType.IgnoreHitDirection) || victim.HasInArc(MathFunctions.PI, this))
-            {
-                float blockChance = GetUnitBlockChance(attackType, victim);
-                if (blockChance != 0 && RandomHelper.randChance(blockChance))
-                    return true;
-            }
-            return false;
-        }
-
         public void _DeleteRemovedAuras()
         {
             while (!m_removedAuras.Empty())
@@ -1974,7 +1954,7 @@ namespace Game.Entities
             }
         }
 
-        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, int damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false, Spell spell = null)
+        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, int damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false, bool blocked = false, Spell spell = null)
         {
             if (damage < 0)
                 return;
@@ -1991,7 +1971,6 @@ namespace Game.Entities
                 if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
                     damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
 
-                bool blocked = false;
                 // Per-school calc
                 switch (spellInfo.DmgClass)
                 {
@@ -1999,17 +1978,6 @@ namespace Game.Entities
                     case SpellDmgClass.Ranged:
                     case SpellDmgClass.Melee:
                     {
-                        // Physical Damage
-                        if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
-                        {
-                            // Spells with this attribute were already calculated in MeleeSpellHitResult
-                            if (!spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked))
-                            {
-                                // Get blocked status
-                                blocked = IsSpellBlocked(victim, spellInfo, attackType);
-                            }
-                        }
-
                         if (crit)
                         {
                             damageInfo.HitInfo |= HitInfo.CriticalHit;

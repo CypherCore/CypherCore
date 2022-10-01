@@ -3920,7 +3920,7 @@ namespace Game.Spells
                     // possibly SPELL_MISS_IMMUNE2 for this??
                     targetInfo.MissCondition = SpellMissInfo.Immune2;
 
-                if (targetInfo.MissCondition == SpellMissInfo.None) // hits
+                if (targetInfo.MissCondition == SpellMissInfo.None || (targetInfo.MissCondition == SpellMissInfo.Block && !m_spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked))) // Add only hits and partial blocked
                 {
                     data.HitTargets.Add(targetInfo.TargetGUID);
                     data.HitStatus.Add(new SpellHitStatus(SpellMissInfo.None));
@@ -7238,7 +7238,7 @@ namespace Game.Spells
         {
             Unit unit = null;
             // In case spell hit target, do all effect on that target
-            if (targetInfo.MissCondition == SpellMissInfo.None)
+            if (targetInfo.MissCondition == SpellMissInfo.None || (targetInfo.MissCondition == SpellMissInfo.Block && !m_spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked)))
                 unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
             // In case spell reflect from target, do all effect on caster (if hit)
             else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
@@ -8280,7 +8280,7 @@ namespace Game.Spells
             spell.m_healing = Healing;
 
             _spellHitTarget = null;
-            if (MissCondition == SpellMissInfo.None)
+            if (MissCondition == SpellMissInfo.None || (MissCondition == SpellMissInfo.Block && !spell.GetSpellInfo().HasAttribute(SpellAttr3.CompletelyBlocked)))
                 _spellHitTarget = unit;
             else if (MissCondition == SpellMissInfo.Reflect && ReflectResult == SpellMissInfo.None)
                 _spellHitTarget = spell.GetCaster().ToUnit();
@@ -8485,7 +8485,7 @@ namespace Game.Spells
                         caster.SetLastDamagedTargetGuid(spell.unitTarget.GetGUID());
 
                         // Add bonuses and fill damageInfo struct
-                        caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit);
+                        caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit, MissCondition == SpellMissInfo.Block, spell);
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
