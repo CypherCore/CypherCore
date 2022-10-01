@@ -4806,6 +4806,25 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 83477 - Eject Passengers 3-8
+    class spell_gen_eject_passengers_3_8 : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            Vehicle vehicle = GetHitUnit().GetVehicleKit();
+            if (vehicle == null)
+                return;
+
+            for (sbyte i = 2; i < 8; i++)
+                vehicle.GetPassenger(i)?.ExitVehicle();
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
     {
