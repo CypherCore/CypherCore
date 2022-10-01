@@ -184,6 +184,11 @@ namespace WorldServer
             int minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", 1);
             uint realPrevTime = Time.GetMSTime();
 
+            uint maxCoreStuckTime = ConfigMgr.GetDefaultValue("MaxCoreStuckTime", 60u) * 1000u;
+            uint halfMaxCoreStuckTime = maxCoreStuckTime / 2;
+            if (halfMaxCoreStuckTime == 0)
+                halfMaxCoreStuckTime = uint.MaxValue;
+
             while (!Global.WorldMgr.IsStopped)
             {
                 var realCurrTime = Time.GetMSTime();
@@ -191,8 +196,12 @@ namespace WorldServer
                 uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
                 if (diff < minUpdateDiff)
                 {
+                    uint sleepTime = (uint)(minUpdateDiff - diff);
+                    if (sleepTime >= halfMaxCoreStuckTime)
+                        Log.outError(LogFilter.Server, $"WorldUpdateLoop() waiting for {sleepTime} ms with MaxCoreStuckTime set to {maxCoreStuckTime} ms");
+
                     // sleep until enough time passes that we can update all timers
-                    Thread.Sleep(TimeSpan.FromMilliseconds(minUpdateDiff - diff));
+                    Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
                     continue;
                 }
 
