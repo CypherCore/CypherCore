@@ -67,7 +67,7 @@ namespace BNetServer.Networking
             if (accountInfo.LoginTicketExpiry < Time.UnixTime)
                 return BattlenetRpcErrorCode.TimedOut;
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
             stmt.AddValue(0, accountInfo.Id);
 
             SQLResult characterCountsResult = DB.Login.Query(stmt);

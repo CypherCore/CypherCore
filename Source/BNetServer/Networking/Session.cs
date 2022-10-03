@@ -215,8 +215,6 @@ namespace BNetServer.Networking
         public uint LoginTicketExpiry;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
-        public string PasswordVerifier;
-        public string Salt;
 
         public Dictionary<uint, GameAccountInfo> GameAccounts;
 
@@ -230,8 +228,6 @@ namespace BNetServer.Networking
             LoginTicketExpiry = result.Read<uint>(5);
             IsBanned = result.Read<ulong>(6) != 0;
             IsPermanenetlyBanned = result.Read<ulong>(7) != 0;
-            PasswordVerifier = result.Read<string>(9);
-            Salt = result.Read<string>(10);
 
             GameAccounts = new Dictionary<uint, GameAccountInfo>();
             const int GameAccountFieldsOffset = 8;

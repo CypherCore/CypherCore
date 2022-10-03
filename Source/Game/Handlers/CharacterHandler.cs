@@ -530,7 +530,7 @@ namespace Game
                     {
                         // Player not create (race/class/etc problem?)
                         newChar.CleanupsBeforeDelete();
-
+                        newChar.Dispose();
                         SendCharCreate(ResponseCodes.CharCreateError);
                         return;
                     }
@@ -567,6 +567,8 @@ namespace Game
                         }
                         else
                             SendCharCreate(ResponseCodes.CharCreateError);
+
+                        newChar.Dispose();
                     });
                 }
 
