@@ -672,7 +672,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool HandleLevelUpCommand(CommandHandler handler, PlayerIdentifier player, short level)
+        static bool HandleLevelUpCommand(CommandHandler handler, [OptionalArg]PlayerIdentifier player, short level)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);

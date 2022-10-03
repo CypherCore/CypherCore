@@ -83,7 +83,7 @@ namespace Game.Chat
             if (tempVal is ulong)
             {
                 _guid = ObjectGuid.Create(HighGuid.Player, tempVal);
-                if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())))
+                if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())) != null)
                     _name = _player.GetName();
                 else
                     if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
@@ -97,7 +97,7 @@ namespace Game.Chat
                 if (!ObjectManager.NormalizePlayerName(ref _name))
                     return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameInvalid, _name));
 
-                if ((_player = Global.ObjAccessor.FindPlayerByName(_name)))
+                if ((_player = Global.ObjAccessor.FindPlayerByName(_name)) != null)
                     _guid = _player.GetGUID();
                 else if ((_guid = Global.CharacterCacheStorage.GetCharacterGuidByName(_name)).IsEmpty())
                     return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameNoExist, _name));
