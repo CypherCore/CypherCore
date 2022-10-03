@@ -277,7 +277,7 @@ namespace Game.Chat
                         case nameof(ItemTemplate):
                         {
                             ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetItemTemplate(tempVal)))
+                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetItemTemplate(tempVal)) != null)
                                 return result;
 
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserItemNoExist, tempVal));
@@ -293,7 +293,7 @@ namespace Game.Chat
                         case nameof(Quest):
                         {
                             ChatCommandResult result =  TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetQuestTemplate(tempVal)))
+                            if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetQuestTemplate(tempVal)) != null)
                                 return result;
                             
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserQuestNoExist, tempVal));
