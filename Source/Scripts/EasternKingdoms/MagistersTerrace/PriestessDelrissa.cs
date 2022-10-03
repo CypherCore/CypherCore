@@ -358,7 +358,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         }
     }
 
-    [Script] //all 8 possible lackey use this common
+    //all 8 possible lackey use this common
     class boss_priestess_lackey_common : ScriptedAI
     {
         InstanceScript instance;
