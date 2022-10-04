@@ -267,6 +267,9 @@ namespace Game.Maps
             if (!entries.MapDifficulty.IsUsingEncounterLocks())
                 instanceLock.GetData().CompletedEncountersMask |= updateEvent.InstanceCompletedEncountersMask;
 
+            if (updateEvent.EntranceWorldSafeLocId.HasValue)
+                instanceLock.GetData().EntranceWorldSafeLocId = updateEvent.EntranceWorldSafeLocId.Value;
+
             if (instanceLock.IsExpired())
             {
                 Cypher.Assert(instanceLock.IsExtended(), "Instance lock must have been extended to create instance map from it");
@@ -298,6 +301,9 @@ namespace Game.Maps
                 sharedData.CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
                 Log.outDebug(LogFilter.Instance, $"Instance {updateEvent.InstanceId} gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
             }
+
+            if (updateEvent.EntranceWorldSafeLocId.HasValue)
+                sharedData.EntranceWorldSafeLocId = updateEvent.EntranceWorldSafeLocId.Value;
 
             trans.Append($"DELETE FROM instance2 WHERE instanceId={sharedData.InstanceId}");
             string escapedData = sharedData.Data;
@@ -505,13 +511,15 @@ namespace Game.Maps
         public string NewData;
         public uint InstanceCompletedEncountersMask;
         public DungeonEncounterRecord CompletedEncounter;
+        public uint? EntranceWorldSafeLocId;
 
-        public InstanceLockUpdateEvent(uint instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter)
+        public InstanceLockUpdateEvent(uint instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter, uint? entranceWorldSafeLocId)
         {
             InstanceId = instanceId;
             NewData = newData;
             InstanceCompletedEncountersMask = instanceCompletedEncountersMask;
             CompletedEncounter = completedEncounter;
+            EntranceWorldSafeLocId = entranceWorldSafeLocId;
         }
     }
 }

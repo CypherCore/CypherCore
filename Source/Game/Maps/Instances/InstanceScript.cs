@@ -506,6 +506,19 @@ namespace Game.Maps
             return writer.GetString();
         }
 
+        public uint? GetEntranceLocationForCompletedEncounters(uint completedEncountersMask)
+        {
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+                return _entranceId;
+
+            return ComputeEntranceLocationForCompletedEncounters(completedEncountersMask);
+        }
+
+        public virtual uint? ComputeEntranceLocationForCompletedEncounters(uint completedEncountersMask)
+        {
+            return null;
+        }
+
         public void HandleGameObject(ObjectGuid guid, bool open, GameObject go = null)
         {
             if (!go)

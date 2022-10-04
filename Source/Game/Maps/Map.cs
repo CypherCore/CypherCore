@@ -4992,7 +4992,8 @@ namespace Game.Maps
                 SQLTransaction trans = new();
 
                 if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter));
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), 
+                        instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(instanceCompletedEncounters)));
 
                 foreach (var player in GetPlayers())
                 {
@@ -5002,12 +5003,17 @@ namespace Game.Maps
 
                     InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
                     string oldData = "";
+                    uint playerCompletedEncounters = 0;
                     if (playerLock != null)
+                    {
                         oldData = playerLock.GetData().Data;
+                        playerCompletedEncounters = playerLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
+                    }
 
                     bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
 
-                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter));
+                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent),
+                        instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(playerCompletedEncounters)));
 
                     if (isNewLock)
                     {
@@ -5034,7 +5040,7 @@ namespace Game.Maps
                 SQLTransaction trans = new();
 
                 if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, null));
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, null, null));
 
                 foreach (var player in GetPlayers())
                 {
@@ -5049,7 +5055,8 @@ namespace Game.Maps
 
                     bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
 
-                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, null));
+                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent),
+                        instanceCompletedEncounters, null, null));
 
                     if (isNewLock)
                     {
@@ -5074,7 +5081,7 @@ namespace Game.Maps
 
             SQLTransaction trans = new();
 
-            InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), i_instanceLock.GetData().CompletedEncountersMask, null));
+            InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), i_instanceLock.GetData().CompletedEncountersMask, null, null));
 
             DB.Characters.CommitTransaction(trans);
 
