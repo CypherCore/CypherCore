@@ -2583,10 +2583,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Group, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_INSTANCE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.BoundInstances, stmt);
-
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURAS);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Auras, stmt);
@@ -2866,7 +2862,6 @@ namespace Game
         From,
         Customizations,
         Group,
-        BoundInstances,
         Auras,
         AuraEffects,
         AuraStoredLocations,

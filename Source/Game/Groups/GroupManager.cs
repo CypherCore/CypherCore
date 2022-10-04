@@ -182,49 +182,6 @@ namespace Game.Groups
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group members in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Group instance saves...");
-            {
-                uint oldMSTime = Time.GetMSTime();
-
-                //                                                 0       1       2            3            4             5            6
-                SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, " +
-                    //           7
-                    "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN `groups` g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
-                    "FROM group_instance gi LEFT JOIN instance i ON gi.instance = i.id ORDER BY guid");
-
-                if (result.IsEmpty())
-                {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group-instance saves. DB table `group_instance` is empty!");
-                    return;
-                }
-
-                uint count = 0;
-                do
-                {
-                    Group group = GetGroupByDbStoreId(result.Read<uint>(0));
-                    // group will never be NULL (we have run consistency sql's before loading)
-
-                    MapRecord mapEntry = CliDB.MapStorage.LookupByKey(result.Read<ushort>(1));
-                    if (mapEntry == null || !mapEntry.IsDungeon())
-                    {
-                        Log.outError(LogFilter.Sql, "Incorrect entry in group_instance table : no dungeon map {0}", result.Read<ushort>(1));
-                        continue;
-                    }
-
-                    uint diff = result.Read<byte>(4);
-                    DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(diff);
-                    if (difficultyEntry == null || difficultyEntry.InstanceType != mapEntry.InstanceType)
-                        continue;
-
-                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<long>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
-                    group.BindToInstance(save, result.Read<bool>(3), true);
-                    ++count;
-                }
-                while (result.NextRow());
-
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group-instance saves in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-            }
         }
 
         Dictionary<ulong, Group> GroupStore = new();

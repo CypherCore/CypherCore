@@ -727,11 +727,6 @@ namespace Game.Entities
 
             if (GetTransport() != null)
                 GetTransport().RemovePassenger(this);
-
-            // clean up player-instance binds, may unload some instance saves
-            foreach (var difficultyDic in m_boundInstances.Values)
-                foreach (var instanceBind in difficultyDic.Values)
-                    instanceBind.save.RemovePlayer(this);
         }
 
         public override void AddToWorld()

@@ -430,7 +430,7 @@ namespace Game.Maps
 
                     bossInfo.state = state;
                     SaveToDB();
-                    if (state == EncounterState.Done)
+                    if (state == EncounterState.Done && dungeonEncounter != null)
                         instance.UpdateInstanceLock(dungeonEncounter, new(id, state));
                 }
 
@@ -754,11 +754,20 @@ namespace Game.Maps
             return false;
         }
 
+        bool IsEncounterCompleted(uint dungeonEncounterId)
+        {
+            for (uint i = 0; i < bosses.Count; ++i)
+                for (var j = 0; j < bosses[i].DungeonEncounters.Length; ++j)
+                    if (bosses[i].DungeonEncounters[j] != null && bosses[i].DungeonEncounters[j].Id == dungeonEncounterId)
+                        return bosses[i].state == EncounterState.Done;
+
+            return false;
+        }
+        
         public void SetEntranceLocation(uint worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
-            if (_temporaryEntranceId != 0)
-                _temporaryEntranceId = 0;
+            _temporaryEntranceId = 0;
         }
 
         public void SendEncounterUnit(EncounterFrameType type, Unit unit = null, byte priority = 0)

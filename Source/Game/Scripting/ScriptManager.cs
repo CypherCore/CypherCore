@@ -963,7 +963,7 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnSave(player));
         }
-        public void OnPlayerBindToInstance(Player player, Difficulty difficulty, uint mapid, bool permanent, BindExtensionState extendState)
+        public void OnPlayerBindToInstance(Player player, Difficulty difficulty, uint mapid, bool permanent, byte extendState)
         {
             ForEach<PlayerScript>(p => p.OnBindToInstance(player, difficulty, mapid, permanent, extendState));
         }

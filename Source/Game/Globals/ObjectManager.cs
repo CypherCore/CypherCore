@@ -12061,4 +12061,10 @@ namespace Game
             }
         }
     }
+
+    public class InstanceTemplate
+    {
+        public uint Parent;
+        public uint ScriptId;
+    }
 }

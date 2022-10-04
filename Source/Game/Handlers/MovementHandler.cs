@@ -377,19 +377,27 @@ namespace Game
             if (mapEntry.IsDungeon())
             {
                 // check if this instance has a reset time and send it to player if so
-                Difficulty diff = newMap.GetDifficultyID();
-                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapEntry.Id, diff);
-                if (mapDiff != null)
+                MapDb2Entries entries = new(mapEntry.Id, newMap.GetDifficultyID());
+                if (entries.MapDifficulty.HasResetSchedule())
                 {
-                    if (mapDiff.GetRaidDuration() != 0)
+                    RaidInstanceMessage raidInstanceMessage = new();
+                    raidInstanceMessage.Type = InstanceResetWarningType.Welcome;
+                    raidInstanceMessage.MapID = mapEntry.Id;
+                    raidInstanceMessage.DifficultyID = newMap.GetDifficultyID();
+
+                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(GetPlayer().GetGUID(), entries);
+                    if (playerLock != null)
                     {
-                        long timeReset = Global.InstanceSaveMgr.GetResetTimeFor(mapEntry.Id, diff);
-                        if (timeReset != 0)
-                        {
-                            uint timeleft = (uint)(timeReset - GameTime.GetGameTime());
-                            player.SendInstanceResetWarning(mapEntry.Id, diff, timeleft, true);
-                        }
+                        raidInstanceMessage.Locked = !playerLock.IsExpired();
+                        raidInstanceMessage.Extended = playerLock.IsExtended();
                     }
+                    else
+                    {
+                        raidInstanceMessage.Locked = false;
+                        raidInstanceMessage.Extended = false;
+                    }
+
+                    SendPacket(raidInstanceMessage);
                 }
 
                 // check if instance is valid

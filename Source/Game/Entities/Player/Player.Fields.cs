@@ -78,7 +78,6 @@ namespace Game.Entities
         bool m_bPassOnGroupLoot;
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
-        public Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new();
         Dictionary<uint, uint> m_recentInstances = new();
         Dictionary<uint, long> _instanceResetTimes = new();
         uint _pendingBindId;

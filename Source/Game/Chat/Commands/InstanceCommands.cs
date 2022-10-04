@@ -74,7 +74,7 @@ namespace Game.Chat
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
         static bool HandleInstanceListBindsCommand(CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            /*Player player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
@@ -110,7 +110,7 @@ namespace Game.Chat
                     }
                 }
             }
-            handler.SendSysMessage("group binds: {0}", counter);
+            handler.SendSysMessage("group binds: {0}", counter);*/
 
             return true;
         }
@@ -186,9 +186,9 @@ namespace Game.Chat
         {
             handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
             handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
-            handler.SendSysMessage("instance saves: {0}", Global.InstanceSaveMgr.GetNumInstanceSaves());
-            handler.SendSysMessage("players bound: {0}", Global.InstanceSaveMgr.GetNumBoundPlayersTotal());
-            handler.SendSysMessage("groups bound: {0}", Global.InstanceSaveMgr.GetNumBoundGroupsTotal());
+            //handler.SendSysMessage("instance saves: {0}", Global.InstanceSaveMgr.GetNumInstanceSaves());
+            //handler.SendSysMessage("players bound: {0}", Global.InstanceSaveMgr.GetNumBoundPlayersTotal());
+            //handler.SendSysMessage("groups bound: {0}", Global.InstanceSaveMgr.GetNumBoundGroupsTotal());
 
             return true;
         }
@@ -196,7 +196,7 @@ namespace Game.Chat
         [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
         static bool HandleInstanceUnbindCommand(CommandHandler handler, string mapArg, byte? difficultyArg)
         {
-            Player player = handler.GetSelectedPlayer();
+            /*Player player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
@@ -223,7 +223,7 @@ namespace Game.Chat
                     }
                 }
             }
-            handler.SendSysMessage("instances unbound: {0}", counter);
+            handler.SendSysMessage("instances unbound: {0}", counter);*/
 
             return true;
         }

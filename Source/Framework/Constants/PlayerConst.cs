@@ -740,14 +740,6 @@ namespace Framework.Constants
         Error = 1
     }
 
-    public enum BindExtensionState
-    {
-        Expired = 0,
-        Normal = 1,
-        Extended = 2,
-        Keep = 255   // special state: keep current save type
-    }
-
     public enum TalentLearnResult
     {
         LearnOk = 0,

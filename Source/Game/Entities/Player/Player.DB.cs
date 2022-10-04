@@ -1056,78 +1056,6 @@ namespace Game.Entities
 
             RemoveAtLoginFlag(AtLoginFlags.Resurrect);
         }
-        void _LoadBoundInstances(SQLResult result)
-        {
-            m_boundInstances.Clear();
-
-            Group group = GetGroup();
-
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    bool perm = result.Read<bool>(1);
-                    uint mapId = result.Read<ushort>(2);
-                    uint instanceId = result.Read<uint>(0);
-                    byte difficulty = result.Read<byte>(3);
-                    BindExtensionState extendState = (BindExtensionState)result.Read<byte>(4);
-
-                    long resetTime = result.Read<long>(5);
-                    // the resettime for normal instances is only saved when the InstanceSave is unloaded
-                    // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
-                    // and in that case it is not used
-
-                    uint entranceId = result.Read<uint>(6);
-
-                    bool deleteInstance = false;
-
-                    MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-                    string mapname = mapEntry != null ? mapEntry.MapName[Global.WorldMgr.GetDefaultDbcLocale()] : "Unknown";
-
-                    if (mapEntry == null || !mapEntry.IsDungeon())
-                    {
-                        Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) has bind to not existed or not dungeon map {2} ({3})", GetName(), GetGUID().ToString(), mapId, mapname);
-                        deleteInstance = true;
-                    }
-                    else if (CliDB.DifficultyStorage.HasRecord(difficulty))
-                    {
-                        Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) has bind to not existed difficulty {2} instance for map {3} ({4})", GetName(), GetGUID().ToString(), difficulty, mapId, mapname);
-                        deleteInstance = true;
-                    }
-                    else
-                    {
-                        MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapId, (Difficulty)difficulty);
-                        if (mapDiff == null)
-                        {
-                            Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) has bind to not existed difficulty {2} instance for map {3} ({4})", GetName(), GetGUID().ToString(), difficulty, mapId, mapname);
-                            deleteInstance = true;
-                        }
-                        else if (!perm && group)
-                        {
-                            Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) is in group {2} but has a non-permanent character bind to map {3} ({4}), {5}, {6}",
-                                GetName(), GetGUID().ToString(), group.GetGUID().ToString(), mapId, mapname, instanceId, difficulty);
-                            deleteInstance = true;
-                        }
-                    }
-
-                    if (deleteInstance)
-                    {
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
-                        stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, instanceId);
-                        DB.Characters.Execute(stmt);
-
-                        continue;
-                    }
-
-                    // since non permanent binds are always solo bind, they can always be reset
-                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapId, instanceId, (Difficulty)difficulty, resetTime, entranceId, !perm, true);
-                    if (save != null)
-                        BindToInstance(save, perm, extendState, true);
-                }
-                while (result.NextRow());
-            }
-        }
         void _LoadVoidStorage(SQLResult result)
         {
             if (result.IsEmpty())
@@ -2793,7 +2721,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), todayKills);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), yesterdayKills);
 
-            _LoadBoundInstances(holder.GetResult(PlayerLoginQueryLoad.BoundInstances));
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
             _LoadBGData(holder.GetResult(PlayerLoginQueryLoad.BgData));
 
@@ -2976,15 +2903,6 @@ namespace Game.Entities
                     Log.outDebug(LogFilter.Player, "Player {0} using client without required expansion tried login at non accessible map {1}", GetName(), mapId);
                     RelocateToHomebind();
                 }
-
-                // fix crash (because of if (Map* map = _FindMap(instanceId)) in MapInstanced.CreateInstance)
-                if (instance_id != 0)
-                {
-                    InstanceSave save = GetInstanceSave(mapId);
-                    if (save != null)
-                        if (save.GetInstanceId() != instance_id)
-                            instance_id = 0;
-                }
             }
 
             // NOW player must have valid map
@@ -3028,7 +2946,7 @@ namespace Game.Entities
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
                     check = true;
                 }
-                else if (instance_id != 0 && Global.InstanceSaveMgr.GetInstanceSave(instance_id) == null) // ... and instance is reseted then look for entrance.
+                else if (instance_id != 0 && Global.InstanceLockMgr.FindActiveInstanceLock(guid, new MapDb2Entries(mapId, map.GetDifficultyID())) != null) // ... and instance is reseted then look for entrance.
                 {
                     areaTrigger = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
                     check = true;

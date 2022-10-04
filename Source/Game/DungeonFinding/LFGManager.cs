@@ -795,19 +795,15 @@ namespace Game.DungeonFinding
                             LFGDungeonData dungeon = GetLFGDungeon(dungeonId);
                             Cypher.Assert(dungeon != null);
                             Cypher.Assert(player);
-                            InstanceBind playerBind = player.GetBoundInstance(dungeon.map, dungeon.difficulty);
+                            MapDb2Entries entries = new(dungeon.map, dungeon.difficulty);
+                            InstanceLock playerBind = Global.InstanceLockMgr.FindActiveInstanceLock(guid, entries);
                             if (playerBind != null)
                             {
-                                InstanceSave playerSave = playerBind.save;
-                                if (playerSave != null)
-                                {
-                                    uint dungeonInstanceId = playerSave.GetInstanceId();
-                                    var itLockedDungeon = lockedDungeons.LookupByKey(dungeonId);
-                                    if (itLockedDungeon == 0 || itLockedDungeon == dungeonInstanceId)
-                                        eraseDungeon = false;
+                                uint dungeonInstanceId = playerBind.GetInstanceId();
+                                if (!lockedDungeons.TryGetValue(dungeonId, out uint lockedDungeon) || lockedDungeon == dungeonInstanceId)
+                                    eraseDungeon = false;
 
-                                    lockedDungeons[dungeonId] = dungeonInstanceId;
-                                }
+                                lockedDungeons[dungeonId] = dungeonInstanceId;
                             }
                         }
 
@@ -1625,7 +1621,7 @@ namespace Game.DungeonFinding
                     lockStatus = LfgLockStatusType.NotInSeason;
                 else if (Global.DisableMgr.IsDisabledFor(DisableType.LFGMap, dungeon.map, player))
                     lockStatus = LfgLockStatusType.RaidLocked;
-                else if (dungeon.difficulty > Difficulty.Normal && player.GetBoundInstance(dungeon.map, dungeon.difficulty) != null)
+                else if (dungeon.difficulty > Difficulty.Normal && Global.InstanceLockMgr.FindActiveInstanceLock(guid, new MapDb2Entries(dungeon.map, dungeon.difficulty)) != null)
                     lockStatus = LfgLockStatusType.RaidLocked;
                 else if (dungeon.seasonal && !IsSeasonActive(dungeon.id))
                     lockStatus = LfgLockStatusType.NotInSeason;

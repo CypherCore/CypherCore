@@ -315,16 +315,20 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
 
-        public void UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
+        public Tuple<DateTime, DateTime> UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
         {
             InstanceLock instanceLock = FindActiveInstanceLock(playerGuid, entries, true, false);
             if (instanceLock != null)
             {
+                DateTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
                 instanceLock.SetExtended(extended);
                 DB.Characters.Execute($"UPDATE character_instance_lock SET extended = {(extended ? 1 : 0)} WHERE guid = {playerGuid.GetCounter()} AND mapId = {entries.MapDifficulty.MapID} AND lockId = {entries.MapDifficulty.LockID}");
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
+                return Tuple.Create(oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
             }
+
+            return Tuple.Create(DateTime.MinValue, DateTime.MinValue);
         }
 
         public DateTime GetNextResetTime(MapDb2Entries entries)

@@ -290,152 +290,6 @@ namespace Game.Entities
         public ZonePVPTypeOverride GetOverrideZonePVPType() { return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType; }
         public void SetOverrideZonePVPType(ZonePVPTypeOverride type) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); }
 
-        public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
-        {
-            // some instances only have one difficulty
-            MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref difficulty);
-            if (mapDiff == null)
-                return null;
-
-            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
-            if (difficultyDic == null)
-                return null;
-
-            var instanceBind = difficultyDic.LookupByKey(mapid);
-            if (instanceBind != null)
-                if (instanceBind.extendState != 0 || withExpired)
-                    return instanceBind;
-
-            return null;
-        }
-        public Dictionary<uint, InstanceBind> GetBoundInstances(Difficulty difficulty) { return m_boundInstances.LookupByKey(difficulty); }
-
-        public InstanceSave GetInstanceSave(uint mapid)
-        {
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapid);
-            InstanceBind pBind = GetBoundInstance(mapid, GetDifficultyID(mapEntry));
-            InstanceSave pSave = pBind?.save;
-            if (pBind == null || !pBind.perm)
-            {
-                Group group = GetGroup();
-                if (group)
-                {
-                    InstanceBind groupBind = group.GetBoundInstance(GetDifficultyID(mapEntry), mapid);
-                    if (groupBind != null)
-                        pSave = groupBind.save;
-                }
-            }
-
-            return pSave;
-        }
-
-        public void UnbindInstance(uint mapid, Difficulty difficulty, bool unload = false)
-        {
-            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
-            if (difficultyDic != null)
-            {
-                var pair = difficultyDic.Find(mapid);
-                if (pair.Value != null)
-                    UnbindInstance(pair, difficultyDic, unload);
-            }
-        }
-
-        public void UnbindInstance(KeyValuePair<uint, InstanceBind> pair, Dictionary<uint, InstanceBind> difficultyDic, bool unload)
-        {
-            if (pair.Value != null)
-            {
-                if (!unload)
-                {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
-
-                    stmt.AddValue(0, GetGUID().GetCounter());
-                    stmt.AddValue(1, pair.Value.save.GetInstanceId());
-
-                    DB.Characters.Execute(stmt);
-                }
-
-                if (pair.Value.perm)
-                    GetSession().SendCalendarRaidLockoutRemoved(pair.Value.save);
-
-                pair.Value.save.RemovePlayer(this);               // save can become invalid
-                difficultyDic.Remove(pair.Key);
-            }
-        }
-
-        public InstanceBind BindToInstance(InstanceSave save, bool permanent, BindExtensionState extendState = BindExtensionState.Normal, bool load = false)
-        {
-            if (save != null)
-            {
-                InstanceBind bind = new();
-                if (m_boundInstances.ContainsKey(save.GetDifficultyID()) && m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
-                    bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
-
-                if (extendState == BindExtensionState.Keep) // special flag, keep the player's current extend state when updating for new boss down
-                {
-                    if (save == bind.save)
-                        extendState = bind.extendState;
-                    else
-                        extendState = BindExtensionState.Normal;
-                }
-
-                if (!load)
-                {
-                    PreparedStatement stmt;
-                    if (bind.save != null)
-                    {
-                        // update the save when the group kills a boss
-                        if (permanent != bind.perm || save != bind.save || extendState != bind.extendState)
-                        {
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_INSTANCE);
-
-                            stmt.AddValue(0, save.GetInstanceId());
-                            stmt.AddValue(1, permanent);
-                            stmt.AddValue(2, (byte)extendState);
-                            stmt.AddValue(3, GetGUID().GetCounter());
-                            stmt.AddValue(4, bind.save.GetInstanceId());
-
-                            DB.Characters.Execute(stmt);
-                        }
-                    }
-                    else
-                    {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_INSTANCE);
-                        stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, save.GetInstanceId());
-                        stmt.AddValue(2, permanent);
-                        stmt.AddValue(3, (byte)extendState);
-                        DB.Characters.Execute(stmt);
-                    }
-                }
-
-                if (bind.save != save)
-                {
-                    if (bind.save != null)
-                        bind.save.RemovePlayer(this);
-                    save.AddPlayer(this);
-                }
-
-                if (permanent)
-                    save.SetCanReset(false);
-
-                bind.save = save;
-                bind.perm = permanent;
-                bind.extendState = extendState;
-                if (!load)
-                    Log.outDebug(LogFilter.Maps, "Player.BindToInstance: Player '{0}' ({1}) is now bound to map (ID: {2}, Instance {3}, Difficulty {4})", GetName(), GetGUID().ToString(), save.GetMapId(), save.GetInstanceId(), save.GetDifficultyID());
-
-                Global.ScriptMgr.OnPlayerBindToInstance(this, save.GetDifficultyID(), save.GetMapId(), permanent, extendState);
-
-                if (!m_boundInstances.ContainsKey(save.GetDifficultyID()))
-                    m_boundInstances[save.GetDifficultyID()] = new Dictionary<uint, InstanceBind>();
-
-                m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = bind;
-                return bind;
-            }
-
-            return null;
-        }
-
         public void ConfirmPendingBind()
         {
             InstanceMap map = GetMap().ToInstanceMap();
@@ -466,7 +320,7 @@ namespace Game.Entities
                 lockInfos.InstanceID = instanceLock.GetInstanceId();
                 lockInfos.MapID = instanceLock.GetMapId();
                 lockInfos.DifficultyID = (uint)instanceLock.GetDifficultyId();
-                lockInfos.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds;
+                lockInfos.TimeRemaining = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds, 0);
                 lockInfos.CompletedMask = instanceLock.GetData().CompletedEncountersMask;
 
                 lockInfos.Locked = !instanceLock.IsExpired();
@@ -646,52 +500,7 @@ namespace Game.Entities
         // Reset all solo instances and optionally send a message on success for each
         public void ResetInstances(InstanceResetMethod method, bool isRaid, bool isLegacy)
         {
-            // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
 
-            // we assume that when the difficulty changes, all instances that can be reset will be
-            Difficulty difficulty = GetDungeonDifficultyID();
-            if (isRaid)
-            {
-                if (!isLegacy)
-                    difficulty = GetRaidDifficultyID();
-                else
-                    difficulty = GetLegacyRaidDifficultyID();
-            }
-
-            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
-            if (difficultyDic == null)
-                return;
-
-            foreach (var pair in difficultyDic)
-            {
-                InstanceSave p = pair.Value.save;
-                MapRecord entry = CliDB.MapStorage.LookupByKey(difficulty);
-                if (entry == null || entry.IsRaid() != isRaid || !p.CanReset())
-                    continue;
-
-                if (method == InstanceResetMethod.All)
-                {
-                    // the "reset all instances" method can only reset normal maps
-                    if (entry.InstanceType == MapTypes.Raid || difficulty == Difficulty.Heroic)
-                        continue;
-                }
-
-                // if the map is loaded, reset it
-                Map map = Global.MapMgr.FindMap(p.GetMapId(), p.GetInstanceId());
-                if (map != null && map.IsDungeon())
-                    if (!map.ToInstanceMap().Reset(method))
-                        continue;
-
-                // since this is a solo instance there should not be any players inside
-                if (method == InstanceResetMethod.All || method == InstanceResetMethod.ChangeDifficulty)
-                    SendResetInstanceSuccess(p.GetMapId());
-
-                p.DeleteFromDB();
-                difficultyDic.Remove(pair.Key);
-
-                // the following should remove the instance save from the manager and delete it as well
-                p.RemovePlayer(this);
-            }
         }
 
         public void SendResetInstanceSuccess(uint MapId)
@@ -717,35 +526,6 @@ namespace Game.Entities
             transferAborted.TransfertAbort = reason;
             transferAborted.MapDifficultyXConditionID = mapDifficultyXConditionID;
             SendPacket(transferAborted);
-        }
-
-        public void SendInstanceResetWarning(uint mapid, Difficulty difficulty, uint time, bool welcome)
-        {
-            // type of warning, based on the time remaining until reset
-            InstanceResetWarningType type;
-            if (welcome)
-                type = InstanceResetWarningType.Welcome;
-            else if (time > 21600)
-                type = InstanceResetWarningType.Welcome;
-            else if (time > 3600)
-                type = InstanceResetWarningType.WarningHours;
-            else if (time > 300)
-                type = InstanceResetWarningType.WarningMin;
-            else
-                type = InstanceResetWarningType.WarningMinSoon;
-
-            RaidInstanceMessage raidInstanceMessage = new();
-            raidInstanceMessage.Type = type;
-            raidInstanceMessage.MapID = mapid;
-            raidInstanceMessage.DifficultyID = difficulty;
-
-            InstanceBind bind = GetBoundInstance(mapid, difficulty);
-            if (bind != null)
-                raidInstanceMessage.Locked = bind.perm;
-            else
-                raidInstanceMessage.Locked = false;
-            raidInstanceMessage.Extended = false;
-            SendPacket(raidInstanceMessage);
         }
 
         public override void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)

@@ -65,8 +65,9 @@ namespace Game.Scenarios
                 Criteria criteria = Global.CriteriaMgr.GetCriteria(iter.Key);
                 switch (criteria.Entry.Type)
                 {
-                    // Blizzard only appears to store creature kills
+                    // Blizzard only appears to store creature kills and dungeon encounters
                     case CriteriaType.KillCreature:
+                    case CriteriaType.DefeatDungeonEncounter:
                         break;
                     default:
                         continue;
@@ -131,6 +132,7 @@ namespace Game.Scenarios
                     {
                         // Blizzard appears to only stores creatures killed progress for unknown reasons. Either technical shortcoming or intentional
                         case CriteriaType.KillCreature:
+                        case CriteriaType.DefeatDungeonEncounter:
                             break;
                         default:
                             continue;

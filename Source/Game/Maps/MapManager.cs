@@ -242,6 +242,50 @@ namespace Game.Entities
                 return FindMap_i(mapId, instanceId);
         }
 
+        public uint FindInstanceIdForPlayer(uint mapId, Player player)
+        {
+            MapRecord entry = CliDB.MapStorage.LookupByKey(mapId);
+            if (entry == null)
+                return 0;
+
+            if (entry.IsBattlegroundOrArena())
+                return player.GetBattlegroundId();
+            else if (entry.IsDungeon())
+            {
+                Group group = player.GetGroup();
+                Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
+                MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty));
+
+                ObjectGuid instanceOwnerGuid = group ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
+                InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, entries);
+                uint newInstanceId = 0;
+                if (instanceLock != null)
+                    newInstanceId = instanceLock.GetInstanceId();
+                else if (!entries.MapDifficulty.HasResetSchedule()) // Try finding instance id for normal dungeon
+                    newInstanceId = group ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
+
+                if (newInstanceId == 0)
+                    return 0;
+
+                Map map = FindMap(mapId, newInstanceId);
+
+                // is is possible that instance id is already in use by another group for boss-based locks
+                if (!entries.IsInstanceIdBound() && instanceLock != null && map != null && map.ToInstanceMap().GetInstanceLock() != instanceLock)
+                    return 0;
+
+                return newInstanceId;
+            }
+            else if (entry.IsGarrison())
+                return (uint)player.GetGUID().GetCounter();
+            else
+            {
+                if (entry.IsSplitByFaction())
+                    return (uint)player.GetTeamId();
+
+                return 0;
+            }
+        }
+
         public void Update(uint diff)
         {
             i_timer.Update(diff);

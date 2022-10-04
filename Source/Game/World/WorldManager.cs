@@ -514,8 +514,8 @@ namespace Game
 
             // Must be called before `respawn` data
             Log.outInfo(LogFilter.ServerLoading, "Loading instances...");
-            Global.InstanceSaveMgr.LoadInstances();
 
+            Global.MapMgr.InitInstanceIds();
             Global.InstanceLockMgr.Load();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Localization strings...");
@@ -1492,9 +1492,6 @@ namespace Game
                 m_timers[WorldTimers.GuildSave].Reset();
                 Global.GuildMgr.SaveGuilds();
             }
-
-            // update the instance reset times
-            Global.InstanceSaveMgr.Update();
 
             // Check for shutdown warning
             if (_guidWarn && !_guidAlert)

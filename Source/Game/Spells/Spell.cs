@@ -5411,22 +5411,16 @@ namespace Game.Spells
                             return SpellCastResult.SummonPending;
 
                         // check if our map is dungeon
-                        MapRecord map = CliDB.MapStorage.LookupByKey(m_caster.GetMapId());
-                        if (map.IsDungeon())
+                        InstanceMap map = m_caster.GetMap().ToInstanceMap();
+                        if (map != null)
                         {
-                            uint mapId = m_caster.GetMap().GetId();
-                            Difficulty difficulty = m_caster.GetMap().GetDifficultyID();
-                            if (map.IsRaid())
-                            {
-                                InstanceBind targetBind = target.GetBoundInstance(mapId, difficulty);
-                                if (targetBind != null)
-                                {
-                                    InstanceBind casterBind = m_caster.ToPlayer().GetBoundInstance(mapId, difficulty);
-                                    if (casterBind != null)
-                                        if (targetBind.perm && targetBind.save != casterBind.save)
-                                            return SpellCastResult.TargetLockedToRaidInstance;
-                                }
-                            }
+                            uint mapId = map.GetId();
+                            Difficulty difficulty = map.GetDifficultyID();
+                            InstanceLock mapLock = map.GetInstanceLock();
+                            if (mapLock != null)
+                                if (Global.InstanceLockMgr.CanJoinInstanceLock(target.GetGUID(), new MapDb2Entries(mapId, difficulty), mapLock) != TransferAbortReason.None)
+                                    return SpellCastResult.TargetLockedToRaidInstance;
+
                             if (!target.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapId, difficulty), mapId))
                                 return SpellCastResult.BadTargets;
                         }

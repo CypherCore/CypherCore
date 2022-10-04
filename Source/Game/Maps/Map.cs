@@ -1713,20 +1713,17 @@ namespace Game.Maps
             {
                 //Get instance where player's group is bound & its map
                 uint instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
-                if (instanceIdToCheck != 0)
+                Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
+                if (boundMap != null)
                 {
-                    Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
-                    if (boundMap != null)
-                    {
-                        EnterState denyReason = boundMap.CannotEnter(player);
-                        if (denyReason != 0)
-                            return denyReason;
-                    }
-
-                    // players are only allowed to enter 10 instances per hour
-                    if (entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
-                        return EnterState.CannotEnterTooManyInstances;
+                    EnterState denyReason = boundMap.CannotEnter(player);
+                    if (denyReason != 0)
+                        return denyReason;
                 }
+
+                // players are only allowed to enter 10 instances per hour
+                if (entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                    return EnterState.CannotEnterTooManyInstances;
             }
 
             return EnterState.CanEnter;
@@ -2090,6 +2087,9 @@ namespace Game.Maps
 
         void DeleteRespawnInfoFromDB(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
         {
+            if (Instanceable())
+                return;
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESPAWN);
             stmt.AddValue(0, (ushort)type);
             stmt.AddValue(1, spawnId);
@@ -2727,6 +2727,9 @@ namespace Game.Maps
 
         public void SaveRespawnInfoDB(RespawnInfo info, SQLTransaction dbTrans = null)
         {
+            if (Instanceable())
+                return;
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
             stmt.AddValue(0, (ushort)info.type);
             stmt.AddValue(1, info.spawnId);
@@ -2738,6 +2741,9 @@ namespace Game.Maps
 
         public void LoadRespawnTimes()
         {
+            if (Instanceable())
+                return;
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetInstanceId());
@@ -2768,14 +2774,17 @@ namespace Game.Maps
         public void DeleteRespawnTimes()
         {
             UnloadAllRespawnInfos();
-            DeleteRespawnTimesInDB(GetId(), GetInstanceId());
+            DeleteRespawnTimesInDB();
         }
 
-        public static void DeleteRespawnTimesInDB(uint mapId, uint instanceId)
+        public void DeleteRespawnTimesInDB()
         {
+            if (Instanceable())
+                return;
+
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_RESPAWNS);
-            stmt.AddValue(0, mapId);
-            stmt.AddValue(1, instanceId);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
             DB.Characters.Execute(stmt);
         }
 
@@ -3282,11 +3291,6 @@ namespace Game.Maps
         public bool IsRaid()
         {
             return i_mapRecord != null && i_mapRecord.IsRaid();
-        }
-
-        public bool IsRaidOrHeroicDungeon()
-        {
-            return IsRaid() || IsHeroic();
         }
 
         public bool IsHeroic()
@@ -4893,7 +4897,6 @@ namespace Game.Maps
 
             // for normal instances schedule the reset after all players have left
             SetResetSchedule(true);
-            Global.InstanceSaveMgr.UnloadInstanceSave(GetInstanceId());
         }
 
         public void CreateInstanceData()
@@ -4942,10 +4945,11 @@ namespace Game.Maps
         public bool Reset(InstanceResetMethod method)
         {
             // note: since the map may not be loaded when the instance needs to be reset
-            // the instance must be deleted from the DB by InstanceSaveManager
+            // the instance must be deleted from the DB
 
             if (HavePlayers())
             {
+                // on manual reset, fail
                 if (method == InstanceResetMethod.All || method == InstanceResetMethod.ChangeDifficulty)
                 {
                     // notify the players to leave the instance so it can be reset
@@ -4954,24 +4958,15 @@ namespace Game.Maps
                 }
                 else
                 {
-                    bool doUnload = true;
+                    // on lock expiration boot players (do we also care about extension state?)
                     if (method == InstanceResetMethod.Global)
                     {
                         // set the homebind timer for players inside (1 minute)
                         foreach (Player player in GetPlayers())
-                        {
-                            InstanceBind bind = player.GetBoundInstance(GetId(), GetDifficultyID());
-                            if (bind != null && bind.extendState != 0 && bind.save.GetInstanceId() == GetInstanceId())
-                                doUnload = false;
-                            else
-                                player.m_InstanceValid = false;
-                        }
-
-                        if (doUnload && HasPermBoundPlayers()) // check if any unloaded players have a nonexpired save to this
-                            doUnload = false;
+                            player.m_InstanceValid = false;
                     }
 
-                    if (doUnload)
+                    if (!HasPermBoundPlayers())
                     {
                         // the unload timer is not started
                         // instead the map will unload immediately after the players have left
@@ -5075,28 +5070,9 @@ namespace Game.Maps
             base.UnloadAll();
         }
 
-        public void SendResetWarnings(uint timeLeft)
-        {
-            foreach (Player player in GetPlayers())
-                player.SendInstanceResetWarning(GetId(), player.GetDifficultyID(GetEntry()), timeLeft, true);
-        }
-
         public void SetResetSchedule(bool on)
         {
-            // only for normal instances
-            // the reset time is only scheduled when there are no payers inside
-            // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
-            if (IsDungeon() && !HavePlayers() && !IsRaidOrHeroicDungeon())
-            {
-                InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());
-                if (save != null)
-                    Global.InstanceSaveMgr.ScheduleReset(on, save.GetResetTime(),
-                        new InstanceSaveManager.InstResetEvent(0, GetId(), GetDifficultyID(), GetInstanceId()));
-                else
-                    Log.outError(LogFilter.Maps,
-                        "InstanceMap.SetResetSchedule: cannot turn schedule {0}, there is no save information for instance (map [id: {1}, name: {2}], instance id: {3}, difficulty: {4})",
-                        on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), GetDifficultyID());
-            }
+
         }
 
         bool HasPermBoundPlayers()
@@ -5113,12 +5089,6 @@ namespace Game.Maps
                 return mapDiff.MaxPlayers;
 
             return GetEntry().MaxPlayers;
-        }
-
-        public uint GetMaxResetDelay()
-        {
-            MapDifficultyRecord mapDiff = GetMapDifficulty();
-            return mapDiff != null ? mapDiff.GetRaidDuration() : 0;
         }
 
         public int GetTeamIdInInstance()

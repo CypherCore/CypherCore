@@ -632,11 +632,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(NewTimeRemaining);
         }
 
-        public int MapID;
-        public int OldTimeRemaining;
         public long ServerTime;
+        public int MapID;
         public uint DifficultyID;
         public int NewTimeRemaining;
+        public int OldTimeRemaining;
     }
 
     class CalendarCommunityInvite : ServerPacket

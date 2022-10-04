@@ -879,28 +879,6 @@ namespace Game.Chat
                 return true;
             }
 
-            if (difficulty == 0)
-            {
-                handler.SendSysMessage($"Resetting all difficulties for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
-                foreach (var diff in CliDB.DifficultyStorage.Values)
-                {
-                    if (Global.DB2Mgr.GetMapDifficultyData(mapId, (Difficulty)diff.Id) != null)
-                    {
-                        handler.SendSysMessage($"Resetting difficulty {diff.Id} for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
-                        Global.InstanceSaveMgr.ForceGlobalReset(mapId, (Difficulty)diff.Id);
-                    }
-                }
-            }
-            else if (mEntry.IsNonRaidDungeon() && difficulty == (int)Difficulty.Normal)
-            {
-                handler.SendSysMessage($"'{mEntry.MapName[handler.GetSessionDbcLocale()]}' does not have any permanent saves for difficulty {(Difficulty)difficulty}.");
-            }
-            else
-            {
-                handler.SendSysMessage($"Resetting difficulty {(Difficulty)difficulty} for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
-                Global.InstanceSaveMgr.ForceGlobalReset(mapId, (Difficulty)difficulty);
-            }
-
             return true;
         }
 

@@ -681,7 +681,7 @@ namespace Game.Scripting
         public virtual void OnSave(Player player) { }
 
         // Called when a player is bound to an instance
-        public virtual void OnBindToInstance(Player player, Difficulty difficulty, uint mapId, bool permanent, BindExtensionState extendState) { }
+        public virtual void OnBindToInstance(Player player, Difficulty difficulty, uint mapId, bool permanent, byte extendState) { }
 
         // Called when a player switches to a new zone
         public virtual void OnUpdateZone(Player player, uint newZone, uint newArea) { }
