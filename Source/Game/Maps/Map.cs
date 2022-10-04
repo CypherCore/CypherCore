@@ -2420,6 +2420,10 @@ namespace Game.Maps
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
             foreach (uint spawnGroupId in spawnGroups)
             {
+                SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
+                if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
+                    continue;
+
                 bool isActive = IsSpawnGroupActive(spawnGroupId);
                 bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
                 if (isActive == shouldBeActive)
@@ -2427,7 +2431,7 @@ namespace Game.Maps
 
                 if (shouldBeActive)
                     SpawnGroupSpawn(spawnGroupId);
-                else if (GetSpawnGroupData(spawnGroupId).flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
+                else if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
                     SpawnGroupDespawn(spawnGroupId, true);
                 else
                     SetSpawnGroupInactive(spawnGroupId);
