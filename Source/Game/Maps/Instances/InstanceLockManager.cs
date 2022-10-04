@@ -347,7 +347,7 @@ namespace Game.Maps
         public DateTime GetNextResetTime(MapDb2Entries entries)
         {
             DateTime dateTime = GameTime.GetDateAndTime();
-            int resetHour = ConfigMgr.GetDefaultValue("ResetSchedule.DailyHour", 9);
+            int resetHour = WorldConfig.GetIntValue(WorldCfg.ResetScheduleHour);
 
             int hour = 0;
             int day = 0;
@@ -363,7 +363,7 @@ namespace Game.Maps
                 }
                 case MapDifficultyResetInterval.Weekly:
                 {
-                    int resetDay = ConfigMgr.GetDefaultValue("ResetSchedule.WeeklyDay", 2);
+                    int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
                     int daysAdjust = resetDay - dateTime.Day;
                     if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
                         daysAdjust += 7; // passed it for current week, grab time from next week

@@ -1730,6 +1730,8 @@ namespace Framework.Constants
         RegenHpCannotReachTargetInRaid,
         ResetDuelCooldowns,
         ResetDuelHealthMana,
+        ResetScheduleWeekDay,
+        ResetScheduleHour,
         RespawnDynamicEscortNpc,
         RespawnDynamicMinimumCreature,
         RespawnDynamicMinimumGameObject,

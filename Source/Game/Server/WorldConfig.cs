@@ -541,7 +541,8 @@ namespace Game
             Values[WorldCfg.InstanceIgnoreRaid] = GetDefaultValue("Instance.IgnoreRaid", false);
 
             Values[WorldCfg.CastUnstuck] = GetDefaultValue("CastUnstuck", true);
-            Values[WorldCfg.InstanceResetTimeHour] = GetDefaultValue("Instance.ResetTimeHour", 4);
+            Values[WorldCfg.ResetScheduleWeekDay] = GetDefaultValue("ResetSchedule.WeekDay", 2);
+            Values[WorldCfg.ResetScheduleHour] = GetDefaultValue("ResetSchedule.Hour", 8);
             Values[WorldCfg.InstanceUnloadDelay] = GetDefaultValue("Instance.UnloadDelay", 30 * Time.Minute * Time.InMilliseconds);
             Values[WorldCfg.DailyQuestResetTimeHour] = GetDefaultValue("Quests.DailyResetTime", 3);
             if ((int)Values[WorldCfg.DailyQuestResetTimeHour] > 23)
