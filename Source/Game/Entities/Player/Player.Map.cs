@@ -584,43 +584,26 @@ namespace Game.Entities
 
             // non-instances are always valid
             Map map = GetMap();
-            if (!map || !map.IsDungeon())
+            InstanceMap instance = map?.ToInstanceMap();
+            if (instance == null)
                 return true;
 
+            Group group = GetGroup();
             // raid instances require the player to be in a raid group to be valid
             if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
-                if (!GetGroup() || !GetGroup().IsRaidGroup())
+                if (group == null || group.IsRaidGroup())
                     return false;
 
-            Group group = GetGroup();
             if (group)
             {
                 // check if player's group is bound to this instance
-                InstanceBind bind = group.GetBoundInstance(map.GetDifficultyID(), map.GetId());
-                if (bind == null || bind.save == null || bind.save.GetInstanceId() != map.GetInstanceId())
+                if (group != instance.GetOwningGroup())
                     return false;
-
-                var players = map.GetPlayers();
-                if (!players.Empty())
-                    foreach (var otherPlayer in players)
-                    {
-                        if (otherPlayer.IsGameMaster())
-                            continue;
-                        if (!otherPlayer.m_InstanceValid) // ignore players that currently have a homebind timer active
-                            continue;
-                        if (group != otherPlayer.GetGroup())
-                            return false;
-                    }
             }
             else
             {
                 // instance is invalid if we are not grouped and there are other players
                 if (map.GetPlayersCountExceptGMs() > 1)
-                    return false;
-
-                // check if the player is bound to this instance
-                InstanceBind bind = GetBoundInstance(map.GetId(), map.GetDifficultyID());
-                if (bind == null || bind.save == null || bind.save.GetInstanceId() != map.GetInstanceId())
                     return false;
             }
 

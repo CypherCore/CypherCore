@@ -91,6 +91,8 @@ namespace Game.Entities
 
             map.LoadRespawnTimes();
             map.LoadCorpseData();
+            if (group != null)
+                map.TrySetOwningGroup(group);
 
             map.CreateInstanceData();
             map.SetInstanceScenario(Global.ScenarioMgr.CreateInstanceScenario(map, team));

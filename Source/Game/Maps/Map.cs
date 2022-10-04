@@ -4914,7 +4914,7 @@ namespace Game.Maps
             if (i_instanceLock != null)
             {
                 MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-                if (entries.IsInstanceIdBound() || IsRaid() || entries.MapDifficulty.IsRestoringDungeonState() || !i_owningGroupRef.isValid())
+                if (entries.IsInstanceIdBound() || IsRaid() || entries.MapDifficulty.IsRestoringDungeonState() || !i_owningGroupRef.IsValid())
                 {
                     InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
                     i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
@@ -4929,6 +4929,14 @@ namespace Game.Maps
             }
             else
                 i_data.Create();
+        }
+
+        public Group GetOwningGroup() { return i_owningGroupRef.GetTarget(); }
+        
+        public void TrySetOwningGroup(Group group)
+        {
+            if (!i_owningGroupRef.IsValid())
+                i_owningGroupRef.Link(group, this);
         }
 
         public bool Reset(InstanceResetMethod method)
@@ -5149,6 +5157,7 @@ namespace Game.Maps
         uint i_script_id;
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
+        GroupInstanceReference i_owningGroupRef = new();
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
     }
