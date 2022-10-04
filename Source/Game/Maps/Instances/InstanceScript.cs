@@ -39,13 +39,6 @@ namespace Game.Maps
             _instanceSpawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(map.GetId());
         }
 
-        public void SaveToDB()
-        {
-            InstanceScenario scenario = instance.GetInstanceScenario();
-            if (scenario != null)
-                scenario.SaveToDB();
-        }
-
         public virtual bool IsEncounterInProgress()
         {
             foreach (var boss in bosses.Values)
@@ -416,7 +409,6 @@ namespace Game.Maps
                     }
 
                     bossInfo.state = state;
-                    SaveToDB();
                     if (dungeonEncounter != null)
                         instance.UpdateInstanceLock(new UpdateBossStateSaveDataEvent(dungeonEncounter, id, state));
                 }
@@ -695,7 +687,7 @@ namespace Game.Maps
             return false;
         }
 
-        bool IsEncounterCompleted(uint dungeonEncounterId)
+        public bool IsEncounterCompleted(uint dungeonEncounterId)
         {
             for (uint i = 0; i < bosses.Count; ++i)
                 for (var j = 0; j < bosses[i].DungeonEncounters.Length; ++j)

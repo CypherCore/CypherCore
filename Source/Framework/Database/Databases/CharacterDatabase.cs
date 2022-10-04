@@ -737,11 +737,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS, "UPDATE blackmarket_auctions SET currentBid = ?, time = ?, numBids = ?, bidder = ? WHERE marketId = ?");
             PrepareStatement(CharStatements.INS_BLACKMARKET_AUCTIONS, "INSERT INTO blackmarket_auctions (marketId, currentBid, time, numBids, bidder) VALUES (?, ?, ?, ? ,?)");
 
-            // Scenario
-            PrepareStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE, "SELECT criteria, counter, date FROM instance_scenario_progress WHERE id = ?");
-            PrepareStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA, "DELETE FROM instance_scenario_progress WHERE id = ? AND criteria = ?");
-            PrepareStatement(CharStatements.INS_SCENARIO_INSTANCE_CRITERIA, "INSERT INTO instance_scenario_progress (id, criteria, counter, date) VALUES (?, ?, ?, ?)");
-
             // Spell Location
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_STORED_LOCATIONS, "SELECT Spell, MapId, PositionX, PositionY, PositionZ, Orientation FROM character_aura_stored_location WHERE Guid = ?");
             PrepareStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID, "DELETE FROM character_aura_stored_location WHERE Guid = ?");
@@ -1346,10 +1341,6 @@ namespace Framework.Database
         DEL_BLACKMARKET_AUCTIONS,
         UPD_BLACKMARKET_AUCTIONS,
         INS_BLACKMARKET_AUCTIONS,
-
-        SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE,
-        DEL_SCENARIO_INSTANCE_CRITERIA,
-        INS_SCENARIO_INSTANCE_CRITERIA,
 
         SEL_CHARACTER_AURA_STORED_LOCATIONS,
         DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID,

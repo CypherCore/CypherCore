@@ -28,7 +28,7 @@ namespace Game.Scenarios
     {
         ScenarioManager() { }
 
-        public InstanceScenario CreateInstanceScenario(Map map, int team)
+        public InstanceScenario CreateInstanceScenario(InstanceMap map, int team)
         {
             var dbData = _scenarioDBData.LookupByKey(Tuple.Create(map.GetId(), (byte)map.GetDifficultyID()));
             // No scenario registered for this map and difficulty in the database

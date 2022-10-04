@@ -28,138 +28,87 @@ namespace Game.Scenarios
 {
     public class InstanceScenario : Scenario
     {
-        public InstanceScenario(Map map, ScenarioData scenarioData) : base(scenarioData)
+        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(scenarioData)
         {
             _map = map;
 
             //ASSERT(_map);
-            LoadInstanceData(_map.GetInstanceId());
+            LoadInstanceData();
 
             var players = map.GetPlayers();
             foreach (var player in players)
                 SendScenarioState(player);
         }
 
-        public void SaveToDB()
+        void LoadInstanceData()
         {
-            if (_criteriaProgress.Empty())
+            InstanceScript instanceScript = _map.GetInstanceScript();
+            if (instanceScript == null)
                 return;
 
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(_map.GetDifficultyID());
-            if (difficultyEntry == null || difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.ChallengeMode)) // Map should have some sort of "CanSave" boolean that returns whether or not the map is savable. (Challenge modes cannot be saved for example)
-                return;
+            List<CriteriaTree> criteriaTrees = new();
 
-            uint id = _map.GetInstanceId();
-            if (id == 0)
+            var killCreatureCriteria = Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.KillCreature, _data.Entry.Id);
+            if (!killCreatureCriteria.Empty())
             {
-                Log.outDebug(LogFilter.Scenario, "Scenario.SaveToDB: Can not save scenario progress without an instance save. Map.GetInstanceId() did not return an instance save.");
-                return;
+                var spawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(_map.GetId());
+                if (spawnGroups != null)
+                {
+                    Dictionary<uint, ulong> despawnedCreatureCountsById = new();
+                    foreach (InstanceSpawnGroupInfo spawnGroup in spawnGroups)
+                    {
+                        if (instanceScript.GetBossState(spawnGroup.BossStateId) != EncounterState.Done)
+                            continue;
+
+                        bool isDespawned = ((1 << (int)EncounterState.Done) & spawnGroup.BossStates) == 0 || spawnGroup.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn);
+                        if (isDespawned)
+                        {
+                            foreach (var spawn in Global.ObjectMgr.GetSpawnMetadataForGroup(spawnGroup.SpawnGroupId))
+                            {
+                                SpawnData spawnData = spawn.ToSpawnData();
+                                if (spawnData != null)
+                                    ++despawnedCreatureCountsById[spawnData.Id];
+                            }
+                        }
+                    }
+
+                    foreach (Criteria criteria in killCreatureCriteria)
+                    {
+                        // count creatures in despawned spawn groups
+                        ulong progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
+                        if (progress != 0)
+                        {
+                            SetCriteriaProgress(criteria, progress, null, ProgressType.Set);
+                            var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                            if (trees != null)
+                                foreach (CriteriaTree tree in trees)
+                                    criteriaTrees.Add(tree);
+                        }
+                    }
+                }
             }
 
-            SQLTransaction trans = new();
-            foreach (var iter in _criteriaProgress)
+            foreach (Criteria criteria in Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.DefeatDungeonEncounter, _data.Entry.Id))
             {
-                if (!iter.Value.Changed)
+                if (!instanceScript.IsEncounterCompleted(criteria.Entry.Asset))
                     continue;
 
-                Criteria criteria = Global.CriteriaMgr.GetCriteria(iter.Key);
-                switch (criteria.Entry.Type)
-                {
-                    // Blizzard only appears to store creature kills and dungeon encounters
-                    case CriteriaType.KillCreature:
-                    case CriteriaType.DefeatDungeonEncounter:
-                        break;
-                    default:
-                        continue;
-                }
-
-                if (iter.Value.Counter != 0)
-                {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA);
-                    stmt.AddValue(0, id);
-                    stmt.AddValue(1, iter.Key);
-                    trans.Append(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_SCENARIO_INSTANCE_CRITERIA);
-                    stmt.AddValue(0, id);
-                    stmt.AddValue(1, iter.Key);
-                    stmt.AddValue(2, iter.Value.Counter);
-                    stmt.AddValue(3, iter.Value.Date);
-                    trans.Append(stmt);
-                }
-
-                iter.Value.Changed = false;
+                SetCriteriaProgress(criteria, 1, null, ProgressType.Set);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                if (trees != null)
+                    foreach (CriteriaTree tree in trees)
+                        criteriaTrees.Add(tree);
             }
 
-            DB.Characters.CommitTransaction(trans);
-        }
-
-        void LoadInstanceData(uint instanceId)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE);
-            stmt.AddValue(0, instanceId);
-
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
+            foreach (CriteriaTree tree in criteriaTrees)
             {
-                SQLTransaction trans = new();
-                long now = GameTime.GetGameTime();
+                ScenarioStepRecord step = tree.ScenarioStep;
+                if (step == null)
+                    continue;
 
-                List<CriteriaTree> criteriaTrees = new();
-                do
-                {
-                    uint id = result.Read<uint>(0);
-                    ulong counter = result.Read<ulong>(1);
-                    long date = result.Read<long>(2);
 
-                    Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
-                    if (criteria == null)
-                    {
-                        // Removing non-existing criteria data for all instances
-                        Log.outError(LogFilter.Scenario, "Removing scenario criteria {0} data from the table `instance_scenario_progress`.", id);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA);
-                        stmt.AddValue(0, instanceId);
-                        stmt.AddValue(1, id);
-                        trans.Append(stmt);
-                        continue;
-                    }
-
-                    if (criteria.Entry.StartTimer != 0 && (date + criteria.Entry.StartTimer) < now)
-                        continue;
-
-                    switch (criteria.Entry.Type)
-                    {
-                        // Blizzard appears to only stores creatures killed progress for unknown reasons. Either technical shortcoming or intentional
-                        case CriteriaType.KillCreature:
-                        case CriteriaType.DefeatDungeonEncounter:
-                            break;
-                        default:
-                            continue;
-                    }
-
-                    SetCriteriaProgress(criteria, counter, null, ProgressType.Set);
-
-                    List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                    if (trees != null)
-                    {
-                        foreach (CriteriaTree tree in trees)
-                            criteriaTrees.Add(tree);
-                    }
-                }
-                while (result.NextRow());
-
-                DB.Characters.CommitTransaction(trans);
-
-                foreach (CriteriaTree tree in criteriaTrees)
-                {
-                    ScenarioStepRecord step = tree.ScenarioStep;
-                    if (step == null)
-                        continue;
-
-                    if (IsCompletedCriteriaTree(tree))
-                        SetStepState(step, ScenarioStepState.Done);
-                }
+                if (IsCompletedCriteriaTree(tree))
+                    SetStepState(step, ScenarioStepState.Done);
             }
         }
 
@@ -179,6 +128,6 @@ namespace Game.Scenarios
             _map.SendToPlayers(data);
         }
 
-        Map _map;
+        InstanceMap _map;
     }
 }

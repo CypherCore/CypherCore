@@ -369,7 +369,7 @@ namespace Game.Scenarios
         public override void SendAllData(Player receiver) { }
 
         List<ObjectGuid> _players = new();
-        ScenarioData _data;
+        protected ScenarioData _data;
         ScenarioStepRecord _currentstep;
         Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
     }
