@@ -4786,6 +4786,9 @@ namespace Game.Maps
                 return EnterState.CannotEnterAlreadyInMap;
             }
 
+            if (m_shuttingDown)
+                return EnterState.CannotEnterInstanceShuttingDown;
+
             // allow GM's to enter
             if (player.IsGameMaster())
                 return base.CannotEnter(player);
@@ -4842,16 +4845,10 @@ namespace Game.Maps
                 }
             }
 
-            // for normal instances cancel the reset schedule when the
-            // first player enters (no players yet)
-            SetResetSchedule(false);
-
             Log.outInfo(LogFilter.Maps, "MAP: Player '{0}' entered instance '{1}' of map '{2}'", player.GetName(),
                         GetInstanceId(), GetMapName());
             // initialize unload state
             m_unloadTimer = 0;
-            m_resetAfterUnload = false;
-            m_unloadWhenEmpty = false;
 
             // this will acquire the same mutex so it cannot be in the previous block
             base.AddPlayerToMap(player, initPlayer);
@@ -4888,15 +4885,12 @@ namespace Game.Maps
 
             // if last player set unload timer
             if (m_unloadTimer == 0 && GetPlayers().Count == 1)
-                m_unloadTimer = m_unloadWhenEmpty ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
+                m_unloadTimer = m_shuttingDown ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
 
             if (i_scenario != null)
                 i_scenario.OnPlayerExit(player);
 
             base.RemovePlayerFromMap(player, remove);
-
-            // for normal instances schedule the reset after all players have left
-            SetResetSchedule(true);
         }
 
         public void CreateInstanceData()
@@ -4942,47 +4936,44 @@ namespace Game.Maps
                 i_owningGroupRef.Link(group, this);
         }
 
-        public bool Reset(InstanceResetMethod method)
+        public InstanceResetResult Reset(InstanceResetMethod method)
         {
-            // note: since the map may not be loaded when the instance needs to be reset
-            // the instance must be deleted from the DB
+            // raids can be reset if no boss was killed
+            if (method != InstanceResetMethod.Expire && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
+                return InstanceResetResult.CannotReset;
 
             if (HavePlayers())
             {
-                // on manual reset, fail
-                if (method == InstanceResetMethod.All || method == InstanceResetMethod.ChangeDifficulty)
+                switch (method)
                 {
-                    // notify the players to leave the instance so it can be reset
-                    foreach (Player player in GetPlayers())
-                        player.SendResetFailedNotify(GetId());
-                }
-                else
-                {
-                    // on lock expiration boot players (do we also care about extension state?)
-                    if (method == InstanceResetMethod.Global)
-                    {
+                    case InstanceResetMethod.Manual:
+                        // notify the players to leave the instance so it can be reset
+                        foreach (var player in GetPlayers())
+                            player.SendResetFailedNotify(GetId());
+                        break;
+                    case InstanceResetMethod.OnChangeDifficulty:
+                        // no client notification
+                        break;
+                    case InstanceResetMethod.Expire:
+                        // on lock expiration boot players (do we also care about extension state?)
                         // set the homebind timer for players inside (1 minute)
                         foreach (Player player in GetPlayers())
                             player.m_InstanceValid = false;
-                    }
-
-                    if (!HasPermBoundPlayers())
-                    {
-                        // the unload timer is not started
-                        // instead the map will unload immediately after the players have left
-                        m_unloadWhenEmpty = true;
-                        m_resetAfterUnload = true;
-                    }
+                        m_shuttingDown = true;
+                        break;
+                    default:
+                        break;
                 }
+
+                return InstanceResetResult.NotEmpty;
             }
             else
             {
                 // unloaded at next update
                 m_unloadTimer = 1;
-                m_resetAfterUnload = !(method == InstanceResetMethod.Global && HasPermBoundPlayers());
             }
 
-            return GetPlayers().Empty();
+            return InstanceResetResult.Success;
         }
 
         public string GetScriptName()
@@ -5097,31 +5088,6 @@ namespace Game.Maps
             }
         }
 
-        public override void UnloadAll()
-        {
-            Cypher.Assert(!HavePlayers());
-
-            if (m_resetAfterUnload)
-            {
-                DeleteRespawnTimes();
-                DeleteCorpseData();
-            }
-
-            base.UnloadAll();
-        }
-
-        public void SetResetSchedule(bool on)
-        {
-
-        }
-
-        bool HasPermBoundPlayers()
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PERM_BIND_BY_INSTANCE);
-            stmt.AddValue(0, GetInstanceId());
-            return !DB.Characters.Query(stmt).IsEmpty();
-        }
-
         public uint GetMaxPlayers()
         {
             MapDifficultyRecord mapDiff = GetMapDifficulty();
@@ -5168,8 +5134,7 @@ namespace Game.Maps
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
         GroupInstanceReference i_owningGroupRef = new();
-        bool m_resetAfterUnload;
-        bool m_unloadWhenEmpty;
+        bool m_shuttingDown;
     }
 
     public class BattlegroundMap : Map

@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.Database;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Guilds;
@@ -24,7 +23,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using Framework.Dynamic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -498,9 +497,40 @@ namespace Game.Entities
         }
 
         // Reset all solo instances and optionally send a message on success for each
-        public void ResetInstances(InstanceResetMethod method, bool isRaid, bool isLegacy)
+        public void ResetInstances(InstanceResetMethod method)
         {
+            foreach (var (mapId, instanceId) in m_recentInstances.ToList())
+            {
+                Map map = Global.MapMgr.FindMap(mapId, instanceId);
+                bool forgetInstance = false;
+                if (map)
+                {
+                    InstanceMap instance = map.ToInstanceMap();
+                    if (instance != null)
+                    {
+                        switch (instance.Reset(method))
+                        {
+                            case InstanceResetResult.Success:
+                                SendResetInstanceSuccess(map.GetId());
+                                forgetInstance = true;
+                                break;
+                            case InstanceResetResult.NotEmpty:
+                                if (method == InstanceResetMethod.Manual)
+                                    SendResetInstanceFailed(ResetFailedReason.Failed, map.GetId());
+                                else if (method == InstanceResetMethod.OnChangeDifficulty)
+                                    forgetInstance = true;
+                                break;
+                            case InstanceResetResult.CannotReset:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
 
+                if (forgetInstance)
+                    m_recentInstances.Remove(mapId);
+            }
         }
 
         public void SendResetInstanceSuccess(uint MapId)

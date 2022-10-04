@@ -92,12 +92,16 @@ namespace Framework.Constants
 
     public enum InstanceResetMethod
     {
-        All,
-        ChangeDifficulty,
-        Global,
-        GroupDisband,
-        GroupJoin,
-        RespawnDelay
+        Manual,
+        OnChangeDifficulty,
+        Expire,
+    }
+
+    public enum InstanceResetResult
+    {
+        Success,
+        NotEmpty,
+        CannotReset
     }
 
     [Flags]
@@ -188,6 +192,7 @@ namespace Framework.Constants
         CannotEnterTooManyInstances, // Player Has Entered Too Many Instances Recently
         CannotEnterMaxPlayers, // Target Map Already Has The Maximum Number Of Players Allowed
         CannotEnterZoneInCombat, // A Boss Encounter Is Currently In Progress On The Target Map
+        CannotEnterInstanceShuttingDown,
         CannotEnterUnspecifiedReason
     }
 

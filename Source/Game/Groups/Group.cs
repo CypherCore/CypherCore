@@ -463,12 +463,6 @@ namespace Game.Groups
 
             if (!IsLeader(player.GetGUID()) && !IsBGGroup() && !IsBFGroup())
             {
-                // reset the new member's instances, unless he is currently in one of them
-                // including raid/heroic instances that they are not permanently bound to!
-                player.ResetInstances(InstanceResetMethod.GroupJoin, false, false);
-                player.ResetInstances(InstanceResetMethod.GroupJoin, true, false);
-                player.ResetInstances(InstanceResetMethod.GroupJoin, true, true);
-
                 if (player.GetDungeonDifficultyID() != GetDungeonDifficultyID())
                 {
                     player.SetDungeonDifficultyID(GetDungeonDifficultyID());
@@ -754,15 +748,11 @@ namespace Game.Groups
                 stmt.AddValue(0, m_dbStoreId);
                 trans.Append(stmt);
 
-                DB.Characters.CommitTransaction(trans);
-
-                ResetInstances(InstanceResetMethod.GroupDisband, false, false, null);
-                ResetInstances(InstanceResetMethod.GroupDisband, true, false, null);
-                ResetInstances(InstanceResetMethod.GroupDisband, true, true, null);
-
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_LFG_DATA);
                 stmt.AddValue(0, m_dbStoreId);
-                DB.Characters.Execute(stmt);
+                trans.Append(stmt);
+
+                DB.Characters.CommitTransaction(trans);
 
                 Global.GroupMgr.FreeGroupDbStoreId(this);
             }
@@ -1359,9 +1349,30 @@ namespace Game.Groups
         public Difficulty GetRaidDifficultyID() { return m_raidDifficulty; }
         public Difficulty GetLegacyRaidDifficultyID() { return m_legacyRaidDifficulty; }
 
-        public void ResetInstances(InstanceResetMethod method, bool isRaid, bool isLegacy, Player SendMsgTo)
+        public void ResetInstances(InstanceResetMethod method, Player notifyPlayer)
         {
-
+            for (GroupInstanceReference refe = m_ownedInstancesMgr.GetFirst(); refe != null; refe = refe.Next())
+            {
+                InstanceMap map = refe.GetSource();
+                switch (map.Reset(method))
+                {
+                    case InstanceResetResult.Success:
+                        notifyPlayer.SendResetInstanceSuccess(map.GetId());
+                        m_recentInstances.Remove(map.GetId());
+                        break;
+                    case InstanceResetResult.NotEmpty:
+                        if (method == InstanceResetMethod.Manual)
+                            notifyPlayer.SendResetInstanceFailed(ResetFailedReason.Failed, map.GetId());
+                        else if (method == InstanceResetMethod.OnChangeDifficulty)
+                            m_recentInstances.Remove(map.GetId()); // map might not have been reset on difficulty change but we still don't want to zone in there again
+                        break;
+                    case InstanceResetResult.CannotReset:
+                        m_recentInstances.Remove(map.GetId()); // forget the instance, allows retrying different lockout with a new leader
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         public void LinkOwnedInstance(GroupInstanceReference refe)

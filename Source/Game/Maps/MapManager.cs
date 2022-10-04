@@ -326,8 +326,8 @@ namespace Game.Entities
 
             map.UnloadAll();
 
-            // Free up the instance id and allow it to be reused for bgs and arenas (other instances are handled in the InstanceSaveMgr)
-            if (map.IsBattlegroundOrArena())
+            // Free up the instance id and allow it to be reused for normal dungeons, bgs and arenas
+            if (map.IsBattlegroundOrArena() || (map.IsDungeon() && !map.GetMapDifficulty().HasResetSchedule()))
                 FreeInstanceId(map.GetInstanceId());
 
             // erase map

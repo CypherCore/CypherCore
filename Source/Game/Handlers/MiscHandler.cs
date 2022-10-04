@@ -300,7 +300,7 @@ namespace Game
                             reviveAtTrigger = true;
                             break;
                         case EnterState.CannotEnterCorpseInDifferentInstance:
-                            player.SendPacket(new AreaTriggerNoCorpse());
+                            SendPacket(new AreaTriggerNoCorpse());
                             Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' does not have a corpse in instance map {1} and cannot enter", player.GetName(), at.target_mapId);
                             break;
                         case EnterState.CannotEnterInstanceBindMismatch:
@@ -324,6 +324,11 @@ namespace Game
                             break;
                         case EnterState.CannotEnterZoneInCombat:
                             player.SendTransferAborted(at.target_mapId, TransferAbortReason.ZoneInCombat);
+                            reviveAtTrigger = true;
+                            break;
+                        case EnterState.CannotEnterInstanceShuttingDown:
+                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.NotFound);
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because instance is resetting.");
                             reviveAtTrigger = true;
                             break;
                         default:
@@ -594,14 +599,23 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ResetInstances)]
         void HandleResetInstances(ResetInstances packet)
         {
+            Map map = _player.GetMap();
+            if (map != null && map.Instanceable())
+                return;
+
             Group group = GetPlayer().GetGroup();
             if (group)
             {
-                if (group.IsLeader(GetPlayer().GetGUID()))
-                    group.ResetInstances(InstanceResetMethod.All, false, false, GetPlayer());
+                if (!group.IsLeader(GetPlayer().GetGUID()))
+                    return;
+
+                if (group.IsLFGGroup())
+                    return;
+
+                group.ResetInstances(InstanceResetMethod.Manual, _player);
             }
             else
-                GetPlayer().ResetInstances(InstanceResetMethod.All, false, false);
+                GetPlayer().ResetInstances(InstanceResetMethod.Manual);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetDungeonDifficulty)]
@@ -635,7 +649,7 @@ namespace Game
 
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
-            if (map && map.IsDungeon())
+            if (map && map.Instanceable())
             {
                 Log.outDebug(LogFilter.Network, "WorldSession:HandleSetDungeonDifficulty: player (Name: {0}, {1}) tried to reset the instance while player is inside!",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -645,33 +659,19 @@ namespace Game
             Group group = GetPlayer().GetGroup();
             if (group)
             {
-                if (group.IsLeader(GetPlayer().GetGUID()))
-                {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-                    {
-                        Player groupGuy = refe.GetSource();
-                        if (!groupGuy)
-                            continue;
+                if (!group.IsLeader(_player.GetGUID()))
+                    return;
 
-                        if (!groupGuy.IsInWorld)
-                            return;
+                if (group.IsLFGGroup())
+                    return;
 
-                        if (groupGuy.GetMap().IsNonRaidDungeon())
-                        {
-                            Log.outDebug(LogFilter.Network, "WorldSession:HandleSetDungeonDifficulty: {0} tried to reset the instance while group member (Name: {1}, {2}) is inside!",
-                                GetPlayer().GetGUID().ToString(), groupGuy.GetName(), groupGuy.GetGUID().ToString());
-                            return;
-                        }
-                    }
-                    // the difficulty is set even if the instances can't be reset
-                    //_player.SendDungeonDifficulty(true);
-                    group.ResetInstances(InstanceResetMethod.ChangeDifficulty, false, false, GetPlayer());
-                    group.SetDungeonDifficultyID(difficultyID);
-                }
+                // the difficulty is set even if the instances can't be reset
+                group.ResetInstances(InstanceResetMethod.OnChangeDifficulty, _player);
+                group.SetDungeonDifficultyID(difficultyID);
             }
             else
             {
-                GetPlayer().ResetInstances(InstanceResetMethod.ChangeDifficulty, false, false);
+                GetPlayer().ResetInstances(InstanceResetMethod.OnChangeDifficulty);
                 GetPlayer().SetDungeonDifficultyID(difficultyID);
                 GetPlayer().SendDungeonDifficulty();
             }
@@ -702,7 +702,7 @@ namespace Game
                 return;
             }
 
-            if (((int)(difficultyEntry.Flags & DifficultyFlags.Legacy) >> 5) != setRaidDifficulty.Legacy)
+            if (((int)(difficultyEntry.Flags & DifficultyFlags.Legacy) != 0) != (setRaidDifficulty.Legacy != 0))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent not matching legacy difficulty {1}!",
                     GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
@@ -715,7 +715,7 @@ namespace Game
 
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
-            if (map && map.IsDungeon())
+            if (map && map.Instanceable())
             {
                 Log.outDebug(LogFilter.Network, "WorldSession:HandleSetRaidDifficulty: player (Name: {0}, {1} tried to reset the instance while inside!",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -725,34 +725,22 @@ namespace Game
             Group group = GetPlayer().GetGroup();
             if (group)
             {
-                if (group.IsLeader(GetPlayer().GetGUID()))
-                {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-                    {
-                        Player groupGuy = refe.GetSource();
-                        if (!groupGuy)
-                            continue;
+                if (!group.IsLeader(_player.GetGUID()))
+                    return;
 
-                        if (!groupGuy.IsInWorld)
-                            return;
+                if (group.IsLFGGroup())
+                    return;
 
-                        if (groupGuy.GetMap().IsRaid())
-                        {
-                            Log.outDebug(LogFilter.Network, "WorldSession:HandleSetRaidDifficulty: player {0} tried to reset the instance while inside!", GetPlayer().GetGUID().ToString());
-                            return;
-                        }
-                    }
-                    // the difficulty is set even if the instances can't be reset
-                    group.ResetInstances(InstanceResetMethod.ChangeDifficulty, true, setRaidDifficulty.Legacy != 0, GetPlayer());
-                    if (setRaidDifficulty.Legacy != 0)
-                        group.SetLegacyRaidDifficultyID(difficultyID);
-                    else
-                        group.SetRaidDifficultyID(difficultyID);
-                }
+                // the difficulty is set even if the instances can't be reset
+                group.ResetInstances(InstanceResetMethod.OnChangeDifficulty, _player);
+                if (setRaidDifficulty.Legacy != 0)
+                    group.SetLegacyRaidDifficultyID(difficultyID);
+                else
+                    group.SetRaidDifficultyID(difficultyID);
             }
             else
             {
-                GetPlayer().ResetInstances(InstanceResetMethod.ChangeDifficulty, true, setRaidDifficulty.Legacy != 0);
+                GetPlayer().ResetInstances(InstanceResetMethod.OnChangeDifficulty);
                 if (setRaidDifficulty.Legacy != 0)
                     GetPlayer().SetLegacyRaidDifficultyID(difficultyID);
                 else

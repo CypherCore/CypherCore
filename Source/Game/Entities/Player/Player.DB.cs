@@ -2892,6 +2892,11 @@ namespace Game.Entities
                     // flight will started later
                 }
             }
+            else if (mapEntry.IsDungeon() && instanceId != 0)
+            {
+                // try finding instance by id first
+                map = Global.MapMgr.FindMap(mapId, instanceId);
+            }
 
             // Map could be changed before
             mapEntry = CliDB.MapStorage.LookupByKey(mapId);
@@ -2939,6 +2944,9 @@ namespace Game.Entities
                             break;
                         case EnterState.CannotEnterZoneInCombat:
                             SendTransferAborted(map.GetId(), TransferAbortReason.ZoneInCombat);
+                            break;
+                        case EnterState.CannotEnterInstanceShuttingDown:
+                            SendTransferAborted(map.GetId(), TransferAbortReason.NotFound);
                             break;
                         default:
                             break;
