@@ -89,7 +89,6 @@ namespace Framework.Database
 
             PrepareStatement(CharStatements.SEL_CHARACTER_CUSTOMIZATIONS, "SELECT chrCustomizationOptionID, chrCustomizationChoiceID FROM character_customizations WHERE guid = ? ORDER BY chrCustomizationOptionID");
             PrepareStatement(CharStatements.SEL_GROUP_MEMBER, "SELECT guid FROM group_member WHERE memberGuid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_INSTANCE, "SELECT id, permanent, map, difficulty, extendState, resettime, entranceId FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_AURAS, "SELECT casterGuid, itemGuid, spell, effectMask, recalculateMask, difficulty, stackCount, maxDuration, remainTime, remainCharges, castItemId, castItemLevel FROM character_aura WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_EFFECTS, "SELECT casterGuid, itemGuid, spell, effectMask, effectIndex, amount, baseAmount FROM character_aura_effect WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SPELL, "SELECT spell, active, disabled FROM character_spell WHERE guid = ?");
@@ -367,10 +366,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_TUTORIALS, "UPDATE account_tutorial SET tut0 = ?, tut1 = ?, tut2 = ?, tut3 = ?, tut4 = ?, tut5 = ?, tut6 = ?, tut7 = ? WHERE accountId = ?");
             PrepareStatement(CharStatements.DEL_TUTORIALS, "DELETE FROM account_tutorial WHERE accountId = ?");
 
-            // Instance saves
-            PrepareStatement(CharStatements.INS_INSTANCE_SAVE, "INSERT INTO instance (id, map, resettime, difficulty, completedEncounters, data, entranceId) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.UPD_INSTANCE_DATA, "UPDATE instance SET completedEncounters=?, data=?, entranceId=? WHERE id=?");
-
             // Game event saves
             PrepareStatement(CharStatements.DEL_GAME_EVENT_SAVE, "DELETE FROM game_event_save WHERE eventEntry = ?");
             PrepareStatement(CharStatements.INS_GAME_EVENT_SAVE, "INSERT INTO game_event_save (eventEntry, state, next_start) VALUES (?, ?, ?)");
@@ -484,7 +479,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_GROUP, "INSERT INTO `groups` (guid, leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raidDifficulty, legacyRaidDifficulty, masterLooterGuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_GROUP_MEMBER, "INSERT INTO group_member (guid, memberGuid, memberFlags, subgroup, roles) VALUES(?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GROUP_MEMBER, "DELETE FROM group_member WHERE memberGuid = ?");
-            PrepareStatement(CharStatements.DEL_GROUP_INSTANCE_PERM_BINDING, "DELETE FROM group_instance WHERE guid = ? AND instance = ?");
             PrepareStatement(CharStatements.UPD_GROUP_LEADER, "UPDATE `groups` SET leaderGuid = ? WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_GROUP_TYPE, "UPDATE `groups` SET groupType = ? WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP, "UPDATE group_member SET subgroup = ? WHERE memberGuid = ?");
@@ -501,20 +495,10 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD, "DELETE FROM guild_achievement_progress WHERE criteria = ?");
             PrepareStatement(CharStatements.DEL_INVALID_ACHIEVMENT, "DELETE FROM character_achievement WHERE achievement = ?");
             PrepareStatement(CharStatements.DEL_INVALID_PET_SPELL, "DELETE FROM pet_spell WHERE spell = ?");
-            PrepareStatement(CharStatements.DEL_GROUP_INSTANCE_BY_INSTANCE, "DELETE FROM group_instance WHERE instance = ?");
-            PrepareStatement(CharStatements.DEL_GROUP_INSTANCE_BY_GUID, "DELETE FROM group_instance WHERE guid = ? AND instance = ?");
-            PrepareStatement(CharStatements.REP_GROUP_INSTANCE, "REPLACE INTO group_instance (guid, instance, permanent) VALUES (?, ?, ?)");
-            PrepareStatement(CharStatements.UPD_INSTANCE_RESETTIME, "UPDATE instance SET resettime = ? WHERE id = ?");
-            PrepareStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME, "INSERT INTO instance_reset (mapid, difficulty, resettime) VALUES (?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_GLOBAL_INSTANCE_RESETTIME, "DELETE FROM instance_reset WHERE mapid = ? AND difficulty = ?");
-            PrepareStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME, "UPDATE instance_reset SET resettime = ? WHERE mapid = ? AND difficulty = ?");
             PrepareStatement(CharStatements.UPD_CHAR_ONLINE, "UPDATE characters SET online = 1 WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN, "UPDATE characters SET name = ?, at_login = ? WHERE guid = ?");
             PrepareStatement(CharStatements.REP_WORLD_STATE, "REPLACE INTO world_state_value (Id, Value) VALUES (?, ?)");
             PrepareStatement(CharStatements.REP_WORLD_VARIABLE, "REPLACE INTO world_variable (Id, Value) VALUES (?, ?)");
-            PrepareStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID, "DELETE FROM character_instance WHERE guid = ? AND instance = ?");
-            PrepareStatement(CharStatements.UPD_CHAR_INSTANCE, "UPDATE character_instance SET instance = ?, permanent = ?, extendState = ? WHERE guid = ? AND instance = ?");
-            PrepareStatement(CharStatements.INS_CHAR_INSTANCE, "INSERT INTO character_instance (guid, instance, permanent, extendState) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHARACTER_SKILL, "DELETE FROM character_skills WHERE guid = ? AND skill = ?");
             PrepareStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS, "UPDATE character_social SET flags = ? WHERE guid = ? AND friend = ?");
             PrepareStatement(CharStatements.INS_CHARACTER_SOCIAL, "INSERT INTO character_social (guid, friend, flags) VALUES (?, ?, ?)");
@@ -538,8 +522,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC, "SELECT guid, name, online FROM characters WHERE account = ?");
             PrepareStatement(CharStatements.SEL_CHAR_CUSTOMIZE_INFO, "SELECT name, race, class, gender, at_login FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT at_login, knownTitles FROM characters WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_INSTANCE, "SELECT data, completedEncounters, entranceId FROM instance WHERE map = ? AND id = ?");
-            PrepareStatement(CharStatements.SEL_PERM_BIND_BY_INSTANCE, "SELECT guid FROM character_instance WHERE instance = ? and permanent = 1");
             PrepareStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL, "SELECT id, messageType, mailTemplateId, sender, subject, body, money, has_items FROM mail WHERE receiver = ? AND has_items <> 0 AND cod <> 0");
             PrepareStatement(CharStatements.SEL_CHAR_SOCIAL, "SELECT DISTINCT guid FROM character_social WHERE friend = ?");
             PrepareStatement(CharStatements.SEL_CHAR_OLD_CHARS, "SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < ?");
@@ -570,12 +552,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_GROUP, "DELETE FROM `groups` WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_GROUP_MEMBER_ALL, "DELETE FROM group_member WHERE guid = ?");
             PrepareStatement(CharStatements.INS_CHAR_GIFT, "INSERT INTO character_gifts (guid, item_guid, entry, flags) VALUES (?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_INSTANCE_BY_INSTANCE, "DELETE FROM instance WHERE id = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE, "DELETE FROM character_instance WHERE instance = ?");
-            PrepareStatement(CharStatements.DEL_EXPIRED_CHAR_INSTANCE_BY_MAP_DIFF, "DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE (extendState = 0 or permanent = 0) and map = ? and difficulty = ?");
-            PrepareStatement(CharStatements.DEL_GROUP_INSTANCE_BY_MAP_DIFF, "DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = ? and difficulty = ?");
-            PrepareStatement(CharStatements.DEL_EXPIRED_INSTANCE_BY_MAP_DIFF, "DELETE FROM instance WHERE map = ? and difficulty = ? and (SELECT guid FROM character_instance WHERE extendState != 0 AND instance = id LIMIT 1) IS NULL");
-            PrepareStatement(CharStatements.UPD_EXPIRE_CHAR_INSTANCE_BY_MAP_DIFF, "UPDATE character_instance LEFT JOIN instance ON character_instance.instance = id SET extendState = extendState-1 WHERE map = ? and difficulty = ?");
             PrepareStatement(CharStatements.DEL_MAIL_ITEM_BY_ID, "DELETE FROM mail_items WHERE mail_id = ?");
             PrepareStatement(CharStatements.INS_PETITION, "INSERT INTO petition (ownerguid, petitionguid, name) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PETITION_BY_GUID, "DELETE FROM petition WHERE petitionguid = ?");
@@ -613,7 +589,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_AURA, "DELETE FROM character_aura WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_AURA_EFFECT, "DELETE FROM character_aura_effect WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_GIFT, "DELETE FROM character_gifts WHERE guid = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_INSTANCE, "DELETE FROM character_instance WHERE guid = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_INSTANCE, "DELETE FROM character_instance_lock WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_INVENTORY, "DELETE FROM character_inventory WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED, "DELETE FROM character_queststatus_rewarded WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_REPUTATION, "DELETE FROM character_reputation WHERE guid = ?");
@@ -765,7 +741,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE, "SELECT criteria, counter, date FROM instance_scenario_progress WHERE id = ?");
             PrepareStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA, "DELETE FROM instance_scenario_progress WHERE id = ? AND criteria = ?");
             PrepareStatement(CharStatements.INS_SCENARIO_INSTANCE_CRITERIA, "INSERT INTO instance_scenario_progress (id, criteria, counter, date) VALUES (?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE, "DELETE FROM instance_scenario_progress WHERE id = ?");
 
             // Spell Location
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_STORED_LOCATIONS, "SELECT Spell, MapId, PositionX, PositionY, PositionZ, Orientation FROM character_aura_stored_location WHERE Guid = ?");
@@ -816,7 +791,6 @@ namespace Framework.Database
         SEL_CHARACTER,
         SEL_CHARACTER_CUSTOMIZATIONS,
         SEL_GROUP_MEMBER,
-        SEL_CHARACTER_INSTANCE,
         SEL_CHARACTER_AURAS,
         SEL_CHARACTER_AURA_EFFECTS,
         SEL_CHARACTER_SPELL,
@@ -1042,9 +1016,6 @@ namespace Framework.Database
         UPD_TUTORIALS,
         DEL_TUTORIALS,
 
-        INS_INSTANCE_SAVE,
-        UPD_INSTANCE_DATA,
-
         DEL_GAME_EVENT_SAVE,
         INS_GAME_EVENT_SAVE,
 
@@ -1131,7 +1102,6 @@ namespace Framework.Database
         INS_GROUP,
         INS_GROUP_MEMBER,
         DEL_GROUP_MEMBER,
-        DEL_GROUP_INSTANCE_PERM_BINDING,
         UPD_GROUP_LEADER,
         UPD_GROUP_TYPE,
         UPD_GROUP_MEMBER_SUBGROUP,
@@ -1148,20 +1118,10 @@ namespace Framework.Database
         DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD,
         DEL_INVALID_ACHIEVMENT,
         DEL_INVALID_PET_SPELL,
-        DEL_GROUP_INSTANCE_BY_INSTANCE,
-        DEL_GROUP_INSTANCE_BY_GUID,
-        REP_GROUP_INSTANCE,
-        UPD_INSTANCE_RESETTIME,
-        INS_GLOBAL_INSTANCE_RESETTIME,
-        DEL_GLOBAL_INSTANCE_RESETTIME,
-        UPD_GLOBAL_INSTANCE_RESETTIME,
         UPD_CHAR_ONLINE,
         UPD_CHAR_NAME_AT_LOGIN,
         REP_WORLD_STATE,
         REP_WORLD_VARIABLE,
-        DEL_CHAR_INSTANCE_BY_INSTANCE_GUID,
-        UPD_CHAR_INSTANCE,
-        INS_CHAR_INSTANCE,
         DEL_CHARACTER_SKILL,
         UPD_CHARACTER_SOCIAL_FLAGS,
         INS_CHARACTER_SOCIAL,
@@ -1189,8 +1149,6 @@ namespace Framework.Database
         SEL_CHAR_GUID_NAME_BY_ACC,
         SEL_CHAR_CUSTOMIZE_INFO,
         SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS,
-        SEL_INSTANCE,
-        SEL_PERM_BIND_BY_INSTANCE,
         SEL_CHAR_COD_ITEM_MAIL,
         SEL_CHAR_SOCIAL,
         SEL_CHAR_OLD_CHARS,
@@ -1216,12 +1174,6 @@ namespace Framework.Database
         DEL_GROUP,
         DEL_GROUP_MEMBER_ALL,
         INS_CHAR_GIFT,
-        DEL_INSTANCE_BY_INSTANCE,
-        DEL_CHAR_INSTANCE_BY_INSTANCE,
-        DEL_EXPIRED_CHAR_INSTANCE_BY_MAP_DIFF,
-        DEL_GROUP_INSTANCE_BY_MAP_DIFF,
-        DEL_EXPIRED_INSTANCE_BY_MAP_DIFF,
-        UPD_EXPIRE_CHAR_INSTANCE_BY_MAP_DIFF,
         DEL_MAIL_ITEM_BY_ID,
         INS_PETITION,
         DEL_PETITION_BY_GUID,
@@ -1398,7 +1350,6 @@ namespace Framework.Database
         SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE,
         DEL_SCENARIO_INSTANCE_CRITERIA,
         INS_SCENARIO_INSTANCE_CRITERIA,
-        DEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE,
 
         SEL_CHARACTER_AURA_STORED_LOCATIONS,
         DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID,
