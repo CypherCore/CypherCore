@@ -89,7 +89,7 @@ namespace Game.Maps
                         if (sharedData == null)
                         {
                             Log.outError(LogFilter.Instance, $"Missing instance data for instance id based lock (id {instanceId})");
-                            DB.Characters.Query($"DELETE FROM character_instance_lock WHERE instanceId = {instanceId}");
+                            DB.Characters.Execute($"DELETE FROM character_instance_lock WHERE instanceId = {instanceId}");
                             continue;
                         }
 
@@ -286,13 +286,24 @@ namespace Game.Maps
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
             }
 
-            // TODO: DB SAVE IN TRANSACTION
-            trans.Append($"DELETE FROM character_instance_lock WHERE guid={playerGuid.GetCounter()} AND mapId={entries.MapDifficulty.MapID} AND lockId={entries.MapDifficulty.LockID}");
-            string escapedData = instanceLock.GetData().Data;
-            CharacterDatabase.EscapeString(ref escapedData);
-            trans.Append($"INSERT INTO character_instance_lock (guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, entranceWorldSafeLocId, expiryTime, extended) " +
-                $"VALUES ({playerGuid.GetCounter()}, {entries.MapDifficulty.MapID}, {entries.MapDifficulty.LockID}, {instanceLock.GetInstanceId()}, {entries.MapDifficulty.DifficultyID}, \"{escapedData}\", " +
-                $"{instanceLock.GetData().CompletedEncountersMask}, {instanceLock.GetData().EntranceWorldSafeLocId}, {Time.DateTimeToUnixTime(instanceLock.GetExpiryTime())}, {(instanceLock.IsExtended() ? 1 : 0)}");
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
+            stmt.AddValue(0, playerGuid.GetCounter());
+            stmt.AddValue(1, entries.MapDifficulty.MapID);
+            stmt.AddValue(2, entries.MapDifficulty.LockID);
+            trans.Append(stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK);
+            stmt.AddValue(0, playerGuid.GetCounter());
+            stmt.AddValue(1, entries.MapDifficulty.MapID);
+            stmt.AddValue(2, entries.MapDifficulty.LockID);
+            stmt.AddValue(3, instanceLock.GetInstanceId());
+            stmt.AddValue(4, entries.MapDifficulty.DifficultyID);
+            stmt.AddValue(5, instanceLock.GetData().Data);
+            stmt.AddValue(6, instanceLock.GetData().CompletedEncountersMask);
+            stmt.AddValue(7, instanceLock.GetData().EntranceWorldSafeLocId);
+            stmt.AddValue(8, (ulong)Time.DateTimeToUnixTime(instanceLock.GetExpiryTime()));
+            stmt.AddValue(9, instanceLock.IsExtended() ? 1 : 0);
+            trans.Append(stmt);
 
             return instanceLock;
         }
@@ -312,10 +323,16 @@ namespace Game.Maps
             if (updateEvent.EntranceWorldSafeLocId.HasValue)
                 sharedData.EntranceWorldSafeLocId = updateEvent.EntranceWorldSafeLocId.Value;
 
-            trans.Append($"DELETE FROM instance2 WHERE instanceId={sharedData.InstanceId}");
-            string escapedData = sharedData.Data;
-            CharacterDatabase.EscapeString(ref escapedData);
-            trans.Append($"INSERT INTO instance2 (instanceId, data, completedEncountersMask, entranceWorldSafeLocId) VALUES ({sharedData.InstanceId}, \"{escapedData}\", {sharedData.CompletedEncountersMask}, {sharedData.EntranceWorldSafeLocId})");
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE);
+            stmt.AddValue(0, sharedData.InstanceId);
+            trans.Append(stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_INSTANCE);
+            stmt.AddValue(0, sharedData.InstanceId);
+            stmt.AddValue(1, sharedData.Data);
+            stmt.AddValue(2, sharedData.CompletedEncountersMask);
+            stmt.AddValue(3, sharedData.EntranceWorldSafeLocId);
+            trans.Append(stmt);
         }
 
         public void OnSharedInstanceLockDataDelete(uint instanceId)
@@ -324,7 +341,9 @@ namespace Game.Maps
                 return;
 
             _instanceLockDataById.Remove(instanceId);
-            DB.Characters.Execute($"DELETE FROM instance2 WHERE instanceId={instanceId}");
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE);
+            stmt.AddValue(0, instanceId);
+            DB.Characters.Execute(stmt);
             Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
 
@@ -335,7 +354,12 @@ namespace Game.Maps
             {
                 DateTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
                 instanceLock.SetExtended(extended);
-                DB.Characters.Execute($"UPDATE character_instance_lock SET extended = {(extended ? 1 : 0)} WHERE guid = {playerGuid.GetCounter()} AND mapId = {entries.MapDifficulty.MapID} AND lockId = {entries.MapDifficulty.LockID}");
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION);
+                stmt.AddValue(0, extended ? 1 : 0);
+                stmt.AddValue(1, playerGuid.GetCounter());
+                stmt.AddValue(2, entries.MapDifficulty.MapID);
+                stmt.AddValue(3, entries.MapDifficulty.LockID);
+                DB.Characters.Execute(stmt);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
                 return Tuple.Create(oldExpiryTime, instanceLock.GetEffectiveExpiryTime());

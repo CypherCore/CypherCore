@@ -589,7 +589,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_AURA, "DELETE FROM character_aura WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_AURA_EFFECT, "DELETE FROM character_aura_effect WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_GIFT, "DELETE FROM character_gifts WHERE guid = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_INSTANCE, "DELETE FROM character_instance_lock WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_INVENTORY, "DELETE FROM character_inventory WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED, "DELETE FROM character_queststatus_rewarded WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_REPUTATION, "DELETE FROM character_reputation WHERE guid = ?");
@@ -745,6 +744,14 @@ namespace Framework.Database
 
             // War mode
             PrepareStatement(CharStatements.SEL_WAR_MODE_TUNING, "SELECT race, COUNT(guid) FROM characters WHERE ((playerFlags & ?) = ?) AND logout_time >= (UNIX_TIMESTAMP() - 604800) GROUP BY race");
+
+            // Instance locks
+            PrepareStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK, "DELETE FROM character_instance_lock WHERE guid = ? AND mapId = ? AND lockId = ?");
+            PrepareStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK_BY_GUID, "DELETE FROM character_instance_lock WHERE guid = ?");
+            PrepareStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK, "INSERT INTO character_instance_lock (guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, entranceWorldSafeLocId, expiryTime, extended) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION, "UPDATE character_instance_lock SET extended = ? WHERE guid = ? AND mapId = ? AND lockId = ?");
+            PrepareStatement(CharStatements.DEL_INSTANCE, "DELETE FROM instance WHERE instanceId = ?");
+            PrepareStatement(CharStatements.INS_INSTANCE, "INSERT INTO instance (instanceId, data, completedEncountersMask, entranceWorldSafeLocId) VALUES (?, ?, ?, ?)");
         }
     }
 
@@ -1206,7 +1213,6 @@ namespace Framework.Database
         DEL_CHAR_AURA,
         DEL_CHAR_AURA_EFFECT,
         DEL_CHAR_GIFT,
-        DEL_CHAR_INSTANCE,
         DEL_CHAR_INVENTORY,
         DEL_CHAR_QUESTSTATUS_REWARDED,
         DEL_CHAR_REPUTATION,
@@ -1348,6 +1354,13 @@ namespace Framework.Database
         INS_CHARACTER_AURA_STORED_LOCATION,
 
         SEL_WAR_MODE_TUNING,
+
+        DEL_CHARACTER_INSTANCE_LOCK,
+        DEL_CHARACTER_INSTANCE_LOCK_BY_GUID,
+        INS_CHARACTER_INSTANCE_LOCK,
+        UPD_CHARACTER_INSTANCE_LOCK_EXTENSION,
+        DEL_INSTANCE,
+        INS_INSTANCE,
 
         MAX_CHARACTERDATABASE_STATEMENTS
     }

@@ -4029,7 +4029,7 @@ namespace Game.Entities
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE);
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK_BY_GUID);
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
