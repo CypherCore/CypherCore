@@ -7827,17 +7827,13 @@ namespace Game.Spells
             {
                 if (!unitCaster.CanCastSpellWhileMoving(m_spellInfo))
                 {
-                    if (m_casttime != 0)
+                    if (GetState() == SpellState.Preparing)
                     {
-                        if (m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
+                        if (m_casttime > 0 && m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
                             return SpellCastResult.Moving;
                     }
-                    else
-                    {
-                        // only fail channeled casts if they are instant but cannot be channeled while moving
-                        if (m_spellInfo.IsChanneled() && !m_spellInfo.IsMoveAllowedChannel())
-                            return SpellCastResult.Moving;
-                    }
+                    else if (GetState() == SpellState.Casting && !m_spellInfo.IsMoveAllowedChannel())
+                        return SpellCastResult.Moving;
                 }
             }
 
