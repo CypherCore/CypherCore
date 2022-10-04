@@ -693,6 +693,11 @@ namespace Game.Maps
             }
         }
 
+        public DungeonEncounterRecord GetBossDungeonEncounter(uint id)
+        {
+            return id < bosses.Count ? bosses[id].GetDungeonEncounterForDifficulty(instance.GetDifficultyID()) : null;
+        }
+        
         public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
         {
             Log.outError(LogFilter.Server, "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for achievement criteria {1}",

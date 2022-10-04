@@ -822,7 +822,7 @@ namespace Game.Loots
 
             List<NotNormalLootItem> ffaItems = new();
 
-            foreach (LootItem  item in items)
+            foreach (LootItem item in items)
             {
                 if (!item.AllowedForPlayer(player))
                     continue;
@@ -950,7 +950,7 @@ namespace Game.Loots
                 var itemList = PlayerFFAItems.LookupByKey(player.GetGUID());
                 if (itemList != null)
                 {
-                    foreach (NotNormalLootItem  notNormalLootItem in itemList)
+                    foreach (NotNormalLootItem notNormalLootItem in itemList)
                     {
                         if (notNormalLootItem.LootListId == lootListId)
                         {
@@ -1087,6 +1087,9 @@ namespace Game.Loots
 
         public ObjectGuid GetLootMasterGUID() { return _lootMaster; }
 
+        public uint GetDungeonEncounterId() { return _dungeonEncounterId; }
+        public void SetDungeonEncounterId(uint dungeonEncounterId) { _dungeonEncounterId = dungeonEncounterId; }
+
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
 
         public List<LootItem> items = new();
@@ -1108,11 +1111,12 @@ namespace Game.Loots
         ObjectGuid _lootMaster;
         List<ObjectGuid> _allowedLooters = new();
         bool _wasOpened;                                                // true if at least one player received the loot content
+        uint _dungeonEncounterId;
     }
 
     public class AELootResult
     {
-        public void Add(Item item, byte count, LootType lootType)
+        public void Add(Item item, byte count, LootType lootType, uint dungeonEncounterId)
         {
             var id = _byItem.LookupByKey(item);
             if (id != 0)
@@ -1127,6 +1131,7 @@ namespace Game.Loots
                 value.item = item;
                 value.count = count;
                 value.lootType = lootType;
+                value.dungeonEncounterId = dungeonEncounterId;
                 _byOrder.Add(value);
             }
         }
@@ -1144,6 +1149,7 @@ namespace Game.Loots
             public Item item;
             public byte count;
             public LootType lootType;
+            public uint dungeonEncounterId;
         }
     }
 }

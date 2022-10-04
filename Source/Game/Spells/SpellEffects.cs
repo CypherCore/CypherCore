@@ -1267,6 +1267,8 @@ namespace Game.Spells
                                     if (addon != null)
                                         loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
                                 }
+
+                                loot.SetDungeonEncounterId(gameObjTarget.GetGoInfo().Chest.DungeonEncounter);
                             }
 
                             /// @todo possible must be moved to loot release (in different from linked triggering)

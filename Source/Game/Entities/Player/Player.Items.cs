@@ -2502,7 +2502,7 @@ namespace Game.Entities
             }
             return true;
         }
-        public void SendNewItem(Item item, uint quantity, bool pushed, bool created, bool broadcast = false)
+        public void SendNewItem(Item item, uint quantity, bool pushed, bool created, bool broadcast = false, uint dungeonEncounterId = 0)
         {
             if (item == null) // prevent crash
                 return;
@@ -2519,7 +2519,6 @@ namespace Game.Entities
             //packet.QuestLogItemID;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
-            //packet.DungeonEncounterID; 
             packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetBreedID = (int)item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
             packet.BattlePetBreedQuality = (item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
@@ -2531,7 +2530,13 @@ namespace Game.Entities
             packet.DisplayText = ItemPushResult.DisplayType.Normal;
             packet.Created = created;
             //packet.IsBonusRoll;
-            //packet.IsEncounterLoot;
+
+            if (dungeonEncounterId != 0)
+            {
+                packet.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
+                packet.DungeonEncounterID = (int)dungeonEncounterId;
+                packet.IsEncounterLoot = true;
+            }
 
             if (broadcast && GetGroup() && !item.GetTemplate().HasFlag(ItemFlags3.DontReportLootLogToParty))
                 GetGroup().BroadcastPacket(packet, true);
@@ -6020,13 +6025,13 @@ namespace Game.Entities
                 // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
                 if (aeResult == null)
                 {
-                    SendNewItem(newitem, item.count, false, false, true);
+                    SendNewItem(newitem, item.count, false, false, true, loot.GetDungeonEncounterId());
                     UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
                     UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (uint)SharedConst.GetLootTypeForClient(loot.loot_type));
                     UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
                 }
                 else
-                    aeResult.Add(newitem, item.count, SharedConst.GetLootTypeForClient(loot.loot_type));
+                    aeResult.Add(newitem, item.count, SharedConst.GetLootTypeForClient(loot.loot_type), loot.GetDungeonEncounterId());
 
                 // LootItem is being removed (looted) from the container, delete it from the DB.
                 if (loot.loot_type == LootType.Item)
