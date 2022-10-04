@@ -36,6 +36,7 @@ namespace Game.Maps
 
     public class InstanceLockManager : Singleton<InstanceLockManager>
     {
+        object _lockObject = new();
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _temporaryInstanceLocksByPlayer = new(); // locks stored here before any boss gets killed
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _instanceLocksByPlayer = new();
         Dictionary<uint, SharedInstanceLockData> _instanceLockDataById = new();
@@ -150,7 +151,8 @@ namespace Game.Maps
 
         public InstanceLock FindActiveInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries)
         {
-            return FindActiveInstanceLock(playerGuid, entries, false, true);
+            lock(_lockObject)
+                return FindActiveInstanceLock(playerGuid, entries, false, true);
         }
 
         public InstanceLock FindActiveInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries, bool ignoreTemporary, bool ignoreExpired)
@@ -200,24 +202,27 @@ namespace Game.Maps
             InstanceLock instanceLock = FindActiveInstanceLock(playerGuid, entries, true, true);
             if (instanceLock == null)
             {
-                // Move lock from temporary storage if it exists there
-                // This is to avoid destroying expired locks before any boss is killed in a fresh lock
-                // player can still change his mind, exit instance and reactivate old lock
-                var playerLocks = _temporaryInstanceLocksByPlayer.LookupByKey(playerGuid);
-                if (playerLocks != null)
+                lock (_lockObject)
                 {
-                    var playerInstanceLock = playerLocks.LookupByKey(entries.GetKey());
-                    if (playerInstanceLock != null)
+                    // Move lock from temporary storage if it exists there
+                    // This is to avoid destroying expired locks before any boss is killed in a fresh lock
+                    // player can still change his mind, exit instance and reactivate old lock
+                    var playerLocks = _temporaryInstanceLocksByPlayer.LookupByKey(playerGuid);
+                    if (playerLocks != null)
                     {
-                        instanceLock = playerInstanceLock;
-                        _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
+                        var playerInstanceLock = playerLocks.LookupByKey(entries.GetKey());
+                        if (playerInstanceLock != null)
+                        {
+                            instanceLock = playerInstanceLock;
+                            _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
 
-                        playerLocks.Remove(entries.GetKey());
-                        if (playerLocks.Empty())
-                            _temporaryInstanceLocksByPlayer.Remove(playerGuid);
+                            playerLocks.Remove(entries.GetKey());
+                            if (playerLocks.Empty())
+                                _temporaryInstanceLocksByPlayer.Remove(playerGuid);
 
-                        Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                            $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
+                            Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
+                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
+                        }
                     }
                 }
             }
@@ -237,7 +242,9 @@ namespace Game.Maps
                     instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
 
-                _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
+                lock(_lockObject)
+                    _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
+
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
             }
