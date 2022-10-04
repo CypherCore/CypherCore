@@ -1139,14 +1139,14 @@ namespace Framework.Constants
         // Instance Commands
         CommandListBindInfo = 5045,
         CommandListBindPlayerBinds = 5046,
-        CommandListBindGroupBinds = 5047,
+        CommandInstUnbindFailed = 5047,
         CommandInstUnbindUnbinding = 5048,
         CommandInstUnbindUnbound = 5049,
         CommandInstStatLoadedInst = 5050,
         CommandInstStatPlayersIn = 5051,
         CommandInstStatSaves = 5052,
         CommandInstStatPlayersbound = 5053,
-        CommandInstStatGroupsbound = 5054,
+        //                                    = 5054, // old LANG_COMMAND_INST_STAT_GROUPSBOUND
         NotDungeon = 5055, // Map Is Not A Dungeon.
         NoInstanceData = 5056, // Map Has No Instance Data.
         CommandInstSetBossState = 5057,

@@ -255,7 +255,7 @@ namespace Game.Maps
             {
                 _doc = JsonNode.Parse(data).AsObject();
             }
-            catch (JsonException ex)
+            catch (JsonException)
             {
                 FillData(false);
             }

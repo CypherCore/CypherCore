@@ -291,7 +291,7 @@ namespace Framework.Constants
         CommandInstanceListbinds = 413,
         CommandInstanceUnbind = 414,
         CommandInstanceStats = 415,
-        CommandInstanceSavedata = 416,
+        // 416 previously used, do not reuse
         CommandLearn = 417,
         // 418 previously used, do not reuse
         CommandLearnAllMy = 419,

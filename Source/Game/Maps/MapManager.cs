@@ -495,7 +495,7 @@ namespace Game.Entities
         IntervalTimer i_timer = new();
         object _mapsLock = new();
         uint i_gridCleanUpDelay;
-        BitSet _freeInstanceIds;
+        BitSet _freeInstanceIds = new(1);
         uint _nextInstanceId;
         MapUpdater m_updater;
         uint _scheduledScripts;

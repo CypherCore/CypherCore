@@ -368,6 +368,71 @@ namespace Game.Maps
             return Tuple.Create(DateTime.MinValue, DateTime.MinValue);
         }
 
+        /// <summary>
+        /// Resets instances that match given filter - for use in GM commands
+        /// </summary>
+        /// <param name="playerGuid">Guid of player whose locks will be removed</param>
+        /// <param name="mapId">(Optional) Map id of instance locks to reset</param>
+        /// <param name="difficulty">(Optional) Difficulty of instance locks to reset</param>
+        /// <param name="locksReset">All locks that were reset</param>
+        /// <param name="locksFailedToReset">Locks that could not be reset because they are used by existing instance map</param>
+        public void ResetInstanceLocksForPlayer(ObjectGuid playerGuid, uint? mapId, Difficulty? difficulty, List<InstanceLock> locksReset, List<InstanceLock> locksFailedToReset)
+        {
+            var playerLocks = _instanceLocksByPlayer.LookupByKey(playerGuid);
+            if (playerLocks == null)
+                return;
+
+            foreach (var playerLockPair in playerLocks)
+            {
+                if (playerLockPair.Value.IsInUse())
+                {
+                    locksFailedToReset.Add(playerLockPair.Value);
+                    continue;
+                }
+
+                if (mapId.HasValue && mapId.Value != playerLockPair.Value.GetMapId())
+                    continue;
+
+                if (difficulty.HasValue && difficulty.Value != playerLockPair.Value.GetDifficultyId())
+                    continue;
+
+                locksReset.Add(playerLockPair.Value);
+            }
+
+            if (!locksReset.Empty())
+            {
+                SQLTransaction trans = new();
+                foreach (InstanceLock instanceLock in locksReset)
+                {
+                    MapDb2Entries entries = new(instanceLock.GetMapId(), instanceLock.GetDifficultyId());
+                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.GetRaidDuration());
+                    // set reset time to last reset time
+                    instanceLock.SetExpiryTime(newExpiryTime);
+                    instanceLock.SetExtended(false);
+
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
+                    stmt.AddValue(0, (ulong)Time.DateTimeToUnixTime(newExpiryTime));
+                    stmt.AddValue(1, playerGuid.GetCounter());
+                    stmt.AddValue(2, entries.MapDifficulty.MapID);
+                    stmt.AddValue(3, entries.MapDifficulty.LockID);
+                    trans.Append(stmt);
+                }
+                DB.Characters.CommitTransaction(trans);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves instance lock statistics - for use in GM commands
+        /// </summary>
+        /// <returns>Statistics info</returns>
+        public InstanceLocksStatistics GetStatistics()
+        {
+            InstanceLocksStatistics statistics;
+            statistics.InstanceCount = _instanceLockDataById.Count;
+            statistics.PlayerCount = _instanceLocksByPlayer.Count;
+            return statistics;
+        }
+        
         public DateTime GetNextResetTime(MapDb2Entries entries)
         {
             DateTime dateTime = GameTime.GetDateAndTime();
@@ -418,7 +483,8 @@ namespace Game.Maps
         uint _instanceId;
         DateTime _expiryTime;
         bool _extended;
-        InstanceLockData _data;
+        InstanceLockData _data = new();
+        bool _isInUse;
 
         public InstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId)
         {
@@ -468,6 +534,10 @@ namespace Game.Maps
         public InstanceLockData GetData() { return _data; }
 
         public virtual InstanceLockData GetInstanceInitializationData() { return _data; }
+
+        public bool IsInUse() { return _isInUse; }
+
+        public void SetInUse(bool inUse) { _isInUse = inUse; }
     }
 
     class SharedInstanceLockData : InstanceLockData
@@ -552,5 +622,11 @@ namespace Game.Maps
             CompletedEncounter = completedEncounter;
             EntranceWorldSafeLocId = entranceWorldSafeLocId;
         }
+    }
+
+    public struct InstanceLocksStatistics
+    {
+        public int InstanceCount;   // Number of existing ID-based locks
+        public int PlayerCount;     // Number of players that have any lock
     }
 }

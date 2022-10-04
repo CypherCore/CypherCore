@@ -750,6 +750,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK_BY_GUID, "DELETE FROM character_instance_lock WHERE guid = ?");
             PrepareStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK, "INSERT INTO character_instance_lock (guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, entranceWorldSafeLocId, expiryTime, extended) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION, "UPDATE character_instance_lock SET extended = ? WHERE guid = ? AND mapId = ? AND lockId = ?");
+            PrepareStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE, "UPDATE character_instance_lock SET expiryTime = ?, extended = 0 WHERE guid = ? AND mapId = ? AND lockId = ?");
             PrepareStatement(CharStatements.DEL_INSTANCE, "DELETE FROM instance WHERE instanceId = ?");
             PrepareStatement(CharStatements.INS_INSTANCE, "INSERT INTO instance (instanceId, data, completedEncountersMask, entranceWorldSafeLocId) VALUES (?, ?, ?, ?)");
         }
@@ -1359,6 +1360,7 @@ namespace Framework.Database
         DEL_CHARACTER_INSTANCE_LOCK_BY_GUID,
         INS_CHARACTER_INSTANCE_LOCK,
         UPD_CHARACTER_INSTANCE_LOCK_EXTENSION,
+        UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE,
         DEL_INSTANCE,
         INS_INSTANCE,
 

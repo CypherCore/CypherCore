@@ -4768,6 +4768,15 @@ namespace Game.Maps
 
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == TeamId.Alliance ? 1 : 0, false, this);
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == TeamId.Horde ? 1 : 0, false, this);
+
+            if (i_instanceLock != null)
+                i_instanceLock.SetInUse(true);
+        }
+
+        ~InstanceMap()
+        {
+            if (i_instanceLock != null)
+                i_instanceLock.SetInUse(false);
         }
 
         public override void InitVisibilityDistance()
