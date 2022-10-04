@@ -230,7 +230,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 return true;
             }
 
-            void ReadSaveDataMore(string data)
+            public override void AfterDataLoad()
             {
                 if (CheckMajordomoExecutus())
                     _executusSchedule = true;

@@ -4990,20 +4990,18 @@ namespace Game.Maps
             return Global.ObjectMgr.GetScriptName(i_script_id);
         }
 
-        public void UpdateInstanceLock(DungeonEncounterRecord dungeonEncounter, UpdateSaveDataEvent updateSaveDataEvent)
+        public void UpdateInstanceLock(UpdateBossStateSaveDataEvent updateSaveDataEvent)
         {
             if (i_instanceLock != null)
             {
-                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask;
-                if (dungeonEncounter != null)
-                    instanceCompletedEncounters |= 1u << dungeonEncounter.Bit;
+                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
 
                 MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
 
                 SQLTransaction trans = new();
 
                 if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, dungeonEncounter));
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter));
 
                 foreach (var player in GetPlayers())
                 {
@@ -5018,7 +5016,49 @@ namespace Game.Maps
 
                     bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
 
-                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, dungeonEncounter));
+                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter));
+
+                    if (isNewLock)
+                    {
+                        InstanceSaveCreated data = new();
+                        data.Gm = player.IsGameMaster();
+                        player.SendPacket(data);
+
+                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
+                    }
+                }
+
+                DB.Characters.CommitTransaction(trans);
+            }
+        }
+        
+        public void UpdateInstanceLock(UpdateAdditionalSaveDataEvent updateSaveDataEvent)
+        {
+            if (i_instanceLock != null)
+            {
+                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask;
+
+                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+
+                SQLTransaction trans = new();
+
+                if (entries.IsInstanceIdBound())
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, null));
+
+                foreach (var player in GetPlayers())
+                {
+                    // never instance bind GMs with GM mode enabled
+                    if (player.IsGameMaster())
+                        continue;
+
+                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
+                    string oldData = "";
+                    if (playerLock != null)
+                        oldData = playerLock.GetData().Data;
+
+                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+
+                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, null));
 
                     if (isNewLock)
                     {

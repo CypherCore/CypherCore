@@ -460,13 +460,13 @@ namespace Game.Maps
             _sharedData = sharedData;            
         }
 
-        public void SetInstanceId(uint instanceId)
+        public override void SetInstanceId(uint instanceId)
         {
             base.SetInstanceId(instanceId);
             _sharedData.InstanceId = instanceId;
         }
 
-        public InstanceLockData GetInstanceInitializationData() { return _sharedData; }
+        public override InstanceLockData GetInstanceInitializationData() { return _sharedData; }
 
         public SharedInstanceLockData GetSharedData() { return _sharedData; }
     }

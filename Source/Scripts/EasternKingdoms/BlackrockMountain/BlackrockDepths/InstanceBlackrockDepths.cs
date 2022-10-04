@@ -114,9 +114,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 
         class instance_blackrock_depths_InstanceMapScript : InstanceScript
         {
-            uint[] encounter = new uint[MiscConst.MaxEncounter];
-            string str_data;
-
             ObjectGuid EmperorGUID;
             ObjectGuid PhalanxGUID;
             ObjectGuid MagmusGUID;
@@ -155,6 +152,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             public instance_blackrock_depths_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("BRD");
+                SetBossNumber(MiscConst.MaxEncounter);
 
                 BarAleCount = 0;
                 GhostKillCount = 0;
@@ -238,39 +236,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 switch (type)
                 {
                     case DataTypes.TypeRingOfLaw:
-                        encounter[0] = data;
+                        SetBossState(0, (EncounterState)data);
                         break;
                     case DataTypes.TypeVault:
-                        encounter[1] = data;
+                        SetBossState(1, (EncounterState)data);
                         break;
                     case DataTypes.TypeBar:
                         if (data == (uint)EncounterState.Special)
                             ++BarAleCount;
                         else
-                            encounter[2] = data;
+                            SetBossState(2, (EncounterState)data);
                         break;
                     case DataTypes.TypeTombOfSeven:
-                        encounter[3] = data;
+                        SetBossState(3, (EncounterState)data);
                         break;
                     case DataTypes.TypeLyceum:
-                        encounter[4] = data;
+                        SetBossState(4, (EncounterState)data);
                         break;
                     case DataTypes.TypeIronHall:
-                        encounter[5] = data;
+                        SetBossState(5, (EncounterState)data);
                         break;
                     case DataTypes.DataGhostkill:
                         GhostKillCount += data;
                         break;
-                }
-
-                if (data == (uint)EncounterState.Done || GhostKillCount >= MiscConst.TombOfSevenBossNum)
-                {
-                    OutSaveInstData();
-
-                    str_data = $"{encounter[0]} {encounter[1]} {encounter[2]} {encounter[3]} {encounter[4]} {encounter[5]} {GhostKillCount}";
-
-                    SaveToDB();
-                    OutSaveInstDataComplete();
                 }
             }
 
@@ -279,20 +267,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 switch (type)
                 {
                     case DataTypes.TypeRingOfLaw:
-                        return encounter[0];
+                        return (uint)GetBossState(0);
                     case DataTypes.TypeVault:
-                        return encounter[1];
+                        return (uint)GetBossState(1);
                     case DataTypes.TypeBar:
-                        if (encounter[2] == (uint)EncounterState.InProgress && BarAleCount == 3)
+                        if (GetBossState(2) == EncounterState.InProgress && BarAleCount == 3)
                             return (uint)EncounterState.Special;
                         else
-                            return encounter[2];
+                            return (uint)GetBossState(2);
                     case DataTypes.TypeTombOfSeven:
-                        return encounter[3];
+                        return (uint)GetBossState(3);
                     case DataTypes.TypeLyceum:
-                        return encounter[4];
+                        return (uint)GetBossState(4);
                     case DataTypes.TypeIronHall:
-                        return encounter[5];
+                        return (uint)GetBossState(5);
                     case DataTypes.DataGhostkill:
                         return GhostKillCount;
                 }
@@ -341,41 +329,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                         return GoSpectralChaliceGUID;
                 }
                 return ObjectGuid.Empty;
-            }
-
-            public override string GetSaveData()
-            {
-                return str_data;
-            }
-
-            public override void Load(string str)
-            {
-                if (str.IsEmpty())
-                {
-
-                    OutLoadInstDataFail();
-                    return;
-                }
-
-                OutLoadInstData(str);
-
-                StringArguments loadStream = new(str);
-
-                for (var i = 0; i < encounter.Length; ++i)
-                    encounter[i] = loadStream.NextUInt32();
-
-                GhostKillCount = loadStream.NextUInt32();
-
-                for (byte i = 0; i < encounter.Length; ++i)
-                    if (encounter[i] == (uint)EncounterState.InProgress)
-                        encounter[i] = (uint)EncounterState.NotStarted;
-
-                if (GhostKillCount > 0 && GhostKillCount < MiscConst.TombOfSevenBossNum)
-                    GhostKillCount = 0;//reset tomb of seven event
-                if (GhostKillCount >= MiscConst.TombOfSevenBossNum)
-                    GhostKillCount = MiscConst.TombOfSevenBossNum;
-
-                OutLoadInstDataComplete();
             }
 
             void TombOfSevenEvent()

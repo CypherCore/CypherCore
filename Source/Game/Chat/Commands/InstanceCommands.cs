@@ -116,9 +116,9 @@ namespace Game.Chat
         }
 
         [Command("savedata", RBACPermissions.CommandInstanceSavedata)]
-        static bool HandleInstanceSaveData(CommandHandler handler)
+        static bool HandleInstanceSaveDataCommand(CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            /*Player player = handler.GetSession().GetPlayer();
             InstanceMap map = player.GetMap().ToInstanceMap();
             if (map == null)
             {
@@ -132,7 +132,7 @@ namespace Game.Chat
                 return false;
             }
 
-            map.GetInstanceScript().SaveToDB();
+            map.GetInstanceScript().SaveToDB();*/
 
             return true;
         }

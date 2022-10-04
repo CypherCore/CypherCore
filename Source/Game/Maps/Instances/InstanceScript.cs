@@ -44,17 +44,6 @@ namespace Game.Maps
             InstanceScenario scenario = instance.GetInstanceScenario();
             if (scenario != null)
                 scenario.SaveToDB();
-
-            string data = GetSaveData();
-            if (string.IsNullOrEmpty(data))
-                return;
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_INSTANCE_DATA);
-            stmt.AddValue(0, GetCompletedEncounterMask());
-            stmt.AddValue(1, data);
-            stmt.AddValue(2, _entranceId);
-            stmt.AddValue(3, instance.GetInstanceId());
-            DB.Characters.Execute(stmt);
         }
 
         public virtual bool IsEncounterInProgress()
@@ -104,9 +93,7 @@ namespace Game.Maps
 
         public void SetHeaders(string dataHeaders)
         {
-            foreach (char header in dataHeaders)
-                if (char.IsLetter(header))
-                    headers.Add(header);
+            headers = dataHeaders;
         }
 
         public void LoadBossBoundaries(BossBoundaryEntry[] data)
@@ -178,7 +165,7 @@ namespace Game.Maps
                 for (int i = 0; i < MapConst.MaxDungeonEncountersPerBoss; ++i)
                     bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
         }
-        
+
         public virtual void UpdateDoorState(GameObject door)
         {
             var range = doors.LookupByKey(door.GetEntry());
@@ -430,8 +417,8 @@ namespace Game.Maps
 
                     bossInfo.state = state;
                     SaveToDB();
-                    if (state == EncounterState.Done && dungeonEncounter != null)
-                        instance.UpdateInstanceLock(dungeonEncounter, new(id, state));
+                    if (dungeonEncounter != null)
+                        instance.UpdateInstanceLock(new UpdateBossStateSaveDataEvent(dungeonEncounter, id, state));
                 }
 
                 for (uint type = 0; type < (int)DoorType.Max; ++type)
@@ -470,7 +457,7 @@ namespace Game.Maps
             UpdateSpawnGroups();
         }
 
-        public virtual void Load(string data)
+        public void Load(string data)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -480,12 +467,11 @@ namespace Game.Maps
 
             OutLoadInstData(data);
 
-            var loadStream = new StringArguments(data);
-
-            if (ReadSaveDataHeaders(loadStream))
+            InstanceScriptDataReader reader = new(this);
+            if (reader.Load(data) == InstanceScriptDataReader.Result.Ok)
             {
-                ReadSaveDataBossStates(loadStream);
-                ReadSaveDataMore(loadStream);
+                UpdateSpawnGroups();
+                AfterDataLoad();
             }
             else
                 OutLoadInstDataFail();
@@ -493,84 +479,39 @@ namespace Game.Maps
             OutLoadInstDataComplete();
         }
 
-        bool ReadSaveDataHeaders(StringArguments data)
-        {
-            foreach (char header in headers)
-            {
-                char buff = data.NextChar();
-
-                if (header != buff)
-                    return false;
-            }
-
-            return true;
-        }
-
-        void ReadSaveDataBossStates(StringArguments data)
-        {
-            foreach (var pair in bosses)
-            {
-                EncounterState buff = (EncounterState)data.NextUInt32();
-                if (buff == EncounterState.InProgress || buff == EncounterState.Fail || buff == EncounterState.Special)
-                    buff = EncounterState.NotStarted;
-
-                if (buff < EncounterState.ToBeDecided)
-                    SetBossState(pair.Key, buff);
-            }
-            UpdateSpawnGroups();
-        }
-
-        public virtual string GetSaveData()
+        public string GetSaveData()
         {
             OutSaveInstData();
 
-            StringBuilder saveStream = new();
+            InstanceScriptDataWriter writer = new(this);
 
-            WriteSaveDataHeaders(saveStream);
-            WriteSaveDataBossStates(saveStream);
-            WriteSaveDataMore(saveStream);
+            writer.FillData();
 
             OutSaveInstDataComplete();
 
-            return saveStream.ToString();
+            return writer.GetString();
         }
 
-        public string UpdateSaveData(string oldData, UpdateSaveDataEvent saveEvent)
+        public string UpdateBossStateSaveData(string oldData, UpdateBossStateSaveDataEvent saveEvent)
         {
             if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
                 return GetSaveData();
 
-            int position = (int)(headers.Count + saveEvent.BossId) * 2;
-            StringBuilder newData = new(oldData);
-            if (position >= oldData.Length)
-            {
-                // Initialize blank data
-                StringBuilder saveStream = new();
-                WriteSaveDataHeaders(saveStream);
-                for (var i = 0; i < bosses.Count; ++i)
-                    saveStream.Append($"{(uint)EncounterState.NotStarted} ");
-
-                WriteSaveDataMore(saveStream);
-
-                newData = saveStream;
-            }
-
-            newData.Remove(position, 2);
-            newData.Insert(position, $"{(uint)saveEvent.NewState}0");
-
-            return newData.ToString();
-        }
-        
-        void WriteSaveDataHeaders(StringBuilder data)
-        {
-            foreach (char header in headers)
-                data.AppendFormat("{0} ", header);
+            InstanceScriptDataWriter writer = new(this);
+            writer.FillDataFrom(oldData);
+            writer.SetBossState(saveEvent);
+            return writer.GetString();
         }
 
-        void WriteSaveDataBossStates(StringBuilder data)
+        public string UpdateAdditionalSaveData(string oldData, UpdateAdditionalSaveDataEvent saveEvent)
         {
-            foreach (BossInfo bossInfo in bosses.Values)
-                data.AppendFormat("{0} ", (uint)bossInfo.state);
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+                return GetSaveData();
+
+            InstanceScriptDataWriter writer = new(this);
+            writer.FillDataFrom(oldData);
+            writer.SetAdditionalData(saveEvent);
+            return writer.GetString();
         }
 
         public void HandleGameObject(ObjectGuid guid, bool open, GameObject go = null)
@@ -763,7 +704,7 @@ namespace Game.Maps
 
             return false;
         }
-        
+
         public void SetEntranceLocation(uint worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
@@ -998,6 +939,12 @@ namespace Game.Maps
 
         public byte GetCombatResurrectionCharges() { return _combatResurrectionCharges; }
 
+        public void RegisterPersistentScriptValue(PersistentInstanceScriptValueBase value) { _persistentScriptValues.Add(value); }
+
+        public string GetHeader() { return headers; }
+
+        public List<PersistentInstanceScriptValueBase> GetPersistentScriptValues() { return _persistentScriptValues; }
+
         public void SetBossNumber(uint number)
         {
             for (uint i = 0; i < number; ++i)
@@ -1010,15 +957,15 @@ namespace Game.Maps
         public void OutLoadInstDataComplete() { Log.outDebug(LogFilter.Scripts, "Instance Data Load for Instance {0} (Map {1}, Instance Id: {2}) is complete.", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
         public void OutLoadInstDataFail() { Log.outDebug(LogFilter.Scripts, "Unable to load Instance Data for Instance {0} (Map {1}, Instance Id: {2}).", instance.GetMapName(), instance.GetId(), instance.GetInstanceId()); }
 
-        public virtual void ReadSaveDataMore(StringArguments data) { }
-
-        public virtual void WriteSaveDataMore(StringBuilder data) { }
-
         public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroups() { return _instanceSpawnGroups; }
 
+        // Override this function to validate all additional data loads
+        public virtual void AfterDataLoad() { }
+
         public InstanceMap instance;
-        List<char> headers = new();
+        string headers;
         Dictionary<uint, BossInfo> bosses = new();
+        List<PersistentInstanceScriptValueBase> _persistentScriptValues = new();
         MultiMap<uint, DoorInfo> doors = new();
         Dictionary<uint, MinionInfo> minions = new();
         Dictionary<uint, uint> _creatureInfo = new();
@@ -1131,15 +1078,84 @@ namespace Game.Maps
         public BossInfo bossInfo;
     }
 
-    public struct UpdateSaveDataEvent
+    public struct UpdateBossStateSaveDataEvent
     {
+        public DungeonEncounterRecord DungeonEncounter;
         public uint BossId;
         public EncounterState NewState;
 
-        public UpdateSaveDataEvent(uint bossId, EncounterState state)
+        public UpdateBossStateSaveDataEvent(DungeonEncounterRecord dungeonEncounter, uint bossId, EncounterState state)
         {
+            DungeonEncounter = dungeonEncounter;
             BossId = bossId;
             NewState = state;
+        }
+    }
+
+    public struct UpdateAdditionalSaveDataEvent
+    {
+        public string Key;
+        public object Value;
+
+        public UpdateAdditionalSaveDataEvent(string key, object value)
+        {
+            Key = key;
+            Value = value;
+        }
+    }
+
+    public class PersistentInstanceScriptValueBase
+    {
+        protected InstanceScript _instance;
+        protected string _name;
+        protected object _value;
+
+        protected PersistentInstanceScriptValueBase(InstanceScript instance, string name, object value)
+        {
+            _instance = instance;
+            _name = name;
+            _value = value;
+            
+            _instance.RegisterPersistentScriptValue(this);
+        }
+
+        public string GetName() { return _name; }
+
+        public UpdateAdditionalSaveDataEvent CreateEvent()
+        {
+            return new UpdateAdditionalSaveDataEvent(_name, _value);
+        }
+
+        public void LoadValue(long value)
+        {
+            _value = value;
+        }
+
+        public void LoadValue(double value)
+        {
+            _value = value;
+        }
+    }
+
+    class PersistentInstanceScriptValue<T> : PersistentInstanceScriptValueBase
+    {
+        public PersistentInstanceScriptValue(InstanceScript instance, string name, T value) : base(instance, name, value) { }
+
+        public PersistentInstanceScriptValue<T> SetValue(T value)
+        {
+            _value = value;
+            NotifyValueChanged();
+            return this;
+        }
+
+        void NotifyValueChanged()
+        {
+            _instance.instance.UpdateInstanceLock(CreateEvent());
+        }
+
+        void LoadValue(T value)
+        {
+            _value = value;
         }
     }
 }
