@@ -2863,7 +2863,7 @@ namespace Game.Entities
                 ObjectGuid transGUID = ObjectGuid.Create(HighGuid.Transport, transguid);
 
                 Transport transport = null;
-                Map transportMap = Global.MapMgr.CreateMap(mapId, this, instanceId);
+                Map transportMap = Global.MapMgr.CreateMap(mapId, this);
                 if (transportMap != null)
                 {
                     Transport transportOnMap = transportMap.GetTransport(transGUID);
@@ -2873,7 +2873,7 @@ namespace Game.Entities
                         {
                             mapId = transportOnMap.GetExpectedMapId();
                             instanceId = 0;
-                            transportMap = Global.MapMgr.CreateMap(mapId, this, instanceId);
+                            transportMap = Global.MapMgr.CreateMap(mapId, this);
                             if (transportMap)
                                 transport = transportMap.GetTransport(transGUID);
                         }
@@ -2990,7 +2990,7 @@ namespace Game.Entities
             // NOW player must have valid map
             // load the player's map here if it's not already loaded
             if (!map)
-                map = Global.MapMgr.CreateMap(mapId, this, instance_id);
+                map = Global.MapMgr.CreateMap(mapId, this);
 
             AreaTriggerStruct areaTrigger = null;
             bool check = false;

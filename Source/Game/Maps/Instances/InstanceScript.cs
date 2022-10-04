@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Networking.Packets;
@@ -25,6 +26,7 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Game.Maps
@@ -164,6 +166,19 @@ namespace Game.Maps
             }
         }
 
+        void LoadDungeonEncounterData(DungeonEncounterData[] encounters)
+        {
+            foreach (DungeonEncounterData encounter in encounters)
+                LoadDungeonEncounterData(encounter.BossId, encounter.DungeonEncounterId);
+        }
+
+        void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
+        {
+            if (bossId < bosses.Count)
+                for (int i = 0; i < MapConst.MaxDungeonEncountersPerBoss; ++i)
+                    bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
+        }
+        
         public virtual void UpdateDoorState(GameObject door)
         {
             var range = doors.LookupByKey(door.GetEntry());
@@ -379,6 +394,7 @@ namespace Game.Maps
                         }
                     }
 
+                    DungeonEncounterRecord dungeonEncounter = null;
                     switch (state)
                     {
                         case EncounterState.InProgress:
@@ -395,9 +411,18 @@ namespace Game.Maps
                             break;
                         }
                         case EncounterState.Fail:
+                            ResetCombatResurrections();
+                            SendEncounterEnd();
+                            break;
                         case EncounterState.Done:
                             ResetCombatResurrections();
                             SendEncounterEnd();
+                            dungeonEncounter = bossInfo.GetDungeonEncounterForDifficulty(instance.GetDifficultyID());
+                            if (dungeonEncounter != null)
+                            {
+                                DoUpdateCriteria(CriteriaType.DefeatDungeonEncounter, dungeonEncounter.Id);
+                                SendBossKillCredit(dungeonEncounter.Id);
+                            }
                             break;
                         default:
                             break;
@@ -405,6 +430,8 @@ namespace Game.Maps
 
                     bossInfo.state = state;
                     SaveToDB();
+                    if (state == EncounterState.Done)
+                        instance.UpdateInstanceLock(dungeonEncounter, new(id, state));
                 }
 
                 for (uint type = 0; type < (int)DoorType.Max; ++type)
@@ -508,6 +535,32 @@ namespace Game.Maps
             return saveStream.ToString();
         }
 
+        public string UpdateSaveData(string oldData, UpdateSaveDataEvent saveEvent)
+        {
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+                return GetSaveData();
+
+            int position = (int)(headers.Count + saveEvent.BossId) * 2;
+            StringBuilder newData = new(oldData);
+            if (position >= oldData.Length)
+            {
+                // Initialize blank data
+                StringBuilder saveStream = new();
+                WriteSaveDataHeaders(saveStream);
+                for (var i = 0; i < bosses.Count; ++i)
+                    saveStream.Append($"{(uint)EncounterState.NotStarted} ");
+
+                WriteSaveDataMore(saveStream);
+
+                newData = saveStream;
+            }
+
+            newData.Remove(position, 2);
+            newData.Insert(position, $"{(uint)saveEvent.NewState}0");
+
+            return newData.ToString();
+        }
+        
         void WriteSaveDataHeaders(StringBuilder data)
         {
             foreach (char header in headers)
@@ -962,7 +1015,7 @@ namespace Game.Maps
         Dictionary<uint, uint> _creatureInfo = new();
         Dictionary<uint, uint> _gameObjectInfo = new();
         Dictionary<uint, ObjectGuid> _objectGuids = new();
-        uint completedEncounters;
+        uint completedEncounters; // DEPRECATED, REMOVE
         List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
         List<uint> _activatedAreaTriggers = new();
         uint _entranceId;
@@ -972,6 +1025,11 @@ namespace Game.Maps
         bool _combatResurrectionTimerStarted;
     }
 
+    class DungeonEncounterData
+    {
+        public uint BossId;
+        public uint[] DungeonEncounterId = new uint[4];
+    }
 
     public class DoorData
     {
@@ -1025,6 +1083,12 @@ namespace Game.Maps
 
     public class BossInfo
     {
+        public EncounterState state;
+        public List<ObjectGuid>[] door = new List<ObjectGuid>[(int)DoorType.Max];
+        public List<ObjectGuid> minion = new();
+        public List<AreaBoundary> boundary = new();
+        public DungeonEncounterRecord[] DungeonEncounters = new DungeonEncounterRecord[MapConst.MaxDungeonEncountersPerBoss];
+
         public BossInfo()
         {
             state = EncounterState.ToBeDecided;
@@ -1032,10 +1096,10 @@ namespace Game.Maps
                 door[i] = new List<ObjectGuid>();
         }
 
-        public EncounterState state;
-        public List<ObjectGuid>[] door = new List<ObjectGuid>[(int)DoorType.Max];
-        public List<ObjectGuid> minion = new();
-        public List<AreaBoundary> boundary = new();
+        public DungeonEncounterRecord GetDungeonEncounterForDifficulty(Difficulty difficulty)
+        {
+            return DungeonEncounters.FirstOrDefault(dungeonEncounter => dungeonEncounter?.DifficultyID == 0 || (Difficulty)dungeonEncounter?.DifficultyID == difficulty);
+        }
     }
     class DoorInfo
     {
@@ -1056,5 +1120,17 @@ namespace Game.Maps
         }
 
         public BossInfo bossInfo;
+    }
+
+    public struct UpdateSaveDataEvent
+    {
+        public uint BossId;
+        public EncounterState NewState;
+
+        public UpdateSaveDataEvent(uint bossId, EncounterState state)
+        {
+            BossId = bossId;
+            NewState = state;
+        }
     }
 }

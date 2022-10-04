@@ -852,13 +852,13 @@ namespace Game.Networking.Packets
             data.WriteUInt64(InstanceID);
             data.WriteInt32(MapID);
             data.WriteUInt32(DifficultyID);
-            data.WriteUInt32((uint)ExpireTime);
+            data.WriteInt32(ExpireTime);
         }
 
         public ulong InstanceID;
         public int MapID;
         public uint DifficultyID;
-        public long ExpireTime;
+        public int ExpireTime;
     }
 
     struct CalendarSendCalendarEventInfo

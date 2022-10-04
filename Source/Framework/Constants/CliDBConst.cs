@@ -1628,9 +1628,20 @@ namespace Framework.Constants
         Scenario = 5
     }
 
-    public enum MapDifficultyFlags : byte
+    public enum MapDifficultyFlags : int
     {
-        CannotExtend = 0x10
+        LimitToPlayersFromOneRealm = 0x01,
+        UseLootBasedLockInsteadOfInstanceLock = 0x02, // Lock to single encounters
+        LockedToSoloOwner = 0x04,
+        ResumeDungeonProgressBasedOnLockout = 0x08, // Mythic dungeons with this flag zone into leaders instance instead of always using a fresh one (Return to Karazhan, Operation: Mechagon)
+        DisableLockExtension = 0x10,
+    }
+
+    public enum MapDifficultyResetInterval : byte
+    {
+        Anytime = 0,
+        Daily = 1,
+        Weekly = 2
     }
 
     public enum AreaMountFlags

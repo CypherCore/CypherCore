@@ -1709,33 +1709,24 @@ namespace Game.Maps
                     Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
             }
 
-            //Get instance where player's group is bound & its map
-            if (!loginCheck && group)
+            if (entry.Instanceable())
             {
-                InstanceBind boundInstance = group.GetBoundInstance(entry);
-                if (boundInstance != null && boundInstance.save != null)
+                //Get instance where player's group is bound & its map
+                uint instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
+                if (instanceIdToCheck != 0)
                 {
-                    Map boundMap = Global.MapMgr.FindMap(mapid, boundInstance.save.GetInstanceId());
+                    Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
                     if (boundMap != null)
                     {
                         EnterState denyReason = boundMap.CannotEnter(player);
                         if (denyReason != 0)
                             return denyReason;
                     }
+
+                    // players are only allowed to enter 10 instances per hour
+                    if (entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                        return EnterState.CannotEnterTooManyInstances;
                 }
-            }
-
-            // players are only allowed to enter 5 instances per hour
-            if (entry.IsDungeon() && (!player.GetGroup() || (player.GetGroup() && !player.GetGroup().IsLFGGroup())))
-            {
-                uint instanceIdToCheck = 0;
-                InstanceSave save = player.GetInstanceSave(mapid);
-                if (save != null)
-                    instanceIdToCheck = save.GetInstanceId();
-
-                // instanceId can never be 0 - will not be found
-                if (!player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
-                    return EnterState.CannotEnterTooManyInstances;
             }
 
             return EnterState.CanEnter;
@@ -3414,6 +3405,7 @@ namespace Game.Maps
         }
 
         public InstanceMap ToInstanceMap() { return IsDungeon() ? (this as InstanceMap) : null; }
+
         public BattlegroundMap ToBattlegroundMap() { return IsBattlegroundOrArena() ? (this as BattlegroundMap) : null; }
 
         public void Balance()
@@ -4759,8 +4751,10 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam) : base(id, expiry, InstanceId, spawnMode)
+        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
         {
+            i_instanceLock = instanceLock;
+
             //lets initialize visibility distance for dungeons
             InitVisibilityDistance();
 
@@ -4804,121 +4798,43 @@ namespace Game.Maps
             if (!player.IsLoading() && IsRaid() && GetInstanceScript() != null && GetInstanceScript().IsEncounterInProgress())
                 return EnterState.CannotEnterZoneInCombat;
 
-            // cannot enter if player is permanent saved to a different instance id
-            InstanceBind playerBind = player.GetBoundInstance(GetId(), GetDifficultyID());
-            if (playerBind != null)
-                if (playerBind.perm && playerBind.save != null)
-                    if (playerBind.save.GetInstanceId() != GetInstanceId())
-                        return EnterState.CannotEnterInstanceBindMismatch;
+            if (i_instanceLock != null)
+            {
+                // cannot enter if player is permanent saved to a different instance id
+                TransferAbortReason lockError = Global.InstanceLockMgr.CanJoinInstanceLock(player.GetGUID(), new MapDb2Entries(GetEntry(), GetMapDifficulty()), i_instanceLock);
+                if (lockError == TransferAbortReason.LockedToDifferentInstance)
+                    return EnterState.CannotEnterInstanceBindMismatch;
+
+                if (lockError == TransferAbortReason.AlreadyCompletedEncounter)
+                    return EnterState.CannotEnterAlreadyCompletedEncounter;
+            }
 
             return base.CannotEnter(player);
         }
 
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
-            Group group = player.GetGroup();
-
             // increase current instances (hourly limit)
-            if (!group || !group.IsLFGGroup())
-                player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
+            player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
 
-            // get or create an instance save for the map
-            InstanceSave mapSave = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());
-            if (mapSave == null)
+            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
             {
-                Log.outInfo(LogFilter.Maps, "InstanceMap.Add: creating instance save for map {0} spawnmode {1} with instance id {2}", GetId(), GetDifficultyID(), GetInstanceId());
-                mapSave = Global.InstanceSaveMgr.AddInstanceSave(GetId(), GetInstanceId(), GetDifficultyID(), 0, 0, true);
-            }
-
-            Cypher.Assert(mapSave != null);
-
-            // check for existing instance binds
-            InstanceBind playerBind = player.GetBoundInstance(GetId(), GetDifficultyID());
-            if (playerBind != null && playerBind.perm)
-            {
-                // cannot enter other instances if bound permanently
-                if (playerBind.save != mapSave)
+                if (!entries.MapDifficulty.IsUsingEncounterLocks())
                 {
-                    Log.outError(LogFilter.Maps, "InstanceMap.Add: player {0}({1}) is permanently bound to instance {2} {3}, {4}, {5}, {6}, {7}, {8} but he is being put into instance {9} {10}, {11}, {12}, {13}, {14}, {15}",
-                        player.GetName(), player.GetGUID().ToString(), GetMapName(), playerBind.save.GetMapId(),
-                        playerBind.save.GetInstanceId(), playerBind.save.GetDifficultyID(),
-                        playerBind.save.GetPlayerCount(), playerBind.save.GetGroupCount(),
-                        playerBind.save.CanReset(), GetMapName(), mapSave.GetMapId(), mapSave.GetInstanceId(),
-                        mapSave.GetDifficultyID(), mapSave.GetPlayerCount(), mapSave.GetGroupCount(),
-                        mapSave.CanReset());
-                    return false;
-                }
-            }
-            else
-            {
-                if (group)
-                {
-                    // solo saves should have been reset when the map was loaded
-                    InstanceBind groupBind = group.GetBoundInstance(this);
-                    if (playerBind != null && playerBind.save != mapSave)
+                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
+                    if (playerLock == null || (playerLock.IsExpired() && playerLock.IsExtended()) ||
+                        playerLock.GetData().CompletedEncountersMask != i_instanceLock.GetData().CompletedEncountersMask)
                     {
-                        Log.outError(LogFilter.Maps,
-                            "InstanceMapAdd: player {0}({1}) is being put into instance {2} {3}, {4}, {5}, {6}, {7}, {8} but he is in group {9} and is bound to instance {10}, {11}, {12}, {13}, {14}, {15}!",
-                            player.GetName(), player.GetGUID().ToString(), GetMapName(), mapSave.GetMapId(), mapSave.GetInstanceId(),
-                            mapSave.GetDifficultyID(), mapSave.GetPlayerCount(), mapSave.GetGroupCount(),
-                            mapSave.CanReset(), group.GetLeaderGUID().ToString(),
-                            playerBind.save.GetMapId(), playerBind.save.GetInstanceId(),
-                            playerBind.save.GetDifficultyID(), playerBind.save.GetPlayerCount(),
-                            playerBind.save.GetGroupCount(), playerBind.save.CanReset());
-                        if (groupBind != null)
-                            Log.outError(LogFilter.Maps,
-                                "InstanceMap.Add: the group is bound to the instance {0} {1}, {2}, {3}, {4}, {5}, {6}",
-                                GetMapName(), groupBind.save.GetMapId(), groupBind.save.GetInstanceId(),
-                                groupBind.save.GetDifficultyID(), groupBind.save.GetPlayerCount(),
-                                groupBind.save.GetGroupCount(), groupBind.save.CanReset());
-                        Cypher.Assert(false);
-                        return false;
+                        PendingRaidLock pendingRaidLock = new();
+                        pendingRaidLock.TimeUntilLock = 60000;
+                        pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
+                        pendingRaidLock.Extending = playerLock != null && playerLock.IsExtended();
+                        pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking(); // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
+                        player.GetSession().SendPacket(pendingRaidLock);
+                        if (!entries.Map.IsFlexLocking())
+                            player.SetPendingBind(GetInstanceId(), 60000);
                     }
-                    // bind to the group or keep using the group save
-                    if (groupBind == null)
-                        group.BindToInstance(mapSave, false);
-                    else
-                    {
-                        // cannot jump to a different instance without resetting it
-                        if (groupBind.save != mapSave)
-                        {
-                            Log.outError(LogFilter.Maps,
-                                "InstanceMap.Add: player {0}({1}) is being put into instance {2}, {3}, {4} but he is in group {5} which is bound to instance {6}, {7}, {8}!",
-                                player.GetName(), player.GetGUID().ToString(), mapSave.GetMapId(), mapSave.GetInstanceId(),
-                                mapSave.GetDifficultyID(), group.GetLeaderGUID().ToString(),
-                                groupBind.save.GetMapId(), groupBind.save.GetInstanceId(),
-                                groupBind.save.GetDifficultyID());
-                            Log.outError(LogFilter.Maps, "MapSave players: {0}, group count: {1}",
-                                mapSave.GetPlayerCount(), mapSave.GetGroupCount());
-                            if (groupBind.save != null)
-                                Log.outError(LogFilter.Maps, "GroupBind save players: {0}, group count: {1}",
-                                    groupBind.save.GetPlayerCount(), groupBind.save.GetGroupCount());
-                            else
-                                Log.outError(LogFilter.Maps, "GroupBind save NULL");
-                            return false;
-                        }
-                        // if the group/leader is permanently bound to the instance
-                        // players also become permanently bound when they enter
-                        if (groupBind.perm)
-                        {
-                            PendingRaidLock pendingRaidLock = new();
-                            pendingRaidLock.TimeUntilLock = 60000;
-                            pendingRaidLock.CompletedMask = i_data != null ? i_data.GetCompletedEncounterMask() : 0;
-                            pendingRaidLock.Extending = false;
-                            pendingRaidLock.WarningOnly = false; // events it throws:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
-                            player.SendPacket(pendingRaidLock);
-                            player.SetPendingBind(mapSave.GetInstanceId(), 60000);
-                        }
-                    }
-                }
-                else
-                {
-                    // set up a solo bind or continue using it
-                    if (playerBind == null)
-                        player.BindToInstance(mapSave, false);
-                    else
-                        // cannot jump to a different instance without resetting it
-                        Cypher.Assert(playerBind.save == mapSave);
                 }
             }
 
@@ -4980,7 +4896,7 @@ namespace Game.Maps
             Global.InstanceSaveMgr.UnloadInstanceSave(GetInstanceId());
         }
 
-        public void CreateInstanceData(bool load)
+        public void CreateInstanceData()
         {
             if (i_data != null)
                 return;
@@ -4995,24 +4911,19 @@ namespace Game.Maps
             if (i_data == null)
                 return;
 
-            if (load)
+            if (i_instanceLock != null)
             {
-                // @todo make a global storage for this
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_INSTANCE);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, i_InstanceId);
-                SQLResult result = DB.Characters.Query(stmt);
-
-                if (!result.IsEmpty())
+                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+                if (entries.IsInstanceIdBound() || IsRaid() || entries.MapDifficulty.IsRestoringDungeonState() || !i_owningGroupRef.isValid())
                 {
-                    var data = result.Read<string>(0);
-                    i_data.SetCompletedEncountersMask(result.Read<uint>(1));
-                    i_data.SetEntranceLocation(result.Read<uint>(2));
-                    if (data != "")
+                    InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
+                    i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
+                    i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
+                    if (!lockData.Data.IsEmpty())
                     {
                         Log.outDebug(LogFilter.Maps, "Loading instance data for `{0}` with id {1}",
                             Global.ObjectMgr.GetScriptName(i_script_id), i_InstanceId);
-                        i_data.Load(data);
+                        i_data.Load(lockData.Data);
                     }
                 }
             }
@@ -5076,54 +4987,70 @@ namespace Game.Maps
             return Global.ObjectMgr.GetScriptName(i_script_id);
         }
 
-        public void PermBindAllPlayers()
+        public void UpdateInstanceLock(DungeonEncounterRecord dungeonEncounter, UpdateSaveDataEvent updateSaveDataEvent)
         {
-            if (!IsDungeon())
-                return;
-
-            InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());
-            if (save == null)
+            if (i_instanceLock != null)
             {
-                Log.outError(LogFilter.Maps, "Cannot bind players to instance map (Name: {0}, Entry: {1}, Difficulty: {2}, ID: {3}) because no instance save is available!", GetMapName(), GetId(), GetDifficultyID(), GetInstanceId());
-                return;
+                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask;
+                if (dungeonEncounter != null)
+                    instanceCompletedEncounters |= 1u << dungeonEncounter.Bit;
+
+                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+
+                SQLTransaction trans = new();
+
+                if (entries.IsInstanceIdBound())
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, dungeonEncounter));
+
+                foreach (var player in GetPlayers())
+                {
+                    // never instance bind GMs with GM mode enabled
+                    if (player.IsGameMaster())
+                        continue;
+
+                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
+                    string oldData = "";
+                    if (playerLock != null)
+                        oldData = playerLock.GetData().Data;
+
+                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+
+                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateSaveData(oldData, updateSaveDataEvent), instanceCompletedEncounters, dungeonEncounter));
+
+                    if (isNewLock)
+                    {
+                        InstanceSaveCreated data = new();
+                        data.Gm = player.IsGameMaster();
+                        player.SendPacket(data);
+
+                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
+                    }
+                }
+
+                DB.Characters.CommitTransaction(trans);
             }
+        }
 
-            // perm bind all players that are currently inside the instance
-            foreach (Player player in GetPlayers())
+        public void CreateInstanceLockForPlayer(Player player)
+        {
+            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+            InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
+
+            bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+
+            SQLTransaction trans = new();
+
+            InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), i_instanceLock.GetData().CompletedEncountersMask, null));
+
+            DB.Characters.CommitTransaction(trans);
+
+            if (isNewLock)
             {
-                // never instance bind GMs with GM mode enabled
-                if (player.IsGameMaster())
-                    continue;
+                InstanceSaveCreated data = new();
+                data.Gm = player.IsGameMaster();
+                player.SendPacket(data);
 
-                InstanceBind bind = player.GetBoundInstance(save.GetMapId(), save.GetDifficultyID());
-                if (bind != null && bind.perm)
-                {
-                    if (bind.save != null && bind.save.GetInstanceId() != save.GetInstanceId())
-                    {
-                        Log.outError(LogFilter.Maps, "Player (GUID: {0}, Name: {1}) is in instance map (Name: {2}, Entry: {3}, Difficulty: {4}, ID: {5}) that is being bound, but already has a save for the map on ID {6}!",
-                            player.GetGUID().GetCounter(), player.GetName(), GetMapName(), save.GetMapId(), save.GetDifficultyID(), save.GetInstanceId(), bind.save.GetInstanceId());
-                    }
-                    else if (bind.save == null)
-                    {
-                        Log.outError(LogFilter.Maps, "Player (GUID: {0}, Name: {1}) is in instance map (Name: {2}, Entry: {3}, Difficulty: {4}, ID: {5}) that is being bound, but already has a bind (without associated save) for the map!",
-                            player.GetGUID().GetCounter(), player.GetName(), GetMapName(), save.GetMapId(), save.GetDifficultyID(), save.GetInstanceId());
-                    }
-                }
-                else
-                {
-                    player.BindToInstance(save, true);
-                    InstanceSaveCreated data = new();
-                    data.Gm = player.IsGameMaster();
-                    player.SendPacket(data);
-
-                    player.GetSession().SendCalendarRaidLockout(save, true);
-
-                    // if group leader is in instance, group also gets bound
-                    Group group = player.GetGroup();
-                    if (group)
-                        if (group.GetLeaderGUID() == player.GetGUID())
-                            group.BindToInstance(save, true);
-                }
+                player.GetSession().SendCalendarRaidLockoutAdded(newLock);
             }
         }
 
@@ -5194,7 +5121,7 @@ namespace Game.Maps
                 return TeamId.Horde;
             return TeamId.Neutral;
         }
-        
+
         public Team GetTeamInInstance() { return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde; }
 
         public uint GetScriptId()
@@ -5213,11 +5140,15 @@ namespace Game.Maps
         }
 
         public InstanceScenario GetInstanceScenario() { return i_scenario; }
+
         public void SetInstanceScenario(InstanceScenario scenario) { i_scenario = scenario; }
+
+        public InstanceLock GetInstanceLock() { return i_instanceLock; }
 
         InstanceScript i_data;
         uint i_script_id;
         InstanceScenario i_scenario;
+        InstanceLock i_instanceLock;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
     }

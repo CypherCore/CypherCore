@@ -324,7 +324,7 @@ namespace Framework.Database
             }
         }
 
-        public void EscapeString(ref string str)
+        public static void EscapeString(ref string str)
         {
             str = MySqlHelper.EscapeString(str);
         }

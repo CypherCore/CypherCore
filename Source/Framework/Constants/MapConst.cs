@@ -71,6 +71,8 @@ namespace Framework.Constants
 
         public const string VMapMagic = "VMAP_4.B";
         public const float VMAPInvalidHeightValue = -200000.0f;
+
+        public const uint MaxDungeonEncountersPerBoss = 4;
     }
 
     public enum NewWorldReason
@@ -182,6 +184,7 @@ namespace Framework.Constants
         CannotEnterNotInRaid, // Target Instance Is A Raid Instance And The Player Is Not In A Raid Group
         CannotEnterCorpseInDifferentInstance, // Player Is Dead And Their Corpse Is Not In Target Instance
         CannotEnterInstanceBindMismatch, // Player'S Permanent Instance Save Is Not Compatible With Their Group'S Current Instance Bind
+        CannotEnterAlreadyCompletedEncounter, // Player is locked to encounter that wasn't defeated in the instance yet
         CannotEnterTooManyInstances, // Player Has Entered Too Many Instances Recently
         CannotEnterMaxPlayers, // Target Map Already Has The Maximum Number Of Players Allowed
         CannotEnterZoneInCombat, // A Boss Encounter Is Currently In Progress On The Target Map

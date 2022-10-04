@@ -223,7 +223,7 @@ namespace Game.Entities
             // call enter script hooks after everyting else has processed
             Global.ScriptMgr.OnPlayerUpdateZone(this, newZone, newArea);
             if (oldZone != newZone)
-            { 
+            {
                 Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
                 Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
                 SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
@@ -288,8 +288,8 @@ namespace Game.Entities
         }
 
         public ZonePVPTypeOverride GetOverrideZonePVPType() { return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType; }
-        public void SetOverrideZonePVPType(ZonePVPTypeOverride type) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); }  
-        
+        public void SetOverrideZonePVPType(ZonePVPTypeOverride type) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); }
+
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
         {
             // some instances only have one difficulty
@@ -355,7 +355,7 @@ namespace Game.Entities
                 }
 
                 if (pair.Value.perm)
-                    GetSession().SendCalendarRaidLockout(pair.Value.save, false);
+                    GetSession().SendCalendarRaidLockoutRemoved(pair.Value.save);
 
                 pair.Value.save.RemovePlayer(this);               // save can become invalid
                 difficultyDic.Remove(pair.Key);
@@ -436,20 +436,14 @@ namespace Game.Entities
             return null;
         }
 
-        public void BindToInstance()
+        public void ConfirmPendingBind()
         {
-            InstanceSave mapSave = Global.InstanceSaveMgr.GetInstanceSave(_pendingBindId);
-            if (mapSave == null) //it seems sometimes mapSave is NULL, but I did not check why
+            InstanceMap map = GetMap().ToInstanceMap();
+            if (map == null || map.GetInstanceId() != _pendingBindId)
                 return;
 
-            InstanceSaveCreated data = new();
-            data.Gm = IsGameMaster();
-            SendPacket(data);
             if (!IsGameMaster())
-            {
-                BindToInstance(mapSave, true, BindExtensionState.Keep);
-                GetSession().SendCalendarRaidLockout(mapSave, true);
-            }
+                map.CreateInstanceLockForPlayer(this);
         }
 
         public void SetPendingBind(uint instanceId, uint bindTimer)
@@ -460,41 +454,25 @@ namespace Game.Entities
 
         public void SendRaidInfo()
         {
+            DateTime now = GameTime.GetSystemTime();
+
+            var instanceLocks = Global.InstanceLockMgr.GetInstanceLocksForPlayer(GetGUID());
+
             InstanceInfoPkt instanceInfo = new();
 
-            long now = GameTime.GetGameTime();
-            foreach (var difficultyDic in m_boundInstances.Values)
+            foreach (InstanceLock instanceLock in instanceLocks)
             {
-                foreach (var instanceBind in difficultyDic.Values)
-                {
-                    if (instanceBind.perm)
-                    {
-                        InstanceSave save = instanceBind.save;
+                InstanceLockPkt lockInfos = new();
+                lockInfos.InstanceID = instanceLock.GetInstanceId();
+                lockInfos.MapID = instanceLock.GetMapId();
+                lockInfos.DifficultyID = (uint)instanceLock.GetDifficultyId();
+                lockInfos.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds;
+                lockInfos.CompletedMask = instanceLock.GetData().CompletedEncountersMask;
 
-                        InstanceLock lockInfos;
-                        lockInfos.InstanceID = save.GetInstanceId();
-                        lockInfos.MapID = save.GetMapId();
-                        lockInfos.DifficultyID = (uint)save.GetDifficultyID();
-                        if (instanceBind.extendState != BindExtensionState.Extended)
-                            lockInfos.TimeRemaining = (int)(save.GetResetTime() - now);
-                        else
-                            lockInfos.TimeRemaining = (int)(Global.InstanceSaveMgr.GetSubsequentResetTime(save.GetMapId(), save.GetDifficultyID(), save.GetResetTime()) - now);
+                lockInfos.Locked = !instanceLock.IsExpired();
+                lockInfos.Extended = instanceLock.IsExtended();
 
-                        lockInfos.CompletedMask = 0;
-                        Map map = Global.MapMgr.FindMap(save.GetMapId(), save.GetInstanceId());
-                        if (map != null)
-                        {
-                            InstanceScript instanceScript = ((InstanceMap)map).GetInstanceScript();
-                            if (instanceScript != null)
-                                lockInfos.CompletedMask = instanceScript.GetCompletedEncounterMask();
-                        }
-
-                        lockInfos.Locked = instanceBind.extendState != BindExtensionState.Expired;
-                        lockInfos.Extended = instanceBind.extendState == BindExtensionState.Extended;
-
-                        instanceInfo.LockList.Add(lockInfos);
-                    }
-                }
+                instanceInfo.LockList.Add(lockInfos);
             }
 
             SendPacket(instanceInfo);
@@ -819,6 +797,16 @@ namespace Game.Entities
 
             if (HasAuraType(AuraType.ForceBeathBar))
                 m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
+        }
+
+        public uint GetRecentInstanceId(uint mapId)
+        {
+            return m_recentInstances.LookupByKey(mapId);
+        }
+
+        public void SetRecentInstance(uint mapId, uint instanceId)
+        {
+            m_recentInstances[mapId] = instanceId;
         }
     }
 }

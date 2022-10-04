@@ -103,22 +103,6 @@ namespace Game.Chat
                         }
                     }
 
-                    // if the player or the player's group is bound to another instance
-                    // the player will not be bound to another one
-                    InstanceBind bind = _player.GetBoundInstance(target.GetMapId(), target.GetDifficultyID(map.GetEntry()));
-                    if (bind == null)
-                    {
-                        Group group = _player.GetGroup();
-                        // if no bind exists, create a solo bind
-                        InstanceBind gBind = group ? group.GetBoundInstance(target) : null;                // if no bind exists, create a solo bind
-                        if (gBind == null)
-                        {
-                            InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(target.GetInstanceId());
-                            if (save != null)
-                                _player.BindToInstance(save, !save.CanReset());
-                        }
-                    }
-
                     if (map.IsRaid())
                     {
                         _player.SetRaidDifficultyID(target.GetRaidDifficultyID());

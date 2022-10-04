@@ -78,7 +78,6 @@ namespace Game.Entities
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
-            m_prevMapDifficulty = Difficulty.NormalRaid;
             m_InstanceValid = true;
 
             _specializationInfo = new SpecializationInfo();
@@ -580,7 +579,7 @@ namespace Game.Entities
                 {
                     // Player left the instance
                     if (_pendingBindId == GetInstanceId())
-                        BindToInstance();
+                        ConfirmPendingBind();
                     SetPendingBind(0, 0);
                 }
                 else
@@ -4051,8 +4050,8 @@ namespace Game.Entities
             corpse.UpdatePositionData();
             corpse.SetZoneScript();
 
-            // we do not need to save corpses for BG/arenas
-            if (!GetMap().IsBattlegroundOrArena())
+            // we do not need to save corpses for instances
+            if (!GetMap().Instanceable())
                 corpse.SaveToDB();
 
             return corpse;
@@ -5304,20 +5303,12 @@ namespace Game.Entities
             // raid downscaling - send difficulty to player
             if (GetMap().IsRaid())
             {
-                m_prevMapDifficulty = GetMap().GetDifficultyID();
-                DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(m_prevMapDifficulty);
-                SendRaidDifficulty(difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy), (int)m_prevMapDifficulty);
+                Difficulty mapDifficulty = GetMap().GetDifficultyID();
+                var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
+                SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
             }
             else if (GetMap().IsNonRaidDungeon())
-            {
-                m_prevMapDifficulty = GetMap().GetDifficultyID();
-                SendDungeonDifficulty((int)m_prevMapDifficulty);
-            }
-            else if (!GetMap().Instanceable())
-            {
-                DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(m_prevMapDifficulty);
-                SendRaidDifficulty(difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy));
-            }
+                SendDungeonDifficulty((int)GetMap().GetDifficultyID());
 
             PhasingHandler.OnMapChange(this);
 

@@ -917,32 +917,6 @@ namespace Game.Entities
                             summoner.ToGameObject().GetAI()?.SummonedCreatureDies(creature, attacker);
                     }
                 }
-
-                // Dungeon specific stuff, only applies to players killing creatures
-                if (creature.GetInstanceId() != 0)
-                {
-                    Map instanceMap = creature.GetMap();
-
-                    /// @todo do instance binding anyway if the charmer/owner is offline
-                    if (instanceMap.IsDungeon() && ((attacker != null && attacker.GetCharmerOrOwnerPlayerOrPlayerItself() != null) || attacker == victim))
-                    {
-                        if (instanceMap.IsRaidOrHeroicDungeon())
-                        {
-                            if (creature.GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.InstanceBind))
-                                instanceMap.ToInstanceMap().PermBindAllPlayers();
-                        }
-                        else
-                        {
-                            // the reset time is set but not added to the scheduler
-                            // until the players leave the instance
-                            long resettime = GameTime.GetGameTime() + 2 * Time.Hour;
-                            InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(creature.GetInstanceId());
-                            if (save != null)
-                                if (save.GetResetTime() < resettime)
-                                    save.SetResetTime(resettime);
-                        }
-                    }
-                }
             }
 
             // outdoor pvp things, do these after setting the death state, else the player activity notify won't work... doh...

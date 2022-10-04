@@ -2155,6 +2155,30 @@ namespace Game.Groups
                 worker(refe.GetSource());
         }
 
+        uint GetInstanceId(MapRecord mapEntry) { return 0;    }
+
+        public ObjectGuid GetRecentInstanceOwner(uint mapId)
+        {
+
+            if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
+                return value.Item1;
+
+            return m_leaderGuid;
+        }
+
+        public uint GetRecentInstanceId(uint mapId)
+        {
+            if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
+                return value.Item2;
+
+            return 0;
+        }
+
+        public void SetRecentInstance(uint mapId, ObjectGuid instanceOwner, uint instanceId)
+        {
+            m_recentInstances[mapId] = Tuple.Create(instanceOwner, instanceId);
+        }
+        
         List<MemberSlot> m_memberSlots = new();
         GroupRefManager m_memberMgr = new();
         List<Player> m_invitees = new();
@@ -2174,6 +2198,7 @@ namespace Game.Groups
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
         Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new();
+        Dictionary<uint, Tuple<ObjectGuid, uint>> m_recentInstances = new();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
         uint m_dbStoreId;

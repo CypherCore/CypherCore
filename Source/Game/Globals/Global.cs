@@ -74,6 +74,7 @@ public static class Global
     public static WaypointManager WaypointMgr { get { return WaypointManager.Instance; } }
     public static TransportManager TransportMgr { get { return TransportManager.Instance; } }
     public static InstanceSaveManager InstanceSaveMgr { get { return InstanceSaveManager.Instance; } }
+    public static InstanceLockManager InstanceLockMgr { get { return InstanceLockManager.Instance; } }
     public static ScenarioManager ScenarioMgr { get { return ScenarioManager.Instance; } }
 
     //PVP

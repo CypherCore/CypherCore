@@ -516,6 +516,8 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading instances...");
             Global.InstanceSaveMgr.LoadInstances();
 
+            Global.InstanceLockMgr.Load();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Localization strings...");
             uint oldMSTime = Time.GetMSTime();
             Global.ObjectMgr.LoadCreatureLocales();

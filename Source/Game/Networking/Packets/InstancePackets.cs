@@ -41,11 +41,11 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(LockList.Count);
 
-            foreach (InstanceLock lockInfos in LockList)
+            foreach (InstanceLockPkt lockInfos in LockList)
                 lockInfos.Write(_worldPacket);
         }
 
-        public List<InstanceLock> LockList = new();
+        public List<InstanceLockPkt> LockList = new();
     }
 
     class ResetInstances : ClientPacket
@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    public struct InstanceLock
+    public struct InstanceLockPkt
     {
         public void Write(WorldPacket data)
         {

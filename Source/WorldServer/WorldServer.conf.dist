@@ -209,6 +209,7 @@ Logger.Network = 3,Console Server
 #Logger.Condition=3,Console Server
 #Logger.Gameevent=3,Console Server
 #Logger.Guild=3,Console Server
+#Logger.Instance=3,Console Server
 #Logger.Lfg=3,Console Server
 #Logger.Loot=3,Console Server
 #Logger.MapsScript=3,Console Server

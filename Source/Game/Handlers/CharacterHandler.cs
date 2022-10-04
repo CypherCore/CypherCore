@@ -1312,7 +1312,7 @@ namespace Game
             for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
             {
                 string declinedName = packet.DeclinedNames.name[i];
-                DB.Characters.EscapeString(ref declinedName);
+                CharacterDatabase.EscapeString(ref declinedName);
                 packet.DeclinedNames.name[i] = declinedName;
             }
 

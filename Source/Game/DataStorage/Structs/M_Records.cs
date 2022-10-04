@@ -105,6 +105,7 @@ namespace Game.DataStorage
         }
 
         public bool IsDynamicDifficultyMap() { return (Flags[0] & MapFlags.CanToggleDifficulty) != 0; }
+        public bool IsFlexLocking() { return (Flags[0] & MapFlags.FlexLocking) != 0; }
         public bool IsGarrison() { return (Flags[0] & MapFlags.Garrison) != 0; }
         public bool IsSplitByFaction() { return Id == 609 || Id == 2175; }
     }
@@ -126,19 +127,24 @@ namespace Game.DataStorage
         public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
         public uint DifficultyID;
         public int LockID;
-        public byte ResetInterval;
+        public MapDifficultyResetInterval ResetInterval;
         public uint MaxPlayers;
         public int ItemContext;
         public uint ItemContextPickerID;
-        public int Flags;
+        public MapDifficultyFlags Flags;
         public int ContentTuningID;
         public uint MapID;
 
+        public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
+        public bool IsUsingEncounterLocks() { return Flags.HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
+        public bool IsRestoringDungeonState() { return Flags.HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
+        public bool IsExtendable() { return !Flags.HasFlag(MapDifficultyFlags.DisableLockExtension); }
+
         public uint GetRaidDuration()
         {
-            if (ResetInterval == 1)
+            if (ResetInterval == MapDifficultyResetInterval.Daily)
                 return 86400;
-            if (ResetInterval == 2)
+            if (ResetInterval == MapDifficultyResetInterval.Weekly)
                 return 604800;
             return 0;
         }

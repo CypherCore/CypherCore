@@ -417,6 +417,7 @@ public enum LogFilter
     Garrison,
     Gameevent,
     Guild,
+    Instance,
     Lfg,
     Loot,
     MapsScript,

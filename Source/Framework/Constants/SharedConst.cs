@@ -943,9 +943,8 @@ namespace Framework.Constants
 
     public enum MapFlags
     {
-        CanToggleDifficulty = 0x0100,
-        FlexLocking = 0x8000, // All difficulties share completed encounters lock, not bound to a single instance id
-                              // heroic difficulty flag overrides it and uses instance id bind
+        CanToggleDifficulty = 0x100,
+        FlexLocking = 0x8000,
         Garrison = 0x4000000
     }
 

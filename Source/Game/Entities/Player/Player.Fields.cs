@@ -79,6 +79,7 @@ namespace Game.Entities
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
         public Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new();
+        Dictionary<uint, uint> m_recentInstances = new();
         Dictionary<uint, long> _instanceResetTimes = new();
         uint _pendingBindId;
         uint _pendingBindTimer;
@@ -87,7 +88,6 @@ namespace Game.Entities
         Difficulty m_dungeonDifficulty;
         Difficulty m_raidDifficulty;
         Difficulty m_legacyRaidDifficulty;
-        Difficulty m_prevMapDifficulty;
 
         //Movement
         public PlayerTaxi m_taxi = new();

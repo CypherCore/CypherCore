@@ -304,18 +304,14 @@ namespace Game
                             Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' does not have a corpse in instance map {1} and cannot enter", player.GetName(), at.target_mapId);
                             break;
                         case EnterState.CannotEnterInstanceBindMismatch:
-                            {
-                                MapRecord entry = CliDB.MapStorage.LookupByKey(at.target_mapId);
-                                if (entry != null)
-                                {
-                                    string mapName = entry.MapName[player.GetSession().GetSessionDbcLocale()];
-                                    Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' cannot enter instance map '{1}' because their permanent bind is incompatible with their group's", player.GetName(), mapName);
-                                    // is there a special opcode for this?
-                                    // @todo figure out how to get player localized difficulty string (e.g. "10 player", "Heroic" etc)
-                                    player.SendSysMessage(CypherStrings.InstanceBindMismatch, mapName);
-                                }
-                                reviveAtTrigger = true;
-                            }
+                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.LockedToDifferentInstance);
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            reviveAtTrigger = true;
+                            break;
+                        case EnterState.CannotEnterAlreadyCompletedEncounter:
+                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.AlreadyCompletedEncounter);
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            reviveAtTrigger = true;
                             break;
                         case EnterState.CannotEnterTooManyInstances:
                             player.SendTransferAborted(at.target_mapId, TransferAbortReason.TooManyInstances);
@@ -783,7 +779,7 @@ namespace Game
             }
 
             if (packet.AcceptLock)
-                GetPlayer().BindToInstance();
+                GetPlayer().ConfirmPendingBind();
             else
                 GetPlayer().RepopAtGraveyard();
 
