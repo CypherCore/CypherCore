@@ -23,7 +23,7 @@ using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 {
-    struct BossIds
+    struct DataTypes
     {
         public const uint Lucifron = 0;
         public const uint Magmadar = 1;
@@ -91,6 +91,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
     [Script]
     class instance_molten_core : InstanceMapScript
     {
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.Lucifron, 663),
+            new DungeonEncounterData(DataTypes.Magmadar, 664),
+            new DungeonEncounterData(DataTypes.Gehennas, 665),
+            new DungeonEncounterData(DataTypes.Garr, 666),
+            new DungeonEncounterData(DataTypes.Shazzrah, 667),
+            new DungeonEncounterData(DataTypes.BaronGeddon, 668),
+            new DungeonEncounterData(DataTypes.SulfuronHarbinger, 669),
+            new DungeonEncounterData(DataTypes.GolemaggTheIncinerator, 670),
+            new DungeonEncounterData(DataTypes.MajordomoExecutus, 671),
+            new DungeonEncounterData(DataTypes.Ragnaros, 672)
+        };
+
         public instance_molten_core() : base(nameof(instance_molten_core), 409) { }
 
         class instance_molten_core_InstanceMapScript : InstanceScript
@@ -104,7 +118,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             public instance_molten_core_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("MC");
-                SetBossNumber(BossIds.MaxEncounter);
+                SetBossNumber(DataTypes.MaxEncounter);
+                LoadDungeonEncounterData(encounters);
                 _executusSchedule = false;
                 _ragnarosAddDeaths = 0;
             }
@@ -168,9 +183,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             {
                 switch (type)
                 {
-                    case BossIds.GolemaggTheIncinerator:
+                    case DataTypes.GolemaggTheIncinerator:
                         return _golemaggTheIncineratorGUID;
-                    case BossIds.MajordomoExecutus:
+                    case DataTypes.MajordomoExecutus:
                         return _majordomoExecutusGUID;
                 }
 
@@ -182,11 +197,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 if (!base.SetBossState(bossId, state))
                     return false;
 
-                if (state == EncounterState.Done && bossId < BossIds.MajordomoExecutus)
+                if (state == EncounterState.Done && bossId < DataTypes.MajordomoExecutus)
                     if (CheckMajordomoExecutus())
                         SummonMajordomoExecutus();
 
-                if (bossId == BossIds.MajordomoExecutus && state == EncounterState.Done)
+                if (bossId == DataTypes.MajordomoExecutus && state == EncounterState.Done)
                     DoRespawnGameObject(_cacheOfTheFirelordGUID, TimeSpan.FromDays(7));
 
                 return true;
@@ -198,7 +213,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 if (!_majordomoExecutusGUID.IsEmpty())
                     return;
 
-                if (GetBossState(BossIds.MajordomoExecutus) != EncounterState.Done)
+                if (GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
                 {
                     instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.SummonPositions[0]);
                     instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[1]);
@@ -220,10 +235,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 
             bool CheckMajordomoExecutus()
             {
-                if (GetBossState(BossIds.Ragnaros) == EncounterState.Done)
+                if (GetBossState(DataTypes.Ragnaros) == EncounterState.Done)
                     return false;
 
-                for (byte i = 0; i < BossIds.MajordomoExecutus; ++i)
+                for (byte i = 0; i < DataTypes.MajordomoExecutus; ++i)
                     if (GetBossState(i) != EncounterState.Done)
                         return false;
 

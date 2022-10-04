@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
     [Script]
     class boss_majordomo : BossAI
     {
-        public boss_majordomo(Creature creature) : base(creature, BossIds.MajordomoExecutus) { }
+        public boss_majordomo(Creature creature) : base(creature, DataTypes.MajordomoExecutus) { }
 
         public override void KilledUnit(Unit victim)
         {
@@ -93,7 +93,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
         {
             _scheduler.Update(diff);
 
-            if (instance.GetBossState(BossIds.MajordomoExecutus) != EncounterState.Done)
+            if (instance.GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
             {
                 if (!UpdateVictim())
                     return;

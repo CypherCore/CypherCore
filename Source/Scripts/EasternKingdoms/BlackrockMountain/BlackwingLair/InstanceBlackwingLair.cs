@@ -25,9 +25,6 @@ using Framework.Constants;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
 {
-    //uint const EncounterCount     = 8;
-
-
     struct DataTypes
     {
         // Encounter States/Boss GUIDs
@@ -141,6 +138,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
     [Script]
     class instance_blackwing_lair : InstanceMapScript
     {
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.RazorgoreTheUntamed, 610),
+            new DungeonEncounterData(DataTypes.VaelastrazTheCorrupt, 611),
+            new DungeonEncounterData(DataTypes.BroodlordLashlayer, 612),
+            new DungeonEncounterData(DataTypes.Firemaw, 613),
+            new DungeonEncounterData(DataTypes.Ebonroc, 614),
+            new DungeonEncounterData(DataTypes.Flamegor, 615),
+            new DungeonEncounterData(DataTypes.Chromaggus, 616),
+            new DungeonEncounterData(DataTypes.Nefarian, 617)
+        };
+
         public instance_blackwing_lair() : base(nameof(instance_blackwing_lair), 469) { }
 
         class instance_blackwing_lair_InstanceMapScript : InstanceScript
@@ -156,6 +165,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 SetBossNumber(BWLMisc.EncounterCount);
                 LoadDoorData(BWLMisc.doorData);
                 LoadObjectData(BWLMisc.creatureData, BWLMisc.gameObjectData);
+                LoadDungeonEncounterData(encounters);
 
                 // Razorgore
                 EggCount = 0;

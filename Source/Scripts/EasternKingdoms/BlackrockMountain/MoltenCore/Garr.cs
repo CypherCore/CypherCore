@@ -40,7 +40,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
     [Script]
     class boss_garr : BossAI
     {
-        public boss_garr(Creature creature) : base(creature, BossIds.Garr) { }
+        public boss_garr(Creature creature) : base(creature, DataTypes.Garr) { }
 
         public override void JustEngagedWith(Unit victim)
         {

@@ -160,7 +160,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         {
             public instance_blackrock_spireMapScript(InstanceMap map) : base(map)
             {
-                SetHeaders("BRS");
+                SetHeaders("BRSv1");
                 SetBossNumber(BRSMiscConst.EncounterCount);
                 LoadDoorData(BRSMiscConst.doorData);
 

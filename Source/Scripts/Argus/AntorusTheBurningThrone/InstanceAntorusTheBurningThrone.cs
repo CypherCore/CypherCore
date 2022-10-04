@@ -79,7 +79,22 @@ namespace Scripts.Argus.AntorusTheBurningThrone
             new DoorData(GameObjectIds.Rock, DataTypes.GarothiWorldbreaker, DoorType.Passage)
         };
 
-        public instance_antorus_the_burning_throne() : base("instance_antorus_the_burning_throne", 757) { }
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.GarothiWorldbreaker, 2076),
+            new DungeonEncounterData(DataTypes.FelhoundsOfSageras, 2074),
+            new DungeonEncounterData(DataTypes.AntoranHighCommand, 2070),
+            new DungeonEncounterData(DataTypes.PortalKeeperHasabel, 2064),
+            new DungeonEncounterData(DataTypes.EonarTheLifeBinder, 2075),
+            new DungeonEncounterData(DataTypes.ImonarTheSoulhunter, 2082),
+            new DungeonEncounterData(DataTypes.Kingaroth, 2088),
+            new DungeonEncounterData(DataTypes.Varimathras, 2069),
+            new DungeonEncounterData(DataTypes.TheCovenOfShivarra, 2073),
+            new DungeonEncounterData(DataTypes.Aggramar, 2063),
+            new DungeonEncounterData(DataTypes.ArgusTheUnmaker, 2092)
+        };
+
+        public instance_antorus_the_burning_throne() : base("instance_antorus_the_burning_throne", 1712) { }
 
         class instance_antorus_the_burning_throne_InstanceMapScript : InstanceScript
         {
@@ -89,6 +104,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone
                 SetBossNumber(BossIds.EncounterCount);
                 LoadObjectData(creatureData, null);
                 LoadDoorData(doorData);
+                LoadDungeonEncounterData(encounters);
             }
 
             public override void OnCreatureCreate(Creature creature)

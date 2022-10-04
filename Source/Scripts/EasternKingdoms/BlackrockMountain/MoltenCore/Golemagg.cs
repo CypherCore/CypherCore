@@ -46,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
     [Script]
     class boss_golemagg : BossAI
     {
-        public boss_golemagg(Creature creature) : base(creature, BossIds.GolemaggTheIncinerator) { }
+        public boss_golemagg(Creature creature) : base(creature, DataTypes.GolemaggTheIncinerator) { }
 
         public override void Reset()
         {
@@ -117,7 +117,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
             if (HealthAbovePct(50) || _instance == null)
                 return;
 
-            Creature pGolemagg = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.GolemaggTheIncinerator));
+            Creature pGolemagg = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.GolemaggTheIncinerator));
             if (pGolemagg)
             {
                 if (pGolemagg.IsAlive())

@@ -49,6 +49,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
             new ObjectData(CreatureIds.RazTheCrazed, DataTypes.RazTheCrazed)
         };
 
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.RomoggBonecrusher, 1040),
+            new DungeonEncounterData(DataTypes.Corla, 1038),
+            new DungeonEncounterData(DataTypes.KarshSteelbender, 1039),
+            new DungeonEncounterData(DataTypes.Beauty, 1037),
+            new DungeonEncounterData(DataTypes.AscendantLordObsidius, 1036)
+        };
+
         public instance_blackrock_caverns() : base(nameof(instance_blackrock_caverns), 645) { }
 
         class instance_blackrock_caverns_InstanceMapScript : InstanceScript
@@ -58,6 +67,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
                 SetHeaders("BRC");
                 SetBossNumber(5);
                 LoadObjectData(creatureData, null);
+                LoadDungeonEncounterData(encounters);
             }
 
             public override bool SetBossState(uint type, EncounterState state)

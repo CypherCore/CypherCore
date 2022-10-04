@@ -146,7 +146,7 @@ namespace Game.Maps
             }
         }
 
-        void LoadDungeonEncounterData(DungeonEncounterData[] encounters)
+        public void LoadDungeonEncounterData(DungeonEncounterData[] encounters)
         {
             foreach (DungeonEncounterData encounter in encounters)
                 LoadDungeonEncounterData(encounter.BossId, encounter.DungeonEncounterId);
@@ -986,10 +986,16 @@ namespace Game.Maps
         bool _combatResurrectionTimerStarted;
     }
 
-    class DungeonEncounterData
+    public class DungeonEncounterData
     {
         public uint BossId;
         public uint[] DungeonEncounterId = new uint[4];
+
+        public DungeonEncounterData(uint bossId, params uint[] dungeonEncounterIds)
+        {
+            BossId = bossId;
+            DungeonEncounterId = dungeonEncounterIds;
+        }
     }
 
     public class DoorData

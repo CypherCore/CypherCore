@@ -109,7 +109,6 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         public const uint MaxTargetsSize = 6;
 
         public const byte SummonGroupIdSurgingFel = 0;
-        public const uint EncounterIdGarothiWorldbreaker = 2076;
         public const ushort AnimKitIdCannonDestroyed = 13264;
         public const uint DataLastFiredCannon = 0;
 
@@ -208,7 +207,6 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             _JustDied();
             Talk(TextIds.SayDeath);
             CleanupEncounter();
-            instance.SendBossKillCredit(MiscConst.EncounterIdGarothiWorldbreaker);
             instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 

@@ -113,6 +113,21 @@ namespace Scripts.EasternKingdoms.Karazhan
             new Position(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)  // Rokad the Ravager
         };
 
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.Attumen, 652),
+            new DungeonEncounterData(DataTypes.Moroes, 653),
+            new DungeonEncounterData(DataTypes.MaidenOfVirtue, 654),
+            new DungeonEncounterData(DataTypes.OperaPerformance, 655),
+            new DungeonEncounterData(DataTypes.Curator, 656),
+            new DungeonEncounterData(DataTypes.Aran, 658),
+            new DungeonEncounterData(DataTypes.Terestian, 657),
+            new DungeonEncounterData(DataTypes.Netherspite, 659),
+            new DungeonEncounterData(DataTypes.Chess, 660),
+            new DungeonEncounterData(DataTypes.Malchezzar, 661),
+            new DungeonEncounterData(DataTypes.Nightbane, 662)
+        };
+
         public instance_karazhan() : base(nameof(instance_karazhan), 532) { }
 
         class instance_karazhan_InstanceMapScript : InstanceScript
@@ -142,6 +157,7 @@ namespace Scripts.EasternKingdoms.Karazhan
             {
                 SetHeaders("KZ");
                 SetBossNumber(12);
+                LoadDungeonEncounterData(encounters);
 
                 // 1 - Oz, 2 - Hood, 3 - Raj, this never gets altered.
                 OperaEvent = RandomHelper.URand(1, 3);

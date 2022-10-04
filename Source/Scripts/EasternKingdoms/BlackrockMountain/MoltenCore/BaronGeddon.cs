@@ -41,7 +41,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
     [Script]
     class boss_baron_geddon : BossAI
     {
-        public boss_baron_geddon(Creature creature) : base(creature, BossIds.BaronGeddon) { }
+        public boss_baron_geddon(Creature creature) : base(creature, DataTypes.BaronGeddon) { }
 
         public override void JustEngagedWith(Unit victim)
         {

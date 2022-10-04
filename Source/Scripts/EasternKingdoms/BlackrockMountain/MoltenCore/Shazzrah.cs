@@ -48,7 +48,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
     [Script]
     class boss_shazzrah : BossAI
     {
-        public boss_shazzrah(Creature creature) : base(creature, BossIds.Shazzrah) { }
+        public boss_shazzrah(Creature creature) : base(creature, DataTypes.Shazzrah) { }
 
         public override void JustEngagedWith(Unit target)
         {

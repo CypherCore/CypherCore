@@ -32,7 +32,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Gehennas
     [Script]
     class boss_gehennas : BossAI
     {
-        public boss_gehennas(Creature creature) : base(creature, BossIds.Gehennas) { }
+        public boss_gehennas(Creature creature) : base(creature, DataTypes.Gehennas) { }
 
         public override void JustEngagedWith(Unit victim)
         {

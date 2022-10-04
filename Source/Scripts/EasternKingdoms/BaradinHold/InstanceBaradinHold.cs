@@ -60,6 +60,13 @@ namespace Scripts.EasternKingdoms.BaradinHold
             new DoorData(GameObjectIds.AlizabalDoor,  DataTypes.Alizabal, DoorType.Room),
         };
 
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.Argaloth, 1033),
+            new DungeonEncounterData(DataTypes.Occuthar, 1250),
+            new DungeonEncounterData(DataTypes.Alizabal, 1332)
+        };
+
         public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757) { }
 
         class instance_baradin_hold_InstanceMapScript : InstanceScript
@@ -73,6 +80,7 @@ namespace Scripts.EasternKingdoms.BaradinHold
                 SetHeaders("BH");
                 SetBossNumber(3);
                 LoadDoorData(doorData);
+                LoadDungeonEncounterData(encounters);
             }
 
             public override void OnCreatureCreate(Creature creature)

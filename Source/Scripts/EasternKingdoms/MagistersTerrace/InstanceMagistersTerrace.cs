@@ -119,6 +119,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
     [Script]
     class instance_magisters_terrace : InstanceMapScript
     {
+        static DungeonEncounterData[] encounters =
+        {
+            new DungeonEncounterData(DataTypes.SelinFireheart, 1897),
+            new DungeonEncounterData(DataTypes.Vexallus, 1898),
+            new DungeonEncounterData(DataTypes.PriestessDelrissa, 1895),
+            new DungeonEncounterData(DataTypes.KaelthasSunstrider, 1894)
+        };
+        
         public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585) { }
 
         class instance_magisters_terrace_InstanceMapScript : InstanceScript
@@ -132,6 +140,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 SetBossNumber(4);
                 LoadObjectData(MiscConst.creatureData, MiscConst.gameObjectData);
                 LoadDoorData(MiscConst.doorData);
+                LoadDungeonEncounterData(encounters);
             }
 
             public override uint GetData(uint type)

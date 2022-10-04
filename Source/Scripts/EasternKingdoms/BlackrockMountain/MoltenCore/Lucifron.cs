@@ -32,7 +32,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Lucifron
     [Script]
     class boss_lucifron : BossAI
     {
-        public boss_lucifron(Creature creature) : base(creature, BossIds.Lucifron) { }
+        public boss_lucifron(Creature creature) : base(creature, DataTypes.Lucifron) { }
 
         public override void JustEngagedWith(Unit victim)
         {

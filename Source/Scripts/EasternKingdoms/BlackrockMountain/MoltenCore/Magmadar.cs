@@ -39,7 +39,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Magmadar
     [Script]
     class boss_magmadar : BossAI
     {
-        public boss_magmadar(Creature creature) : base(creature, BossIds.Magmadar) { }
+        public boss_magmadar(Creature creature) : base(creature, DataTypes.Magmadar) { }
 
         public override void Reset()
         {

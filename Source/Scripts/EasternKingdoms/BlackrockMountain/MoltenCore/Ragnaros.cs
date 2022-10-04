@@ -79,7 +79,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
         bool _hasSubmergedOnce;
         bool _isBanished;
 
-        public boss_ragnaros(Creature creature) : base(creature, BossIds.Ragnaros)
+        public boss_ragnaros(Creature creature) : base(creature, DataTypes.Ragnaros)
         {
             Initialize();
             _introState = 0;
@@ -153,7 +153,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                             break;
                         case EventIds.Intro4:
                             Talk(TextIds.SayArrival5Rag);
-                            Creature executus = ObjectAccessor.GetCreature(me, instance.GetGuidData(BossIds.MajordomoExecutus));
+                            Creature executus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.MajordomoExecutus));
                             if (executus)
                                 Unit.Kill(me, executus);
                             break;

@@ -41,7 +41,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
     [Script]
     class boss_sulfuron : BossAI
     {
-        public boss_sulfuron(Creature creature) : base(creature, BossIds.SulfuronHarbinger) { }
+        public boss_sulfuron(Creature creature) : base(creature, DataTypes.SulfuronHarbinger) { }
 
         public override void JustEngagedWith(Unit victim)
         {
