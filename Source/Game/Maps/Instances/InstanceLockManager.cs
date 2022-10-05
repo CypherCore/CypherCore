@@ -171,7 +171,10 @@ namespace Game.Maps
 
         public ICollection<InstanceLock> GetInstanceLocksForPlayer(ObjectGuid playerGuid)
         {
-            return _instanceLocksByPlayer.LookupByKey(playerGuid)?.Values;
+            if (_instanceLocksByPlayer.TryGetValue(playerGuid, out Dictionary<InstanceLockKey, InstanceLock> dictionary))
+                return dictionary.Values;
+
+            return new List<InstanceLock>();
         }
 
         public InstanceLock CreateInstanceLockForNewInstance(ObjectGuid playerGuid, MapDb2Entries entries, uint instanceId)
