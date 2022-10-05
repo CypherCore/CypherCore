@@ -279,7 +279,6 @@ namespace Game.Maps
 
             if (instanceLock.IsExpired())
             {
-                Cypher.Assert(instanceLock.IsExtended(), "Instance lock must have been extended to create instance map from it");
                 instanceLock.SetExpiryTime(GetNextResetTime(entries));
                 instanceLock.SetExtended(false);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +

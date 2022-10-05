@@ -4770,7 +4770,10 @@ namespace Game.Maps
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == TeamId.Horde ? 1 : 0, false, this);
 
             if (i_instanceLock != null)
+            {
                 i_instanceLock.SetInUse(true);
+                i_instanceExpireEvent = i_instanceLock.GetExpiryTime(); // ignore extension state for reset event (will ask players to accept extended save on expiration)
+            }
         }
 
         ~InstanceMap()
@@ -4794,9 +4797,6 @@ namespace Game.Maps
                 Cypher.Assert(false);
                 return EnterState.CannotEnterAlreadyInMap;
             }
-
-            if (m_shuttingDown)
-                return EnterState.CannotEnterInstanceShuttingDown;
 
             // allow GM's to enter
             if (player.IsGameMaster())
@@ -4883,6 +4883,12 @@ namespace Game.Maps
 
             if (i_scenario != null)
                 i_scenario.Update(diff);
+
+            if (i_instanceExpireEvent.HasValue && i_instanceExpireEvent.Value < GameTime.GetSystemTime())
+            {
+                Reset(InstanceResetMethod.Expire);
+                i_instanceExpireEvent = Global.InstanceLockMgr.GetNextResetTime(new MapDb2Entries(GetEntry(), GetMapDifficulty()));
+            }
         }
 
         public override void RemovePlayerFromMap(Player player, bool remove)
@@ -4894,7 +4900,7 @@ namespace Game.Maps
 
             // if last player set unload timer
             if (m_unloadTimer == 0 && GetPlayers().Count == 1)
-                m_unloadTimer = m_shuttingDown ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
+                m_unloadTimer = (i_instanceLock != null && i_instanceLock.IsExpired()) ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
 
             if (i_scenario != null)
                 i_scenario.OnPlayerExit(player);
@@ -4964,12 +4970,30 @@ namespace Game.Maps
                         // no client notification
                         break;
                     case InstanceResetMethod.Expire:
-                        // on lock expiration boot players (do we also care about extension state?)
-                        // set the homebind timer for players inside (1 minute)
+                    {
+                        RaidInstanceMessage raidInstanceMessage = new();
+                        raidInstanceMessage.Type = InstanceResetWarningType.Expired;
+                        raidInstanceMessage.MapID = GetId();
+                        raidInstanceMessage.DifficultyID = GetDifficultyID();
+                        raidInstanceMessage.Write();
+
+                        PendingRaidLock pendingRaidLock = new();
+                        pendingRaidLock.TimeUntilLock = 60000;
+                        pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
+                        pendingRaidLock.Extending = true;
+                        pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
+                        pendingRaidLock.Write();
+
                         foreach (Player player in GetPlayers())
-                            player.m_InstanceValid = false;
-                        m_shuttingDown = true;
+                        {
+                            player.SendPacket(raidInstanceMessage);
+                            player.SendPacket(pendingRaidLock);
+
+                            if (!pendingRaidLock.WarningOnly)
+                                player.SetPendingBind(GetInstanceId(), 60000);
+                        }
                         break;
+                    }
                     default:
                         break;
                 }
@@ -5150,7 +5174,7 @@ namespace Game.Maps
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
         GroupInstanceReference i_owningGroupRef = new();
-        bool m_shuttingDown;
+        DateTime? i_instanceExpireEvent;
     }
 
     public class BattlegroundMap : Map
