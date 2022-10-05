@@ -185,9 +185,6 @@ namespace Game
                 if (creature.IsAlive())
                     return false;
 
-                if (creature.GetGUID() == _mainLootTarget)
-                    return false;
-
                 if (!_looter.IsWithinDist(creature, LootDistance))
                     return false;
 
