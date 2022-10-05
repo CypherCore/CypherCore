@@ -16,18 +16,15 @@
  */
 
 using Framework.Constants;
-using Framework.Database;
-using Framework.IO;
+using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Networking.Packets;
-using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Game.Maps
 {
@@ -702,6 +699,15 @@ namespace Game.Maps
         public DungeonEncounterRecord GetBossDungeonEncounter(uint id)
         {
             return id < bosses.Count ? bosses[id].GetDungeonEncounterForDifficulty(instance.GetDifficultyID()) : null;
+        }
+
+        public DungeonEncounterRecord GetBossDungeonEncounter(Creature creature)
+        {
+            BossAI bossAi = (BossAI)creature.GetAI();
+            if (bossAi != null)
+                return GetBossDungeonEncounter(bossAi.GetBossId());
+
+            return null;
         }
         
         public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)

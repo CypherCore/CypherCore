@@ -20,6 +20,7 @@ using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Combat;
+using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
@@ -777,6 +778,14 @@ namespace Game.Entities
                     Loot loot = creature.loot;
                     if (creature.GetMap().Is25ManRaid())
                         loot.maxDuplicates = 3;
+
+                    InstanceScript instance = creature.GetInstanceScript();
+                    if (instance != null)
+                    {
+                        DungeonEncounterRecord dungeonEncounter = instance.GetBossDungeonEncounter(creature);
+                        if (dungeonEncounter != null)
+                            loot.SetDungeonEncounterId(dungeonEncounter.Id);
+                    }
 
                     uint lootid = creature.GetCreatureTemplate().LootId;
                     if (lootid != 0)

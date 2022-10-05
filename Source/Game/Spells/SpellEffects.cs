@@ -1259,6 +1259,7 @@ namespace Game.Spells
                                 loot = new(gameObjTarget.GetMap(), guid, loottype, groupRules ? group : null);
                                 gameObjTarget.loot = loot;
 
+                                loot.SetDungeonEncounterId(gameObjTarget.GetGoInfo().Chest.DungeonEncounter);
                                 loot.FillLoot(lootId, LootStorage.Gameobject, player, !groupRules, false, gameObjTarget.GetLootMode(), gameObjTarget.GetMap().GetDifficultyLootItemContext());
 
                                 if (gameObjTarget.GetLootMode() > 0)
@@ -1267,8 +1268,6 @@ namespace Game.Spells
                                     if (addon != null)
                                         loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
                                 }
-
-                                loot.SetDungeonEncounterId(gameObjTarget.GetGoInfo().Chest.DungeonEncounter);
                             }
 
                             /// @todo possible must be moved to loot release (in different from linked triggering)

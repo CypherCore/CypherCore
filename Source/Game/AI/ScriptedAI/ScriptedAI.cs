@@ -547,16 +547,7 @@ namespace Game.AI
             summons.DespawnAll();
             _scheduler.CancelAll();
             if (instance != null)
-            {
-                if (me.loot != null)
-                {
-                    DungeonEncounterRecord dungeonEncounter = instance.GetBossDungeonEncounter(_bossId);
-                    if (dungeonEncounter != null)
-                        me.loot.SetDungeonEncounterId(dungeonEncounter.Id);
-                }
-
                 instance.SetBossState(_bossId, EncounterState.Done);
-            }
         }
 
         public void _JustEngagedWith(Unit who)
@@ -587,7 +578,7 @@ namespace Game.AI
             {
                 Unit target = pair.Value.GetOther(me);
                 if (target.IsControlledByPlayer() && !IsInBoundary(target))
-                        target.NearTeleportTo(x, y, z, 0);
+                    target.NearTeleportTo(x, y, z, 0);
             }
         }
 
@@ -689,6 +680,8 @@ namespace Game.AI
         public override bool CanAIAttack(Unit victim) { return IsInBoundary(victim); }
 
         public void _JustReachedHome() { me.SetActive(false); }
+
+        public uint GetBossId() { return _bossId; }
     }
 
     public class WorldBossAI : ScriptedAI
