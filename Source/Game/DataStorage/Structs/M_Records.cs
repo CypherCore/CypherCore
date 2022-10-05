@@ -134,14 +134,14 @@ namespace Game.DataStorage
         public uint MaxPlayers;
         public int ItemContext;
         public uint ItemContextPickerID;
-        public MapDifficultyFlags Flags;
+        public int Flags;
         public int ContentTuningID;
         public uint MapID;
 
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
-        public bool IsUsingEncounterLocks() { return Flags.HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
-        public bool IsRestoringDungeonState() { return Flags.HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
-        public bool IsExtendable() { return !Flags.HasFlag(MapDifficultyFlags.DisableLockExtension); }
+        public bool IsUsingEncounterLocks() { return GetFlags().HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
+        public bool IsRestoringDungeonState() { return GetFlags().HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
+        public bool IsExtendable() { return !GetFlags().HasFlag(MapDifficultyFlags.DisableLockExtension); }
 
         public uint GetRaidDuration()
         {
@@ -151,6 +151,8 @@ namespace Game.DataStorage
                 return 604800;
             return 0;
         }
+
+        public MapDifficultyFlags GetFlags() { return (MapDifficultyFlags)Flags; }
     }
 
     public sealed class MapDifficultyXConditionRecord
