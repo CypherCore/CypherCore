@@ -116,9 +116,8 @@ namespace Game.Groups
                 DB.Characters.DirectExecute("DELETE FROM `groups` WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
                 // Delete all groups with less than 2 members
                 DB.Characters.DirectExecute("DELETE FROM `groups` WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
-                // Delete all rows from group_member or group_instance with no group
+                // Delete all rows from group_member with no group
                 DB.Characters.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM `groups`)");
-                DB.Characters.DirectExecute("DELETE FROM group_instance WHERE guid NOT IN (SELECT guid FROM `groups`)");
 
                 //                                                    0              1           2             3                 4      5          6      7         8       9
                 SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
