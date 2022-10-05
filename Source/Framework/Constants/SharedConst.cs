@@ -641,18 +641,18 @@ namespace Framework.Constants
     [Flags]
     public enum ReputationFlags : ushort
     {
-        None = 0x0000,
-        Visible = 0x0001,                   // makes visible in client (set or can be set at interaction with target of this faction)
-        AtWar = 0x0002,                   // enable AtWar-button in client. player controlled (except opposition team always war state), Flag only set on initial creation
-        Hidden = 0x0004,                   // hidden faction from reputation pane in client (player can gain reputation, but this update not sent to client)
-        Header = 0x0008,                   // Display as header in UI
-        Peaceful = 0x0010,
-        Inactive = 0x0020,                   // player controlled (CMSG_SET_FACTION_INACTIVE)
-        ShowPropagated = 0x0040,
-        HeaderShowsBar = 0x0080,                   // Header has its own reputation bar
-        CapitalCityForRaceChange = 0x0100,
-        Guild = 0x0200,
-        GarrisonInvasion = 0x0400
+        None = 0x00,
+        Visible = 0x01,                   // makes visible in client (set or can be set at interaction with target of this faction)
+        AtWar = 0x02,                   // enable AtWar-button in client. player controlled (except opposition team always war state), Flag only set on initial creation
+        Hidden = 0x04,                   // hidden faction from reputation pane in client (player can gain reputation, but this update not sent to client)
+        Header = 0x08,                   // Display as header in UI
+        Peaceful = 0x10,
+        Inactive = 0x20,                   // player controlled (CMSG_SET_FACTION_INACTIVE)
+        ShowPropagated = 0x40,
+        HeaderShowsBar = 0x80,                   // Header has its own reputation bar
+        CapitalCityForRaceChange = 0x100,
+        Guild = 0x200,
+        GarrisonInvasion = 0x400
     }
 
     public enum Gender : sbyte
@@ -941,11 +941,67 @@ namespace Framework.Constants
         DisplayMythic = 0x80  // Controls icon displayed on minimap when inside the instance
     }
 
-    public enum MapFlags
+    [Flags]
+    public enum MapFlags : uint
     {
-        CanToggleDifficulty = 0x100,
-        FlexLocking = 0x8000,
-        Garrison = 0x4000000
+        Optimize = 0x01,
+        DevelopmentMap = 0x02,
+        WeightedBlend = 0x04,
+        VertexColoring = 0x08,
+        SortObjects = 0x10,
+        LimitToPlayersFromOneRealm = 0x20,
+        EnableLighting = 0x40,
+        InvertedTerrain = 0x80,
+        DynamicDifficulty = 0x100,
+        ObjectFile = 0x200,
+        TextureFile = 0x400,
+        GenerateNormals = 0x800,
+        FixBorderShadowSeams = 0x1000,
+        InfiniteOcean = 0x2000,
+        UnderwaterMap = 0x4000,
+        FlexibleRaidLocking = 0x8000,
+        LimitFarclip = 0x10000,
+        UseParentMapFlightBounds = 0x20000,
+        NoRaceChangeOnThisMap = 0x40000,
+        DisabledForNonGMs = 0x80000,
+        WeightedNormals1 = 0x100000,
+        DisableLowDetailTerrain = 0x200000,
+        EnableOrgArenaBlinkRule = 0x400000,
+        WeightedHeightBlend = 0x800000,
+        CoalescingAreaSharing = 0x1000000,
+        ProvingGrounds = 0x2000000,
+        Garrison = 0x4000000,
+        EnableAINeedSystem = 0x8000000,
+        SingleVServer = 0x10000000,
+        UseInstancePool = 0x20000000,
+        MapUsesRaidGraphics = 0x40000000,
+        ForceCustomUIMap = 0x80000000,
+    }
+
+    [Flags]
+    public enum MapFlags2 : uint
+    {
+        DontActivateShowMap = 0x01,
+        NoVoteKicks = 0x02,
+        NoIncomingTransfers = 0x04,
+        DontVoxelizePathData = 0x08,
+        TerrainLOD = 0x10,
+        UnclampedPointLights = 0x20,
+        PVP = 0x40,
+        IgnoreInstanceFarmLimit = 0x80,
+        DontInheritAreaLightsFromParent = 0x100,
+        ForceLightBufferOn = 0x200,
+        WMOLiquidScale = 0x400,
+        SpellClutterOn = 0x800,
+        SpellClutterOff = 0x1000,
+        ReducedPathMapHeightValidation = 0x2000,
+        NewMinimapGeneration = 0x4000,
+        AIBotsDetectedLikePlayers = 0x8000,
+        LinearlyLitTerrain = 0x10000,
+        FogOfWar = 0x20000,
+        DisableSharedWeatherSystems = 0x40000,
+        HonorSpellAttribute11LosHitsNocamcollide = 0x80000,
+        BelongsToLayer = 0x100000,
     }
 
     // values based at Holidays.dbc
@@ -2955,7 +3011,7 @@ namespace Framework.Constants
 
     public enum CorpseDynFlags
     {
-        Lootable = 0x0001
+        Lootable = 0x1
     }
 
     public enum QueryDataGroup

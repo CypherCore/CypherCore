@@ -51,7 +51,7 @@ namespace Game.DataStorage
         public short WindSettingsID;
         public int ZmpFileDataID;
         public int WdtFileDataID;
-        public MapFlags[] Flags = new MapFlags[3];
+        public uint[] Flags = new uint[3];
 
         // Helpers
         public Expansion Expansion() { return (Expansion)ExpansionID; }
@@ -104,10 +104,13 @@ namespace Game.DataStorage
             }
         }
 
-        public bool IsDynamicDifficultyMap() { return (Flags[0] & MapFlags.CanToggleDifficulty) != 0; }
-        public bool IsFlexLocking() { return (Flags[0] & MapFlags.FlexLocking) != 0; }
-        public bool IsGarrison() { return (Flags[0] & MapFlags.Garrison) != 0; }
+        public bool IsDynamicDifficultyMap() { return GetFlags().HasFlag(MapFlags.DynamicDifficulty); }
+        public bool IsFlexLocking() { return GetFlags().HasFlag(MapFlags.FlexibleRaidLocking); }
+        public bool IsGarrison() { return GetFlags().HasFlag(MapFlags.Garrison); }
         public bool IsSplitByFaction() { return Id == 609 || Id == 2175; }
+
+        public MapFlags GetFlags() { return (MapFlags)Flags[0]; }
+        public MapFlags2 GetFlags2() { return (MapFlags2)Flags[1]; }
     }
 
     public sealed class MapChallengeModeRecord
