@@ -155,7 +155,7 @@ namespace Game.Maps
         void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
         {
             if (bossId < bosses.Count)
-                for (int i = 0; i < MapConst.MaxDungeonEncountersPerBoss; ++i)
+                for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
                     bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
         }
 

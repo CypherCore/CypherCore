@@ -25,14 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Maps
 {
-    //#define INSTANCE_ID_HIGH_MASK   0x1F440000
-    //#define INSTANCE_ID_LFG_MASK    0x00000001
-    //#define INSTANCE_ID_NORMAL_MASK 0x00010000
-
     using InstanceLockKey = Tuple<uint, uint>;
-
-    //using PlayerLockMap = std::unordered_map<InstanceLockKey, std::unique_ptr<InstanceLock>>;
-    //using LockMap = std::unordered_map<ObjectGuid, PlayerLockMap>;
 
     public class InstanceLockManager : Singleton<InstanceLockManager>
     {
@@ -193,6 +186,9 @@ namespace Game.Maps
             else
                 instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), 0);
+
+            if (!_temporaryInstanceLocksByPlayer.ContainsKey(playerGuid))
+                _temporaryInstanceLocksByPlayer[playerGuid] = new Dictionary<InstanceLockKey, InstanceLock>();
 
             _temporaryInstanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
             Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
