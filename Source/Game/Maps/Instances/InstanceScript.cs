@@ -462,6 +462,12 @@ namespace Game.Maps
             InstanceScriptDataReader reader = new(this);
             if (reader.Load(data) == InstanceScriptDataReader.Result.Ok)
             {
+                // in loot-based lockouts instance can be loaded with later boss marked as killed without preceding bosses
+                // but we still need to have them alive
+                for (uint i = 0; i < bosses.Count; ++i)
+                    if (bosses[i].state == EncounterState.Done && !CheckRequiredBosses(i))
+                        bosses[i].state = EncounterState.NotStarted;
+
                 UpdateSpawnGroups();
                 AfterDataLoad();
             }
@@ -715,6 +721,16 @@ namespace Game.Maps
             return false;
         }
 
+        public bool IsEncounterCompletedInMaskByBossId(uint completedEncountersMask, uint bossId)
+        {
+            DungeonEncounterRecord dungeonEncounter = GetBossDungeonEncounter(bossId);
+            if (dungeonEncounter != null)
+                if ((completedEncountersMask & (1 << dungeonEncounter.Bit)) != 0)
+                    return bosses[bossId].state == EncounterState.Done;
+
+            return false;
+        }
+        
         public void SetEntranceLocation(uint worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
