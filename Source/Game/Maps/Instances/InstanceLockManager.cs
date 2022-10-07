@@ -463,7 +463,7 @@ namespace Game.Maps
                     break;
             }
 
-            return new DateTime(dateTime.Year, dateTime.Month, day, hour, 0, 0);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day + day, hour, 0, 0);
         }
     }
 
