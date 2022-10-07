@@ -4923,21 +4923,26 @@ namespace Game.Maps
             if (i_data == null)
                 return;
 
-            if (i_instanceLock != null)
+            if (i_instanceLock == null || i_instanceLock.GetInstanceId() == 0)
             {
-                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-                if (entries.IsInstanceIdBound() || IsRaid() || entries.MapDifficulty.IsRestoringDungeonState() || !i_owningGroupRef.IsValid())
-                {
-                    InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
-                    i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
-                    i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
-                    if (!lockData.Data.IsEmpty())
-                    {
-                        Log.outDebug(LogFilter.Maps, "Loading instance data for `{0}` with id {1}",
-                            Global.ObjectMgr.GetScriptName(i_script_id), i_InstanceId);
-                        i_data.Load(lockData.Data);
-                    }
-                }
+                i_data.Create();
+                return;
+            }
+
+            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
+            if (!entries.IsInstanceIdBound() || !IsRaid() || !entries.MapDifficulty.IsRestoringDungeonState() || i_owningGroupRef.IsValid())
+            {
+                i_data.Create();
+                return;
+            }
+
+            InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
+            i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
+            i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
+            if (!lockData.Data.IsEmpty())
+            {
+                Log.outDebug(LogFilter.Maps, $"Loading instance data for `{Global.ObjectMgr.GetScriptName(i_script_id)}` with id {i_InstanceId}");
+                i_data.Load(lockData.Data);
             }
             else
                 i_data.Create();
