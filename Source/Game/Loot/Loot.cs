@@ -45,7 +45,13 @@ namespace Game.Loots
             randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
         }
 
-        public bool AllowedForPlayer(Player player, bool isGivenByMasterLooter = false)
+        /// <summary>
+        /// Basic checks for player/item compatibility - if false no chance to see the item in the loot - used only for loot generation
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="loot"></param>
+        /// <returns></returns>
+        public bool AllowedForPlayer(Player player, Loot loot)
         {
             // DB conditions check
             if (!Global.ConditionMgr.IsObjectMeetToConditions(player, conditions))
@@ -63,7 +69,7 @@ namespace Game.Loots
                 return false;
 
             // Master looter can see all items even if the character can't loot them
-            if (!isGivenByMasterLooter && player.GetGroup() && player.GetGroup().GetMasterLooterGuid() == player.GetGUID())
+            if (loot.GetLootMethod() == LootMethod.MasterLoot && follow_loot_rules && player.GetGroup() != null && player.GetGroup().GetMasterLooterGuid() == player.GetGUID())
                 return true;
 
             // Don't allow loot for players without profession or those who already know the recipe
@@ -108,6 +114,11 @@ namespace Game.Loots
             allowedGUIDs.Add(player.GetGUID());
         }
 
+        public bool HasAllowedLooter(ObjectGuid looter)
+        {
+            return allowedGUIDs.Contains(looter);
+        }
+        
         public LootSlotType? GetUiTypeForPlayer(Player player, Loot loot)
         {
             if (is_looted)
@@ -439,7 +450,7 @@ namespace Game.Loots
                 foreach (ObjectGuid allowedLooter in m_lootItem.GetAllowedLooters())
                 {
                     Player plr = Global.ObjAccessor.GetPlayer(m_map, allowedLooter);
-                    if (!plr || !m_lootItem.AllowedForPlayer(plr))     // check if player meet the condition to be able to roll this item
+                    if (!plr || !m_lootItem.HasAllowedLooter(plr.GetGUID()))     // check if player meet the condition to be able to roll this item
                     {
                         m_rollVoteMap[allowedLooter].Vote = RollVote.NotValid;
                         continue;
@@ -692,7 +703,7 @@ namespace Game.Loots
                 if (lootItem == null || lootItem.is_looted)
                     continue;
 
-                if (!lootItem.AllowedForPlayer(player))
+                if (!lootItem.HasAllowedLooter(GetGUID()))
                     continue;
 
                 if (lootItem.is_blocked)
@@ -817,6 +828,10 @@ namespace Game.Loots
 
         void FillNotNormalLootFor(Player player)
         {
+            if (_dungeonEncounterId != 0)
+                if (player.IsLockedToDungeonEncounter(_dungeonEncounterId))
+                    return;
+
             ObjectGuid plguid = player.GetGUID();
             _allowedLooters.Add(plguid);
 
@@ -824,7 +839,7 @@ namespace Game.Loots
 
             foreach (LootItem item in items)
             {
-                if (!item.AllowedForPlayer(player))
+                if (!item.AllowedForPlayer(player, this))
                     continue;
 
                 if (item.freeforall)
@@ -921,6 +936,11 @@ namespace Game.Loots
             }
         }
 
+        public bool HasAllowedLooter(ObjectGuid looter)
+        {
+            return _allowedLooters.Contains(looter);
+        }
+        
         public void GenerateMoneyLoot(uint minAmount, uint maxAmount)
         {
             if (maxAmount > 0)

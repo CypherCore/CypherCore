@@ -558,6 +558,19 @@ namespace Game.Entities
             SendPacket(transferAborted);
         }
 
+        public bool IsLockedToDungeonEncounter(uint dungeonEncounterId)
+        {
+            DungeonEncounterRecord dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterId);
+            if (dungeonEncounter == null)
+                return false;
+
+            InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(GetGUID(), new MapDb2Entries(GetMap().GetEntry(), GetMap().GetMapDifficulty()));
+            if (instanceLock == null)
+                return false;
+
+            return (instanceLock.GetData().CompletedEncountersMask & (1u << dungeonEncounter.Bit)) != 0;
+        }
+        
         public override void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
         {
             // process liquid auras using generic unit code

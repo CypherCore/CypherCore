@@ -3130,7 +3130,8 @@ namespace Game.Entities
             Loot loot = creature.GetLootForPlayer(this);
             if (loot == null || loot.IsLooted()) // nothing to loot or everything looted.
                 return false;
-            if (!loot.HasItemForAll() && !loot.HasItemFor(this)) // no loot in creature for this player
+
+            if (!loot.HasAllowedLooter(GetGUID()) || (!loot.HasItemForAll() && !loot.HasItemFor(this))) // no loot in creature for this player
                 return false;
 
             if (loot.loot_type == LootType.Skinning)

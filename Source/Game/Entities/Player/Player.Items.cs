@@ -5973,7 +5973,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (!item.AllowedForPlayer(this))
+            if (!item.HasAllowedLooter(GetGUID()))
             {
                 SendLootReleaseAll();
                 return;
