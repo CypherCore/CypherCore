@@ -274,76 +274,76 @@ namespace Game
             bool teleported = false;
             if (player.GetMapId() != at.target_mapId)
             {
-                EnterState denyReason = Map.PlayerCannotEnter(at.target_mapId, player, false);
-                if (denyReason != 0)
+                if (!player.IsAlive())
                 {
-                    bool reviveAtTrigger = false; // should we revive the player if he is trying to enter the correct instance?
-                    switch (denyReason)
+                    if (player.HasCorpse())
                     {
-                        case EnterState.CannotEnterNoEntry:
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' attempted to enter map with id {1} which has no entry", player.GetName(), at.target_mapId);
-                            break;
-                        case EnterState.CannotEnterUninstancedDungeon:
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' attempted to enter dungeon map {1} but no instance template was found", player.GetName(), at.target_mapId);
-                            break;
-                        case EnterState.CannotEnterDifficultyUnavailable:
-                            {
-                                Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' attempted to enter instance map {1} but the requested difficulty was not found", player.GetName(), at.target_mapId);
-                                MapRecord entry = CliDB.MapStorage.LookupByKey(at.target_mapId);
-                                if (entry != null)
-                                    player.SendTransferAborted(entry.Id, TransferAbortReason.Difficulty, (byte)player.GetDifficultyID(entry));
-                            }
-                            break;
-                        case EnterState.CannotEnterNotInRaid:
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' must be in a raid group to enter map {1}", player.GetName(), at.target_mapId);
-                            player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, 0);
-                            reviveAtTrigger = true;
-                            break;
-                        case EnterState.CannotEnterCorpseInDifferentInstance:
+                        // let enter in ghost mode in instance that connected to inner instance with corpse
+                        uint corpseMap = player.GetCorpseLocation().GetMapId();
+                        do
+                        {
+                            if (corpseMap == at.target_mapId)
+                                break;
+
+                            InstanceTemplate corpseInstance = Global.ObjectMgr.GetInstanceTemplate(corpseMap);
+                            corpseMap = corpseInstance != null ? corpseInstance.Parent : 0;
+                        } while (corpseMap != 0);
+
+                        if (corpseMap == 0)
+                        {
                             SendPacket(new AreaTriggerNoCorpse());
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' does not have a corpse in instance map {1} and cannot enter", player.GetName(), at.target_mapId);
+                            return;
+                        }
+
+                        Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance {at.target_mapId} and can enter.");
+                    }
+                    else
+                        Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
+                }
+
+                TransferAbortParams denyReason = Map.PlayerCannotEnter(at.target_mapId, player);
+                if (denyReason != null)
+                {
+                    switch (denyReason.Reason)
+                    {
+                        case TransferAbortReason.MapNotAllowed:
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with id {at.target_mapId} which has no entry");
                             break;
-                        case EnterState.CannotEnterInstanceBindMismatch:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.LockedToDifferentInstance);
+                        case TransferAbortReason.Difficulty:
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter instance map {at.target_mapId} but the requested difficulty was not found");
+                            break;
+                        case TransferAbortReason.NeedGroup:
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' must be in a raid group to enter map {at.target_mapId}");
+                            player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, 0);
+                            break;
+                        case TransferAbortReason.LockedToDifferentInstance:
                             Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
-                            reviveAtTrigger = true;
                             break;
-                        case EnterState.CannotEnterAlreadyCompletedEncounter:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.AlreadyCompletedEncounter);
+                        case TransferAbortReason.AlreadyCompletedEncounter:
                             Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
-                            reviveAtTrigger = true;
                             break;
-                        case EnterState.CannotEnterTooManyInstances:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.TooManyInstances);
+                        case TransferAbortReason.TooManyInstances:
                             Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' cannot enter instance map {1} because he has exceeded the maximum number of instances per hour.", player.GetName(), at.target_mapId);
-                            reviveAtTrigger = true;
                             break;
-                        case EnterState.CannotEnterMaxPlayers:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.MaxPlayers);
-                            reviveAtTrigger = true;
+                        case TransferAbortReason.MaxPlayers:
+                        case TransferAbortReason.ZoneInCombat:
                             break;
-                        case EnterState.CannotEnterZoneInCombat:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.ZoneInCombat);
-                            reviveAtTrigger = true;
-                            break;
-                        case EnterState.CannotEnterInstanceShuttingDown:
-                            player.SendTransferAborted(at.target_mapId, TransferAbortReason.NotFound);
+                        case TransferAbortReason.NotFound:
                             Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because instance is resetting.");
-                            reviveAtTrigger = true;
                             break;
                         default:
                             break;
                     }
 
-                    if (reviveAtTrigger) // check if the player is touching the areatrigger leading to the map his corpse is on
+                    if (denyReason.Reason != TransferAbortReason.NeedGroup)
+                        player.SendTransferAborted(at.target_mapId, denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
+
+                    if (!player.IsAlive() && player.HasCorpse())
                     {
-                        if (!player.IsAlive() && player.HasCorpse())
+                        if (player.GetCorpseLocation().GetMapId() == at.target_mapId)
                         {
-                            if (player.GetCorpseLocation().GetMapId() == at.target_mapId)
-                            {
-                                player.ResurrectPlayer(0.5f);
-                                player.SpawnCorpseBones();
-                            }
+                            player.ResurrectPlayer(0.5f);
+                            player.SpawnCorpseBones();
                         }
                     }
 

@@ -2925,32 +2925,10 @@ namespace Game.Entities
             }
             else if (map.IsDungeon()) // if map is dungeon...
             {
-                EnterState denyReason = ((InstanceMap)map).CannotEnter(this);
-                if (denyReason != 0) // ... and can't enter map, then look for entry point.
+                TransferAbortParams denyReason = map.CannotEnter(this); // ... and can't enter map, then look for entry point.
+                if (denyReason != null) 
                 {
-                    switch (denyReason)
-                    {
-                        case EnterState.CannotEnterDifficultyUnavailable:
-                            SendTransferAborted(map.GetId(), TransferAbortReason.Difficulty, (byte)map.GetDifficultyID());
-                            break;
-                        case EnterState.CannotEnterInstanceBindMismatch:
-                            SendSysMessage(CypherStrings.InstanceBindMismatch, map.GetMapName());
-                            break;
-                        case EnterState.CannotEnterTooManyInstances:
-                            SendTransferAborted(map.GetId(), TransferAbortReason.TooManyInstances);
-                            break;
-                        case EnterState.CannotEnterMaxPlayers:
-                            SendTransferAborted(map.GetId(), TransferAbortReason.MaxPlayers);
-                            break;
-                        case EnterState.CannotEnterZoneInCombat:
-                            SendTransferAborted(map.GetId(), TransferAbortReason.ZoneInCombat);
-                            break;
-                        case EnterState.CannotEnterInstanceShuttingDown:
-                            SendTransferAborted(map.GetId(), TransferAbortReason.NotFound);
-                            break;
-                        default:
-                            break;
-                    }
+                    SendTransferAborted(map.GetId(), denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
                     check = true;
                 }

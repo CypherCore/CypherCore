@@ -270,7 +270,7 @@ namespace Game
             // relocate the player to the teleport destination
             // the CannotEnter checks are done in TeleporTo but conditions may change
             // while the player is in transit, for example the map may get full
-            if (newMap == null || newMap.CannotEnter(player) != 0)
+            if (newMap == null || newMap.CannotEnter(player) != null)
             {
                 Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
                 player.TeleportTo(player.GetHomebind());

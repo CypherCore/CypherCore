@@ -331,7 +331,7 @@ namespace Game.Entities
             SendPacket(instanceInfo);
         }
 
-        public bool Satisfy(AccessRequirement ar, uint target_map, bool report = false)
+        public bool Satisfy(AccessRequirement ar, uint target_map, TransferAbortParams abortParams = null, bool report = false)
         {
             if (!IsGameMaster())
             {
@@ -380,12 +380,6 @@ namespace Game.Entities
                     else if (ar.item2 != 0 && !HasItemCount(ar.item2))
                         missingItem = ar.item2;
 
-                    if (Global.DisableMgr.IsDisabledFor(DisableType.Map, target_map, this))
-                    {
-                        GetSession().SendNotification("{0}", Global.ObjectMgr.GetCypherString(CypherStrings.InstanceClosed));
-                        return false;
-                    }
-
                     if (GetTeam() == Team.Alliance && ar.quest_A != 0 && !GetQuestRewardStatus(ar.quest_A))
                         missingQuest = ar.quest_A;
                     else if (GetTeam() == Team.Horde && ar.quest_H != 0 && !GetQuestRewardStatus(ar.quest_H))
@@ -403,12 +397,22 @@ namespace Game.Entities
 
                 if (LevelMin != 0 || LevelMax != 0 || failedMapDifficultyXCondition != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
                 {
+                    if (abortParams != null)
+                        abortParams.Reason = TransferAbortReason.Error;
+
                     if (report)
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
                             SendSysMessage("{0}", ar.questFailedText);
                         else if (mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
-                            SendTransferAborted(target_map, TransferAbortReason.Difficulty, (byte)target_difficulty, failedMapDifficultyXCondition);
+                        {
+                            if (abortParams != null)
+                            {
+                                abortParams.Reason = TransferAbortReason.Difficulty;
+                                abortParams.Arg = (byte)target_difficulty;
+                                abortParams.MapDifficultyXConditionId = failedMapDifficultyXCondition;
+                            }
+                        }
                         else if (missingItem != 0)
                             GetSession().SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.LevelMinrequiredAndItem), LevelMin, Global.ObjectMgr.GetItemTemplate(missingItem).GetName());
                         else if (LevelMin != 0)

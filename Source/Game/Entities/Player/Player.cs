@@ -1783,8 +1783,12 @@ namespace Game.Entities
 
                 // Check enter rights before map getting to avoid creating instance copy for player
                 // this check not dependent from map instance copy and same for all instance copies of selected map
-                if (Map.PlayerCannotEnter(mapid, this, false) != 0)
+                TransferAbortParams abortParams = Map.PlayerCannotEnter(mapid, this);
+                if (abortParams != null)
+                {
+                    SendTransferAborted(mapid, abortParams.Reason, abortParams.Arg, abortParams.MapDifficultyXConditionId);
                     return false;
+                }
 
                 // Seamless teleport can happen only if cosmetic maps match
                 if (!oldmap || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
@@ -1795,13 +1799,13 @@ namespace Game.Entities
                 SetSemaphoreTeleportNear(false);
                 //setup delayed teleport flag
                 SetDelayedTeleportFlag(IsCanDelayTeleport());
-                //if teleport spell is casted in Unit.Update() func
+                //if teleport spell is cast in Unit::Update() func
                 //then we need to delay it until update process will be finished
                 if (IsHasDelayedTeleport())
                 {
                     SetSemaphoreTeleportFar(true);
                     //lets save teleport destination for player
-                    teleportDest = new WorldLocation(mapid, x, y, z, orientation);
+                    teleportDest = new(mapid, x, y, z, orientation);
                     m_teleport_instanceId = instanceId;
                     m_teleport_options = options;
                     return true;
@@ -1837,11 +1841,11 @@ namespace Game.Entities
                 if (pet)
                     UnsummonPetTemporaryIfAny();
 
-                // remove all areatriggers entities
-                RemoveAllAreaTriggers();
-
                 // remove all dyn objects
                 RemoveAllDynObjects();
+                
+                // remove all areatriggers entities
+                RemoveAllAreaTriggers();
 
                 // stop spellcasting
                 // not attempt interrupt teleportation spell at caster teleport

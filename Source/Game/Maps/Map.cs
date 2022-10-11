@@ -1654,60 +1654,36 @@ namespace Game.Maps
             return result;
         }
 
-        public static EnterState PlayerCannotEnter(uint mapid, Player player, bool loginCheck)
+        public static TransferAbortParams PlayerCannotEnter(uint mapid, Player player)
         {
             var entry = CliDB.MapStorage.LookupByKey(mapid);
             if (entry == null)
-                return EnterState.CannotEnterNoEntry;
+                return new TransferAbortParams(TransferAbortReason.MapNotAllowed);
 
             if (!entry.IsDungeon())
-                return EnterState.CanEnter;
+                return TransferAbortParams.None;
 
-            Difficulty targetDifficulty, requestedDifficulty;
-            targetDifficulty = requestedDifficulty = player.GetDifficultyID(entry);
+            Difficulty targetDifficulty = player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
             var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref targetDifficulty);
             if (mapDiff == null)
-                return EnterState.CannotEnterDifficultyUnavailable;
+                return new TransferAbortParams(TransferAbortReason.Difficulty);
 
             //Bypass checks for GMs
             if (player.IsGameMaster())
-                return EnterState.CanEnter;
+                return TransferAbortParams.None;
 
             //Other requirements
-            if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, true))
-                return EnterState.CannotEnterUnspecifiedReason;
-
-            string mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
+            {
+                TransferAbortParams abortParams = new();
+                if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, abortParams, true))
+                    return abortParams;
+            }
 
             Group group = player.GetGroup();
             if (entry.IsRaid() && (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
                 if ((!group || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
-                    return EnterState.CannotEnterNotInRaid;
-
-            if (!player.IsAlive())
-            {
-                if (player.HasCorpse())
-                {
-                    // let enter in ghost mode in instance that connected to inner instance with corpse
-                    uint corpseMap = player.GetCorpseLocation().GetMapId();
-                    do
-                    {
-                        if (corpseMap == mapid)
-                            break;
-
-                        InstanceTemplate corpseInstance = Global.ObjectMgr.GetInstanceTemplate(corpseMap);
-                        corpseMap = corpseInstance != null ? corpseInstance.Parent : 0;
-                    } while (corpseMap != 0);
-
-                    if (corpseMap == 0)
-                        return EnterState.CannotEnterCorpseInDifferentInstance;
-
-                    Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance '{mapName}' and can enter.");
-                }
-                else
-                    Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
-            }
+                    return new TransferAbortParams(TransferAbortReason.NeedGroup);
 
             if (entry.Instanceable())
             {
@@ -1716,17 +1692,17 @@ namespace Game.Maps
                 Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
                 if (boundMap != null)
                 {
-                    EnterState denyReason = boundMap.CannotEnter(player);
-                    if (denyReason != 0)
+                    TransferAbortParams denyReason = boundMap.CannotEnter(player);
+                    if (denyReason != null)
                         return denyReason;
                 }
 
                 // players are only allowed to enter 10 instances per hour
                 if (!entry.GetFlags2().HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
-                    return EnterState.CannotEnterTooManyInstances;
+                    return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
-            return EnterState.CanEnter;
+            return TransferAbortParams.None;
         }
 
         public string GetMapName()
@@ -3243,7 +3219,7 @@ namespace Game.Maps
             return i_InstanceId;
         }
 
-        public virtual EnterState CannotEnter(Player player) { return EnterState.CanEnter; }
+        public virtual TransferAbortParams CannotEnter(Player player) { return TransferAbortParams.None; }
 
         public Difficulty GetDifficultyID()
         {
@@ -4789,13 +4765,13 @@ namespace Game.Maps
             m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
         }
 
-        public override EnterState CannotEnter(Player player)
+        public override TransferAbortParams CannotEnter(Player player)
         {
             if (player.GetMap() == this)
             {
                 Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetDifficultyID());
                 Cypher.Assert(false);
-                return EnterState.CannotEnterAlreadyInMap;
+                return new TransferAbortParams(TransferAbortReason.Error);
             }
 
             // allow GM's to enter
@@ -4807,22 +4783,19 @@ namespace Game.Maps
             if (GetPlayersCountExceptGMs() >= maxPlayers)
             {
                 Log.outInfo(LogFilter.Maps, "MAP: Instance '{0}' of map '{1}' cannot have more than '{2}' players. Player '{3}' rejected", GetInstanceId(), GetMapName(), maxPlayers, player.GetName());
-                return EnterState.CannotEnterMaxPlayers;
+                return new TransferAbortParams(TransferAbortReason.MaxPlayers);
             }
 
             // cannot enter while an encounter is in progress (unless this is a relog, in which case it is permitted)
             if (!player.IsLoading() && IsRaid() && GetInstanceScript() != null && GetInstanceScript().IsEncounterInProgress())
-                return EnterState.CannotEnterZoneInCombat;
+                return new TransferAbortParams(TransferAbortReason.ZoneInCombat);
 
             if (i_instanceLock != null)
             {
                 // cannot enter if player is permanent saved to a different instance id
                 TransferAbortReason lockError = Global.InstanceLockMgr.CanJoinInstanceLock(player.GetGUID(), new MapDb2Entries(GetEntry(), GetMapDifficulty()), i_instanceLock);
-                if (lockError == TransferAbortReason.LockedToDifferentInstance)
-                    return EnterState.CannotEnterInstanceBindMismatch;
-
-                if (lockError == TransferAbortReason.AlreadyCompletedEncounter)
-                    return EnterState.CannotEnterAlreadyCompletedEncounter;
+                if (lockError != TransferAbortReason.None)
+                    return new TransferAbortParams(lockError);
             }
 
             return base.CannotEnter(player);
@@ -5196,17 +5169,17 @@ namespace Game.Maps
             m_VisibilityNotifyPeriod = IsBattleArena() ? Global.WorldMgr.GetVisibilityNotifyPeriodInArenas() : Global.WorldMgr.GetVisibilityNotifyPeriodInBG();
         }
 
-        public override EnterState CannotEnter(Player player)
+        public override TransferAbortParams CannotEnter(Player player)
         {
             if (player.GetMap() == this)
             {
                 Log.outError(LogFilter.Maps, "BGMap:CannotEnter - player {0} is already in map!", player.GetGUID().ToString());
                 Cypher.Assert(false);
-                return EnterState.CannotEnterAlreadyInMap;
+                return new TransferAbortParams(TransferAbortReason.Error);
             }
 
             if (player.GetBattlegroundId() != GetInstanceId())
-                return EnterState.CannotEnterInstanceBindMismatch;
+                return new TransferAbortParams(TransferAbortReason.LockedToDifferentInstance);
 
             return base.CannotEnter(player);
         }
@@ -5244,6 +5217,24 @@ namespace Game.Maps
         Battleground m_bg;
     }
 
+    public class TransferAbortParams
+    {
+        public static TransferAbortParams None = new TransferAbortParams();
+
+        public TransferAbortReason Reason;
+        public byte Arg;
+        public uint MapDifficultyXConditionId;
+
+        public TransferAbortParams(TransferAbortReason reason = TransferAbortReason.None, byte arg = 0, uint mapDifficultyXConditionId = 0)
+        {
+            Reason = reason;
+            Arg = arg;
+            MapDifficultyXConditionId = mapDifficultyXConditionId;
+        }
+
+        public bool IsFailed() { return Reason != TransferAbortReason.None; }
+    }
+    
     public struct ScriptAction
     {
         public ObjectGuid ownerGUID;
