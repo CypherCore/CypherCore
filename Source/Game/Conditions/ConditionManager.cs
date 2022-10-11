@@ -654,11 +654,11 @@ namespace Game
         bool AddToGossipMenuItems(Condition cond)
         {
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
-            foreach (var menuItems in pMenuItemBounds)
+            foreach (var gossipMenuItem in pMenuItemBounds)
             {
-                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionId == cond.SourceEntry)
+                if (gossipMenuItem.MenuId == cond.SourceGroup && gossipMenuItem.OptionId == cond.SourceEntry)
                 {
-                    menuItems.Conditions.Add(cond);
+                    gossipMenuItem.Conditions.Add(cond);
                     return true;
                 }
             }

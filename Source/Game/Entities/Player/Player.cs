@@ -2299,7 +2299,7 @@ namespace Game.Entities
         }
 
         //Chat - Text - Channel
-        public void PrepareGossipMenu(WorldObject source, uint menuId = 0, bool showQuests = false)
+        public void PrepareGossipMenu(WorldObject source, uint menuId, bool showQuests = false)
         {
             PlayerMenu menu = PlayerTalkClass;
             menu.ClearMenus();
@@ -2307,10 +2307,6 @@ namespace Game.Entities
             menu.GetGossipMenu().SetMenuId(menuId);
 
             var menuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
-
-            // if default menuId and no menu options exist for this, use options from default options
-            if (menuItemBounds.Empty() && menuId == GetDefaultGossipMenuForSource(source))
-                menuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(0);
 
             NPCFlags npcflags = 0;
 
@@ -2324,9 +2320,9 @@ namespace Game.Entities
                 if (source.ToGameObject().GetGoType() == GameObjectTypes.QuestGiver)
                     PrepareQuestMenu(source.GetGUID());
 
-            foreach (var menuItems in menuItemBounds)
+            foreach (var gossipMenuItem in menuItemBounds)
             {
-                if (!Global.ConditionMgr.IsObjectMeetToConditions(this, source, menuItems.Conditions))
+                if (!Global.ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
                     continue;
 
                 bool canTalk = true;
@@ -2334,10 +2330,10 @@ namespace Game.Entities
                 Creature creature = source.ToCreature();
                 if (creature)
                 {
-                    if (!menuItems.OptionNpcFlag.HasAnyFlag(npcflags))
+                    if (!gossipMenuItem.OptionNpcFlag.HasAnyFlag(npcflags))
                         continue;
 
-                    switch (menuItems.OptionNpc)
+                    switch (gossipMenuItem.OptionNpc)
                     {
                         case GossipOptionNpc.TaxiNode:
                             if (GetSession().SendLearnNewTaxiNode(creature))
@@ -2411,14 +2407,14 @@ namespace Game.Entities
                         case GossipOptionNpc.CovenantRenown:
                             break;                                         // NYI
                         default:
-                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {menuItems.OptionNpc} for menu {menuItems.MenuId}.");
+                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuId}.");
                             canTalk = false;
                             break;
                     }
                 }
                 else if (go != null)
                 {
-                    switch (menuItems.OptionNpc)
+                    switch (gossipMenuItem.OptionNpc)
                     {
                         case GossipOptionNpc.None:
                             if (go.GetGoType() != GameObjectTypes.QuestGiver && go.GetGoType() != GameObjectTypes.Goober)
@@ -2434,26 +2430,26 @@ namespace Game.Entities
                 {
                     string strOptionText;
                     string strBoxText;
-                    BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.OptionBroadcastTextId);
-                    BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.BoxBroadcastTextId);
+                    BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.OptionBroadcastTextId);
+                    BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.BoxBroadcastTextId);
                     Locale locale = GetSession().GetSessionDbLocaleIndex();
 
                     if (optionBroadcastText != null)
                         strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, locale, GetGender());
                     else
-                        strOptionText = menuItems.OptionText;
+                        strOptionText = gossipMenuItem.OptionText;
 
                     if (boxBroadcastText != null)
                         strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, locale, GetGender());
                     else
-                        strBoxText = menuItems.BoxText;
+                        strBoxText = gossipMenuItem.BoxText;
 
                     if (locale != Locale.enUS)
                     {
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2461,14 +2457,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionNpc, strOptionText, 0, (uint)menuItems.OptionNpc, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId);
+                    menu.GetGossipMenu().AddMenuItem((int)gossipMenuItem.OptionId, gossipMenuItem.OptionNpc, strOptionText, 0, (uint)gossipMenuItem.OptionNpc, strBoxText, gossipMenuItem.BoxMoney, gossipMenuItem.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(gossipMenuItem.OptionId, gossipMenuItem.ActionMenuId, gossipMenuItem.ActionPoiId);
                 }
             }
         }

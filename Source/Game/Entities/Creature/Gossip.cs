@@ -79,28 +79,28 @@ namespace Game.Misc
                 return;
 
             // Iterate over each of them.
-            foreach (var item in bounds)
+            foreach (var gossipMenuOption in bounds)
             {
                 // Find the one with the given menu item id.
-                if (item.OptionId != menuItemId)
+                if (gossipMenuOption.OptionId != menuItemId)
                     continue;
 
                 // Store texts for localization.
                 string strOptionText, strBoxText;
-                BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.OptionBroadcastTextId);
-                BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.BoxBroadcastTextId);
+                BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuOption.OptionBroadcastTextId);
+                BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuOption.BoxBroadcastTextId);
 
                 // OptionText
                 if (optionBroadcastText != null)
                     strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, GetLocale());
                 else
-                    strOptionText = item.OptionText;
+                    strOptionText = gossipMenuOption.OptionText;
 
                 // BoxText
                 if (boxBroadcastText != null)
                     strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, GetLocale());
                 else
-                    strBoxText = item.BoxText;
+                    strBoxText = gossipMenuOption.BoxText;
 
                 // Check need of localization.
                 if (GetLocale() != Locale.enUS)
@@ -124,8 +124,8 @@ namespace Game.Misc
                 }
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                uint newOptionId = AddMenuItem(-1, item.OptionNpc, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
-                AddGossipMenuItemData(newOptionId, item.ActionMenuId, item.ActionPoiId);
+                uint newOptionId = AddMenuItem(-1, gossipMenuOption.OptionNpc, strOptionText, sender, action, strBoxText, gossipMenuOption.BoxMoney, gossipMenuOption.BoxCoded);
+                AddGossipMenuItemData(newOptionId, gossipMenuOption.ActionMenuId, gossipMenuOption.ActionPoiId);
             }
         }
 
