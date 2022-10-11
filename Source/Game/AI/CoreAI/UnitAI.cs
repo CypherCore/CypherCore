@@ -334,6 +334,8 @@ namespace Game.AI
 
         public SpellCastResult DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null)
         {
+            args = args ?? new CastSpellExtraArgs();
+
             if (me.HasUnitState(UnitState.Casting) && !args.TriggerFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress))
                 return SpellCastResult.SpellInProgress;
 

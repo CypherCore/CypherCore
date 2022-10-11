@@ -122,7 +122,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (me.IsAlive())
                 SpawnAdds();
 
-            base.Reset();
+            instance.SetBossState(DataTypes.Moroes, EncounterState.NotStarted);
         }
 
         public override void JustEngagedWith(Unit who)
@@ -203,15 +203,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 List<uint> AddList = MiscConst.Adds.ToList();
                 AddList.RandomResize(4);
-
-                byte i = 0;
-                foreach (var entry in AddList)
+                
+                for (var i = 0; i < 4; ++i)
                 {
-                    Creature creature = me.SummonCreature(entry, MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
+                    Creature creature = me.SummonCreature(AddList[i], MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
                     if (creature)
                     {
                         AddGUID[i] = creature.GetGUID();
-                        AddId[i] = entry;
+                        AddId[i] = AddList[i];
                     }
                 }
             }
