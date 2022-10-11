@@ -49,6 +49,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint DeathStrikeOffhand = 66188;
         public const uint FesteringWound = 194310;
         public const uint Frost = 137006;
+        public const uint FrostScythe = 207230;
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
         public const uint GlyphOfTheSkeleton = 146652;
@@ -738,6 +739,29 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
+    [Script] // 59057 - Rime
+    class spell_dk_rime : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(SpellIds.FrostScythe);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            float chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
+            if (eventInfo.GetSpellInfo().Id == SpellIds.FrostScythe)
+                chance /= 2.0f;
+
+            return RandomHelper.randChance(chance);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+    
     [Script] // 55233 - Vampiric Blood
     class spell_dk_vampiric_blood : AuraScript
     {
