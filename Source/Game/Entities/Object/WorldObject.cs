@@ -1271,7 +1271,7 @@ namespace Game.Entities
 
         bool CanDetectInvisibilityOf(WorldObject obj)
         {
-            uint mask = obj.m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
+            ulong mask = obj.m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
 
             // Check for not detected types
             if (mask != obj.m_invisibility.GetFlags())
@@ -1279,7 +1279,7 @@ namespace Game.Entities
 
             for (int i = 0; i < (int)InvisibilityType.Max; ++i)
             {
-                if (!Convert.ToBoolean(mask & (1 << i)))
+                if (!Convert.ToBoolean(mask & (1ul << i)))
                     continue;
 
                 int objInvisibilityValue = obj.m_invisibility.GetValue((InvisibilityType)i);
@@ -3708,14 +3708,14 @@ namespace Game.Entities
 
         SmoothPhasing _smoothPhasing;
 
-        public FlaggedArray<StealthType> m_stealth = new(2);
-        public FlaggedArray<StealthType> m_stealthDetect = new(2);
+        public FlaggedArray32<StealthType> m_stealth = new(2);
+        public FlaggedArray32<StealthType> m_stealthDetect = new(2);
 
-        public FlaggedArray<InvisibilityType> m_invisibility = new((int)InvisibilityType.Max);
-        public FlaggedArray<InvisibilityType> m_invisibilityDetect = new((int)InvisibilityType.Max);
+        public FlaggedArray64<InvisibilityType> m_invisibility = new((int)InvisibilityType.Max);
+        public FlaggedArray64<InvisibilityType> m_invisibilityDetect = new((int)InvisibilityType.Max);
 
-        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibility = new(2);
-        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibilityDetect = new(2);
+        public FlaggedArray32<ServerSideVisibilityType> m_serverSideVisibility = new(2);
+        public FlaggedArray32<ServerSideVisibilityType> m_serverSideVisibilityDetect = new(2);
         #endregion
 
         public static implicit operator bool(WorldObject obj)
