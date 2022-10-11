@@ -1141,8 +1141,8 @@ namespace Game
             // load update time related configs
             _worldUpdateTime.LoadFromConfig();
 
-            Global.WorldMgr.SetPlayerAmountLimit((uint)ConfigMgr.GetDefaultValue("PlayerLimit", 100));
-            Global.WorldMgr.SetMotd(ConfigMgr.GetDefaultValue("Motd", "Welcome to a Cypher Core Server."));
+            SetPlayerAmountLimit((uint)ConfigMgr.GetDefaultValue("PlayerLimit", 100));
+            SetMotd(ConfigMgr.GetDefaultValue("Motd", "Welcome to a Cypher Core Server."));
 
             if (reload)
             {

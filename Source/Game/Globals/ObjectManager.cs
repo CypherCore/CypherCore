@@ -4033,7 +4033,7 @@ namespace Game
 
                     got.ContentTuningId = result.Read<uint>(43);
                     got.AIName = result.Read<string>(44);
-                    got.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(45));
+                    got.ScriptId = GetScriptId(result.Read<string>(45));
 
                     switch (got.type)
                     {
@@ -4181,7 +4181,7 @@ namespace Game
             {
                 uint entry = result.Read<uint>(0);
 
-                GameObjectTemplate got = Global.ObjectMgr.GetGameObjectTemplate(entry);
+                GameObjectTemplate got = GetGameObjectTemplate(entry);
                 if (got == null)
                 {
                     Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`");
@@ -4750,7 +4750,7 @@ namespace Game
         }
         void CheckGOLinkedTrapId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
-            GameObjectTemplate trapInfo = Global.ObjectMgr.GetGameObjectTemplate(dataN);
+            GameObjectTemplate trapInfo = GetGameObjectTemplate(dataN);
             if (trapInfo != null)
             {
                 if (trapInfo.type != GameObjectTypes.Trap)
@@ -5263,7 +5263,7 @@ namespace Game
 
                 var instanceTemplate = new InstanceTemplate();
                 instanceTemplate.Parent = result.Read<uint>(1);
-                instanceTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(2));
+                instanceTemplate.ScriptId = GetScriptId(result.Read<string>(2));
 
                 instanceTemplateStorage.Add(mapID, instanceTemplate);
 
@@ -6884,9 +6884,9 @@ namespace Game
                 uint alliance = result.Read<uint>(0);
                 uint horde = result.Read<uint>(1);
 
-                if (Global.ObjectMgr.GetQuestTemplate(alliance) == null)
+                if (GetQuestTemplate(alliance) == null)
                     Log.outError(LogFilter.Sql, "Quest {0} (alliance_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", alliance);
-                else if (Global.ObjectMgr.GetQuestTemplate(horde) == null)
+                else if (GetQuestTemplate(horde) == null)
                     Log.outError(LogFilter.Sql, "Quest {0} (horde_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", horde);
                 else
                     FactionChangeQuests[alliance] = horde;
@@ -7459,7 +7459,7 @@ namespace Game
 
                 if (qinfo.SourceItemId != 0)
                 {
-                    if (Global.ObjectMgr.GetItemTemplate(qinfo.SourceItemId) == null)
+                    if (GetItemTemplate(qinfo.SourceItemId) == null)
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} has `SourceItemId` = {1} but item with entry {2} does not exist, quest can't be done.",
                             qinfo.Id, qinfo.SourceItemId, qinfo.SourceItemId);
@@ -7536,7 +7536,7 @@ namespace Game
                                 Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing gameobject entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.TalkTo:
-                            if (Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID) == null)
+                            if (GetCreatureTemplate((uint)obj.ObjectID) == null)
                                 Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.MinReputation:
@@ -7562,7 +7562,7 @@ namespace Game
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.WinPetBattleAgainstNpc:
-                            if (obj.ObjectID != 0 && Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID) == null)
+                            if (obj.ObjectID != 0 && GetCreatureTemplate((uint)obj.ObjectID) == null)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.DefeatBattlePet:
@@ -7626,7 +7626,7 @@ namespace Game
                         switch (qinfo.RewardChoiceItemType[j])
                         {
                             case LootItemType.Item:
-                                if (Global.ObjectMgr.GetItemTemplate(id) == null)
+                                if (GetItemTemplate(id) == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
                                     qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
@@ -7660,7 +7660,7 @@ namespace Game
                     var id = qinfo.RewardItemId[j];
                     if (id != 0)
                     {
-                        if (Global.ObjectMgr.GetItemTemplate(id) == null)
+                        if (GetItemTemplate(id) == null)
                         {
                             Log.outError(LogFilter.Sql, "Quest {0} has `RewardItemId{1}` = {2} but item with entry {3} does not exist, quest will not reward this item.",
                                 qinfo.Id, j + 1, id, id);
@@ -7894,7 +7894,7 @@ namespace Game
 
                     questSet.Add(qinfo.Id);
 
-                    qinfo = Global.ObjectMgr.GetQuestTemplate(breadcrumbForQuestId);
+                    qinfo = GetQuestTemplate(breadcrumbForQuestId);
 
                     //every quest has a list of every breadcrumb towards it
                     qinfo.DependentBreadcrumbQuests.Add(qid);
@@ -8095,7 +8095,7 @@ namespace Game
                 int spawnTrackingID = result.Read<int>(13);
                 bool alwaysAllowMergingBlobs = result.Read<bool>(14);
 
-                if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
+                if (GetQuestTemplate(questID) == null)
                     Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`");
 
                 var blobs = allPoints.LookupByKey(questID);
@@ -8204,14 +8204,14 @@ namespace Game
                 switch (type)
                 {
                     case 0: // Creature
-                        if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
+                        if (GetCreatureTemplate(id) == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `quest_greeting`: creature template entry {0} does not exist.", id);
                             continue;
                         }
                         break;
                     case 1: // GameObject
-                        if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)
+                        if (GetGameObjectTemplate(id) == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `quest_greeting`: gameobject template entry {0} does not exist.", id);
                             continue;
@@ -10616,7 +10616,7 @@ namespace Game
             {
                 uint creatureId = result.Read<uint>(0);
 
-                if (Global.ObjectMgr.GetCreatureTemplate(creatureId) == null)
+                if (GetCreatureTemplate(creatureId) == null)
                 {
                     Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Vehicle {creatureId} does not exist.");
                     continue;
