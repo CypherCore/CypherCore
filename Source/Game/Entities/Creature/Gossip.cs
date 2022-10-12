@@ -731,7 +731,6 @@ namespace Game.Misc
         public GossipOptionNpc OptionNpc;
         public string OptionText;
         public uint OptionBroadcastTextId;
-        public NPCFlags OptionNpcFlag;
         public uint Language;
         public uint ActionMenuId;
         public uint ActionPoiId;

@@ -2308,12 +2308,9 @@ namespace Game.Entities
 
             var menuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
-            NPCFlags npcflags = 0;
-
             if (source.IsTypeId(TypeId.Unit))
             {
-                npcflags = (NPCFlags)(((ulong)(source.ToUnit().m_unitData.NpcFlags[1]) << 32) | source.ToUnit().m_unitData.NpcFlags[0]);
-                if (Convert.ToBoolean(npcflags & NPCFlags.QuestGiver) && showQuests)
+                if (showQuests && source.ToUnit().IsQuestGiver())
                     PrepareQuestMenu(source.GetGUID());
             }
             else if (source.IsTypeId(TypeId.GameObject))
@@ -2330,9 +2327,6 @@ namespace Game.Entities
                 Creature creature = source.ToCreature();
                 if (creature)
                 {
-                    if (!gossipMenuItem.OptionNpcFlag.HasAnyFlag(npcflags))
-                        continue;
-
                     switch (gossipMenuItem.OptionNpc)
                     {
                         case GossipOptionNpc.TaxiNode:

@@ -579,8 +579,8 @@ namespace Game
 
             gossipMenuItemsStorage.Clear();
 
-            //                                         0       1         2           3           4                      5              6         7             8            9         10        11       12
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionNpc, OptionText, OptionBroadcastTextID, OptionNpcFlag, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
+            //                                         0       1         2          3           4                      5         6             7            8         9         10       11
+            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionNpc, OptionText, OptionBroadcastTextID, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
                 "FROM gossip_menu_option ORDER BY MenuID, OptionID");
 
             if (result.IsEmpty())
@@ -598,14 +598,13 @@ namespace Game
                 gMenuItem.OptionNpc = (GossipOptionNpc)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
-                gMenuItem.OptionNpcFlag = (NPCFlags)result.Read<ulong>(5);
-                gMenuItem.Language = result.Read<uint>(6);
-                gMenuItem.ActionMenuId = result.Read<uint>(7);
-                gMenuItem.ActionPoiId = result.Read<uint>(8);
-                gMenuItem.BoxCoded = result.Read<bool>(9);
-                gMenuItem.BoxMoney = result.Read<uint>(10);
-                gMenuItem.BoxText = result.Read<string>(11);
-                gMenuItem.BoxBroadcastTextId = result.Read<uint>(12);
+                gMenuItem.Language = result.Read<uint>(5);
+                gMenuItem.ActionMenuId = result.Read<uint>(6);
+                gMenuItem.ActionPoiId = result.Read<uint>(7);
+                gMenuItem.BoxCoded = result.Read<bool>(8);
+                gMenuItem.BoxMoney = result.Read<uint>(9);
+                gMenuItem.BoxText = result.Read<string>(10);
+                gMenuItem.BoxBroadcastTextId = result.Read<uint>(11);
 
                 if (gMenuItem.OptionNpc >= GossipOptionNpc.Max)
                 {

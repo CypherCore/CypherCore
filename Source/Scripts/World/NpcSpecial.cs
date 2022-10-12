@@ -403,6 +403,7 @@ namespace Scripts.World.NpcSpecial
         public const uint AuraDurationTimeLeft = 30000;
 
         //Argent squire/gruntling
+        public const uint AchievementPonyUp = 3736;
         public static Tuple<uint, uint>[] bannerSpells =
         {
             Tuple.Create(SpellIds.DarnassusPennant, SpellIds.SenjinPennant),
@@ -1354,7 +1355,7 @@ namespace Scripts.World.NpcSpecial
             _scheduler.Update(diff);
         }
     }
-    
+
     [Script]
     class npc_training_dummy : NullCreatureAI
     {
@@ -1366,7 +1367,7 @@ namespace Scripts.World.NpcSpecial
         {
             _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
         }
-        
+
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             damage = 0;
@@ -1647,46 +1648,46 @@ namespace Scripts.World.NpcSpecial
                 switch (_nextAction)
                 {
                     case TrainWrecker.EventDoJump:
-                        {
-                            GameObject target = VerifyTarget();
-                            if (target)
-                                me.GetMotionMaster().MoveJump(target, 5.0f, 10.0f, TrainWrecker.MoveidJump);
-                            _nextAction = 0;
-                        }
-                        break;
+                    {
+                        GameObject target = VerifyTarget();
+                        if (target)
+                            me.GetMotionMaster().MoveJump(target, 5.0f, 10.0f, TrainWrecker.MoveidJump);
+                        _nextAction = 0;
+                    }
+                    break;
                     case TrainWrecker.EventDoFacing:
+                    {
+                        GameObject target = VerifyTarget();
+                        if (target)
                         {
-                            GameObject target = VerifyTarget();
-                            if (target)
-                            {
-                                me.SetFacingTo(target.GetOrientation());
-                                me.HandleEmoteCommand(Emote.OneshotAttack1h);
-                                _timer = (uint)(1.5 * Time.InMilliseconds);
-                                _nextAction = TrainWrecker.EventDoWreck;
-                            }
-                            else
-                                _nextAction = 0;
+                            me.SetFacingTo(target.GetOrientation());
+                            me.HandleEmoteCommand(Emote.OneshotAttack1h);
+                            _timer = (uint)(1.5 * Time.InMilliseconds);
+                            _nextAction = TrainWrecker.EventDoWreck;
                         }
-                        break;
+                        else
+                            _nextAction = 0;
+                    }
+                    break;
                     case TrainWrecker.EventDoWreck:
+                    {
+                        if (diff < _timer)
                         {
-                            if (diff < _timer)
-                            {
-                                _timer -= diff;
-                                break;
-                            }
-
-                            GameObject target = VerifyTarget();
-                            if (target)
-                            {
-                                me.CastSpell(target, SpellIds.WreckTrain, false);
-                                _timer = 2 * Time.InMilliseconds;
-                                _nextAction = TrainWrecker.EventDoDance;
-                            }
-                            else
-                                _nextAction = 0;
+                            _timer -= diff;
+                            break;
                         }
-                        break;
+
+                        GameObject target = VerifyTarget();
+                        if (target)
+                        {
+                            me.CastSpell(target, SpellIds.WreckTrain, false);
+                            _timer = 2 * Time.InMilliseconds;
+                            _nextAction = TrainWrecker.EventDoDance;
+                        }
+                        else
+                            _nextAction = 0;
+                    }
+                    break;
                     case TrainWrecker.EventDoDance:
                         if (diff < _timer)
                         {
@@ -1721,29 +1722,29 @@ namespace Scripts.World.NpcSpecial
     [Script]
     class npc_argent_squire_gruntling : ScriptedAI
     {
-        public npc_argent_squire_gruntling(Creature creature) : base(creature)
-        {
-            ScheduleTasks();
-        }
+        public npc_argent_squire_gruntling(Creature creature) : base(creature) { }
 
-        public void ScheduleTasks()
+        public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            Player owner = me.GetOwner()?.ToPlayer();
+            if (owner != null)
             {
-                Aura ownerTired = me.GetOwner().GetAura(SpellIds.TiredPlayer);
+                Aura ownerTired = owner.GetAura(SpellIds.TiredPlayer);
                 if (ownerTired != null)
                 {
                     Aura squireTired = me.AddAura(IsArgentSquire() ? SpellIds.AuraTiredS : SpellIds.AuraTiredG, me);
                     if (squireTired != null)
                         squireTired.SetDuration(ownerTired.GetDuration());
                 }
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-            {
-                if ((me.HasAura(SpellIds.AuraTiredS) || me.HasAura(SpellIds.AuraTiredG)) && me.HasNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor))
-                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
-                task.Repeat();
-            });
+
+                if (owner.HasAchieved(Misc.AchievementPonyUp) && !me.HasAura(SpellIds.AuraTiredS) && !me.HasAura(SpellIds.AuraTiredG))
+                {
+                    me.SetNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
+                    return;
+                }
+            }
+
+            me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
         }
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
@@ -1751,40 +1752,39 @@ namespace Scripts.World.NpcSpecial
             switch (gossipListId)
             {
                 case GossipMenus.OptionIdBank:
-                    {
-                        me.SetNpcFlag(NPCFlags.Banker);
-                        uint _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
-                        if (!me.HasAura(_bankAura))
-                            DoCastSelf(_bankAura);
+                {
+                    me.RemoveNpcFlag(NPCFlags.Mailbox | NPCFlags.Vendor);
+                    uint _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
+                    if (!me.HasAura(_bankAura))
+                        DoCastSelf(_bankAura);
 
-                        if (!player.HasAura(SpellIds.TiredPlayer))
-                            player.CastSpell(player, SpellIds.TiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(SpellIds.TiredPlayer))
+                        player.CastSpell(player, SpellIds.TiredPlayer, true);
+                    break;
+                }
                 case GossipMenus.OptionIdShop:
-                    {
-                        me.SetNpcFlag(NPCFlags.Vendor);
-                        uint _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
-                        if (!me.HasAura(_shopAura))
-                            DoCastSelf(_shopAura);
+                {
+                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
+                    uint _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
+                    if (!me.HasAura(_shopAura))
+                        DoCastSelf(_shopAura);
 
-                        if (!player.HasAura(SpellIds.TiredPlayer))
-                            player.CastSpell(player, SpellIds.TiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(SpellIds.TiredPlayer))
+                        player.CastSpell(player, SpellIds.TiredPlayer, true);
+                    break;
+                }
                 case GossipMenus.OptionIdMail:
-                    {
-                        me.SetNpcFlag(NPCFlags.Mailbox);
-                        player.GetSession().SendShowMailBox(me.GetGUID());
+                {
+                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Vendor);
 
-                        uint _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;
-                        if (!me.HasAura(_mailAura))
-                            DoCastSelf(_mailAura);
+                    uint _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;
+                    if (!me.HasAura(_mailAura))
+                        DoCastSelf(_mailAura);
 
-                        if (!player.HasAura(SpellIds.TiredPlayer))
-                            player.CastSpell(player, SpellIds.TiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(SpellIds.TiredPlayer))
+                        player.CastSpell(player, SpellIds.TiredPlayer, true);
+                    break;
+                }
                 case GossipMenus.OptionIdDarnassusSenjinPennant:
                 case GossipMenus.OptionIdExodarUndercityPennant:
                 case GossipMenus.OptionIdGnomereganOrgrimmarPennant:
@@ -1794,15 +1794,14 @@ namespace Scripts.World.NpcSpecial
                         DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item1, new CastSpellExtraArgs(true));
                     else
                         DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item2, new CastSpellExtraArgs(true));
+
+                    player.PlayerTalkClass.SendCloseGossip();
+                    break;
+                default:
                     break;
             }
-            player.PlayerTalkClass.SendCloseGossip();
-            return false;
-        }
 
-        public override void UpdateAI(uint diff)
-        {
-            _scheduler.Update(diff);
+            return false;
         }
 
         bool IsArgentSquire() { return me.GetEntry() == CreatureIds.ArgentSquire; }
@@ -1902,7 +1901,7 @@ namespace Scripts.World.NpcSpecial
             _scheduler.Update(diff);
         }
     }
-    
+
     class CastFoodSpell : BasicEvent
     {
         Unit _owner;
