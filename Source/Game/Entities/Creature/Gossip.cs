@@ -746,6 +746,11 @@ namespace Game.Misc
         public int FriendshipFactionID;
     }
 
+    public class GossipMenuItemAddon
+    {
+        public int? GarrTalentTreeID;
+    }
+
     public class PointOfInterest
     {
         public uint Id;

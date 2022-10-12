@@ -2612,6 +2612,13 @@ namespace Game.Entities
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, 0, SpecResetType.Glyphs);
                     break;
+                case GossipOptionNpc.GarrisonTalent:
+                {
+                    GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(menuId);
+                    GossipMenuItemAddon itemAddon = Global.ObjectMgr.GetGossipMenuItemAddon(menuId, gossipListId);
+                    SendGarrisonOpenTalentNpc(guid, itemAddon != null ? itemAddon.GarrTalentTreeID.GetValueOrDefault(0) : 0, addon != null ? addon.FriendshipFactionID : 0);
+                    break;
+                }
                 case GossipOptionNpc.Transmogrify:
                     GetSession().SendOpenTransmogrifier(guid);
                     break;

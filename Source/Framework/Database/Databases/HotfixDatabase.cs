@@ -497,6 +497,11 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GARR_SITE_LEVEL_PLOT_INST, "SELECT ID, UiMarkerPosX, UiMarkerPosY, GarrSiteLevelID, GarrPlotInstanceID, UiMarkerSize" +
                 " FROM garr_site_level_plot_inst");
 
+            // GarrTalentTree.db2
+            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE, "SELECT ID, Name, GarrTypeID, ClassID, MaxTiers, UiOrder, Flags, UiTextureKitID, " +
+                "GarrTalentTreeType, PlayerConditionID, FeatureTypeIndex, FeatureSubtypeIndex, CurrencyID FROM garr_talent_tree");
+            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE, "SELECT ID, Name_lang FROM garr_talent_tree_locale WHERE locale = ?");
+
             // GemProperties.db2
             PrepareStatement(HotfixStatements.SEL_GEM_PROPERTIES, "SELECT ID, EnchantId, Type FROM gem_properties");
 
@@ -1532,6 +1537,9 @@ namespace Framework.Database
         SEL_GARR_SITE_LEVEL,
 
         SEL_GARR_SITE_LEVEL_PLOT_INST,
+
+        SEL_GARR_TALENT_TREE,
+        SEL_GARR_TALENT_TREE_LOCALE,
 
         SEL_GEM_PROPERTIES,
 

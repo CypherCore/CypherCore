@@ -661,7 +661,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
-        public void LoadGossipMenuFriendshipFactions()
+        public void LoadGossipMenuAddon()
         {
             uint oldMSTime = Time.GetMSTime();
 
@@ -700,6 +700,42 @@ namespace Game
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuAddonStorage.Count} gossip_menu_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+        public void LoadGossipMenuItemAddon()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _gossipMenuItemAddonStorage.Clear();
+
+            //                                         0       1         2
+            SQLResult result = DB.World.Query("SELECT MenuID, OptionId, GarrTalentTreeID FROM gossip_menu_option_addon");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_option_addon IDs. DB table `gossip_menu_option_addon` is empty!");
+                return;
+            }
+
+            do
+            {
+                uint menuId = result.Read<uint>(0);
+                uint optionId = result.Read<uint>(1);
+                GossipMenuItemAddon  addon = new();
+                if (!result.IsNull(2))
+                {
+                    addon.GarrTalentTreeID = result.Read<int>(2);
+
+                    if (!CliDB.GarrTalentTreeStorage.ContainsKey(addon.GarrTalentTreeID.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table gossip_menu_option_addon: MenuID {menuId} OptionID {optionId} is using non-existing GarrTalentTree {addon.GarrTalentTreeID.Value}");
+                        addon.GarrTalentTreeID = null;
+                    }
+                }
+
+                _gossipMenuItemAddonStorage[Tuple.Create(menuId, optionId)] = addon;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuItemAddonStorage.Count} gossip_menu_option_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadPointsOfInterest()
@@ -755,6 +791,10 @@ namespace Game
         public GossipMenuAddon GetGossipMenuAddon(uint menuId)
         {
             return _gossipMenuAddonStorage.LookupByKey(menuId);
+        }
+        public GossipMenuItemAddon GetGossipMenuItemAddon(uint menuId, uint optionId)
+        {
+            return _gossipMenuItemAddonStorage.LookupByKey(Tuple.Create(menuId, optionId));
         }
         public PointOfInterest GetPointOfInterest(uint id)
         {
@@ -10863,6 +10903,7 @@ namespace Game
         MultiMap<uint, GossipMenus> gossipMenusStorage = new();
         MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
         Dictionary<uint, GossipMenuAddon> _gossipMenuAddonStorage = new();
+        Dictionary<Tuple<uint, uint>, GossipMenuItemAddon> _gossipMenuItemAddonStorage = new();
         Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature

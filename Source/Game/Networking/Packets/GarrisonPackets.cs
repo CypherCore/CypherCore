@@ -317,6 +317,22 @@ namespace Game.Networking.Packets
         public uint GarrPlotInstanceID;
     }
 
+    class GarrisonOpenTalentNpc : ServerPacket
+    {
+        public GarrisonOpenTalentNpc() : base(ServerOpcodes.GarrisonOpenTalentNpc, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(NpcGUID);
+            _worldPacket.WriteInt32(GarrTalentTreeID);
+            _worldPacket.WriteInt32(FriendshipFactionID);
+        }
+
+        public ObjectGuid NpcGUID;
+        public int GarrTalentTreeID;
+        public int FriendshipFactionID; // Always 0 except on The Deaths of Chromie Scenario
+    }
+    
     //Structs
     public struct GarrisonPlotInfo
     {

@@ -258,6 +258,23 @@ namespace Game.DataStorage
         public byte UiMarkerSize;
     }
 
+    public sealed class GarrTalentTreeRecord
+    {
+        public uint Id;
+        public string Name;
+        public byte GarrTypeID;
+        public int ClassID;
+        public sbyte MaxTiers;
+        public sbyte UiOrder;
+        public int Flags;
+        public ushort UiTextureKitID;
+        public int GarrTalentTreeType;
+        public int PlayerConditionID;
+        public sbyte FeatureTypeIndex;
+        public sbyte FeatureSubtypeIndex;
+        public int CurrencyID;
+    }
+
     public sealed class GemPropertiesRecord
     {
         public uint Id;

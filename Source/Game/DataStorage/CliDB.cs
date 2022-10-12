@@ -158,6 +158,7 @@ namespace Game.DataStorage
             GarrPlotInstanceStorage = ReadDB2<GarrPlotInstanceRecord>("GarrPlotInstance.db2", HotfixStatements.SEL_GARR_PLOT_INSTANCE);
             GarrSiteLevelStorage = ReadDB2<GarrSiteLevelRecord>("GarrSiteLevel.db2", HotfixStatements.SEL_GARR_SITE_LEVEL);
             GarrSiteLevelPlotInstStorage = ReadDB2<GarrSiteLevelPlotInstRecord>("GarrSiteLevelPlotInst.db2", HotfixStatements.SEL_GARR_SITE_LEVEL_PLOT_INST);
+            GarrTalentTreeStorage = ReadDB2<GarrTalentTreeRecord>("GarrTalentTree.db2", HotfixStatements.SEL_GARR_TALENT_TREE, HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE);
             GemPropertiesStorage = ReadDB2<GemPropertiesRecord>("GemProperties.db2", HotfixStatements.SEL_GEM_PROPERTIES);
             GlobalCurveStorage = ReadDB2<GlobalCurveRecord>("GlobalCurve.db2", HotfixStatements.SEL_GLOBAL_CURVE);
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
@@ -555,6 +556,7 @@ namespace Game.DataStorage
         public static DB6Storage<GarrPlotInstanceRecord> GarrPlotInstanceStorage;
         public static DB6Storage<GarrSiteLevelRecord> GarrSiteLevelStorage;
         public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage;
+        public static DB6Storage<GarrTalentTreeRecord> GarrTalentTreeStorage;
         public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
         public static DB6Storage<GlobalCurveRecord> GlobalCurveStorage;
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;

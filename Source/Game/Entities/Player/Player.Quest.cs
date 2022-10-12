@@ -3111,5 +3111,14 @@ namespace Game.Entities
 
             SendPacket(displayToast);
         }
+
+        void SendGarrisonOpenTalentNpc(ObjectGuid guid, int garrTalentTreeId, int friendshipFactionId)
+        {
+            GarrisonOpenTalentNpc openTalentNpc = new();
+            openTalentNpc.NpcGUID = guid;
+            openTalentNpc.GarrTalentTreeID = garrTalentTreeId;
+            openTalentNpc.FriendshipFactionID = friendshipFactionId;
+            SendPacket(openTalentNpc);
+        }
     }
 }
