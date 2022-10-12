@@ -1704,23 +1704,13 @@ namespace Game.Spells
                                     // randomize position for multiple summons
                                     pos = caster.GetRandomPoint(destTarget, radius);
 
-                                summon = caster.SummonCreature(entry, pos, summonType, TimeSpan.FromMilliseconds(duration), 0, m_spellInfo.Id, privateObjectOwner);
+                                summon = unitCaster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                                 if (summon == null)
                                     continue;
 
+                                summon.SetTempSummonType(summonType);
                                 if (properties.Control == SummonCategory.Ally)
                                     summon.SetOwnerGUID(caster.GetGUID());
-
-                                uint faction = properties.Faction;
-                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
-                                {
-                                    WorldObject summoner = summon.GetSummoner();
-                                    if (summoner != null)
-                                        faction = summoner.GetFaction();
-                                }
-
-                                if (faction != 0)
-                                    summon.SetFaction(faction);
 
                                 ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
                             }
