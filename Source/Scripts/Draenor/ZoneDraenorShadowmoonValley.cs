@@ -70,24 +70,5 @@ namespace Scripts.Draenor
                 Talk(MiscConst.SayStartConstruction, player);
         }
     }
-
-    [Script] // 160938 - Despawn All Summons (Garrison Intro Only)
-    class spell_despawn_all_summons_garrison_intro_only : SpellScript
-    {
-        void HandleScript(uint effIndex)
-        {
-            Creature hitCreature = GetHitCreature();
-            if (hitCreature)
-            {
-                if (hitCreature.GetOwner() == GetCaster())
-                    hitCreature.DespawnOrUnsummon();
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
 }
 

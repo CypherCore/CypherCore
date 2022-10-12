@@ -4824,7 +4824,45 @@ namespace Scripts.Spells.Generic
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
+    [Script] // 83781 - Reverse Cast Ride Vehicle
+    class spell_gen_reverse_cast_target_to_caster_triggered : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // Note: this spell unsummons any creature owned by the caster. Set appropriate target conditions on the DB.
+    // 84065 - Despawn All Summons
+    // 83935 - Despawn All Summons
+    [Script] // 160938 - Despawn All Summons (Garrison Intro Only)
+    class spell_gen_despawn_all_summons_owned_by_caster : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Creature target = GetHitCreature();
+
+                if (target.GetOwner() == caster)
+                    target.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
     // 40307 - Stasis Field
     class StasisFieldSearcher : ICheck<Unit>
     {
