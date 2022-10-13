@@ -23,6 +23,7 @@ using Game.Entities;
 using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Misc
@@ -37,6 +38,15 @@ namespace Game.Misc
             if (menuItemId == -1)
             {
                 menuItemId = 0;
+                if (_menuId != 0)
+                {
+                    // set baseline menuItemId as higher than whatever exists in db
+                    var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(_menuId);
+                    var itr = bounds.MaxBy(a => a.OptionId);
+                    if (itr != null)
+                        menuItemId = (int)(itr.OptionId + 1);
+                }
+
                 if (!_menuItems.Empty())
                 {
                     foreach (var item in _menuItems)
@@ -78,55 +88,40 @@ namespace Game.Misc
             if (bounds.Empty())
                 return;
 
-            // Iterate over each of them.
-            foreach (var gossipMenuOption in bounds)
+            /// Find the one with the given menu item id.
+            var gossipMenuItems = bounds.Find(menuItem => menuItem.OptionId == menuItemId);
+            if (gossipMenuItems == null)
+                return;
+
+            // Store texts for localization.
+            string strOptionText, strBoxText;
+            BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItems.OptionBroadcastTextId);
+            BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItems.BoxBroadcastTextId);
+
+            // OptionText
+            if (optionBroadcastText != null)
+                strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, GetLocale());
+            else
+                strOptionText = gossipMenuItems.OptionText;
+
+            // BoxText
+            if (boxBroadcastText != null)
+                strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, GetLocale());
+            else
+                strBoxText = gossipMenuItems.BoxText;
+
+            // Check need of localization.
+            if (boxBroadcastText == null)
             {
-                // Find the one with the given menu item id.
-                if (gossipMenuOption.OptionId != menuItemId)
-                    continue;
-
-                // Store texts for localization.
-                string strOptionText, strBoxText;
-                BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuOption.OptionBroadcastTextId);
-                BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuOption.BoxBroadcastTextId);
-
-                // OptionText
-                if (optionBroadcastText != null)
-                    strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, GetLocale());
-                else
-                    strOptionText = gossipMenuOption.OptionText;
-
-                // BoxText
-                if (boxBroadcastText != null)
-                    strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, GetLocale());
-                else
-                    strBoxText = gossipMenuOption.BoxText;
-
-                // Check need of localization.
-                if (GetLocale() != Locale.enUS)
-                {
-                    if (optionBroadcastText == null)
-                    {
-                        // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
-                        if (gossipMenuLocale != null)
-                            ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, GetLocale(), ref strOptionText);
-                    }
-
-                    if (boxBroadcastText == null)
-                    {
-                        // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
-                        if (gossipMenuLocale != null)
-                            ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
-                    }
-
-                }
-
-                // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                uint newOptionId = AddMenuItem(-1, gossipMenuOption.OptionNpc, strOptionText, sender, action, strBoxText, gossipMenuOption.BoxMoney, gossipMenuOption.BoxCoded);
-                AddGossipMenuItemData(newOptionId, gossipMenuOption.ActionMenuId, gossipMenuOption.ActionPoiId);
+                // Find localizations from database.
+                GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
+                if (gossipMenuLocale != null)
+                    ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
             }
+
+            // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
+            AddMenuItem((int)gossipMenuItems.OptionId, gossipMenuItems.OptionNpc, strOptionText, sender, action, strBoxText, gossipMenuItems.BoxMoney, gossipMenuItems.BoxCoded);
+            AddGossipMenuItemData(gossipMenuItems.OptionId, gossipMenuItems.ActionMenuId, gossipMenuItems.ActionPoiId);
         }
 
         public void AddGossipMenuItemData(uint menuItemId, uint gossipActionMenuId, uint gossipActionPoi)
