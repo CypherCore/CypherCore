@@ -7406,6 +7406,8 @@ namespace Game.Entities
         // Closes the Menu
         public void CloseGossipMenu() { PlayerTalkClass.SendCloseGossip(); }
 
+        public void InitGossipMenu(uint menuId) { PlayerTalkClass.GetGossipMenu().SetMenuId(menuId); }
+
         //Clears the Menu
         public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }
     }

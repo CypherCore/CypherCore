@@ -41,6 +41,7 @@ namespace Scripts.World.NpcInnkeeper
 
         public override bool OnGossipHello(Player player)
         {
+            player.InitGossipMenu(Gossip.MenuId);
             if (Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) && !player.HasAura(SpellIds.TrickOrTreated))
                 player.AddGossipItem(Gossip.MenuEventId, 0, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 

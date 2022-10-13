@@ -214,6 +214,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             switch (action)
             {
                 case eTradeskill.GossipActionInfoDef + 1:
+                    player.InitGossipMenu(TextIds.GossipSelectDoomrel);
                     player.AddGossipItem(TextIds.GossipSelectDoomrel, TextIds.GossipMenuIdContinue, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                     player.SendGossipMenu(2605, me.GetGUID());
                     break;
@@ -232,6 +233,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
 
         public override bool OnGossipHello(Player player)
         {
+            player.InitGossipMenu(TextIds.GossipMenuChallenge);
             player.AddGossipItem(TextIds.GossipMenuChallenge, TextIds.GossipMenuIdChallenge, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
             player.SendGossipMenu(2601, me.GetGUID());
 

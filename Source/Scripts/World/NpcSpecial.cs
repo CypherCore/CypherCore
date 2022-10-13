@@ -1417,6 +1417,7 @@ namespace Scripts.World.NpcSpecial
 
         public override bool OnGossipHello(Player player)
         {
+            player.InitGossipMenu(GossipMenus.MenuIdWormhole);
             if (me.IsSummon())
             {
                 if (player == me.ToTempSummon().GetSummoner())
