@@ -1807,7 +1807,8 @@ namespace Game.Entities
 
                     // cast this spell later if provided
                     spellId = info.Goober.spell;
-                    spellCaster = null;
+                    if (info.Goober.playerCast == 0)
+                        spellCaster = null;
 
                     break;
                 }
