@@ -1663,11 +1663,6 @@ namespace Game.Entities
                 case GameObjectTypes.Chair:                         //7
                 {
                     GameObjectTemplate info = GetGoInfo();
-                    if (info == null)
-                        return;
-
-                    if (!user.IsTypeId(TypeId.Player))
-                        return;
 
                     if (ChairListSlots.Empty())        // this is called once at first chair use to make list of available slots
                     {
@@ -1679,8 +1674,6 @@ namespace Game.Entities
                         else
                             ChairListSlots[0] = default;     // error in DB, make one default slot
                     }
-
-                    Player player = user.ToPlayer();
 
                     // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
                     float lowestDist = SharedConst.DefaultVisibilityDistance;
@@ -1695,34 +1688,36 @@ namespace Game.Entities
                     // find nearest slot
                     bool found_free_slot = false;
 
-                    foreach (var slot in ChairListSlots.ToList())
+                    foreach (var (slot, sittingUnit) in ChairListSlots.ToList())
                     {
                         // the distance between this slot and the center of the go - imagine a 1D space
-                        float relativeDistance = (info.size * slot.Key) - (info.size * (info.Chair.chairslots - 1) / 2.0f);
+                        float relativeDistance = (info.size * slot) - (info.size * (info.Chair.chairslots - 1) / 2.0f);
 
                         float x_i = (float)(GetPositionX() + relativeDistance * Math.Cos(orthogonalOrientation));
                         float y_i = (float)(GetPositionY() + relativeDistance * Math.Sin(orthogonalOrientation));
 
-                        if (!slot.Value.IsEmpty())
+                        if (!sittingUnit.IsEmpty())
                         {
-                            Player ChairUser = Global.ObjAccessor.GetPlayer(this, slot.Value);
-                            if (ChairUser != null)
-                                if (ChairUser.IsSitState() && ChairUser.GetStandState() != UnitStandStateType.Sit && ChairUser.GetExactDist2d(x_i, y_i) < 0.1f)
+                            Unit chairUser = Global.ObjAccessor.GetUnit(this, sittingUnit);
+                            if (chairUser != null)
+                            {
+                                if (chairUser.IsSitState() && chairUser.GetStandState() != UnitStandStateType.Sit && chairUser.GetExactDist2d(x_i, y_i) < 0.1f)
                                     continue;        // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
-                                else
-                                    ChairListSlots[slot.Key] = default; // This seat is unoccupied.
+
+                                ChairListSlots[slot].Clear(); // This seat is unoccupied.
+                            }
                             else
-                                ChairListSlots[slot.Key] = default;     // The seat may of had an occupant, but they're offline.
+                                ChairListSlots[slot].Clear();     // The seat may of had an occupant, but they're offline.
                         }
 
                         found_free_slot = true;
 
                         // calculate the distance between the player and this slot
-                        float thisDistance = player.GetDistance2d(x_i, y_i);
+                        float thisDistance = user.GetDistance2d(x_i, y_i);
 
                         if (thisDistance <= lowestDist)
                         {
-                            nearest_slot = slot.Key;
+                            nearest_slot = slot;
                             lowestDist = thisDistance;
                             x_lowest = x_i;
                             y_lowest = y_i;
@@ -1734,16 +1729,14 @@ namespace Game.Entities
                         var guid = ChairListSlots.LookupByKey(nearest_slot);
                         if (guid.IsEmpty())
                         {
-                            ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
-                            player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                            player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
+                            ChairListSlots[nearest_slot] = user.GetGUID(); //this slot in now used by player
+                            user.NearTeleportTo(x_lowest, y_lowest, GetPositionZ(), GetOrientation());
+                            user.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
                             if (info.Chair.triggeredEvent != 0)
-                                GameEvents.Trigger(info.Chair.triggeredEvent, player, this);
+                                GameEvents.Trigger(info.Chair.triggeredEvent, user, this);
                             return;
                         }
                     }
-                    else
-                        player.GetSession().SendNotification("There's nowhere left for you to sit.");
 
                     return;
                 }
