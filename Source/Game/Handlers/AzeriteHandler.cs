@@ -243,5 +243,10 @@ namespace Game
 
             azeriteEmpoweredItem.SetState(ItemUpdateState.Changed, _player);
         }
+
+        public void SendAzeriteRespecNPC(ObjectGuid npc)
+        {
+            SendPacket(new AzeriteRespecNPC(npc));
+        }
     }
 }

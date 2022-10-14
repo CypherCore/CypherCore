@@ -6764,7 +6764,7 @@ namespace Game.Spells
                             return SpellCastResult.AzeriteEmpoweredOnly;
 
                         bool hasSelections = false;
-                        for (int tier = 0; tier < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++tier)
+                        for (int tier = 0; tier < SharedConst.MaxAzeriteEmpoweredTier; ++tier)
                         {
                             if (azeriteEmpoweredItem.GetSelectedAzeritePower(tier) != 0)
                             {

@@ -2370,6 +2370,7 @@ namespace Game.Entities
                         case GossipOptionNpc.Auctioneer:
                         case GossipOptionNpc.Mailbox:
                         case GossipOptionNpc.Transmogrify:
+                        case GossipOptionNpc.AzeriteRespec:
                             break;                                         // No checks
                         case GossipOptionNpc.CemeterySelect:
                             canTalk = false;                               // Deprecated
@@ -2388,7 +2389,6 @@ namespace Game.Entities
                         case GossipOptionNpc.AdventureMap:
                         case GossipOptionNpc.GarrisonTalent:
                         case GossipOptionNpc.ContributionCollector:
-                        case GossipOptionNpc.AzeriteRespec:
                         case GossipOptionNpc.IslandsMission:
                         case GossipOptionNpc.UIItemInteraction:
                         case GossipOptionNpc.WorldMap:
@@ -2621,6 +2621,10 @@ namespace Game.Entities
                 }
                 case GossipOptionNpc.Transmogrify:
                     GetSession().SendOpenTransmogrifier(guid);
+                    break;
+                case GossipOptionNpc.AzeriteRespec:
+                    PlayerTalkClass.SendCloseGossip();
+                    GetSession().SendAzeriteRespecNPC(guid);
                     break;
                 default:
                     break;
