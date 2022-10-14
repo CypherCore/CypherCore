@@ -4728,6 +4728,46 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 132334 - Trainer Heal Cooldown (SERVERSIDE)
+    class spell_gen_trainer_heal_cooldown : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SharedConst.SpellReviveBattlePets);
+        }
+
+        public override bool Load()
+        {
+            return GetUnitOwner().IsPlayer();
+        }
+
+        void UpdateReviveBattlePetCooldown(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Player target = GetUnitOwner().ToPlayer();
+            SpellInfo reviveBattlePetSpellInfo = Global.SpellMgr.GetSpellInfo(SharedConst.SpellReviveBattlePets, Difficulty.None);
+
+            if (target.GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
+            {
+                TimeSpan expectedCooldown = TimeSpan.FromMilliseconds(GetAura().GetMaxDuration());
+                TimeSpan remainingCooldown = target.GetSpellHistory().GetRemainingCategoryCooldown(reviveBattlePetSpellInfo);
+                if (remainingCooldown > TimeSpan.Zero)
+                {
+                    if (remainingCooldown < expectedCooldown)
+                        target.GetSpellHistory().ModifyCooldown(reviveBattlePetSpellInfo, expectedCooldown - remainingCooldown);
+                }
+                else
+                {
+                    target.GetSpellHistory().StartCooldown(reviveBattlePetSpellInfo, 0, null, false, expectedCooldown);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(UpdateReviveBattlePetCooldown, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 45313 - Anchor Here
     class spell_gen_anchor_here : SpellScript
     {

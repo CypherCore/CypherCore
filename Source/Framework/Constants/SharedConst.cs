@@ -57,7 +57,6 @@ namespace Framework.Constants
         public const int SpellReviveBattlePets = 125439;
         public const int SpellSummonBattlePet = 118301;
         public const int MaxBattlePetLevel = 25;
-        public static TimeSpan ReviveBattlePetsCooldown = TimeSpan.FromSeconds(180);
 
         /// <summary>
         /// Lfg Const

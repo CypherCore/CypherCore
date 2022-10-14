@@ -1014,25 +1014,6 @@ namespace Game.Entities
             m_lastPotionId = 0;
         }
 
-        public void UpdateReviveBattlePetCooldown()
-        {
-            SpellInfo reviveBattlePetSpellInfo = Global.SpellMgr.GetSpellInfo(SharedConst.SpellReviveBattlePets, Difficulty.None);
-
-            if (reviveBattlePetSpellInfo != null && HasSpell(SharedConst.SpellReviveBattlePets))
-            {
-                var remainingCooldown = GetSpellHistory().GetRemainingCategoryCooldown(reviveBattlePetSpellInfo);
-                if (remainingCooldown > TimeSpan.Zero)
-                {
-                    if (remainingCooldown < SharedConst.ReviveBattlePetsCooldown)
-                        GetSpellHistory().ModifyCooldown(reviveBattlePetSpellInfo, SharedConst.ReviveBattlePetsCooldown - remainingCooldown);
-                }
-                else
-                {
-                    GetSpellHistory().StartCooldown(reviveBattlePetSpellInfo, 0, null, false, SharedConst.ReviveBattlePetsCooldown);
-                }
-            }
-        }
-
         public bool CanUseMastery()
         {
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
