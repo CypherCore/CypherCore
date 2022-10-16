@@ -1646,6 +1646,61 @@ namespace Game.Entities
                     player.SendPreparedGossip(this);
                     return;
                 }
+                case GameObjectTypes.Chest:                         //3
+                {
+                    Player player = user.ToPlayer();
+                    if (!player)
+                        return;
+
+                    Battleground bg = player.GetBattleground();
+                    if (bg != null && !bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(user.GetGUID())))
+                        return;
+
+                    GameObjectTemplate info = GetGoInfo();
+                    if (GetLootState() == LootState.Ready)
+                    {
+                        uint lootId = info.GetLootId();
+                        if (lootId != 0)
+                        {
+                            SetLootGenerationTime();
+
+                            Group group = player.GetGroup();
+                            bool groupRules = group != null && info.Chest.usegrouplootrules != 0;
+
+                            loot = new Loot(GetMap(), GetGUID(), LootType.Chest, groupRules ? group : null);
+                            loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
+                            loot.FillLoot(lootId, LootStorage.Gameobject, player, !groupRules, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+
+                            if (GetLootMode() > 0)
+                            {
+                                GameObjectTemplateAddon addon = GetTemplateAddon();
+                                if (addon != null)
+                                    loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
+                            }
+                        }
+
+                        /// @todo possible must be moved to loot release (in different from linked triggering)
+                        if (info.Chest.triggeredEvent != 0)
+                        {
+                            Log.outDebug(LogFilter.Spells, $"Chest ScriptStart id {info.Chest.triggeredEvent} for GO {GetSpawnId()}");
+                            GameEvents.Trigger(info.Chest.triggeredEvent, user, this);
+                        }
+
+                        // triggering linked GO
+                        uint trapEntry = info.Chest.linkedTrap;
+                        if (trapEntry != 0)
+                            TriggeringLinkedGameObject(trapEntry, player);
+
+                        SetLootState(LootState.Activated, player);
+                    }
+                    else
+                        loot = GetLootForPlayer(player);
+
+                    // Send loot
+                    if (loot != null)
+                        player.SendLoot(loot);
+                    break;
+                }
                 case GameObjectTypes.Trap:                          //6
                 {
                     GameObjectTemplate goInfo = GetGoInfo();
@@ -1739,6 +1794,14 @@ namespace Game.Entities
                     }
 
                     return;
+                }
+                case GameObjectTypes.SpellFocus:                   //8
+                {
+                    // triggering linked GO
+                    uint trapEntry = GetGoInfo().SpellFocus.linkedTrap;
+                    if (trapEntry != 0)
+                        TriggeringLinkedGameObject(trapEntry, user);
+                    break;
                 }
                 //big gun, its a spell/aura
                 case GameObjectTypes.Goober:                        //10
