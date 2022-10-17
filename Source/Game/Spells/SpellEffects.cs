@@ -1186,118 +1186,6 @@ namespace Game.Spells
             unitCaster.EnergizeBySpell(unitTarget, m_spellInfo, gain, power);
         }
 
-        void SendLoot(ObjectGuid guid, LootType loottype)
-        {
-            Player player = m_caster.ToPlayer();
-            if (player == null)
-                return;
-
-            if (gameObjTarget != null)
-            {
-                // Players shouldn't be able to loot gameobjects that are currently despawned
-                if (!gameObjTarget.IsSpawned() && !player.IsGameMaster())
-                {
-                    Log.outError(LogFilter.Spells, "Possible hacking attempt: Player {0} [{1}] tried to loot a gameobject [{2}] which is on respawn time without being in GM mode!",
-                                    player.GetName(), player.GetGUID().ToString(), gameObjTarget.GetGUID().ToString());
-                    return;
-                }
-                // special case, already has GossipHello inside so return and avoid calling twice
-                if (gameObjTarget.GetGoType() == GameObjectTypes.Goober)
-                {
-                    gameObjTarget.Use(player);
-                    return;
-                }
-
-                player.PlayerTalkClass.ClearMenus();
-                if (gameObjTarget.GetAI().OnGossipHello(player))
-                    return;
-
-                switch (gameObjTarget.GetGoType())
-                {
-                    case GameObjectTypes.Door:
-                    case GameObjectTypes.Button:
-                        gameObjTarget.UseDoorOrButton(0, false, player);
-                        return;
-
-                    case GameObjectTypes.QuestGiver:
-                        player.PrepareGossipMenu(gameObjTarget, gameObjTarget.GetGoInfo().QuestGiver.gossipID, true);
-                        player.SendPreparedGossip(gameObjTarget);
-                        return;
-
-                    case GameObjectTypes.SpellFocus:
-                    {
-                        // triggering linked GO
-                        uint trapEntry = gameObjTarget.GetGoInfo().SpellFocus.linkedTrap;
-                        if (trapEntry != 0)
-                            gameObjTarget.TriggeringLinkedGameObject(trapEntry, player);
-                        return;
-                    }
-                    case GameObjectTypes.Chest:
-                    {
-                        // @todo possible must be moved to loot release (in different from linked triggering)
-                        var bg = player.GetBattleground();
-                        if (bg != null)
-                        {
-                            if (!bg.CanActivateGO((int)gameObjTarget.GetEntry(), (uint)bg.GetPlayerTeam(player.GetGUID())))
-                            {
-                                player.SendLootRelease(guid);
-                                return;
-                            }
-                        }
-
-                        Loot loot = null;
-                        if (gameObjTarget.GetLootState() == LootState.Ready)
-                        {
-                            uint lootId = gameObjTarget.GetGoInfo().GetLootId();
-                            if (lootId != 0)
-                            {
-                                gameObjTarget.SetLootGenerationTime();
-
-                                Group group = player.GetGroup();
-                                bool groupRules = group != null && gameObjTarget.GetGoInfo().Chest.usegrouplootrules != 0;
-
-                                loot = new(gameObjTarget.GetMap(), guid, loottype, groupRules ? group : null);
-                                gameObjTarget.loot = loot;
-
-                                loot.SetDungeonEncounterId(gameObjTarget.GetGoInfo().Chest.DungeonEncounter);
-                                loot.FillLoot(lootId, LootStorage.Gameobject, player, !groupRules, false, gameObjTarget.GetLootMode(), gameObjTarget.GetMap().GetDifficultyLootItemContext());
-
-                                if (gameObjTarget.GetLootMode() > 0)
-                                {
-                                    var addon = gameObjTarget.GetTemplateAddon();
-                                    if (addon != null)
-                                        loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
-                                }
-                            }
-
-                            /// @todo possible must be moved to loot release (in different from linked triggering)
-                            if (gameObjTarget.GetGoInfo().Chest.triggeredEvent != 0)
-                            {
-                                Log.outDebug(LogFilter.Spells, $"Chest ScriptStart id {gameObjTarget.GetGoInfo().Chest.triggeredEvent} for GO {gameObjTarget.GetSpawnId()}");
-                                GameEvents.Trigger(gameObjTarget.GetGoInfo().Chest.triggeredEvent, player, gameObjTarget);
-                            }
-
-                            // triggering linked GO
-                            uint trapEntry = gameObjTarget.GetGoInfo().Chest.linkedTrap;
-                            if (trapEntry != 0)
-                                gameObjTarget.TriggeringLinkedGameObject(trapEntry, player);
-
-                            gameObjTarget.SetLootState(LootState.Activated, player);
-                        }
-                        else
-                            loot = gameObjTarget.GetLootForPlayer(player);
-
-                        // Send loot
-                        if (loot != null)
-                            player.SendLoot(loot);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-        }
-
         [SpellEffectHandler(SpellEffectName.OpenLock)]
         void EffectOpenLock()
         {
@@ -1394,7 +1282,7 @@ namespace Game.Spells
             }
 
             if (gameObjTarget != null)
-                SendLoot(guid, LootType.Chest);
+                gameObjTarget.Use(player);
             else if (itemTarget != null)
             {
                 itemTarget.SetItemFlag(ItemFieldFlags.Unlocked);
