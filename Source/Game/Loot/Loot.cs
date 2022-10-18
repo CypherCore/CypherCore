@@ -659,7 +659,6 @@ namespace Game.Loots
         public Loot(Map map, ObjectGuid owner, LootType type, Group group)
         {
             loot_type = type;
-            maxDuplicates = 1;
             _guid = map ? ObjectGuid.Create(HighGuid.LootObject, map.GetId(), 0, map.GenerateLowGuid(HighGuid.LootObject)) : ObjectGuid.Empty;
             _owner = owner;
             _itemContext = ItemContext.None;
@@ -1052,26 +1051,6 @@ namespace Game.Loots
             }
         }
 
-        public void Clear()
-        {
-            PlayerFFAItems.Clear();
-
-            foreach (ObjectGuid playerGuid in PlayersLooting)
-            {
-                Player player = Global.ObjAccessor.FindConnectedPlayer(playerGuid);
-                if (player != null)
-                    player.GetSession().DoLootRelease(this);
-            }
-
-            PlayersLooting.Clear();
-            items.Clear();
-            gold = 0;
-            unlootedCount = 0;
-            roundRobinPlayer = ObjectGuid.Empty;
-            _itemContext = 0;
-            _rolls.Clear();
-        }
-
         public void NotifyLootList(Map map)
         {
             LootList lootList = new();
@@ -1095,7 +1074,6 @@ namespace Game.Loots
             }
         }
 
-        public bool Empty() { return items.Empty() && gold == 0; }
         public bool IsLooted() { return gold == 0 && unlootedCount == 0; }
 
         public void AddLooter(ObjectGuid guid) { PlayersLooting.Add(guid); }
@@ -1117,7 +1095,6 @@ namespace Game.Loots
         public byte unlootedCount;
         public ObjectGuid roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
         public LootType loot_type;                                     // required for achievement system
-        public byte maxDuplicates;                                    // Max amount of items with the same entry that can drop (default is 1; on 25 man raid mode 3)
 
         List<ObjectGuid> PlayersLooting = new();
         MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new();

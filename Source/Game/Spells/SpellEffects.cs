@@ -1844,25 +1844,25 @@ namespace Game.Spells
             {
                 creature.StartPickPocketRefillTimer();
 
-                creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
+                creature._loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
                 uint lootid = creature.GetCreatureTemplate().PickPocketId;
                 if (lootid != 0)
-                    creature.loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
+                    creature._loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
 
                 // Generate extra money for pick pocket loot
                 uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
                 uint b = RandomHelper.URand(0, player.GetLevel() / 2);
-                creature.loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                creature._loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             }
-            else if (creature.loot != null)
+            else if (creature._loot != null)
             {
-                if (creature.loot.loot_type == LootType.Pickpocketing && creature.loot.IsLooted())
-                    player.SendLootError(creature.loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
+                if (creature._loot.loot_type == LootType.Pickpocketing && creature._loot.IsLooted())
+                    player.SendLootError(creature._loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
 
                 return;
             }
 
-            player.SendLoot(creature.loot);
+            player.SendLoot(creature._loot);
         }
 
         [SpellEffectHandler(SpellEffectName.AddFarsight)]
@@ -3493,12 +3493,12 @@ namespace Game.Spells
 
             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
-            creature.RemoveUnitFlag(UnitFlags.Skinnable);
+            creature.SetUnitFlag3(UnitFlags3.AlreadySkinned);
             creature.SetDynamicFlag(UnitDynFlags.Lootable);
-            creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
-            creature.loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
-            creature.SetLootRecipient(player, false);
-            player.SendLoot(creature.loot);
+            Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
+            creature.m_personalLoot[player.GetGUID()] = loot;
+            loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
+            player.SendLoot(loot);
 
             if (skill == SkillType.Skinning)
             {

@@ -160,7 +160,7 @@ namespace Game.Entities
                 SetDeathState(DeathState.Dead);
                 RemoveAllAuras();
                 //DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-                loot = null;
+                _loot = null;
                 uint respawnDelay = m_respawnDelay;
                 CreatureAI ai = GetAI();
                 if (ai != null)
@@ -507,7 +507,10 @@ namespace Game.Entities
                     if (IsEngaged())
                         AIUpdateTick(diff);
 
-                    loot?.Update();
+                    _loot?.Update();
+
+                    foreach (var (playerOwner, loot) in m_personalLoot)
+                        loot.Update();
 
                     if (m_corpseRemoveTime <= GameTime.GetGameTime())
                     {
@@ -1165,24 +1168,8 @@ namespace Game.Entities
         }
         public void ResetPickPocketRefillTimer() { _pickpocketLootRestore = 0; }
         public bool CanGeneratePickPocketLoot() { return _pickpocketLootRestore <= GameTime.GetGameTime(); }
-        public ObjectGuid GetLootRecipientGUID() { return m_lootRecipient; }
 
-        public Player GetLootRecipient()
-        {
-            if (m_lootRecipient.IsEmpty())
-                return null;
-            return Global.ObjAccessor.FindPlayer(m_lootRecipient);
-        }
-
-        public Group GetLootRecipientGroup()
-        {
-            if (m_lootRecipientGroup.IsEmpty())
-                return null;
-
-            return Global.GroupMgr.GetGroupByGUID(m_lootRecipientGroup);
-        }
-
-        public void SetLootRecipient(Unit unit, bool withGroup = true)
+        public void SetTappedBy(Unit unit, bool withGroup = true)
         {
             // set the player whose group should receive the right
             // to loot the creature after it dies
@@ -1190,11 +1177,13 @@ namespace Game.Entities
 
             if (unit == null)
             {
-                m_lootRecipient.Clear();
-                m_lootRecipientGroup.Clear();
+                m_tapList.Clear();
                 RemoveDynamicFlag(UnitDynFlags.Lootable | UnitDynFlags.Tapped);
                 return;
             }
+
+            if (m_tapList.Count >= SharedConst.CreatureTappersSoftCap)
+                return;
 
             if (!unit.IsTypeId(TypeId.Player) && !unit.IsVehicle())
                 return;
@@ -1203,31 +1192,62 @@ namespace Game.Entities
             if (player == null)                                             // normal creature, no player involved
                 return;
 
-            m_lootRecipient = player.GetGUID();
+            m_tapList.Add(player.GetGUID());
             if (withGroup)
             {
                 Group group = player.GetGroup();
-                if (group)
-                    m_lootRecipientGroup = group.GetGUID();
+                if (group != null)
+                    for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+                        if (GetMap().IsRaid() || group.SameSubGroup(player, itr.GetSource()))
+                            m_tapList.Add(itr.GetSource().GetGUID());
             }
-            else
-                m_lootRecipientGroup = ObjectGuid.Empty;
 
-            SetDynamicFlag(UnitDynFlags.Tapped);
+            if (m_tapList.Count >= SharedConst.CreatureTappersSoftCap)
+                SetDynamicFlag(UnitDynFlags.Tapped);
         }
 
         public bool IsTappedBy(Player player)
         {
-            if (player.GetGUID() == m_lootRecipient)
-                return true;
+            return m_tapList.Contains(player.GetGUID()); 
+        }
 
-            Group playerGroup = player.GetGroup();
-            if (!playerGroup || playerGroup != GetLootRecipientGroup()) // if we dont have a group we arent the recipient
-                return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
+        public override Loot GetLootForPlayer(Player player)
+        {
+            if (m_personalLoot.Empty())
+                return _loot;
+
+            var loot = m_personalLoot.LookupByKey(player.GetGUID());
+            if (loot != null)
+                return loot;
+
+            return null;
+        }
+
+        public bool IsFullyLooted()
+        {
+            if (_loot != null && !_loot.IsLooted())
+                return false;
+
+            foreach (var (_, loot) in m_personalLoot)
+                if (!loot.IsLooted())
+                    return false;
 
             return true;
         }
 
+        public bool IsSkinnedBy(Player player)
+        {
+            Loot loot = GetLootForPlayer(player);
+            if (loot != null)
+                return loot.loot_type == LootType.Skinning;
+
+            return false;
+        }
+
+        public List<ObjectGuid> GetTapList() { return m_tapList; }
+        public void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
+        public bool HasLootRecipient() { return !m_tapList.Empty(); }
+        
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
@@ -1867,7 +1887,7 @@ namespace Game.Entities
                 else
                     SetSpawnHealth();
 
-                SetLootRecipient(null);
+                SetTappedBy(null);
                 ResetPlayerDamageReq();
 
                 SetCannotReachTarget(false);
@@ -1926,7 +1946,7 @@ namespace Game.Entities
                     Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
                     m_respawnTime = 0;
                     ResetPickPocketRefillTimer();
-                    loot = null;
+                    _loot = null;
 
                     if (m_originalEntry != GetEntry())
                         UpdateEntry(m_originalEntry);
@@ -2560,13 +2580,9 @@ namespace Game.Entities
         {
             return !_isMissingCanSwimFlagOutOfCombat;
         }
-        
+
         public void AllLootRemovedFromCorpse()
         {
-            if ((loot == null || loot.loot_type != LootType.Skinning) && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
-                if (LootStorage.Skinning.HaveLootFor(GetCreatureTemplate().SkinLootId))
-                    SetUnitFlag(UnitFlags.Skinnable);
-
             long now = GameTime.GetGameTime();
             // Do not reset corpse remove time if corpse is already removed
             if (m_corpseRemoveTime <= now)
@@ -2576,7 +2592,19 @@ namespace Game.Entities
             float decayRate = m_ignoreCorpseDecayRatio ? 1.0f : WorldConfig.GetFloatValue(WorldCfg.RateCorpseDecayLooted);
 
             // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
-            if (loot != null && loot.loot_type == LootType.Skinning)
+            bool isFullySkinned()
+            {
+                if (_loot != null && _loot.loot_type == LootType.Skinning && _loot.IsLooted())
+                    return true;
+
+                foreach (var (_, loot) in m_personalLoot)
+                    if (loot.loot_type != LootType.Skinning || !loot.IsLooted())
+                        return false;
+
+                return true;
+            }
+
+            if (isFullySkinned())
                 m_corpseRemoveTime = now;
             else
                 m_corpseRemoveTime = now + (uint)(m_corpseDelay * decayRate);
@@ -3269,10 +3297,6 @@ namespace Game.Entities
                 return false;
             return true;
         }
-
-        public bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
-
-        public override Loot GetLootForPlayer(Player player) { return loot; }
         
         public LootModes GetLootMode() { return m_LootMode; }
         public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
@@ -3343,7 +3367,6 @@ namespace Game.Entities
 
         void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
         public bool IsReputationGainDisabled() { return DisableReputationGain; }
-        public bool IsDamageEnoughForLootingAndReward() { return m_creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoPlayerDamageReq) || m_PlayerDamageReq == 0; }
 
         // Part of Evade mechanics
         long GetLastDamagedTime() { return _lastDamagedTime; }

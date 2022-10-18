@@ -956,44 +956,46 @@ namespace Game.Entities
 
         public Loot GetFishLoot(Player lootOwner)
         {
-            uint zone, subzone;
             uint defaultzone = 1;
-            GetZoneAndAreaId(out zone, out subzone);
 
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.Fishing, null);
 
-            // if subzone loot exist use it
-            fishLoot.FillLoot(subzone, LootStorage.Fishing, lootOwner, true, true);
-            if (fishLoot.Empty())
+            uint areaId = GetAreaId();
+            AreaTableRecord areaEntry;
+            while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                //subzone no result,use zone loot
-                fishLoot.FillLoot(zone, LootStorage.Fishing, lootOwner, true);
-                //use zone 1 as default, somewhere fishing got nothing,becase subzone and zone not set, like Off the coast of Storm Peaks.
-                if (fishLoot.Empty())
-                    fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true);
+                if (!fishLoot.IsLooted())
+                    break;
+
+                areaId = areaEntry.ParentAreaID;
             }
+
+            if (fishLoot.IsLooted())
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true);
 
             return fishLoot;
         }
 
         public Loot GetFishLootJunk(Player lootOwner)
         {
-            uint zone, subzone;
             uint defaultzone = 1;
-            GetZoneAndAreaId(out zone, out subzone);
 
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.FishingJunk, null);
 
-            // if subzone loot exist use it
-            fishLoot.FillLoot(subzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
-            if (fishLoot.Empty())  //use this becase if zone or subzone has normal mask drop, then fishloot.FillLoot return true.
+            uint areaId = GetAreaId();
+            AreaTableRecord areaEntry;
+            while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                //use zone loot
-                fishLoot.FillLoot(zone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
-                if (fishLoot.Empty())
-                    //use zone 1 as default
-                    fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+                if (!fishLoot.IsLooted())
+                    break;
+
+                areaId = areaEntry.ParentAreaID;
             }
+
+            if (fishLoot.IsLooted())
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
 
             return fishLoot;
         }
@@ -2886,51 +2888,6 @@ namespace Game.Entities
                 GetMap().InsertGameObjectModel(m_model);
         }
 
-        Player GetLootRecipient()
-        {
-            if (m_lootRecipient.IsEmpty())
-                return null;
-            return Global.ObjAccessor.FindPlayer(m_lootRecipient);
-        }
-
-        Group GetLootRecipientGroup()
-        {
-            if (m_lootRecipientGroup.IsEmpty())
-                return Global.GroupMgr.GetGroupByGUID(m_lootRecipientGroup);
-
-            return null;
-        }
-
-        public void SetLootRecipient(Unit unit, Group group)
-        {
-            // set the player whose group should receive the right
-            // to loot the creature after it dies
-            // should be set to null after the loot disappears
-
-            if (unit == null)
-            {
-                m_lootRecipient.Clear();
-                m_lootRecipientGroup = group ? group.GetGUID() : ObjectGuid.Empty;
-                return;
-            }
-
-            if (!unit.IsTypeId(TypeId.Player) && !unit.IsVehicle())
-                return;
-
-            Player player = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (player == null)                                             // normal creature, no player involved
-                return;
-
-            m_lootRecipient = player.GetGUID();
-
-            // either get the group from the passed parameter or from unit's one
-            Group unitGroup = player.GetGroup();
-            if (group)
-                m_lootRecipientGroup = group.GetGUID();
-            else if (unitGroup)
-                m_lootRecipientGroup = unitGroup.GetGUID();
-        }
-
         public bool IsLootAllowedFor(Player player)
         {
             Loot loot = GetLootForPlayer(player);
@@ -2942,15 +2899,8 @@ namespace Game.Entities
                     return false;
             }
 
-            if (m_lootRecipient.IsEmpty() && m_lootRecipientGroup.IsEmpty())
-                return true;
-
-            if (player.GetGUID() == m_lootRecipient)
-                return true;
-
-            Group playerGroup = player.GetGroup();
-            if (!playerGroup || playerGroup != GetLootRecipientGroup()) // if we dont have a group we arent the recipient
-                return false;                                           // if go doesnt have group bound it means it was solo killed by someone else
+            if (HasLootRecipient())
+                return m_tapList.Contains(player.GetGUID());                                      // if go doesnt have group bound it means it was solo killed by someone else
 
             return true;
         }
@@ -3444,7 +3394,10 @@ namespace Game.Entities
         public uint GetUseCount() { return m_usetimes; }
         uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
 
-        bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
+        List<ObjectGuid> GetTapList() { return m_tapList; }
+        void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
+        
+        bool HasLootRecipient() { return !m_tapList.Empty(); }
         
         public override uint GetLevelForTarget(WorldObject target)
         {
@@ -3552,8 +3505,7 @@ namespace Game.Entities
         List<ObjectGuid> m_unique_users = new();
         uint m_usetimes;
 
-        ObjectGuid m_lootRecipient;
-        ObjectGuid m_lootRecipientGroup;
+        List<ObjectGuid> m_tapList = new();
         LootModes m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
         long m_packedRotation;
         Quaternion m_localRotation;

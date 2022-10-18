@@ -211,7 +211,7 @@ namespace Game.AI
             if (reset)
             {
                 who.LoadCreaturesAddon();
-                who.SetLootRecipient(null);
+                who.SetTappedBy(null);
                 who.ResetPlayerDamageReq();
                 who.SetLastDamagedTime(0);
                 who.SetCannotReachTarget(false);
@@ -596,7 +596,7 @@ namespace Game.AI
                 if (reset)
                 {
                     creature.LoadCreaturesAddon();
-                    creature.SetLootRecipient(null);
+                    creature.SetTappedBy(null);
                     creature.ResetPlayerDamageReq();
                     creature.SetLastDamagedTime(0);
                     creature.SetCannotReachTarget(false);

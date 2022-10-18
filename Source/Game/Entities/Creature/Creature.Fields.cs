@@ -90,9 +90,9 @@ namespace Game.Entities
         // vendor items
         List<VendorItemCount> m_vendorItemCounts = new();
 
-        public Loot loot;
-        ObjectGuid m_lootRecipient;
-        ObjectGuid m_lootRecipientGroup;
+        internal Dictionary<ObjectGuid, Loot> m_personalLoot = new();
+        public Loot _loot;
+        List<ObjectGuid> m_tapList = new();
     }
 
     public enum ObjectCellMoveState

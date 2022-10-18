@@ -626,8 +626,13 @@ namespace Game.Chat
             if (!target)
                 return false;
 
-            handler.SendSysMessage("Loot recipient for creature {0} (GUID {1}, SpawnID {2}) is {3}", target.GetName(), target.GetGUID().ToString(), target.GetSpawnId(),
-                target.HasLootRecipient() ? (target.GetLootRecipient() ? target.GetLootRecipient().GetName() : "offline") : "no loot recipient");
+            handler.SendSysMessage($"Loot recipients for creature {target.GetName()} ({target.GetGUID()}, SpawnID {target.GetSpawnId()}) are:");
+
+            foreach (ObjectGuid tapperGuid in target.GetTapList())
+            {
+                Player tapper = Global.ObjAccessor.GetPlayer(target, tapperGuid);
+                handler.SendSysMessage($"* {(tapper != null ? tapper.GetName() : "offline")}");
+            }
             return true;
         }
 

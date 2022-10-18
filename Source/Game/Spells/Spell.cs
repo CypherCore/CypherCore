@@ -1213,8 +1213,8 @@ namespace Game.Spells
                     break;
                 case Targets.UnitTargetTapList:
                     Creature creatureCaster = m_caster.ToCreature();
-                    if (creatureCaster != null)
-                        target = creatureCaster.GetLootRecipient();
+                    if (creatureCaster != null && !creatureCaster.GetTapList().Empty())
+                        target = Global.ObjAccessor.GetWorldObject(creatureCaster, creatureCaster.GetTapList().SelectRandom());
                     break;
                 case Targets.UnitOwnCritter:
                 {
@@ -5188,7 +5188,7 @@ namespace Game.Spells
 
                         Creature creature = m_targets.GetUnitTarget().ToCreature();
                         Loot loot = creature.GetLootForPlayer(m_caster.ToPlayer());
-                        if (loot != null && !loot.IsLooted())
+                        if (loot != null && (!loot.IsLooted() || loot.loot_type == LootType.Skinning))
                             return SpellCastResult.TargetNotLooted;
 
                         SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
@@ -8557,8 +8557,8 @@ namespace Game.Spells
                         {
                             Creature targetCreature = unit.ToCreature();
                             if (targetCreature != null)
-                                if (!targetCreature.HasLootRecipient() && unitCaster.IsPlayer())
-                                    targetCreature.SetLootRecipient(unitCaster);
+                                if (unitCaster.IsPlayer())
+                                    targetCreature.SetTappedBy(unitCaster);
                         }
                     }
 

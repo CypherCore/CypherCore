@@ -135,7 +135,7 @@ namespace Game.AI
         {
             me.RemoveAllAuras();
             me.CombatStop(true);
-            me.SetLootRecipient(null);
+            me.SetTappedBy(null);
 
             EngagementOver();
 

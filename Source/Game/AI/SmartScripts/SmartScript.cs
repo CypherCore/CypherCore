@@ -826,12 +826,14 @@ namespace Game.AI
                         if (_me == null)
                             break;
 
-                        Player player = _me.GetLootRecipient();
-                        if (player != null)
+                        foreach (ObjectGuid tapperGuid in _me.GetTapList())
                         {
-                            player.RewardPlayerAndGroupAtEvent(e.Action.killedMonster.creature, player);
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_KILLEDMONSTER: Player {0}, Killcredit: {1}",
-                                player.GetGUID().ToString(), e.Action.killedMonster.creature);
+                            Player tapper = Global.ObjAccessor.GetPlayer(_me, tapperGuid);
+                            if (tapper != null)
+                            {
+                                tapper.KilledMonsterCredit(e.Action.killedMonster.creature, _me.GetGUID());
+                                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction: SMART_ACTION_CALL_KILLEDMONSTER: Player {tapper.GetGUID()}, Killcredit: {e.Action.killedMonster.creature}");
+                            }
                         }
                     }
                     else // Specific target type
@@ -2984,22 +2986,11 @@ namespace Game.AI
                 {
                     if (_me)
                     {
-                        Group lootGroup = _me.GetLootRecipientGroup();
-                        if (lootGroup)
+                        foreach (ObjectGuid tapperGuid in _me.GetTapList())
                         {
-                            for (GroupReference refe = lootGroup.GetFirstMember(); refe != null; refe = refe.Next())
-                            {
-                                Player recipient = refe.GetSource();
-                                if (recipient)
-                                    if (recipient.IsInMap(_me))
-                                        targets.Add(recipient);
-                            }
-                        }
-                        else
-                        {
-                            Player recipient = _me.GetLootRecipient();
-                            if (recipient)
-                                targets.Add(recipient);
+                            Player tapper = Global.ObjAccessor.GetPlayer(_me, tapperGuid);
+                            if (tapper != null)
+                                targets.Add(tapper);
                         }
                     }
                     break;

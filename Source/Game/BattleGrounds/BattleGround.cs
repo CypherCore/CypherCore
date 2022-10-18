@@ -1855,7 +1855,7 @@ namespace Game.BattleGrounds
         void RewardXPAtKill(Player killer, Player victim)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BgXpForKill) && killer && victim)
-                killer.RewardPlayerAndGroupAtKill(victim, true);
+                new KillRewarder(new[] { killer }, victim, true).Reward();
         }
 
         public uint GetTeamScore(int teamIndex)

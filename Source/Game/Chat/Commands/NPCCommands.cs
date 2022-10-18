@@ -324,8 +324,8 @@ namespace Game.Chat
                 return false;
             }
 
-            Loot loot = creatureTarget.loot;
-            if (!creatureTarget.IsDead() || loot == null || loot.Empty())
+            Loot loot = creatureTarget._loot;
+            if (!creatureTarget.IsDead() || loot == null || loot.IsLooted())
             {
                 handler.SendSysMessage(CypherStrings.CommandNotDeadOrNoLoot, creatureTarget.GetName());
                 return false;

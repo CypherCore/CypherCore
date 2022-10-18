@@ -200,6 +200,7 @@ namespace Framework.Constants
         public const int BoundaryVisualizeFailsafeLimit = 750;
         public const int BoundaryVisualizeSpawnHeight = 5;
         public const uint AIDefaultCooldown = 5000;
+        public const uint CreatureTappersSoftCap = 5;
 
         /// <summary>
         /// GameObject Const

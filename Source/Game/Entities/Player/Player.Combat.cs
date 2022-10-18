@@ -44,11 +44,6 @@ namespace Game.Entities
             }
         }
 
-        public void RewardPlayerAndGroupAtKill(Unit victim, bool isBattleground)
-        {
-            new KillRewarder(this, victim, isBattleground).Reward();
-        }
-
         public void RewardPlayerAndGroupAtEvent(uint creature_id, WorldObject pRewardSource)
         {
             if (pRewardSource == null)

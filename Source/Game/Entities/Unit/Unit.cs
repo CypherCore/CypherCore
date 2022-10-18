@@ -2574,8 +2574,7 @@ namespace Game.Entities
 
             if (victim.GetTypeId() != TypeId.Player && (!victim.IsControlledByPlayer() || victim.IsVehicle()))
             {
-                if (!victim.ToCreature().HasLootRecipient())
-                    victim.ToCreature().SetLootRecipient(attacker);
+                victim.ToCreature().SetTappedBy(attacker);
 
                 if (attacker == null || attacker.IsControlledByPlayer())
                     victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);

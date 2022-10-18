@@ -3126,7 +3126,7 @@ namespace Game.Entities
 
         public bool IsAllowedToLoot(Creature creature)
         {
-            if (!creature.IsDead() || !creature.IsDamageEnoughForLootingAndReward())
+            if (!creature.IsDead())
                 return false;
 
             if (HasPendingBind())
@@ -3137,15 +3137,6 @@ namespace Game.Entities
                 return false;
 
             if (!loot.HasAllowedLooter(GetGUID()) || (!loot.HasItemForAll() && !loot.HasItemFor(this))) // no loot in creature for this player
-                return false;
-
-            if (loot.loot_type == LootType.Skinning)
-                return creature.GetLootRecipientGUID() == GetGUID();
-
-            Group thisGroup = GetGroup();
-            if (!thisGroup)
-                return this == creature.GetLootRecipient();
-            else if (thisGroup != creature.GetLootRecipientGroup())
                 return false;
 
             switch (loot.GetLootMethod())

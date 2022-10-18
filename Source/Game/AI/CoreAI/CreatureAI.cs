@@ -309,7 +309,7 @@ namespace Game.AI
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
-            me.SetLootRecipient(null);
+            me.SetTappedBy(null);
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);

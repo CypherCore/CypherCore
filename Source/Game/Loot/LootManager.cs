@@ -1100,12 +1100,6 @@ namespace Game.Loots
             if (!Convert.ToBoolean(item.lootmode & _lootMode))
                 return true;
 
-            byte foundDuplicates = 0;
-            foreach (var lootItem in _loot.items)
-                if (lootItem.itemid == item.itemid)
-                    if (++foundDuplicates == _loot.maxDuplicates)
-                        return true;
-
             return false;
         }
 

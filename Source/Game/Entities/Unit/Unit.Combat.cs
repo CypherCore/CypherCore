@@ -706,36 +706,16 @@ namespace Game.Entities
 
             bool isRewardAllowed = true;
             if (creature != null)
-            {
-                isRewardAllowed = creature.IsDamageEnoughForLootingAndReward();
-                if (!isRewardAllowed)
-                    creature.SetLootRecipient(null);
-            }
+                isRewardAllowed = !creature.GetTapList().Empty();
 
+            List<Player> tappers = new();
             if (isRewardAllowed && creature)
             {
-                Player lootRecipient = creature.GetLootRecipient();
-                if (lootRecipient != null)
+                foreach (ObjectGuid tapperGuid in creature.GetTapList())
                 {
-                    // Loot recipient can be in a different map
-                    if (!creature.IsInMap(lootRecipient))
-                    {
-                        Group group = creature.GetLootRecipientGroup();
-                        if (group != null)
-                        {
-                            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            {
-                                Player member = itr.GetSource();
-                                if (!member || !creature.IsInMap(member))
-                                    continue;
-
-                                player = member;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                        player = creature.GetLootRecipient();
+                    Player tapper = Global.ObjAccessor.GetPlayer(creature, tapperGuid);
+                    if (tapper != null)
+                        tappers.Add(tapper);
                 }
             }
 
@@ -745,64 +725,92 @@ namespace Game.Entities
 
             // Reward player, his pets, and group/raid members
             // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
-            if (isRewardAllowed && player != null && player != victim)
+            if (isRewardAllowed)
             {
                 PartyKillLog partyKillLog = new();
                 partyKillLog.Player = player.GetGUID();
                 partyKillLog.Victim = victim.GetGUID();
+                partyKillLog.Write();
 
-                Player looter = player;
-                var group = player.GetGroup();
-                if (group)
+                HashSet<Group> groups = new();
+                foreach (Player tapper in tappers)
                 {
-                    group.BroadcastPacket(partyKillLog, group.GetMemberGroup(player.GetGUID()) != 0);
-
-                    if (creature)
+                    Group tapperGroup = tapper.GetGroup();
+                    if (tapperGroup != null)
                     {
-                        group.UpdateLooterGuid(creature, true);
-                        if (!group.GetLooterGuid().IsEmpty())
+                        if (groups.Add(tapperGroup))
                         {
-                            looter = Global.ObjAccessor.FindPlayer(group.GetLooterGuid());
-                            if (looter)
-                                creature.SetLootRecipient(looter);   // update creature loot recipient to the allowed looter.
+                            tapperGroup.BroadcastPacket(partyKillLog, tapperGroup.GetMemberGroup(tapper.GetGUID()) != 0);
+
+                            if (creature)
+                                tapperGroup.UpdateLooterGuid(creature, true);
                         }
                     }
+                    else
+                        tapper.SendPacket(partyKillLog);
                 }
-                else
-                    player.SendPacket(partyKillLog);
 
                 // Generate loot before updating looter
                 if (creature)
                 {
-                    creature.loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Corpse, group);
-                    Loot loot = creature.loot;
-                    if (creature.GetMap().Is25ManRaid())
-                        loot.maxDuplicates = 3;
-
+                    DungeonEncounterRecord dungeonEncounter = null;
                     InstanceScript instance = creature.GetInstanceScript();
                     if (instance != null)
+                        dungeonEncounter = instance.GetBossDungeonEncounter(creature);
+
+                    if (creature.GetMap().IsDungeon())
                     {
-                        DungeonEncounterRecord dungeonEncounter = instance.GetBossDungeonEncounter(creature);
+                        Group group = !groups.Empty() ? groups.First() : null;
+                        Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
+
+                        Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
+
                         if (dungeonEncounter != null)
                             loot.SetDungeonEncounterId(dungeonEncounter.Id);
+
+                        uint lootid = creature.GetCreatureTemplate().LootId;
+                        if (lootid != 0)
+                            loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
+
+                        if (creature.GetLootMode() > 0)
+                            loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+
+                        if (group)
+                            loot.NotifyLootList(creature.GetMap());
+
+                        if (dungeonEncounter != null || groups.Empty())
+                            creature._loot = loot;   // TODO: personal boss loot
+                        else
+                            creature.m_personalLoot[looter.GetGUID()] = loot;   // trash mob loot is personal, generated with round robin rules
+
+                        // Update round robin looter only if the creature had loot
+                        if (!loot.IsLooted())
+                            foreach (Group tapperGroup in groups)
+                                tapperGroup.UpdateLooterGuid(creature);
                     }
+                    else
+                    {
+                        foreach (Player tapper in tappers)
+                        {
+                            Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, null);
 
-                    uint lootid = creature.GetCreatureTemplate().LootId;
-                    if (lootid != 0)
-                        loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
+                            if (dungeonEncounter != null)
+                                loot.SetDungeonEncounterId(dungeonEncounter.Id);
 
-                    if (creature.GetLootMode() > 0)
-                        loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+                            uint lootid = creature.GetCreatureTemplate().LootId;
+                            if (lootid != 0)
+                                loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 
-                    loot.NotifyLootList(creature.GetMap());
+                            if (creature.GetLootMode() > 0)
+                                loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
-                    // Update round robin looter only if the creature had loot
-                    if (group != null && !loot.Empty())
-                        group.UpdateLooterGuid(creature);
+                            creature.m_personalLoot[tapper.GetGUID()] = loot;
+                        }
+                    }
                 }
 
-                player.RewardPlayerAndGroupAtKill(victim, false);
-            }
+                new KillRewarder(tappers.ToArray(), victim, false).Reward();
+            }      
 
             // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim
             if (attacker != null && (attacker.IsPet() || attacker.IsTotem()))
@@ -816,16 +824,10 @@ namespace Game.Entities
             if (!victim.IsCritter())
             {
                 ProcSkillsAndAuras(attacker, victim, new ProcFlagsInit(ProcFlags.Kill), new ProcFlagsInit(ProcFlags.Heartbeat), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-                if (player != null && player.GetGroup() != null)
-                {
-                    for (GroupReference itr = player.GetGroup().GetFirstMember(); itr != null; itr = itr.Next())
-                    {
-                        Player member = itr.GetSource();
-                        if (member != null)
-                            if (member.IsAtGroupRewardDistance(victim))
-                                Unit.ProcSkillsAndAuras(member, victim, new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-                    }
-                }
+
+                foreach (Player tapper in tappers)
+                    if (tapper.IsAtGroupRewardDistance(victim))
+                        Unit.ProcSkillsAndAuras(tapper, victim, new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
             }
 
             // Proc auras on death - must be before aura/combat remove
@@ -849,9 +851,9 @@ namespace Game.Entities
             // Inform pets (if any) when player kills target)
             // MUST come after victim.setDeathState(JUST_DIED); or pet next target
             // selection will get stuck on same target and break pet react state
-            if (player != null)
+            foreach (Player tapper in tappers)
             {
-                Pet pet = player.GetPet();
+                Pet pet = tapper.GetPet();
                 if (pet != null && pet.IsAlive() && pet.IsControlled())
                 {
                     if (pet.IsAIEnabled())
@@ -899,10 +901,16 @@ namespace Game.Entities
                 if (!creature.IsPet())
                 {
                     // must be after setDeathState which resets dynamic flags
-                    if (creature.loot != null && !creature.loot.IsLooted())
+                    if (!creature.IsFullyLooted())
                         creature.SetDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();
+
+                    if (LootStorage.Skinning.HaveLootFor(creature.GetCreatureTemplate().SkinLootId))
+                    {
+                        creature.SetDynamicFlag(UnitDynFlags.CanSkin);
+                        creature.SetUnitFlag(UnitFlags.Skinnable);
+                    }
                 }
 
                 // Call KilledUnit for creatures, this needs to be called after the lootable flag is set

@@ -99,8 +99,6 @@ namespace Game.Entities
             Unit unit = obj.ToUnit();
             if (unit != null)
             {
-                unitDynFlags &= ~(uint)UnitDynFlags.Tapped;
-
                 Creature creature = obj.ToCreature();
                 if (creature != null)
                 {
@@ -109,6 +107,9 @@ namespace Game.Entities
 
                     if (!receiver.IsAllowedToLoot(creature))
                         unitDynFlags &= ~(uint)UnitDynFlags.Lootable;
+
+                    if ((unitDynFlags & (uint)UnitDynFlags.CanSkin) != 0 && creature.IsSkinnedBy(receiver))
+                        unitDynFlags &= ~(uint)UnitDynFlags.CanSkin;
                 }
 
                 // unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED auras
@@ -1327,7 +1328,7 @@ namespace Game.Entities
 
             data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
             data.WriteUInt32(Flags2);
-            data.WriteUInt32(Flags3);
+            data.WriteUInt32(GetViewerDependentFlags3(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
             for (int i = 0; i < 2; ++i)
                 data.WriteUInt32(AttackRoundBaseTime[i]);
@@ -1712,7 +1713,7 @@ namespace Game.Entities
                 }
                 if (changesMask[45])
                 {
-                    data.WriteUInt32(Flags3);
+                    data.WriteUInt32(GetViewerDependentFlags3(this, owner, receiver));
                 }
                 if (changesMask[46])
                 {
@@ -2305,6 +2306,14 @@ namespace Game.Entities
             // Update fields of triggers, transformed units or uninteractible units (values dependent on GM state)
             if (receiver.IsGameMaster())
                 flags &= ~(uint)UnitFlags.Uninteractible;
+
+            return flags;
+        }
+        uint GetViewerDependentFlags3(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint flags = unitData.Flags3;
+            if ((flags & (uint)UnitFlags3.AlreadySkinned) != 0 && unit.IsCreature() && !unit.ToCreature().IsSkinnedBy(receiver))
+                flags &= ~(uint)UnitFlags3.AlreadySkinned;
 
             return flags;
         }
