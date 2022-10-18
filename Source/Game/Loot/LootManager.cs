@@ -165,17 +165,29 @@ namespace Game.Loots
             List<uint> lootIdSet, lootIdSetUsed = new();
             uint count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
 
+            void checkLootId(uint lootId, uint gameObjectId)
+            {
+                if (!lootIdSet.Contains(lootId))
+                    Gameobject.ReportNonExistingId(lootId, gameObjectId);
+                else
+                    lootIdSetUsed.Add(lootId);
+            }
+
             // remove real entries and check existence loot
             var gotc = Global.ObjectMgr.GetGameObjectTemplates();
-            foreach (var go in gotc)
+            foreach (var (gameObjectId, gameObjectTemplate) in gotc)
             {
-                uint lootid = go.Value.GetLootId();
+                uint lootid = gameObjectTemplate.GetLootId();
                 if (lootid != 0)
+                    checkLootId(lootid, gameObjectId);
+
+                if (gameObjectTemplate.type == GameObjectTypes.Chest)
                 {
-                    if (!lootIdSet.Contains(lootid))
-                        Gameobject.ReportNonExistingId(lootid, go.Value.entry);
-                    else
-                        lootIdSetUsed.Add(lootid);
+                    if (gameObjectTemplate.Chest.chestPersonalLoot != 0)
+                        checkLootId(gameObjectTemplate.Chest.chestPersonalLoot, gameObjectId);
+
+                    if (gameObjectTemplate.Chest.chestPushLoot != 0)
+                        checkLootId(gameObjectTemplate.Chest.chestPushLoot, gameObjectId);
                 }
             }
 

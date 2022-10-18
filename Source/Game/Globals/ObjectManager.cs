@@ -18,11 +18,11 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
 using Framework.IO;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
@@ -30,7 +30,6 @@ using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -4687,10 +4686,11 @@ namespace Game
                     case GameObjectTypes.Chest:
                     {
                         // scan GO chest with loot including quest items
-                        uint lootId = pair.Value.GetLootId();
-
                         // find quest loot for GO
-                        if (pair.Value.Chest.questID != 0 || Loots.LootStorage.Gameobject.HaveQuestLootFor(lootId))
+                        if (pair.Value.Chest.questID != 0
+                            || LootStorage.Gameobject.HaveQuestLootFor(pair.Value.Chest.chestLoot)
+                            || LootStorage.Gameobject.HaveQuestLootFor(pair.Value.Chest.chestPersonalLoot)
+                            || LootStorage.Gameobject.HaveQuestLootFor(pair.Value.Chest.chestPushLoot))
                             break;
 
                         continue;

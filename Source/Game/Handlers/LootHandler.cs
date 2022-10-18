@@ -296,10 +296,8 @@ namespace Game
                         else
                             go.SetLootState(LootState.Ready);
                     }
-                    else
+                    else if (go.IsFullyLooted())
                         go.SetLootState(LootState.JustDeactivated);
-
-                    loot.Clear();
                 }
                 else
                 {

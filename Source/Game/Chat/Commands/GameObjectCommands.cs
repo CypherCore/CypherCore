@@ -151,6 +151,8 @@ namespace Game.Chat
             uint displayId = gameObjectInfo.displayId;
             string name = gameObjectInfo.name;
             uint lootId = gameObjectInfo.GetLootId();
+            if (type == GameObjectTypes.Chest && lootId == 0)
+                lootId = gameObjectInfo.Chest.chestPersonalLoot;
 
             // If we have a real object, send some info about it
             if (thisGO != null)

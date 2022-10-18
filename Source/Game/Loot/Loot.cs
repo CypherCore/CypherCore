@@ -694,7 +694,7 @@ namespace Game.Loots
             }
         }
 
-        public bool AutoStore(Player player, byte bag, byte slot, bool broadcast, bool createdByPlayer = false)
+        public bool AutoStore(Player player, byte bag, byte slot, bool broadcast = false, bool createdByPlayer = false)
         {
             bool allLooted = true;
             for (uint i = 0; i < items.Count; ++i)
