@@ -102,10 +102,10 @@ namespace Game.Entities
                 Creature creature = obj.ToCreature();
                 if (creature != null)
                 {
-                    if (creature.HasLootRecipient() && !creature.IsTappedBy(receiver))
-                        unitDynFlags |= (uint)UnitDynFlags.Tapped;
+                    if ((unitDynFlags & (uint)UnitDynFlags.Tapped) != 0 && !creature.IsTappedBy(receiver))
+                        unitDynFlags &= ~(uint)UnitDynFlags.Tapped;
 
-                    if (!receiver.IsAllowedToLoot(creature))
+                    if ((unitDynFlags & (uint)UnitDynFlags.Lootable) != 0 && !receiver.IsAllowedToLoot(creature))
                         unitDynFlags &= ~(uint)UnitDynFlags.Lootable;
 
                     if ((unitDynFlags & (uint)UnitDynFlags.CanSkin) != 0 && creature.IsSkinnedBy(receiver))
