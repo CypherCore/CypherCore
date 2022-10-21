@@ -1731,9 +1731,9 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool IsInvisibleDueToDespawn()
+        public override bool IsInvisibleDueToDespawn(WorldObject seer)
         {
-            if (base.IsInvisibleDueToDespawn())
+            if (base.IsInvisibleDueToDespawn(seer))
                 return true;
 
             if (IsAlive() || m_corpseRemoveTime > GameTime.GetGameTime())

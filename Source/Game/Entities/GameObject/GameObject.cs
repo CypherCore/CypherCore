@@ -426,6 +426,40 @@ namespace Game.Entities
             if (m_goTypeImpl != null)
                 m_goTypeImpl.Update(diff);
 
+            if (m_perPlayerState != null)
+            {
+                foreach (var (guid, playerState) in m_perPlayerState.ToList())
+                {
+                    if (playerState.ValidUntil > GameTime.GetSystemTime())
+                        continue;
+
+                    Player seer = Global.ObjAccessor.GetPlayer(this, guid);
+                    bool needsStateUpdate = playerState.State != GetGoState();
+                    bool despawned = playerState.Despawned;
+
+                    m_perPlayerState.Remove(guid);
+
+                    if (seer)
+                    {
+                        if (despawned)
+                        {
+                            seer.UpdateVisibilityOf(this);
+                        }
+                        else if (needsStateUpdate)
+                        {
+                            ObjectFieldData objMask = new();
+                            GameObjectFieldData goMask = new();
+                            goMask.MarkChanged(m_gameObjectData.State);
+
+                            UpdateData udata = new(GetMapId());
+                            BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), seer);
+                            udata.BuildPacket(out UpdateObject packet);
+                            seer.SendPacket(packet);
+                        }
+                    }
+                }
+            }
+
             switch (m_lootState)
             {
                 case LootState.NotReady:
@@ -1311,14 +1345,21 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsInvisibleDueToDespawn()
+        public override bool IsInvisibleDueToDespawn(WorldObject seer)
         {
-            if (base.IsInvisibleDueToDespawn())
+            if (base.IsInvisibleDueToDespawn(seer))
                 return true;
 
             // Despawned
             if (!IsSpawned())
                 return true;
+
+            if (m_perPlayerState != null)
+            {
+                PerPlayerState state = m_perPlayerState.LookupByKey(seer.GetGUID());
+                if (state != null && state.Despawned)
+                    return true;
+            }
 
             return false;
         }
@@ -2797,7 +2838,30 @@ namespace Game.Entities
 
             return true;
         }
-        
+
+        public void OnLootRelease(Player looter)
+        {
+            switch (GetGoType())
+            {
+                case GameObjectTypes.Chest:
+                {
+                    GameObjectTemplate goInfo = GetGoInfo();
+                    if (goInfo.Chest.consumable == 0 && goInfo.Chest.chestPersonalLoot != 0)
+                    {
+                        PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[looter.GetGUID()];
+                        perPlayerState.ValidUntil = GameTime.GetSystemTime() + (goInfo.Chest.chestRestockTime != 0
+                            ? TimeSpan.FromSeconds(goInfo.Chest.chestRestockTime)
+                            : TimeSpan.FromSeconds(m_respawnDelayTime)); // not hiding this object permanently to prevent infinite growth of m_perPlayerState
+                                                            // while also maintaining some sort of cheater protection (not getting rid of entries on logout)
+                        perPlayerState.Despawned = true;
+
+                        looter.UpdateVisibilityOf(this);
+                    }
+                    break;
+                }
+            }
+        }
+
         public void SetGoState(GameObjectState state)
         {
             GameObjectState oldState = GetGoState();
@@ -2822,6 +2886,30 @@ namespace Game.Entities
             }
         }
 
+        public GameObjectState GetGoStateFor(ObjectGuid viewer)
+        {
+            if (m_perPlayerState != null)
+            {
+                PerPlayerState state = m_perPlayerState.LookupByKey(viewer);
+                if (state != null && state.State.HasValue)
+                    return state.State.Value;
+            }
+
+            return GetGoState();
+        }
+
+        void SetGoStateFor(GameObjectState state, Player viewer)
+        {
+            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[viewer.GetGUID()];
+            perPlayerState.ValidUntil = GameTime.GetSystemTime() + TimeSpan.FromSeconds(m_respawnDelayTime);
+            perPlayerState.State = state;
+
+            GameObjectSetStateLocal setStateLocal = new();
+            setStateLocal.ObjectGUID = GetGUID();
+            setStateLocal.State = (byte)state;
+            viewer.SendPacket(setStateLocal);
+        }
+        
         public void SetDisplayId(uint displayid)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), displayid);
@@ -3289,6 +3377,14 @@ namespace Game.Entities
                 || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
         }
 
+        Dictionary<ObjectGuid, PerPlayerState> GetOrCreatePerPlayerStates()
+        {
+            if (m_perPlayerState == null)
+                m_perPlayerState = new();
+
+            return m_perPlayerState;
+        }
+        
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
@@ -3515,6 +3611,8 @@ namespace Game.Entities
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
+
+        Dictionary<ObjectGuid, PerPlayerState> m_perPlayerState;
 
         GameObjectState m_prevGoState;                          // What state to set whenever resetting
 
@@ -4023,5 +4121,12 @@ namespace Game.Entities
                     transport.SetAutoCycleBetweenStopFrames(_on);
             }
         }
+    }
+
+    public class PerPlayerState
+    {
+        public DateTime ValidUntil = DateTime.MinValue;
+        public GameObjectState? State;
+        public bool Despawned;
     }
 }

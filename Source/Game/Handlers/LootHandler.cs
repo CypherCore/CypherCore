@@ -298,6 +298,8 @@ namespace Game
                     }
                     else if (go.IsFullyLooted())
                         go.SetLootState(LootState.JustDeactivated);
+
+                    go.OnLootRelease(player);
                 }
                 else
                 {

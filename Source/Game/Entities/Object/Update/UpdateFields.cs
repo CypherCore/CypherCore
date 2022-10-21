@@ -4997,7 +4997,7 @@ namespace Game.Entities
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteInt8(State);
+            data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
@@ -5104,7 +5104,7 @@ namespace Game.Entities
                 }
                 if (changesMask[14])
                 {
-                    data.WriteInt8(State);
+                    data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
                 }
                 if (changesMask[15])
                 {
@@ -5166,6 +5166,11 @@ namespace Game.Entities
                     flags |= (uint)(GameObjectFlags.Locked | GameObjectFlags.NotSelectable);
 
             return flags;
+        }
+
+        sbyte GetViewerGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            return (sbyte)gameObject.GetGoStateFor(receiver.GetGUID());
         }
     }
 

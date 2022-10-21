@@ -1218,7 +1218,7 @@ namespace Game.Entities
                     return false;
             }
 
-            if (obj.IsInvisibleDueToDespawn())
+            if (obj.IsInvisibleDueToDespawn(this))
                 return false;
 
             if (!CanDetect(obj, ignoreStealth, checkAlert))
@@ -3038,7 +3038,7 @@ namespace Game.Entities
 
         public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld || IsDestroyedObject(); }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
-        public virtual bool IsInvisibleDueToDespawn() { return false; }
+        public virtual bool IsInvisibleDueToDespawn(WorldObject seer) { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }
 
         public virtual bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate) { return true; }

@@ -167,4 +167,18 @@ namespace Game.Networking.Packets
         public ObjectGuid ActivatorGUID;
         public uint SpellVisualID;
     }
+
+    class GameObjectSetStateLocal : ServerPacket
+    {
+        public GameObjectSetStateLocal() : base(ServerOpcodes.GameObjectSetStateLocal, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(ObjectGUID);
+            _worldPacket.WriteUInt8(State);
+        }
+
+        public ObjectGuid ObjectGUID;
+        public byte State;
+    }
 }
