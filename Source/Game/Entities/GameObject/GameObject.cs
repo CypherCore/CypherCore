@@ -957,6 +957,14 @@ namespace Game.Entities
             }
         }
 
+        void DespawnForPlayer(Player seer, TimeSpan respawnTime)
+        {
+            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[seer.GetGUID()];
+            perPlayerState.ValidUntil = GameTime.GetSystemTime() + respawnTime;
+            perPlayerState.Despawned = true;
+            seer.UpdateVisibilityOf(this);
+        }
+
         public void Delete()
         {
             SetLootState(LootState.NotReady);
@@ -1891,11 +1899,10 @@ namespace Game.Entities
                 case GameObjectTypes.Goober:                        //10
                 {
                     GameObjectTemplate info = GetGoInfo();
+                    Player player = user.ToPlayer();
 
-                    if (user.IsTypeId(TypeId.Player))
+                    if (player != null)
                     {
-                        Player player = user.ToPlayer();
-
                         if (info.Goober.pageID != 0)                    // show page...
                         {
                             PageTextPkt data = new();
@@ -1941,16 +1948,26 @@ namespace Game.Entities
                     if (trapEntry != 0)
                         TriggeringLinkedGameObject(trapEntry, user);
 
-                    SetFlag(GameObjectFlags.InUse);
-                    SetLootState(LootState.Activated, user);
-
-                    // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-                    if (info.Goober.customAnim != 0)
-                        SendCustomAnim(GetGoAnimProgress());
+                    if (info.Goober.AllowMultiInteract != 0 && player != null)
+                    {
+                        if (info.IsDespawnAtAction())
+                            DespawnForPlayer(player, TimeSpan.FromSeconds(m_respawnDelayTime));
+                        else
+                            SetGoStateFor(GameObjectState.Active, player);
+                    }
                     else
-                        SetGoState(GameObjectState.Active);
+                    {
+                        SetFlag(GameObjectFlags.InUse);
+                        SetLootState(LootState.Activated, user);
 
-                    m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
+                        // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+                        if (info.Goober.customAnim != 0)
+                            SendCustomAnim(GetGoAnimProgress());
+                        else
+                            SetGoState(GameObjectState.Active);
+
+                        m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
+                    }
 
                     // cast this spell later if provided
                     spellId = info.Goober.spell;
@@ -2906,14 +2923,10 @@ namespace Game.Entities
                     GameObjectTemplate goInfo = GetGoInfo();
                     if (goInfo.Chest.consumable == 0 && goInfo.Chest.chestPersonalLoot != 0)
                     {
-                        PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[looter.GetGUID()];
-                        perPlayerState.ValidUntil = GameTime.GetSystemTime() + (goInfo.Chest.chestRestockTime != 0
+                        DespawnForPlayer(looter, goInfo.Chest.chestRestockTime != 0
                             ? TimeSpan.FromSeconds(goInfo.Chest.chestRestockTime)
                             : TimeSpan.FromSeconds(m_respawnDelayTime)); // not hiding this object permanently to prevent infinite growth of m_perPlayerState
-                                                            // while also maintaining some sort of cheater protection (not getting rid of entries on logout)
-                        perPlayerState.Despawned = true;
-
-                        looter.UpdateVisibilityOf(this);
+                                                                         // while also maintaining some sort of cheater protection (not getting rid of entries on logout)
                     }
                     break;
                 }

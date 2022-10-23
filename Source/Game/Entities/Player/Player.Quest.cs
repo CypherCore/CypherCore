@@ -2978,6 +2978,7 @@ namespace Game.Entities
                             case GameObjectTypes.Chest:
                             case GameObjectTypes.Goober:
                             case GameObjectTypes.Generic:
+                            case GameObjectTypes.GatheringNode:
                                 if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
                                     objMask.MarkChanged(obj.m_objectData.DynamicFlags);
                                 break;

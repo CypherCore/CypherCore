@@ -131,9 +131,18 @@ namespace Game.Entities
                                 dynFlags |= GameObjectDynamicLowFlags.Activate;
                             break;
                         case GameObjectTypes.Chest:
-                        case GameObjectTypes.Goober:
                             if (gameObject.ActivateToQuest(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                            else if (receiver.IsGameMaster())
+                                dynFlags |= GameObjectDynamicLowFlags.Activate;
+                            break;
+                        case GameObjectTypes.Goober:
+                            if (gameObject.ActivateToQuest(receiver))
+                            {
+                                dynFlags |= GameObjectDynamicLowFlags.Highlight;
+                                if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
+                                    dynFlags |= GameObjectDynamicLowFlags.Activate;
+                            }
                             else if (receiver.IsGameMaster())
                                 dynFlags |= GameObjectDynamicLowFlags.Activate;
                             break;

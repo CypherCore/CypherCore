@@ -4709,6 +4709,14 @@ namespace Game
 
                         continue;
                     }
+                    case GameObjectTypes.GatheringNode:
+                    {
+                        // scan GO chest with loot including quest items
+                        // find quest loot for GO
+                        if (LootStorage.Gameobject.HaveQuestLootFor(pair.Value.GatheringNode.chestLoot))
+                            break;
+                        continue;
+                    }
                     default:
                         continue;
                 }
