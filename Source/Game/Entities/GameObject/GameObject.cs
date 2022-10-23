@@ -2410,6 +2410,64 @@ namespace Game.Entities
                     player.SendPacket(gameObjectUILink);
                     return;
                 }
+                case GameObjectTypes.GatheringNode:                //50
+                {
+                    Player player = user.ToPlayer();
+                    if (player == null)
+                        return;
+
+                    GameObjectTemplate info = GetGoInfo();
+                    if (!m_personalLoot.ContainsKey(player.GetGUID()))
+                    {
+                        if (info.GatheringNode.chestLoot != 0)
+                        {
+                            Loot newLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
+                            m_personalLoot[player.GetGUID()] = newLoot;
+
+                            newLoot.FillLoot(info.GatheringNode.chestLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                        }
+
+                        if (info.GatheringNode.triggeredEvent != 0)
+                            GameEvents.Trigger(info.GatheringNode.triggeredEvent, player, this);
+
+                        // triggering linked GO
+                        uint trapEntry = info.GatheringNode.linkedTrap;
+                        if (trapEntry != 0)
+                            TriggeringLinkedGameObject(trapEntry, player);
+
+                        if (info.GatheringNode.xpDifficulty != 0 && info.GatheringNode.xpDifficulty < 10)
+                        {
+                            QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(player.GetLevel());
+                            if (questXp != null)
+                            {
+                                uint xp = Quest.RoundXPValue(questXp.Difficulty[info.GatheringNode.xpDifficulty]);
+                                if (xp != 0)
+                                    player.GiveXP(xp, null);
+                            }
+                        }
+
+                        spellId = info.GatheringNode.spell;
+                    }
+
+                    if (m_personalLoot.Count >= info.GatheringNode.MaxNumberofLoots)
+                    {
+                        SetGoState(GameObjectState.Active);
+                        SetDynamicFlag(GameObjectDynamicLowFlags.NoInterract);
+                    }
+
+                    if (GetLootState() != LootState.Activated)
+                    {
+                        SetLootState(LootState.Activated, player);
+                        if (info.GatheringNode.ObjectDespawnDelay != 0)
+                            DespawnOrUnsummon(TimeSpan.FromSeconds(info.GatheringNode.ObjectDespawnDelay));
+                    }
+
+                    // Send loot
+                    Loot loot = GetLootForPlayer(player);
+                    if (loot != null)
+                        player.SendLoot(loot);
+                    break;
+                }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
                         Log.outError(LogFilter.Server, "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",
@@ -2859,6 +2917,20 @@ namespace Game.Entities
                     }
                     break;
                 }
+                case GameObjectTypes.GatheringNode:
+                {
+                    SetGoStateFor(GameObjectState.Active, looter);
+
+                    ObjectFieldData objMask = new();
+                    GameObjectFieldData goMask = new();
+                    objMask.MarkChanged(objMask.DynamicFlags);
+
+                    UpdateData udata = new(GetMapId());
+                    BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), looter);
+                    udata.BuildPacket(out UpdateObject packet);
+                    looter.SendPacket(packet);
+                    break;
+                }
             }
         }
 
@@ -3132,6 +3204,9 @@ namespace Game.Entities
 
         public float GetInteractionDistance()
         {
+            if (GetGoInfo().GetInteractRadiusOverride() != 0)
+                return (float)GetGoInfo().GetInteractRadiusOverride() / 100.0f;
+
             switch (GetGoType())
             {
                 case GameObjectTypes.AreaDamage:
@@ -3377,6 +3452,19 @@ namespace Game.Entities
                 || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
         }
 
+        public bool MeetsInteractCondition(Player user)
+        {
+            if (m_goInfo.GetConditionID1() == 0)
+                return true;
+
+            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(m_goInfo.GetConditionID1());
+            if (playerCondition != null)
+                if (!ConditionManager.IsPlayerMeetingCondition(user, playerCondition))
+                    return false;
+
+            return true;
+        }
+        
         Dictionary<ObjectGuid, PerPlayerState> GetOrCreatePerPlayerStates()
         {
             if (m_perPlayerState == null)

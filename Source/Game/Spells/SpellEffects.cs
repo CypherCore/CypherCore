@@ -1300,7 +1300,7 @@ namespace Game.Spells
                     {
                         // Allow one skill-up until respawned
                         if (!gameObjTarget.IsInSkillupList(player.GetGUID()) &&
-                            player.UpdateGatherSkill(skillId, pureSkillValue, (uint)reqSkillValue))
+                            player.UpdateGatherSkill(skillId, pureSkillValue, (uint)reqSkillValue, 1, gameObjTarget))
                             gameObjTarget.AddToSkillupList(player.GetGUID());
                     }
                     else if (itemTarget != null)

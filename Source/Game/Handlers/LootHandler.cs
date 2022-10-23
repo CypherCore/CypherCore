@@ -296,7 +296,7 @@ namespace Game
                         else
                             go.SetLootState(LootState.Ready);
                     }
-                    else if (go.IsFullyLooted())
+                    else if (go.GetGoType() != GameObjectTypes.GatheringNode && go.IsFullyLooted())
                         go.SetLootState(LootState.JustDeactivated);
 
                     go.OnLootRelease(player);

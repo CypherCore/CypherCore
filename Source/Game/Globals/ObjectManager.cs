@@ -4182,7 +4182,7 @@ namespace Game
                             break;
                         case GameObjectTypes.GarrisonBuilding:
                         {
-                            int transportMap = got.garrisonBuilding.SpawnMap;
+                            int transportMap = got.GarrisonBuilding.SpawnMap;
                             if (transportMap != 0)
                                 _transportMaps.Add((ushort)transportMap);
                         }

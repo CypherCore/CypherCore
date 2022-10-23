@@ -750,9 +750,9 @@ namespace Game.Garrisons
                     }
                 }
 
-                if (go.GetGoType() == GameObjectTypes.GarrisonBuilding && go.GetGoInfo().garrisonBuilding.SpawnMap != 0)
+                if (go.GetGoType() == GameObjectTypes.GarrisonBuilding && go.GetGoInfo().GarrisonBuilding.SpawnMap != 0)
                 {
-                    foreach (var cellGuids in Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().garrisonBuilding.SpawnMap, map.GetDifficultyID()))
+                    foreach (var cellGuids in Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID()))
                     {
                         foreach (var spawnId in cellGuids.Value.creatures)
                         {

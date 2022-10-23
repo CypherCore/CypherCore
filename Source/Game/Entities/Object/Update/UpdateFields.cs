@@ -154,9 +154,18 @@ namespace Game.Entities
                             else
                                 dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
                             break;
+                        case GameObjectTypes.GatheringNode:
+                            if (gameObject.ActivateToQuest(receiver))
+                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                            if (gameObject.GetGoStateFor(receiver.GetGUID()) == GameObjectState.Active)
+                                dynFlags |= GameObjectDynamicLowFlags.Depleted;
+                            break;
                         default:
                             break;
                     }
+
+                    if (!gameObject.MeetsInteractCondition(receiver))
+                        dynFlags |= GameObjectDynamicLowFlags.NoInterract;
 
                     unitDynFlags = ((uint)pathProgress << 16) | (uint)dynFlags;
                 }

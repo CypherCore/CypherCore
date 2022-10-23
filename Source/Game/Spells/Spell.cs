@@ -5242,6 +5242,9 @@ namespace Game.Spells
                             lockId = go.GetGoInfo().GetLockId();
                             if (lockId == 0)
                                 return SpellCastResult.BadTargets;
+
+                            if (go.GetGoInfo().GetNotInCombat() != 0 && m_caster.ToUnit().IsInCombat())
+                                return SpellCastResult.AffectingCombat;
                         }
                         else if (itm != null)
                             lockId = itm.GetTemplate().GetLockID();

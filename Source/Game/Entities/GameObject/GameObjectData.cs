@@ -163,7 +163,7 @@ namespace Game.Entities
         public newflagdrop NewFlagDrop;
 
         [FieldOffset(68)]
-        public Garrisonbuilding garrisonBuilding;
+        public garrisonbuilding GarrisonBuilding;
 
         [FieldOffset(68)]
         public garrisonplot GarrisonPlot;
@@ -274,6 +274,89 @@ namespace Game.Entities
             }
         }
 
+        public uint GetConditionID1() => type switch
+        {
+            GameObjectTypes.Door => Door.conditionID1,
+            GameObjectTypes.Button => Button.conditionID1,
+            GameObjectTypes.QuestGiver => QuestGiver.conditionID1,
+            GameObjectTypes.Chest => Chest.conditionID1,
+            GameObjectTypes.Generic => Generic.conditionID1,
+            GameObjectTypes.Trap => Trap.conditionID1,
+            GameObjectTypes.Chair => Chair.conditionID1,
+            GameObjectTypes.SpellFocus => SpellFocus.conditionID1,
+            GameObjectTypes.Text => Text.conditionID1,
+            GameObjectTypes.Goober => Goober.conditionID1,
+            GameObjectTypes.Camera => Camera.conditionID1,
+            GameObjectTypes.Ritual => Ritual.conditionID1,
+            GameObjectTypes.Mailbox => MailBox.conditionID1,
+            GameObjectTypes.SpellCaster => SpellCaster.conditionID1,
+            GameObjectTypes.FlagStand => FlagStand.conditionID1,
+            GameObjectTypes.AuraGenerator => AuraGenerator.conditionID1,
+            GameObjectTypes.GuildBank => GuildBank.conditionID1,
+            GameObjectTypes.NewFlag => NewFlag.conditionID1,
+            GameObjectTypes.ItemForge => ItemForge.conditionID1,
+            GameObjectTypes.GatheringNode => GatheringNode.conditionID1,
+            _ => 0,
+        };
+
+        public uint GetInteractRadiusOverride() => type switch
+        {
+
+            GameObjectTypes.Door => Door.InteractRadiusOverride,
+            GameObjectTypes.Button => Button.InteractRadiusOverride,
+            GameObjectTypes.QuestGiver => QuestGiver.InteractRadiusOverride,
+            GameObjectTypes.Chest => Chest.InteractRadiusOverride,
+            GameObjectTypes.Binder => Binder.InteractRadiusOverride,
+            GameObjectTypes.Generic => Generic.InteractRadiusOverride,
+            GameObjectTypes.Trap => Trap.InteractRadiusOverride,
+            GameObjectTypes.Chair => Chair.InteractRadiusOverride,
+            GameObjectTypes.SpellFocus => SpellFocus.InteractRadiusOverride,
+            GameObjectTypes.Text => Text.InteractRadiusOverride,
+            GameObjectTypes.Goober => Goober.InteractRadiusOverride,
+            GameObjectTypes.Transport => Transport.InteractRadiusOverride,
+            GameObjectTypes.AreaDamage => AreaDamage.InteractRadiusOverride,
+            GameObjectTypes.Camera => Camera.InteractRadiusOverride,
+            GameObjectTypes.MapObjTransport => MoTransport.InteractRadiusOverride,
+            GameObjectTypes.DuelArbiter => DuelFlag.InteractRadiusOverride,
+            GameObjectTypes.FishingNode => FishingNode.InteractRadiusOverride,
+            GameObjectTypes.Ritual => Ritual.InteractRadiusOverride,
+            GameObjectTypes.Mailbox => MailBox.InteractRadiusOverride,
+            GameObjectTypes.GuardPost => GuardPost.InteractRadiusOverride,
+            GameObjectTypes.SpellCaster => SpellCaster.InteractRadiusOverride,
+            GameObjectTypes.MeetingStone => MeetingStone.InteractRadiusOverride,
+            GameObjectTypes.FlagStand => FlagStand.InteractRadiusOverride,
+            GameObjectTypes.FishingHole => FishingHole.InteractRadiusOverride,
+            GameObjectTypes.FlagDrop => FlagDrop.InteractRadiusOverride,
+            GameObjectTypes.ControlZone => ControlZone.InteractRadiusOverride,
+            GameObjectTypes.AuraGenerator => AuraGenerator.InteractRadiusOverride,
+            GameObjectTypes.DungeonDifficulty => DungeonDifficulty.InteractRadiusOverride,
+            GameObjectTypes.BarberChair => BarberChair.InteractRadiusOverride,
+            GameObjectTypes.DestructibleBuilding => DestructibleBuilding.InteractRadiusOverride,
+            GameObjectTypes.GuildBank => GuildBank.InteractRadiusOverride,
+            GameObjectTypes.TrapDoor => TrapDoor.InteractRadiusOverride,
+            GameObjectTypes.NewFlag => NewFlag.InteractRadiusOverride,
+            GameObjectTypes.NewFlagDrop => NewFlagDrop.InteractRadiusOverride,
+            GameObjectTypes.GarrisonBuilding => GarrisonBuilding.InteractRadiusOverride,
+            GameObjectTypes.GarrisonPlot => GarrisonPlot.InteractRadiusOverride,
+            GameObjectTypes.CapturePoint => CapturePoint.InteractRadiusOverride,
+            GameObjectTypes.PhaseableMo => PhaseableMO.InteractRadiusOverride,
+            GameObjectTypes.GarrisonMonument => GarrisonMonument.InteractRadiusOverride,
+            GameObjectTypes.GarrisonShipment => GarrisonShipment.InteractRadiusOverride,
+            GameObjectTypes.GarrisonMonumentPlaque => GarrisonMonumentPlaque.InteractRadiusOverride,
+            GameObjectTypes.ItemForge => ItemForge.InteractRadiusOverride,
+            GameObjectTypes.UILink => UILink.InteractRadiusOverride,
+            GameObjectTypes.KeystoneReceptacle => KeystoneReceptacle.InteractRadiusOverride,
+            GameObjectTypes.GatheringNode => GatheringNode.InteractRadiusOverride,
+            GameObjectTypes.ChallengeModeReward => ChallengeModeReward.InteractRadiusOverride,
+            GameObjectTypes.SiegeableMo => SiegeableMO.InteractRadiusOverride,
+            GameObjectTypes.PvpReward => PvpReward.InteractRadiusOverride,
+            GameObjectTypes.PlayerChoiceChest => PlayerChoiceChest.InteractRadiusOverride,
+            GameObjectTypes.LegendaryForge => LegendaryForge.InteractRadiusOverride,
+            GameObjectTypes.GarrTalentTree => GarrTalentTree.InteractRadiusOverride,
+            GameObjectTypes.WeeklyRewardChest => WeeklyRewardChest.InteractRadiusOverride,
+            _ => 0
+        };
+
         public uint GetRequireLOS() => type switch
         {
             GameObjectTypes.Button => Button.requireLOS,
@@ -287,48 +370,27 @@ namespace Game.Entities
             _ => 0,
         };
 
-        public uint GetLockId()
+        public uint GetLockId() => type switch
         {
-            switch (type)
-            {
-                case GameObjectTypes.Door:
-                    return Door.open;
-                case GameObjectTypes.Button:
-                    return Button.open;
-                case GameObjectTypes.QuestGiver:
-                    return QuestGiver.open;
-                case GameObjectTypes.Chest:
-                    return Chest.open;
-                case GameObjectTypes.Trap:
-                    return Trap.open;
-                case GameObjectTypes.Goober:
-                    return Goober.open;
-                case GameObjectTypes.AreaDamage:
-                    return AreaDamage.open;
-                case GameObjectTypes.Camera:
-                    return Camera.open;
-                case GameObjectTypes.FlagStand:
-                    return FlagStand.open;
-                case GameObjectTypes.FishingHole:
-                    return FishingHole.open;
-                case GameObjectTypes.FlagDrop:
-                    return FlagDrop.open;
-                case GameObjectTypes.NewFlag:
-                    return NewFlag.open;
-                case GameObjectTypes.NewFlagDrop:
-                    return NewFlagDrop.open;
-                case GameObjectTypes.CapturePoint:
-                    return CapturePoint.open;
-                case GameObjectTypes.GatheringNode:
-                    return GatheringNode.open;
-                case GameObjectTypes.ChallengeModeReward:
-                    return ChallengeModeReward.open;
-                case GameObjectTypes.PvpReward:
-                    return PvpReward.open;
-                default:
-                    return 0;
-            }
-        }
+            GameObjectTypes.Door => Door.open,
+            GameObjectTypes.Button => Button.open,
+            GameObjectTypes.QuestGiver => QuestGiver.open,
+            GameObjectTypes.Chest => Chest.open,
+            GameObjectTypes.Trap => Trap.open,
+            GameObjectTypes.Goober => Goober.open,
+            GameObjectTypes.AreaDamage => AreaDamage.open,
+            GameObjectTypes.Camera => Camera.open,
+            GameObjectTypes.FlagStand => FlagStand.open,
+            GameObjectTypes.FishingHole => FishingHole.open,
+            GameObjectTypes.FlagDrop => FlagDrop.open,
+            GameObjectTypes.NewFlag => NewFlag.open,
+            GameObjectTypes.NewFlagDrop => NewFlagDrop.open,
+            GameObjectTypes.CapturePoint => CapturePoint.open,
+            GameObjectTypes.GatheringNode => GatheringNode.open,
+            GameObjectTypes.ChallengeModeReward => ChallengeModeReward.open,
+            GameObjectTypes.PvpReward => PvpReward.open,
+            _ => 0,
+        };
 
         // despawn at targeting of cast?
         public bool GetDespawnPossibility()
@@ -378,7 +440,14 @@ namespace Game.Entities
                     return 0;
             }
         }
-        
+
+        public uint GetNotInCombat() => type switch
+        {
+            GameObjectTypes.Chest => Chest.notInCombat,
+            GameObjectTypes.GatheringNode => GatheringNode.notInCombat,
+            _ => 0,
+        };
+
         /// <summary>
         /// despawn at uses amount
         /// </summary>
@@ -491,6 +560,20 @@ namespace Game.Entities
                     return 0;
             }
         }
+
+        public uint GetTrivialSkillHigh() => type switch
+        {
+            GameObjectTypes.Chest => Chest.trivialSkillHigh,
+            GameObjectTypes.GatheringNode => GatheringNode.trivialSkillHigh,
+            _ => 0,
+        };
+
+        public uint GetTrivialSkillLow() => type switch
+        {
+            GameObjectTypes.Chest => Chest.trivialSkillLow,
+            GameObjectTypes.GatheringNode => GatheringNode.trivialSkillLow,
+            _ => 0,
+        };
 
         // Cooldown preventing goober and traps to cast spell
         public uint GetCooldown()
@@ -1182,7 +1265,7 @@ namespace Game.Entities
             public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
-        public struct Garrisonbuilding
+        public struct garrisonbuilding
         {
             public int SpawnMap;                                 // 0 Spawn Map, References: Map, NoValue = -1
             public uint InteractRadiusOverride;                  // 1 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
@@ -1395,7 +1478,7 @@ namespace Game.Entities
             public uint open;                                    // 1 open, References: Lock_, NoValue = 0
             public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
-        
+
         public struct clientmodel
         {
             public uint LargeAOI;                                // 0 Large AOI, enum { false, true, }; Default: false
