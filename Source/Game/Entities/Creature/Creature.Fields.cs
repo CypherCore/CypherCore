@@ -92,7 +92,7 @@ namespace Game.Entities
 
         internal Dictionary<ObjectGuid, Loot> m_personalLoot = new();
         public Loot _loot;
-        List<ObjectGuid> m_tapList = new();
+        HashSet<ObjectGuid> m_tapList = new();
     }
 
     public enum ObjectCellMoveState

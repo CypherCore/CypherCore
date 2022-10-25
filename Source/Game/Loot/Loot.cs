@@ -827,10 +827,6 @@ namespace Game.Loots
 
         void FillNotNormalLootFor(Player player)
         {
-            if (_dungeonEncounterId != 0)
-                if (player.IsLockedToDungeonEncounter(_dungeonEncounterId))
-                    return;
-
             ObjectGuid plguid = player.GetGUID();
             _allowedLooters.Add(plguid);
 
@@ -840,6 +836,8 @@ namespace Game.Loots
             {
                 if (!item.AllowedForPlayer(player, this))
                     continue;
+
+                item.AddAllowedLooter(player);
 
                 if (item.freeforall)
                 {

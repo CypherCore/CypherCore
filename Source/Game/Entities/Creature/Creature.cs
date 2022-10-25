@@ -1244,8 +1244,8 @@ namespace Game.Entities
             return false;
         }
 
-        public List<ObjectGuid> GetTapList() { return m_tapList; }
-        public void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
+        public HashSet<ObjectGuid> GetTapList() { return m_tapList; }
+        public void SetTapList(HashSet<ObjectGuid> tapList) { m_tapList = tapList; }
         public bool HasLootRecipient() { return !m_tapList.Empty(); }
         
         public void SaveToDB()

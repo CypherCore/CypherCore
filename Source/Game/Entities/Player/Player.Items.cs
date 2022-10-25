@@ -4107,10 +4107,7 @@ namespace Game.Entities
 
         public Loot GetLootByWorldObjectGUID(ObjectGuid lootWorldObjectGuid)
         {
-            if (m_AELootView.TryGetValue(lootWorldObjectGuid, out Loot lootView))
-                return lootView;
-
-            return null;
+            return m_AELootView.FirstOrDefault(pair => pair.Value.GetOwnerGUID() == lootWorldObjectGuid).Value;
         }
 
         public LootRoll GetLootRoll(ObjectGuid lootObjectGuid, byte lootListId)
