@@ -518,7 +518,7 @@ namespace Game.Entities
                             m_personalLoot.Clear();
                             m_unique_users.Clear();
                             m_usetimes = 0;
-                            AddToObjectUpdateIfNeeded();
+                            UpdateDynamicFlagsForNearbyPlayers();
                             break;
                         default:
                             m_lootState = LootState.Ready;                         // for other GOis same switched without delay to GO_READY
@@ -749,7 +749,7 @@ namespace Game.Entities
                                 m_personalLoot.Clear();
                                 m_unique_users.Clear();
                                 m_usetimes = 0;
-                                AddToObjectUpdateIfNeeded();
+                                UpdateDynamicFlagsForNearbyPlayers();
                             }
                             break;
                         case GameObjectTypes.Trap:
@@ -847,7 +847,7 @@ namespace Game.Entities
                             // Start restock timer when the chest is fully looted
                             m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
                             SetLootState(LootState.NotReady);
-                            AddToObjectUpdateIfNeeded();
+                            UpdateDynamicFlagsForNearbyPlayers();
                         }
                         else
                             SetLootState(LootState.Ready);
@@ -3655,10 +3655,8 @@ namespace Game.Entities
 
         void UpdateDynamicFlagsForNearbyPlayers()
         {
-            ValuesUpdateForPlayerWithMaskSender sender = new(this);
-            sender.ObjectMask.MarkChanged(m_objectData.DynamicFlags);
-            MessageDistDeliverer<ValuesUpdateForPlayerWithMaskSender> deliverer = new(this, sender, GetVisibilityRange());
-            Cell.VisitWorldObjects(this, deliverer, GetVisibilityRange());
+            m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags);
+            AddToObjectUpdateIfNeeded();
         }
 
         void HandleCustomTypeCommand(GameObjectTypeBase.CustomCommand command)
