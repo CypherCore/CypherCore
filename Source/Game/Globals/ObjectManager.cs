@@ -744,7 +744,7 @@ namespace Game
             pointsOfInterestStorage.Clear(); // need for reload case
 
             //                                   0   1          2          3          4     5      6           7     8
-            var result = DB.World.Query("SELECT ID, PositionX, PositionY, PositionZ, Icon, Flags, Importance, Name, Unknown905 FROM points_of_interest");
+            var result = DB.World.Query("SELECT ID, PositionX, PositionY, PositionZ, Icon, Flags, Importance, Name, WMOGroupID FROM points_of_interest");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
@@ -763,7 +763,7 @@ namespace Game
                 POI.Flags = result.Read<uint>(5);
                 POI.Importance = result.Read<uint>(6);
                 POI.Name = result.Read<string>(7);
-                POI.Unknown905 = result.Read<uint>(8);
+                POI.WMOGroupID = result.Read<uint>(8);
 
                 if (!GridDefines.IsValidMapCoord(POI.Pos.X, POI.Pos.Y, POI.Pos.Z))
                 {

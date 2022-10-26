@@ -323,7 +323,7 @@ namespace Game.Misc
             packet.Pos = pointOfInterest.Pos;
             packet.Icon = pointOfInterest.Icon;
             packet.Importance = pointOfInterest.Importance;
-            packet.Unknown905 = pointOfInterest.Unknown905;
+            packet.WMOGroupID = pointOfInterest.WMOGroupID;
 
             _session.SendPacket(packet);
         }
@@ -754,7 +754,7 @@ namespace Game.Misc
         public uint Flags;
         public uint Importance;
         public string Name;
-        public uint Unknown905;
+        public uint WMOGroupID;
     }
 
     public class PointOfInterestLocale
