@@ -1749,17 +1749,34 @@ namespace Game.Entities
                     {
                         if (info.Chest.chestPersonalLoot != 0)
                         {
-                            Loot personalLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
-                            m_personalLoot[player.GetGUID()] = personalLoot;
-
-                            personalLoot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
-                            personalLoot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
-
-                            if (GetLootMode() > 0)
+                            GameObjectTemplateAddon addon = GetTemplateAddon();
+                            if (info.Chest.DungeonEncounter != 0)
                             {
-                                GameObjectTemplateAddon addon = GetTemplateAddon();
-                                if (addon != null)
-                                    personalLoot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
+                                List<Player> tappers = new();
+                                foreach (ObjectGuid tapperGuid in GetTapList())
+                                {
+                                    Player tapper = Global.ObjAccessor.GetPlayer(this, tapperGuid);
+                                    if (tapper != null)
+                                        tappers.Add(tapper);
+                                }
+
+                                if (tappers.Empty())
+                                    tappers.Add(player);
+
+                                m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(info.Chest.DungeonEncounter, info.Chest.chestPersonalLoot,
+                                    LootStorage.Gameobject, LootType.Chest, this, addon != null ? addon.Mingold : 0, addon != null ? addon.Maxgold : 0,
+                                    (ushort)GetLootMode(), GetMap().GetDifficultyLootItemContext(), tappers);
+                            }
+                            else
+                            {
+                                Loot loot = new(GetMap(), GetGUID(), LootType.Chest, null);
+                                m_personalLoot[player.GetGUID()] = loot;
+
+                                loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
+                                loot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+
+                                if (GetLootMode() > 0 && addon != null)
+                                    loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
                             }
                         }
                     }

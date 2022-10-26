@@ -335,6 +335,8 @@ namespace Game.Entities
 
         public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
 
+        public bool IsArmor() { return GetClass() == ItemClass.Armor; }
+        
         public bool IsRangedWeapon()
         {
             return IsWeapon() && (GetSubClass() == (uint)ItemSubClassWeapon.Bow ||

@@ -704,9 +704,9 @@ namespace Game.Entities
 
             Creature creature = victim.ToCreature();
 
-            bool isRewardAllowed = true;
+            bool isRewardAllowed = attacker != victim;
             if (creature != null)
-                isRewardAllowed = !creature.GetTapList().Empty();
+                isRewardAllowed = isRewardAllowed && !creature.GetTapList().Empty();
 
             List<Player> tappers = new();
             if (isRewardAllowed && creature)
@@ -727,11 +727,6 @@ namespace Game.Entities
             // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
             if (isRewardAllowed)
             {
-                PartyKillLog partyKillLog = new();
-                partyKillLog.Player = player.GetGUID();
-                partyKillLog.Victim = victim.GetGUID();
-                partyKillLog.Write();
-
                 HashSet<Group> groups = new();
                 foreach (Player tapper in tappers)
                 {
@@ -740,6 +735,11 @@ namespace Game.Entities
                     {
                         if (groups.Add(tapperGroup))
                         {
+                            PartyKillLog partyKillLog = new();
+                            partyKillLog.Player = player && tapperGroup.IsMember(player.GetGUID()) ? player.GetGUID() : tapper.GetGUID();
+                            partyKillLog.Victim = victim.GetGUID();
+                            partyKillLog.Write();
+
                             tapperGroup.BroadcastPacket(partyKillLog, tapperGroup.GetMemberGroup(tapper.GetGUID()) != 0);
 
                             if (creature)
@@ -747,7 +747,12 @@ namespace Game.Entities
                         }
                     }
                     else
+                    {
+                        PartyKillLog partyKillLog = new();
+                        partyKillLog.Player = tapper.GetGUID();
+                        partyKillLog.Victim = victim.GetGUID();
                         tapper.SendPacket(partyKillLog);
+                    }
                 }
 
                 // Generate loot before updating looter
@@ -763,30 +768,33 @@ namespace Game.Entities
                         Group group = !groups.Empty() ? groups.First() : null;
                         Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
 
-                        Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
-
                         if (dungeonEncounter != null)
-                            loot.SetDungeonEncounterId(dungeonEncounter.Id);
-
-                        uint lootid = creature.GetCreatureTemplate().LootId;
-                        if (lootid != 0)
-                            loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
-
-                        if (creature.GetLootMode() > 0)
-                            loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
-
-                        if (group)
-                            loot.NotifyLootList(creature.GetMap());
-
-                        if (dungeonEncounter != null || groups.Empty())
-                            creature._loot = loot;   // TODO: personal boss loot
+                        {
+                            creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetCreatureTemplate().LootId,
+                                LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold,
+                                (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
+                        }
                         else
+                        {
+                            Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
+
+                            uint lootid = creature.GetCreatureTemplate().LootId;
+                            if (lootid != 0)
+                                loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
+
+                            if (creature.GetLootMode() > 0)
+                                loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+
+                            if (group)
+                                loot.NotifyLootList(creature.GetMap());
+
                             creature.m_personalLoot[looter.GetGUID()] = loot;   // trash mob loot is personal, generated with round robin rules
 
-                        // Update round robin looter only if the creature had loot
-                        if (!loot.IsLooted())
-                            foreach (Group tapperGroup in groups)
-                                tapperGroup.UpdateLooterGuid(creature);
+                            // Update round robin looter only if the creature had loot
+                            if (!loot.IsLooted())
+                                foreach (Group tapperGroup in groups)
+                                    tapperGroup.UpdateLooterGuid(creature);
+                        }
                     }
                     else
                     {

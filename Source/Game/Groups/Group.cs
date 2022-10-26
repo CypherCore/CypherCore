@@ -40,7 +40,7 @@ namespace Game.Groups
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
-            m_lootMethod = LootMethod.FreeForAll;
+            m_lootMethod = LootMethod.PersonalLoot;
             m_lootThreshold = ItemQuality.Uncommon;
         }
 
@@ -119,9 +119,6 @@ namespace Game.Groups
 
             if (m_groupFlags.HasAnyFlag(GroupFlags.Raid))
                 _initRaidSubGroupsCounter();
-
-            if (!IsLFGGroup())
-                m_lootMethod = LootMethod.GroupLoot;
 
             m_lootThreshold = ItemQuality.Uncommon;
             m_looterGuid = leaderGuid;
@@ -246,7 +243,7 @@ namespace Game.Groups
         {
             m_groupFlags = (m_groupFlags | GroupFlags.Lfg | GroupFlags.LfgRestricted);
             m_groupCategory = GroupCategory.Instance;
-            m_lootMethod = LootMethod.GroupLoot;
+            m_lootMethod = LootMethod.PersonalLoot;
             if (!IsBGGroup() && !IsBFGroup())
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);

@@ -3141,8 +3141,7 @@ namespace Game.Entities
 
             switch (loot.GetLootMethod())
             {
-                case LootMethod.PersonalLoot:// @todo implement personal loot (http://wow.gamepedia.com/Loot#Personal_Loot)
-                    return false;
+                case LootMethod.PersonalLoot:
                 case LootMethod.FreeForAll:
                     return true;
                 case LootMethod.RoundRobin:

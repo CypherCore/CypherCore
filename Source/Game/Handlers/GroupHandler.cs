@@ -350,11 +350,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetLootMethod)]
         void HandleSetLootMethod(SetLootMethod packet)
         {
+            // not allowed to change
+            /*
             Group group = GetPlayer().GetGroup();
             if (!group)
-                return;
+                 return;
 
-            /** error handling **/
             if (!group.IsLeader(GetPlayer().GetGUID()))
                 return;
 
@@ -383,6 +384,7 @@ namespace Game
             group.SetMasterLooterGuid(packet.LootMasterGUID);
             group.SetLootThreshold(packet.LootThreshold);
             group.SendUpdate();
+            */
         }
 
         [WorldPacketHandler(ClientOpcodes.MinimapPing)]

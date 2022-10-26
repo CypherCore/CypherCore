@@ -53,6 +53,11 @@ namespace Game.Loots
         /// <returns></returns>
         public bool AllowedForPlayer(Player player, Loot loot)
         {
+            return AllowedForPlayer(player, loot, itemid, needs_quest, follow_loot_rules, false, conditions);
+        }
+
+        public static bool AllowedForPlayer(Player player, Loot loot, uint itemid, bool needs_quest, bool follow_loot_rules, bool strictUsabilityCheck, List<Condition> conditions)
+        {
             // DB conditions check
             if (!Global.ConditionMgr.IsObjectMeetToConditions(player, conditions))
                 return false;
@@ -69,7 +74,7 @@ namespace Game.Loots
                 return false;
 
             // Master looter can see all items even if the character can't loot them
-            if (loot.GetLootMethod() == LootMethod.MasterLoot && follow_loot_rules && player.GetGroup() != null && player.GetGroup().GetMasterLooterGuid() == player.GetGUID())
+            if (loot != null && loot.GetLootMethod() == LootMethod.MasterLoot && follow_loot_rules && loot.GetLootMasterGUID() == player.GetGUID())
                 return true;
 
             // Don't allow loot for players without profession or those who already know the recipe
@@ -88,23 +93,19 @@ namespace Game.Loots
                 }
             }
 
-            // Don't allow to loot soulbound recipes that the player has already learned
-            if (pProto.GetClass() == ItemClass.Recipe && pProto.GetBonding() == ItemBondingType.OnAcquire)
-            {
-                foreach (var itemEffect in pProto.Effects)
-                {
-                    if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
-                        continue;
-
-                    if (player.HasSpell((uint)itemEffect.SpellID))
-                        return false;
-                }
-            }
-
             // check quest requirements
             if (!pProto.FlagsCu.HasAnyFlag(ItemFlagsCustom.IgnoreQuestStatus)
                 && ((needs_quest || (pProto.GetStartQuest() != 0 && player.GetQuestStatus(pProto.GetStartQuest()) != QuestStatus.None)) && !player.HasQuestForItem(itemid)))
                 return false;
+
+            if (strictUsabilityCheck)
+            {
+                if ((pProto.IsWeapon() || pProto.IsArmor()) && !pProto.IsUsableByLootSpecialization(player, true))
+                    return false;
+
+                if (player.CanRollNeedForItem(pProto, null, false) != InventoryResult.Ok)
+                    return false;
+            }
 
             return true;
         }
@@ -286,7 +287,7 @@ namespace Game.Loots
                 startLootRoll.Method = m_loot.GetLootMethod();
                 startLootRoll.ValidRolls = m_voteMask;
                 // In NEED_BEFORE_GREED need disabled for non-usable item for player
-                if (m_loot.GetLootMethod() == LootMethod.NeedBeforeGreed && player.CanRollForItemInLFG(itemTemplate, m_map) != InventoryResult.Ok)
+                if (m_loot.GetLootMethod() == LootMethod.NeedBeforeGreed && player.CanRollNeedForItem(itemTemplate, m_map, true) != InventoryResult.Ok)
                     startLootRoll.ValidRolls &= ~RollMask.Need;
 
                 FillPacket(startLootRoll.Item);
@@ -825,7 +826,7 @@ namespace Game.Loots
                     _rolls.Remove(pair.Key);
         }
 
-        void FillNotNormalLootFor(Player player)
+        public void FillNotNormalLootFor(Player player)
         {
             ObjectGuid plguid = player.GetGUID();
             _allowedLooters.Add(plguid);
@@ -1079,6 +1080,8 @@ namespace Game.Loots
 
         public ObjectGuid GetGUID() { return _guid; }
         public ObjectGuid GetOwnerGUID() { return _owner; }
+        public ItemContext GetItemContext() { return _itemContext; }
+        public void SetItemContext(ItemContext context) { _itemContext = context; }
         public LootMethod GetLootMethod() { return _lootMethod; }
 
         public ObjectGuid GetLootMasterGUID() { return _lootMaster; }

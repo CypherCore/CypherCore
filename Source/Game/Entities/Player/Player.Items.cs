@@ -2959,14 +2959,17 @@ namespace Game.Entities
             }
         }
 
-        public InventoryResult CanRollForItemInLFG(ItemTemplate proto, Map map)
+        public InventoryResult CanRollNeedForItem(ItemTemplate proto, Map map, bool restrictOnlyLfg)
         {
-            if (!GetGroup() || !GetGroup().IsLFGGroup())
-                return InventoryResult.Ok;    // not in LFG group
+            if (restrictOnlyLfg)
+            {
+                if (!GetGroup() || !GetGroup().IsLFGGroup())
+                    return InventoryResult.Ok;    // not in LFG group
 
-            // check if looted object is inside the lfg dungeon
-            if (!Global.LFGMgr.InLfgDungeonMap(GetGroup().GetGUID(), map.GetId(), map.GetDifficultyID()))
-                return InventoryResult.Ok;
+                // check if looted object is inside the lfg dungeon
+                if (!Global.LFGMgr.InLfgDungeonMap(GetGroup().GetGUID(), map.GetId(), map.GetDifficultyID()))
+                    return InventoryResult.Ok;
+            }
 
             if (proto == null)
                 return InventoryResult.ItemNotFound;
@@ -2986,41 +2989,14 @@ namespace Game.Entities
                     return InventoryResult.CantEquipSkill;
             }
 
-            Class _class = GetClass();
             if (proto.GetClass() == ItemClass.Weapon && GetSkillValue(proto.GetSkill()) == 0)
                 return InventoryResult.ProficiencyNeeded;
 
-            if (proto.GetClass() == ItemClass.Armor && proto.GetSubClass() > (uint)ItemSubClassArmor.Miscellaneous
-                && proto.GetSubClass() < (uint)ItemSubClassArmor.Cosmetic && proto.GetInventoryType() != InventoryType.Cloak)
+            if (proto.GetClass() == ItemClass.Armor && proto.GetInventoryType() != InventoryType.Cloak)
             {
-                if (_class == Class.Warrior || _class == Class.Paladin || _class == Class.Deathknight)
-                {
-                    if (GetLevel() < 40)
-                    {
-                        if (proto.GetSubClass() != (uint)ItemSubClassArmor.Mail)
-                            return InventoryResult.ClientLockedOut;
-                    }
-                    else if (proto.GetSubClass() != (uint)ItemSubClassArmor.Plate)
-                        return InventoryResult.ClientLockedOut;
-                }
-                else if (_class == Class.Hunter || _class == Class.Shaman)
-                {
-                    if (GetLevel() < 40)
-                    {
-                        if (proto.GetSubClass() != (uint)ItemSubClassArmor.Leather)
-                            return InventoryResult.ClientLockedOut;
-                    }
-                    else if (proto.GetSubClass() != (uint)ItemSubClassArmor.Mail)
-                        return InventoryResult.ClientLockedOut;
-                }
-
-                if (_class == Class.Rogue || _class == Class.Druid)
-                    if (proto.GetSubClass() != (uint)ItemSubClassArmor.Leather)
-                        return InventoryResult.ClientLockedOut;
-
-                if (_class == Class.Mage || _class == Class.Priest || _class == Class.Warlock)
-                    if (proto.GetSubClass() != (uint)ItemSubClassArmor.Cloth)
-                        return InventoryResult.ClientLockedOut;
+                ChrClassesRecord classesEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                if ((classesEntry.ArmorTypeMask & 1 << (int)proto.GetSubClass()) == 0)
+                    return InventoryResult.ClientLockedOut;
             }
 
             return InventoryResult.Ok;
