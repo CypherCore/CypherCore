@@ -959,7 +959,7 @@ namespace Game.Entities
 
         void DespawnForPlayer(Player seer, TimeSpan respawnTime)
         {
-            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[seer.GetGUID()];
+            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates(seer.GetGUID());
             perPlayerState.ValidUntil = GameTime.GetSystemTime() + respawnTime;
             perPlayerState.Despawned = true;
             seer.UpdateVisibilityOf(this);
@@ -3002,7 +3002,7 @@ namespace Game.Entities
 
         void SetGoStateFor(GameObjectState state, Player viewer)
         {
-            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates()[viewer.GetGUID()];
+            PerPlayerState perPlayerState = GetOrCreatePerPlayerStates(viewer.GetGUID());
             perPlayerState.ValidUntil = GameTime.GetSystemTime() + TimeSpan.FromSeconds(m_respawnDelayTime);
             perPlayerState.State = state;
 
@@ -3495,12 +3495,15 @@ namespace Game.Entities
             return true;
         }
         
-        Dictionary<ObjectGuid, PerPlayerState> GetOrCreatePerPlayerStates()
+        PerPlayerState GetOrCreatePerPlayerStates(ObjectGuid guid)
         {
             if (m_perPlayerState == null)
                 m_perPlayerState = new();
 
-            return m_perPlayerState;
+            if (!m_perPlayerState.ContainsKey(guid))
+                m_perPlayerState[guid] = new();
+
+            return m_perPlayerState[guid];
         }
         
         public override ushort GetAIAnimKitId() { return _animKitId; }

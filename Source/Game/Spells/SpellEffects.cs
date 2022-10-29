@@ -168,7 +168,7 @@ namespace Game.Spells
                 if (unitCaster != null && apply_direct_bonus)
                 {
                     uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                    damage = (int)(bonus + (bonus * variance));
+                    damage = (int)(bonus + (uint)(bonus * variance));
                     damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
                 }
 
@@ -697,7 +697,7 @@ namespace Game.Spells
             if (unitCaster != null)
             {
                 uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                damage = (int)(bonus + (bonus * variance));
+                damage = (int)(bonus + (uint)(bonus * variance));
                 damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
             }
 
@@ -886,7 +886,7 @@ namespace Game.Spells
             if (unitCaster != null)
                 unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
 
-            damage = (int)(bonus + (bonus * variance));
+            damage = (int)(bonus + (uint)(bonus * variance));
 
             if (unitCaster != null)
                 damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);

@@ -4284,7 +4284,7 @@ namespace Game.Entities
 
             map.AddToMap(pet.ToCreature());
 
-            Cypher.Assert(petStable.CurrentPetIndex == 0);
+            Cypher.Assert(!petStable.CurrentPetIndex.HasValue);
             petStable.SetCurrentUnslottedPetIndex((uint)petStable.UnslottedPets.Count);
             PetStable.PetInfo petInfo = new();
             pet.FillPetInfo(petInfo);

@@ -290,7 +290,7 @@ namespace Game.Entities
                     owner.RemovePet(null, PetSaveMode.NotInSlot);
 
                 var unslottedPetIndex = petStable.UnslottedPets.FindIndex(unslottedPet => unslottedPet.PetNumber == petInfoNumber);
-                Cypher.Assert(petStable.CurrentPetIndex == 0);
+                Cypher.Assert(!petStable.CurrentPetIndex.HasValue);
                 Cypher.Assert(unslottedPetIndex != -1);
 
                 petStable.SetCurrentUnslottedPetIndex((uint)unslottedPetIndex);
@@ -302,7 +302,7 @@ namespace Game.Entities
                 Cypher.Assert(activePetIndex != -1);
 
                 // Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying mount)
-                Cypher.Assert(petStable.CurrentPetIndex == 0 || petStable.CurrentPetIndex == activePetIndex);
+                Cypher.Assert(!petStable.CurrentPetIndex.HasValue || petStable.CurrentPetIndex == activePetIndex);
 
                 petStable.SetCurrentActivePetIndex((uint)activePetIndex);
             }
