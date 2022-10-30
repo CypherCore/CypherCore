@@ -896,8 +896,9 @@ namespace Game
 
             // Warden
             Values[WorldCfg.WardenEnabled] = GetDefaultValue("Warden.Enabled", false);
-            Values[WorldCfg.WardenNumMemChecks] = GetDefaultValue("Warden.NumMemChecks", 3);
-            Values[WorldCfg.WardenNumOtherChecks] = GetDefaultValue("Warden.NumOtherChecks", 7);
+            Values[WorldCfg.WardenNumInjectChecks] = GetDefaultValue("Warden.NumInjectionChecks", 9);
+            Values[WorldCfg.WardenNumLuaChecks] = GetDefaultValue("Warden.NumLuaSandboxChecks", 1);
+            Values[WorldCfg.WardenNumClientModChecks] = GetDefaultValue("Warden.NumClientModChecks", 1);
             Values[WorldCfg.WardenClientBanDuration] = GetDefaultValue("Warden.BanDuration", 86400);
             Values[WorldCfg.WardenClientCheckHoldoff] = GetDefaultValue("Warden.ClientCheckHoldOff", 30);
             Values[WorldCfg.WardenClientFailAction] = GetDefaultValue("Warden.ClientCheckFailAction", 0);

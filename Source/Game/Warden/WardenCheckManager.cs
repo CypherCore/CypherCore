@@ -25,7 +25,17 @@ namespace Game
 {
     public class WardenCheckManager : Singleton<WardenCheckManager>
     {
-        WardenCheckManager() { }
+        static byte WARDEN_MAX_LUA_CHECK_LENGTH = 170;
+
+        List<WardenCheck> _checks = new();
+        Dictionary<uint, byte[]> _checkResults = new();
+        List<ushort>[] _pools = new List<ushort>[(int)WardenCheckCategory.Max];
+
+        WardenCheckManager()
+        {
+            for (var i = 0; i < (int)WardenCheckCategory.Max; ++i)
+                _pools[i] = new();
+        }
 
         public void LoadWardenChecks()
         {
@@ -38,7 +48,7 @@ namespace Game
                 return;
             }
 
-            //                              0    1     2     3        4       5      6      7
+            //                                         0   1     2     3       4        5       6    7
             SQLResult result = DB.World.Query("SELECT id, type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
             if (result.IsEmpty())
             {
@@ -51,51 +61,62 @@ namespace Game
             {
                 ushort id = result.Read<ushort>(0);
                 WardenCheckType checkType = (WardenCheckType)result.Read<byte>(1);
-                string data = result.Read<string>(2);
-                string checkResult = result.Read<string>(3);
-                uint address = result.Read<uint>(4);
-                byte length = result.Read<byte>(5);
-                string str = result.Read<string>(6);
-                string comment = result.Read<string>(7);
+
+                WardenCheckCategory category = GetWardenCheckCategory(checkType);
+
+                if (category == WardenCheckCategory.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check type {checkType} in `warden_checks`, which is not supported. Skipped.");
+                    continue;
+                }
+
+                if ((checkType == WardenCheckType.LuaEval) && (id > 9999))
+                {
+                    Log.outError(LogFilter.Sql, $"Warden Lua check with id {id} found in `warden_checks`. Lua checks may have four-digit IDs at most. Skipped.");
+                    continue;
+                }
 
                 WardenCheck wardenCheck = new();
                 wardenCheck.Type = checkType;
                 wardenCheck.CheckId = id;
 
-                // Initialize action with default action from config
-                wardenCheck.Action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
-
                 if (checkType == WardenCheckType.PageA || checkType == WardenCheckType.PageB || checkType == WardenCheckType.Driver)
-                    wardenCheck.Data = new BigInteger(data.ToByteArray());
+                    wardenCheck.Data = result.Read<byte[]>(2);
 
-                if (checkType == WardenCheckType.Memory || checkType == WardenCheckType.Module)
-                    MemChecksIdPool.Add(id);
-                else
-                    OtherChecksIdPool.Add(id);
+                if (checkType == WardenCheckType.Mpq || checkType == WardenCheckType.Mem)
+                    _checkResults.Add(id, result.Read<byte[]>(3));
 
-                if (checkType == WardenCheckType.Memory || checkType == WardenCheckType.PageA || checkType == WardenCheckType.PageB || checkType == WardenCheckType.Proc)
-                {
-                    wardenCheck.Address = address;
-                    wardenCheck.Length = length;
-                }
+                if (checkType == WardenCheckType.Mem || checkType == WardenCheckType.PageA || checkType == WardenCheckType.PageB || checkType == WardenCheckType.Proc)
+                    wardenCheck.Address = result.Read<uint>(4);
+
+                if (checkType == WardenCheckType.PageA || checkType == WardenCheckType.PageB || checkType == WardenCheckType.Proc)
+                    wardenCheck.Length = result.Read<byte>(5);
 
                 // PROC_CHECK support missing
-                if (checkType == WardenCheckType.Memory || checkType == WardenCheckType.MPQ || checkType == WardenCheckType.LuaStr || checkType == WardenCheckType.Driver || checkType == WardenCheckType.Module)
-                    wardenCheck.Str = str;
+                if (checkType == WardenCheckType.Mem || checkType == WardenCheckType.Mpq || checkType == WardenCheckType.LuaEval || checkType == WardenCheckType.Driver || checkType == WardenCheckType.Module)
+                    wardenCheck.Str = result.Read<string>(6);
 
-                CheckStore[id] = wardenCheck;
+                wardenCheck.Comment = result.Read<string>(7);
+                if (wardenCheck.Comment.IsEmpty())
+                    wardenCheck.Comment = "Undocumented Check";
 
-                if (checkType == WardenCheckType.MPQ || checkType == WardenCheckType.Memory)
+                if (checkType == WardenCheckType.LuaEval)
                 {
-                    BigInteger Result = new(checkResult.ToByteArray());
-                    CheckResultStore[id] = Result;
+                    if (wardenCheck.Str.Length > WARDEN_MAX_LUA_CHECK_LENGTH)
+                    {
+                        Log.outError(LogFilter.Sql, $"Found over-long Lua check for Warden check with id {id} in `warden_checks`. Max length is {WARDEN_MAX_LUA_CHECK_LENGTH}. Skipped.");
+                        continue;
+                    }
+
+                    string str = $"{id:U4}";
+                    Cypher.Assert(str.Length == 4);
+                    wardenCheck.IdStr = str.ToCharArray();
                 }
 
-                if (comment.IsEmpty())
-                    wardenCheck.Comment = "Undocumented Check";
-                else
-                    wardenCheck.Comment = comment;
+                // initialize action with default action from config, this may be overridden later
+                wardenCheck.Action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
 
+                _pools[(int)category].Add(id);
                 ++count;
             }
             while (result.NextRow());
@@ -114,7 +135,7 @@ namespace Game
                 return;
             }
 
-            //                                               0        1
+            //                                              0         1
             SQLResult result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
             if (result.IsEmpty())
             {
@@ -130,13 +151,13 @@ namespace Game
 
                 // Check if action value is in range (0-2, see WardenActions enum)
                 if (action > WardenActions.Ban)
-                    Log.outError(LogFilter.Warden, "Warden check override action out of range (ID: {0}, action: {1})", checkId, action);
+                    Log.outError(LogFilter.Warden, $"Warden check override action out of range (ID: {checkId}, action: {action})");
                 // Check if check actually exists before accessing the CheckStore vector
-                else if (checkId >= CheckStore.Count)
-                    Log.outError(LogFilter.Warden, "Warden check action override for non-existing check (ID: {0}, action: {1}), skipped", checkId, action);
+                else if (checkId >= _checks.Count)
+                    Log.outError(LogFilter.Warden, $"Warden check action override for non-existing check (ID: {checkId}, action: {action}), skipped");
                 else
                 {
-                    CheckStore[checkId].Action = action;
+                    _checks[checkId].Action = action;
                     ++count;
                 }
             }
@@ -145,23 +166,52 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden action overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public WardenCheck GetWardenDataById(ushort Id)
+        public WardenCheck GetCheckData(ushort Id)
         {
-            if (Id < CheckStore.Count)
-                return CheckStore[Id];
+            if (Id < _checks.Count)
+                return _checks[Id];
 
             return null;
         }
 
-        public BigInteger GetWardenResultById(ushort Id)
+        public byte[] GetCheckResult(ushort Id)
         {
-            return CheckResultStore.LookupByKey(Id);
+            return _checkResults.LookupByKey(Id);
         }
 
-        public List<ushort> MemChecksIdPool = new();
-        public List<ushort> OtherChecksIdPool = new();
-        List<WardenCheck> CheckStore = new();
-        Dictionary<uint, BigInteger> CheckResultStore = new();
+        public ushort GetMaxValidCheckId() { return (ushort)_checks.Count; }
+
+        public List<ushort> GetAvailableChecks(WardenCheckCategory category) { return _pools[(int)category]; }
+
+        public static WardenCheckCategory GetWardenCheckCategory(WardenCheckType type) => type switch
+        {
+            WardenCheckType.Timing => WardenCheckCategory.Max,
+            WardenCheckType.Driver => WardenCheckCategory.Inject,
+            WardenCheckType.Proc => WardenCheckCategory.Max,
+            WardenCheckType.LuaEval => WardenCheckCategory.Lua,
+            WardenCheckType.Mpq => WardenCheckCategory.Modded,
+            WardenCheckType.PageA => WardenCheckCategory.Inject,
+            WardenCheckType.PageB => WardenCheckCategory.Inject,
+            WardenCheckType.Module => WardenCheckCategory.Inject,
+            WardenCheckType.Mem => WardenCheckCategory.Modded,
+            _ => WardenCheckCategory.Max,
+        };
+
+        public static WorldCfg GetWardenCategoryCountConfig(WardenCheckCategory category) => category switch
+        {
+            WardenCheckCategory.Inject => WorldCfg.WardenNumInjectChecks,
+            WardenCheckCategory.Lua => WorldCfg.WardenNumLuaChecks,
+            WardenCheckCategory.Modded => WorldCfg.WardenNumClientModChecks,
+            _ => WorldCfg.Max,
+        };
+
+        public static bool IsWardenCategoryInWorldOnly(WardenCheckCategory category) => category switch
+        {
+            WardenCheckCategory.Inject => false,
+            WardenCheckCategory.Lua => true,
+            WardenCheckCategory.Modded => false,
+            _ => false,
+        };
     }
 
     public enum WardenActions
@@ -171,28 +221,39 @@ namespace Game
         Ban
     }
 
+    public enum WardenCheckCategory
+    {
+        Inject = 0, // checks that test whether the client's execution has been interfered with
+        Lua,        // checks that test whether the lua sandbox has been modified
+        Modded,     // checks that test whether the client has been modified
+
+        Max // SKIP
+    }
+
     public enum WardenCheckType
     {
-        Memory = 0xF3, // 243: byte moduleNameIndex + uint Offset + byte Len (check to ensure memory isn't modified)
-        PageA = 0xB2, // 178: uint Seed + byte[20] SHA1 + uint Addr + byte Len (scans all pages for specified hash)
-        PageB = 0xBF, // 191: uint Seed + byte[20] SHA1 + uint Addr + byte Len (scans only pages starts with MZ+PE headers for specified hash)
-        MPQ = 0x98, // 152: byte fileNameIndex (check to ensure MPQ file isn't modified)
-        LuaStr = 0x8B, // 139: byte luaNameIndex (check to ensure LUA string isn't used)
-        Driver = 0x71, // 113: uint Seed + byte[20] SHA1 + byte driverNameIndex (check to ensure driver isn't loaded)
-        Timing = 0x57, //  87: empty (check to ensure GetTickCount() isn't detoured)
-        Proc = 0x7E, // 126: uint Seed + byte[20] SHA1 + byte moluleNameIndex + byte procNameIndex + uint Offset + byte Len (check to ensure proc isn't detoured)
-        Module = 0xD9  // 217: uint Seed + byte[20] SHA1 (check to ensure module isn't injected)
+        None = 0,
+        Timing = 87, // nyi
+        Driver = 113, // uint Seed + byte[20] SHA1 + byte driverNameIndex (check to ensure driver isn't loaded)
+        Proc = 126, // nyi
+        LuaEval = 139, // evaluate arbitrary Lua check
+        Mpq = 152, // get hash of MPQ file (to check it is not modified)
+        PageA = 178, // scans all pages for specified SHA1 hash
+        PageB = 191, // scans only pages starts with MZ+PE headers for specified hash
+        Module = 217, // check to make sure module isn't injected
+        Mem = 243, // retrieve specific memory
     }
 
     public class WardenCheck
     {
+        public ushort CheckId;
         public WardenCheckType Type;
-        public BigInteger Data;
+        public byte[] Data;
         public uint Address;                                         // PROC_CHECK, MEM_CHECK, PAGE_CHECK
         public byte Length;                                           // PROC_CHECK, MEM_CHECK, PAGE_CHECK
         public string Str;                                        // LUA, MPQ, DRIVER
         public string Comment;
-        public ushort CheckId;
+        public char[] IdStr = new char[4];                         // LUA
         public WardenActions Action;
     }
 }

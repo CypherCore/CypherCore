@@ -1854,13 +1854,14 @@ namespace Framework.Constants
         TradeLevelReq,
         UptimeUpdate,
         VmapIndoorCheck,
-        WardenClientBanDuration,
+        WardenClientResponseDelay,
         WardenClientCheckHoldoff,
         WardenClientFailAction,
-        WardenClientResponseDelay,
+        WardenClientBanDuration,
         WardenEnabled,
-        WardenNumMemChecks,
-        WardenNumOtherChecks,
+        WardenNumInjectChecks,
+        WardenNumLuaChecks,
+        WardenNumClientModChecks,
         Weather,
         WeeklyQuestResetTimeWDay,
         WintergraspBattletime,
@@ -1871,7 +1872,8 @@ namespace Framework.Constants
         WintergraspPlrMinLvl,
         WintergraspRestartAfterCrash,
         WorldBossLevelDiff,
-        XpBoostDaymask
+        XpBoostDaymask,
+        Max
     }
 
     public enum TimerType

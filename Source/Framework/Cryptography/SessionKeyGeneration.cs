@@ -21,11 +21,14 @@ namespace Framework.Cryptography
 {
     public class SessionKeyGenerator
     {
-        public SessionKeyGenerator(byte[] buff, int size)
+        public SessionKeyGenerator(byte[] buff, int size = 0)
         {
+            if (size == 0)
+                size = buff.Length;
+
             int halfSize = size / 2;
 
-            sh = SHA256.Create();
+            sh = SHA1.Create();
             sh.TransformFinalBlock(buff, 0, halfSize);
             o1 = sh.Hash;
 
@@ -59,7 +62,7 @@ namespace Framework.Cryptography
             taken = 0;
         }
 
-        SHA256 sh;
+        SHA1 sh;
         uint taken;
         byte[] o0 = new byte[32];
         byte[] o1 = new byte[32];

@@ -796,23 +796,23 @@ namespace Game
 
             switch (opcode)
             {
-                case WardenOpcodes.CMSG_ModuleMissing:
+                case WardenOpcodes.CmsgModuleMissing:
                     _warden.SendModuleToClient();
                     break;
-                case WardenOpcodes.Cmsg_ModuleOk:
+                case WardenOpcodes.CmsgModuleOk:
                     _warden.RequestHash();
                     break;
-                case WardenOpcodes.Smsg_CheatChecksRequest:
+                case WardenOpcodes.SmsgCheatChecksRequest:
                     _warden.HandleData(packet.Data);
                     break;
-                case WardenOpcodes.Cmsg_MemChecksResult:
+                case WardenOpcodes.CmsgMemChecksResult:
                     Log.outDebug(LogFilter.Warden, "NYI WARDEN_CMSG_MEM_CHECKS_RESULT received!");
                     break;
-                case WardenOpcodes.Cmsg_HashResult:
+                case WardenOpcodes.CmsgHashResult:
                     _warden.HandleHashResult(packet.Data);
                     _warden.InitializeModule();
                     break;
-                case WardenOpcodes.Cmsg_ModuleFailed:
+                case WardenOpcodes.CmsgModuleFailed:
                     Log.outDebug(LogFilter.Warden, "NYI WARDEN_CMSG_MODULE_FAILED received!");
                     break;
                 default:

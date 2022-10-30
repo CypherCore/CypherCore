@@ -344,19 +344,19 @@ namespace Game
             if (updater.ProcessUnsafe())
             {
                 if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
-                    _warden.Update();
+                    _warden.Update(diff);
 
                 // If necessary, log the player out
                 if (ShouldLogOut(currentTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
 
-                if (m_Socket[(int)ConnectionType.Realm] != null && GetPlayer() && _warden != null)
-                    _warden.Update();
-
                 //- Cleanup socket if need
                 if ((m_Socket[(int)ConnectionType.Realm] != null && !m_Socket[(int)ConnectionType.Realm].IsOpen()) ||
                     (m_Socket[(int)ConnectionType.Instance] != null && !m_Socket[(int)ConnectionType.Instance].IsOpen()))
                 {
+                    if (GetPlayer() != null && _warden != null)
+                        _warden.Update(diff);
+
                     expireTime -= expireTime > diff ? diff : expireTime;
                     if (expireTime < diff || forceExit || !GetPlayer())
                     {
@@ -654,6 +654,14 @@ namespace Game
 
             ss.AppendFormat("Account: {0}]", GetAccountId());
             return ss.ToString();
+        }
+
+        void HandleWardenData(WardenData packet)
+        {
+            if (_warden == null || packet.Data.GetSize() == 0)
+                return;
+
+            _warden.HandleData(packet.Data);
         }
 
         public bool PlayerLoading() { return !m_playerLoading.IsEmpty(); }
