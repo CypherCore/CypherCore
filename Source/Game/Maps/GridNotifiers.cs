@@ -2414,6 +2414,40 @@ namespace Game.Maps
         float i_range;
     }
 
+    public class NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck : ICheck<Creature>
+    {
+        WorldObject i_obj;
+        uint i_entry;
+        uint i_spellId;
+        bool i_alive;
+        float i_range;
+
+        public NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(WorldObject obj, uint entry, uint spellId, bool alive, float range)
+        {
+            i_obj = obj;
+            i_entry = entry;
+            i_spellId = spellId;
+            i_alive = alive;
+            i_range = range;
+        }
+
+        public bool Invoke(Creature u)
+        {
+            if (u.GetDeathState() != DeathState.Dead
+                && u.GetEntry() == i_entry
+                && u.HasAura(i_spellId)
+                && u.IsAlive() == i_alive
+                && u.GetGUID() != i_obj.GetGUID()
+                && i_obj.IsWithinDistInMap(u, i_range)
+                && u.CheckPrivateObjectOwnerVisibility(i_obj))
+            {
+                i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+    }
+    
     public class AnyPlayerInObjectRangeCheck : ICheck<Player>
     {
         public AnyPlayerInObjectRangeCheck(WorldObject obj, float range, bool reqAlive = true)

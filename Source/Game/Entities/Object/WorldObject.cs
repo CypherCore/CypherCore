@@ -1619,6 +1619,14 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
+        public Creature FindNearestCreatureWithAura(uint entry, uint spellId, float range, bool alive = true)
+        {
+            var checker = new NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(this, entry, spellId, alive, range);
+            var searcher = new CreatureLastSearcher(this, checker);
+            Cell.VisitAllObjects(this, searcher, range);
+            return searcher.GetTarget();
+        }
+
         public GameObject FindNearestGameObject(uint entry, float range, bool spawnedOnly = true)
         {
             var checker = new NearestGameObjectEntryInObjectRangeCheck(this, entry, range, spawnedOnly);
