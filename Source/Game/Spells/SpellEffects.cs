@@ -5578,10 +5578,10 @@ namespace Game.Spells
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
-            if (unitCaster == null || unitTarget == null || !unitTarget.IsPlayer())
+            if (unitCaster == null || !unitCaster.IsPlayer())
                 return;
 
-            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, unitTarget.GetPosition(), unitTarget.GetGUID(), GetSpellInfo());
+            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), unitCaster.GetGUID(), GetSpellInfo());
         }
 
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
