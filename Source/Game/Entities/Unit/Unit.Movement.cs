@@ -1883,6 +1883,13 @@ namespace Game.Entities
                 moveUpdateTeleport.Status.Guid = GetGUID();
                 moveUpdateTeleport.Status.Pos.Relocate(pos);
                 moveUpdateTeleport.Status.Time = Time.GetMSTime();
+                var transportBase = GetDirectTransport();
+                if (transportBase != null)
+                {
+                    pos.GetPosition(out float tx, out float ty, out float tz, out float to);
+                    transportBase.CalculatePassengerOffset(ref tx, ref ty, ref tz, ref to);
+                    moveUpdateTeleport.Status.transport.pos.Relocate(tx, ty, tz, to);
+                }
             }
 
             // Broadcast the packet to everyone except self.
