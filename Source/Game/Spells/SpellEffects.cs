@@ -5587,7 +5587,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
         void EffectSendChatMessage()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
