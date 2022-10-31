@@ -599,11 +599,22 @@ namespace Game.Entities
                     return FlagStand.InfiniteAOI != 0;
                 case GameObjectTypes.FlagDrop:
                     return FlagDrop.InfiniteAOI != 0;
+                case GameObjectTypes.DestructibleBuilding:
+                    return true;
                 case GameObjectTypes.TrapDoor:
                     return TrapDoor.InfiniteAOI != 0;
                 case GameObjectTypes.NewFlag:
                     return NewFlag.InfiniteAOI != 0;
-                default: return false;
+                case GameObjectTypes.GarrisonBuilding:
+                    return true;
+                case GameObjectTypes.PhaseableMo:
+                    return true;
+                case GameObjectTypes.SiegeableMo:
+                    return true;
+                case GameObjectTypes.ClientModel:
+                    return ClientModel.InfiniteAOI != 0;
+                default:
+                    return false;
             }
         }
 
@@ -643,6 +654,8 @@ namespace Game.Entities
                     return TrapDoor.GiganticAOI != 0;
                 case GameObjectTypes.NewFlag:
                     return NewFlag.GiganticAOI != 0;
+                case GameObjectTypes.GarrisonPlot:
+                    return true;
                 case GameObjectTypes.CapturePoint:
                     return CapturePoint.GiganticAOI != 0;
                 case GameObjectTypes.GarrisonShipment:
