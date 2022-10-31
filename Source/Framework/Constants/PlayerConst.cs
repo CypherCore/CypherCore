@@ -74,6 +74,8 @@ namespace Framework.Constants
 
         //Warmode
         public const uint WarmodeEnlistedSpellOutside = 269083;
+
+        public const uint SpellExperienceEliminated = 206662;
     }
 
     public struct MoneyConstants

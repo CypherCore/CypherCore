@@ -2353,11 +2353,11 @@ namespace Game.Entities
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.DisableXPGain:
-                            if (HasPlayerFlag(PlayerFlags.NoXPGain))
+                            if (HasPlayerFlag(PlayerFlags.NoXPGain) || IsMaxLevel())
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.EnableXPGain:
-                            if (!HasPlayerFlag(PlayerFlags.NoXPGain))
+                            if (!HasPlayerFlag(PlayerFlags.NoXPGain) || IsMaxLevel())
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.None:
@@ -2595,10 +2595,12 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.DisableXPGain:
                     PlayerTalkClass.SendCloseGossip();
+                    CastSpell(null, PlayerConst.SpellExperienceEliminated, true);
                     SetPlayerFlag(PlayerFlags.NoXPGain);
                     break;
                 case GossipOptionNpc.EnableXPGain:
                     PlayerTalkClass.SendCloseGossip();
+                    RemoveAurasDueToSpell(PlayerConst.SpellExperienceEliminated);
                     RemovePlayerFlag(PlayerFlags.NoXPGain);
                     break;
                 case GossipOptionNpc.Mailbox:
