@@ -113,6 +113,21 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actors. DB table `conversation_actors` is empty.");
             }
 
+            // Validate FirstLineId
+            Dictionary<uint, uint> prevConversationLineIds = new();
+            foreach (var conversationLine in CliDB.ConversationLineStorage.Values)
+                if (conversationLine.NextConversationLineID != 0)
+                    prevConversationLineIds[conversationLine.NextConversationLineID] = conversationLine.Id;
+
+            uint getFirstLineIdFromAnyLineId(uint lineId)
+            {
+                uint prevLineId;
+                while ((prevLineId = prevConversationLineIds.LookupByKey(lineId)) != 0)
+                    lineId = prevLineId;
+
+                return lineId;
+            }
+
             SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, ScriptName FROM conversation_template");
             if (!templateResult.IsEmpty())
             {
@@ -127,6 +142,13 @@ namespace Game.DataStorage
                     conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
                     conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : null;
+
+                    uint correctedFirstLineId = getFirstLineIdFromAnyLineId(conversationTemplate.FirstLineId);
+                    if (conversationTemplate.FirstLineId != correctedFirstLineId)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `conversation_template` has incorrect FirstLineId {conversationTemplate.FirstLineId}, it should be {correctedFirstLineId} for Conversation {conversationTemplate.Id}, corrected");
+                        conversationTemplate.FirstLineId = correctedFirstLineId;
+                    }
 
                     ConversationLineRecord currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(conversationTemplate.FirstLineId);
                     if (currentConversationLine == null)
