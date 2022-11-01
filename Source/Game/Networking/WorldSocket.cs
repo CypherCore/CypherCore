@@ -537,7 +537,7 @@ namespace Game.Networking
             sessionKeyHmac.Finish(SessionKeySeed, 16);
 
             _sessionKey = new byte[40];
-            var sessionKeyGenerator = new SessionKeyGenerator(sessionKeyHmac.Digest, 32);
+            var sessionKeyGenerator = new SessionKeyGenerator256(sessionKeyHmac.Digest, 32);
             sessionKeyGenerator.Generate(_sessionKey, 40);
 
             HmacSha256 encryptKeyGen = new(_sessionKey);
