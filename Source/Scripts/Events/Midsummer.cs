@@ -71,7 +71,7 @@ namespace Scripts.Events.Midsummer
         public const uint TorchCatchingA = 11657;
         public const uint TorchCatchingH = 11923;
         public const uint MoreTorchCatchingA = 11924;
-        public const uint MoreTorchCatchingH = 1192;
+        public const uint MoreTorchCatchingH = 11925;
     }
 
     [Script] // 45724 - Braziers Hit!

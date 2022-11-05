@@ -959,6 +959,13 @@ namespace Game.Networking.Packets
 
         public static bool operator ==(ItemInstance left, ItemInstance right)
         {
+            if (ReferenceEquals(left, right))
+                return true;
+            if (ReferenceEquals(left, null))
+                return false;
+            if (ReferenceEquals(right, null))
+                return false;
+
             if (left.ItemID != right.ItemID)
                 return false;
 

@@ -1661,7 +1661,7 @@ namespace Game.Maps
                 return new TransferAbortParams(TransferAbortReason.MapNotAllowed);
 
             if (!entry.IsDungeon())
-                return TransferAbortParams.None;
+                return null;
 
             Difficulty targetDifficulty = player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
@@ -1671,7 +1671,7 @@ namespace Game.Maps
 
             //Bypass checks for GMs
             if (player.IsGameMaster())
-                return TransferAbortParams.None;
+                return null;
 
             //Other requirements
             {
@@ -1702,7 +1702,7 @@ namespace Game.Maps
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
-            return TransferAbortParams.None;
+            return null;
         }
 
         public string GetMapName()
@@ -3219,7 +3219,7 @@ namespace Game.Maps
             return i_InstanceId;
         }
 
-        public virtual TransferAbortParams CannotEnter(Player player) { return TransferAbortParams.None; }
+        public virtual TransferAbortParams CannotEnter(Player player) { return null; }
 
         public Difficulty GetDifficultyID()
         {
@@ -5219,8 +5219,6 @@ namespace Game.Maps
 
     public class TransferAbortParams
     {
-        public static TransferAbortParams None = new TransferAbortParams();
-
         public TransferAbortReason Reason;
         public byte Arg;
         public uint MapDifficultyXConditionId;
@@ -5231,8 +5229,6 @@ namespace Game.Maps
             Arg = arg;
             MapDifficultyXConditionId = mapDifficultyXConditionId;
         }
-
-        public bool IsFailed() { return Reason != TransferAbortReason.None; }
     }
     
     public struct ScriptAction
