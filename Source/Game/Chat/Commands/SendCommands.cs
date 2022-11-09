@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Entities;
 using Game.Mails;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat.Commands
@@ -28,29 +29,15 @@ namespace Game.Chat.Commands
     class SendCommands
     {
         [Command("mail", RBACPermissions.CommandSendMail, true)]
-        static bool HandleSendMailCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSendMailCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text)
         {
             // format: name "subject text" "mail text"
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null)
                 return false;
 
-            string tail1 = args.NextString("");
-            if (string.IsNullOrEmpty(tail1))
-                return false;
-
-            string subject = handler.ExtractQuotedArg(tail1);
-            if (string.IsNullOrEmpty(subject))
-                return false;
-
-            string tail2 = args.NextString("");
-            if (string.IsNullOrEmpty(tail2))
-                return false;
-
-            string text = handler.ExtractQuotedArg(tail2);
-            if (string.IsNullOrEmpty(text))
+            if (subject.IsEmpty() || text.IsEmpty())
                 return false;
 
             // from console show not existed sender
@@ -59,78 +46,58 @@ namespace Game.Chat.Commands
             // @todo Fix poor design
             SQLTransaction trans = new();
             new MailDraft(subject, text)
-                .SendMailTo(trans, new MailReceiver(target, targetGuid.GetCounter()), sender);
+                .SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(targetName);
+            string nameLink = handler.PlayerLink(playerIdentifier.GetName());
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
 
         [Command("items", RBACPermissions.CommandSendItems, true)]
-        static bool HandleSendItemsCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSendItemsCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, string itemsStr)
         {
             // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
-            Player receiver;
-            ObjectGuid receiverGuid;
-            string receiverName;
-            if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null)
                 return false;
 
-            string tail1 = args.NextString("");
-            if (string.IsNullOrEmpty(tail1))
-                return false;
-
-            string subject = handler.ExtractQuotedArg(tail1);
-            if (string.IsNullOrEmpty(subject))
-                return false;
-
-            string tail2 = args.NextString("");
-            if (string.IsNullOrEmpty(tail2))
-                return false;
-
-            string text = handler.ExtractQuotedArg(tail2);
-            if (string.IsNullOrEmpty(text))
+            if (subject.IsEmpty() || text.IsEmpty())
                 return false;
 
             // extract items
             List<KeyValuePair<uint, uint>> items = new();
 
-            // get all tail string
-            StringArguments tail = new(args.NextString(""));
-
-            // get from tail next item str
-            StringArguments itemStr;
-            while (!(itemStr = new StringArguments(tail.NextString(" "))).Empty())
+            var tokens = new StringArray(itemsStr, ' ');
+            for (var i = 0; i < tokens.Length; ++i)
             {
                 // parse item str
-                string itemIdStr = itemStr.NextString(":");
-                string itemCountStr = itemStr.NextString(" ");
-
-                if (!uint.TryParse(itemIdStr, out uint itemId) || itemId == 0)
+                string[] itemIdAndCountStr = tokens[i].Split(':');
+                if (!uint.TryParse(itemIdAndCountStr[0], out uint itemId) || itemId == 0)
                     return false;
 
-                ItemTemplate item_proto = Global.ObjectMgr.GetItemTemplate(itemId);
-                if (item_proto == null)
+                ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(itemId);
+                if (itemProto == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(itemCountStr) || !uint.TryParse(itemCountStr, out uint itemCount))
+                if (itemIdAndCountStr[1].IsEmpty() || !uint.TryParse(itemIdAndCountStr[1], out uint itemCount))
                     itemCount = 1;
 
-                if (itemCount < 1 || (item_proto.GetMaxCount() > 0 && itemCount > item_proto.GetMaxCount()))
+                if (itemCount < 1 || (itemProto.GetMaxCount() > 0 && itemCount > itemProto.GetMaxCount()))
                 {
                     handler.SendSysMessage(CypherStrings.CommandInvalidItemCount, itemCount, itemId);
                     return false;
                 }
 
-                while (itemCount > item_proto.GetMaxStackSize())
+                while (itemCount > itemProto.GetMaxStackSize())
                 {
-                    items.Add(new KeyValuePair<uint, uint>(itemId, item_proto.GetMaxStackSize()));
-                    itemCount -= item_proto.GetMaxStackSize();
+                    items.Add(new KeyValuePair<uint, uint>(itemId, itemProto.GetMaxStackSize()));
+                    itemCount -= itemProto.GetMaxStackSize();
                 }
 
                 items.Add(new KeyValuePair<uint, uint>(itemId, itemCount));
@@ -160,43 +127,25 @@ namespace Game.Chat.Commands
                 }
             }
 
-            draft.SendMailTo(trans, new MailReceiver(receiver, receiverGuid.GetCounter()), sender);
+            draft.SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(receiverName);
+            string nameLink = handler.PlayerLink(playerIdentifier.GetName());
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
 
         [Command("money", RBACPermissions.CommandSendMoney, true)]
-        static bool HandleSendMoneyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSendMoneyCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, long money)
         {
             // format: name "subject text" "mail text" money
-
-            Player receiver;
-            ObjectGuid receiverGuid;
-            string receiverName;
-            if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null)
                 return false;
 
-            string tail1 = args.NextString("");
-            if (string.IsNullOrEmpty(tail1))
+            if (subject.IsEmpty() || text.IsEmpty())
                 return false;
-
-            string subject = handler.ExtractQuotedArg(tail1);
-            if (string.IsNullOrEmpty(subject))
-                return false;
-
-            string tail2 = args.NextString("");
-            if (string.IsNullOrEmpty(tail2))
-                return false;
-
-            string text = handler.ExtractQuotedArg(tail2);
-            if (string.IsNullOrEmpty(text))
-                return false;
-
-            if (!long.TryParse(args.NextString(""), out long money))
-                money = 0;
 
             if (money <= 0)
                 return false;
@@ -208,40 +157,40 @@ namespace Game.Chat.Commands
 
             new MailDraft(subject, text)
                 .AddMoney((uint)money)
-                .SendMailTo(trans, new MailReceiver(receiver, receiverGuid.GetCounter()), sender);
+                .SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(receiverName);
+            string nameLink = handler.PlayerLink(playerIdentifier.GetName());
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
 
         [Command("message", RBACPermissions.CommandSendMessage, true)]
-        static bool HandleSendMessageCommand(CommandHandler handler, StringArguments args)
+        static bool HandleSendMessageCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString msgStr)
         {
             // - Find the player
-            Player player;
-            if (!handler.ExtractPlayerTarget(args, out player))
+            if (playerIdentifier == null)
+                playerIdentifier = PlayerIdentifier.FromTarget(handler);
+            if (playerIdentifier == null || !playerIdentifier.IsConnected())
                 return false;
 
-            string msgStr = args.NextString("");
-            if (string.IsNullOrEmpty(msgStr))
+            if (!msgStr.IsEmpty())
                 return false;
 
             // Check that he is not logging out.
-            if (player.GetSession().IsLogingOut())
+            if (playerIdentifier.GetConnectedPlayer().GetSession().IsLogingOut())
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
             // - Send the message
-            player.GetSession().SendNotification("{0}", msgStr);
-            player.GetSession().SendNotification("|cffff0000[Message from administrator]:|r");
+            playerIdentifier.GetConnectedPlayer().GetSession().SendNotification("{0}", msgStr);
+            playerIdentifier.GetConnectedPlayer().GetSession().SendNotification("|cffff0000[Message from administrator]:|r");
 
             // Confirmation message
-            string nameLink = handler.GetNameLink(player);
+            string nameLink = handler.GetNameLink(playerIdentifier.GetConnectedPlayer());
             handler.SendSysMessage(CypherStrings.Sendmessage, nameLink, msgStr);
 
             return true;

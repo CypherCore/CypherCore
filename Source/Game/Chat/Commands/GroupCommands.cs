@@ -32,13 +32,9 @@ namespace Game.Chat
     class GroupCommands
     {
         [Command("disband", RBACPermissions.CommandGroupDisband)]
-        static bool HandleGroupDisbandCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupDisbandCommand(CommandHandler handler, string name)
         {
-            Player player;
-            Group group;
-            string nameStr = args.NextString();
-
-            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out _))
+            if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out _))
                 return false;
 
             if (!group)
@@ -52,19 +48,9 @@ namespace Game.Chat
         }
 
         [Command("join", RBACPermissions.CommandGroupJoin)]
-        static bool HandleGroupJoinCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupJoinCommand(CommandHandler handler, string playerNameGroup, string playerName)
         {
-            if (args.Empty())
-                return false;
-
-            Player playerSource;
-            Player playerTarget;
-            Group groupSource;
-            Group groupTarget;
-            string nameplgrStr = args.NextString();
-            string nameplStr = args.NextString();
-
-            if (!handler.GetPlayerGroupAndGUIDByName(nameplgrStr, out playerSource, out groupSource, out _, true))
+            if (!handler.GetPlayerGroupAndGUIDByName(playerNameGroup, out Player playerSource, out Group groupSource, out _, true))
                 return false;
 
             if (!groupSource)
@@ -73,7 +59,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!handler.GetPlayerGroupAndGUIDByName(nameplStr, out playerTarget, out groupTarget, out _, true))
+            if (!handler.GetPlayerGroupAndGUIDByName(playerName, out Player playerTarget, out Group groupTarget, out _, true))
                 return false;
 
             if (groupTarget || playerTarget.GetGroup() == groupSource)
@@ -95,13 +81,9 @@ namespace Game.Chat
         }
 
         [Command("leader", RBACPermissions.CommandGroupLeader)]
-        static bool HandleGroupLeaderCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupLeaderCommand(CommandHandler handler, string name)
         {
-            Player player;
-            Group group;
-            ObjectGuid guid;
-
-            if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
+            if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                 return false;
 
             if (!group)
@@ -277,14 +259,9 @@ namespace Game.Chat
         }
 
         [Command("remove", RBACPermissions.CommandGroupRemove)]
-        static bool HandleGroupRemoveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupRemoveCommand(CommandHandler handler, string name)
         {
-            Player player;
-            Group group;
-            ObjectGuid guid;
-            string nameStr = args.NextString();
-
-            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
+            if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                 return false;
 
             if (!group)
@@ -298,13 +275,14 @@ namespace Game.Chat
         }
 
         [Command("repair", RBACPermissions.CommandRepairitems, true)]
-        static bool HandleGroupRepairCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupRepairCommand(CommandHandler handler, PlayerIdentifier playerTarget)
         {
-            Player playerTarget;
-            if (!handler.ExtractPlayerTarget(args, out playerTarget))
+            if (playerTarget == null)
+                playerTarget = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (playerTarget == null || !playerTarget.IsConnected())
                 return false;
 
-            Group groupTarget = playerTarget.GetGroup();
+            Group groupTarget = playerTarget.GetConnectedPlayer().GetGroup();
             if (groupTarget == null)
                 return false;
 
@@ -319,13 +297,14 @@ namespace Game.Chat
         }
 
         [Command("revive", RBACPermissions.CommandRevive, true)]
-        static bool HandleGroupReviveCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupReviveCommand(CommandHandler handler, PlayerIdentifier playerTarget)
         {
-            Player playerTarget;
-            if (!handler.ExtractPlayerTarget(args, out playerTarget))
+            if (playerTarget == null)
+                playerTarget = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (playerTarget == null || !playerTarget.IsConnected())
                 return false;
 
-            Group groupTarget = playerTarget.GetGroup();
+            Group groupTarget = playerTarget.GetConnectedPlayer().GetGroup();
             if (groupTarget == null)
                 return false;
 
@@ -344,11 +323,14 @@ namespace Game.Chat
         }
 
         [Command("summon", RBACPermissions.CommandGroupSummon)]
-        static bool HandleGroupSummonCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupSummonCommand(CommandHandler handler, PlayerIdentifier playerTarget)
         {
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
+            if (playerTarget == null)
+                playerTarget = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (playerTarget == null || !playerTarget.IsConnected())
                 return false;
+
+            Player target = playerTarget.GetConnectedPlayer();
 
             // check online security
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
@@ -437,36 +419,32 @@ namespace Game.Chat
         class GroupSetCommands
         {
             [Command("assistant", RBACPermissions.CommandGroupAssistant)]
-            static bool HandleGroupSetAssistantCommand(CommandHandler handler, StringArguments args)
+            static bool HandleGroupSetAssistantCommand(CommandHandler handler, string name)
             {
-                return GroupFlagCommand(args, handler, GroupMemberFlags.Assistant, "Assistant");
+                return GroupFlagCommand(name, handler, GroupMemberFlags.Assistant);
             }
 
             [Command("leader", RBACPermissions.CommandGroupLeader)]
-            static bool HandleGroupSetLeaderCommand(CommandHandler handler, StringArguments args)
+            static bool HandleGroupSetLeaderCommand(CommandHandler handler, string name)
             {
-                return HandleGroupLeaderCommand(handler, args);
+                return HandleGroupLeaderCommand(handler, name);
             }
 
             [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
-            static bool HandleGroupSetMainAssistCommand(CommandHandler handler, StringArguments args)
+            static bool HandleGroupSetMainAssistCommand(CommandHandler handler, string name)
             {
-                return GroupFlagCommand(args, handler, GroupMemberFlags.MainAssist, "Main Assist");
+                return GroupFlagCommand(name, handler, GroupMemberFlags.MainAssist);
             }
 
             [Command("maintank", RBACPermissions.CommandGroupMaintank)]
-            static bool HandleGroupSetMainTankCommand(CommandHandler handler, StringArguments args)
+            static bool HandleGroupSetMainTankCommand(CommandHandler handler, string name)
             {
-                return GroupFlagCommand(args, handler, GroupMemberFlags.MainTank, "Main Tank");
+                return GroupFlagCommand(name, handler, GroupMemberFlags.MainTank);
             }
 
-            static bool GroupFlagCommand(StringArguments args, CommandHandler handler, GroupMemberFlags flag, string what)
+            static bool GroupFlagCommand(string name, CommandHandler handler, GroupMemberFlags flag)
             {
-                Player player;
-                Group group;
-                ObjectGuid guid;
-
-                if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
+                if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                     return false;
 
                 if (!group)
@@ -490,12 +468,12 @@ namespace Game.Chat
                 if (group.GetMemberFlags(guid).HasAnyFlag(flag))
                 {
                     group.SetGroupMemberFlag(guid, false, flag);
-                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "no longer", what);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "no longer", flag);
                 }
                 else
                 {
                     group.SetGroupMemberFlag(guid, true, flag);
-                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "now", what);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "now", flag);
                 }
                 return true;
             }

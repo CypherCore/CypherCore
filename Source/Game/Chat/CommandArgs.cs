@@ -241,6 +241,9 @@ namespace Game.Chat
                         case nameof(Tail):
                             val = new Tail();
                             return val.TryConsume(handler, args);
+                        case nameof(QuotedString):
+                            val = new QuotedString();
+                            return val.TryConsume(handler, args);
                         case nameof(PlayerIdentifier):
                             val = new PlayerIdentifier();
                             return val.TryConsume(handler, args);

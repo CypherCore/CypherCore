@@ -85,9 +85,8 @@ namespace Game.Chat
                 _guid = ObjectGuid.Create(HighGuid.Player, tempVal);
                 if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())) != null)
                     _name = _player.GetName();
-                else
-                    if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
-                        return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharGuidNoExist, _guid.ToString()));
+                else if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharGuidNoExist, _guid.ToString()));
                 return next;
             }
             else
@@ -183,6 +182,51 @@ namespace Game.Chat
         {
             str = args;
             return new ChatCommandResult(str);
+        }
+    }
+
+    struct QuotedString
+    {
+        string str;
+
+        public bool IsEmpty() { return str.IsEmpty(); }
+
+        public static implicit operator string(QuotedString quotedString)
+        {
+            return quotedString.str;
+        }
+
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
+        {
+            str = "";
+
+            if (args.IsEmpty())
+                return ChatCommandResult.FromErrorMessage("");
+            if ((args[0] != '"') && (args[0] != '\''))
+                return CommandArgs.TryConsume(out dynamic str, typeof(string), handler, args);
+
+            char QUOTE = args[0];
+            for (var i = 1; i < args.Length; ++i)
+            {
+                if (args[i] == QUOTE)
+                {
+                    var (remainingToken, tail) = args.Substring(i + 1).Tokenize();
+                    if (remainingToken.IsEmpty()) // if this is not empty, then we did not consume the full token
+                        return new ChatCommandResult(tail);
+                    else
+                        return ChatCommandResult.FromErrorMessage("");
+                }
+
+                if (args[i] == '\\')
+                {
+                    ++i;
+                    if (!(i < args.Length))
+                        break;
+                }
+                str += args[i];
+            }
+            // if we reach this, we did not find a closing quote
+            return ChatCommandResult.FromErrorMessage("");
         }
     }
 }

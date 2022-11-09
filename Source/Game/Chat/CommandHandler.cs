@@ -143,7 +143,7 @@ namespace Game.Chat
                 return null;
 
             if (!str.Contains("\""))
-                return null;
+                return str;
 
             return str.Replace("\"", String.Empty);
         }
