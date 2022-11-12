@@ -1354,8 +1354,7 @@ namespace Game.Networking.Packets
             foreach (var unkInner in Data)
             {
                 data.WriteInt32(unkInner.Unknown_1);
-                data.WriteInt32(unkInner.Unknown_2);
-                data.WriteInt32(unkInner.Unknown_3);
+                unkInner.Visual.Write(data);
                 data.WriteUInt32(unkInner.Unknown_4);
             }
         }
@@ -1363,8 +1362,7 @@ namespace Game.Networking.Packets
         public struct Inner
         {
             public int Unknown_1;
-            public int Unknown_2;
-            public int Unknown_3;
+            public SpellCastVisual Visual;
             public uint Unknown_4;
         }
     }
