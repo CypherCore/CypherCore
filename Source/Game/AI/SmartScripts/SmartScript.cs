@@ -3356,7 +3356,7 @@ namespace Game.AI
                 }
                 case SmartEvents.Movementinform:
                 {
-                    if ((e.Event.movementInform.type != 0 && var0 != e.Event.movementInform.type) || (e.Event.movementInform.id != 0 && var1 != e.Event.movementInform.id))
+                    if ((e.Event.movementInform.type != 0 && var0 != e.Event.movementInform.type) || (e.Event.movementInform.id != 0xFFFFFFFF && var1 != e.Event.movementInform.id))
                         return;
                     ProcessAction(e, unit, var0, var1);
                     break;
