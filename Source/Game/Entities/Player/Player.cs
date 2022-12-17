@@ -2013,10 +2013,10 @@ namespace Game.Entities
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.DisableGravity | MovementFlag.CanFly) && mi.HasMovementFlag(MovementFlag.Falling),
                 MovementFlag.Falling);
 
-            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.SplineElevation) && MathFunctions.fuzzyEq(mi.SplineElevation, 0.0f), MovementFlag.SplineElevation);
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.SplineElevation) && MathFunctions.fuzzyEq(mi.stepUpStartElevation, 0.0f), MovementFlag.SplineElevation);
 
             // Client first checks if spline elevation != 0, then verifies flag presence
-            if (MathFunctions.fuzzyNe(mi.SplineElevation, 0.0f))
+            if (MathFunctions.fuzzyNe(mi.stepUpStartElevation, 0.0f))
                 mi.AddMovementFlag(MovementFlag.SplineElevation);
         }
         public void HandleFall(MovementInfo movementInfo)

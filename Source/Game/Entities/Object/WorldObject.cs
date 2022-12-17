@@ -292,7 +292,7 @@ namespace Game.Entities
                 data.WriteFloat(unit.GetOrientation());
 
                 data.WriteFloat(unit.m_movementInfo.Pitch);                     // Pitch
-                data.WriteFloat(unit.m_movementInfo.SplineElevation);           // StepUpStartElevation
+                data.WriteFloat(unit.m_movementInfo.stepUpStartElevation);           // StepUpStartElevation
 
                 data.WriteUInt32(0);                                             // RemoveForcesIDs.size()
                 data.WriteUInt32(0);                                             // MoveIndex
@@ -3744,7 +3744,7 @@ namespace Game.Entities
         public float Pitch { get; set; }
         public Inertia? inertia;
         public JumpInfo jump;
-        public float SplineElevation { get; set; }
+        public float stepUpStartElevation { get; set; }
 
         public MovementInfo()
         {

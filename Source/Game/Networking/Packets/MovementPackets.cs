@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
 
             movementInfo.Pos.Relocate(x, y, z, o);
             movementInfo.Pitch = data.ReadFloat();
-            movementInfo.SplineElevation = data.ReadFloat();
+            movementInfo.stepUpStartElevation = data.ReadFloat();
 
             uint removeMovementForcesCount = data.ReadUInt32();
 
@@ -157,7 +157,7 @@ namespace Game.Networking.Packets
             data.WriteFloat(movementInfo.Pos.GetPositionZ());
             data.WriteFloat(movementInfo.Pos.GetOrientation());
             data.WriteFloat(movementInfo.Pitch);
-            data.WriteFloat(movementInfo.SplineElevation);
+            data.WriteFloat(movementInfo.stepUpStartElevation);
 
             uint removeMovementForcesCount = 0;
             data.WriteUInt32(removeMovementForcesCount);
