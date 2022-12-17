@@ -47,6 +47,9 @@ namespace Game.Entities
         [FieldOffset(0)]
         public diskDatas DiskDatas;
 
+        [FieldOffset(0)]
+        public boundedPlaneDatas BoundedPlaneDatas;
+
         public struct defaultdatas
         {
             public fixed float Data[SharedConst.MaxAreatriggerEntityData];
@@ -94,6 +97,12 @@ namespace Game.Entities
             public float HeightTarget;
             public float LocationZOffset;
             public float LocationZOffsetTarget;
+        }
+        // AREATRIGGER_TYPE_BOUNDED_PLANE
+        public struct boundedPlaneDatas
+        {
+            public fixed float Extents[2];
+            public fixed float ExtentsTarget[2];
         }
     }
 
@@ -218,6 +227,8 @@ namespace Game.Entities
                     return Math.Max(CylinderDatas.Radius, CylinderDatas.RadiusTarget);
                 case AreaTriggerTypes.Disk:
                     return Math.Max(DiskDatas.OuterRadius, DiskDatas.OuterRadiusTarget);
+                case AreaTriggerTypes.BoundedPlane:
+                    return MathF.Sqrt(BoundedPlaneDatas.Extents[0] * BoundedPlaneDatas.Extents[0] / 4 + BoundedPlaneDatas.Extents[1] * BoundedPlaneDatas.Extents[1] / 4);
             }
 
             return 0.0f;
@@ -228,6 +239,7 @@ namespace Game.Entities
         public bool IsPolygon() { return TriggerType == AreaTriggerTypes.Polygon; }
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
         public bool IsDisk() { return TriggerType == AreaTriggerTypes.Disk; }
+        public bool IsBoudedPlane() { return TriggerType == AreaTriggerTypes.BoundedPlane; }
     }
 
     public class AreaTriggerOrbitInfo

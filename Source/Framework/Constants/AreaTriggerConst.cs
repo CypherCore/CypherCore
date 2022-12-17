@@ -41,6 +41,7 @@ namespace Framework.Constants
         Polygon = 3,
         Cylinder = 4,
         Disk = 5,
+        BoundedPlane = 6,
         Max
     }
 

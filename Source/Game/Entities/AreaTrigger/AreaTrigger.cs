@@ -376,6 +376,9 @@ namespace Game.Entities
                 case AreaTriggerTypes.Disk:
                     SearchUnitInDisk(targetList);
                     break;
+                case AreaTriggerTypes.BoundedPlane:
+                    SearchUnitInBoundedPlane(targetList);
+                    break;
                 default:
                     break;
             }
@@ -468,6 +471,25 @@ namespace Game.Entities
             float maxZ = GetPositionZ() + height;
 
             targetList.RemoveAll(unit => unit.IsInDist2d(this, innerRadius) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
+        }
+
+        void SearchUnitInBoundedPlane(List<Unit> targetList)
+        {
+            SearchUnits(targetList, GetMaxSearchRadius(), false);
+
+            Position boxCenter = GetPosition();
+            float extentsX, extentsY;
+
+            unsafe
+            {
+                extentsX = _shape.BoxDatas.Extents[0];
+                extentsY = _shape.BoxDatas.Extents[1];
+            }
+
+            targetList.RemoveAll(unit =>
+            {
+                return !unit.IsWithinBox(boxCenter, extentsX, extentsY, MapConst.MapSize);
+            });
         }
 
         void HandleUnitEnterExit(List<Unit> newTargetList)
