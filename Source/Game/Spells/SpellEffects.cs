@@ -3863,7 +3863,7 @@ namespace Game.Spells
                     continue;
 
                 if (RandomHelper.randChance(aura.CalcDispelChance(unitTarget, !unitTarget.IsFriendlyTo(m_caster))))
-                    if (Convert.ToBoolean(aura.GetSpellInfo().GetAllEffectsMechanicMask() & (1 << mechanic)))
+                    if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & (1ul << mechanic)) != 0)
                         dispel_list.Add(new KeyValuePair<uint, ObjectGuid>(aura.GetId(), aura.GetCasterGUID()));
             }
 

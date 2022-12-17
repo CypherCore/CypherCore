@@ -1287,40 +1287,40 @@ namespace Game.Spells
             return SchoolMask;
         }
 
-        public uint GetAllEffectsMechanicMask()
+        public ulong GetAllEffectsMechanicMask()
         {
-            uint mask = 0;
+            ulong mask = 0;
             if (Mechanic != 0)
-                mask |= (uint)(1 << (int)Mechanic);
+                mask |= 1ul << (int)Mechanic;
 
             foreach (var effectInfo in _effects)
                 if (effectInfo.IsEffect() && effectInfo.Mechanic != 0)
-                    mask |= 1u << (int)effectInfo.Mechanic;
+                    mask |= 1ul << (int)effectInfo.Mechanic;
 
             return mask;
         }
 
-        public uint GetEffectMechanicMask(uint effIndex)
+        public ulong GetEffectMechanicMask(uint effIndex)
         {
-            uint mask = 0;
+            ulong mask = 0;
             if (Mechanic != 0)
-                mask |= 1u << (int)Mechanic;
+                mask |= 1ul << (int)Mechanic;
 
             if (GetEffect(effIndex).IsEffect() && GetEffect(effIndex).Mechanic != 0)
-                mask |= 1u << (int)GetEffect(effIndex).Mechanic;
+                mask |= 1ul << (int)GetEffect(effIndex).Mechanic;
 
             return mask;
         }
 
-        public uint GetSpellMechanicMaskByEffectMask(uint effectMask)
+        public ulong GetSpellMechanicMaskByEffectMask(uint effectMask)
         {
-            uint mask = 0;
+            ulong mask = 0;
             if (Mechanic != 0)
-                mask |= (uint)(1 << (int)Mechanic);
+                mask |= 1ul << (int)Mechanic;
 
             foreach (var effectInfo in _effects)
                 if ((effectMask & (1 << (int)effectInfo.EffectIndex)) != 0 && effectInfo.Mechanic != 0)
-                    mask |= 1u << (int)effectInfo.Mechanic;
+                    mask |= 1ul << (int)effectInfo.Mechanic;
 
             return mask;
         }
@@ -1381,7 +1381,7 @@ namespace Game.Spells
                 _auraState = AuraStateType.Enraged;
 
             // Bleeding aura state
-            if (Convert.ToBoolean(GetAllEffectsMechanicMask() & 1 << (int)Mechanics.Bleed))
+            if (Convert.ToBoolean(GetAllEffectsMechanicMask() & (1 << (int)Mechanics.Bleed)))
                 _auraState = AuraStateType.Bleed;
 
             if (Convert.ToBoolean(GetSchoolMask() & SpellSchoolMask.Frost))
@@ -2117,7 +2117,7 @@ namespace Game.Spells
             {
                 uint schoolImmunityMask = 0;
                 uint applyHarmfulAuraImmunityMask = 0;
-                uint mechanicImmunityMask = 0;
+                ulong mechanicImmunityMask = 0;
                 uint dispelImmunity = 0;
                 uint damageImmunityMask = 0;
 
@@ -2134,7 +2134,7 @@ namespace Game.Spells
                         {
                             case 96:   // Free Friend, Uncontrollable Frenzy, Warlord's Presence
                             {
-                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                 immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                 immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
@@ -2150,7 +2150,7 @@ namespace Game.Spells
                                 {
                                     case 43292: // Incite Rage
                                     case 49172: // Wolf Spirit
-                                        mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                        mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
@@ -2178,7 +2178,7 @@ namespace Game.Spells
                             {
                                 if (Id == 57742) // Avenging Fury
                                 {
-                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                    mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
@@ -2193,12 +2193,12 @@ namespace Game.Spells
                             {
                                 if (Id == 64187) // Stormshield
                                 {
-                                    mechanicImmunityMask |= (1 << (int)Mechanics.Stun);
+                                    mechanicImmunityMask |= 1 << (int)Mechanics.Stun;
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                 }
                                 else
                                 {
-                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                    mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
@@ -2225,7 +2225,7 @@ namespace Game.Spells
                                 }
                                 else
                                 {
-                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                    mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
@@ -2241,7 +2241,7 @@ namespace Game.Spells
                             {
                                 if (amount == 0)
                                 {
-                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                    mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                     immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBack);
                                     immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBackDest);
@@ -2301,7 +2301,7 @@ namespace Game.Spells
                         {
                             case 42292: // PvP trinket
                             case 59752: // Every Man for Himself
-                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
                                 immuneInfo.AuraTypeImmune.Add(AuraType.UseNormalMovementSpeed);
                                 break;
                             case 34471: // The Beast Within
@@ -2313,7 +2313,7 @@ namespace Game.Spells
                             case 134956: // Supremacy of the Horde
                             case 195710: // Honorable Medallion
                             case 208683: // Gladiator's Medallion
-                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
                                 break;
                             case 54508: // Demonic Empowerment
                                 mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root) | (1 << (int)Mechanics.Stun);
@@ -2322,7 +2322,7 @@ namespace Game.Spells
                                 if (miscVal < 1)
                                     return;
 
-                                mechanicImmunityMask |= 1u << miscVal;
+                                mechanicImmunityMask |= 1ul << miscVal;
                                 break;
                         }
                         break;
@@ -2434,11 +2434,11 @@ namespace Game.Spells
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.InvulnerabilityBuff);
             }
 
-            uint mechanicImmunity = immuneInfo.MechanicImmuneMask;
+            ulong mechanicImmunity = immuneInfo.MechanicImmuneMask;
             if (mechanicImmunity != 0)
             {
                 for (uint i = 0; i < (int)Mechanics.Max; ++i)
-                    if (Convert.ToBoolean(mechanicImmunity & (1 << (int)i)))
+                    if (Convert.ToBoolean(mechanicImmunity & (1ul << (int)i)))
                         target.ApplySpellImmune(Id, SpellImmunity.Mechanic, i, apply);
 
                 if (HasAttribute(SpellAttr1.ImmunityPurgesEffect))
@@ -2525,9 +2525,9 @@ namespace Game.Spells
                             return true;
                 }
 
-                uint mechanicImmunity = immuneInfo.MechanicImmuneMask;
+                ulong mechanicImmunity = immuneInfo.MechanicImmuneMask;
                 if (mechanicImmunity != 0)
-                    if ((mechanicImmunity & (1 << (int)auraSpellInfo.Mechanic)) != 0)
+                    if ((mechanicImmunity & (1ul << (int)auraSpellInfo.Mechanic)) != 0)
                         return true;
 
                 uint dispelImmunity = immuneInfo.DispelImmune;
@@ -2550,7 +2550,7 @@ namespace Game.Spells
                     uint mechanic = (uint)auraSpellEffectInfo.Mechanic;
                     if (mechanic != 0)
                     {
-                        if (!Convert.ToBoolean(immuneInfo.MechanicImmuneMask & (1 << (int)mechanic)))
+                        if (!Convert.ToBoolean(immuneInfo.MechanicImmuneMask & (1ul << (int)mechanic)))
                         {
                             immuneToAllEffects = false;
                             break;
@@ -2636,15 +2636,15 @@ namespace Game.Spells
             return false;
         }
 
-        public uint GetAllowedMechanicMask()
+        public ulong GetAllowedMechanicMask()
         {
             return _allowedMechanicMask;
         }
 
-        public uint GetMechanicImmunityMask(Unit caster)
+        public ulong GetMechanicImmunityMask(Unit caster)
         {
-            uint casterMechanicImmunityMask = caster.GetMechanicImmunityMask();
-            uint mechanicImmunityMask = 0;
+            ulong casterMechanicImmunityMask = caster.GetMechanicImmunityMask();
+            ulong mechanicImmunityMask = 0;
 
             if (CanBeInterrupted(null, caster, true))
             {
@@ -4026,7 +4026,7 @@ namespace Game.Spells
         AuraStateType _auraState;
 
         SpellDiminishInfo _diminishInfo;
-        uint _allowedMechanicMask;
+        ulong _allowedMechanicMask;
         #endregion
 
         public struct ScalingInfo
@@ -5172,7 +5172,7 @@ namespace Game.Spells
     {
         public uint SchoolImmuneMask;
         public uint ApplyHarmfulAuraImmuneMask;
-        public uint MechanicImmuneMask;
+        public ulong MechanicImmuneMask;
         public uint DispelImmune;
         public uint DamageSchoolMask;
 

@@ -542,7 +542,7 @@ namespace Game.Entities
                         Creature creature1 = ToCreature();
                         if (creature1)
                         {
-                            uint immuneMask = creature1.GetCreatureTemplate().MechanicImmuneMask;
+                            ulong immuneMask = creature1.GetCreatureTemplate().MechanicImmuneMask;
                             if (Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Snare - 1))) || Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Daze - 1))))
                                 break;
                         }

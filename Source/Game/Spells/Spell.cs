@@ -3714,7 +3714,7 @@ namespace Game.Spells
 
             SpellCastFlags castFlags = SpellCastFlags.HasTrajectory;
             uint schoolImmunityMask = 0;
-            uint mechanicImmunityMask = 0;
+            ulong mechanicImmunityMask = 0;
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
@@ -3801,7 +3801,7 @@ namespace Game.Spells
             if (castFlags.HasAnyFlag(SpellCastFlags.Immunity))
             {
                 castData.Immunities.School = schoolImmunityMask;
-                castData.Immunities.Value = mechanicImmunityMask;
+                castData.Immunities.Value = (uint)mechanicImmunityMask;
             }
 
             /** @todo implement heal prediction packet data
@@ -4194,7 +4194,7 @@ namespace Game.Spells
             spellChannelStart.ChannelDuration = duration;
 
             uint schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
-            uint mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
+            ulong mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
 
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
             {
@@ -5876,7 +5876,7 @@ namespace Game.Spells
                 var auras = unitCaster.GetAuraEffectsByType(auraType);
                 foreach (AuraEffect aurEff in auras)
                 {
-                    uint mechanicMask = aurEff.GetSpellInfo().GetAllEffectsMechanicMask();
+                    ulong mechanicMask = aurEff.GetSpellInfo().GetAllEffectsMechanicMask();
                     if (mechanicMask != 0 && !Convert.ToBoolean(mechanicMask & GetSpellInfo().GetAllowedMechanicMask()))
                     {
                         foundNotMechanic = true;

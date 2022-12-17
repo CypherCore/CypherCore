@@ -604,7 +604,7 @@ namespace Game.Spells
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
-                    if (spellInfo == null || !Convert.ToBoolean(spellInfo.GetAllEffectsMechanicMask() & (1 << GetMiscValue())))
+                    if (spellInfo == null || (spellInfo.GetAllEffectsMechanicMask() & (1ul << GetMiscValue())) == 0)
                         return false;
                     break;
                 case AuraType.ModCastingSpeedNotStack:

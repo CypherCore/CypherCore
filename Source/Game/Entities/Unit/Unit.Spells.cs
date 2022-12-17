@@ -257,12 +257,12 @@ namespace Game.Entities
             float TakenTotalMod = 1.0f;
 
             // Mod damage from spell mechanic
-            uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
+            ulong mechanicMask = spellProto.GetAllEffectsMechanicMask();
             if (mechanicMask != 0)
             {
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMechanicDamageTakenPercent, aurEff =>
                 {
-                    if ((mechanicMask & (1 << aurEff.GetMiscValue())) != 0)
+                    if ((mechanicMask & (1ul << aurEff.GetMiscValue())) != 0)
                         return true;
                     return false;
                 });
@@ -1331,12 +1331,12 @@ namespace Game.Entities
             return mask;
         }
 
-        public uint GetMechanicImmunityMask()
+        public ulong GetMechanicImmunityMask()
         {
-            uint mask = 0;
+            ulong mask = 0;
             var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
             foreach (var pair in mechanicList)
-                mask |= (1u << (int)pair.Value);
+                mask |= (1ul << (int)pair.Value);
 
             return mask;
         }
@@ -2648,17 +2648,18 @@ namespace Game.Entities
 
             return false;
         }
-        public bool HasAuraWithMechanic(uint mechanicMask)
+
+        public bool HasAuraWithMechanic(ulong mechanicMask)
         {
             foreach (var pair in GetAppliedAuras())
             {
                 SpellInfo spellInfo = pair.Value.GetBase().GetSpellInfo();
-                if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1 << (int)spellInfo.Mechanic)))
+                if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1ul << (int)spellInfo.Mechanic)))
                     return true;
 
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                     if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.IsEffect() && spellEffectInfo.Mechanic != 0)
-                        if ((mechanicMask & (1 << (int)spellEffectInfo.Mechanic)) != 0)
+                        if ((mechanicMask & (1ul << (int)spellEffectInfo.Mechanic)) != 0)
                             return true;
             }
 
@@ -2669,6 +2670,7 @@ namespace Game.Entities
         {
             return !m_modAuras.LookupByKey(auraType).Empty();
         }
+
         public bool HasAuraTypeWithCaster(AuraType auraType, ObjectGuid caster)
         {
             foreach (var auraEffect in GetAuraEffectsByType(auraType))
@@ -2677,6 +2679,7 @@ namespace Game.Entities
 
             return false;
         }
+
         public bool HasAuraTypeWithMiscvalue(AuraType auraType, int miscvalue)
         {
             foreach (var auraEffect in GetAuraEffectsByType(auraType))
@@ -2685,6 +2688,7 @@ namespace Game.Entities
 
             return false;
         }
+
         public bool HasAuraTypeWithAffectMask(AuraType auraType, SpellInfo affectedSpell)
         {
             foreach (var auraEffect in GetAuraEffectsByType(auraType))
@@ -2693,6 +2697,7 @@ namespace Game.Entities
 
             return false;
         }
+
         public bool HasAuraTypeWithValue(AuraType auraType, int value)
         {
             foreach (var auraEffect in GetAuraEffectsByType(auraType))
@@ -2930,7 +2935,7 @@ namespace Game.Entities
             UpdateInterruptMask();
         }
 
-        public void RemoveAurasWithMechanic(uint mechanicMaskToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default, uint exceptSpellId = 0, bool withEffectMechanics = false)
+        public void RemoveAurasWithMechanic(ulong mechanicMaskToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default, uint exceptSpellId = 0, bool withEffectMechanics = false)
         {
             RemoveAppliedAuras(aurApp =>
             {
@@ -2938,12 +2943,12 @@ namespace Game.Entities
                 if (exceptSpellId != 0 && aura.GetId() == exceptSpellId)
                     return false;
 
-                uint appliedMechanicMask = aura.GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask());
+                ulong appliedMechanicMask = aura.GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask());
                 if ((appliedMechanicMask & mechanicMaskToRemove) == 0)
                     return false;
 
                 // spell mechanic matches required mask for removal
-                if (((1 << (int)aura.GetSpellInfo().Mechanic) & mechanicMaskToRemove) != 0 || withEffectMechanics)
+                if (((1ul << (int)aura.GetSpellInfo().Mechanic) & mechanicMaskToRemove) != 0 || withEffectMechanics)
                     return true;
 
                 // effect mechanic matches required mask for removal - don't remove, only update targets
@@ -3356,7 +3361,7 @@ namespace Game.Entities
 
         public void RemoveAurasByShapeShift()
         {
-            uint mechanic_mask = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
+            ulong mechanic_mask = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
             foreach (var pair in GetAppliedAuras())
             {
                 Aura aura = pair.Value.GetBase();

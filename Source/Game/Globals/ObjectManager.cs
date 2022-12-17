@@ -1902,7 +1902,7 @@ namespace Game
             creature.WidgetSetID = fields.Read<int>(64);
             creature.WidgetSetUnitConditionID = fields.Read<int>(65);
             creature.RegenHealth = fields.Read<bool>(66);
-            creature.MechanicImmuneMask = fields.Read<uint>(67);
+            creature.MechanicImmuneMask = fields.Read<ulong>(67);
             creature.SpellSchoolImmuneMask = fields.Read<uint>(68);
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(69);
             creature.ScriptID = GetScriptId(fields.Read<string>(70));
@@ -2774,7 +2774,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `RegenHealth`={0} WHERE `entry`={1};", cInfo.RegenHealth, cInfo.DifficultyEntry[diff]);
                 }
 
-                uint differenceMask = cInfo.MechanicImmuneMask & (~difficultyInfo.MechanicImmuneMask);
+                ulong differenceMask = cInfo.MechanicImmuneMask & (~difficultyInfo.MechanicImmuneMask);
                 if (differenceMask != 0)
                 {
                     Log.outError(LogFilter.Sql, "Creature (Entry: {0}, mechanic_immune_mask: {1}) has weaker immunities in difficulty {2} mode (Entry: {3}, mechanic_immune_mask: {4}).",

@@ -3897,7 +3897,7 @@ namespace Game.Entities
                 });
 
                 // Mod damage from spell mechanic
-                uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
+                ulong mechanicMask = spellProto.GetAllEffectsMechanicMask();
 
                 // Shred, Maul - "Effects which increase Bleed damage also increase Shred damage"
                 if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[0].HasAnyFlag(0x00008800u))
@@ -3907,7 +3907,7 @@ namespace Game.Entities
                 {
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMechanicDamageTakenPercent, aurEff =>
                     {
-                        if ((mechanicMask & (1 << (aurEff.GetMiscValue()))) != 0)
+                        if ((mechanicMask & (1ul << (aurEff.GetMiscValue()))) != 0)
                             return true;
                         return false;
                     });

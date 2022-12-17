@@ -97,7 +97,7 @@ namespace Game.Chat
 
             uint faction = target.GetFaction();
             ulong npcflags = (ulong)target.m_unitData.NpcFlags[1] << 32 | target.m_unitData.NpcFlags[0];
-            uint mechanicImmuneMask = cInfo.MechanicImmuneMask;
+            ulong mechanicImmuneMask = cInfo.MechanicImmuneMask;
             uint displayid = target.GetDisplayId();
             uint nativeid = target.GetNativeDisplayId();
             uint entry = target.GetEntry();
@@ -166,7 +166,7 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.NpcinfoMechanicImmune, mechanicImmuneMask);
             foreach (int value in Enum.GetValues(typeof(Mechanics)))
-                if (Convert.ToBoolean(mechanicImmuneMask & (1 << (value - 1))))
+                if (Convert.ToBoolean(mechanicImmuneMask & (1ul << (value - 1))))
                     handler.SendSysMessage("{0} (0x{1:X})", (Mechanics)value, value);
 
             return true;

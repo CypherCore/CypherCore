@@ -337,7 +337,11 @@ namespace Framework.Constants
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
-        Max = 33,
+        Infected2 = 33,
+        Infected3 = 34,
+        Infected4 = 35,
+        Taunted = 36,
+        Max = 37,
 
         ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) | (1 << Disoriented) |
             (1 << Fear) | (1 << Root) | (1 << Sleep) | (1 << Snare) | (1 << Stun) |

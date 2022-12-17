@@ -1855,10 +1855,10 @@ namespace Game.Entities
 
             if (!positive)
             {
-                uint mechanicMask = spellInfo.GetSpellMechanicMaskByEffectMask(effectMask);
+                ulong mechanicMask = spellInfo.GetSpellMechanicMaskByEffectMask(effectMask);
                 bool mechanicCheck(AuraEffect aurEff)
                 {
-                    if ((mechanicMask & (1 << aurEff.GetMiscValue())) != 0)
+                    if ((mechanicMask & (1ul << aurEff.GetMiscValue())) != 0)
                         return true;
                     return false;
                 }

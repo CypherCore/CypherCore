@@ -2067,20 +2067,20 @@ namespace Game.Entities
             if (GetOwnerGUID().IsPlayer() && IsHunterPet())
                 return;
 
-            uint mask = GetCreatureTemplate().MechanicImmuneMask;
-            if (mask != 0)
+            ulong mechanicMask = GetCreatureTemplate().MechanicImmuneMask;
+            if (mechanicMask != 0)
             {
                 for (uint i = 0 + 1; i < (int)Mechanics.Max; ++i)
                 {
-                    if ((mask & (1u << ((int)i - 1))) != 0)
+                    if ((mechanicMask & (1ul << ((int)i - 1))) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
                 }
             }
 
-            mask = GetCreatureTemplate().SpellSchoolImmuneMask;
-            if (mask != 0)
+            uint schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
+            if (schoolMask != 0)
                 for (var i = (int)SpellSchools.Normal; i <= (int)SpellSchools.Max; ++i)
-                    if ((mask & (1 << i)) != 0)
+                    if ((schoolMask & (1 << i)) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }
 
