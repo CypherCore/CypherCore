@@ -29,51 +29,42 @@ namespace Game.Chat.Commands
     class WPCommands
     {
         [Command("add", RBACPermissions.CommandWpAdd)]
-        static bool HandleWpAddCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpAddCommand(CommandHandler handler, uint? optionalPathId)
         {
-            // optional
-            string path_number = null;
-            uint pathid;
-
-            if (!args.Empty())
-                path_number = args.NextString();
-
             uint point = 0;
             Creature target = handler.GetSelectedCreature();
 
             PreparedStatement stmt;
+            uint pathId;
 
-            if (string.IsNullOrEmpty(path_number))
+            if (!optionalPathId.HasValue)
             {
                 if (target)
-                    pathid = target.GetWaypointPath();
+                    pathId = target.GetWaypointPath();
                 else
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
                     SQLResult result1 = DB.World.Query(stmt);
 
                     uint maxpathid = result1.Read<uint>(0);
-                    pathid = maxpathid + 1;
+                    pathId = maxpathid + 1;
                     handler.SendSysMessage("|cff00ff00New path started.|r");
                 }
             }
             else
-            {
-                if (!uint.TryParse(path_number, out pathid))
-                    return false;
-            }
+                pathId = optionalPathId.Value;
 
             // path_id . ID of the Path
             // point   . number of the waypoint (if not 0)
 
-            if (pathid == 0)
+            if (pathId == 0)
             {
                 handler.SendSysMessage("|cffff33ffCurrent creature haven't loaded path.|r");
                 return true;
             }
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_POINT);
-            stmt.AddValue(0, pathid);
+            stmt.AddValue(0, pathId);
             SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
@@ -82,7 +73,7 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession().GetPlayer();
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_DATA);
-            stmt.AddValue(0, pathid);
+            stmt.AddValue(0, pathId);
             stmt.AddValue(1, point + 1);
             stmt.AddValue(2, player.GetPositionX());
             stmt.AddValue(3, player.GetPositionY());
@@ -91,30 +82,21 @@ namespace Game.Chat.Commands
 
             DB.World.Execute(stmt);
 
-            handler.SendSysMessage("|cff00ff00PathID: |r|cff00ffff{0} |r|cff00ff00: Waypoint |r|cff00ffff{1}|r|cff00ff00 created.|r", pathid, point + 1);
+            handler.SendSysMessage("|cff00ff00PathID: |r|cff00ffff{0} |r|cff00ff00: Waypoint |r|cff00ffff{1}|r|cff00ff00 created.|r", pathId, point + 1);
             return true;
         }
 
         [Command("event", RBACPermissions.CommandWpEvent)]
-        static bool HandleWpEventCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpEventCommand(CommandHandler handler, string subCommand, uint id, [OptionalArg] string arg, [OptionalArg] string arg2)
         {
-            if (args.Empty())
-                return false;
-
-            string show = args.NextString();
             PreparedStatement stmt;
 
             // Check
-            if ((show != "add") && (show != "mod") && (show != "del") && (show != "listid"))
+            if ((subCommand != "add") && (subCommand != "mod") && (subCommand != "del") && (subCommand != "listid"))
                 return false;
 
-            string arg_id = args.NextString();
-            uint id;
-            if (show == "add")
+            if (subCommand == "add")
             {
-                if (!uint.TryParse(arg_id, out id))
-                    id = 0;
-
                 if (id != 0)
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
@@ -148,16 +130,13 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "listid")
+            if (subCommand == "listid")
             {
-                if (string.IsNullOrEmpty(arg_id))
+                if (id == 0)
                 {
                     handler.SendSysMessage("|cff33ffffWp Event: You must provide waypoint script id.|r");
                     return true;
                 }
-
-                if (!uint.TryParse(arg_id, out id))
-                    return false;
 
                 uint a2, a3, a4, a5, a6;
                 float a8, a9, a10, a11;
@@ -193,16 +172,13 @@ namespace Game.Chat.Commands
                 while (result.NextRow());
             }
 
-            if (show == "del")
+            if (subCommand == "del")
             {
-                if (arg_id.IsEmpty())
+                if (id == 0)
                 {
                     handler.SendSysMessage("|cffff33ffERROR: Waypoint script guid not present.|r");
                     return true;
                 }
-
-                if (!uint.TryParse(arg_id, out id))
-                    return false;
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                 stmt.AddValue(0, id);
@@ -222,45 +198,37 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "mod")
+            if (subCommand == "mod")
             {
-                if (string.IsNullOrEmpty(arg_id))
-                {
-                    handler.SendSysMessage("|cffff33ffERROR: Waypoint script guid not present.|r");
-                    return true;
-                }
-
-                if (!uint.TryParse(arg_id, out id) || id == 0)
+                if (id == 0)
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No valid waypoint script id not present.|r");
                     return true;
                 }
 
-                string arg_string = args.NextString();
-                if (string.IsNullOrEmpty(arg_string))
+                if (arg.IsEmpty())
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No argument present.|r");
                     return true;
                 }
 
-                if ((arg_string != "setid") && (arg_string != "delay") && (arg_string != "command")
-                    && (arg_string != "datalong") && (arg_string != "datalong2") && (arg_string != "dataint") && (arg_string != "posx")
-                    && (arg_string != "posy") && (arg_string != "posz") && (arg_string != "orientation"))
+                if ((arg != "setid") && (arg != "delay") && (arg != "command")
+                    && (arg != "datalong") && (arg != "datalong2") && (arg != "dataint") && (arg != "posx")
+                    && (arg != "posy") && (arg != "posz") && (arg != "orientation"))
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No valid argument present.|r");
                     return true;
                 }
 
-                string arg_3 = args.NextString();
-                if (string.IsNullOrEmpty(arg_3))
+                if (arg2.IsEmpty())
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No additional argument present.|r");
                     return true;
                 }
 
-                if (arg_string == "setid")
+                if (arg == "setid")
                 {
-                    if (!uint.TryParse(arg_3, out uint newid))
+                    if (!uint.TryParse(arg2, out uint newid))
                         return false;
                     handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
 
@@ -284,9 +252,9 @@ namespace Game.Chat.Commands
                         return true;
                     }
 
-                    if (arg_string == "posx")
+                    if (arg == "posx")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg2, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
@@ -297,9 +265,9 @@ namespace Game.Chat.Commands
                         handler.SendSysMessage("|cff00ff00Waypoint script:|r|cff00ffff {0}|r|cff00ff00 position_x updated.|r", id);
                         return true;
                     }
-                    else if (arg_string == "posy")
+                    else if (arg == "posy")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg2, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
@@ -310,9 +278,9 @@ namespace Game.Chat.Commands
                         handler.SendSysMessage("|cff00ff00Waypoint script: {0} position_y updated.|r", id);
                         return true;
                     }
-                    else if (arg_string == "posz")
+                    else if (arg == "posz")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg2, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
@@ -323,9 +291,9 @@ namespace Game.Chat.Commands
                         handler.SendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff{0}|r|cff00ff00 position_z updated.|r", id);
                         return true;
                     }
-                    else if (arg_string == "orientation")
+                    else if (arg == "orientation")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg2, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
@@ -336,41 +304,36 @@ namespace Game.Chat.Commands
                         handler.SendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff{0}|r|cff00ff00 orientation updated.|r", id);
                         return true;
                     }
-                    else if (arg_string == "dataint")
+                    else if (arg == "dataint")
                     {
-                        if (!uint.TryParse(arg_3, out uint arg3))
+                        if (!uint.TryParse(arg2, out uint arg3))
                             return false;
 
-                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg_string, arg3, id); // Query can't be a prepared statement
+                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg, arg3, id); // Query can't be a prepared statement
 
                         handler.SendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff{0}|r|cff00ff00 dataint updated.|r", id);
                         return true;
                     }
                     else
                     {
-                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg_string, arg_string, id); // Query can't be a prepared statement
+                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg, arg, id); // Query can't be a prepared statement
                     }
                 }
-                handler.SendSysMessage("|cff00ff00Waypoint script:|r|cff00ffff{0}:|r|cff00ff00 {1} updated.|r", id, arg_string);
+                handler.SendSysMessage("|cff00ff00Waypoint script:|r|cff00ffff{0}:|r|cff00ff00 {1} updated.|r", id, arg);
             }
             return true;
         }
 
         [Command("load", RBACPermissions.CommandWpLoad)]
-        static bool HandleWpLoadCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpLoadCommand(CommandHandler handler, uint? optionalPathId)
         {
-            if (args.Empty())
-                return false;
-
-            // optional
-            string path_number = args.NextString();
-
-            uint pathid;
             Creature target = handler.GetSelectedCreature();
 
             // Did player provide a path_id?
-            if (string.IsNullOrEmpty(path_number))
+            if (!optionalPathId.HasValue)
                 return false;
+
+            uint pathId = optionalPathId.Value;
 
             if (!target)
             {
@@ -384,7 +347,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!uint.TryParse(path_number, out pathid) || pathid == 0)
+            if (pathId == 0)
             {
                 handler.SendSysMessage("|cffff33ffNo valid path number provided.|r");
                 return true;
@@ -399,14 +362,14 @@ namespace Game.Chat.Commands
             if (!result.IsEmpty())
             {
                 stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ADDON_PATH);
-                stmt.AddValue(0, pathid);
+                stmt.AddValue(0, pathId);
                 stmt.AddValue(1, guidLow);
             }
             else
             {
                 stmt = DB.World.GetPreparedStatement(WorldStatements.INS_CREATURE_ADDON);
                 stmt.AddValue(0, guidLow);
-                stmt.AddValue(1, pathid);
+                stmt.AddValue(1, pathId);
             }
 
             DB.World.Execute(stmt);
@@ -417,7 +380,7 @@ namespace Game.Chat.Commands
 
             DB.World.Execute(stmt);
 
-            target.LoadPath(pathid);
+            target.LoadPath(pathId);
             target.SetDefaultMovementType(MovementGeneratorType.Waypoint);
             target.GetMotionMaster().Initialize();
             target.Say("Path loaded.", Language.Universal);
@@ -426,22 +389,16 @@ namespace Game.Chat.Commands
         }
 
         [Command("modify", RBACPermissions.CommandWpModify)]
-        static bool HandleWpModifyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpModifyCommand(CommandHandler handler, string subCommand, [OptionalArg] string arg)
         {
-            if (args.Empty())
-                return false;
-
             // first arg: add del text emote spell waittime move
-            string show = args.NextString();
-            if (string.IsNullOrEmpty(show))
-            {
+            if (subCommand.IsEmpty())
                 return false;
-            }
 
             // Check
             // Remember: "show" must also be the name of a column!
-            if ((show != "delay") && (show != "action") && (show != "action_chance")
-                && (show != "move_flag") && (show != "del") && (show != "move"))
+            if ((subCommand != "delay") && (subCommand != "action") && (subCommand != "action_chance")
+                && (subCommand != "move_flag") && (subCommand != "del") && (subCommand != "move"))
             {
                 return false;
             }
@@ -500,16 +457,15 @@ namespace Game.Chat.Commands
 
             // We have the waypoint number and the GUID of the "master npc"
             // Text is enclosed in "<>", all other arguments not
-            string arg_str = args.NextString();
 
             // Check for argument
-            if (show != "del" && show != "move" && arg_str == null)
+            if (subCommand != "del" && subCommand != "move")
             {
-                handler.SendSysMessage(CypherStrings.WaypointArgumentreq, show);
+                handler.SendSysMessage(CypherStrings.WaypointArgumentreq, subCommand);
                 return false;
             }
 
-            if (show == "del")
+            if (subCommand == "del")
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp modify del, PathID: |r|cff00ffff{0}|r", pathid);
 
@@ -536,7 +492,7 @@ namespace Game.Chat.Commands
                 }
             }                                                       // del
 
-            if (show == "move")
+            if (subCommand == "move")
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp move, PathID: |r|cff00ffff{0}|r", pathid);
 
@@ -590,57 +546,45 @@ namespace Game.Chat.Commands
                 return true;
             }                                                     // move
 
-            if (string.IsNullOrEmpty(arg_str))
+            if (arg.IsEmpty())
             {
                 // show_str check for present in list of correct values, no sql injection possible
-                DB.World.Execute("UPDATE waypoint_data SET {0}=null WHERE id='{1}' AND point='{2}'", show, pathid, point); // Query can't be a prepared statement
+                DB.World.Execute("UPDATE waypoint_data SET {0}=null WHERE id='{1}' AND point='{2}'", subCommand, pathid, point); // Query can't be a prepared statement
             }
             else
             {
                 // show_str check for present in list of correct values, no sql injection possible
-                DB.World.Execute("UPDATE waypoint_data SET {0}='{1}' WHERE id='{2}' AND point='{3}'", show, arg_str, pathid, point); // Query can't be a prepared statement
+                DB.World.Execute("UPDATE waypoint_data SET {0}='{1}' WHERE id='{2}' AND point='{3}'", subCommand, arg, pathid, point); // Query can't be a prepared statement
             }
 
-            handler.SendSysMessage(CypherStrings.WaypointChangedNo, show);
+            handler.SendSysMessage(CypherStrings.WaypointChangedNo, subCommand);
             return true;
         }
 
         [Command("reload", RBACPermissions.CommandWpReload)]
-        static bool HandleWpReloadCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpReloadCommand(CommandHandler handler, uint pathId)
         {
-            if (args.Empty())
+            if (pathId == 0)
                 return false;
 
-            uint id = args.NextUInt32();
-
-            if (id == 0)
-                return false;
-
-            handler.SendSysMessage("|cff00ff00Loading Path: |r|cff00ffff{0}|r", id);
-            Global.WaypointMgr.ReloadPath(id);
+            handler.SendSysMessage("|cff00ff00Loading Path: |r|cff00ffff{0}|r", pathId);
+            Global.WaypointMgr.ReloadPath(pathId);
             return true;
         }
 
         [Command("show", RBACPermissions.CommandWpShow)]
-        static bool HandleWpShowCommand(CommandHandler handler, StringArguments args)
+        static bool HandleWpShowCommand(CommandHandler handler, string subCommand, uint? optionalPathId)
         {
-            if (args.Empty())
-                return false;
-
             // first arg: on, off, first, last
-            string show = args.NextString();
-            if (string.IsNullOrEmpty(show))
+            if (subCommand.IsEmpty())
                 return false;
 
-            // second arg: GUID (optional, if a creature is selected)
-            string guid_str = args.NextString();
-
-            uint pathid;
             Creature target = handler.GetSelectedCreature();
 
             // Did player provide a PathID?
+            uint pathId;
 
-            if (string.IsNullOrEmpty(guid_str))
+            if (!optionalPathId.HasValue)
             {
                 // No PathID provided
                 // . Player must have selected a creature
@@ -651,7 +595,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                pathid = target.GetWaypointPath();
+                pathId = target.GetWaypointPath();
             }
             else
             {
@@ -661,12 +605,11 @@ namespace Game.Chat.Commands
                 if (target)
                     handler.SendSysMessage(CypherStrings.WaypointCreatselected);
 
-                if (!uint.TryParse(guid_str, out pathid))
-                    return false;
+                pathId = optionalPathId.Value;
             }
 
             // Show info for the selected waypoint
-            if (show == "info")
+            if (subCommand == "info")
             {
                 // Check if the user did specify a visual waypoint
                 if (!target || target.GetEntry() != 1)
@@ -688,14 +631,14 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage("|cff00ffffDEBUG: wp show info:|r");
                 do
                 {
-                    pathid = result.Read<uint>(0);
+                    pathId = result.Read<uint>(0);
                     uint point = result.Read<uint>(1);
                     uint delay = result.Read<uint>(2);
                     uint flag = result.Read<uint>(3);
                     uint ev_id = result.Read<uint>(4);
                     uint ev_chance = result.Read<ushort>(5);
 
-                    handler.SendSysMessage("|cff00ff00Show info: for current point: |r|cff00ffff{0}|r|cff00ff00, Path ID: |r|cff00ffff{1}|r", point, pathid);
+                    handler.SendSysMessage("|cff00ff00Show info: for current point: |r|cff00ffff{0}|r|cff00ff00, Path ID: |r|cff00ffff{1}|r", point, pathId);
                     handler.SendSysMessage("|cff00ff00Show info: delay: |r|cff00ffff{0}|r", delay);
                     handler.SendSysMessage("|cff00ff00Show info: Move flag: |r|cff00ffff{0}|r", flag);
                     handler.SendSysMessage("|cff00ff00Show info: Waypoint event: |r|cff00ffff{0}|r", ev_id);
@@ -706,10 +649,10 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "on")
+            if (subCommand == "on")
             {
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
-                stmt.AddValue(0, pathid);
+                stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
@@ -718,11 +661,11 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                handler.SendSysMessage("|cff00ff00DEBUG: wp on, PathID: |cff00ffff{0}|r", pathid);
+                handler.SendSysMessage("|cff00ff00DEBUG: wp on, PathID: |cff00ffff{0}|r", pathId);
 
                 // Delete all visuals for this NPC
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_WPGUID_BY_ID);
-                stmt.AddValue(0, pathid);
+                stmt.AddValue(0, pathId);
                 SQLResult result2 = DB.World.Query(stmt);
 
                 if (!result2.IsEmpty())
@@ -796,7 +739,7 @@ namespace Game.Chat.Commands
                     // Set "wpguid" column to the visual waypoint
                     stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
                     stmt.AddValue(0, creature.GetSpawnId());
-                    stmt.AddValue(1, pathid);
+                    stmt.AddValue(1, pathId);
                     stmt.AddValue(2, point);
                     DB.World.Execute(stmt);
                 }
@@ -806,17 +749,17 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "first")
+            if (subCommand == "first")
             {
-                handler.SendSysMessage("|cff00ff00DEBUG: wp first, pathid: {0}|r", pathid);
+                handler.SendSysMessage("|cff00ff00DEBUG: wp first, pathid: {0}|r", pathId);
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
-                stmt.AddValue(0, pathid);
+                stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotfound, pathid);    
+                    handler.SendSysMessage(CypherStrings.WaypointNotfound, pathId);    
                     return false;
                 }
 
@@ -860,17 +803,17 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "last")
+            if (subCommand == "last")
             {
-                handler.SendSysMessage("|cff00ff00DEBUG: wp last, PathID: |r|cff00ffff{0}|r", pathid);
+                handler.SendSysMessage("|cff00ff00DEBUG: wp last, PathID: |r|cff00ffff{0}|r", pathId);
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
-                stmt.AddValue(0, pathid);
+                stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotfoundlast, pathid);    
+                    handler.SendSysMessage(CypherStrings.WaypointNotfoundlast, pathId);    
                     return false;
                 }
 
@@ -915,7 +858,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            if (show == "off")
+            if (subCommand == "off")
             {
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
                 stmt.AddValue(0, 1);

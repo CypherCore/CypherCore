@@ -76,11 +76,8 @@ namespace Game.Chat
         }
 
         [Command("learn", RBACPermissions.CommandPetLearn)]
-        static bool HandlePetLearnCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePetLearnCommand(CommandHandler handler, uint spellId)
         {
-            if (args.Empty())
-                return false;
-
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
             if (!pet)
             {
@@ -88,7 +85,6 @@ namespace Game.Chat
                 return false;
             }
 
-            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 return false;
 
@@ -114,19 +110,14 @@ namespace Game.Chat
         }
 
         [Command("unlearn", RBACPermissions.CommandPetUnlearn)]
-        static bool HandlePetUnlearnCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePetUnlearnCommand(CommandHandler handler, uint spellId)
         {
-            if (args.Empty())
-                return false;
-
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
             if (!pet)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
-
-            uint spellId = handler.ExtractSpellIdFromLink(args);
 
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
@@ -137,7 +128,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandPetLevel)]
-        static bool HandlePetLevelCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePetLevelCommand(CommandHandler handler, int level)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
             Player owner = pet ? pet.GetOwner() : null;
@@ -147,7 +138,6 @@ namespace Game.Chat
                 return false;
             }
 
-            int level = args.NextInt32();
             if (level == 0)
                 level = (int)(owner.GetLevel() - pet.GetLevel());
             if (level == 0 || level < -SharedConst.StrongMaxLevel || level > SharedConst.StrongMaxLevel)

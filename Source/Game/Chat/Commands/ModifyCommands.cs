@@ -29,13 +29,13 @@ namespace Game.Chat
     class ModifyCommand
     {
         [Command("hp", RBACPermissions.CommandModifyHp)]
-        static bool HandleModifyHPCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyHPCommand(CommandHandler handler, int hp, int? maxHp)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (CheckModifyResources(args, handler, target, out int hp, out int hpmax))
+            if (CheckModifyResources(handler, target, ref hp, ref maxHp))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, hpmax);
-                target.SetMaxHealth((uint)hpmax);
+                NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, maxHp);
+                target.SetMaxHealth((uint)maxHp.Value);
                 target.SetHealth((uint)hp);
                 return true;
             }
@@ -43,15 +43,14 @@ namespace Game.Chat
         }
 
         [Command("mana", RBACPermissions.CommandModifyMana)]
-        static bool HandleModifyManaCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyManaCommand(CommandHandler handler, int mana, int? maxMana)
         {
-            int mana, manamax;
             Player target = handler.GetSelectedPlayerOrSelf();
 
-            if (CheckModifyResources(args, handler, target, out mana, out manamax))
+            if (CheckModifyResources(handler, target, ref mana, ref maxMana))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeMana, CypherStrings.YoursManaChanged, mana, manamax);
-                target.SetMaxPower(PowerType.Mana, manamax);
+                NotifyModification(handler, target, CypherStrings.YouChangeMana, CypherStrings.YoursManaChanged, mana, maxMana.Value);
+                target.SetMaxPower(PowerType.Mana, maxMana.Value);
                 target.SetPower(PowerType.Mana, mana);
                 return true;
             }
@@ -60,15 +59,14 @@ namespace Game.Chat
         }
 
         [Command("energy", RBACPermissions.CommandModifyEnergy)]
-        static bool HandleModifyEnergyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyEnergyCommand(CommandHandler handler, int energy, int? maxEnergy)
         {
-            int energy, energymax;
             Player target = handler.GetSelectedPlayerOrSelf();
             byte energyMultiplier = 10;
-            if (CheckModifyResources(args, handler, target, out energy, out energymax, energyMultiplier))
+            if (CheckModifyResources(handler, target, ref energy, ref maxEnergy, energyMultiplier))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, energymax / energyMultiplier);
-                target.SetMaxPower(PowerType.Energy, energymax);
+                NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, maxEnergy.Value / energyMultiplier);
+                target.SetMaxPower(PowerType.Energy, maxEnergy.Value);
                 target.SetPower(PowerType.Energy, energy);
                 return true;
             }
@@ -76,15 +74,14 @@ namespace Game.Chat
         }
 
         [Command("rage", RBACPermissions.CommandModifyRage)]
-        static bool HandleModifyRageCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyRageCommand(CommandHandler handler, int rage, int? maxRage)
         {
-            int rage, ragemax;
             Player target = handler.GetSelectedPlayerOrSelf();
             byte rageMultiplier = 10;
-            if (CheckModifyResources(args, handler, target, out rage, out ragemax, rageMultiplier))
+            if (CheckModifyResources(handler, target, ref rage, ref maxRage, rageMultiplier))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeRage, CypherStrings.YoursRageChanged, rage / rageMultiplier, ragemax / rageMultiplier);
-                target.SetMaxPower(PowerType.Rage, ragemax);
+                NotifyModification(handler, target, CypherStrings.YouChangeRage, CypherStrings.YoursRageChanged, rage / rageMultiplier, maxRage.Value / rageMultiplier);
+                target.SetMaxPower(PowerType.Rage, maxRage.Value);
                 target.SetPower(PowerType.Rage, rage);
                 return true;
             }
@@ -92,15 +89,14 @@ namespace Game.Chat
         }
 
         [Command("runicpower", RBACPermissions.CommandModifyRunicpower)]
-        static bool HandleModifyRunicPowerCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyRunicPowerCommand(CommandHandler handler, int rune, int? maxRune)
         {
-            int rune, runemax;
             Player target = handler.GetSelectedPlayerOrSelf();
             byte runeMultiplier = 10;
-            if (CheckModifyResources(args, handler, target, out rune, out runemax, runeMultiplier))
+            if (CheckModifyResources(handler, target, ref rune, ref maxRune, runeMultiplier))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeRunicPower, CypherStrings.YoursRunicPowerChanged, rune / runeMultiplier, runemax / runeMultiplier);
-                target.SetMaxPower(PowerType.RunicPower, runemax);
+                NotifyModification(handler, target, CypherStrings.YouChangeRunicPower, CypherStrings.YoursRunicPowerChanged, rune / runeMultiplier, maxRune.Value / runeMultiplier);
+                target.SetMaxPower(PowerType.RunicPower, maxRune.Value);
                 target.SetPower(PowerType.RunicPower, rune);
                 return true;
             }
@@ -834,16 +830,10 @@ namespace Game.Chat
             }
         }
 
-        static bool CheckModifyResources(StringArguments args, CommandHandler handler, Player target, out int res, out int resmax, byte multiplier = 1)
+        static bool CheckModifyResources(CommandHandler handler, Player target, ref int res, ref int? resmax, byte multiplier = 1)
         {
-            res = 0;
-            resmax = 0;
-
-            if (args.Empty())
-                return false;
-
-            res = args.NextInt32() * multiplier;
-            resmax = args.NextInt32() * multiplier;
+            res *= multiplier;
+            resmax *= multiplier;
 
             if (resmax == 0)
                 resmax = res;
