@@ -70,7 +70,7 @@ namespace Game
         [Service(OriginalHash.GameUtilitiesService, 10)]
         BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
-            if (request.AttributeKey == "Command_RealmListRequest_v1")
+            if (!request.AttributeKey.Contains("Command_RealmListRequest_v1"))
             {
                 Global.RealmMgr.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
