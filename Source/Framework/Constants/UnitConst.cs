@@ -140,10 +140,11 @@ namespace Framework.Constants
     }
     public enum UnitMods
     {
-        StatStrength, // STAT_STRENGTH..UNIT_MOD_STAT_INTELLECT must be in existed order, it's accessed by index values of Stats enum.
+        StatStrength, // STAT_STRENGTH..UNIT_MOD_STAT_SPIRIT must be in existed order, it's accessed by index values of Stats enum.
         StatAgility,
         StatStamina,
         StatIntellect,
+        StatSpirit,
         Health,
         Mana, // UNIT_MOD_MANA..UNIT_MOD_PAIN must be listed in existing order, it is accessed by index values of Powers enum.
         Rage,
@@ -179,7 +180,7 @@ namespace Framework.Constants
         End,
         // synonyms
         StatStart = StatStrength,
-        StatEnd = StatIntellect + 1,
+        StatEnd = StatSpirit + 1,
         ResistanceStart = Armor,
         ResistanceEnd = ResistanceArcane + 1,
         PowerStart = Mana,

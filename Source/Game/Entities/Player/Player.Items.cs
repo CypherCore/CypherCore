@@ -3631,10 +3631,10 @@ namespace Game.Entities
                         HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
-                    //case ItemModType.Spirit:                           //modify spirit
-                    //HandleStatModifier(UnitMods.StatSpirit, UnitModifierType.BaseValue, (float)val, apply);
-                    //ApplyStatBuffMod(Stats.Spirit, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatSpirit, UnitModifierType.BasePCTExcludeCreate)), apply);
-                    //break;
+                    case ItemModType.Spirit:                           //modify spirit
+                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Spirit);
+                        break;
                     case ItemModType.Stamina:                          //modify stamina
                         GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(itemLevel);
                         if (staminaMult != null)

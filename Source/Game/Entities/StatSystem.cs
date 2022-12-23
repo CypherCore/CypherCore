@@ -127,6 +127,7 @@ namespace Game.Entities
                 case UnitMods.StatAgility:
                 case UnitMods.StatStamina:
                 case UnitMods.StatIntellect:
+                case UnitMods.StatSpirit:
                     UpdateStats(GetStatByAuraGroup(unitMod));
                     break;
                 case UnitMods.Armor:
@@ -238,6 +239,9 @@ namespace Game.Entities
                     break;
                 case UnitMods.StatIntellect:
                     stat = Stats.Intellect;
+                    break;
+                case UnitMods.StatSpirit:
+                    stat = Stats.Spirit;
                     break;
                 default:
                     break;
@@ -1091,6 +1095,8 @@ namespace Game.Entities
                 case Stats.Intellect:
                     UpdateSpellCritChance();
                     break;
+                case Stats.Spirit:
+                    break;
                 default:
                     break;
             }
@@ -1133,6 +1139,42 @@ namespace Game.Entities
         public void ApplyModDamageDoneNeg(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, (int)school), mod, apply); }
         public void ApplyModDamageDonePercent(SpellSchools school, float pct, bool apply) { ApplyPercentModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct, apply); }
         public void SetModDamageDonePercent(SpellSchools school, float pct) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct); }
+
+        float OCTRegenHPPerSpirit()
+        {
+            uint level = GetLevel();
+            Class pclass = GetClass();
+
+            float baseRatio = Global.ObjectMgr.GetOCTRegenHP(pclass, level);
+            float moreRatio = Global.ObjectMgr.GetRegenHPPerSpt(pclass, level);
+            if (baseRatio == 0 || moreRatio == 0)
+                return 0.0f;
+
+            // Formula from PaperDollFrame script 3.3.5
+            float spirit = GetStat(Stats.Spirit);
+            float baseSpirit = spirit;
+            if (baseSpirit > 50)
+                baseSpirit = 50;
+            float moreSpirit = spirit - baseSpirit;
+            float regen = baseSpirit * baseRatio + moreSpirit * moreRatio;
+            return regen;
+        }
+
+        float OCTRegenMPPerSpirit()
+        {
+            uint level = GetLevel();
+            Class pclass = GetClass();
+
+            //    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+            float moreRatio = Global.ObjectMgr.GetRegenMPPerSpt(pclass, level);
+            if (moreRatio == 0)
+                return 0.0f;
+
+            // Formula get from PaperDollFrame script 3.3.5
+            float spirit = GetStat(Stats.Spirit);
+            float regen = spirit * moreRatio;
+            return regen;
+        }
 
         public void ApplyRatingMod(CombatRating combatRating, int value, bool apply)
         {
@@ -1215,21 +1257,28 @@ namespace Game.Entities
             if (manaIndex == (int)PowerType.Max)
                 return;
 
-            // Get base of Mana Pool in sBaseMPGameTable
-            uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
-            float base_regen = basemana / 100.0f;
+            float Intellect = GetStat(Stats.Intellect);
+            // Mana regen from spirit and intellect
+            float power_regen = (float)Math.Sqrt(Intellect) * OCTRegenMPPerSpirit();
+            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
+            power_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
 
-            base_regen += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana);
+            // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
+            float power_regen_mp5 = (GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) + m_baseManaRegen) / 5.0f;
 
-            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT
-            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
+            // SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL is the proper name, needs proper implementation
+            // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
+            //AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_MANA_REGEN_FROM_STAT);
+            //for (AuraEffectList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
+            //    power_regen_mp5 += GetStat(Stats((*i)->GetMiscValue())) * (*i)->GetAmount() / 500.0f;
 
-            // Apply PCT bonus from SPELL_AURA_MOD_MANA_REGEN_PCT
-            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModManaRegenPct, (int)PowerType.Mana);
+            // Set regen rate in cast state apply only on spirit based regen
+            int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
+            if (modManaRegenInterrupt > 100)
+                modManaRegenInterrupt = 100;
 
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), base_regen);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), base_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), power_regen_mp5 + power_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt));
         }
 
         public void UpdateSpellDamageAndHealingBonus()

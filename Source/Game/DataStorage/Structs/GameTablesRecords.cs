@@ -114,6 +114,51 @@ namespace Game.DataStorage
         public float Scaler;
     }
 
+    public sealed class GtOCTRegenHPRecord
+    {
+        public float Warrior;
+        public float Paladin;
+        public float Hunter;
+        public float Rogue;
+        public float Priest;
+        public float DeathKnight;
+        public float Shaman;
+        public float Mage;
+        public float Warlock;
+        public float Monk;
+        public float Druid;
+    }
+
+    public sealed class GtRegenHPPerSptRecord
+    {
+        public float Warrior;
+        public float Paladin;
+        public float Hunter;
+        public float Rogue;
+        public float Priest;
+        public float DeathKnight;
+        public float Shaman;
+        public float Mage;
+        public float Warlock;
+        public float Monk;
+        public float Druid;
+    }
+
+    public sealed class GtRegenMPPerSptRecord
+    {
+        public float Warrior;
+        public float Paladin;
+        public float Hunter;
+        public float Rogue;
+        public float Priest;
+        public float DeathKnight;
+        public float Shaman;
+        public float Mage;
+        public float Warlock;
+        public float Monk;
+        public float Druid;
+    }
+
     public sealed class GtSpellScalingRecord
     {
         public float Rogue;

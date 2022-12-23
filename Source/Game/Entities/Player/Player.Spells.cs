@@ -665,11 +665,11 @@ namespace Game.Entities
                                     HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, enchant_amount, apply);
                                     UpdateStatBuffMod(Stats.Intellect);
                                     break;
-                                //case ItemModType.Spirit:
-                                //Log.outDebug(LogFilter.Player, "+ {0} SPIRIT", enchant_amount);
-                                //HandleStatModifier(UnitMods.StatSpirit, UnitModifierType.TotalValue, enchant_amount, apply);
-                                //ApplyStatBuffMod(Stats.Spirit, enchant_amount, apply);
-                                //break;
+                                case ItemModType.Spirit:
+                                    Log.outDebug(LogFilter.Player, "+ {0} SPIRIT", enchant_amount);
+                                    HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Total, enchant_amount, apply);
+                                    UpdateStatBuffMod(Stats.Spirit);
+                                    break;
                                 case ItemModType.Stamina:
                                     Log.outDebug(LogFilter.Player, "+ {0} STAMINA", enchant_amount);
                                     HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Total, enchant_amount, apply);

@@ -64,10 +64,12 @@ namespace Game.Entities
 
             return HasUnitFlag(UnitFlags.Rename | UnitFlags.CanSwim);
         }
+
         public bool IsInWater()
         {
             return GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
         }
+
         public bool IsUnderWater()
         {
             return GetLiquidStatus().HasFlag(ZLiquidStatus.UnderWater);

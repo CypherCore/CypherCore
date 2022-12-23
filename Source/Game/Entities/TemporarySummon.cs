@@ -602,6 +602,7 @@ namespace Game.Entities
                 SetCreateStat(Stats.Agility, 22);
                 SetCreateStat(Stats.Stamina, 25);
                 SetCreateStat(Stats.Intellect, 28);
+                SetCreateStat(Stats.Spirit, 27);
             }
 
             // Power

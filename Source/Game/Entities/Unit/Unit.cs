@@ -2208,6 +2208,11 @@ namespace Game.Entities
             return !IsSitState() && s != UnitStandStateType.Sleep && s != UnitStandStateType.Kneel;
         }
 
+        public bool IsUnderLastManaUseEffect()
+        {
+            return Time.GetMSTimeDiff(m_lastManaUse, GameTime.GetGameTimeMS()) < 5000;
+        }
+
         public void SetStandState(UnitStandStateType state, uint animKitId = 0)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StandState), (byte)state);

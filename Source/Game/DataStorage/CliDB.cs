@@ -440,6 +440,9 @@ namespace Game.DataStorage
             ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             HpPerStaGameTable = ReadGameTable<GtHpPerStaRecord>("HpPerSta.txt");
             NpcManaCostScalerGameTable = ReadGameTable<GtNpcManaCostScalerRecord>("NPCManaCostScaler.txt");
+            OCTRegenHPGameTable = ReadGameTable<GtOCTRegenHPRecord>("OCTRegenHP.txt");
+            RegenHPPerSptGameTable = ReadGameTable<GtRegenHPPerSptRecord>("RegenHPPerSpt.txt");
+            RegenMPPerSptGameTable = ReadGameTable<GtRegenMPPerSptRecord>("RegenMPPerSpt.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
             StaminaMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
             XpGameTable = ReadGameTable<GtXpRecord>("xp.txt");
@@ -756,6 +759,9 @@ namespace Game.DataStorage
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
+        public static GameTable<GtOCTRegenHPRecord> OCTRegenHPGameTable;
+        public static GameTable<GtRegenHPPerSptRecord> RegenHPPerSptGameTable;
+        public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;        
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
         public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;
@@ -794,11 +800,11 @@ namespace Game.DataStorage
                 case Class.Warlock:
                     return row.Warlock;
                 case Class.Monk:
-                    return row.Monk;
+                    return 0.0f;
                 case Class.Druid:
                     return row.Druid;
                 case Class.DemonHunter:
-                    return row.DemonHunter;
+                    return 0.0f;
                 default:
                     break;
             }

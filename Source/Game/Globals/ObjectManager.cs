@@ -6559,6 +6559,61 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} xp for level definition(s) from database in {1} ms", count, Time.GetMSTimeDiffToNow(time));
             }
         }
+
+        public float GetOCTRegenHP(Class class_, uint level)
+        {
+            if (level < 1 || class_ >= Class.Max)
+                return 0.0f;
+
+            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+
+            GtOCTRegenHPRecord octRegenHP = CliDB.OCTRegenHPGameTable.GetRow(level);            
+            if (octRegenHP is null)
+            {
+                Log.outError(LogFilter.Misc, "Tried to get non-existant Class-Level combination data from OCTRegenHP. Class {0} Level {1}", class_, level);                
+                return 0.0f;
+            }
+            
+            return CliDB.GetGameTableColumnForClass(octRegenHP, class_);
+        }
+
+        public float GetRegenHPPerSpt(Class class_, uint level)
+        {
+             if (level < 1 || class_ >= Class.Max)
+                return 0.0f;
+
+            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+
+            GtRegenHPPerSptRecord regenHPPerSpt = CliDB.RegenHPPerSptGameTable.GetRow(level);
+            if (regenHPPerSpt is null)
+            {
+                Log.outError(LogFilter.Misc, "Tried to get non-existant Class-Level combination data from RegenHPPerSpt. Class {0} Level {1}", class_, level);
+                return 0.0f;
+            }
+            return CliDB.GetGameTableColumnForClass(regenHPPerSpt, class_);
+        }
+
+        public float GetRegenMPPerSpt(Class class_, uint level)
+        {
+            if (level < 1 || class_ >= Class.Max)
+                return 0.0f;
+
+            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+
+            GtRegenMPPerSptRecord regenMPPerSpt = CliDB.RegenMPPerSptGameTable.GetRow(level);
+            if (regenMPPerSpt is null)
+            {
+                Log.outError(LogFilter.Misc, "Tried to get non-existant Class-Level combination data from RegenMPPerSpt. Class {0} Level {1}", class_, level);
+                return 0.0f;
+            }
+
+            return CliDB.GetGameTableColumnForClass(regenMPPerSpt, class_);
+        }
+
+
         void PlayerCreateInfoAddItemHelper(uint race, uint class_, uint itemId, int count)
         {
             if (_playerInfo[race][class_] == null)
@@ -6590,6 +6645,7 @@ namespace Game
 
             return info;
         }
+
         public void GetPlayerClassLevelInfo(Class _class, uint level, out uint baseMana)
         {
             baseMana = 0;
@@ -6608,6 +6664,7 @@ namespace Game
 
             baseMana = (uint)CliDB.GetGameTableColumnForClass(mp, _class);
         }
+
         public PlayerLevelInfo GetPlayerLevelInfo(Race race, Class _class, uint level)
         {
             if (level < 1 || race >= Race.Max || _class >= Class.Max)

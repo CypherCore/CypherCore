@@ -28,6 +28,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -456,49 +457,49 @@ namespace Game.Entities
                     Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong state: {m_deathState}");
                     break;
                 case DeathState.Dead:
-                {
-                    if (!m_respawnCompatibilityMode)
                     {
-                        Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
+                        if (!m_respawnCompatibilityMode)
+                        {
+                            Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
+                            break;
+                        }
+                        long now = GameTime.GetGameTime();
+                        if (m_respawnTime <= now)
+                        {
+                            // Delay respawn if spawn group is not active
+                            if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
+                            {
+                                m_respawnTime = now + RandomHelper.URand(4, 7);
+                                break; // Will be rechecked on next Update call after delay expires
+                            }
+
+                            ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
+                            long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                            if (linkedRespawnTime == 0)             // Can respawn
+                                Respawn();
+                            else                                // the master is dead
+                            {
+                                ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
+                                if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
+                                    SetRespawnTime(Time.Week);
+                                else
+                                {
+                                    // else copy time from master and add a little
+                                    long baseRespawnTime = Math.Max(linkedRespawnTime, now);
+                                    long offset = RandomHelper.URand(5, Time.Minute);
+
+                                    // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
+                                    // we shall inherit it instead of adding and causing an overflow
+                                    if (baseRespawnTime <= long.MaxValue - offset)
+                                        m_respawnTime = baseRespawnTime + offset;
+                                    else
+                                        m_respawnTime = long.MaxValue;
+                                }
+                                SaveRespawnTime(); // also save to DB immediately
+                            }
+                        }
                         break;
                     }
-                    long now = GameTime.GetGameTime();
-                    if (m_respawnTime <= now)
-                    {
-                        // Delay respawn if spawn group is not active
-                        if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
-                        {
-                            m_respawnTime = now + RandomHelper.URand(4, 7);
-                            break; // Will be rechecked on next Update call after delay expires
-                        }
-
-                        ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
-                        long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                        if (linkedRespawnTime == 0)             // Can respawn
-                            Respawn();
-                        else                                // the master is dead
-                        {
-                            ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
-                            if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                SetRespawnTime(Time.Week);
-                            else
-                            {
-                                // else copy time from master and add a little
-                                long baseRespawnTime = Math.Max(linkedRespawnTime, now);
-                                long offset = RandomHelper.URand(5, Time.Minute);
-
-                                // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
-                                // we shall inherit it instead of adding and causing an overflow
-                                if (baseRespawnTime <= long.MaxValue - offset)
-                                    m_respawnTime = baseRespawnTime + offset;
-                                else
-                                    m_respawnTime = long.MaxValue;
-                            }
-                            SaveRespawnTime(); // also save to DB immediately
-                        }
-                    }
-                    break;
-                }
                 case DeathState.Corpse:
                     base.Update(diff);
                     if (m_deathState != DeathState.Corpse)
@@ -636,35 +637,40 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float addvalue;
+            float addvalue = 0;
 
             switch (power)
             {
                 case PowerType.Focus:
-                {
-                    // For hunter pets.
-                    addvalue = 24 * WorldConfig.GetFloatValue(WorldCfg.RatePowerFocus);
-                    break;
-                }
-                case PowerType.Energy:
-                {
-                    // For deathknight's ghoul.
-                    addvalue = 20;
-                    break;
-                }
-                case PowerType.Mana:
-                {
-                    // Combat and any controlled creature
-                    if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
                     {
-                        float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
-                        addvalue = (27.0f / 5.0f + 17.0f) * ManaIncreaseRate;
+                        // For hunter pets.
+                        addvalue = 24 * WorldConfig.GetFloatValue(WorldCfg.RatePowerFocus);
+                        break;
                     }
-                    else
-                        addvalue = maxValue / 3;
+                case PowerType.Energy:
+                    {
+                        // For deathknight's ghoul.
+                        addvalue = 20;
+                        break;
+                    }
+                case PowerType.Mana:
+                    {
+                        // Combat and any controlled creature
+                        if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
+                        {
+                            if (!IsUnderLastManaUseEffect())
+                            {
+                                float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
+                                float Spirit = GetStat(Stats.Spirit);
 
-                    break;
-                }
+                                addvalue = (int)((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
+                            }
+                        }
+                        else
+                            addvalue = maxValue / 3;
+
+                        break;
+                    }
                 default:
                     return;
             }
@@ -693,7 +699,12 @@ namespace Game.Entities
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
             {
                 float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-                addvalue = (uint)(0.015f * GetMaxHealth() * HealthIncreaseRate);
+                float Spirit = GetStat(Stats.Spirit);
+
+                if (GetPower(PowerType.Mana) > 0)
+                    addvalue = (int)(Spirit * 0.25 * HealthIncreaseRate);
+                else
+                    addvalue = (int)(Spirit * 0.80 * HealthIncreaseRate);
             }
             else
                 addvalue = (long)maxValue / 3;
@@ -1140,7 +1151,7 @@ namespace Game.Entities
             // exited position so it won't run away (home) and evade if it's hostile
             SetHomePosition(GetPosition());
         }
-        
+
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
@@ -1208,7 +1219,7 @@ namespace Game.Entities
 
         public bool IsTappedBy(Player player)
         {
-            return m_tapList.Contains(player.GetGUID()); 
+            return m_tapList.Contains(player.GetGUID());
         }
 
         public override Loot GetLootForPlayer(Player player)
@@ -1247,7 +1258,7 @@ namespace Game.Entities
         public HashSet<ObjectGuid> GetTapList() { return m_tapList; }
         public void SetTapList(HashSet<ObjectGuid> tapList) { m_tapList = tapList; }
         public bool HasLootRecipient() { return !m_tapList.Empty(); }
-        
+
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
@@ -1852,7 +1863,7 @@ namespace Game.Entities
                     else
                         m_respawnTime = GameTime.GetGameTime() + respawnDelay;
                 }
-                
+
                 SaveRespawnTime();
 
                 ReleaseSpellFocus(null, false);               // remove spellcast focus
@@ -1864,7 +1875,7 @@ namespace Game.Entities
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
-                SetActive(false);                
+                SetActive(false);
                 SetNoSearchAssistance(false);
 
                 //Dismiss group if is leader
@@ -2960,7 +2971,7 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().Scale;
         }
-        
+
         public override void SetObjectScale(float scale)
         {
             base.SetObjectScale(scale);
@@ -3146,9 +3157,9 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
         }
-        
+
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
-        public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
+        public override bool CanFly() { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
         bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover || IsHovering(); }
 
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
@@ -3297,7 +3308,7 @@ namespace Game.Entities
                 return false;
             return true;
         }
-        
+
         public LootModes GetLootMode() { return m_LootMode; }
         public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
         public void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
@@ -3309,7 +3320,7 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
         public bool CanIgnoreFeignDeath() { return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreFeighDeath); }
-        
+
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 

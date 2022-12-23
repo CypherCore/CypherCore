@@ -3250,6 +3250,7 @@ namespace Game.Entities
                 m_foodEmoteTimerCount -= 5000;
             }
         }
+
         void Regenerate(PowerType power)
         {
             // Skip regeneration for power type we cannot have
@@ -3393,6 +3394,7 @@ namespace Game.Entities
                 });
             }
         }
+
         void RegenerateHealth()
         {
             uint curValue = (uint)GetHealth();
@@ -3410,14 +3412,10 @@ namespace Game.Entities
             // normal regen case (maybe partly in combat case)
             else if (!IsInCombat() || HasAuraType(AuraType.ModRegenDuringCombat))
             {
-                addValue = HealthIncreaseRate;
+                addValue = OCTRegenHPPerSpirit() * HealthIncreaseRate;
+
                 if (!IsInCombat())
                 {
-                    if (GetLevel() < 15)
-                        addValue = (0.20f * (GetMaxHealth()) / GetLevel() * HealthIncreaseRate);
-                    else
-                        addValue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
-
                     addValue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
                     addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
                 }
@@ -3437,6 +3435,7 @@ namespace Game.Entities
 
             ModifyHealth((int)addValue);
         }
+
         public void ResetAllPowers()
         {
             SetFullHealth();

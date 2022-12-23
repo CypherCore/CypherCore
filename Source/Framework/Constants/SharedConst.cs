@@ -781,7 +781,8 @@ namespace Framework.Constants
         Agility = 1,
         Stamina = 2,
         Intellect = 3,
-        Max = 4
+        Spirit = 4,
+        Max = 5
     }
 
     public enum TrainerType
