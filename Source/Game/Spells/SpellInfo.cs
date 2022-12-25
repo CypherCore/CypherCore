@@ -4063,7 +4063,6 @@ namespace Game.Spells
                 TriggerSpell = effect.EffectTriggerSpell;
                 SpellClassMask = effect.EffectSpellClassMask;
                 BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
-                Scaling.Class = effect.ScalingClass;
                 Scaling.Coefficient = effect.Coefficient;
                 Scaling.Variance = effect.Variance;
                 Scaling.ResourceCoefficient = effect.ResourceCoefficient;

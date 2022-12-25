@@ -278,17 +278,19 @@ namespace Game.DataStorage
 
     public sealed class SpellEffectRecord
     {
-        public uint Id;
-        public short EffectAura;
+        public uint Id;        
         public uint DifficultyID;
         public int EffectIndex;
         public uint Effect;
         public float EffectAmplitude;
         public SpellEffectAttributes EffectAttributes;
+        public short EffectAura;
         public uint EffectAuraPeriod;
+        public int EffectBasePoints;
         public float EffectBonusCoefficient;
         public float EffectChainAmplitude;
         public int EffectChainTargets;
+        public int EffectDieSides;
         public uint EffectItemType;
         public int EffectMechanic;
         public float EffectPointsPerResource;
@@ -300,9 +302,7 @@ namespace Game.DataStorage
         public float Coefficient;
         public float Variance;
         public float ResourceCoefficient;
-        public float GroupSizeBasePointsCoefficient;
-        public float EffectBasePoints;
-        public int ScalingClass;
+        public float GroupSizeBasePointsCoefficient;      
         public int[] EffectMiscValue = new int[2];
         public uint[] EffectRadiusIndex = new uint[2];
         public FlagArray128 EffectSpellClassMask;

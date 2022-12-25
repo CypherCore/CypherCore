@@ -2357,55 +2357,56 @@ namespace Game.Entities
 
             MultiMap<(uint spellId, Difficulty difficulty), SpellEffectRecord> spellEffects = new();
 
-            //                                                0        1            2             3       4           5                6
-            SQLResult effectsResult = DB.World.Query("SELECT SpellID, EffectIndex, DifficultyID, Effect, EffectAura, EffectAmplitude, EffectAttributes, " +
-                //7                 8                       9                     10                  11              12              13
-                "EffectAuraPeriod, EffectBonusCoefficient, EffectChainAmplitude, EffectChainTargets, EffectItemType, EffectMechanic, EffectPointsPerResource, " +
-                //14               15                        16                  17                      18             19           20
-                "EffectPosFacing, EffectRealPointsPerLevel, EffectTriggerSpell, BonusCoefficientFromAP, PvpMultiplier, Coefficient, Variance, " +
-                //21                   22                              23                24                25                26
-                "ResourceCoefficient, GroupSizeBasePointsCoefficient, EffectBasePoints, EffectMiscValue1, EffectMiscValue2, EffectRadiusIndex1, " +
-                //27                  28                     29                     30                     31                     32
-                "EffectRadiusIndex2, EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
-                //33
-                "ImplicitTarget2 FROM serverside_spell_effect");
+            //                                                  0          1            2           3            4               5              6
+            SQLResult effectsResult = DB.World.Query("SELECT SpellID, DifficultyID, EffectIndex, Effect, EffectAmplitude, EffectAttributes, EffectAura, " +
+            //         7                 8                 9                       10                    11                  12              13              14
+            "EffectAuraPeriod, EffectBasePoints, EffectBonusCoefficient, EffectChainAmplitude, EffectChainTargets, EffectDieSides, EffectItemType, EffectMechanic, " +
+            //         15                       16               17                        18                  19                    20           21         22
+            "EffectPointsPerResource, EffectPosFacing, EffectRealPointsPerLevel, EffectTriggerSpell, BonusCoefficientFromAP, PvpMultiplier, Coefficient, Variance, " +
+            //         23                          24                      25                26                27                  28
+            "ResourceCoefficient, GroupSizeBasePointsCoefficient, EffectMiscValue1, EffectMiscValue2, EffectRadiusIndex1, EffectRadiusIndex2, " +
+            //         29                     30                     31                     32                     33
+            "EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
+            //         34
+            "ImplicitTarget2 FROM serverside_spell_effect");
 
             if (!effectsResult.IsEmpty())
             {
                 do
                 {
                     uint spellId = effectsResult.Read<uint>(0);
-                    Difficulty difficulty = (Difficulty)effectsResult.Read<uint>(2);
+                    Difficulty difficulty = (Difficulty)effectsResult.Read<uint>(1);
                     SpellEffectRecord effect = new();
-                    effect.EffectIndex = effectsResult.Read<int>(1);
-                    effect.Effect = effectsResult.Read<uint>(3);
-                    effect.EffectAura = effectsResult.Read<short>(4);
-                    effect.EffectAmplitude = effectsResult.Read<float>(5);
-                    effect.EffectAttributes = (SpellEffectAttributes)effectsResult.Read<int>(6);
+                    effect.EffectIndex = effectsResult.Read<int>(2);
+                    effect.Effect = effectsResult.Read<uint>(3);                    
+                    effect.EffectAmplitude = effectsResult.Read<float>(4);
+                    effect.EffectAttributes = (SpellEffectAttributes)effectsResult.Read<int>(5);
+                    effect.EffectAura = effectsResult.Read<short>(6);
                     effect.EffectAuraPeriod = effectsResult.Read<uint>(7);
-                    effect.EffectBonusCoefficient = effectsResult.Read<float>(8);
-                    effect.EffectChainAmplitude = effectsResult.Read<float>(9);
-                    effect.EffectChainTargets = effectsResult.Read<int>(10);
-                    effect.EffectItemType = effectsResult.Read<uint>(11);
-                    effect.EffectMechanic = effectsResult.Read<int>(12);
-                    effect.EffectPointsPerResource = effectsResult.Read<float>(13);
-                    effect.EffectPosFacing = effectsResult.Read<float>(14);
-                    effect.EffectRealPointsPerLevel = effectsResult.Read<float>(15);
-                    effect.EffectTriggerSpell = effectsResult.Read<uint>(16);
-                    effect.BonusCoefficientFromAP = effectsResult.Read<float>(17);
-                    effect.PvpMultiplier = effectsResult.Read<float>(18);
-                    effect.Coefficient = effectsResult.Read<float>(19);
-                    effect.Variance = effectsResult.Read<float>(20);
-                    effect.ResourceCoefficient = effectsResult.Read<float>(21);
-                    effect.GroupSizeBasePointsCoefficient = effectsResult.Read<float>(22);
-                    effect.EffectBasePoints = effectsResult.Read<float>(23);
-                    effect.EffectMiscValue[0] = effectsResult.Read<int>(24);
-                    effect.EffectMiscValue[1] = effectsResult.Read<int>(25);
-                    effect.EffectRadiusIndex[0] = effectsResult.Read<uint>(26);
-                    effect.EffectRadiusIndex[1] = effectsResult.Read<uint>(27);
-                    effect.EffectSpellClassMask = new FlagArray128(effectsResult.Read<uint>(28), effectsResult.Read<uint>(29), effectsResult.Read<uint>(30), effectsResult.Read<uint>(31));
-                    effect.ImplicitTarget[0] = effectsResult.Read<short>(32);
-                    effect.ImplicitTarget[1] = effectsResult.Read<short>(33);
+                    effect.EffectBasePoints = effectsResult.Read<int>(8);
+                    effect.EffectBonusCoefficient = effectsResult.Read<float>(9);
+                    effect.EffectChainAmplitude = effectsResult.Read<float>(10);
+                    effect.EffectChainTargets = effectsResult.Read<int>(11);
+                    effect.EffectDieSides = effectsResult.Read<int>(12);
+                    effect.EffectItemType = effectsResult.Read<uint>(13);
+                    effect.EffectMechanic = effectsResult.Read<int>(14);
+                    effect.EffectPointsPerResource = effectsResult.Read<float>(15);
+                    effect.EffectPosFacing = effectsResult.Read<float>(16);
+                    effect.EffectRealPointsPerLevel = effectsResult.Read<float>(17);
+                    effect.EffectTriggerSpell = effectsResult.Read<uint>(18);
+                    effect.BonusCoefficientFromAP = effectsResult.Read<float>(19);
+                    effect.PvpMultiplier = effectsResult.Read<float>(20);
+                    effect.Coefficient = effectsResult.Read<float>(21);
+                    effect.Variance = effectsResult.Read<float>(22);
+                    effect.ResourceCoefficient = effectsResult.Read<float>(23);
+                    effect.GroupSizeBasePointsCoefficient = effectsResult.Read<float>(24);                    
+                    effect.EffectMiscValue[0] = effectsResult.Read<int>(25);
+                    effect.EffectMiscValue[1] = effectsResult.Read<int>(26);
+                    effect.EffectRadiusIndex[0] = effectsResult.Read<uint>(27);
+                    effect.EffectRadiusIndex[1] = effectsResult.Read<uint>(28);
+                    effect.EffectSpellClassMask = new FlagArray128(effectsResult.Read<uint>(29), effectsResult.Read<uint>(30), effectsResult.Read<uint>(31), effectsResult.Read<uint>(32));
+                    effect.ImplicitTarget[0] = effectsResult.Read<short>(33);
+                    effect.ImplicitTarget[1] = effectsResult.Read<short>(34);
 
                     var existingSpellBounds = _GetSpellInfo(spellId);
                     if (existingSpellBounds == null)
