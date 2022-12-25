@@ -131,11 +131,5 @@ namespace Game
         {
             GetBattlePetMgr().ClearFanfare(battlePetClearFanfare.PetGuid);
         }
-
-        [WorldPacketHandler(ClientOpcodes.CageBattlePet)]
-        void HandleCageBattlePet(CageBattlePet cageBattlePet)
-        {
-            GetBattlePetMgr().CageBattlePet(cageBattlePet.PetGuid);
-        }        
     }
 }

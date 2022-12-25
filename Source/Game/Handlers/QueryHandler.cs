@@ -311,32 +311,6 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestPoiQuery, Processing = PacketProcessing.Inplace)]
-        void HandleQuestPOIQuery(QuestPOIQuery packet)
-        {
-            if (packet.MissingQuestCount >= SharedConst.MaxQuestLogSize)
-                return;
-
-            // Read quest ids and add the in a unordered_set so we don't send POIs for the same quest multiple times
-            HashSet<uint> questIds = new();
-            for (int i = 0; i < packet.MissingQuestCount; ++i)
-                questIds.Add(packet.MissingQuestPOIs[i]); // QuestID
-
-            QuestPOIQueryResponse response = new();
-
-            foreach (uint questId in questIds)
-            {
-                if (_player.FindQuestSlot(questId) != SharedConst.MaxQuestLogSize)
-                {
-                    QuestPOIData poiData = Global.ObjectMgr.GetQuestPOIData(questId);
-                    if (poiData != null)
-                        response.QuestPOIDataStats.Add(poiData);
-                }
-            }
-
-            SendPacket(response);
-        }
-
         [WorldPacketHandler(ClientOpcodes.ItemTextQuery, Processing = PacketProcessing.Inplace)]
         void HandleItemTextQuery(ItemTextQuery packet)
         {

@@ -1073,30 +1073,6 @@ namespace Game
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.SortBags, Processing = PacketProcessing.Inplace)]
-        void HandleSortBags(SortBags sortBags)
-        {
-            // TODO: Implement sorting
-            // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new BagCleanupFinished());
-        }
-
-        [WorldPacketHandler(ClientOpcodes.SortBankBags, Processing = PacketProcessing.Inplace)]
-        void HandleSortBankBags(SortBankBags sortBankBags)
-        {
-            // TODO: Implement sorting
-            // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new BagCleanupFinished());
-        }
-
-        [WorldPacketHandler(ClientOpcodes.SortReagentBankBags, Processing = PacketProcessing.Inplace)]
-        void HandleSortReagentBankBags(SortReagentBankBags sortReagentBankBags)
-        {
-            // TODO: Implement sorting
-            // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new BagCleanupFinished());
-        }
-
         [WorldPacketHandler(ClientOpcodes.RemoveNewItem, Processing = PacketProcessing.Inplace)]
         void HandleRemoveNewItem(RemoveNewItem removeNewItem)
         {

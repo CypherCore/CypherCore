@@ -535,27 +535,6 @@ namespace Game
             SendPacket(new CalendarSendNumPending(pending));
         }
 
-        [WorldPacketHandler(ClientOpcodes.SetSavedInstanceExtend)]
-        void HandleSetSavedInstanceExtend(SetSavedInstanceExtend setSavedInstanceExtend)
-        {
-            // cannot modify locks currently in use
-            if (_player.GetMapId() == setSavedInstanceExtend.MapID)
-                return;
-
-            var expiryTimes = Global.InstanceLockMgr.UpdateInstanceLockExtensionForPlayer(_player.GetGUID(), new MapDb2Entries((uint)setSavedInstanceExtend.MapID, (Difficulty)setSavedInstanceExtend.DifficultyID), setSavedInstanceExtend.Extend);
-
-            if (expiryTimes.Item1 == DateTime.MinValue)
-                return;
-
-            CalendarRaidLockoutUpdated calendarRaidLockoutUpdated = new();
-            calendarRaidLockoutUpdated.ServerTime = GameTime.GetGameTime();
-            calendarRaidLockoutUpdated.MapID = setSavedInstanceExtend.MapID;
-            calendarRaidLockoutUpdated.DifficultyID = setSavedInstanceExtend.DifficultyID;
-            calendarRaidLockoutUpdated.OldTimeRemaining = (int)Math.Max((expiryTimes.Item1 - GameTime.GetSystemTime()).TotalSeconds, 0);
-            calendarRaidLockoutUpdated.NewTimeRemaining = (int)Math.Max((expiryTimes.Item2 - GameTime.GetSystemTime()).TotalSeconds, 0);
-            SendPacket(calendarRaidLockoutUpdated);
-        }
-
         public void SendCalendarRaidLockoutAdded(InstanceLock instanceLock)
         {
             CalendarRaidLockoutAdded calendarRaidLockoutAdded = new();

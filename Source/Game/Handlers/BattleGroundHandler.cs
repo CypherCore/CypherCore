@@ -623,12 +623,6 @@ namespace Game
             SendPacket(new PVPOptionsEnabled());
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestPvpRewards, Processing = PacketProcessing.Inplace)]
-        void HandleRequestPvpReward(RequestPVPRewards packet)
-        {
-            GetPlayer().SendPvpRewards();
-        }
-
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQuery)]
         void HandleAreaSpiritHealerQuery(AreaSpiritHealerQuery areaSpiritHealerQuery)
         {
