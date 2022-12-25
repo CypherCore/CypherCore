@@ -94,7 +94,7 @@ namespace Scripts.Spells.Warlock
 
         void HandleDummy(uint effIndex)
         {
-            SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
+            SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage[(int)SpellSchools.Normal]));
         }
 
         void CalcCritChance(Unit victim, ref float critChance)

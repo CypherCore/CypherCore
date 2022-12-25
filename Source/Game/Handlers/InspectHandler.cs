@@ -66,14 +66,6 @@ namespace Game
                 inspectResult.GuildData = guildData;
             }
 
-            Item heartOfAzeroth = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-            if (heartOfAzeroth != null)
-            {
-                AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                if (azeriteItem != null)
-                    inspectResult.AzeriteLevel = azeriteItem.GetEffectiveLevel();
-            }
-
             inspectResult.ItemLevel = (int)player.GetAverageItemLevel();
             inspectResult.LifetimeMaxRank = player.m_activePlayerData.LifetimeMaxRank;
             inspectResult.TodayHK = player.m_activePlayerData.TodayHonorableKills;

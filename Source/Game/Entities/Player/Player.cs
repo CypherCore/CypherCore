@@ -937,30 +937,16 @@ namespace Game.Entities
             SendPacket(new PetSpells());
         }
 
-        public Creature GetSummonedBattlePet()
-        {
-            Creature summonedBattlePet = ObjectAccessor.GetCreatureOrPetOrVehicle(this, GetCritterGUID());
-            if (summonedBattlePet != null)
-                if (!GetSummonedBattlePetGUID().IsEmpty() && GetSummonedBattlePetGUID() == summonedBattlePet.GetBattlePetCompanionGUID())
-                    return summonedBattlePet;
-
-            return null;
-        }
-
         public void SetBattlePetData(BattlePet pet = null)
         {
             if (pet != null)
             {
-                SetSummonedBattlePetGUID(pet.PacketInfo.Guid);
                 SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
-                SetBattlePetCompanionExperience(pet.PacketInfo.Exp);
                 SetWildBattlePetLevel(pet.PacketInfo.Level);
             }
             else
             {
-                SetSummonedBattlePetGUID(ObjectGuid.Empty);
                 SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
-                SetBattlePetCompanionExperience(0);
                 SetWildBattlePetLevel(0);
             }
         }
@@ -1154,17 +1140,6 @@ namespace Game.Entities
                 if (currency.Flags[0].HasAnyFlag((int)CurrencyFlags.HighPrecision))
                     count /= 100;
                 GetReputationMgr().ModifyReputation(factionEntry, count, false, true);
-                return;
-            }
-
-            if (id == CurrencyTypes.Azerite)
-            {
-                if (count > 0)
-                {
-                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                        heartOfAzeroth.ToAzeriteItem().GiveXP((ulong)count);
-                }
                 return;
             }
 
@@ -1565,7 +1540,7 @@ namespace Game.Entities
                     LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
                     {
-                        var dungeonLevels = Global.DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        var dungeonLevels = Global.DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, 0);
                         if (dungeonLevels.HasValue)
                             if (dungeonLevels.Value.TargetLevelMax == Global.ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
                                 ChampioningFaction = GetChampioningFaction();
@@ -2624,10 +2599,6 @@ namespace Game.Entities
                 case GossipOptionNpc.Transmogrify:
                     GetSession().SendOpenTransmogrifier(guid);
                     break;
-                case GossipOptionNpc.AzeriteRespec:
-                    PlayerTalkClass.SendCloseGossip();
-                    GetSession().SendAzeriteRespecNPC(guid);
-                    break;
                 default:
                     break;
             }
@@ -3269,7 +3240,7 @@ namespace Game.Entities
             if (powerType == null)
                 return;
 
-            float addvalue;
+            float addvalue = 0;
 
             if (!IsInCombat())
             {
@@ -3278,8 +3249,6 @@ namespace Game.Entities
 
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
             }
-            else
-                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
 
             WorldCfg[] RatesForPower =
             {
@@ -4825,7 +4794,6 @@ namespace Game.Entities
             if (guildId != 0)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.GuildGUID), ObjectGuid.Create(HighGuid.Guild, guildId));
-                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GuildClubMemberID), GetGUID().GetCounter());
                 SetPlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
             else
@@ -5422,10 +5390,10 @@ namespace Game.Entities
             {
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, i), 0);
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePos, i), 0);
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, i), 1.0f);
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent, i), 1.0f);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, i), 1.0f);                
             }
 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent), 1.0f);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModSpellPowerPercent), 1.0f);
 
             //reset attack power, damage and attack speed fields
@@ -5455,7 +5423,8 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RangedCritPercentage), 0.0f);
 
             // Init spell schools (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SpellCritPercentage), 0.0f);
+            for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SpellCritPercentage, (int)spellSchool), 0.0f);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), 0.0f);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BlockPercentage), 0.0f);
@@ -5467,19 +5436,15 @@ namespace Game.Entities
 
             // set armor (resistance 0) to original value (create_agility*2)
             SetArmor((int)(GetCreateStat(Stats.Agility) * 2), 0);
-            SetBonusResistanceMod(SpellSchools.Normal, 0);
             // set other resistance to original value (0)
             for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
             {
                 SetResistance(spellSchool, 0);
-                SetBonusResistanceMod(spellSchool, 0);
             }
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetResistance), 0);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetPhysicalResistance), 0);
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, i), 0);
-
+            
             // Reset no reagent cost field
             SetNoRegentCostMask(new FlagArray128());
 
@@ -5883,6 +5848,7 @@ namespace Game.Entities
 
         public void AddExploredZones(uint pos, ulong mask) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
         public void RemoveExploredZones(uint pos, ulong mask) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
+        
         void CheckAreaExploreAndOutdoor()
         {
             if (!IsAlive())
@@ -5919,11 +5885,11 @@ namespace Game.Entities
 
             if (!Convert.ToBoolean(currFields & val))
             {
-                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)offset), val);
+                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, offset), val);
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
-                var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, 0);
                 if (areaLevels.HasValue)
                 {
                     if (IsMaxLevel())
@@ -7166,7 +7132,6 @@ namespace Game.Entities
         public void AddToy(uint itemId, uint flags)
         {
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), itemId);
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ToyFlags), flags);
         }
 
         public void AddTransmogBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog), blockValue); }
@@ -7180,9 +7145,6 @@ namespace Game.Entities
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), index);
         }
 
-        public void AddIllusionBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogIllusions), blockValue); }
-        public void AddIllusionFlag(int slot, uint flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogIllusions, slot), flag); }
-
         public void AddSelfResSpell(uint spellId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), spellId); }
         public void RemoveSelfResSpell(uint spellId)
         {
@@ -7191,9 +7153,6 @@ namespace Game.Entities
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), index);
         }
         public void ClearSelfResSpell() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells)); }
-
-        public ObjectGuid GetSummonedBattlePetGUID() { return m_activePlayerData.SummonedBattlePetGUID; }
-        public void SetSummonedBattlePetGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SummonedBattlePetGUID), guid); }
 
         public void SetTrackCreatureFlag(uint flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }
         public void RemoveTrackCreatureFlag(uint flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }

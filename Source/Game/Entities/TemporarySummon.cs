@@ -881,17 +881,12 @@ namespace Game.Entities
             if (school > SpellSchools.Normal)
             {
                 float baseValue = GetFlatModifierValue(UnitMods.ResistanceStart + (int)school, UnitModifierFlatType.Base);
-                float bonusValue = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school) - baseValue;
 
                 // hunter and warlock pets gain 40% of owner's resistance
                 if (IsPet())
-                {
                     baseValue += (float)MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
-                    bonusValue += (float)MathFunctions.CalculatePct(m_owner.GetBonusResistanceMod(school), 40);
-                }
 
                 SetResistance(school, (int)baseValue);
-                SetBonusResistanceMod(school, (int)bonusValue);
             }
             else
                 UpdateArmor();

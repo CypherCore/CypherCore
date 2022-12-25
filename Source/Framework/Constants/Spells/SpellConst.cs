@@ -2401,13 +2401,13 @@ namespace Framework.Constants
         Unk256 = 256,
         Unk257 = 257,
         ModifyKeystone = 258,
-        RespecAzeriteEmpoweredItem = 259,
+        Unk259 = 259, //RespecAzeriteEmpoweredItem
         SummonStabledPet = 260,
         ScrapItem = 261,
         Unk262 = 262,
         RepairItem = 263,
         RemoveGem = 264,
-        LearnAzeriteEssencePower = 265,
+        Unk265 = 265, //LearnAzeriteEssencePower
         SetItemBonusListGroupEntry = 266, // Sets item bonuses to specific ItemBonusListGroupEntry id
         CreatePrivateConversation = 267,
         ApplyMountEquipment = 268,
@@ -2418,7 +2418,7 @@ namespace Framework.Constants
         CraftRuneforgeLegendary = 273,
         Unk274 = 274,
         Unk275 = 275,
-        LearnTransmogIllusion = 276,
+        Unk276 = 276, //LearnTransmogIllusion
         SetChromieTime = 277,
         Unk278 = 278,
         LearnGarrTalent = 279,

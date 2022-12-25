@@ -156,30 +156,6 @@ namespace Game.Networking.Packets
                 }
                 ++i;
             }
-
-            AzeriteItem azeriteItem = item.ToAzeriteItem();
-            if (azeriteItem != null)
-            {
-                SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
-                if (essences != null)
-                {
-                    for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
-                    {
-                        AzeriteEssenceData essence = new();
-                        essence.Index = slot;
-                        essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
-                        if (essence.AzeriteEssenceID != 0)
-                        {
-                            essence.Rank = azeriteItem.GetEssenceRank(essence.AzeriteEssenceID);
-                            essence.SlotUnlocked = true;
-                        }
-                        else
-                            essence.SlotUnlocked = azeriteItem.HasUnlockedEssenceSlot(slot);
-
-                        AzeriteEssences.Add(essence);
-                    }
-                }
-            }
         }
 
         public void Write(WorldPacket data)

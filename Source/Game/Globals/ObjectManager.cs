@@ -9666,11 +9666,7 @@ namespace Game
                     {
                         // mail open and then not returned
                         foreach (var itemInfo in m.items)
-                        {
                             Item.DeleteFromDB(null, itemInfo.item_guid);
-                            AzeriteItem.DeleteFromDB(null, itemInfo.item_guid);
-                            AzeriteEmpoweredItem.DeleteFromDB(null, itemInfo.item_guid);
-                        }
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
                         stmt.AddValue(0, m.messageID);

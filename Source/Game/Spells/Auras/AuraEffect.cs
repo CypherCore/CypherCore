@@ -3523,15 +3523,6 @@ namespace Game.Spells
             }
         }
 
-        [AuraEffectHandler(AuraType.ModManaCostPct)]
-        void HandleModManaCostPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
-                return;
-
-            aurApp.GetTarget().ApplyModManaCostMultiplier(GetAmount() / 100.0f, apply);
-        }
-
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
         void HandleAuraModPowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4109,24 +4100,7 @@ namespace Game.Spells
 
         /********************************/
         /***        POWER COST        ***/
-        /********************************/
-        [AuraEffectHandler(AuraType.ModPowerCostSchool)]
-        void HandleModPowerCost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
-                return;
-
-            // handled in SpellInfo::CalcPowerCost, this is only for client UI
-            if ((GetMiscValueB() & (1 << (int)PowerType.Mana)) == 0)
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                    target.ApplyModManaCostModifier((SpellSchools)i, GetAmount(), apply);
-        }
-
+        /********************************/        
         [AuraEffectHandler(AuraType.ArenaPreparation)]
         void HandleArenaPreparation(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5855,25 +5829,7 @@ namespace Game.Spells
                 return;
 
             aurApp.GetTarget().UpdateMountCapability();
-        }
-
-        [AuraEffectHandler(AuraType.CosmeticMounted)]
-        void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                return;
-
-            if (apply)
-                aurApp.GetTarget().SetCosmeticMountDisplayId((uint)GetMiscValue());
-            else
-                aurApp.GetTarget().SetCosmeticMountDisplayId(0); // set cosmetic mount to 0, even if multiple auras are active; tested with zandalari racial + divine steed
-
-            Player playerTarget = aurApp.GetTarget().ToPlayer();
-            if (playerTarget == null)
-                return;
-
-            playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
-        }
+        }        
 
         [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]
         void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)

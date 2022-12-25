@@ -4171,7 +4171,7 @@ namespace Game.Spells
             {
                 unitCaster.ClearChannelObjects();
                 unitCaster.SetChannelSpellId(0);
-                unitCaster.SetChannelVisual(new SpellCastVisualField());
+                unitCaster.SetChannelSpellXSpellVisual(0);
             }
 
             SpellChannelUpdate spellChannelUpdate = new();
@@ -4250,7 +4250,7 @@ namespace Game.Spells
                         creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, unitCaster.m_unitData.ChannelObjects[0]));
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
-            unitCaster.SetChannelVisual(m_SpellVisual);
+            unitCaster.SetChannelSpellXSpellVisual(m_SpellVisual.SpellXSpellVisualID);
         }
 
         void SendResurrectRequest(Player target)
@@ -5570,12 +5570,6 @@ namespace Game.Spells
                         Creature creature = m_targets.GetUnitTarget().ToCreature();
                         if (creature != null)
                         {
-                            if (playerCaster.GetSummonedBattlePetGUID().IsEmpty() || creature.GetBattlePetCompanionGUID().IsEmpty())
-                                return SpellCastResult.NoPet;
-
-                            if (playerCaster.GetSummonedBattlePetGUID() != creature.GetBattlePetCompanionGUID())
-                                return SpellCastResult.BadTargets;
-
                             var battlePet = battlePetMgr.GetPet(creature.GetBattlePetCompanionGUID());
                             if (battlePet != null)
                             {
@@ -6752,38 +6746,7 @@ namespace Game.Spells
                                     return SpellCastResult.ItemAtMaxCharges;
                         }
                         break;
-                    }
-                    case SpellEffectName.RespecAzeriteEmpoweredItem:
-                    {
-                        Item item = m_targets.GetItemTarget();
-                        if (item == null)
-                            return SpellCastResult.AzeriteEmpoweredOnly;
-
-                        if (item.GetOwnerGUID() != m_caster.GetGUID())
-                            return SpellCastResult.DontReport;
-
-                        AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                        if (azeriteEmpoweredItem == null)
-                            return SpellCastResult.AzeriteEmpoweredOnly;
-
-                        bool hasSelections = false;
-                        for (int tier = 0; tier < SharedConst.MaxAzeriteEmpoweredTier; ++tier)
-                        {
-                            if (azeriteEmpoweredItem.GetSelectedAzeritePower(tier) != 0)
-                            {
-                                hasSelections = true;
-                                break;
-                            }
-                        }
-
-                        if (!hasSelections)
-                            return SpellCastResult.AzeriteEmpoweredNoChoicesToUndo;
-
-                        if (!m_caster.ToPlayer().HasEnoughMoney(azeriteEmpoweredItem.GetRespecCost()))
-                            return SpellCastResult.DontReport;
-
-                        break;
-                    }
+                    }                    
                     default:
                         break;
                 }

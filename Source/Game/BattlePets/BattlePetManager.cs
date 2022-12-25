@@ -482,12 +482,6 @@ namespace Game.BattlePets
 
             if (pet.SaveInfo != BattlePetSaveInfo.New)
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
-
-            // Update the timestamp if the battle pet is summoned
-            Creature summonedBattlePet = _owner.GetPlayer().GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                    summonedBattlePet.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
         }
         
         bool IsPetInSlot(ObjectGuid guid)
@@ -602,18 +596,6 @@ namespace Game.BattlePets
             BattlePetDeleted deletePet = new();
             deletePet.PetGuid = guid;
             _owner.SendPacket(deletePet);
-
-            // Battle pet despawns if it's summoned
-            Player player = _owner.GetPlayer();
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-            {
-                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                {
-                    summonedBattlePet.DespawnOrUnsummon();
-                    player.SetBattlePetData(null);
-                }
-            }
         }
 
         public void ChangeBattlePetQuality(ObjectGuid guid, BattlePetBreedQuality quality)
@@ -775,26 +757,6 @@ namespace Game.BattlePets
             SendUpdates(updates, false);
         }
 
-        public void UpdateBattlePetData(ObjectGuid guid)
-        {
-            BattlePet pet = GetPet(guid);
-            if (pet == null)
-                return;
-
-            Player player = _owner.GetPlayer();
-
-            // Update battle pet related update fields
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-            {
-                if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
-                {
-                    summonedBattlePet.SetWildBattlePetLevel(pet.PacketInfo.Level);
-                    player.SetBattlePetData(pet);
-                }
-            }
-        }
-
         public void SummonPet(ObjectGuid guid)
         {
             BattlePet pet = GetPet(guid);
@@ -816,17 +778,6 @@ namespace Game.BattlePets
                 args.AddSpellMod(SpellValueMod.BasePoint0, (int)speciesEntry.CreatureID);
             }
             player.CastSpell(_owner.GetPlayer(), summonSpellId, args);
-        }
-
-        public void DismissPet()
-        {
-            Player player = _owner.GetPlayer();
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet)
-            {
-                summonedBattlePet.DespawnOrUnsummon();
-                player.SetBattlePetData(null);
-            }
         }
 
         public void SendJournal()

@@ -151,15 +151,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC, "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? ORDER BY button");
             PrepareStatement(CharStatements.SEL_MAILITEMS, "SELECT " + SelectItemInstanceContent + ", ii.owner_guid, m.id FROM mail_items mi INNER JOIN mail m ON mi.mail_id = m.id LEFT JOIN item_instance ii ON mi.item_guid = ii.guid LEFT JOIN item_instance_gems ig ON ii.guid = ig.itemGuid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid LEFT JOIN item_instance_modifiers im ON ii.guid = im.itemGuid WHERE m.receiver = ?");
             PrepareStatement(CharStatements.SEL_MAILITEMS_ARTIFACT, "SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN mail_items mi ON a.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
-            PrepareStatement(CharStatements.SEL_MAILITEMS_AZERITE, "SELECT iz.itemGuid, iz.xp, iz.level, iz.knowledgeLevel, " +
-                "iz.selectedAzeriteEssences1specId, iz.selectedAzeriteEssences1azeriteEssenceId1, iz.selectedAzeriteEssences1azeriteEssenceId2, iz.selectedAzeriteEssences1azeriteEssenceId3, iz.selectedAzeriteEssences1azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences2specId, iz.selectedAzeriteEssences2azeriteEssenceId1, iz.selectedAzeriteEssences2azeriteEssenceId2, iz.selectedAzeriteEssences2azeriteEssenceId3, iz.selectedAzeriteEssences2azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences3specId, iz.selectedAzeriteEssences3azeriteEssenceId1, iz.selectedAzeriteEssences3azeriteEssenceId2, iz.selectedAzeriteEssences3azeriteEssenceId3, iz.selectedAzeriteEssences3azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences4specId, iz.selectedAzeriteEssences4azeriteEssenceId1, iz.selectedAzeriteEssences4azeriteEssenceId2, iz.selectedAzeriteEssences4azeriteEssenceId3, iz.selectedAzeriteEssences4azeriteEssenceId4 " +
-                "FROM item_instance_azerite iz INNER JOIN mail_items mi ON iz.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
-            PrepareStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER, "SELECT iamp.itemGuid, iamp.azeriteItemMilestonePowerId FROM item_instance_azerite_milestone_power iamp INNER JOIN mail_items mi ON iamp.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
-            PrepareStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE, "SELECT iaue.itemGuid, iaue.azeriteEssenceId, iaue.`rank` FROM item_instance_azerite_unlocked_essence iaue INNER JOIN mail_items mi ON iaue.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
-            PrepareStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED, "SELECT iae.itemGuid, iae.azeritePowerId1, iae.azeritePowerId2, iae.azeritePowerId3, iae.azeritePowerId4, iae.azeritePowerId5 FROM item_instance_azerite_empowered iae INNER JOIN mail_items mi ON iae.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
             PrepareStatement(CharStatements.SEL_AUCTION_ITEMS, "SELECT " + SelectItemInstanceContent + ", ii.owner_guid, ai.auctionId FROM auction_items ai INNER JOIN item_instance ii ON ai.itemGuid = ii.guid LEFT JOIN item_instance_gems ig ON ii.guid = ig.itemGuid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid LEFT JOIN item_instance_modifiers im ON ii.guid = im.itemGuid");
             PrepareStatement(CharStatements.SEL_AUCTIONS, "SELECT id, auctionHouseId, owner, bidder, minBid, buyoutOrUnitPrice, deposit, bidAmount, startTime, endTime, serverFlags FROM auctionhouse");
             PrepareStatement(CharStatements.INS_AUCTION_ITEMS, "INSERT INTO auction_items (auctionId, itemGuid) VALUES (?, ?)");
@@ -211,32 +202,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_ITEM_INSTANCE_MODIFIERS, "INSERT INTO item_instance_modifiers (itemGuid, fixedScalingLevel, artifactKnowledgeLevel) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS, "DELETE FROM item_instance_modifiers WHERE itemGuid = ?");
             PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER, "DELETE im FROM item_instance_modifiers im LEFT JOIN item_instance ii ON im.itemGuid = ii.guid WHERE ii.owner_guid = ?");
-            PrepareStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE, "SELECT iz.itemGuid, iz.xp, iz.level, iz.knowledgeLevel, " +
-                "iz.selectedAzeriteEssences1specId, iz.selectedAzeriteEssences1azeriteEssenceId1, iz.selectedAzeriteEssences1azeriteEssenceId2, iz.selectedAzeriteEssences1azeriteEssenceId3, iz.selectedAzeriteEssences1azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences2specId, iz.selectedAzeriteEssences2azeriteEssenceId1, iz.selectedAzeriteEssences2azeriteEssenceId2, iz.selectedAzeriteEssences2azeriteEssenceId3, iz.selectedAzeriteEssences2azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences3specId, iz.selectedAzeriteEssences3azeriteEssenceId1, iz.selectedAzeriteEssences3azeriteEssenceId2, iz.selectedAzeriteEssences3azeriteEssenceId3, iz.selectedAzeriteEssences3azeriteEssenceId4, " +
-                "iz.selectedAzeriteEssences4specId, iz.selectedAzeriteEssences4azeriteEssenceId1, iz.selectedAzeriteEssences4azeriteEssenceId2, iz.selectedAzeriteEssences4azeriteEssenceId3, iz.selectedAzeriteEssences4azeriteEssenceId4 " +
-                "FROM item_instance_azerite iz INNER JOIN character_inventory ci ON iz.itemGuid = ci.item WHERE ci.guid = ?");
-            PrepareStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE, "INSERT INTO item_instance_azerite (itemGuid, xp, level, knowledgeLevel, selectedAzeriteEssences1specId, selectedAzeriteEssences1azeriteEssenceId1, selectedAzeriteEssences1azeriteEssenceId2, selectedAzeriteEssences1azeriteEssenceId3, selectedAzeriteEssences1azeriteEssenceId4, " +
-                "selectedAzeriteEssences2specId, selectedAzeriteEssences2azeriteEssenceId1, selectedAzeriteEssences2azeriteEssenceId2, selectedAzeriteEssences2azeriteEssenceId3, selectedAzeriteEssences2azeriteEssenceId4, " +
-                "selectedAzeriteEssences3specId, selectedAzeriteEssences3azeriteEssenceId1, selectedAzeriteEssences3azeriteEssenceId2, selectedAzeriteEssences3azeriteEssenceId3, selectedAzeriteEssences3azeriteEssenceId4, " +
-                "selectedAzeriteEssences4specId, selectedAzeriteEssences4azeriteEssenceId1, selectedAzeriteEssences4azeriteEssenceId2, selectedAzeriteEssences4azeriteEssenceId3, selectedAzeriteEssences4azeriteEssenceId4) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_ON_LOAD, "UPDATE item_instance_azerite SET xp = ?, knowledgeLevel = ? WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE, "DELETE FROM item_instance_azerite WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER, "DELETE iz FROM item_instance_azerite iz LEFT JOIN item_instance ii ON iz.itemGuid = ii.guid WHERE ii.owner_guid = ?");
-            PrepareStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER, "SELECT iamp.itemGuid, iamp.azeriteItemMilestonePowerId FROM item_instance_azerite_milestone_power iamp INNER JOIN character_inventory ci ON iamp.itemGuid = ci.item WHERE ci.guid = ?");
-            PrepareStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_MILESTONE_POWER, "INSERT INTO item_instance_azerite_milestone_power (itemGuid, azeriteItemMilestonePowerId) VALUES (?, ?)");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER, "DELETE FROM item_instance_azerite_milestone_power WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER_BY_OWNER, "DELETE iamp FROM item_instance_azerite_milestone_power iamp LEFT JOIN item_instance ii ON iamp.itemGuid = ii.guid WHERE ii.owner_guid = ?");
-            PrepareStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE, "SELECT iaue.itemGuid, iaue.azeriteEssenceId, iaue.`rank` FROM item_instance_azerite_unlocked_essence iaue INNER JOIN character_inventory ci ON iaue.itemGuid = ci.item WHERE ci.guid = ?");
-            PrepareStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE, "INSERT INTO item_instance_azerite_unlocked_essence (itemGuid, azeriteEssenceId, `rank`) VALUES (?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE, "DELETE FROM item_instance_azerite_unlocked_essence WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER, "DELETE iaue FROM item_instance_azerite_unlocked_essence iaue LEFT JOIN item_instance ii ON iaue.itemGuid = ii.guid WHERE ii.owner_guid = ?");
-            PrepareStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_EMPOWERED, "SELECT iae.itemGuid, iae.azeritePowerId1, iae.azeritePowerId2, iae.azeritePowerId3, iae.azeritePowerId4, iae.azeritePowerId5 FROM item_instance_azerite_empowered iae INNER JOIN character_inventory ci ON iae.itemGuid = ci.item WHERE ci.guid = ?");
-            PrepareStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED, "INSERT INTO item_instance_azerite_empowered (itemGuid, azeritePowerId1, azeritePowerId2, azeritePowerId3, azeritePowerId4, azeritePowerId5) VALUES (?, ?, ?, ? ,? ,?)");
-            PrepareStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_EMPOWERED, "UPDATE item_instance_azerite_empowered SET azeritePowerId1 = ?, azeritePowerId2 = ?, azeritePowerId3 = ?, azeritePowerId4 = ?, azeritePowerId5 = ? WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED, "DELETE FROM item_instance_azerite_empowered WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER, "DELETE iae FROM item_instance_azerite_empowered iae LEFT JOIN item_instance ii ON iae.itemGuid = ii.guid WHERE ii.owner_guid = ?");
             PrepareStatement(CharStatements.UPD_GIFT_OWNER, "UPDATE character_gifts SET guid = ? WHERE item_guid = ?");
             PrepareStatement(CharStatements.DEL_GIFT, "DELETE FROM character_gifts WHERE item_guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM, "SELECT entry, flags FROM character_gifts WHERE item_guid = ?");
@@ -850,11 +815,7 @@ namespace Framework.Database
         DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR,
         SEL_ACCOUNT_INSTANCELOCKTIMES,
         SEL_MAILITEMS,
-        SEL_MAILITEMS_ARTIFACT,
-        SEL_MAILITEMS_AZERITE,
-        SEL_MAILITEMS_AZERITE_MILESTONE_POWER,
-        SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE,
-        SEL_MAILITEMS_AZERITE_EMPOWERED,
+        SEL_MAILITEMS_ARTIFACT,        
         SEL_AUCTION_ITEMS,
         INS_AUCTION,
         DEL_AUCTION,
@@ -903,24 +864,6 @@ namespace Framework.Database
         INS_ITEM_INSTANCE_MODIFIERS,
         DEL_ITEM_INSTANCE_MODIFIERS,
         DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER,
-        SEL_ITEM_INSTANCE_AZERITE,
-        INS_ITEM_INSTANCE_AZERITE,
-        UPD_ITEM_INSTANCE_AZERITE_ON_LOAD,
-        DEL_ITEM_INSTANCE_AZERITE,
-        DEL_ITEM_INSTANCE_AZERITE_BY_OWNER,
-        SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER,
-        INS_ITEM_INSTANCE_AZERITE_MILESTONE_POWER,
-        DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER,
-        DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER_BY_OWNER,
-        SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE,
-        INS_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE,
-        DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE,
-        DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER,
-        SEL_ITEM_INSTANCE_AZERITE_EMPOWERED,
-        INS_ITEM_INSTANCE_AZERITE_EMPOWERED,
-        UPD_ITEM_INSTANCE_AZERITE_EMPOWERED,
-        DEL_ITEM_INSTANCE_AZERITE_EMPOWERED,
-        DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER,
         UPD_GIFT_OWNER,
         DEL_GIFT,
         SEL_CHARACTER_GIFT_BY_ITEM,

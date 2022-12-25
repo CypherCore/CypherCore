@@ -1608,7 +1608,7 @@ namespace Game.BattleGrounds
                 // creature.SetVisibleAura(0, SPELL_SPIRIT_HEAL_CHANNEL);
                 // casting visual effect
                 creature.SetChannelSpellId(BattlegroundConst.SpellSpiritHealChannel);
-                creature.SetChannelVisual(new SpellCastVisual(BattlegroundConst.SpellSpiritHealChannelVisual, 0));
+                creature.SetChannelSpellXSpellVisual(BattlegroundConst.SpellSpiritHealChannelVisual);
                 //creature.CastSpell(creature, SPELL_SPIRIT_HEAL_CHANNEL, true);
                 return true;
             }

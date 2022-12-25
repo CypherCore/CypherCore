@@ -37,7 +37,6 @@ namespace Game.Entities
         BitSet _appearances;
         MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
         Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
-        BitSet _transmogIllusions;
 
         public static void LoadMountDefinitions()
         {
@@ -77,7 +76,6 @@ namespace Game.Entities
         {
             _owner = owner;
             _appearances = new BitSet(0);
-            _transmogIllusions = new BitSet(0);
         }
 
         public void LoadToys()
@@ -847,91 +845,7 @@ namespace Game.Entities
             }
 
             return !knownPieces.Contains(0);
-        }
-
-        public void LoadTransmogIllusions()
-        {
-            Player owner = _owner.GetPlayer();
-            foreach (var blockValue in _transmogIllusions.ToBlockRange())
-                owner.AddIllusionBlock(blockValue);
-        }
-
-        public void LoadAccountTransmogIllusions(SQLResult knownTransmogIllusions)
-        {
-            uint[] blocks = new uint[7];
-
-            if (!knownTransmogIllusions.IsEmpty())
-            {
-                do
-                {
-                    ushort blobIndex = knownTransmogIllusions.Read<ushort>(0);
-                    if (blobIndex >= blocks.Length)
-                        Array.Resize(ref blocks, blobIndex + 1);
-
-                    blocks[blobIndex] = knownTransmogIllusions.Read<uint>(1);
-
-                } while (knownTransmogIllusions.NextRow());
-            }
-            
-            _transmogIllusions = new(blocks);
-
-            // Static illusions known by every player
-            ushort[] defaultIllusions =
-            {
-                3, // Lifestealing
-                13, // Crusader
-                22, // Striking
-                23, // Agility
-                34, // Hide Weapon Enchant
-                43, // Beastslayer
-                44, // Titanguard
-            };
-
-            foreach (ushort illusionId in defaultIllusions)
-                _transmogIllusions.Set(illusionId, true);
-        }
-
-        public void SaveAccountTransmogIllusions(SQLTransaction trans)
-        {
-            ushort blockIndex = 0;
-
-            foreach (var blockValue in _transmogIllusions.ToBlockRange())
-            {
-                if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
-                {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS);
-                    stmt.AddValue(0, _owner.GetBattlenetAccountId());
-                    stmt.AddValue(1, blockIndex);
-                    stmt.AddValue(2, blockValue);
-                    trans.Append(stmt);
-                }
-                ++blockIndex;
-            }
-        }
-
-        public void AddTransmogIllusion(uint transmogIllusionId)
-        {
-            Player owner = _owner.GetPlayer();
-            if (_transmogIllusions.Count <= transmogIllusionId)
-            {
-                uint numBlocks = (uint)(_transmogIllusions.Count << 2);
-                _transmogIllusions.Length = (int)transmogIllusionId + 1;
-                numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
-                while (numBlocks-- != 0)
-                    owner.AddIllusionBlock(0);
-            }
-
-            _transmogIllusions.Set((int)transmogIllusionId, true);
-            uint blockIndex = transmogIllusionId / 32;
-            uint bitIndex = transmogIllusionId % 32;
-
-            owner.AddIllusionFlag((int)blockIndex, (uint)(1 << (int)bitIndex));
-        }
-
-        public bool HasTransmogIllusion(uint transmogIllusionId)
-        {
-            return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
-        }
+        }        
         
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
         public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }

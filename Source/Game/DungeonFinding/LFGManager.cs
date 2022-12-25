@@ -1646,7 +1646,7 @@ namespace Game.DungeonFinding
                 }
                 else
                 {
-                    var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, 0);
                     if (levels.HasValue)
                     {
                         if (levels.Value.MinLevel > level)

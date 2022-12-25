@@ -1406,14 +1406,6 @@ namespace Game.Networking.Packets
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt32(ScriptVisualID);
         }
-
-        public static implicit operator SpellCastVisualField(SpellCastVisual spellCastVisual)
-        {
-            SpellCastVisualField visual = new();
-            visual.SpellXSpellVisualID = spellCastVisual.SpellXSpellVisualID;
-            visual.ScriptVisualID = spellCastVisual.ScriptVisualID;
-            return visual;
-        }
     }
 
     public class AuraDataInfo

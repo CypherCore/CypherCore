@@ -515,7 +515,7 @@ namespace Game.Entities
                 float maxModDamagePercentSchool = 0.0f;
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                     if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
-                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent[i]);
+                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent);
 
                 return maxModDamagePercentSchool;
             }
@@ -613,7 +613,7 @@ namespace Game.Entities
                         crit_chance = 0.0f;
                     // For other schools
                     else if (IsTypeId(TypeId.Player))
-                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
+                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage[(int)SharedConst.GetFirstSchoolInMask(schoolMask)];
                     else
                         crit_chance = BaseSpellCritChance;
                     break;

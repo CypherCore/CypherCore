@@ -1983,7 +1983,8 @@ namespace Game
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
-            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+
+            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, 0);
             if (levels.HasValue)
             {
                 byte minLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MinLevelWithDelta : levels.Value.MinLevel);
@@ -2437,9 +2438,6 @@ namespace Game
                 return false;
 
             if (condition.ModifierTreeID != 0 && !player.ModifierTreeSatisfied(condition.ModifierTreeID))
-                return false;
-
-            if (condition.CovenantID != 0 && player.m_playerData.CovenantID != condition.CovenantID)
                 return false;
 
             return true;

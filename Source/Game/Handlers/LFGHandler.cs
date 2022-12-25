@@ -144,8 +144,7 @@ namespace Game
         {
             // Get Random dungeons that can be done at a certain level and expansion
             uint level = GetPlayer().GetLevel();
-            uint contentTuningReplacementConditionMask = GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask;
-            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), contentTuningReplacementConditionMask);
+            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), 0);
 
             LfgPlayerInfo lfgPlayerInfo = new();
 

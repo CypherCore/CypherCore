@@ -2966,9 +2966,6 @@ namespace Game.Spells
                 }
             }
 
-            if (power.PowerType == PowerType.Mana)
-                powerCost = (int)((float)powerCost * (1.0f + unitCaster.m_unitData.ManaCostMultiplier));
-
             // power cost cannot become negative if initially positive
             if (initiallyNegative != (powerCost < 0))
                 powerCost = 0;
@@ -3053,7 +3050,6 @@ namespace Game.Spells
 
             float crit = player.m_activePlayerData.CritPercentage;
             float rangedCrit = player.m_activePlayerData.RangedCritPercentage;
-            float spellCrit = player.m_activePlayerData.SpellCritPercentage;
 
             switch (mod.Param)
             {
@@ -3062,9 +3058,9 @@ namespace Game.Spells
                 case 2:
                     return rangedCrit * mod.Coeff * 0.01f;
                 case 3:
-                    return spellCrit * mod.Coeff * 0.01f;
+                    return 0.0f;
                 case 4:
-                    return Math.Min(Math.Min(crit, rangedCrit), spellCrit) * mod.Coeff * 0.01f;
+                    return Math.Min(crit, rangedCrit) * mod.Coeff * 0.01f;
                 default:
                     break;
             }

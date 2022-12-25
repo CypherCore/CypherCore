@@ -2890,10 +2890,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerAzeriteLevelEqualOrGreaterThan: // 235
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
-                        return false;
-                    break;
+                    return false;
                 }
                 case ModifierTreeType.PlayerIsOnQuestInQuestline: // 236
                 {
@@ -3078,47 +3075,14 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.PlayerHasAzeriteEssenceRankLessThan: // 259
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                    {
-                        AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                        if (azeriteItem != null)
-                        {
-                            foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
-                                if (essence.AzeriteEssenceID == reqValue && essence.Rank < secondaryAsset)
-                                    return true;
-                        }
-                    }
                     return false;
                 }
                 case ModifierTreeType.PlayerHasAzeriteEssenceRankEqual: // 260
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                    {
-                        AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                        if (azeriteItem != null)
-                        {
-                            foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
-                                if (essence.AzeriteEssenceID == reqValue && essence.Rank == secondaryAsset)
-                                    return true;
-                        }
-                    }
                     return false;
                 }
                 case ModifierTreeType.PlayerHasAzeriteEssenceRankGreaterThan: // 261
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                    {
-                        AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                        if (azeriteItem != null)
-                        {
-                            foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
-                                if (essence.AzeriteEssenceID == reqValue && essence.Rank > secondaryAsset)
-                                    return true;
-                        }
-                    }
                     return false;
                 }
                 case ModifierTreeType.PlayerHasAuraWithEffectIndex: // 262
@@ -3148,40 +3112,10 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerHasAzeriteEssenceInSlotAtRankLessThan: // 266
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                    {
-                        AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                        if (azeriteItem != null)
-                        {
-                            SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
-                            if (selectedEssences != null)
-                            {
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
-                                    if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank < secondaryAsset)
-                                        return true;
-                            }
-                        }
-                    }
                     return false;
                 }
                 case ModifierTreeType.PlayerHasAzeriteEssenceInSlotAtRankGreaterThan: // 267
                 {
-                    Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                    {
-                        AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-                        if (azeriteItem != null)
-                        {
-                            SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
-                            if (selectedEssences != null)
-                            {
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
-                                    if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank > secondaryAsset)
-                                        return true;
-                            }
-                        }
-                    }
                     return false;
                 }
                 case ModifierTreeType.PlayerLevelWithinContentTuning: // 268
@@ -3242,10 +3176,8 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerLevelWithinOrAboveLevelRange: // 274 NYI
                 case ModifierTreeType.TargetLevelWithinOrAboveLevelRange: // 275 NYI
                     return false;
-                case ModifierTreeType.MaxJailersTowerLevelEqualOrGreaterThan: // 276
-                    if (referencePlayer.m_activePlayerData.JailersTowerLevelMax < reqValue)
-                        return false;
-                    break;
+                case ModifierTreeType.MaxJailersTowerLevelEqualOrGreaterThan: // 276                    
+                    return false;
                 case ModifierTreeType.GroupedWithRaFRecruit: // 277
                 {
                     var group = referencePlayer.GetGroup();
@@ -3292,10 +3224,8 @@ namespace Game.Achievements
                 case ModifierTreeType.JailersTowerActiveFloorIndexEqualOrGreaterThan: // 286 NYI
                 case ModifierTreeType.JailersTowerActiveFloorDifficultyEqualOrGreaterThan: // 287 NYI
                     return false;
-                case ModifierTreeType.PlayerCovenant: // 288
-                    if (referencePlayer.m_playerData.CovenantID != reqValue)
-                        return false;
-                    break;
+                case ModifierTreeType.PlayerCovenant: // 288                    
+                    return false;                 
                 case ModifierTreeType.HasTimeEventPassed: // 289
                 {
                     long eventTimestamp = GameTime.GetGameTime();
@@ -3326,9 +3256,7 @@ namespace Game.Achievements
                 case ModifierTreeType.GarrisonHasPermanentTalent: // 290 NYI
                     return false;
                 case ModifierTreeType.HasActiveSoulbind: // 291
-                    if (referencePlayer.m_playerData.SoulbindID != reqValue)
-                        return false;
-                    break;
+                    return false;
                 case ModifierTreeType.HasMemorizedSpell: // 292 NYI
                     return false;
                 case ModifierTreeType.PlayerHasAPACSubscriptionReward_2020: // 293
@@ -3361,30 +3289,19 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.PlayerIsInChromieTime: // 300
-                    if (referencePlayer.m_activePlayerData.UiChromieTimeExpansionID != reqValue)
-                        return false;
-                    break;
+                    return false;
                 case ModifierTreeType.PlayerIsInAnyChromieTime: // 301
-                    if (referencePlayer.m_activePlayerData.UiChromieTimeExpansionID == 0)
-                        return false;
-                    break;
+                    return false;
                 case ModifierTreeType.ItemIsAzeriteArmor: // 302
                     if (Global.DB2Mgr.GetAzeriteEmpoweredItem((uint)miscValue1) == null)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasRuneforgePower: // 303
                 {
-                    int block = (int)reqValue / 32;
-                    if (block >= referencePlayer.m_activePlayerData.RuneforgePowers.Size())
-                        return false;
-
-                    uint bit = reqValue % 32;
-                    return (referencePlayer.m_activePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
+                    return false;
                 }
                 case ModifierTreeType.PlayerInChromieTimeForScaling: // 304
-                    if ((referencePlayer.m_playerData.CtrOptions._value.ContentTuningConditionMask & 1) == 0)
-                        return false;
-                    break;
+                    return false;
                 case ModifierTreeType.IsRaFRecruit: // 305
                     if (referencePlayer.GetSession().GetRecruiterId() == 0)
                         return false;
@@ -3438,15 +3355,9 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerHasWeeklyRewardsAvailable: // 313
-                    if (referencePlayer.m_activePlayerData.WeeklyRewardsPeriodSinceOrigin == 0)
-                        return false;
-                    break;
+                    return false;
                 case ModifierTreeType.TargetCovenant: // 314
-                    if (!refe || !refe.IsPlayer())
-                        return false;
-                    if (refe.ToPlayer().m_playerData.CovenantID != reqValue)
-                        return false;
-                    break;
+                    return false;                    
                 case ModifierTreeType.PlayerHasTBCCollectorsEdition: // 315
                 case ModifierTreeType.PlayerHasWrathCollectorsEdition: // 316
                     return false;

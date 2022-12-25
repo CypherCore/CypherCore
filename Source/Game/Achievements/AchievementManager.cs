@@ -97,12 +97,6 @@ namespace Game.Achievements
                 if (referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnRealmFirstAchievements))
                     return false;
 
-            if (achievement.CovenantID != 0 && referencePlayer.m_playerData.CovenantID != achievement.CovenantID)
-            {
-                Log.outTrace(LogFilter.Achievement, $"CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Achievement {achievement.Id}) Wrong covenant");
-                return false;
-            }
-
             return base.CanUpdateCriteriaTree(criteria, tree, referencePlayer);
         }
 

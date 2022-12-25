@@ -42,12 +42,7 @@ namespace Game
             if (GetPlayer().GetCritterGUID() == pet.GetGUID())
             {
                 if (pet.IsCreature() && pet.IsSummon())
-                {
-                    if (!_player.GetSummonedBattlePetGUID().IsEmpty() && _player.GetSummonedBattlePetGUID() == pet.GetBattlePetCompanionGUID())
-                        _player.SetBattlePetData(null);
-
                     pet.ToTempSummon().UnSummon();
-                }
             }
         }
 

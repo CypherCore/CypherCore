@@ -1052,7 +1052,6 @@ namespace Game.Entities
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0u);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), 0u);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)0);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Inactive), (ushort)0);
             SetState(ItemUpdateState.Changed, GetOwner());
         }
 
@@ -1823,26 +1822,18 @@ namespace Game.Entities
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
             uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-
-            uint azeriteLevel = 0;
-            AzeriteItem azeriteItem = ToAzeriteItem();
-            if (azeriteItem != null)
-                azeriteLevel = azeriteItem.GetEffectiveLevel();
-
+            
             return GetItemLevel(itemTemplate, _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
-                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus, azeriteLevel);
+                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
         }
 
-        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus, uint azeriteLevel)
+        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus)
         {
             if (itemTemplate == null)
                 return 1;
 
             uint itemLevel = itemTemplate.GetBaseItemLevel();
-            AzeriteLevelInfoRecord azeriteLevelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(azeriteLevel);
-            if (azeriteLevelInfo != null)
-                itemLevel = azeriteLevelInfo.ItemLevel;
-
+            
             if (bonusData.PlayerLevelToItemLevelCurveId != 0)
             {
                 if (fixedLevel != 0)
@@ -2399,12 +2390,6 @@ namespace Game.Entities
             if (proto.GetInventoryType() == InventoryType.Bag)
                 return new Bag();
 
-            if (Global.DB2Mgr.IsAzeriteItem(proto.GetId()))
-                return new AzeriteItem();
-
-            if (Global.DB2Mgr.GetAzeriteEmpoweredItem(proto.GetId()) != null)
-                return new AzeriteEmpoweredItem();
-
             return new Item();
         }
 
@@ -2433,7 +2418,7 @@ namespace Game.Entities
                 {
                     uint maxLevel = (uint)Global.DB2Mgr.GetCurveXAxisRange(item.GetBonus().PlayerLevelToItemLevelCurveId).Item2;
 
-                    var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.m_playerData.CtrOptions._value.ContentTuningConditionMask, true);
+                    var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, 0, true);
                     if (contentTuning.HasValue)
                         maxLevel = Math.Min(maxLevel, (uint)contentTuning.Value.MaxLevel);
 
@@ -2579,8 +2564,6 @@ namespace Game.Entities
         public void ReplaceAllItemFlags2(ItemFieldFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
 
         public Bag ToBag() { return IsBag() ? this as Bag : null; }
-        public AzeriteItem ToAzeriteItem() { return IsAzeriteItem() ? this as AzeriteItem : null; }
-        public AzeriteEmpoweredItem ToAzeriteEmpoweredItem() { return IsAzeriteEmpoweredItem() ? this as AzeriteEmpoweredItem : null; }
 
         public bool IsRefundable() { return HasItemFlag(ItemFieldFlags.Refundable); }
         public bool IsBOPTradeable() { return HasItemFlag(ItemFieldFlags.BopTradeable); }
@@ -2863,12 +2846,7 @@ namespace Game.Entities
             RelicType = -1;
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
-            AzeriteTierUnlockSetId = 0;
-
-            AzeriteEmpoweredItemRecord azeriteEmpoweredItem = Global.DB2Mgr.GetAzeriteEmpoweredItem(proto.GetId());
-            if (azeriteEmpoweredItem != null)
-                AzeriteTierUnlockSetId = azeriteEmpoweredItem.AzeriteTierUnlockSetID;
-
+            
             EffectCount = 0;
             foreach (ItemEffectRecord itemEffect in proto.Effects)
                 Effects[EffectCount++] = itemEffect;
@@ -2882,7 +2860,6 @@ namespace Game.Entities
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
-            _state.AzeriteTierUnlockSetPriority = int.MaxValue;
             _state.RequiredLevelCurvePriority = int.MaxValue;
             _state.HasQualityBonus = false;
         }
@@ -2986,12 +2963,7 @@ namespace Game.Entities
                 case ItemBonusType.OverrideRequiredLevel:
                     RequiredLevelOverride = values[0];
                     break;
-                case ItemBonusType.AzeriteTierUnlockSet:
-                    if (values[1] < _state.AzeriteTierUnlockSetPriority)
-                    {
-                        AzeriteTierUnlockSetId = (uint)values[0];
-                        _state.AzeriteTierUnlockSetPriority = values[1];
-                    }
+                case ItemBonusType.AzeriteTierUnlockSet:                    
                     break;
                 case ItemBonusType.OverrideCanDisenchant:
                     CanDisenchant = values[0] != 0;
@@ -3078,11 +3050,9 @@ namespace Game.Entities
     class ItemAdditionalLoadInfo
     {
         public ArtifactData Artifact;
-        public AzeriteData AzeriteItem;
         public AzeriteEmpoweredData AzeriteEmpoweredItem;
 
-        public static void Init(Dictionary<ulong, ItemAdditionalLoadInfo> loadInfo, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult,
-            SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult)
+        public static void Init(Dictionary<ulong, ItemAdditionalLoadInfo> loadInfo, SQLResult artifactResult)
         {
             ItemAdditionalLoadInfo GetOrCreateLoadInfo(ulong guid)
             {
@@ -3126,85 +3096,7 @@ namespace Game.Entities
 
                 } while (artifactResult.NextRow());
             }
-
-            if (!azeriteItemResult.IsEmpty())
-            {
-                do
-                {
-                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemResult.Read<ulong>(0));
-                    if (info.AzeriteItem == null)
-                        info.AzeriteItem = new AzeriteData();
-
-                    info.AzeriteItem.Xp = azeriteItemResult.Read<ulong>(1);
-                    info.AzeriteItem.Level = azeriteItemResult.Read<uint>(2);
-                    info.AzeriteItem.KnowledgeLevel = azeriteItemResult.Read<uint>(3);
-                    for (int i = 0; i < info.AzeriteItem.SelectedAzeriteEssences.Length; ++i)
-                    {
-                        info.AzeriteItem.SelectedAzeriteEssences[i] = new();
-
-                        uint specializationId = azeriteItemResult.Read<uint>(4 + i * 4);
-                        if (!CliDB.ChrSpecializationStorage.ContainsKey(specializationId))
-                            continue;
-
-                        info.AzeriteItem.SelectedAzeriteEssences[i].SpecializationId = specializationId;
-                        for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
-                        {
-                            AzeriteEssenceRecord azeriteEssence = CliDB.AzeriteEssenceStorage.LookupByKey(azeriteItemResult.Read<uint>(5 + i * 5 + j));
-                            if (azeriteEssence == null || !Global.DB2Mgr.IsSpecSetMember(azeriteEssence.SpecSetID, specializationId))
-                                continue;
-
-                            info.AzeriteItem.SelectedAzeriteEssences[i].AzeriteEssenceId[j] = azeriteEssence.Id;
-                        }
-                    }
-
-                } while (azeriteItemResult.NextRow());
-            }
-
-            if (!azeriteItemMilestonePowersResult.IsEmpty())
-            {
-                do
-                {
-                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemMilestonePowersResult.Read<ulong>(0));
-                    if (info.AzeriteItem == null)
-                        info.AzeriteItem = new AzeriteData();
-
-                    info.AzeriteItem.AzeriteItemMilestonePowers.Add(azeriteItemMilestonePowersResult.Read<uint>(1));
-                }
-                while (azeriteItemMilestonePowersResult.NextRow());
-            }
-
-            if (!azeriteItemUnlockedEssencesResult.IsEmpty())
-            {
-                do
-                {
-                    AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(azeriteItemUnlockedEssencesResult.Read<uint>(1), azeriteItemUnlockedEssencesResult.Read<uint>(2));
-                    if (azeriteEssencePower != null)
-                    {
-                        ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemUnlockedEssencesResult.Read<ulong>(0));
-                        if (info.AzeriteItem == null)
-                            info.AzeriteItem = new AzeriteData();
-
-                        info.AzeriteItem.UnlockedAzeriteEssences.Add(azeriteEssencePower);
-                    }
-                }
-                while (azeriteItemUnlockedEssencesResult.NextRow());
-            }
-
-            if (!azeriteEmpoweredItemResult.IsEmpty())
-            {
-                do
-                {
-                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteEmpoweredItemResult.Read<ulong>(0));
-                    if (info.AzeriteEmpoweredItem == null)
-                        info.AzeriteEmpoweredItem = new AzeriteEmpoweredData();
-
-                    for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
-                        if (CliDB.AzeritePowerStorage.ContainsKey(azeriteEmpoweredItemResult.Read<int>(1 + i)))
-                            info.AzeriteEmpoweredItem.SelectedAzeritePowers[i] = azeriteEmpoweredItemResult.Read<int>(1 + i);
-
-                } while (azeriteEmpoweredItemResult.NextRow());
-            }
-        }
+        }            
     }
 
     [StructLayout(LayoutKind.Sequential)]

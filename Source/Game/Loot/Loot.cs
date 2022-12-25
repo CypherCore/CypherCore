@@ -602,7 +602,7 @@ namespace Game.Loots
                 return null;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
-            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, 1, 0, 0, 0, 0, false, 0);
+            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, 1, 0, 0, 0, 0, false);
             return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
         }
 

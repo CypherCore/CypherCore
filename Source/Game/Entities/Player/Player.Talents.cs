@@ -445,30 +445,6 @@ namespace Game.Entities
             activeGlyphs.IsFullUpdate = true;
             SendPacket(activeGlyphs);
 
-            Item item = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-            if (item != null)
-            {
-                AzeriteItem azeriteItem = item.ToAzeriteItem();
-                if (azeriteItem != null)
-                {
-                    if (azeriteItem.IsEquipped())
-                    {
-                        ApplyAllAzeriteEmpoweredItemMods(false);
-                        ApplyAzeritePowers(azeriteItem, false);
-                    }
-
-                    azeriteItem.SetSelectedAzeriteEssences(spec.Id);
-
-                    if (azeriteItem.IsEquipped())
-                    {
-                        ApplyAzeritePowers(azeriteItem, true);
-                        ApplyAllAzeriteEmpoweredItemMods(true);
-                    }
-
-                    azeriteItem.SetState(ItemUpdateState.Changed, this);
-                }
-            }
-
             var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
             foreach (AuraEffect aurEff in shapeshiftAuras)
             {

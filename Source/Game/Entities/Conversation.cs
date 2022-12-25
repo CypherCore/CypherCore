@@ -177,17 +177,6 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
-            // All actors need to be set
-            foreach (ushort actorIndex in actorIndices)
-            {
-                ConversationActorField actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
-                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
-                {
-                    Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
-                    return false;
-                }
-            }
-
             if (!GetMap().AddToMap(this))
                 return false;
 
@@ -202,7 +191,6 @@ namespace Game.Entities
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
             SetUpdateFieldValue(ref actorField.Id, actorId);
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObject);
-            SetUpdateFieldValue(ref actorField.NoActorObject, 0u);
         }
 
         public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
@@ -213,7 +201,6 @@ namespace Game.Entities
             SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);
             SetUpdateFieldValue(ref actorField.Id, actorId);
             SetUpdateFieldValue(ref actorField.Type, type);
-            SetUpdateFieldValue(ref actorField.NoActorObject, type == ConversationActorType.WorldObject ? 1 : 0u);
         }
 
         public TimeSpan GetLineStartTime(Locale locale, int lineId)

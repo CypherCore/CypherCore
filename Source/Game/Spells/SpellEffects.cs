@@ -60,6 +60,9 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.Effect122)]
         [SpellEffectHandler(SpellEffectName.Effect175)]
         [SpellEffectHandler(SpellEffectName.Effect178)]
+        [SpellEffectHandler(SpellEffectName.Unk259)]
+        [SpellEffectHandler(SpellEffectName.Unk265)]
+        [SpellEffectHandler(SpellEffectName.Unk276)]
         void EffectUnused() { }
 
         void EffectResurrectNew()
@@ -219,39 +222,39 @@ namespace Game.Spells
                 {
                     // Demonic Empowerment -- succubus
                     case 54437:
-                    {
-                        unitTarget.RemoveMovementImpairingAuras(true);
-                        unitTarget.RemoveAurasByType(AuraType.ModStalked);
-                        unitTarget.RemoveAurasByType(AuraType.ModStun);
+                        {
+                            unitTarget.RemoveMovementImpairingAuras(true);
+                            unitTarget.RemoveAurasByType(AuraType.ModStalked);
+                            unitTarget.RemoveAurasByType(AuraType.ModStun);
 
-                        // Cast Lesser Invisibility
-                        unitTarget.CastSpell(unitTarget, 7870, new CastSpellExtraArgs(this));
-                        return;
-                    }
+                            // Cast Lesser Invisibility
+                            unitTarget.CastSpell(unitTarget, 7870, new CastSpellExtraArgs(this));
+                            return;
+                        }
                     // Brittle Armor - (need add max stack of 24575 Brittle Armor)
                     case 29284:
-                    {
-                        // Brittle Armor
-                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(24575, GetCastDifficulty());
-                        if (spell == null)
-                            return;
+                        {
+                            // Brittle Armor
+                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(24575, GetCastDifficulty());
+                            if (spell == null)
+                                return;
 
-                        for (uint j = 0; j < spell.StackAmount; ++j)
-                            m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(this));
-                        return;
-                    }
+                            for (uint j = 0; j < spell.StackAmount; ++j)
+                                m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(this));
+                            return;
+                        }
                     // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
                     case 29286:
-                    {
-                        // Mercurial Shield
-                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(26464, GetCastDifficulty());
-                        if (spell == null)
-                            return;
+                        {
+                            // Mercurial Shield
+                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(26464, GetCastDifficulty());
+                            if (spell == null)
+                                return;
 
-                        for (uint j = 0; j < spell.StackAmount; ++j)
-                            m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(this));
-                        return;
-                    }
+                            for (uint j = 0; j < spell.StackAmount; ++j)
+                                m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(this));
+                            return;
+                        }
                 }
             }
 
@@ -434,14 +437,14 @@ namespace Game.Spells
                         break;
                     case 52463: // Hide In Mine Car
                     case 52349: // Overtake
-                    {
-                        CastSpellExtraArgs args1 = new(TriggerCastFlags.FullMask);
-                        args1.SetOriginalCaster(m_originalCasterGUID);
-                        args1.SetTriggeringSpell(this);
-                        args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
-                        unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
-                        return;
-                    }
+                        {
+                            CastSpellExtraArgs args1 = new(TriggerCastFlags.FullMask);
+                            args1.SetOriginalCaster(m_originalCasterGUID);
+                            args1.SetTriggeringSpell(this);
+                            args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
+                            unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
+                            return;
+                        }
                 }
             }
 
@@ -1147,13 +1150,13 @@ namespace Game.Spells
                     damage -= 4 * (int)Math.Max(0, Math.Min(15, unitCaster.GetLevel() - 60));
                     break;
                 case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
-                {
-                    Player player = unitCaster.ToPlayer();
-                    if (player != null)
-                        if (player.HasSkill(SkillType.Engineering))
-                            MathFunctions.AddPct(ref damage, 25);
-                    break;
-                }
+                    {
+                        Player player = unitCaster.ToPlayer();
+                        if (player != null)
+                            if (player.HasSkill(SkillType.Engineering))
+                                MathFunctions.AddPct(ref damage, 25);
+                        break;
+                    }
                 default:
                     break;
             }
@@ -1540,114 +1543,114 @@ namespace Game.Spells
                         // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                         case SummonTitle.Vehicle:
                         case SummonTitle.Mount:
-                        {
-                            if (unitCaster == null)
-                                return;
+                            {
+                                if (unitCaster == null)
+                                    return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
-                            break;
-                        }
+                                summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
+                                break;
+                            }
                         case SummonTitle.LightWell:
                         case SummonTitle.Totem:
-                        {
-                            if (unitCaster == null)
-                                return;
-
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                            if (summon == null || !summon.IsTotem())
-                                return;
-
-                            if (damage != 0)                                            // if not spell info, DB values used
                             {
-                                summon.SetMaxHealth((uint)damage);
-                                summon.SetHealth((uint)damage);
+                                if (unitCaster == null)
+                                    return;
+
+                                summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                if (summon == null || !summon.IsTotem())
+                                    return;
+
+                                if (damage != 0)                                            // if not spell info, DB values used
+                                {
+                                    summon.SetMaxHealth((uint)damage);
+                                    summon.SetHealth((uint)damage);
+                                }
+                                break;
                             }
-                            break;
-                        }
                         case SummonTitle.Companion:
-                        {
-                            if (unitCaster == null)
-                                return;
-
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                            if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
-                                return;
-
-                            summon.SetImmuneToAll(true);
-
-                            break;
-                        }
-                        default:
-                        {
-                            float radius = effectInfo.CalcRadius();
-
-                            TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
-
-                            for (uint count = 0; count < numSummons; ++count)
                             {
-                                Position pos;
-                                if (count == 0)
-                                    pos = destTarget;
-                                else
-                                    // randomize position for multiple summons
-                                    pos = caster.GetRandomPoint(destTarget, radius);
+                                if (unitCaster == null)
+                                    return;
 
-                                summon = unitCaster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                                if (summon == null)
-                                    continue;
+                                summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
+                                    return;
 
-                                summon.SetTempSummonType(summonType);
-                                if (properties.Control == SummonCategory.Ally)
-                                    summon.SetOwnerGUID(caster.GetGUID());
+                                summon.SetImmuneToAll(true);
 
-                                ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
+                                break;
                             }
-                            return;
-                        }
+                        default:
+                            {
+                                float radius = effectInfo.CalcRadius();
+
+                                TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+
+                                for (uint count = 0; count < numSummons; ++count)
+                                {
+                                    Position pos;
+                                    if (count == 0)
+                                        pos = destTarget;
+                                    else
+                                        // randomize position for multiple summons
+                                        pos = caster.GetRandomPoint(destTarget, radius);
+
+                                    summon = unitCaster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                    if (summon == null)
+                                        continue;
+
+                                    summon.SetTempSummonType(summonType);
+                                    if (properties.Control == SummonCategory.Ally)
+                                        summon.SetOwnerGUID(caster.GetGUID());
+
+                                    ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
+                                }
+                                return;
+                            }
                     }//switch
                     break;
                 case SummonCategory.Pet:
                     SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                     break;
                 case SummonCategory.Puppet:
-                {
-                    if (unitCaster == null)
-                        return;
-
-                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                    break;
-                }
-                case SummonCategory.Vehicle:
-                {
-                    if (unitCaster == null)
-                        return;
-
-                    // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker
-                    // to cast a ride vehicle spell on the summoned unit.
-                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
-                    if (summon == null || !summon.IsVehicle())
-                        return;
-
-                    // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
-                    uint spellId = SharedConst.VehicleSpellRideHardcoded;
-                    int basePoints = effectInfo.CalcValue();
-                    if (basePoints > SharedConst.MaxVehicleSeats)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints, GetCastDifficulty());
-                        if (spellInfo != null && spellInfo.HasAura(AuraType.ControlVehicle))
-                            spellId = spellInfo.Id;
+                        if (unitCaster == null)
+                            return;
+
+                        summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                        break;
                     }
+                case SummonCategory.Vehicle:
+                    {
+                        if (unitCaster == null)
+                            return;
 
-                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.SetTriggeringSpell(this);
+                        // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker
+                        // to cast a ride vehicle spell on the summoned unit.
+                        summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
+                        if (summon == null || !summon.IsVehicle())
+                            return;
 
-                    // if we have small value, it indicates seat position
-                    if (basePoints > 0 && basePoints < SharedConst.MaxVehicleSeats)
-                        args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
+                        // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
+                        uint spellId = SharedConst.VehicleSpellRideHardcoded;
+                        int basePoints = effectInfo.CalcValue();
+                        if (basePoints > SharedConst.MaxVehicleSeats)
+                        {
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints, GetCastDifficulty());
+                            if (spellInfo != null && spellInfo.HasAura(AuraType.ControlVehicle))
+                                spellId = spellInfo.Id;
+                        }
 
-                    unitCaster.CastSpell(summon, spellId, args);
-                    break;
-                }
+                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                        args.SetTriggeringSpell(this);
+
+                        // if we have small value, it indicates seat position
+                        if (basePoints > 0 && basePoints < SharedConst.MaxVehicleSeats)
+                            args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
+
+                        unitCaster.CastSpell(summon, spellId, args);
+                        break;
+                    }
             }
 
             if (summon != null)
@@ -2421,14 +2424,14 @@ namespace Game.Spells
             switch (m_spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Shaman:
-                {
-                    // Skyshatter Harness item set bonus
-                    // Stormstrike
-                    AuraEffect aurEff = unitCaster.IsScriptOverriden(m_spellInfo, 5634);
-                    if (aurEff != null)
-                        unitCaster.CastSpell((WorldObject)null, 38430, new CastSpellExtraArgs(aurEff));
-                    break;
-                }
+                    {
+                        // Skyshatter Harness item set bonus
+                        // Stormstrike
+                        AuraEffect aurEff = unitCaster.IsScriptOverriden(m_spellInfo, 5634);
+                        if (aurEff != null)
+                            unitCaster.CastSpell((WorldObject)null, 38430, new CastSpellExtraArgs(aurEff));
+                        break;
+                    }
             }
 
             bool normalized = false;
@@ -2664,170 +2667,170 @@ namespace Game.Spells
             switch (m_spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
-                {
-                    switch (m_spellInfo.Id)
                     {
-                        case 45204: // Clone Me!
-                            m_caster.CastSpell(unitTarget, (uint)damage, new CastSpellExtraArgs(true));
-                            break;
-                        // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
-                        case 22539:
-                        case 22972:
-                        case 22975:
-                        case 22976:
-                        case 22977:
-                        case 22978:
-                        case 22979:
-                        case 22980:
-                        case 22981:
-                        case 22982:
-                        case 22983:
-                        case 22984:
-                        case 22985:
+                        switch (m_spellInfo.Id)
                         {
-                            if (unitTarget == null || !unitTarget.IsAlive())
-                                return;
-
-                            // Onyxia Scale Cloak
-                            if (unitTarget.HasAura(22683))
-                                return;
-
-                            // Shadow Flame
-                            m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(this));
-                            return;
-                        }
-                        // Mug Transformation
-                        case 41931:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return;
-
-                            byte bag = 19;
-                            byte slot = 0;
-                            Item item;
-
-                            while (bag != 0) // 256 = 0 due to var type
-                            {
-                                item = m_caster.ToPlayer().GetItemByPos(bag, slot);
-                                if (item != null && item.GetEntry() == 38587)
-                                    break;
-
-                                ++slot;
-                                if (slot == 39)
+                            case 45204: // Clone Me!
+                                m_caster.CastSpell(unitTarget, (uint)damage, new CastSpellExtraArgs(true));
+                                break;
+                            // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
+                            case 22539:
+                            case 22972:
+                            case 22975:
+                            case 22976:
+                            case 22977:
+                            case 22978:
+                            case 22979:
+                            case 22980:
+                            case 22981:
+                            case 22982:
+                            case 22983:
+                            case 22984:
+                            case 22985:
                                 {
-                                    slot = 0;
-                                    ++bag;
+                                    if (unitTarget == null || !unitTarget.IsAlive())
+                                        return;
+
+                                    // Onyxia Scale Cloak
+                                    if (unitTarget.HasAura(22683))
+                                        return;
+
+                                    // Shadow Flame
+                                    m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(this));
+                                    return;
                                 }
-                            }
-                            if (bag != 0)
-                            {
-                                if (m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() == 1) m_caster.ToPlayer().RemoveItem(bag, slot, true);
-                                else m_caster.ToPlayer().GetItemByPos(bag, slot).SetCount(m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() - 1);
-                                // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
-                                m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(this));
-                                return;
-                            }
-                            break;
-                        }
-                        // Brutallus - Burn
-                        case 45141:
-                        case 45151:
-                        {
-                            //Workaround for Range ... should be global for every ScriptEffect
-                            float radius = effectInfo.CalcRadius();
-                            if (unitTarget != null && unitTarget.IsTypeId(TypeId.Player) && unitTarget.GetDistance(m_caster) >= radius && !unitTarget.HasAura(46394) && unitTarget != m_caster)
-                                unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(this));
-
-                            break;
-                        }
-                        // Emblazon Runeblade
-                        case 51770:
-                        {
-                            if (m_originalCaster == null)
-                                return;
-
-                            m_originalCaster.CastSpell(m_originalCaster, (uint)damage, new CastSpellExtraArgs(false));
-                            break;
-                        }
-                        // Summon Ghouls On Scarlet Crusade
-                        case 51904:
-                        {
-                            if (!m_targets.HasDst())
-                                return;
-
-                            float radius = effectInfo.CalcRadius();
-                            for (byte i = 0; i < 15; ++i)
-                                m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius), 54522, new CastSpellExtraArgs(this));
-                            break;
-                        }
-                        case 52173: // Coyote Spirit Despawn
-                        case 60243: // Blood Parrot Despawn
-                            if (unitTarget.IsTypeId(TypeId.Unit) && unitTarget.ToCreature().IsSummon())
-                                unitTarget.ToTempSummon().UnSummon();
-                            return;
-                        case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
-                        {
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit) || !m_caster.IsTypeId(TypeId.Player))
-                                return;
-
-                            unitTarget.ToCreature().DespawnOrUnsummon();
-
-                            return;
-                        }
-                        case 57349: // Drop RP-GG (Wintergrasp RP-GG at death drop spell)
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return;
-
-                            // Delete item from inventory at death
-                            m_caster.ToPlayer().DestroyItemCount((uint)damage, 5, true);
-
-                            return;
-                        }
-                        case 58941:                                 // Rock Shards
-                            if (unitTarget != null && m_originalCaster != null)
-                            {
-                                for (uint i = 0; i < 3; ++i)
+                            // Mug Transformation
+                            case 41931:
                                 {
-                                    m_originalCaster.CastSpell(unitTarget, 58689, new CastSpellExtraArgs(true));
-                                    m_originalCaster.CastSpell(unitTarget, 58692, new CastSpellExtraArgs(true));
-                                }
-                                if (m_originalCaster.GetMap().GetDifficultyID() == Difficulty.None)
-                                {
-                                    m_originalCaster.CastSpell(unitTarget, 58695, new CastSpellExtraArgs(true));
-                                    m_originalCaster.CastSpell(unitTarget, 58696, new CastSpellExtraArgs(true));
-                                }
-                                else
-                                {
-                                    m_originalCaster.CastSpell(unitTarget, 60883, new CastSpellExtraArgs(true));
-                                    m_originalCaster.CastSpell(unitTarget, 60884, new CastSpellExtraArgs(true));
-                                }
-                            }
-                            return;
-                        case 62482: // Grab Crate
-                        {
-                            if (unitCaster == null)
-                                return;
+                                    if (!m_caster.IsTypeId(TypeId.Player))
+                                        return;
 
-                            if (unitTarget != null)
-                            {
-                                Unit seat = unitCaster.GetVehicleBase();
-                                if (seat != null)
-                                {
-                                    Unit parent = seat.GetVehicleBase();
-                                    if (parent != null)
+                                    byte bag = 19;
+                                    byte slot = 0;
+                                    Item item;
+
+                                    while (bag != 0) // 256 = 0 due to var type
                                     {
-                                        // @todo a hack, range = 11, should after some time cast, otherwise too far
-                                        unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(this));
-                                        unitTarget.CastSpell(parent, (uint)damage, new CastSpellExtraArgs().SetTriggeringSpell(this)); // DIFFICULTY_NONE, so effect always valid
+                                        item = m_caster.ToPlayer().GetItemByPos(bag, slot);
+                                        if (item != null && item.GetEntry() == 38587)
+                                            break;
+
+                                        ++slot;
+                                        if (slot == 39)
+                                        {
+                                            slot = 0;
+                                            ++bag;
+                                        }
+                                    }
+                                    if (bag != 0)
+                                    {
+                                        if (m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() == 1) m_caster.ToPlayer().RemoveItem(bag, slot, true);
+                                        else m_caster.ToPlayer().GetItemByPos(bag, slot).SetCount(m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() - 1);
+                                        // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
+                                        m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(this));
+                                        return;
+                                    }
+                                    break;
+                                }
+                            // Brutallus - Burn
+                            case 45141:
+                            case 45151:
+                                {
+                                    //Workaround for Range ... should be global for every ScriptEffect
+                                    float radius = effectInfo.CalcRadius();
+                                    if (unitTarget != null && unitTarget.IsTypeId(TypeId.Player) && unitTarget.GetDistance(m_caster) >= radius && !unitTarget.HasAura(46394) && unitTarget != m_caster)
+                                        unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(this));
+
+                                    break;
+                                }
+                            // Emblazon Runeblade
+                            case 51770:
+                                {
+                                    if (m_originalCaster == null)
+                                        return;
+
+                                    m_originalCaster.CastSpell(m_originalCaster, (uint)damage, new CastSpellExtraArgs(false));
+                                    break;
+                                }
+                            // Summon Ghouls On Scarlet Crusade
+                            case 51904:
+                                {
+                                    if (!m_targets.HasDst())
+                                        return;
+
+                                    float radius = effectInfo.CalcRadius();
+                                    for (byte i = 0; i < 15; ++i)
+                                        m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius), 54522, new CastSpellExtraArgs(this));
+                                    break;
+                                }
+                            case 52173: // Coyote Spirit Despawn
+                            case 60243: // Blood Parrot Despawn
+                                if (unitTarget.IsTypeId(TypeId.Unit) && unitTarget.ToCreature().IsSummon())
+                                    unitTarget.ToTempSummon().UnSummon();
+                                return;
+                            case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
+                                {
+                                    if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit) || !m_caster.IsTypeId(TypeId.Player))
+                                        return;
+
+                                    unitTarget.ToCreature().DespawnOrUnsummon();
+
+                                    return;
+                                }
+                            case 57349: // Drop RP-GG (Wintergrasp RP-GG at death drop spell)
+                                {
+                                    if (!m_caster.IsTypeId(TypeId.Player))
+                                        return;
+
+                                    // Delete item from inventory at death
+                                    m_caster.ToPlayer().DestroyItemCount((uint)damage, 5, true);
+
+                                    return;
+                                }
+                            case 58941:                                 // Rock Shards
+                                if (unitTarget != null && m_originalCaster != null)
+                                {
+                                    for (uint i = 0; i < 3; ++i)
+                                    {
+                                        m_originalCaster.CastSpell(unitTarget, 58689, new CastSpellExtraArgs(true));
+                                        m_originalCaster.CastSpell(unitTarget, 58692, new CastSpellExtraArgs(true));
+                                    }
+                                    if (m_originalCaster.GetMap().GetDifficultyID() == Difficulty.None)
+                                    {
+                                        m_originalCaster.CastSpell(unitTarget, 58695, new CastSpellExtraArgs(true));
+                                        m_originalCaster.CastSpell(unitTarget, 58696, new CastSpellExtraArgs(true));
+                                    }
+                                    else
+                                    {
+                                        m_originalCaster.CastSpell(unitTarget, 60883, new CastSpellExtraArgs(true));
+                                        m_originalCaster.CastSpell(unitTarget, 60884, new CastSpellExtraArgs(true));
                                     }
                                 }
-                            }
-                            return;
+                                return;
+                            case 62482: // Grab Crate
+                                {
+                                    if (unitCaster == null)
+                                        return;
+
+                                    if (unitTarget != null)
+                                    {
+                                        Unit seat = unitCaster.GetVehicleBase();
+                                        if (seat != null)
+                                        {
+                                            Unit parent = seat.GetVehicleBase();
+                                            if (parent != null)
+                                            {
+                                                // @todo a hack, range = 11, should after some time cast, otherwise too far
+                                                unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(this));
+                                                unitTarget.CastSpell(parent, (uint)damage, new CastSpellExtraArgs().SetTriggeringSpell(this)); // DIFFICULTY_NONE, so effect always valid
+                                            }
+                                        }
+                                    }
+                                    return;
+                                }
                         }
+                        break;
                     }
-                    break;
-                }
             }
 
             // normal DB scripted effect
@@ -3246,7 +3249,7 @@ namespace Game.Spells
                 unitCaster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
                 o = unitCaster.GetOrientation();
             }
-            
+
             Map map = m_caster.GetMap();
             Position pos = new(x, y, z, o);
             Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
@@ -4126,36 +4129,36 @@ namespace Game.Spells
             switch (goinfo.type)
             {
                 case GameObjectTypes.FishingNode:
-                {
-                    go.SetFaction(unitCaster.GetFaction());
-                    ObjectGuid bobberGuid = go.GetGUID();
-                    // client requires fishing bobber guid in channel object slot 0 to be usable
-                    unitCaster.SetChannelObject(0, bobberGuid);
-                    unitCaster.AddGameObject(go);              // will removed at spell cancel
-
-                    // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
-                    // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-                    int lastSec = 0;
-                    switch (RandomHelper.IRand(0, 2))
                     {
-                        case 0: lastSec = 3; break;
-                        case 1: lastSec = 7; break;
-                        case 2: lastSec = 13; break;
-                    }
+                        go.SetFaction(unitCaster.GetFaction());
+                        ObjectGuid bobberGuid = go.GetGUID();
+                        // client requires fishing bobber guid in channel object slot 0 to be usable
+                        unitCaster.SetChannelObject(0, bobberGuid);
+                        unitCaster.AddGameObject(go);              // will removed at spell cancel
 
-                    // Duration of the fishing bobber can't be higher than the Fishing channeling duration
-                    duration = Math.Min(duration, duration - lastSec * Time.InMilliseconds + 5 * Time.InMilliseconds);
-                    break;
-                }
+                        // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
+                        // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
+                        int lastSec = 0;
+                        switch (RandomHelper.IRand(0, 2))
+                        {
+                            case 0: lastSec = 3; break;
+                            case 1: lastSec = 7; break;
+                            case 2: lastSec = 13; break;
+                        }
+
+                        // Duration of the fishing bobber can't be higher than the Fishing channeling duration
+                        duration = Math.Min(duration, duration - lastSec * Time.InMilliseconds + 5 * Time.InMilliseconds);
+                        break;
+                    }
                 case GameObjectTypes.Ritual:
-                {
-                    if (unitCaster.IsPlayer())
                     {
-                        go.AddUniqueUse(unitCaster.ToPlayer());
-                        unitCaster.AddGameObject(go);      // will be removed at spell cancel
+                        if (unitCaster.IsPlayer())
+                        {
+                            go.AddUniqueUse(unitCaster.ToPlayer());
+                            unitCaster.AddGameObject(go);      // will be removed at spell cancel
+                        }
+                        break;
                     }
-                    break;
-                }
                 case GameObjectTypes.DuelArbiter: // 52991
                     unitCaster.AddGameObject(go);
                     break;
@@ -5530,47 +5533,6 @@ namespace Game.Spells
             unitTarget.ToPlayer().GetSession().GetCollectionMgr().AddTransmogSet((uint)effectInfo.MiscValue);
         }
 
-        [SpellEffectHandler(SpellEffectName.LearnAzeriteEssencePower)]
-        void EffectLearnAzeriteEssencePower()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            Player playerTarget = unitTarget != null ? unitTarget.ToPlayer() : null;
-            if (!playerTarget)
-                return;
-
-            Item heartOfAzeroth = playerTarget.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-            if (heartOfAzeroth == null)
-                return;
-
-            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
-            if (azeriteItem == null)
-                return;
-
-            // remove old rank and apply new one
-            if (azeriteItem.IsEquipped())
-            {
-                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
-                if (selectedEssences != null)
-                {
-                    for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
-                    {
-                        if (selectedEssences.AzeriteEssenceID[slot] == effectInfo.MiscValue)
-                        {
-                            bool major = (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence;
-                            playerTarget.ApplyAzeriteEssence(azeriteItem, (uint)effectInfo.MiscValue, SharedConst.MaxAzeriteEssenceRank, major, false);
-                            playerTarget.ApplyAzeriteEssence(azeriteItem, (uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB, major, false);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            azeriteItem.SetEssenceRank((uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB);
-            azeriteItem.SetState(ItemUpdateState.Changed, playerTarget);
-        }
-
         [SpellEffectHandler(SpellEffectName.CreatePrivateConversation)]
         void EffectCreatePrivateConversation()
         {
@@ -5616,23 +5578,6 @@ namespace Game.Spells
                 return;
 
             playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetExperience(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage, BattlePetXpSource.SpellEffect);
-        }
-
-        [SpellEffectHandler(SpellEffectName.LearnTransmogIllusion)]
-        void EffectLearnTransmogIllusion()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            Player player = unitTarget?.ToPlayer();
-            if (player == null)
-                return;
-
-            uint illusionId = (uint)effectInfo.MiscValue;
-            if (!CliDB.TransmogIllusionStorage.ContainsKey(illusionId))
-                return;
-
-            player.GetSession().GetCollectionMgr().AddTransmogIllusion(illusionId);
         }
     }
 

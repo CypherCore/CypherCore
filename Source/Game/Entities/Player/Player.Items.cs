@@ -3584,7 +3584,6 @@ namespace Game.Entities
             }
 
             ApplyArtifactPowers(item, apply);
-            ApplyAzeritePowers(item, apply);
             ApplyEnchantment(item, apply);
 
             Log.outDebug(LogFilter.Player, "_ApplyItemMods complete.");
@@ -4049,34 +4048,6 @@ namespace Game.Entities
                         else
                             Item.RemoveItemsSetItem(this, m_items[i]);
                     }
-                }
-            }
-        }
-
-        void ApplyAllAzeriteItemMods(bool apply)
-        {
-            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
-            {
-                if (m_items[i])
-                {
-                    if (!m_items[i].IsAzeriteItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
-                        continue;
-
-                    ApplyAzeritePowers(m_items[i], apply);
-                }
-            }
-        }
-
-        void ApplyAllAzeriteEmpoweredItemMods(bool apply)
-        {
-            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
-            {
-                if (m_items[i])
-                {
-                    if (!m_items[i].IsAzeriteEmpoweredItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
-                        continue;
-
-                    ApplyAzeritePowers(m_items[i], apply);
                 }
             }
         }
@@ -5261,127 +5232,6 @@ namespace Game.Entities
             }
         }
 
-        void ApplyAzeritePowers(Item item, bool apply)
-        {
-            AzeriteItem azeriteItem = item.ToAzeriteItem();
-            if (azeriteItem != null)
-            {
-                // milestone powers
-                foreach (uint azeriteItemMilestonePowerId in azeriteItem.m_azeriteItemData.UnlockedEssenceMilestones)
-                    ApplyAzeriteItemMilestonePower(azeriteItem, CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteItemMilestonePowerId), apply);
-
-                // essences
-                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
-                if (selectedEssences != null)
-                {
-                    for (byte slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
-                        if (selectedEssences.AzeriteEssenceID[slot] != 0)
-                            ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[slot], azeriteItem.GetEssenceRank(selectedEssences.AzeriteEssenceID[slot]),
-                                (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence, apply);
-                }
-            }
-            else
-            {
-                AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                if (azeriteEmpoweredItem)
-                {
-                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Equipment))
-                    {
-                        for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
-                        {
-                            AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteEmpoweredItem.GetSelectedAzeritePower(i));
-                            if (azeritePower != null)
-                                ApplyAzeritePower(azeriteEmpoweredItem, azeritePower, apply);
-                        }
-                    }
-                }
-            }
-        }
-
-        public void ApplyAzeriteItemMilestonePower(AzeriteItem item, AzeriteItemMilestonePowerRecord azeriteItemMilestonePower, bool apply)
-        {
-            AzeriteItemMilestoneType type = (AzeriteItemMilestoneType)azeriteItemMilestonePower.Type;
-            if (type == AzeriteItemMilestoneType.BonusStamina)
-            {
-                AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteItemMilestonePower.AzeritePowerID);
-                if (azeritePower != null)
-                {
-                    if (apply)
-                        CastSpell(this, azeritePower.SpellID, item);
-                    else
-                        RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());
-                }
-            }
-        }
-
-        public void ApplyAzeriteEssence(AzeriteItem item, uint azeriteEssenceId, uint rank, bool major, bool apply)
-        {
-            for (uint currentRank = 1; currentRank <= rank; ++currentRank)
-            {
-                AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(azeriteEssenceId, currentRank);
-                if (azeriteEssencePower != null)
-                {
-                    ApplyAzeriteEssencePower(item, azeriteEssencePower, major, apply);
-                    if (major && currentRank == 1)
-                    {
-                        if (apply)
-                        {
-                            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                            args.AddSpellMod(SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription);
-                            CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, args);
-                        }
-                        else
-                            RemoveAurasDueToSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride);
-                    }
-                }
-            }
-        }
-
-        void ApplyAzeriteEssencePower(AzeriteItem item, AzeriteEssencePowerRecord azeriteEssencePower, bool major, bool apply)
-        {
-            SpellInfo powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MinorPowerDescription, Difficulty.None);
-            if (powerSpell != null)
-            {
-                if (apply)
-                    CastSpell(this, powerSpell.Id, item);
-                else
-                    RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
-            }
-
-            if (major)
-            {
-                powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MajorPowerDescription, Difficulty.None);
-                if (powerSpell != null)
-                {
-                    if (powerSpell.IsPassive())
-                    {
-                        if (apply)
-                            CastSpell(this, powerSpell.Id, item);
-                        else
-                            RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
-                    }
-                    else
-                    {
-                        if (apply)
-                            LearnSpell(powerSpell.Id, true, 0, true);
-                        else
-                            RemoveSpell(powerSpell.Id, false, false, true);
-                    }
-                }
-            }
-        }
-
-        public void ApplyAzeritePower(AzeriteEmpoweredItem item, AzeritePowerRecord azeritePower, bool apply)
-        {
-            if (apply)
-            {
-                if (azeritePower.SpecSetID == 0 || Global.DB2Mgr.IsSpecSetMember(azeritePower.SpecSetID, GetPrimarySpecialization()))
-                    CastSpell(this, azeritePower.SpellID, item);
-            }
-            else
-                RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());
-        }
-
         public bool HasItemOrGemWithIdEquipped(uint item, uint count, byte except_slot = ItemConst.NullSlot)
         {
             uint tempcount = 0;
@@ -5450,14 +5300,12 @@ namespace Game.Entities
             if (pItem != null)
             {
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), pItem.GetVisibleEntry(this));
-                SetUpdateFieldValue(itemField.ModifyValue(itemField.SecondaryItemModifiedAppearanceID), pItem.GetVisibleSecondaryModifiedAppearanceId(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), pItem.GetVisibleAppearanceModId(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), pItem.GetVisibleItemVisual(this));
             }
             else
             {
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), 0u);
-                SetUpdateFieldValue(itemField.ModifyValue(itemField.SecondaryItemModifiedAppearanceID), 0u);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), (ushort)0);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), (ushort)0);
             }

@@ -331,13 +331,10 @@ namespace Game.Entities
                 float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
                 value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
 
-                float baseValue = value;
-
                 value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
                 value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
                 SetResistance(school, (int)value);
-                SetBonusResistanceMod(school, (int)(value - baseValue));
             }
             else
                 UpdateArmor();
@@ -391,7 +388,6 @@ namespace Game.Entities
         public void SetArmor(int val, int bonusVal)
         {
             SetResistance(SpellSchools.Normal, val);
-            SetBonusResistanceMod(SpellSchools.Normal, bonusVal);
         }
         public float GetCreateStat(Stats stat)
         {
@@ -407,10 +403,6 @@ namespace Game.Entities
         {
             return m_unitData.Resistances[(int)school];
         }
-        public int GetBonusResistanceMod(SpellSchools school)
-        {
-            return m_unitData.BonusResistanceMods[(int)school];
-        }
         public int GetResistance(SpellSchoolMask mask)
         {
             int? resist = null;
@@ -425,7 +417,6 @@ namespace Game.Entities
             return resist.HasValue ? resist.Value : 0;
         }
         public void SetResistance(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Resistances, (int)school), val); }
-        public void SetBonusResistanceMod(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BonusResistanceMods, (int)school), val); }
         public void SetModCastingSpeed(float castingSpeed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), castingSpeed); }
         public void SetModSpellHaste(float spellHaste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), spellHaste); }
         public void SetModHaste(float haste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), haste); }
@@ -791,9 +782,6 @@ namespace Game.Entities
         public void SetRangedAttackPowerModPos(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModPos), attackPowerMod); }
         public void SetRangedAttackPowerModNeg(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModNeg), attackPowerMod); }
         public void SetRangedAttackPowerMultiplier(float attackPowerMult) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerMultiplier), attackPowerMult); }
-        public void SetMainHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MainHandWeaponAttackPower), attackPower); }
-        public void SetOffHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OffHandWeaponAttackPower), attackPower); }
-        public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
         public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
@@ -1029,10 +1017,6 @@ namespace Game.Entities
             }
             return Math.Max(resistMech, 0);
         }
-        
-        public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostMultiplier), manaCostMultiplier, apply); }
-
-        public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, (int)school), mod, apply); }
     }
 
     public partial class Player
@@ -1278,7 +1262,6 @@ namespace Game.Entities
                 modManaRegenInterrupt = 100;
 
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), power_regen_mp5 + power_regen);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt));
         }
 
         public void UpdateSpellDamageAndHealingBonus()
@@ -1428,7 +1411,6 @@ namespace Game.Entities
 
             _ApplyAllAuraStatMods();
             _ApplyAllItemMods();
-            ApplyAllAzeriteItemMods(true);
 
             SetCanModifyStats(true);
 
@@ -1438,7 +1420,6 @@ namespace Game.Entities
         {
             SetCanModifyStats(false);
 
-            ApplyAllAzeriteItemMods(false);
             _RemoveAllItemMods();
             _RemoveAllAuraStatMods();
 
@@ -1630,8 +1611,7 @@ namespace Game.Entities
             foreach (AuraEffect auraEffect in GetAuraEffectsByType(AuraType.ModHealingDonePercent))
                 MathFunctions.AddPct(ref value, auraEffect.GetAmount());
 
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                SetUpdateFieldStatValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent, i), value);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent), value);
         }
 
         void UpdateCorruption()
@@ -1935,7 +1915,8 @@ namespace Game.Entities
             crit += GetRatingBonusValue(CombatRating.CritSpell);
 
             // Store crit value
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SpellCritPercentage), crit);
+            for (SpellSchools school = SpellSchools.Holy; school < SpellSchools.Max; school++)
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SpellCritPercentage, (int)school), crit);
         }
 
         public void UpdateMeleeHitChances()

@@ -38,10 +38,10 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
+        void _LoadInventory(SQLResult result, SQLResult artifactsResult, uint timeDiff)
         {
             Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
+            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult);
 
             if (!result.IsEmpty())
             {
@@ -63,20 +63,6 @@ namespace Game.Entities
                         {
                             if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
                                 item.LoadArtifactData(this, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId, addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
-
-                            if (addionalData.AzeriteItem != null)
-                            {
-                                AzeriteItem azeriteItem = item.ToAzeriteItem();
-                                if (azeriteItem != null)
-                                    azeriteItem.LoadAzeriteItemData(this, addionalData.AzeriteItem);
-                            }
-
-                            if (addionalData.AzeriteEmpoweredItem != null)
-                            {
-                                AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                                if (azeriteEmpoweredItem != null)
-                                    azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(this, addionalData.AzeriteEmpoweredItem);
-                            }
                         }
 
 
@@ -207,8 +193,6 @@ namespace Game.Entities
             }
 
             _ApplyAllItemMods();
-            // Apply all azerite item mods, azerite empowered item mods will get applied through its spell script
-            ApplyAllAzeriteItemMods(true);
         }
         Item _LoadItem(SQLTransaction trans, uint zoneId, uint timeDiff, SQLFields fields)
         {
@@ -339,8 +323,6 @@ namespace Game.Entities
                     GetGUID().ToString(), GetName(), itemEntry);
                 Item.DeleteFromInventoryDB(trans, itemGuid);
                 Item.DeleteFromDB(trans, itemGuid);
-                AzeriteItem.DeleteFromDB(trans, itemGuid);
-                AzeriteEmpoweredItem.DeleteFromDB(trans, itemGuid);
             }
             return item;
         }
@@ -787,8 +769,6 @@ namespace Game.Entities
                             int data = result.Read<int>(2);
                             if (!objective.IsStoringFlag())
                                 SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
-                            else if (data != 0)
-                                SetQuestSlotObjectiveFlag(questStatusData.Slot, (sbyte)storageIndex);
                         }
                         else
                             Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
@@ -1106,7 +1086,7 @@ namespace Game.Entities
             while (result.NextRow());
         }
 
-        public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult)
+        public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult)
         {
             m_mail.Clear();
 
@@ -1149,7 +1129,7 @@ namespace Game.Entities
             if (!mailItemsResult.IsEmpty())
             {
                 Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteItemResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
+                ItemAdditionalLoadInfo.Init(additionalData, artifactResult);
 
                 do
                 {
@@ -1179,8 +1159,6 @@ namespace Game.Entities
                 trans.Append(stmt);
 
                 Item.DeleteFromDB(trans, itemGuid);
-                AzeriteItem.DeleteFromDB(trans, itemGuid);
-                AzeriteEmpoweredItem.DeleteFromDB(trans, itemGuid);
 
                 DB.Characters.CommitTransaction(trans);
                 return null;
@@ -1207,20 +1185,6 @@ namespace Game.Entities
                 if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
                     item.LoadArtifactData(player, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId,
                         addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
-
-                if (addionalData.AzeriteItem != null)
-                {
-                    AzeriteItem azeriteItem = item.ToAzeriteItem();
-                    if (azeriteItem != null)
-                        azeriteItem.LoadAzeriteItemData(player, addionalData.AzeriteItem);
-                }
-
-                if (addionalData.AzeriteEmpoweredItem != null)
-                {
-                    AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                    if (azeriteEmpoweredItem != null)
-                        azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(player, addionalData.AzeriteEmpoweredItem);
-                }
             }
 
             if (mail != null)
@@ -2171,11 +2135,7 @@ namespace Game.Entities
                     if (m.HasItems())
                     {
                         foreach (var mailItemInfo in m.items)
-                        {
-                            Item.DeleteFromDB(trans, mailItemInfo.item_guid);
-                            AzeriteItem.DeleteFromDB(trans, mailItemInfo.item_guid);
-                            AzeriteEmpoweredItem.DeleteFromDB(trans, mailItemInfo.item_guid);
-                        }
+                            Item.DeleteFromDB(trans, mailItemInfo.item_guid);                       
                     }
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
                     stmt.AddValue(0, m.messageID);
@@ -2257,7 +2217,8 @@ namespace Game.Entities
             stmt.AddValue(index++, m_activePlayerData.ParryPercentage);
             stmt.AddValue(index++, m_activePlayerData.CritPercentage);
             stmt.AddValue(index++, m_activePlayerData.RangedCritPercentage);
-            stmt.AddValue(index++, m_activePlayerData.SpellCritPercentage);
+            // @TODO 340 fixme
+            //stmt.AddValue(index++, m_activePlayerData.SpellCritPercentage);
             stmt.AddValue(index++, m_unitData.AttackPower);
             stmt.AddValue(index++, m_unitData.RangedAttackPower);
             stmt.AddValue(index++, GetBaseSpellPowerBonus());
@@ -2598,7 +2559,6 @@ namespace Game.Entities
 
 
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
 
             if (gender >= Gender.None)
             {
@@ -3053,7 +3013,6 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().LoadHeirlooms();
             GetSession().GetCollectionMgr().LoadMounts();
             GetSession().GetCollectionMgr().LoadItemAppearances();
-            GetSession().GetCollectionMgr().LoadTransmogIllusions();
 
             LearnSpecializationSpells();
 
@@ -3084,8 +3043,7 @@ namespace Game.Entities
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
-            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), holder.GetResult(PlayerLoginQueryLoad.Azerite),
-                        holder.GetResult(PlayerLoginQueryLoad.AzeriteMilestonePowers), holder.GetResult(PlayerLoginQueryLoad.AzeriteUnlockedEssences), holder.GetResult(PlayerLoginQueryLoad.AzeriteEmpowered), time_diff);
+            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), time_diff);
 
             if (IsVoidStorageUnlocked())
                 _LoadVoidStorage(holder.GetResult(PlayerLoginQueryLoad.VoidStorage));
@@ -3098,11 +3056,7 @@ namespace Game.Entities
             // unread mails and next delivery time, actual mails not loaded
             _LoadMail(holder.GetResult(PlayerLoginQueryLoad.Mails),
                 holder.GetResult(PlayerLoginQueryLoad.MailItems),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsArtifact),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzerite),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteMilestonePower),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteUnlockedEssence),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsAzeriteEmpowered));
+                holder.GetResult(PlayerLoginQueryLoad.MailItemsArtifact));
 
             m_social = Global.SocialMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.SocialList), GetGUID());
 
@@ -3272,22 +3226,6 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
 
             PushQuests();
-
-            foreach (var transmogIllusion in CliDB.TransmogIllusionStorage.Values)
-            {
-                if (!transmogIllusion.GetFlags().HasFlag(TransmogIllusionFlags.PlayerConditionGrantsOnLogin))
-                    continue;
-
-                if (GetSession().GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))
-                    continue;
-
-                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(transmogIllusion.UnlockConditionID);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                        continue;
-
-                GetSession().GetCollectionMgr().AddTransmogIllusion(transmogIllusion.Id);
-            }
 
             return true;
         }
@@ -3668,7 +3606,6 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SaveAccountHeirlooms(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountMounts(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
-            GetSession().GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, GetSession().GetAccountId());
@@ -3832,25 +3769,8 @@ namespace Game.Entities
                             stmt.AddValue(0, guid);
                             SQLResult artifactResult = DB.Characters.Query(stmt);
 
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
-                            stmt.AddValue(0, guid);
-                            SQLResult azeriteResult = DB.Characters.Query(stmt);
-
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
-                            stmt.AddValue(0, guid);
-                            SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
-
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
-                            stmt.AddValue(0, guid);
-                            SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
-
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
-                            stmt.AddValue(0, guid);
-                            SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
-
                             Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                            ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
-
+                            ItemAdditionalLoadInfo.Init(additionalData, artifactResult);
                             do
                             {
                                 uint mailId = resultItems.Read<uint>(44);
@@ -4056,22 +3976,6 @@ namespace Game.Entities
                     trans.Append(stmt);
 
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER);
-                    stmt.AddValue(0, guid);
-                    trans.Append(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER);
-                    stmt.AddValue(0, guid);
-                    trans.Append(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER_BY_OWNER);
-                    stmt.AddValue(0, guid);
-                    trans.Append(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER);
-                    stmt.AddValue(0, guid);
-                    trans.Append(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER);
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 

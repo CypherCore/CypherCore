@@ -155,30 +155,7 @@ namespace Game.Entities
 
                 var properties = minion.m_Properties;
                 if (properties != null && properties.Title == SummonTitle.Companion)
-                {
                     SetCritterGUID(minion.GetGUID());
-                    Player thisPlayer = ToPlayer();
-                    if (thisPlayer != null)
-                    {
-                        if (properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
-                        {
-                            var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
-                            if (pet != null)
-                            {
-                                minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
-                                minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
-                                minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
-
-                                uint display = pet.PacketInfo.DisplayID;
-                                if (display != 0)
-                                {
-                                    minion.SetDisplayId(display);
-                                    minion.SetNativeDisplayId(display);
-                                }
-                            }
-                        }
-                    }
-                }
 
                 // PvP, FFAPvP
                 minion.ReplaceAllPvpFlags(GetPvpFlags());

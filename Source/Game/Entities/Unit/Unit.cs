@@ -1914,8 +1914,6 @@ namespace Game.Entities
         }
         public uint GetMountDisplayId() { return m_unitData.MountDisplayID; }
         public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
-        uint GetCosmeticMountDisplayId() { return m_unitData.CosmeticMountDisplayID; }
-        public void SetCosmeticMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CosmeticMountDisplayID), mountDisplayId); }
 
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
@@ -1988,8 +1986,6 @@ namespace Game.Entities
 
         public uint GetBattlePetCompanionNameTimestamp() { return m_unitData.BattlePetCompanionNameTimestamp; }
         public void SetBattlePetCompanionNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), timestamp); }
-        public uint GetBattlePetCompanionExperience() { return m_unitData.BattlePetCompanionExperience; }
-        public void SetBattlePetCompanionExperience(uint experience) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionExperience), experience); }
         public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
         public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
 
@@ -2013,8 +2009,6 @@ namespace Game.Entities
         public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
         public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
-
-        public void SetNameplateAttachToGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NameplateAttachToGUID), guid); }
 
         public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
@@ -2247,12 +2241,11 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
         }
-        public uint GetChannelSpellXSpellVisualId() { return m_unitData.ChannelData.GetValue().SpellVisual.SpellXSpellVisualID; }
-        public uint GetChannelScriptVisualId() { return m_unitData.ChannelData.GetValue().SpellVisual.ScriptVisualID; }
-        public void SetChannelVisual(SpellCastVisualField channelVisual)
+        public uint GetChannelSpellXSpellVisualId() { return m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
+        public void SetChannelSpellXSpellVisual(uint spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
-            SetUpdateFieldValue(ref unitChannel.SpellVisual, channelVisual);
+            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, spellXSpellVisualId);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }

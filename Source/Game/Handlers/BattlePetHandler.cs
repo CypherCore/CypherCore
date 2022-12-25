@@ -136,21 +136,6 @@ namespace Game
         void HandleCageBattlePet(CageBattlePet cageBattlePet)
         {
             GetBattlePetMgr().CageBattlePet(cageBattlePet.PetGuid);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.BattlePetSummon, Processing = PacketProcessing.Inplace)]
-        void HandleBattlePetSummon(BattlePetSummon battlePetSummon)
-        {
-            if (_player.GetSummonedBattlePetGUID() != battlePetSummon.PetGuid)
-                GetBattlePetMgr().SummonPet(battlePetSummon.PetGuid);
-            else
-                GetBattlePetMgr().DismissPet();
-        }
-
-        [WorldPacketHandler(ClientOpcodes.BattlePetUpdateNotify)]
-        void HandleBattlePetUpdateNotify(BattlePetUpdateNotify battlePetUpdateNotify)
-        {
-            GetBattlePetMgr().UpdateBattlePetData(battlePetUpdateNotify.PetGuid);
-        }
+        }        
     }
 }

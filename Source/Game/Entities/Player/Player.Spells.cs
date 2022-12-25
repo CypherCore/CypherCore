@@ -3180,7 +3180,6 @@ namespace Game.Entities
 
             // set a base regen timer equal to 10 sec
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), 0.0f);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), 0.0f);
         }
 
         public void UpdateAllRunesRegen()
@@ -3196,7 +3195,6 @@ namespace Game.Entities
 
             uint cooldown = GetRuneBaseCooldown();
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenPeace);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenCombat);
         }
 
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
