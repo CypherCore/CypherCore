@@ -2596,9 +2596,9 @@ namespace Game.Entities
                     SendGarrisonOpenTalentNpc(guid, itemAddon != null ? itemAddon.GarrTalentTreeID.GetValueOrDefault(0) : 0, addon != null ? addon.FriendshipFactionID : 0);
                     break;
                 }
-                case GossipOptionNpc.Transmogrify:
-                    GetSession().SendOpenTransmogrifier(guid);
-                    break;
+                //case GossipOptionNpc.Transmogrify:
+                //    GetSession().SendOpenTransmogrifier(guid);
+                //    break;
                 default:
                     break;
             }

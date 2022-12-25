@@ -533,9 +533,6 @@ namespace Game.DataStorage
             foreach (ToyRecord toy in ToyStorage.Values)
                 _toys.Add(toy.ItemID);
 
-            foreach (TransmogIllusionRecord transmogIllusion in TransmogIllusionStorage.Values)
-                _transmogIllusionsByEnchantmentId[(uint)transmogIllusion.SpellItemEnchantmentID] = transmogIllusion;
-
             foreach (TransmogSetItemRecord transmogSetItem in TransmogSetItemStorage.Values)
             {
                 TransmogSetRecord set = TransmogSetStorage.LookupByKey(transmogSetItem.TransmogSetID);
@@ -2056,11 +2053,6 @@ namespace Game.DataStorage
             return _toys.Contains(toy);
         }
 
-        public TransmogIllusionRecord GetTransmogIllusionForEnchantment(uint spellItemEnchantmentId)
-        {
-            return _transmogIllusionsByEnchantmentId.LookupByKey(spellItemEnchantmentId);
-        }
-
         public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(uint itemModifiedAppearanceId)
         {
             return _transmogSetsByItemModifiedAppearance.LookupByKey(itemModifiedAppearanceId);
@@ -2071,7 +2063,7 @@ namespace Game.DataStorage
             return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
         }
 
-        static bool CheckUiMapAssignmentStatus(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
+        static bool CheckUiMapAssignmentStatus(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
         {
             status = new UiMapAssignmentStatus();
             status.UiMapAssignment = uiMapAssignment;
@@ -2200,7 +2192,7 @@ namespace Game.DataStorage
             return true;
         }
 
-        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
+        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
         {
             UiMapAssignmentStatus nearestMapAssignment = new();
             var iterateUiMapAssignments = new Action<MultiMap<int, UiMapAssignmentRecord>, int>((assignments, id) =>
@@ -2261,17 +2253,17 @@ namespace Game.DataStorage
             return uiPosition;
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
+        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
         {
             uiMapId = -1;
             newPos = new Vector2();
@@ -2432,7 +2424,6 @@ namespace Game.DataStorage
         MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
-        Dictionary<uint, TransmogIllusionRecord> _transmogIllusionsByEnchantmentId = new();
         MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
         MultiMap<uint, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
         Dictionary<int, UiMapBounds> _uiMapBounds = new();

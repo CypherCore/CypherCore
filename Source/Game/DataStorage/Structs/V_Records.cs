@@ -39,7 +39,7 @@ namespace Game.DataStorage
         public float CameraYawOffset;
         public ushort VehicleUIIndicatorID;
         public int MissileTargetingID;
-        public ushort VehiclePOITypeID;
+        public byte VehiclePOITypeID;
         public ushort[] SeatID = new ushort[8];
         public ushort[] PowerDisplayID = new ushort[3];
     }

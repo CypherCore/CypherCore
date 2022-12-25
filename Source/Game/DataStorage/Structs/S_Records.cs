@@ -342,11 +342,10 @@ namespace Game.DataStorage
         public string HordeName;
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
-        public uint IconFileDataID;
-        public int MinItemLevel;
-        public int MaxItemLevel;
+        public uint GemItemID;
         public uint TransmogUseConditionID;
         public uint TransmogCost;
+        public uint IconFileDataID;
         public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
         public ushort Flags;
@@ -394,17 +393,16 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DifficultyID;
-        public ushort MaxLevel;
-        public byte MaxPassiveAuraLevel;
         public ushort BaseLevel;
+        public ushort MaxLevel;
         public ushort SpellLevel;
+        public byte MaxPassiveAuraLevel;        
         public uint SpellID;
     }
 
     public sealed class SpellMiscRecord
     {
         public uint Id;
-        public int[] Attributes = new int[15];
         public byte DifficultyID;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;
@@ -417,9 +415,8 @@ namespace Game.DataStorage
         public uint ActiveIconFileDataID;
         public uint ContentTuningID;
         public int ShowFutureSpellPlayerConditionID;
-        public int SpellVisualScript;
-        public int ActiveSpellVisualScript;
-        public uint SpellID;
+        public int[] Attributes = new int[14];
+        public uint SpellID;        
     }
 
     public sealed class SpellNameRecord
@@ -465,7 +462,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public SpellProcsPerMinuteModType Type;
-        public uint Param;
+        public ushort Param;
         public float Coeff;
         public uint SpellProcsPerMinuteID;
     }
@@ -509,6 +506,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
+        public uint Class;
         public uint MinScalingLevel;
         public uint MaxScalingLevel;
         public ushort ScalesFromItemLevel;
@@ -578,6 +576,8 @@ namespace Game.DataStorage
         public uint LowViolenceSpellVisualID;
         public uint RaidSpellVisualMissileSetID;
         public int ReducedUnexpectedCameraMovementSpellVisualID;
+        public ushort AreaModel;
+        public sbyte HasMissile;
     }
 
     public sealed class SpellVisualEffectNameRecord
@@ -597,7 +597,6 @@ namespace Game.DataStorage
         public uint RibbonQualityID;
         public int DissolveEffectID;
         public int ModelPosition;
-        public sbyte Unknown901;
     }
 
     public sealed class SpellVisualMissileRecord
@@ -617,18 +616,16 @@ namespace Game.DataStorage
         public uint Flags;
         public ushort SpellMissileMotionID;
         public uint AnimKitID;
-        public sbyte ClutterLevel;
-        public int DecayTimeAfterImpact;
         public uint SpellVisualMissileSetID;
     }
 
     public sealed class SpellVisualKitRecord
     {
         public uint Id;
-        public sbyte FallbackPriority;
-        public int FallbackSpellVisualKitId;
+        public uint FallbackSpellVisualKitId;
         public ushort DelayMin;
         public ushort DelayMax;
+        public float FallbackPriority;           
         public int[] Flags = new int[2];
     }
 
@@ -638,6 +635,7 @@ namespace Game.DataStorage
         public byte DifficultyID;
         public uint SpellVisualID;
         public float Probability;
+        public byte Flags;
         public int Priority;
         public int SpellIconFileID;
         public int ActiveIconFileID;

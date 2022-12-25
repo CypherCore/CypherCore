@@ -1190,9 +1190,6 @@ namespace Framework.Database
             // TransmogHoliday.db2
             PrepareStatement(HotfixStatements.SEL_TRANSMOG_HOLIDAY, "SELECT ID, RequiredTransmogHoliday FROM transmog_holiday");
 
-            // TransmogIllusion.db2
-            PrepareStatement(HotfixStatements.SEL_TRANSMOG_ILLUSION, "SELECT ID, UnlockConditionID, TransmogCost, SpellItemEnchantmentID, Flags FROM transmog_illusion");
-
             // TransmogSet.db2
             PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET, "SELECT Name, ID, ClassMask, TrackingQuestID, Flags, TransmogSetGroupID, ItemNameDescriptionID, " +
                 "ParentTransmogSetID, Unknown810, ExpansionID, PatchID, UiOrder, PlayerConditionID FROM transmog_set");
@@ -1226,13 +1223,6 @@ namespace Framework.Database
 
             // UiMapXMapArt.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP_X_MAP_ART, "SELECT ID, PhaseID, UiMapArtID, UiMapID FROM ui_map_x_map_art");
-
-            // UiSplashScreen.db2
-            PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN, "SELECT ID, Header, TopLeftFeatureTitle, TopLeftFeatureDesc, BottomLeftFeatureTitle, " +
-                "BottomLeftFeatureDesc, RightFeatureTitle, RightFeatureDesc, AllianceQuestID, HordeQuestID, ScreenType, TextureKitID, SoundKitID, " +
-                "PlayerConditionID, CharLevelConditionID, RequiredTimeEventPassed FROM ui_splash_screen");
-            PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN_LOCALE, "SELECT ID, Header_lang, TopLeftFeatureTitle_lang, TopLeftFeatureDesc_lang, " +
-                "BottomLeftFeatureTitle_lang, BottomLeftFeatureDesc_lang, RightFeatureTitle_lang, RightFeatureDesc_lang FROM ui_splash_screen_locale WHERE locale = ?");
 
             // UnitCondition.db2
             PrepareStatement(HotfixStatements.SEL_UNIT_CONDITION, "SELECT ID, Flags, Variable1, Variable2, Variable3, Variable4, Variable5, Variable6, Variable7, " +
@@ -1916,8 +1906,6 @@ namespace Framework.Database
 
         SEL_TRANSMOG_HOLIDAY,
 
-        SEL_TRANSMOG_ILLUSION,
-
         SEL_TRANSMOG_SET,
         SEL_TRANSMOG_SET_LOCALE,
 
@@ -1938,9 +1926,6 @@ namespace Framework.Database
         SEL_UI_MAP_LINK,
 
         SEL_UI_MAP_X_MAP_ART,
-
-        SEL_UI_SPLASH_SCREEN,
-        SEL_UI_SPLASH_SCREEN_LOCALE,
 
         SEL_UNIT_CONDITION,
 
