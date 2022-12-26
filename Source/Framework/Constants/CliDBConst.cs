@@ -68,7 +68,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum SkillLineAbilityFlags
+    public enum SkillLineAbilityFlags : byte
     {
         CanFallbackToLearnedOnSkillLearn = 0x80, // The skill is rewarded from a quest if player started on exile's reach
     }
@@ -1011,7 +1011,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum BattlemasterListFlags : int
+    public enum BattlemasterListFlags : byte
     {
         Disabled = 0x01,
         SkipRoleCheck = 0x02,
@@ -2368,12 +2368,6 @@ namespace Framework.Constants
         Max,
     }
 
-    public enum CorruptionEffectsFlag
-    {
-        None = 0,
-        Disabled = 0x1
-    }
-
     [Flags]
     public enum CreatureModelDataFlags
     {
@@ -2406,25 +2400,25 @@ namespace Framework.Constants
         NoRepGainModifiers = 0x10
     }
 
-    public enum GlobalCurve
-    {
-        CritDiminishing = 0,
-        MasteryDiminishing = 1,
-        HasteDiminishing = 2,
-        SpeedDiminishing = 3,
-        AvoidanceDiminishing = 4,
-        VersatilityDoneDiminishing = 5,
-        LifestealDiminishing = 6,
-        DodgeDiminishing = 7,
-        BlockDiminishing = 8,
-        ParryDiminishing = 9,
+    //public enum GlobalCurve
+    //{
+    //    CritDiminishing = 0,
+    //    MasteryDiminishing = 1,
+    //    HasteDiminishing = 2,
+    //    SpeedDiminishing = 3,
+    //    AvoidanceDiminishing = 4,
+    //    VersatilityDoneDiminishing = 5,
+    //    LifestealDiminishing = 6,
+    //    DodgeDiminishing = 7,
+    //    BlockDiminishing = 8,
+    //    ParryDiminishing = 9,
 
-        VersatilityTakenDiminishing = 11,
+    //    VersatilityTakenDiminishing = 11,
 
-        ContentTuningPvpItemLevelHealthScaling = 13,
-        ContentTuningPvpLevelDamageScaling = 14,
-        ContentTuningPvpItemLevelDamageScaling = 15,
-    }
+    //    ContentTuningPvpItemLevelHealthScaling = 13,
+    //    ContentTuningPvpLevelDamageScaling = 14,
+    //    ContentTuningPvpItemLevelDamageScaling = 15,
+    //}
 
     public enum BattlePetSpeciesFlags : ushort
     {

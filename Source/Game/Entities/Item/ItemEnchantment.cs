@@ -147,14 +147,14 @@ namespace Game.Entities
             switch (quality)
             {
                 case ItemQuality.Uncommon:
-                    return randPropPointsEntry.GoodF[propIndex];
+                    return randPropPointsEntry.Good[propIndex];
                 case ItemQuality.Rare:
                 case ItemQuality.Heirloom:
-                    return randPropPointsEntry.SuperiorF[propIndex];
+                    return randPropPointsEntry.Superior[propIndex];
                 case ItemQuality.Epic:
                 case ItemQuality.Legendary:
                 case ItemQuality.Artifact:
-                    return randPropPointsEntry.EpicF[propIndex];
+                    return randPropPointsEntry.Epic[propIndex];
             }
 
             return 0;

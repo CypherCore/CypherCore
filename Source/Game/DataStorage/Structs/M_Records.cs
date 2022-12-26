@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -35,7 +36,6 @@ namespace Game.DataStorage
         public string MapDescription1;                               // Alliance
         public string PvpShortDescription;
         public string PvpLongDescription;
-        public Vector2 Corpse;                                           // entrance coordinates in ghost mode  (in most cases = normal entrance)
         public byte MapType;
         public MapTypes InstanceType;
         public byte ExpansionID;
@@ -46,11 +46,11 @@ namespace Game.DataStorage
         public short CosmeticParentMapID;
         public byte TimeOffset;
         public float MinimapIconScale;
+        public int RaidOffset;
         public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
         public byte MaxPlayers;
         public short WindSettingsID;
         public int ZmpFileDataID;
-        public int WdtFileDataID;
         public uint[] Flags = new uint[3];
 
         // Helpers
@@ -68,21 +68,6 @@ namespace Game.DataStorage
         public bool IsBattlegroundOrArena() { return InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena; }
         public bool IsScenario() { return InstanceType == MapTypes.Scenario; }
         public bool IsWorldMap() { return InstanceType == MapTypes.Common; }
-
-        public bool GetEntrancePos(out uint mapid, out float x, out float y)
-        {
-            mapid = 0;
-            x = 0;
-            y = 0;
-
-            if (CorpseMapID < 0)
-                return false;
-
-            mapid = (uint)CorpseMapID;
-            x = Corpse.X;
-            y = Corpse.Y;
-            return true;
-        }
 
         public bool IsContinent()
         {
@@ -128,15 +113,15 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
-        public uint DifficultyID;
-        public int LockID;
-        public MapDifficultyResetInterval ResetInterval;
-        public uint MaxPlayers;
-        public int ItemContext;
         public uint ItemContextPickerID;
-        public int Flags;
         public int ContentTuningID;
-        public uint MapID;
+        public byte DifficultyID;
+        public byte LockID;
+        public MapDifficultyResetInterval ResetInterval;
+        public byte MaxPlayers;
+        public byte ItemContext;
+        public int Flags;
+        public int MapID;
 
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
         public bool IsUsingEncounterLocks() { return GetFlags().HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
@@ -164,13 +149,6 @@ namespace Game.DataStorage
         public uint MapDifficultyID;
     }
 
-    public sealed class MawPowerRecord
-    {
-        public uint Id;
-        public int SpellID;
-        public int MawPowerRarityID;
-    }
-
     public sealed class ModifierTreeRecord
     {
         public uint Id;
@@ -180,7 +158,7 @@ namespace Game.DataStorage
         public uint Type;
         public uint Asset;
         public int SecondaryAsset;
-        public int TertiaryAsset;
+        public sbyte TertiaryAsset;
     }
 
     public sealed class MountRecord
@@ -196,8 +174,6 @@ namespace Game.DataStorage
         public uint PlayerConditionID;
         public float MountFlyRideHeight;
         public int UiModelSceneID;
-        public int MountSpecialRiderAnimKitID;
-        public int MountSpecialSpellVisualKitID;
 
         public bool IsSelfMount() { return (Flags & MountFlags.SelfMount) != 0; }
     }
@@ -212,7 +188,6 @@ namespace Game.DataStorage
         public uint ReqSpellKnownID;
         public uint ModSpellAuraID;
         public short ReqMapID;
-        public int PlayerConditionID;
     }
 
     public sealed class MountTypeXCapabilityRecord

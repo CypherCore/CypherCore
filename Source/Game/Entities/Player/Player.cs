@@ -1426,28 +1426,15 @@ namespace Game.Entities
         //Repitation
         public int CalculateReputationGain(ReputationSource source, uint creatureOrQuestLevel, int rep, int faction, bool noQuestBonus = false)
         {
-            bool noBonuses = false;
-            var factionEntry = CliDB.FactionStorage.LookupByKey(faction);
-            if (factionEntry != null)
-            {
-                var friendshipReputation = CliDB.FriendshipReputationStorage.LookupByKey(factionEntry.FriendshipRepID);
-                if (friendshipReputation != null)
-                    if (friendshipReputation.Flags.HasAnyFlag(FriendshipReputationFlags.NoRepGainModifiers))
-                        noBonuses = true;
-            }
-
             float percent = 100.0f;
 
-            if (!noBonuses)
-            {
-                float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
+            float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
 
-                // faction specific auras only seem to apply to kills
-                if (source == ReputationSource.Kill)
-                    repMod += GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, faction);
+            // faction specific auras only seem to apply to kills
+            if (source == ReputationSource.Kill)
+                repMod += GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, faction);
 
-                percent += rep > 0 ? repMod : -repMod;
-            }
+            percent += rep > 0 ? repMod : -repMod;
 
             float rate;
             switch (source)
@@ -5889,46 +5876,44 @@ namespace Game.Entities
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
-                var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, 0);
-                if (areaLevels.HasValue)
+                if (IsMaxLevel())
                 {
-                    if (IsMaxLevel())
+                    SendExplorationExperience(areaId, 0);
+                }
+                else
+                {
+                    //ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
+                    uint areaLevel = GetLevel();
+                    int diff = (int)GetLevel() - (int)areaLevel;
+                    uint XP;
+                    if (diff < -5)
                     {
-                        SendExplorationExperience(areaId, 0);
+                        XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                    }
+                    else if (diff > 5)
+                    {
+                        int exploration_percent = 100 - ((diff - 5) * 5);
+                        if (exploration_percent < 0)
+                            exploration_percent = 0;
+
+                        XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                     }
                     else
                     {
-                        ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
-                        int diff = (int)GetLevel() - areaLevel;
-                        uint XP;
-                        if (diff < -5)
-                        {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-                        else if (diff > 5)
-                        {
-                            int exploration_percent = 100 - ((diff - 5) * 5);
-                            if (exploration_percent < 0)
-                                exploration_percent = 0;
-
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-                        else
-                        {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-
-                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
-                        {
-                            uint minScaledXP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
-                            XP = Math.Max(minScaledXP, XP);
-                        }
-
-                        GiveXP(XP, null);
-                        SendExplorationExperience(areaId, XP);
+                        XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                     }
-                    Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
+
+                    if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
+                    {
+                        uint minScaledXP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                        XP = Math.Max(minScaledXP, XP);
+                    }
+
+                    GiveXP(XP, null);
+                    SendExplorationExperience(areaId, XP);
                 }
+                Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
+
             }
         }
         void SendExplorationExperience(uint Area, uint Experience)

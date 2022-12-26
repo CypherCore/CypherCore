@@ -4948,18 +4948,6 @@ namespace Game
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
 
-            // Load item effects (spells)
-            foreach (var effectEntry in CliDB.ItemXItemEffectStorage.Values)
-            {
-                var item = ItemTemplateStorage.LookupByKey(effectEntry.ItemID);
-                if (item != null)
-                {
-                    var effect = CliDB.ItemEffectStorage.LookupByKey(effectEntry.ItemEffectID);
-                    if (effect != null)
-                        item.Effects.Add(effect);
-                }
-            }
-
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item templates in {1} ms", sparseCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 

@@ -16,6 +16,8 @@
  */
 
 using Framework.Constants;
+using Game.Entities;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -24,13 +26,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Word;
-        public uint LanguageID;
+        public byte LanguageID;
     }
 
     public sealed class LanguagesRecord
     {
-        public uint Id;
         public LocalizedString Name;
+        public uint Id;        
         public int Flags;
         public int UiTextureKitID;
         public int UiTextureKitElementCount;
@@ -41,6 +43,8 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Name;
         public string Description;
+        public byte MinLevel;
+        public ushort MaxLevel;
         public LfgType TypeID;
         public sbyte Subtype;
         public sbyte Faction;
@@ -54,6 +58,9 @@ namespace Game.DataStorage
         public byte GroupID;
         public byte OrderIndex;
         public uint RequiredPlayerConditionId;
+        public byte TargetLevel;
+        public byte TargetLevelMin;
+        public ushort TargetLevelMax;
         public ushort RandomID;
         public ushort ScenarioID;
         public ushort FinalEncounterID;
@@ -66,7 +73,6 @@ namespace Game.DataStorage
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
         public byte MentorCharLevel;
-        public uint ContentTuningID;
         public LfgFlags[] Flags = new LfgFlags[2];
 
         // Helpers
@@ -112,7 +118,6 @@ namespace Game.DataStorage
     public sealed class LockRecord
     {
         public uint Id;
-        public int Flags;
         public int[] Index = new int[SharedConst.MaxLockCase];
         public ushort[] Skill = new ushort[SharedConst.MaxLockCase];
         public byte[] LockType = new byte[SharedConst.MaxLockCase];

@@ -39,7 +39,7 @@ namespace Game.DataStorage
         public float CameraYawOffset;
         public ushort VehicleUIIndicatorID;
         public int MissileTargetingID;
-        public byte VehiclePOITypeID;
+        public byte UiLocomotionType;
         public ushort[] SeatID = new ushort[8];
         public ushort[] PowerDisplayID = new ushort[3];
     }
@@ -92,6 +92,7 @@ namespace Game.DataStorage
         public uint EnterUISoundID;
         public uint ExitUISoundID;
         public int UiSkinFileDataID;
+        public int UiSkin;
         public float CameraEnteringDelay;
         public float CameraEnteringDuration;
         public float CameraExitingDelay;

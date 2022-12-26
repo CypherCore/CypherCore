@@ -33,10 +33,10 @@ namespace Game.DataStorage
     }
 
     public sealed class BarberShopStyleRecord
-    {
-        public uint Id;
+    {        
         public string DisplayName;
         public string Description;
+        public uint Id;
         public byte Type;                                                     // value 0 . hair, value 2 . facialhair
         public float CostModifier;
         public byte Race;
@@ -54,9 +54,9 @@ namespace Game.DataStorage
     public sealed class BattlePetBreedStateRecord
     {
         public uint Id;
-        public int BattlePetStateID;
+        public byte BattlePetStateID;
         public ushort Value;
-        public uint BattlePetBreedID;
+        public int BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
@@ -67,12 +67,11 @@ namespace Game.DataStorage
         public uint CreatureID;
         public uint SummonSpellID;
         public int IconFileDataID;
-        public sbyte PetTypeEnum;
+        public byte PetTypeEnum;
         public ushort Flags;
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
-        public int CovenantID;
 
         public BattlePetSpeciesFlags GetFlags() { return (BattlePetSpeciesFlags)Flags; }
 }
@@ -80,9 +79,9 @@ namespace Game.DataStorage
     public sealed class BattlePetSpeciesStateRecord
     {
         public uint Id;
-        public ushort BattlePetStateID;
+        public byte BattlePetStateID;
         public int Value;
-        public uint BattlePetSpeciesID;
+        public int BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord
@@ -97,14 +96,12 @@ namespace Game.DataStorage
         public byte MaxLevel;
         public sbyte RatedPlayers;
         public byte MinPlayers;
-        public byte MaxPlayers;
+        public int MaxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
         public ushort HolidayWorldState;
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
-        public int RequiredPlayerConditionID;
-        public short[] MapId = new short[16];
     }
 
     public sealed class BroadcastTextRecord
@@ -121,13 +118,5 @@ namespace Game.DataStorage
         public uint[] SoundKitID = new uint[2];
         public ushort[] EmoteID = new ushort[3];
         public ushort[] EmoteDelay = new ushort[3];
-    }
-
-    public sealed class BroadcastTextDurationRecord
-    {
-        public uint Id;
-        public int BroadcastTextID;
-        public int Locale;
-        public int Duration;
     }
 }

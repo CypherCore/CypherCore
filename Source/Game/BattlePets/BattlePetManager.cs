@@ -56,17 +56,17 @@ namespace Game.BattlePets
             foreach (var battlePetBreedState in CliDB.BattlePetBreedStateStorage.Values)
             {
                 if (!BattlePetBreedStates.ContainsKey(battlePetBreedState.BattlePetBreedID))
-                    BattlePetBreedStates[battlePetBreedState.BattlePetBreedID] = new Dictionary<BattlePetState, int>();
+                    BattlePetBreedStates[(uint)battlePetBreedState.BattlePetBreedID] = new Dictionary<BattlePetState, int>();
 
-                BattlePetBreedStates[battlePetBreedState.BattlePetBreedID][(BattlePetState)battlePetBreedState.BattlePetStateID] = battlePetBreedState.Value;
+                BattlePetBreedStates[(uint)battlePetBreedState.BattlePetBreedID][(BattlePetState)battlePetBreedState.BattlePetStateID] = battlePetBreedState.Value;
             }
 
             foreach (var battlePetSpeciesState in CliDB.BattlePetSpeciesStateStorage.Values)
             {
                 if (!BattlePetSpeciesStates.ContainsKey(battlePetSpeciesState.BattlePetSpeciesID))
-                    BattlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID] = new Dictionary<BattlePetState, int>();
+                    BattlePetSpeciesStates[(uint)battlePetSpeciesState.BattlePetSpeciesID] = new Dictionary<BattlePetState, int>();
 
-                BattlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID][(BattlePetState)battlePetSpeciesState.BattlePetStateID] = battlePetSpeciesState.Value;
+                BattlePetSpeciesStates[(uint)battlePetSpeciesState.BattlePetSpeciesID][(BattlePetState)battlePetSpeciesState.BattlePetStateID] = battlePetSpeciesState.Value;
             }
 
             LoadAvailablePetBreeds();

@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 
 namespace Game.DataStorage
 {
@@ -43,6 +44,7 @@ namespace Game.DataStorage
         public byte Priority;
         public sbyte CalendarFilterType;
         public byte Flags;
+        public uint WorldStateExpressionID;
         public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
         public uint[] Date = new uint[SharedConst.MaxHolidayDates];                                 // dates in unix time starting at January, 1, 2000
         public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];

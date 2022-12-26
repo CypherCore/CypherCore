@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -33,8 +34,8 @@ namespace Game.DataStorage
         public int VisibilityPlayerConditionID;
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
-        public int AlternateUiMapGroup;
-        public int ContentTuningID;
+        public uint LevelRangeMin;
+        public uint LevelRangeMax;
 
         public UiMapFlag GetFlags() { return (UiMapFlag)Flags; }
 }

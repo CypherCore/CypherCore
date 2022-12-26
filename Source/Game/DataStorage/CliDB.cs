@@ -83,7 +83,6 @@ namespace Game.DataStorage
             AzeritePowerSetMemberStorage = ReadDB2<AzeritePowerSetMemberRecord>("AzeritePowerSetMember.db2", HotfixStatements.SEL_AZERITE_POWER_SET_MEMBER);
             AzeriteTierUnlockStorage = ReadDB2<AzeriteTierUnlockRecord>("AzeriteTierUnlock.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK);
             AzeriteTierUnlockSetStorage = ReadDB2<AzeriteTierUnlockSetRecord>("AzeriteTierUnlockSet.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK_SET);
-            AzeriteUnlockMappingStorage = ReadDB2<AzeriteUnlockMappingRecord>("AzeriteUnlockMapping.db2", HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING);
             BankBagSlotPricesStorage = ReadDB2<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
             BannedAddOnsStorage = ReadDB2<BannedAddonsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = ReadDB2<BarberShopStyleRecord>("BarberShopStyle.db2", HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
@@ -93,7 +92,6 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = ReadDB2<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = ReadDB2<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
-            BroadcastTextDurationStorage = ReadDB2<BroadcastTextDurationRecord>("BroadcastTextDuration.db2", HotfixStatements.SEL_BROADCAST_TEXT_DURATION);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
             CharacterLoadoutStorage = ReadDB2<CharacterLoadoutRecord>("CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
@@ -115,9 +113,7 @@ namespace Game.DataStorage
             CinematicCameraStorage = ReadDB2<CinematicCameraRecord>("CinematicCamera.db2", HotfixStatements.SEL_CINEMATIC_CAMERA);
             CinematicSequencesStorage = ReadDB2<CinematicSequencesRecord>("CinematicSequences.db2", HotfixStatements.SEL_CINEMATIC_SEQUENCES);
             ContentTuningStorage = ReadDB2<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
-            ContentTuningXExpectedStorage = ReadDB2<ContentTuningXExpectedRecord>("ContentTuningXExpected.db2", HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED);
             ConversationLineStorage = ReadDB2<ConversationLineRecord>("ConversationLine.db2", HotfixStatements.SEL_CONVERSATION_LINE);
-            CorruptionEffectsStorage = ReadDB2<CorruptionEffectsRecord>("CorruptionEffects.db2", HotfixStatements.SEL_CORRUPTION_EFFECTS);
             CreatureDisplayInfoStorage = ReadDB2<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
             CreatureDisplayInfoExtraStorage = ReadDB2<CreatureDisplayInfoExtraRecord>("CreatureDisplayInfoExtra.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO_EXTRA);
             CreatureFamilyStorage = ReadDB2<CreatureFamilyRecord>("CreatureFamily.db2", HotfixStatements.SEL_CREATURE_FAMILY, HotfixStatements.SEL_CREATURE_FAMILY_LOCALE);
@@ -160,7 +156,6 @@ namespace Game.DataStorage
             GarrSiteLevelPlotInstStorage = ReadDB2<GarrSiteLevelPlotInstRecord>("GarrSiteLevelPlotInst.db2", HotfixStatements.SEL_GARR_SITE_LEVEL_PLOT_INST);
             GarrTalentTreeStorage = ReadDB2<GarrTalentTreeRecord>("GarrTalentTree.db2", HotfixStatements.SEL_GARR_TALENT_TREE, HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE);
             GemPropertiesStorage = ReadDB2<GemPropertiesRecord>("GemProperties.db2", HotfixStatements.SEL_GEM_PROPERTIES);
-            GlobalCurveStorage = ReadDB2<GlobalCurveRecord>("GlobalCurve.db2", HotfixStatements.SEL_GLOBAL_CURVE);
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
             GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
@@ -202,15 +197,13 @@ namespace Game.DataStorage
             ItemModifiedAppearanceStorage = ReadDB2<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemModifiedAppearanceExtraStorage = ReadDB2<ItemModifiedAppearanceExtraRecord>("ItemModifiedAppearanceExtra.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA);
             ItemNameDescriptionStorage = ReadDB2<ItemNameDescriptionRecord>("ItemNameDescription.db2", HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE);
-            ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
-            ItemSearchNameStorage = ReadDB2<ItemSearchNameRecord>("ItemSearchName.db2", HotfixStatements.SEL_ITEM_SEARCH_NAME, HotfixStatements.SEL_ITEM_SEARCH_NAME_LOCALE);
+            ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);            
             ItemSetStorage = ReadDB2<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
             ItemSetSpellStorage = ReadDB2<ItemSetSpellRecord>("ItemSetSpell.db2", HotfixStatements.SEL_ITEM_SET_SPELL);
             ItemSparseStorage = ReadDB2<ItemSparseRecord>("ItemSparse.db2", HotfixStatements.SEL_ITEM_SPARSE, HotfixStatements.SEL_ITEM_SPARSE_LOCALE);
             ItemSpecStorage = ReadDB2<ItemSpecRecord>("ItemSpec.db2", HotfixStatements.SEL_ITEM_SPEC);
             ItemSpecOverrideStorage = ReadDB2<ItemSpecOverrideRecord>("ItemSpecOverride.db2", HotfixStatements.SEL_ITEM_SPEC_OVERRIDE);
             ItemXBonusTreeStorage = ReadDB2<ItemXBonusTreeRecord>("ItemXBonusTree.db2", HotfixStatements.SEL_ITEM_X_BONUS_TREE);
-            ItemXItemEffectStorage = ReadDB2<ItemXItemEffectRecord>("ItemXItemEffect.db2", HotfixStatements.SEL_ITEM_X_ITEM_EFFECT);
             JournalEncounterStorage = ReadDB2<JournalEncounterRecord>("JournalEncounter.db2", HotfixStatements.SEL_JOURNAL_ENCOUNTER, HotfixStatements.SEL_JOURNAL_ENCOUNTER_LOCALE);
             JournalEncounterSectionStorage = ReadDB2<JournalEncounterSectionRecord>("JournalEncounterSection.db2", HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION, HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION_LOCALE);
             JournalInstanceStorage = ReadDB2<JournalInstanceRecord>("JournalInstance.db2", HotfixStatements.SEL_JOURNAL_INSTANCE, HotfixStatements.SEL_JOURNAL_INSTANCE_LOCALE);
@@ -228,7 +221,6 @@ namespace Game.DataStorage
             MapChallengeModeStorage = ReadDB2<MapChallengeModeRecord>("MapChallengeMode.db2", HotfixStatements.SEL_MAP_CHALLENGE_MODE, HotfixStatements.SEL_MAP_CHALLENGE_MODE_LOCALE);
             MapDifficultyStorage = ReadDB2<MapDifficultyRecord>("MapDifficulty.db2", HotfixStatements.SEL_MAP_DIFFICULTY, HotfixStatements.SEL_MAP_DIFFICULTY_LOCALE);
             MapDifficultyXConditionStorage = ReadDB2<MapDifficultyXConditionRecord>("MapDifficultyXCondition.db2", HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION, HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE);
-            MawPowerStorage = ReadDB2<MawPowerRecord>("MawPower.db2", HotfixStatements.SEL_MAW_POWER);
             ModifierTreeStorage = ReadDB2<ModifierTreeRecord>("ModifierTree.db2", HotfixStatements.SEL_MODIFIER_TREE);
             MountCapabilityStorage = ReadDB2<MountCapabilityRecord>("MountCapability.db2", HotfixStatements.SEL_MOUNT_CAPABILITY);
             MountStorage = ReadDB2<MountRecord>("Mount.db2", HotfixStatements.SEL_MOUNT, HotfixStatements.SEL_MOUNT_LOCALE);
@@ -275,7 +267,6 @@ namespace Game.DataStorage
             SkillLineStorage = ReadDB2<SkillLineRecord>("SkillLine.db2", HotfixStatements.SEL_SKILL_LINE, HotfixStatements.SEL_SKILL_LINE_LOCALE);
             SkillLineAbilityStorage = ReadDB2<SkillLineAbilityRecord>("SkillLineAbility.db2", HotfixStatements.SEL_SKILL_LINE_ABILITY);
             SkillRaceClassInfoStorage = ReadDB2<SkillRaceClassInfoRecord>("SkillRaceClassInfo.db2", HotfixStatements.SEL_SKILL_RACE_CLASS_INFO);
-            SoulbindConduitRankStorage = ReadDB2<SoulbindConduitRankRecord>("SoulbindConduitRank.db2", HotfixStatements.SEL_SOULBIND_CONDUIT_RANK);
             SoundKitStorage = ReadDB2<SoundKitRecord>("SoundKit.db2", HotfixStatements.SEL_SOUND_KIT);
             SpecializationSpellsStorage = ReadDB2<SpecializationSpellsRecord>("SpecializationSpells.db2", HotfixStatements.SEL_SPECIALIZATION_SPELLS, HotfixStatements.SEL_SPECIALIZATION_SPELLS_LOCALE);
             SpecSetMemberStorage = ReadDB2<SpecSetMemberRecord>("SpecSetMember.db2", HotfixStatements.SEL_SPEC_SET_MEMBER);
@@ -482,7 +473,6 @@ namespace Game.DataStorage
         public static DB6Storage<AzeritePowerSetMemberRecord> AzeritePowerSetMemberStorage;
         public static DB6Storage<AzeriteTierUnlockRecord> AzeriteTierUnlockStorage;
         public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage;
-        public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage;
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
         public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
@@ -492,7 +482,6 @@ namespace Game.DataStorage
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
-        public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
         public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;
@@ -514,9 +503,7 @@ namespace Game.DataStorage
         public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
         public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
-        public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;
         public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
-        public static DB6Storage<CorruptionEffectsRecord> CorruptionEffectsStorage;
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
         public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage;
         public static DB6Storage<CreatureFamilyRecord> CreatureFamilyStorage;
@@ -559,7 +546,6 @@ namespace Game.DataStorage
         public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage;
         public static DB6Storage<GarrTalentTreeRecord> GarrTalentTreeStorage;
         public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
-        public static DB6Storage<GlobalCurveRecord> GlobalCurveStorage;
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
         public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
         public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
@@ -602,14 +588,12 @@ namespace Game.DataStorage
         public static DB6Storage<ItemModifiedAppearanceExtraRecord> ItemModifiedAppearanceExtraStorage;
         public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
-        public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;
         public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
         public static DB6Storage<ItemSparseRecord> ItemSparseStorage;
         public static DB6Storage<ItemSpecRecord> ItemSpecStorage;
         public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
         public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
-        public static DB6Storage<ItemXItemEffectRecord> ItemXItemEffectStorage;
         public static DB6Storage<JournalEncounterRecord> JournalEncounterStorage;
         public static DB6Storage<JournalEncounterSectionRecord> JournalEncounterSectionStorage;
         public static DB6Storage<JournalInstanceRecord> JournalInstanceStorage;
@@ -627,7 +611,6 @@ namespace Game.DataStorage
         public static DB6Storage<MapChallengeModeRecord> MapChallengeModeStorage;
         public static DB6Storage<MapDifficultyRecord> MapDifficultyStorage;
         public static DB6Storage<MapDifficultyXConditionRecord> MapDifficultyXConditionStorage;
-        public static DB6Storage<MawPowerRecord> MawPowerStorage;
         public static DB6Storage<ModifierTreeRecord> ModifierTreeStorage;
         public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage;
         public static DB6Storage<MountRecord> MountStorage;
@@ -674,7 +657,6 @@ namespace Game.DataStorage
         public static DB6Storage<SkillLineRecord> SkillLineStorage;
         public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage;
         public static DB6Storage<SkillRaceClassInfoRecord> SkillRaceClassInfoStorage;
-        public static DB6Storage<SoulbindConduitRankRecord> SoulbindConduitRankStorage;
         public static DB6Storage<SoundKitRecord> SoundKitStorage;
         public static DB6Storage<SpecializationSpellsRecord> SpecializationSpellsStorage;
         public static DB6Storage<SpecSetMemberRecord> SpecSetMemberStorage;

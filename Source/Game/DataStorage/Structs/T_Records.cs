@@ -36,9 +36,9 @@ namespace Game.DataStorage
         public ushort TabID;
         public byte ClassID;
         public ushort SpecID;
-        public uint SpellID;
-        public uint OverridesSpellID;
-        public uint RequiredSpellID;
+        public int SpellID;
+        public int OverridesSpellID;
+        public int RequiredSpellID;
         public int[] CategoryMask = new int[2];
         public int[] SpellRank = new int[9];
         public int[] PrereqTalent = new int[3];
@@ -123,7 +123,7 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetGroupRecord
     {
-        public string Name;
+        public LocalizedString Name;
         public uint Id;        
     }
 

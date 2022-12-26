@@ -294,7 +294,7 @@ namespace Game.Chat
                         if (talentEntry == null)
                             return 0;
 
-                        return talentEntry.SpellID;
+                        return (uint)talentEntry.SpellID;
                     }
                 case 2:
                 case 3:

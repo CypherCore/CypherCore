@@ -23,7 +23,7 @@ namespace Framework.Constants
         public const uint Alliance = 1;
     }
 
-    public enum GarrisonBuildingFlags : int
+    public enum GarrisonBuildingFlags : byte
     {
         NeedsPlan = 0x1
     }
@@ -42,7 +42,7 @@ namespace Framework.Constants
         Covenant = 123
     }
 
-    public enum GarrisonAbilityFlags : int
+    public enum GarrisonAbilityFlags : ushort
     {
         Trait = 0x01,
         CannotRoll = 0x02,

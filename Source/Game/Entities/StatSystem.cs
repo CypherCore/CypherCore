@@ -1503,7 +1503,6 @@ namespace Game.Entities
                     break;
                 case CombatRating.Corruption:
                 case CombatRating.CorruptionResistance:
-                    UpdateCorruption();
                     break;
                 case CombatRating.HasteMelee:
                 case CombatRating.HasteRanged:
@@ -1613,35 +1612,7 @@ namespace Game.Entities
 
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent), value);
         }
-
-        void UpdateCorruption()
-        {
-            float effectiveCorruption = GetRatingBonusValue(CombatRating.Corruption) - GetRatingBonusValue(CombatRating.CorruptionResistance);
-            foreach (var corruptionEffect in CliDB.CorruptionEffectsStorage.Values)
-            {
-                if (((CorruptionEffectsFlag)corruptionEffect.Flags).HasAnyFlag(CorruptionEffectsFlag.Disabled))
-                    continue;
-
-                if (effectiveCorruption < corruptionEffect.MinCorruption)
-                {
-                    RemoveAura(corruptionEffect.Aura);
-                    continue;
-                }
-
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(corruptionEffect.PlayerConditionID);
-                if (playerCondition != null)
-                {
-                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                    {
-                        RemoveAura(corruptionEffect.Aura);
-                        continue;
-                    }
-                }
-
-                CastSpell(this, corruptionEffect.Aura, true);
-            }
-        }
-
+                
         void UpdateArmorPenetration(int amount)
         {
             // Store Rating Value

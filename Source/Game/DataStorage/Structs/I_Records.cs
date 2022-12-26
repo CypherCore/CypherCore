@@ -16,6 +16,8 @@
  */
 
 using Framework.Constants;
+using Game.Entities;
+using System;
 
 namespace Game.DataStorage
 {
@@ -53,22 +55,31 @@ namespace Game.DataStorage
         public byte SubclassID;
         public byte Material;
         public InventoryType inventoryType;
+        public int RequiredLevel;
         public byte SheatheType;
+        public ushort RandomSelect;
+        public ushort ItemRandomSuffixGroupID;
         public sbyte SoundOverrideSubclassID;
+        public ushort ModifiedCraftingReagentItemID;
         public int IconFileDataID;
         public byte ItemGroupSoundsID;
         public int ContentTuningID;
-        public int ModifiedCraftingReagentItemID;
+        public uint MaxDurability;
+        public byte AmmunitionType;
+        public int Field_3_4_0_45704_015;
+        public byte[] DamageType = new byte[5];
+        public short[] Resistances = new short[7];
+        public ushort[] MinDamage = new ushort[5];
+        public ushort[] MaxDamage = new ushort[5];
     }
 
     public sealed class ItemAppearanceRecord
     {
         public uint Id;
-        public int DisplayType;
+        public byte DisplayType;
         public uint ItemDisplayInfoID;
         public int DefaultIconFileDataID;
         public int UiOrder;
-        public int PlayerConditionID;
     }
 
     public sealed class ItemArmorQualityRecord
@@ -126,13 +137,6 @@ namespace Game.DataStorage
         public uint Id;
     }
 
-    public sealed class ItemBonusSequenceSpellRecord
-    {
-        public uint Id;
-        public int SpellID;
-        public int ItemID;
-    }
-
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
@@ -140,17 +144,15 @@ namespace Game.DataStorage
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
-        public uint ChildItemBonusListGroupID;
-        public uint IblGroupPointsModSetID;
         public uint ParentItemBonusTreeID;
     }
 
     public sealed class ItemChildEquipmentRecord
     {
-        public uint Id;
-        public uint ParentItemID;
+        public uint Id;        
         public uint ChildItemID;
         public byte ChildItemEquipSlot;
+        public uint ParentItemID;
     }
 
     public sealed class ItemClassRecord
@@ -206,6 +208,7 @@ namespace Game.DataStorage
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
+        public int ParentItemID;
     }
 
     public sealed class ItemExtendedCostRecord
@@ -228,7 +231,6 @@ namespace Game.DataStorage
         public uint Id;
         public ushort MinItemLevel;
         public ushort ItemLevelSelectorQualitySetID;
-        public ushort AzeriteUnlockMappingSet;
     }
 
     public sealed class ItemLevelSelectorQualityRecord
@@ -269,7 +271,7 @@ namespace Game.DataStorage
         public int ItemAppearanceModifierID;
         public int ItemAppearanceID;
         public int OrderIndex;
-        public byte TransmogSourceTypeEnum;
+        public sbyte TransmogSourceTypeEnum;
     }
 
     public sealed class ItemModifiedAppearanceExtraRecord
@@ -295,24 +297,6 @@ namespace Game.DataStorage
         public ushort ItemLevel;
         public float Armor;
         public float Weapon;
-    }
-
-    public sealed class ItemSearchNameRecord
-    {
-        public uint Id;
-        public long AllowableRace;
-        public string Display;
-        public byte OverallQualityID;
-        public int ExpansionID;
-        public ushort MinFactionID;
-        public byte MinReputation;
-        public int AllowableClass;
-        public sbyte RequiredLevel;
-        public ushort RequiredSkill;
-        public ushort RequiredSkillRank;
-        public uint RequiredAbility;
-        public ushort ItemLevel;
-        public int[] Flags = new int[4];
     }
 
     public sealed class ItemSetRecord
@@ -343,14 +327,11 @@ namespace Game.DataStorage
         public string Display2;
         public string Display1;
         public LocalizedString Display;
-        public int ExpansionID;
         public float DmgVariance;
-        public uint LimitCategory;
         public uint DurationInInventory;
         public float QualityModifier;
         public uint BagFamily;
         public uint StartQuestID;
-        public int LanguageID;
         public float ItemRange;
         public float[] StatPercentageOfSocket = new float[ItemConst.MaxStats];
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
@@ -363,13 +344,15 @@ namespace Game.DataStorage
         public float PriceVariance;
         public float PriceRandomValue;
         public int[] Flags = new int[4];
-        public uint FactionRelated;
+        public int OppositeFactionItemID;
         public int ModifiedCraftingReagentItemID;
         public uint ContentTuningID;
         public uint PlayerLevelToItemLevelCurveID;
+        public uint MaxDurability;
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;
         public ushort RequiredHoliday;
+        public ushort LimitCategory;
         public ushort GemProperties;
         public ushort SocketMatchEnchantmentId;
         public ushort TotemCategoryID;
@@ -384,6 +367,14 @@ namespace Game.DataStorage
         public ushort RequiredSkill;
         public ushort ItemLevel;
         public short AllowableClass;
+        public ushort ItemRandomSuffixGroupID;
+        public ushort RandomSelect;
+        public ushort[] MinDamage = new ushort[5];
+        public ushort[] MaxDamage = new ushort[5];
+        public short[] Resistances = new short[7];
+        public ushort ScalingStatDistributionID;
+        public short[] StatModifierBonusAmount = new short[ItemConst.MaxStats];
+        public byte ExpansionID;
         public byte ArtifactID;
         public byte SpellWeight;
         public byte SpellWeightCategory;
@@ -391,6 +382,7 @@ namespace Game.DataStorage
         public byte SheatheType;
         public byte Material;
         public byte PageMaterialID;
+        public byte LanguageID;
         public byte Bonding;
         public byte DamageType;
         public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];
@@ -398,9 +390,10 @@ namespace Game.DataStorage
         public byte MinReputation;
         public byte RequiredPVPMedal;
         public byte RequiredPVPRank;
-        public sbyte RequiredLevel;
         public InventoryType inventoryType;
         public sbyte OverallQualityID;
+        public byte AmmunitionType;
+        public sbyte RequiredLevel;
     }
 
     public sealed class ItemSpecRecord
@@ -425,13 +418,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort ItemBonusTreeID;
-        public uint ItemID;
-    }
-
-    public sealed class ItemXItemEffectRecord
-    {
-        public uint Id;
-        public int ItemEffectID;
         public uint ItemID;
     }
 }

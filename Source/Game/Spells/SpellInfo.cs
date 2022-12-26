@@ -4220,7 +4220,7 @@ namespace Game.Spells
                             if (randPropPoints == null)
                                 randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.GetNumRows() - 1);
 
-                            tempValue = Scaling.Class == -8 ? randPropPoints.DamageReplaceStatF : randPropPoints.DamageSecondaryF;
+                            tempValue = Scaling.Class == -8 ? randPropPoints.DamageReplaceStat : 0;
                         }
                         else
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);

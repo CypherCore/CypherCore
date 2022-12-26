@@ -1983,32 +1983,6 @@ namespace Game
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
-
-            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, 0);
-            if (levels.HasValue)
-            {
-                byte minLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MinLevelWithDelta : levels.Value.MinLevel);
-                byte maxLevel = 0;
-                if (!condition.Flags.HasAnyFlag(0x20))
-                    maxLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MaxLevelWithDelta : levels.Value.MaxLevel);
-                if (condition.Flags.HasAnyFlag(0x80))
-                {
-                    if (minLevel != 0 && player.GetLevel() >= minLevel && (maxLevel == 0 || player.GetLevel() <= maxLevel))
-                        return false;
-
-                    if (maxLevel != 0 && player.GetLevel() <= maxLevel && (minLevel == 0 || player.GetLevel() >= minLevel))
-                        return false;
-                }
-                else
-                {
-                    if (minLevel != 0 && player.GetLevel() < minLevel)
-                        return false;
-
-                    if (maxLevel != 0 && player.GetLevel() > maxLevel)
-                        return false;
-                }
-            }
-
             if (condition.RaceMask != 0 && !Convert.ToBoolean(SharedConst.GetMaskForRace(player.GetRace()) & condition.RaceMask))
                 return false;
 

@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -30,6 +31,7 @@ namespace Game.DataStorage
     public sealed class GameObjectDisplayInfoRecord
     {
         public uint Id;
+        public string ModelName;
         public float[] GeoBox = new float[6];
         public int FileDataID;
         public short ObjectEffectPackageID;
@@ -54,23 +56,23 @@ namespace Game.DataStorage
         public Vector3 Pos;
         public float[] Rot = new float[4];
         public uint Id;
-        public uint OwnerID;
+        public ushort OwnerID;
         public uint DisplayID;
         public float Scale;
         public GameObjectTypes TypeID;
-        public int PhaseUseFlags;
-        public int PhaseID;
-        public int PhaseGroupID;
+        public byte PhaseUseFlags;
+        public ushort PhaseID;
+        public ushort PhaseGroupID;
         public int[] PropValue = new int[8];
     }
 
     public sealed class GarrAbilityRecord
-    {
-        public uint Id;
+    {        
         public string Name;
         public string Description;
+        public uint Id;
         public byte GarrAbilityCategoryID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public int IconFileDataID;
         public ushort FactionChangeGarrAbilityID;
         public GarrisonAbilityFlags Flags;
@@ -84,10 +86,10 @@ namespace Game.DataStorage
         public string Description;
         public string Tooltip;
         public byte GarrTypeID;
-        public sbyte BuildingType;
+        public byte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
-        public int GarrSiteID;
+        public byte GarrSiteID;
         public byte UpgradeLevel;
         public int BuildSeconds;
         public ushort CurrencyTypeID;
@@ -115,32 +117,32 @@ namespace Game.DataStorage
     }
 
     public sealed class GarrClassSpecRecord
-    {
-        public uint Id;
+    {       
         public string ClassSpec;
         public string ClassSpecMale;
         public string ClassSpecFemale;
+        public uint Id;
         public ushort UiTextureAtlasMemberID;
         public ushort GarrFollItemSetID;
         public byte FollowerClassLimit;
-        public int Flags;
+        public byte Flags;
     }
 
     public sealed class GarrFollowerRecord
-    {
-        public uint Id;
+    {        
         public string HordeSourceText;
         public string AllianceSourceText;
         public string TitleName;
+        public uint Id;
         public byte GarrTypeID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public int HordeCreatureID;
         public int AllianceCreatureID;
         public byte HordeGarrFollRaceID;
         public byte AllianceGarrFollRaceID;
-        public uint HordeGarrClassSpecID;
-        public uint AllianceGarrClassSpecID;
-        public sbyte Quality;
+        public byte HordeGarrClassSpecID;
+        public byte AllianceGarrClassSpecID;
+        public byte Quality;
         public byte FollowerLevel;
         public ushort ItemLevelWeapon;
         public ushort ItemLevelArmor;
@@ -158,10 +160,8 @@ namespace Game.DataStorage
         public uint HordeSlottingBroadcastTextID;
         public uint AllySlottingBroadcastTextID;
         public byte ChrClassID;
-        public int Flags;
+        public byte Flags;
         public byte Gender;
-        public int AutoCombatantID;
-        public int CovenantID;
     }
 
     public sealed class GarrFollowerXAbilityRecord
@@ -174,25 +174,24 @@ namespace Game.DataStorage
     }
 
     public sealed class GarrMissionRecord
-    {
-        public uint Id;
+    {        
         public LocalizedString Name;
         public LocalizedString Location;
         public LocalizedString Description;
         public Vector2 MapPos;
         public Vector2 WorldPos;
+        public uint Id;
         public byte GarrTypeID;
         public byte GarrMissionTypeID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public byte MaxFollowers;
         public uint MissionCost;
         public ushort MissionCostCurrencyTypesID;
         public byte OfferedGarrMissionTextureID;
         public ushort UiTextureKitID;
         public uint EnvGarrMechanicID;
-        public int EnvGarrMechanicTypeID;
+        public byte EnvGarrMechanicTypeID;
         public uint PlayerConditionID;
-        public int GarrMissionSetID;
         public sbyte TargetLevel;
         public ushort TargetItemLevel;
         public int MissionDuration;
@@ -203,10 +202,8 @@ namespace Game.DataStorage
         public uint OvermaxRewardPackID;
         public byte FollowerDeathChance;
         public uint AreaID;
-        public int Flags;
-        public float AutoMissionScalar;
-        public int AutoMissionScalarCurveID;
-        public int AutoCombatantEnvCasterID;
+        public uint Flags;
+        public int GarrMissionSetID;
     }
 
     public sealed class GarrPlotRecord
@@ -280,13 +277,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort EnchantId;
         public SocketColor Type;
-    }
-
-    public sealed class GlobalCurveRecord
-    {
-        public uint Id;
-        public uint CurveID;
-        public GlobalCurve Type;
+        public ushort MinItemLevel;
     }
 
     public sealed class GlyphBindableSpellRecord

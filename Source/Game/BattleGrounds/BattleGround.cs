@@ -1454,7 +1454,7 @@ namespace Game.BattleGrounds
 
         public uint GetMapId()
         {
-            return (uint)_battlegroundTemplate.BattlemasterEntry.MapId[0];
+            return (uint)_battlegroundTemplate.BattlemasterEntry.MapID[0];
         }
 
         public void SpawnBGObject(int type, uint respawntime)

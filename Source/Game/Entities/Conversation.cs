@@ -158,10 +158,6 @@ namespace Game.Entities
                     if (locale == Locale.enUS)
                         lineField.StartTime = (uint)_lastLineEndTimes[(int)locale].TotalMilliseconds;
 
-                    int broadcastTextDuration = Global.DB2Mgr.GetBroadcastTextDuration((int)convoLine.BroadcastTextID, locale);
-                    if (broadcastTextDuration != 0)
-                        _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(broadcastTextDuration);
-
                     _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(convoLine.AdditionalDuration);
                 }
 

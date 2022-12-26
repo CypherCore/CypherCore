@@ -36,10 +36,8 @@ namespace Game.DataStorage
         public AchievementFlags Flags;
         public ushort UiOrder;
         public uint IconFileID;
-        public int RewardItemID;
         public uint CriteriaTree;
         public ushort SharesCriteria;
-        public int CovenantID;
     }
 
     public sealed class AchievementCategoryRecord
@@ -132,6 +130,7 @@ namespace Game.DataStorage
         public ushort UwAmbience;
         public ushort ZoneMusic;
         public ushort UwZoneMusic;
+        public byte ExplorationLevel;
         public ushort IntroSound;
         public uint UwIntroSound;
         public byte FactionGroupMask;
@@ -141,7 +140,6 @@ namespace Game.DataStorage
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
-        public uint ContentTuningID;
         public uint[] Flags = new uint[2];
         public ushort[] LiquidTypeID = new ushort[4];
 
@@ -168,6 +166,7 @@ namespace Game.DataStorage
 
     public sealed class AreaTriggerRecord
     {
+        public LocalizedString Message;
         public Vector3 Pos;
         public uint Id;
         public ushort ContinentID;
@@ -227,7 +226,6 @@ namespace Game.DataStorage
         public uint UiAltItemAppearanceID;
         public byte Flags;
         public ushort UiCameraID;
-        public uint UsablePlayerConditionID;
     }
 
     public sealed class ArtifactAppearanceSetRecord
@@ -409,15 +407,5 @@ namespace Game.DataStorage
     {
         public uint Id;
         public AzeriteTierUnlockSetFlags Flags;
-    }
-
-    public sealed class AzeriteUnlockMappingRecord
-    {
-        public uint Id;
-        public int ItemLevel;
-        public uint ItemBonusListHead;
-        public uint ItemBonusListShoulders;
-        public uint ItemBonusListChest;
-        public uint AzeriteUnlockMappingSetID;
     }
 }

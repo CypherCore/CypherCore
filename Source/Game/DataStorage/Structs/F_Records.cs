@@ -20,15 +20,15 @@ using Framework.Constants;
 namespace Game.DataStorage
 {
     public sealed class FactionRecord
-    {
-        public uint Id;
+    {        
         public long[] ReputationRaceMask = new long[4];
         public LocalizedString Name;
         public string Description;
+        public uint Id;
         public short ReputationIndex;
         public ushort ParentFactionID;
         public byte Expansion;
-        public uint FriendshipRepID;
+        public byte FriendshipRepID;
         public byte Flags;
         public ushort ParagonFactionID;
         public short[] ReputationClassMask = new short[4];
@@ -104,7 +104,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Reaction;
-        public uint FriendshipRepID;
+        public byte FriendshipRepID;
         public ushort ReactionThreshold;
         public int OverrideColor;
     }
@@ -115,8 +115,7 @@ namespace Game.DataStorage
         public LocalizedString StandingModified;
         public LocalizedString StandingChanged;
         public uint Id;
-        public int FactionID;
+        public ushort FactionID;
         public int TextureFileID;
-        public FriendshipReputationFlags Flags;
     }
 }

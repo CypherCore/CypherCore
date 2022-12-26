@@ -592,9 +592,6 @@ namespace Game.Entities
             if (itemModifiedAppearance.TransmogSourceTypeEnum == 6 || itemModifiedAppearance.TransmogSourceTypeEnum == 9)
                 return false;
 
-            if (!CliDB.ItemSearchNameStorage.ContainsKey(itemModifiedAppearance.ItemID))
-                return false;
-
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID);
             if (itemTemplate == null)
                 return false;

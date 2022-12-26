@@ -26,7 +26,7 @@ namespace Framework.Constants
         Any = -1,
     }
 
-    public enum CriteriaTreeFlags
+    public enum CriteriaTreeFlags : short
     {
         ProgressBar = 0x0001, // Progress Bar
         DoNotDisplay = 0x0002, // Do Not Display

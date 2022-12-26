@@ -930,7 +930,7 @@ namespace Framework.Constants
         TeemingIsland = 153
     }
 
-    public enum DifficultyFlags : ushort
+    public enum DifficultyFlags : byte
     {
         Heroic = 0x01,
         Default = 0x02,

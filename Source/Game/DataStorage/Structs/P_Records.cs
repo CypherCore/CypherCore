@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 
 namespace Game.DataStorage
 {
@@ -41,13 +42,15 @@ namespace Game.DataStorage
     }
 
     public sealed class PlayerConditionRecord
-    {
-        public uint Id;
+    {        
         public long RaceMask;
         public string FailureDescription;
+        public uint Id;
+        public ushort MinLevel;
+        public ushort MaxLevel;
         public int ClassMask;
         public uint SkillLogic;
-        public int LanguageID;
+        public byte LanguageID;
         public byte MinLanguage;
         public int MaxLanguage;
         public ushort MaxFactionID;
@@ -63,7 +66,7 @@ namespace Game.DataStorage
         public byte ItemFlags;
         public uint AuraSpellLogic;
         public ushort WorldStateExpressionID;
-        public int WeatherID;
+        public byte WeatherID;
         public byte PartyStatus;
         public byte LifetimeMaxPVPRank;
         public uint AchievementLogic;
@@ -83,7 +86,7 @@ namespace Game.DataStorage
         public byte PhaseUseFlags;
         public ushort PhaseID;
         public uint PhaseGroupID;
-        public int Flags;
+        public byte Flags;
         public sbyte ChrSpecializationIndex;
         public sbyte ChrSpecializationRole;
         public uint ModifierTreeID;
@@ -97,8 +100,6 @@ namespace Game.DataStorage
         public sbyte MinExpansionTier;
         public byte MinPVPRank;
         public byte MaxPVPRank;
-        public uint ContentTuningID;
-        public int CovenantID;
         public ushort[] SkillID = new ushort[4];
         public ushort[] MinSkill = new ushort[4];
         public ushort[] MaxSkill = new ushort[4];
@@ -137,15 +138,15 @@ namespace Game.DataStorage
 
     public sealed class PowerTypeRecord
     {
-        public string NameGlobalStringTag;
-        public string CostGlobalStringTag;
         public uint Id;
+        public string NameGlobalStringTag;
+        public string CostGlobalStringTag;        
         public PowerType PowerTypeEnum;
         public sbyte MinPower;
-        public short MaxBasePower;
+        public uint MaxBasePower;
         public sbyte CenterPower;
         public sbyte DefaultPower;
-        public sbyte DisplayModifier;
+        public ushort DisplayModifier;
         public short RegenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
@@ -216,8 +217,8 @@ namespace Game.DataStorage
 
     public sealed class PvpTierRecord
     {
-        public LocalizedString Name;
         public uint Id;
+        public LocalizedString Name;        
         public short MinRating;
         public short MaxRating;
         public int PrevTier;
