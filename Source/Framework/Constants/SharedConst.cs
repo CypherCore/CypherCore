@@ -32,7 +32,7 @@ namespace Framework.Constants
         public const int MaxMailItems = 16;
         public const int MaxDeclinedNameCases = 5;
         public const int MaxHolidayDurations = 10;
-        public const int MaxHolidayDates = 26;
+        public const int MaxHolidayDates = 16;
         public const int MaxHolidayFlags = 10;
         public const int DefaultMaxLevel = 60;
         public const int MaxLevel = 123;

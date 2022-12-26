@@ -271,6 +271,7 @@ namespace Game.Entities
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
         public uint GetSubClass() { return BasicData.SubclassID; }
         public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
+        public uint GetOtherFactionItemId() { return ExtendedData.OppositeFactionItemID; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }
@@ -293,6 +294,7 @@ namespace Game.Entities
         public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
         public uint GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
         public uint GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
+        public uint GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }
         public float GetRangedModRange() { return ExtendedData.ItemRange; }
         public ItemBondingType GetBonding() { return (ItemBondingType)ExtendedData.Bonding; }

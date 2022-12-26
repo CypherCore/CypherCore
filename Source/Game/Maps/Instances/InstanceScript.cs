@@ -825,8 +825,6 @@ namespace Game.Maps
                 if (encounter.creditType == type && encounter.creditEntry == creditEntry)
                 {
                     completedEncounters |= (1u << encounter.dbcEntry.Bit);
-                    if (encounter.dbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
 
                     if (encounter.lastEncounterDungeon != 0)
                     {
@@ -857,14 +855,6 @@ namespace Game.Maps
         public void SetCompletedEncountersMask(uint newMask)
         {
             completedEncounters = newMask;
-
-            var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
-            if (encounters != null)
-            {
-                foreach (DungeonEncounter encounter in encounters)
-                    if ((completedEncounters & (1 << encounter.dbcEntry.Bit)) != 0 && encounter.dbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
-            }
         }
 
         void UpdatePhasing()

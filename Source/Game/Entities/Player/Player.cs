@@ -1526,11 +1526,9 @@ namespace Game.Entities
                 {
                     LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
-                    {
-                        var dungeonLevels = Global.DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, 0);
-                        if (dungeonLevels.HasValue)
-                            if (dungeonLevels.Value.TargetLevelMax == Global.ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
-                                ChampioningFaction = GetChampioningFaction();
+                    {                        
+                        if (dungeon.TargetLevel == 80)
+                            ChampioningFaction = GetChampioningFaction();
                     }
                 }
             }

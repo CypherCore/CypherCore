@@ -825,15 +825,6 @@ namespace Game.Entities
                 if (mountCapability.ReqSpellKnownID != 0 && !HasSpell(mountCapability.ReqSpellKnownID))
                     continue;
 
-                Player thisPlayer = ToPlayer();
-                if (thisPlayer != null)
-                {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountCapability.PlayerConditionID);
-                    if (playerCondition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(thisPlayer, playerCondition))
-                            continue;
-                }
-
                 return mountCapability;
             }
 
