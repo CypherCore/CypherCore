@@ -298,7 +298,7 @@ namespace Game.DataStorage
         public float GroupSizeBasePointsCoefficient;      
         public int[] EffectMiscValue = new int[2];
         public uint[] EffectRadiusIndex = new uint[2];
-        public int[] EffectSpellClassMask = new int[4];
+        public FlagArray128 EffectSpellClassMask;
         public short[] ImplicitTarget = new short[2];
         public uint SpellID;
     }
