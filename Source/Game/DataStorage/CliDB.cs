@@ -159,6 +159,7 @@ namespace Game.DataStorage
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
             GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
+            GlyphSlotStorage = ReadDB2<GlyphSlotRecord>("GlyphSlot.db2", HotfixStatements.SEL_GLYPH_SLOT);
             GuildColorBackgroundStorage = ReadDB2<GuildColorBackgroundRecord>("GuildColorBackground.db2", HotfixStatements.SEL_GUILD_COLOR_BACKGROUND);
             GuildColorBorderStorage = ReadDB2<GuildColorBorderRecord>("GuildColorBorder.db2", HotfixStatements.SEL_GUILD_COLOR_BORDER);
             GuildColorEmblemStorage = ReadDB2<GuildColorEmblemRecord>("GuildColorEmblem.db2", HotfixStatements.SEL_GUILD_COLOR_EMBLEM);
@@ -549,6 +550,7 @@ namespace Game.DataStorage
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
         public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
         public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
+        public static DB6Storage<GlyphSlotRecord> GlyphSlotStorage;
         public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage;
         public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage;
         public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage;

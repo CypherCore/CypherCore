@@ -303,6 +303,13 @@ namespace Game.DataStorage
         public uint GlyphPropertiesID;
     }
 
+    public sealed class GlyphSlotRecord
+    {
+        public uint Id;
+        public int ToolTip;
+        public uint Type;
+    };
+
     public sealed class GuildColorBackgroundRecord
     {
         public uint Id;

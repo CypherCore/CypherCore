@@ -498,6 +498,9 @@ namespace Framework.Database
             // GlyphRequiredSpec.db2
             PrepareStatement(HotfixStatements.SEL_GLYPH_REQUIRED_SPEC, "SELECT ID, ChrSpecializationID, GlyphPropertiesID FROM glyph_required_spec");
 
+            // GlyphSlot.db2
+            PrepareStatement(HotfixStatements.SEL_GLYPH_SLOT, "SELECT ID, ToolTip, Type FROM glyph_slot");
+           
             // GuildColorBackground.db2
             PrepareStatement(HotfixStatements.SEL_GUILD_COLOR_BACKGROUND, "SELECT ID, Red, Blue, Green FROM guild_color_background");
 
@@ -1510,6 +1513,8 @@ namespace Framework.Database
         SEL_GLYPH_PROPERTIES,
 
         SEL_GLYPH_REQUIRED_SPEC,
+
+        SEL_GLYPH_SLOT,
 
         SEL_GUILD_COLOR_BACKGROUND,
 
