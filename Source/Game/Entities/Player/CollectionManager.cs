@@ -471,31 +471,6 @@ namespace Game.Entities
                     _favoriteAppearances[favoriteAppearances.Read<uint>(0)] = FavoriteAppearanceState.Unchanged;
                 } while (favoriteAppearances.NextRow());
             }
-
-            // Static item appearances known by every player
-            uint[] hiddenAppearanceItems =
-            {
-                134110, // Hidden Helm
-                134111, // Hidden Cloak
-                134112, // Hidden Shoulder
-                168659, // Hidden Chestpiece
-                142503, // Hidden Shirt
-                142504, // Hidden Tabard
-                168665, // Hidden Bracers
-                158329, // Hidden Gloves
-                143539, // Hidden Belt
-                168664  // Hidden Boots
-            };
-
-            foreach (uint hiddenItem in hiddenAppearanceItems)
-            {
-                ItemModifiedAppearanceRecord hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
-                //ASSERT(hiddenAppearance);
-                if (_appearances.Length <= hiddenAppearance.Id)
-                    _appearances.Length = (int)hiddenAppearance.Id + 1;
-
-                _appearances.Set((int)hiddenAppearance.Id, true);
-            }
         }
 
         public void SaveAccountItemAppearances(SQLTransaction trans)
