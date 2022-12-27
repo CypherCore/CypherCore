@@ -6378,8 +6378,8 @@ namespace Game
                     raceStatModifiers[i] = new short[(int)Stats.Max];
 
 
-                //                                         0     1    2    3    4 
-                SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte FROM player_racestats");
+                //                                         0     1    2    3    4     5
+                SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte, spi FROM player_racestats");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_racestats` is empty.");
@@ -6401,8 +6401,8 @@ namespace Game
 
                 } while (result.NextRow());
 
-                //                               0      1      2    3    4    5
-                result = DB.World.Query("SELECT class, level, str, agi, sta, inte FROM player_classlevelstats");
+                //                               0      1      2    3    4    5     6
+                result = DB.World.Query("SELECT class, level, str, agi, sta, inte, spi FROM player_classlevelstats");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_classlevelstats` is empty.");
