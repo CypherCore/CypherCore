@@ -68,7 +68,6 @@ namespace Game.Spells
                 AttributesEx11 = (SpellAttr11)_misc.Attributes[11];
                 AttributesEx12 = (SpellAttr12)_misc.Attributes[12];
                 AttributesEx13 = (SpellAttr13)_misc.Attributes[13];
-                AttributesEx14 = (SpellAttr14)_misc.Attributes[14];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
@@ -3901,7 +3900,6 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr11 attribute) { return Convert.ToBoolean(AttributesEx11 & attribute); }
         public bool HasAttribute(SpellAttr12 attribute) { return Convert.ToBoolean(AttributesEx12 & attribute); }
         public bool HasAttribute(SpellAttr13 attribute) { return Convert.ToBoolean(AttributesEx13 & attribute); }
-        public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
         public bool CanBeInterrupted(WorldObject interruptCaster, Unit interruptTarget, bool ignoreImmunity = false)
@@ -3943,7 +3941,6 @@ namespace Game.Spells
         public SpellAttr11 AttributesEx11 { get; set; }
         public SpellAttr12 AttributesEx12 { get; set; }
         public SpellAttr13 AttributesEx13 { get; set; }
-        public SpellAttr14 AttributesEx14 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }
