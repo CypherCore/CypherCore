@@ -68,6 +68,12 @@ namespace Game.Maps
 
                 if (goInfo.MoTransport.taxiPathID == 0)
                     continue;
+                                
+                if (!CliDB.TaxiPathStorage.ContainsKey(goInfo.MoTransport.taxiPathID))
+                {
+                    Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`Data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
+                    continue;
+                }
 
                 // paths are generated per template, saves us from generating it again in case of instanced transports
                 TransportTemplate transport = new();
