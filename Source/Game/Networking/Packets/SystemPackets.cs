@@ -272,9 +272,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
-            _worldPacket.WriteBit(Unknown901CheckoutRelated);
+            _worldPacket.WriteBit(Unknown340_1);
+            _worldPacket.WriteBit(Unknown340_2);            
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
+            _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(LaunchETA.HasValue);
+            _worldPacket.WriteBit(TBCInfoPaneEnabled);
+            _worldPacket.WriteBit(TBCInfoPanePriceEnabled);
+            _worldPacket.WriteBit(TBCTransitionUIEnabled);
+            _worldPacket.WriteBit(SoMNotificationEnabled);
             _worldPacket.FlushBits();
 
             if (EuropaTicketSystemStatus.HasValue)
@@ -320,8 +326,14 @@ namespace Game.Networking.Packets
         public bool LiveRegionCharacterListEnabled; // NYI
         public bool LiveRegionCharacterCopyEnabled; // NYI
         public bool LiveRegionAccountCopyEnabled; // NYI
-        public bool LiveRegionKeyBindingsCopyEnabled = false;
-        public bool Unknown901CheckoutRelated = false; // NYI
+        public bool LiveRegionKeyBindingsCopyEnabled;
+        public bool Unknown901CheckoutRelated; // NYI
+        public bool Unknown340_1; // NYI
+        public bool Unknown340_2; // NYI
+        public bool TBCInfoPaneEnabled; // NYI
+        public bool TBCInfoPanePriceEnabled; // NYI
+        public bool TBCTransitionUIEnabled; // NYI
+        public bool SoMNotificationEnabled; // NYI
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
