@@ -368,12 +368,15 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBits(ServerTimeTZ.GetByteCount(), 7);
             _worldPacket.WriteBits(GameTimeTZ.GetByteCount(), 7);
+            _worldPacket.WriteBits(ServerRegionalTZ.GetByteCount(), 7);
             _worldPacket.WriteString(ServerTimeTZ);
             _worldPacket.WriteString(GameTimeTZ);
+            _worldPacket.WriteString(ServerRegionalTZ);
         }
 
         public string ServerTimeTZ;
         public string GameTimeTZ;
+        public string ServerRegionalTZ;
     }
 
     public struct SavedThrottleObjectState
