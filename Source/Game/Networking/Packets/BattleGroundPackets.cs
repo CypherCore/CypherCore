@@ -569,18 +569,17 @@ namespace Game.Networking.Packets
         public int Ranking;
         public int SeasonPlayed;
         public int SeasonWon;
-        public int Unused1;
-        public int Unused2;
         public int WeeklyPlayed;
         public int WeeklyWon;
         public int BestWeeklyRating;
-        public int LastWeeksBestRating;
         public int BestSeasonRating;
+        public int LastWeeksBestRating;
         public int PvpTierID;
+        public int Unused1;
+        public int Unused2;
         public int Unused3;
-        public int WeeklyBestWinPvpTierID;
         public int Unused4;
-        public int Rank;
+        public int Unused5;
         public bool Disqualified;
 
         public void Write(WorldPacket data)
@@ -589,18 +588,17 @@ namespace Game.Networking.Packets
             data.WriteInt32(Ranking);
             data.WriteInt32(SeasonPlayed);
             data.WriteInt32(SeasonWon);
-            data.WriteInt32(Unused1);
-            data.WriteInt32(Unused2);
             data.WriteInt32(WeeklyPlayed);
             data.WriteInt32(WeeklyWon);
             data.WriteInt32(BestWeeklyRating);
-            data.WriteInt32(LastWeeksBestRating);
             data.WriteInt32(BestSeasonRating);
+            data.WriteInt32(LastWeeksBestRating);            
             data.WriteInt32(PvpTierID);
+            data.WriteInt32(Unused1);
+            data.WriteInt32(Unused2);
             data.WriteInt32(Unused3);
-            data.WriteInt32(WeeklyBestWinPvpTierID);
             data.WriteInt32(Unused4);
-            data.WriteInt32(Rank);
+            data.WriteInt32(Unused5);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
