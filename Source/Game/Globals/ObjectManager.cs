@@ -10759,8 +10759,8 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _mapCorpsePositionStorage.Clear();
 
-            //                                         0     1    2
-            SQLResult result = DB.World.Query("SELECT `ID`, `X`, `Y` FROM `map_corpse_position`");
+            //                                            0     1    2
+            SQLResult result = DB.World.Query("SELECT `MapId`, `X`, `Y` FROM `map_corpse_position`");
 
             if (result.IsEmpty())
             {
