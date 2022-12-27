@@ -138,9 +138,9 @@ namespace Game.Networking.Packets
 
             if (Unknown340)
             { 
-                _worldPacket.WriteUInt32((uint)UnknownBytes.Count);
-                if (UnknownBytes.Count > 0)
-                    _worldPacket.WriteBytes(UnknownBytes.ToArray(), (uint)UnknownBytes.Count);                    
+                _worldPacket.WriteUInt32((uint)UnknownBytes.Length);
+                if (UnknownBytes.Length > 0)
+                    _worldPacket.WriteBytes(UnknownBytes, (uint)UnknownBytes.Length);                    
             }
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
@@ -209,7 +209,7 @@ namespace Game.Networking.Packets
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
         public List<GameRuleValuePair> GameRuleValues = new();
-        public List<byte> UnknownBytes = new();
+        public byte[] UnknownBytes;
 
 
 
