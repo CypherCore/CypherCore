@@ -311,6 +311,7 @@ namespace Game.DataStorage
             SummonPropertiesStorage = ReadDB2<SummonPropertiesRecord>("SummonProperties.db2", HotfixStatements.SEL_SUMMON_PROPERTIES);
             TactKeyStorage = ReadDB2<TactKeyRecord>("TactKey.db2", HotfixStatements.SEL_TACT_KEY);
             TalentStorage = ReadDB2<TalentRecord>("Talent.db2", HotfixStatements.SEL_TALENT, HotfixStatements.SEL_TALENT_LOCALE);
+            TalentTabStorage = ReadDB2<TalentTabRecord>("TalentTab.db2", HotfixStatements.SEL_TALENT_TAB, HotfixStatements.SEL_TALENT_TAB_LOCALE);
             TaxiNodesStorage = ReadDB2<TaxiNodesRecord>("TaxiNodes.db2", HotfixStatements.SEL_TAXI_NODES, HotfixStatements.SEL_TAXI_NODES_LOCALE);
             TaxiPathStorage = ReadDB2<TaxiPathRecord>("TaxiPath.db2", HotfixStatements.SEL_TAXI_PATH);
             TaxiPathNodeStorage = ReadDB2<TaxiPathNodeRecord>("TaxiPathNode.db2", HotfixStatements.SEL_TAXI_PATH_NODE);
@@ -700,6 +701,7 @@ namespace Game.DataStorage
         public static DB6Storage<SummonPropertiesRecord> SummonPropertiesStorage;
         public static DB6Storage<TactKeyRecord> TactKeyStorage;
         public static DB6Storage<TalentRecord> TalentStorage;
+        public static DB6Storage<TalentTabRecord> TalentTabStorage;
         public static DB6Storage<TaxiNodesRecord> TaxiNodesStorage;
         public static DB6Storage<TaxiPathRecord> TaxiPathStorage;
         public static DB6Storage<TaxiPathNodeRecord> TaxiPathNodeStorage;

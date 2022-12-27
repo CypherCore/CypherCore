@@ -538,7 +538,7 @@ namespace Framework.Database
             // Item.db2
             PrepareStatement(HotfixStatements.SEL_ITEM, "SELECT ID, ClassID, SubclassID, Material, InventoryType, RequiredLevel, SheatheType, RandomSelect, " +
                 "ItemRandomSuffixGroupID, SoundOverrideSubclassID, ModifiedCraftingReagentItemID, IconFileDataID, ItemGroupSoundsID, ContentTuningID, " +
-                "MaxDurability, AmmunitionType, Field_3_4_0_45704_015, DamageType1, DamageType2, DamageType3, DamageType4, DamageType5, Resistances1, " +
+                "MaxDurability, AmmunitionType, ScalingStatValue, DamageType1, DamageType2, DamageType3, DamageType4, DamageType5, Resistances1, " +
                 "Resistances2, Resistances3, Resistances4, Resistances5, Resistances6, Resistances7, MinDamage1, MinDamage2, MinDamage3, MinDamage4, " +
                 "MinDamage5, MaxDamage1, MaxDamage2, MaxDamage3, MaxDamage4, MaxDamage5 FROM item");
 
@@ -1139,6 +1139,11 @@ namespace Framework.Database
                 "RequiredSpellID, CategoryMask1, CategoryMask2, SpellRank1, SpellRank2, SpellRank3, SpellRank4, SpellRank5, SpellRank6, SpellRank7, " +
                 "SpellRank8, SpellRank9, PrereqTalent1, PrereqTalent2, PrereqTalent3, PrereqRank1, PrereqRank2, PrereqRank3 FROM talent");
             PrepareStatement(HotfixStatements.SEL_TALENT_LOCALE, "SELECT ID, Description_lang FROM talent_locale WHERE locale = ?");
+
+            // TalentTab.db2
+            PrepareStatement(HotfixStatements.SEL_TALENT_TAB, "SELECT ID, Name, BackgroundFile, OrderIndex, RaceMask, ClassMask, PetTalentMask, SpellIconID" +
+                " FROM talent_tab");
+            PrepareStatement(HotfixStatements.SEL_TALENT_TAB_LOCALE, "SELECT ID, Name_lang FROM talent_tab_locale WHERE locale = ?");
 
             // TaxiNodes.db2
             PrepareStatement(HotfixStatements.SEL_TAXI_NODES, "SELECT Name, PosX, PosY, PosZ, MapOffsetX, MapOffsetY, FlightMapOffsetX, FlightMapOffsetY, ID, " +
@@ -1846,6 +1851,9 @@ namespace Framework.Database
 
         SEL_TALENT,
         SEL_TALENT_LOCALE,
+
+        SEL_TALENT_TAB,
+        SEL_TALENT_TAB_LOCALE,
 
         SEL_TAXI_NODES,
         SEL_TAXI_NODES_LOCALE,

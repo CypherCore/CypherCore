@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -44,6 +45,18 @@ namespace Game.DataStorage
         public int[] PrereqTalent = new int[3];
         public int[] PrereqRank = new int[3];
     }
+
+    public sealed class TalentTabRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public string BackgroundFile;
+        public int OrderIndex;
+        public int RaceMask;
+        public int ClassMask;
+        public int PetTalentMask;
+        public int SpellIconID;
+    };
 
     public sealed class TaxiNodesRecord
     {
