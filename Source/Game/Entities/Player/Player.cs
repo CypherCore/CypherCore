@@ -700,7 +700,7 @@ namespace Game.Entities
                     m_items[i].DestroyForPlayer(target);
                 }
 
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -6684,9 +6684,6 @@ namespace Game.Entities
         public void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         public void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
 
-        public bool IsReagentBankUnlocked() { return HasPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
-        public void UnlockReagentBank() { SetPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
-
         //new
         public uint DoRandomRoll(uint minimum, uint maximum)
         {
@@ -7170,7 +7167,7 @@ namespace Game.Entities
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
                 }
 
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;

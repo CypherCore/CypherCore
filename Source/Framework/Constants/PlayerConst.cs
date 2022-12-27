@@ -769,10 +769,10 @@ namespace Framework.Constants
         Equipment = 0x01,
         Inventory = 0x02,
         Bank = 0x04,
-        ReagentBank = 0x08,
+        KeyRing = 0x08,
 
         Default = Equipment | Inventory,
-        Everywhere = Equipment | Inventory | Bank | ReagentBank
+        Everywhere = Equipment | Inventory | Bank | KeyRing
     }
 
     public enum ZonePVPTypeOverride

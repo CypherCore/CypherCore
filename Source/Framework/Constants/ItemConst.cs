@@ -106,20 +106,24 @@ namespace Framework.Constants
     {
         public const byte BagStart = 19;
         public const byte BagEnd = 23;
+
         public const byte ItemStart = 23;
-        public const byte ItemEnd = 51;
+        public const byte ItemEnd = 47;
 
-        public const byte BankItemStart = 51;
-        public const byte BankItemEnd = 79;
-        public const byte BankBagStart = 79;
-        public const byte BankBagEnd = 86;
+        public const byte BankItemStart = 47;
+        public const byte BankItemEnd = 75;
 
-        public const byte BuyBackStart = 86;
-        public const byte BuyBackEnd = 98;
-        public const byte ReagentStart = 98;
-        public const byte ReagentEnd = 196;
-        public const byte ChildEquipmentStart = 196;
-        public const byte ChildEquipmentEnd = 199;
+        public const byte BankBagStart = 75;
+        public const byte BankBagEnd = 82;
+
+        public const byte BuyBackStart = 82;
+        public const byte BuyBackEnd = 94;
+
+        public const byte KeyringStart = 94;
+        public const byte KeyringEnd = 126;
+
+        public const byte ChildEquipmentStart = 126;
+        public const byte ChildEquipmentEnd = 129;
 
         public const byte Bag0 = 255;
         public const byte DefaultSize = 16;

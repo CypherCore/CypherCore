@@ -31,6 +31,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Detour;
+using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
@@ -591,6 +593,13 @@ namespace Game.Entities
                 {
                     if (bag == InventorySlots.Bag0)               // inventory
                     {
+                        res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                        if (res != InventoryResult.Ok)
+                        {
+                            no_space_count = count + no_similar_count;
+                            return res;
+                        }
+
                         res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, true, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
                         {
@@ -651,6 +660,26 @@ namespace Game.Entities
                 // search free slot in bag for place to
                 if (bag == InventorySlots.Bag0)                     // inventory
                 {
+                    // search free slot - keyring case
+                    if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
+                    {
+                        res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, false, pItem, bag, slot);
+                        if (res != InventoryResult.Ok)
+                        {
+                            no_space_count = count + no_similar_count;
+                            return res;
+                        }
+
+                        if (count == 0)
+                        {
+                            if (no_similar_count == 0)
+                                return InventoryResult.Ok;
+
+                            no_space_count = count + no_similar_count;
+                            return InventoryResult.ItemMaxCount;
+                        }
+                    }
+
                     if (pItem && pItem.HasItemFlag(ItemFieldFlags.Child))
                     {
                         res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, false, pItem, bag, slot);
@@ -785,6 +814,25 @@ namespace Game.Entities
             // search free slot - special bag case
             if (pProto.GetBagFamily() != 0)
             {
+                if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0) 
+                {
+                    res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, false, pItem, bag, slot);
+                    if (res != InventoryResult.Ok)
+                    {
+                        no_space_count = count + no_similar_count;
+                        return res;
+                    }
+
+                    if (count == 0)
+                    {
+                        if (no_similar_count == 0)
+                            return InventoryResult.Ok;
+
+                        no_space_count = count + no_similar_count;
+                        return InventoryResult.ItemMaxCount;
+                    }
+                }
+
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                 {
                     res = CanStoreItem_InBag(i, dest, pProto, ref count, false, false, pItem, bag, slot);
@@ -876,10 +924,12 @@ namespace Game.Entities
             // counts
             uint[] inventoryCounts = new uint[InventorySlots.ItemEnd - InventorySlots.ItemStart];
             uint[][] bagCounts = new uint[InventorySlots.BagEnd - InventorySlots.BagStart][];
+            uint[] keyringCounts = new uint[InventorySlots.KeyringEnd - InventorySlots.KeyringStart];
 
             // Item array
             Item[] inventoryPointers = new Item[InventorySlots.ItemEnd - InventorySlots.ItemStart];
             Item[][] bagPointers = new Item[InventorySlots.BagEnd - InventorySlots.BagStart][];
+            Item[] keyringPointers = new Item[InventorySlots.KeyringEnd - InventorySlots.KeyringStart];
 
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
 
@@ -912,6 +962,17 @@ namespace Game.Entities
                             bagPointers[i - InventorySlots.BagStart][j] = item2;
                         }
                     }
+                }
+            }
+
+            for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; i++)
+            {
+                // build items in key ring 'bag'
+                item2 = GetItemByPos(InventorySlots.Bag0, i);
+                if (item2 != null && !item2.IsInTrade())
+                {
+                    keyringCounts[i - InventorySlots.KeyringStart] = item2.GetCount();
+                    keyringPointers[i - InventorySlots.KeyringStart] = item2;
                 }
             }
 
@@ -953,6 +1014,25 @@ namespace Game.Entities
                 // search stack for merge to
                 if (pProto.GetMaxStackSize() != 1)
                 {
+                    for (byte t = InventorySlots.KeyringStart; t < InventorySlots.KeyringEnd; ++t)
+                    {
+                        item2 = keyringPointers[t - InventorySlots.KeyringStart];
+                        if (item2 != null && item.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && keyringCounts[t - InventorySlots.KeyringStart] < pProto.GetMaxStackSize())
+                        {
+                            keyringCounts[t - InventorySlots.KeyringStart] += remaining_count;
+                            remaining_count = keyringCounts[t - InventorySlots.KeyringStart] < pProto.GetMaxStackSize() ? 0 : keyringCounts[t - InventorySlots.KeyringStart] - pProto.GetMaxStackSize();
+
+                            b_found = remaining_count == 0;
+
+                            // if no pieces of the stack remain, then stop checking keyring
+                            if (b_found)
+                                break;
+                        }
+                    }
+
+                    if (b_found)
+                        continue;
+
                     for (byte t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                     {
                         item2 = inventoryPointers[t - InventorySlots.ItemStart];
@@ -1001,10 +1081,30 @@ namespace Game.Entities
                     if (b_found)
                         continue;
                 }
+
                 b_found = false;
                 // special bag case
                 if (pProto.GetBagFamily() != 0)
                 {
+                    if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
+                    {
+                        uint keyringSize = InventorySlots.KeyringEnd - InventorySlots.KeyringStart;
+                        for (uint t = InventorySlots.KeyringStart; t < (InventorySlots.KeyringStart + keyringSize); ++t)
+                        {
+                            if (keyringCounts[t - InventorySlots.KeyringStart] == 0)
+                            {
+                                keyringCounts[t - InventorySlots.KeyringStart] = remaining_count;
+                                keyringPointers[t - InventorySlots.KeyringStart] = item;
+
+                                b_found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (b_found)
+                        continue;
+
                     for (byte t = InventorySlots.BagStart; !b_found && t < InventorySlots.BagEnd; ++t)
                     {
                         Bag bag = GetBagByPos(t);
@@ -1798,25 +1898,25 @@ namespace Game.Entities
                 {
                     case InventoryResult.CantEquipLevelI:
                     case InventoryResult.PurchaseLevelTooLow:
-                    {
-                        failure.Level = (item1 ? item1.GetRequiredLevel() : 0);
-                        break;
-                    }
+                        {
+                            failure.Level = (item1 ? item1.GetRequiredLevel() : 0);
+                            break;
+                        }
                     case InventoryResult.EventAutoequipBindConfirm:    // no idea about this one...
-                    {
-                        //failure.SrcContainer
-                        //failure.SrcSlot
-                        //failure.DstContainer
-                        break;
-                    }
+                        {
+                            //failure.SrcContainer
+                            //failure.SrcSlot
+                            //failure.DstContainer
+                            break;
+                        }
                     case InventoryResult.ItemMaxLimitCategoryCountExceededIs:
                     case InventoryResult.ItemMaxLimitCategorySocketedExceededIs:
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
-                    {
-                        ItemTemplate proto = item1 ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
-                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
-                        break;
-                    }
+                        {
+                            ItemTemplate proto = item1 ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
+                            failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -2138,12 +2238,6 @@ namespace Game.Entities
                 }
             }
 
-            if (IsReagentBankPos(dst) && !IsReagentBankUnlocked())
-            {
-                SendEquipError(InventoryResult.ReagentBankLocked, pSrcItem, pDstItem);
-                return;
-            }
-
             // NOW this is or item move (swap with empty), or swap with another item (including bags in bag possitions)
             // or swap empty bag with another empty or not empty bag (with items exchange)
 
@@ -2177,8 +2271,7 @@ namespace Game.Entities
 
                     RemoveItem(srcbag, srcslot, true);
                     BankItem(dest, pSrcItem, true);
-                    if (!IsReagentBankPos(dst))
-                        ItemRemovedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
+                    ItemRemovedQuestCheck(pSrcItem.GetEntry(), pSrcItem.GetCount());
                 }
                 else if (IsEquipmentPos(dst))
                 {
@@ -2668,7 +2761,7 @@ namespace Game.Entities
         {
             bool countGems = skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0;
 
-            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.KeyRing;
             if (inBankAlso)
                 location |= ItemSearchLocation.Bank;
 
@@ -2735,7 +2828,7 @@ namespace Game.Entities
         }
         public List<Item> GetItemListByEntry(uint entry, bool inBankAlso = false)
         {
-            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.KeyRing;
             if (inBankAlso)
                 location |= ItemSearchLocation.Bank;
 
@@ -2752,7 +2845,7 @@ namespace Game.Entities
         }
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {
-            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.KeyRing;
             if (inBankAlso)
                 location |= ItemSearchLocation.Bank;
 
@@ -2806,7 +2899,7 @@ namespace Game.Entities
                     return true;
 
                 // reagent bank bag slots
-                if (slot >= InventorySlots.ReagentStart && slot < InventorySlots.ReagentEnd)
+                if (slot >= InventorySlots.KeyringStart && slot < InventorySlots.KeyringEnd)
                     return true;
 
                 return false;
@@ -2929,6 +3022,14 @@ namespace Game.Entities
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
+                    if (pItem.IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
+                        DestroyItem(InventorySlots.Bag0, i, update);
+            }
+
+            for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
+            {
+                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                if (pItem !=  null)
                     if (pItem.IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
                         DestroyItem(InventorySlots.Bag0, i, update);
             }
@@ -3543,6 +3644,13 @@ namespace Game.Entities
                 }
             }
 
+            for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
+            {
+                Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
+                if (item != null && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
+                    return true;
+            }
+
             for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
             {
                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
@@ -4078,7 +4186,7 @@ namespace Game.Entities
                 return true;
             if (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd)
                 return true;
-            if (bag == InventorySlots.Bag0 && (slot >= InventorySlots.ReagentStart && slot < InventorySlots.ReagentEnd))
+            if (bag == InventorySlots.Bag0 && (slot >= InventorySlots.KeyringStart && slot < InventorySlots.KeyringEnd))
                 return true;
             if (bag == InventorySlots.Bag0 && (slot >= InventorySlots.ChildEquipmentStart && slot < InventorySlots.ChildEquipmentEnd))
                 return true;
@@ -4161,12 +4269,12 @@ namespace Game.Entities
             {
                 if (bag == InventorySlots.Bag0)
                 {
-                    // prevent cheating
-                    if ((slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd) || slot >= (byte)PlayerSlots.End)
+                    // keyring case
+                    if (slot >= InventorySlots.KeyringStart && (slot < InventorySlots.KeyringEnd) && (pProto.GetBagFamily() & BagFamilyMask.Keys) == 0)
                         return InventoryResult.WrongBagType;
 
-                    // can't store anything else than crafting reagents in Reagent Bank
-                    if (IsReagentBankPos(bag, slot) && (!IsReagentBankUnlocked() || !pProto.IsCraftingReagent()))
+                    // prevent cheating
+                    if ((slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd) || slot >= (byte)PlayerSlots.End)
                         return InventoryResult.WrongBagType;
                 }
                 else
@@ -4270,27 +4378,12 @@ namespace Game.Entities
                 return true;
             if (bag >= InventorySlots.BankBagStart && bag < InventorySlots.BankBagEnd)
                 return true;
-            if (bag == InventorySlots.Bag0 && (slot >= InventorySlots.ReagentStart && slot < InventorySlots.ReagentEnd))
-                return true;
             return false;
         }
-        public InventoryResult CanBankItem(byte bag, byte slot, List<ItemPosCount> dest, Item pItem, bool swap, bool not_loading = true, bool reagentBankOnly = false)
+        public InventoryResult CanBankItem(byte bag, byte slot, List<ItemPosCount> dest, Item pItem, bool swap, bool not_loading = true)
         {
             if (pItem == null)
                 return swap ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
-
-            // different slots range if we're trying to store item in Reagent Bank
-            if (reagentBankOnly)
-            {
-                Cypher.Assert(bag == ItemConst.NullBag && slot == ItemConst.NullSlot); // when reagentBankOnly is true then bag & slot must be hardcoded constants, not client input
-            }
-
-            if ((IsReagentBankPos(bag, slot) || reagentBankOnly) && !IsReagentBankUnlocked())
-                return InventoryResult.ReagentBankLocked;
-
-            byte slotStart = reagentBankOnly ? InventorySlots.ReagentStart : InventorySlots.BankItemStart;
-            byte slotEnd = reagentBankOnly ? InventorySlots.ReagentEnd : InventorySlots.BankItemEnd;
-
             uint count = pItem.GetCount();
 
             Log.outDebug(LogFilter.Player, "STORAGE: CanBankItem bag = {0}, slot = {1}, item = {2}, count = {3}", bag, slot, pItem.GetEntry(), count);
@@ -4355,7 +4448,7 @@ namespace Game.Entities
                 {
                     if (bag == InventorySlots.Bag0)
                     {
-                        res = CanStoreItem_InInventorySlots(slotStart, slotEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                        res = CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
                             return res;
 
@@ -4379,7 +4472,7 @@ namespace Game.Entities
                 // search free slot in bag
                 if (bag == InventorySlots.Bag0)
                 {
-                    res = CanStoreItem_InInventorySlots(slotStart, slotEnd, dest, pProto, ref count, false, pItem, bag, slot);
+                    res = CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
                     if (res != InventoryResult.Ok)
                         return res;
 
@@ -4406,34 +4499,20 @@ namespace Game.Entities
             if (pProto.GetMaxStackSize() != 1)
             {
                 // in slots
-                res = CanStoreItem_InInventorySlots(slotStart, slotEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                res = CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
                 if (res != InventoryResult.Ok)
                     return res;
 
                 if (count == 0)
                     return InventoryResult.Ok;
 
-                // don't try to store reagents anywhere else than in Reagent Bank if we're on it
-                if (!reagentBankOnly)
+
+                // in special bags
+                if (pProto.GetBagFamily() != BagFamilyMask.None)
                 {
-                    // in special bags
-                    if (pProto.GetBagFamily() != BagFamilyMask.None)
-                    {
-                        for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
-                        {
-                            res = CanStoreItem_InBag(i, dest, pProto, ref count, true, false, pItem, bag, slot);
-                            if (res != InventoryResult.Ok)
-                                continue;
-
-                            if (count == 0)
-                                return InventoryResult.Ok;
-                        }
-                    }
-
-                    // in regular bags
                     for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
                     {
-                        res = CanStoreItem_InBag(i, dest, pProto, ref count, true, true, pItem, bag, slot);
+                        res = CanStoreItem_InBag(i, dest, pProto, ref count, true, false, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
                             continue;
 
@@ -4441,10 +4520,21 @@ namespace Game.Entities
                             return InventoryResult.Ok;
                     }
                 }
+
+                // in regular bags
+                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
+                {
+                    res = CanStoreItem_InBag(i, dest, pProto, ref count, true, true, pItem, bag, slot);
+                    if (res != InventoryResult.Ok)
+                        continue;
+
+                    if (count == 0)
+                        return InventoryResult.Ok;
+                }
             }
 
             // search free place in special bag
-            if (!reagentBankOnly && pProto.GetBagFamily() != BagFamilyMask.None)
+            if (pProto.GetBagFamily() != BagFamilyMask.None)
             {
                 for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
                 {
@@ -4458,27 +4548,25 @@ namespace Game.Entities
             }
 
             // search free space
-            res = CanStoreItem_InInventorySlots(slotStart, slotEnd, dest, pProto, ref count, false, pItem, bag, slot);
+            res = CanStoreItem_InInventorySlots(InventorySlots.BankItemStart, InventorySlots.BankItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
             if (res != InventoryResult.Ok)
                 return res;
 
             if (count == 0)
                 return InventoryResult.Ok;
 
-            // search free space in regular bags (don't try to store reagents anywhere else than in Reagent Bank if we're on it)
-            if (!reagentBankOnly)
+            // search free space in regular bags
+            for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
             {
-                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
-                {
-                    res = CanStoreItem_InBag(i, dest, pProto, ref count, false, true, pItem, bag, slot);
-                    if (res != InventoryResult.Ok)
-                        continue;
+                res = CanStoreItem_InBag(i, dest, pProto, ref count, false, true, pItem, bag, slot);
+                if (res != InventoryResult.Ok)
+                    continue;
 
-                    if (count == 0)
-                        return InventoryResult.Ok;
-                }
+                if (count == 0)
+                    return InventoryResult.Ok;
             }
-            return reagentBankOnly ? InventoryResult.ReagentBankFull : InventoryResult.BankFull;
+
+            return InventoryResult.BankFull;
         }
 
         public Item BankItem(List<ItemPosCount> dest, Item pItem, bool update)
@@ -4531,8 +4619,8 @@ namespace Game.Entities
                 }
             }
 
-            if (location.HasFlag(ItemSearchLocation.ReagentBank))
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+            if (location.HasFlag(ItemSearchLocation.KeyRing))
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
                     if (GetItemByPos(InventorySlots.Bag0, i) == null)
                         ++freeSlotCount;
 
@@ -4560,15 +4648,6 @@ namespace Game.Entities
             }
 
             return freeSpace;
-        }
-
-        //Reagent
-        public static bool IsReagentBankPos(ushort pos) { return IsReagentBankPos((byte)(pos >> 8), (byte)(pos & 255)); }
-        public static bool IsReagentBankPos(byte bag, byte slot)
-        {
-            if (bag == InventorySlots.Bag0 && (slot >= InventorySlots.ReagentStart && slot < InventorySlots.ReagentEnd))
-                return true;
-            return false;
         }
 
         //Bags
@@ -4737,15 +4816,15 @@ namespace Game.Entities
                     slots[0] = EquipmentSlot.Cloak;
                     break;
                 case InventoryType.Weapon:
-                {
-                    slots[0] = EquipmentSlot.MainHand;
+                    {
+                        slots[0] = EquipmentSlot.MainHand;
 
-                    // suggest offhand slot only if know dual wielding
-                    // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
-                    if (CanDualWield())
-                        slots[1] = EquipmentSlot.OffHand;
-                    break;
-                }
+                        // suggest offhand slot only if know dual wielding
+                        // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
+                        if (CanDualWield())
+                            slots[1] = EquipmentSlot.OffHand;
+                        break;
+                    }
                 case InventoryType.Shield:
                     slots[0] = EquipmentSlot.OffHand;
                     break;
@@ -5507,6 +5586,35 @@ namespace Game.Entities
                 }
             }
 
+            for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, i);
+                if (item != null)
+                {
+                    if (item.GetEntry() == itemEntry && !item.IsInTrade())
+                    {
+                        if (item.GetCount() + remcount <= count)
+                        {
+                            // all keys can be unequipped
+                            remcount += item.GetCount();
+                            DestroyItem(InventorySlots.Bag0, i, update);
+
+                            if (remcount >= count)
+                                return remcount;
+                        }
+                        else
+                        {
+                            item.SetCount(item.GetCount() - count + remcount);
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
+                            if (IsInWorld && update)
+                                item.SendUpdateToPlayer(this);
+                            item.SetState(ItemUpdateState.Changed, this);
+                            return count;
+                        }
+                    }
+                }
+            }
+
             // in equipment and bag list
             for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; i++)
             {
@@ -5621,35 +5729,6 @@ namespace Game.Entities
                                 if (remcount >= count)
                                     return remcount;
                             }
-                        }
-                        else
-                        {
-                            item.SetCount(item.GetCount() - count + remcount);
-                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
-                            if (IsInWorld && update)
-                                item.SendUpdateToPlayer(this);
-                            item.SetState(ItemUpdateState.Changed, this);
-                            return count;
-                        }
-                    }
-                }
-            }
-
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-            {
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
-                {
-                    if (item.GetEntry() == itemEntry && !item.IsInTrade())
-                    {
-                        if (item.GetCount() + remcount <= count)
-                        {
-                            // all keys can be unequipped
-                            remcount += item.GetCount();
-                            DestroyItem(InventorySlots.Bag0, i, update);
-
-                            if (remcount >= count)
-                                return remcount;
                         }
                         else
                         {
@@ -6221,9 +6300,9 @@ namespace Game.Entities
                 }
             }
 
-            if (location.HasAnyFlag(ItemSearchLocation.ReagentBank))
+            if (location.HasAnyFlag(ItemSearchLocation.KeyRing))
             {
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
                 {
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)

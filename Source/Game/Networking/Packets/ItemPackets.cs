@@ -644,13 +644,6 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class SortReagentBankBags : ClientPacket
-    {
-        public SortReagentBankBags(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
-
     class BagCleanupFinished : ServerPacket
     {
         public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
