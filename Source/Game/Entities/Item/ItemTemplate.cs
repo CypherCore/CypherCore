@@ -287,19 +287,19 @@ namespace Game.Entities
         public uint GetRequiredSpell() { return ExtendedData.RequiredAbility; }
         public uint GetRequiredReputationFaction() { return ExtendedData.MinFactionID; }
         public uint GetRequiredReputationRank() { return ExtendedData.MinReputation; }
-        public uint GetMaxCount() { return ExtendedData.MaxCount; }
+        public uint GetMaxCount() { return (uint)ExtendedData.MaxCount; }
         public uint GetContainerSlots() { return ExtendedData.ContainerSlots; }
         public int GetStatModifierBonusStat(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat[index]; }
         public int GetStatPercentEditor(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentEditor[index]; }
         public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
-        public uint GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
-        public uint GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
+        public uint GetScalingStatContentTuning() { return (uint)ExtendedData.ContentTuningID; }
+        public uint GetPlayerLevelToItemLevelCurveId() { return (uint)ExtendedData.PlayerLevelToItemLevelCurveID; }
         public uint GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }
         public float GetRangedModRange() { return ExtendedData.ItemRange; }
         public ItemBondingType GetBonding() { return (ItemBondingType)ExtendedData.Bonding; }
         public uint GetPageText() { return ExtendedData.PageID; }
-        public uint GetStartQuest() { return ExtendedData.StartQuestID; }
+        public uint GetStartQuest() { return (uint)ExtendedData.StartQuestID; }
         public uint GetLockID() { return ExtendedData.LockID; }
         public uint GetItemSet() { return ExtendedData.ItemSet; }
         public uint GetArea(int index) { return ExtendedData.ZoneBound[index]; }
@@ -325,7 +325,7 @@ namespace Game.Entities
 
         public uint GetMaxStackSize()
         {
-            return (ExtendedData.Stackable == 2147483647 || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : ExtendedData.Stackable;
+            return (ExtendedData.Stackable == 2147483647 || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : (uint)ExtendedData.Stackable;
         }
 
         public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }
