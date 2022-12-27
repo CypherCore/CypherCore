@@ -2840,17 +2840,17 @@ namespace Game.Entities
         }
     }
 
-    public class ActivePlayerUnk340 : BaseUpdateData<Player>
+    public class GlyphInfo : BaseUpdateData<Player>
     {
-        public UpdateField<uint> Field_0 = new(0, 1);
-        public UpdateField<uint> Field_10 = new(0, 2);
+        public UpdateField<uint> GlyphSlot = new(0, 1);
+        public UpdateField<uint> Glyph = new(0, 2);
 
-        public ActivePlayerUnk340() : base(3) { }
+        public GlyphInfo() : base(3) { }
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(Field_0);
-            data.WriteUInt32(Field_10);
+            data.WriteUInt32(GlyphSlot);
+            data.WriteUInt32(Glyph);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
@@ -2866,19 +2866,19 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(Field_0);
+                    data.WriteUInt32(GlyphSlot);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(Field_10);
+                    data.WriteUInt32(Glyph);
                 }
             }
         }
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_0);
-            ClearChangesMask(Field_10);
+            ClearChangesMask(GlyphSlot);
+            ClearChangesMask(Glyph);
             _changesMask.ResetAll();
         }
     }
@@ -3012,7 +3012,7 @@ namespace Game.Entities
         public UpdateFieldArray<uint> BagSlotFlags = new(4, 594, 595);
         public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 599, 600);
         public UpdateFieldArray<ulong> QuestCompleted = new(875, 607, 608);
-        UpdateFieldArray<ActivePlayerUnk340> Unk340 = new (6, 1483, 1484);
+        UpdateFieldArray<GlyphInfo> GlyphInfos = new (6, 1483, 1484);
 
         public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1554)
         {
@@ -3192,7 +3192,7 @@ namespace Game.Entities
             data.WriteInt32(TransportServerTime);
             for (int i = 0; i < 6; ++i)
             {
-                Unk340[i].WriteCreate(data, owner, receiver);
+                GlyphInfos[i].WriteCreate(data, owner, receiver);
             }
             data.WriteUInt8(Unk340_2);
             for (int i = 0; i < KnownTitles.Size(); ++i)
@@ -4076,7 +4076,7 @@ namespace Game.Entities
                 {
                     if (changesMask[1484 + i])
                     {
-                        Unk340[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        GlyphInfos[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
@@ -4217,7 +4217,7 @@ namespace Game.Entities
             ClearChangesMask(BagSlotFlags);
             ClearChangesMask(BankBagSlotFlags);
             ClearChangesMask(QuestCompleted);
-            ClearChangesMask(Unk340);
+            ClearChangesMask(GlyphInfos);
             _changesMask.ResetAll();
         }
     }
