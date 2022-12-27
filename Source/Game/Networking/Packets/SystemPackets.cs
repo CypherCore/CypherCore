@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using System;
 using System.Collections.Generic;
 using Game.Entities;
+using System.Linq;
 
 namespace Game.Networking.Packets
 {
@@ -98,6 +99,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ChatDisabledByDefault);
             _worldPacket.WriteBit(ChatDisabledByPlayer);
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
+            _worldPacket.WriteBit(BattlegroundsEnabled);
+            _worldPacket.WriteBit(Unknown340);
             _worldPacket.FlushBits();
 
             {
@@ -131,6 +134,13 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.Delay);
                 _worldPacket.WriteInt32(SessionAlert.Value.Period);
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
+            }
+
+            if (Unknown340)
+            { 
+                _worldPacket.WriteUInt32((uint)UnknownBytes.Count);
+                if (UnknownBytes.Count > 0)
+                    _worldPacket.WriteBytes(UnknownBytes.ToArray(), (uint)UnknownBytes.Count);                    
             }
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
@@ -192,11 +202,16 @@ namespace Game.Networking.Packets
         public bool ChatDisabledByDefault;
         public bool ChatDisabledByPlayer;
         public bool LFGListCustomRequiresAuthenticator;
+        public bool BattlegroundsEnabled = true; // NYI
+        public bool Unknown340; // NYI
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
         public List<GameRuleValuePair> GameRuleValues = new();
+        public List<byte> UnknownBytes = new();
+
+
 
         public struct SessionAlertConfig
         {
