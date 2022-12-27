@@ -1687,7 +1687,7 @@ namespace Framework.Constants
         UpdateLastInstance = 0x2685,
         UpdateObject = 0x27cb,
         UpdatePrimarySpec = 0x25d4,
-        UpdateTalentData = 0x25d2,
+        UpdateTalentData = 0x25D3,
         UpdateTaskProgress = 0x278d,
         UpdateWeeklySpellUsage = 0x2c19,
         UpdateWorldState = 0x2744,
