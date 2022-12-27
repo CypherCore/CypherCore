@@ -23,8 +23,8 @@ namespace Framework.Constants
     {
         public const Expansion CurrentExpansion = Expansion.ShadowLands;
 
-        public const int MaxTalentTiers = 7;
-        public const int MaxTalentColumns = 3;
+        public const int MaxTalentTiers = 11;
+        public const int MaxTalentColumns = 4;
         public const int MaxTalentRank = 5;
         public const int MaxPvpTalentSlots = 4;
         public const int MinSpecializationLevel = 10;

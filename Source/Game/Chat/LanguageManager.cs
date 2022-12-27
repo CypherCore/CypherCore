@@ -84,7 +84,7 @@ namespace Game.Chat
             {
                 byte length = (byte)Math.Min(18, wordEntry.Word.Length);
 
-                var key = Tuple.Create(wordEntry.LanguageID, length);
+                var key = Tuple.Create((uint)wordEntry.LanguageID, length);
 
                 _wordsMap.Add(key, wordEntry.Word);
                 ++wordsNum;

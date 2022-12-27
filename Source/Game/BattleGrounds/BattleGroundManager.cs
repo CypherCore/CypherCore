@@ -424,8 +424,8 @@ namespace Game.BattleGrounds
 
                 _battlegroundTemplates[bgTypeId] = bgTemplate;
 
-                if (bgTemplate.BattlemasterEntry.MapId[1] == -1) // in this case we have only one mapId
-                    _battlegroundMapTemplates[(uint)bgTemplate.BattlemasterEntry.MapId[0]] = _battlegroundTemplates[bgTypeId];
+                if (bgTemplate.BattlemasterEntry.MapID[1] == -1) // in this case we have only one mapId
+                    _battlegroundMapTemplates[(uint)bgTemplate.BattlemasterEntry.MapID[0]] = _battlegroundTemplates[bgTypeId];
 
                 ++count;
             }
@@ -709,7 +709,7 @@ namespace Game.BattleGrounds
             {
                 Dictionary<BattlegroundTypeId, float> selectionWeights = new();
 
-                foreach (var mapId in bgTemplate.BattlemasterEntry.MapId)
+                foreach (var mapId in bgTemplate.BattlemasterEntry.MapID)
                 {
                     if (mapId == -1)
                         break;
@@ -865,7 +865,7 @@ namespace Game.BattleGrounds
 
         public ushort GetMaxPlayersPerTeam()
         {
-            return BattlemasterEntry.MaxPlayers;
+            return (ushort)BattlemasterEntry.MaxPlayers;
         }
 
         public byte GetMinLevel()

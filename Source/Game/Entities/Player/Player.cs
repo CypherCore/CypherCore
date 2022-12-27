@@ -26,7 +26,6 @@ using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Chat;
 using Game.DataStorage;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Guilds;
 using Game.Loots;
@@ -843,24 +842,6 @@ namespace Game.Entities
         }
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
-
-        public void CreateGarrison(uint garrSiteId)
-        {
-            _garrison = new Garrison(this);
-            if (!_garrison.Create(garrSiteId))
-                _garrison = null;
-        }
-
-        void DeleteGarrison()
-        {
-            if (_garrison != null)
-            {
-                _garrison.Delete();
-                _garrison = null;
-            }
-        }
-
-        public Garrison GetGarrison() { return _garrison; }
 
         public SceneMgr GetSceneMgr() { return m_sceneMgr; }
 
@@ -2576,9 +2557,6 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.GarrisonTalent:
                 {
-                    GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(menuId);
-                    GossipMenuItemAddon itemAddon = Global.ObjectMgr.GetGossipMenuItemAddon(menuId, gossipListId);
-                    SendGarrisonOpenTalentNpc(guid, itemAddon != null ? itemAddon.GarrTalentTreeID.GetValueOrDefault(0) : 0, addon != null ? addon.FriendshipFactionID : 0);
                     break;
                 }
                 //case GossipOptionNpc.Transmogrify:
@@ -5256,9 +5234,6 @@ namespace Game.Entities
                 SendDungeonDifficulty((int)GetMap().GetDifficultyID());
 
             PhasingHandler.OnMapChange(this);
-
-            if (_garrison != null)
-                _garrison.SendRemoteInfo();
 
             UpdateItemLevelAreaBasedScaling();
 

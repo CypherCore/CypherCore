@@ -174,12 +174,12 @@ namespace Game.DataStorage
         public uint Id;
         public byte DifficultyID;
         public uint CumulativeAura;
-        public uint ProcCategoryRecovery;
+        public int ProcCategoryRecovery;
         public byte ProcChance;
         public int ProcCharges;
         public ushort SpellProcsPerMinuteID;
         public int[] ProcTypeMask = new int[2];
-        public int SpellID;
+        public uint SpellID;
     }
 
     public sealed class SpellAuraRestrictionsRecord
@@ -255,10 +255,10 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DifficultyID;
-        public uint CategoryRecoveryTime;
-        public uint RecoveryTime;
-        public uint StartRecoveryTime;
-        public int SpellID;
+        public int CategoryRecoveryTime;
+        public int RecoveryTime;
+        public int StartRecoveryTime;
+        public uint SpellID;
     }
 
     public sealed class SpellDurationRecord
@@ -386,11 +386,11 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DifficultyID;
-        public ushort BaseLevel;
-        public ushort MaxLevel;
-        public ushort SpellLevel;
+        public short BaseLevel;
+        public short MaxLevel;
+        public short SpellLevel;
         public byte MaxPassiveAuraLevel;        
-        public int SpellID;
+        public uint SpellID;
     }
 
     public sealed class SpellMiscRecord
@@ -404,12 +404,12 @@ namespace Game.DataStorage
         public float Speed;
         public float LaunchDelay;
         public float MinDuration;
-        public uint SpellIconFileDataID;
-        public uint ActiveIconFileDataID;
-        public uint ContentTuningID;
+        public int SpellIconFileDataID;
+        public int ActiveIconFileDataID;
+        public int ContentTuningID;
         public int ShowFutureSpellPlayerConditionID;
         public int[] Attributes = new int[14];
-        public int SpellID;        
+        public uint SpellID;        
     }
 
     public sealed class SpellNameRecord
@@ -636,7 +636,7 @@ namespace Game.DataStorage
         public uint ViewerPlayerConditionID;
         public ushort CasterUnitConditionID;
         public uint CasterPlayerConditionID;
-        public int SpellID;
+        public uint SpellID;
     }
 
     public sealed class SummonPropertiesRecord

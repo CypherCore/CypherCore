@@ -73,7 +73,7 @@ namespace Game.Entities
 
         public bool AddTalent(TalentRecord talent, byte spec, bool learning)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Player.AddTalent: Spell (ID: {0}) does not exist.", talent.SpellID);
@@ -93,9 +93,9 @@ namespace Game.Entities
 
             if (spec == GetActiveTalentGroup())
             {
-                LearnSpell(talent.SpellID, true);
+                LearnSpell((uint)talent.SpellID, true);
                 if (talent.OverridesSpellID != 0)
-                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+                    AddOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
             }
 
             if (learning)
@@ -106,11 +106,11 @@ namespace Game.Entities
 
         public void RemoveTalent(TalentRecord talent)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
-            RemoveSpell(talent.SpellID, true);
+            RemoveSpell((uint)talent.SpellID, true);
 
             // search for spells that the talent teaches and unlearn them
             foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -118,7 +118,7 @@ namespace Game.Entities
                     RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
             if (talent.OverridesSpellID != 0)
-                RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+                RemoveOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
 
             var talentMap = GetTalentMap(GetActiveTalentGroup());
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
@@ -190,7 +190,7 @@ namespace Game.Entities
                     if (!HasPlayerFlag(PlayerFlags.Resting) && HasUnitFlag2(UnitFlags2.AllowChangingTalents))
                         return TalentLearnResult.FailedRestArea;
 
-                    if (GetSpellHistory().HasCooldown(talent.SpellID))
+                    if (GetSpellHistory().HasCooldown((uint)talent.SpellID))
                     {
                         spellOnCooldown = (int)talent.SpellID;
                         return TalentLearnResult.FailedCantRemoveTalent;
@@ -201,7 +201,7 @@ namespace Game.Entities
             }
 
             // spell not set in talent.dbc
-            uint spellid = talentInfo.SpellID;
+            uint spellid = (uint)talentInfo.SpellID;
             if (spellid == 0)
             {
                 Log.outError(LogFilter.Player, "Player.LearnTalent: Talent.dbc has no spellInfo for talent: {0} (spell id = 0)", talentId);
@@ -317,11 +317,11 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell(talentInfo.SpellID, true);
+                RemoveSpell((uint)talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -329,7 +329,7 @@ namespace Game.Entities
                         RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
                 if (talentInfo.OverridesSpellID != 0)
-                    RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
+                    RemoveOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
             }
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
@@ -369,9 +369,9 @@ namespace Game.Entities
 
                 if (HasTalent(talentInfo.Id, GetActiveTalentGroup()))
                 {
-                    LearnSpell(talentInfo.SpellID, true);      // add the talent to the PlayerSpellMap
+                    LearnSpell((uint)talentInfo.SpellID, true);      // add the talent to the PlayerSpellMap
                     if (talentInfo.OverridesSpellID != 0)
-                        AddOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
+                        AddOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
                 }
             }
 
@@ -573,7 +573,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, "Player {0} has unknown talent spell: {1}", GetName(), talentInfo.SpellID);

@@ -52,10 +52,10 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public string Description;
-        public string ButtonText;
-        public string RewardDescription;
-        public string ContinueDescription;
+        public LocalizedString Description;
+        public LocalizedString ButtonText;
+        public LocalizedString RewardDescription;
+        public LocalizedString ContinueDescription;
         public byte Type;
         public uint PlayerConditionID;
         public int Flags;
@@ -69,7 +69,7 @@ namespace Game.DataStorage
         public int ItemID;
         public uint ItemQuantity;
         public ushort CurrencyType;
-        public uint CurrencyQuantity;
+        public byte CurrencyQuantity;
         public ushort UiMapID;
         public uint[] BonusPlayerConditionID = new uint[2];
         public byte[] BonusValue = new byte[2];

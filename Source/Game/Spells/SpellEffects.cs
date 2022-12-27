@@ -22,7 +22,6 @@ using Game.BattlePets;
 using Game.Combat;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Guilds;
 using Game.Loots;
@@ -5047,27 +5046,11 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.LearnGarrisonBuilding)]
         void EffectLearnGarrisonBuilding()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
-                return;
-
-            Garrison garrison = unitTarget.ToPlayer().GetGarrison();
-            if (garrison != null)
-                garrison.LearnBlueprint((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateGarrison)]
         void EffectCreateGarrison()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
-                return;
-
-            unitTarget.ToPlayer().CreateGarrison((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateConversation)]
@@ -5108,15 +5091,6 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.AddGarrisonFollower)]
         void EffectAddGarrisonFollower()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
-                return;
-
-            Garrison garrison = unitTarget.ToPlayer().GetGarrison();
-            if (garrison != null)
-                garrison.AddFollower((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateHeirloomItem)]
@@ -5143,15 +5117,6 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.ActivateGarrisonBuilding)]
         void EffectActivateGarrisonBuilding()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
-                return;
-
-            Garrison garrison = unitTarget.ToPlayer().GetGarrison();
-            if (garrison != null)
-                garrison.ActivateBuilding((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.GrantBattlepetLevel)]

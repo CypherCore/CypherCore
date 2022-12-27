@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Garrisons;
 using Game.Maps;
 using Game.Movement;
 using Game.Networking;
@@ -335,13 +334,6 @@ namespace Game
 
             if (!seamlessTeleport)
                 player.SendInitialPacketsAfterAddToMap();
-            else
-            {
-                player.UpdateVisibilityForPlayer();
-                Garrison garrison = player.GetGarrison();
-                if (garrison != null)
-                    garrison.SendRemoteInfo();
-            }
 
             // flight fast teleport case
             if (player.IsInFlight())

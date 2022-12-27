@@ -814,7 +814,7 @@ namespace Game
                             else if (CliDB.ChrClassesStorage.TryGetValue((uint)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
                                 pCurrChar.SendCinematicStart(chrClassesRecord.CinematicSequenceID);
                             else if (CliDB.ChrRacesStorage.TryGetValue((uint)pCurrChar.GetRace(), out ChrRacesRecord chrRacesRecord) && chrRacesRecord.CinematicSequenceID != 0)
-                                pCurrChar.SendCinematicStart(chrRacesRecord.CinematicSequenceID);
+                                pCurrChar.SendCinematicStart((uint)chrRacesRecord.CinematicSequenceID);
                             break;
                         case PlayerCreateMode.NPE:
                             if (playerInfo.introSceneIdNPE.HasValue)
@@ -2196,7 +2196,7 @@ namespace Game
                 if (classEntry.CinematicSequenceID != 0)
                     GetPlayer().SendCinematicStart(classEntry.CinematicSequenceID);
                 else if (raceEntry != null)
-                    GetPlayer().SendCinematicStart(raceEntry.CinematicSequenceID);
+                    GetPlayer().SendCinematicStart((uint)raceEntry.CinematicSequenceID);
             }
         }
 

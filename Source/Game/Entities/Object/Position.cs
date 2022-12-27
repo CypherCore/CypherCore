@@ -128,10 +128,22 @@ namespace Game.Entities
         {
             x = posX; y = posY;
         }
+
+        public Vector2 GetPosition2D()
+        {
+            return new Vector2(posX, posY);
+        }
+
         public void GetPosition(out float x, out float y, out float z)
         {
             x = posX; y = posY; z = posZ;
         }
+
+        public Vector3 GetPosition3D()
+        {
+            return new Vector3(posX, posY, posZ);
+        }
+
         public void GetPosition(out float x, out float y, out float z, out float o)
         {
             x = posX;
@@ -139,6 +151,7 @@ namespace Game.Entities
             z = posZ;
             o = Orientation;
         }
+
         public Position GetPosition()
         {
             return this;

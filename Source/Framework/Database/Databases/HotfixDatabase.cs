@@ -23,7 +23,7 @@ namespace Framework.Database
         {
             // Achievement.db2
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT, "SELECT Description, Title, Reward, ID, InstanceID, Faction, Supercedes, Category, MinimumCriteria, " +
-                "Points, Flags, UiOrder, IconFileID, RewardItemID, CriteriaTree, SharesCriteria, CovenantID FROM achievement");
+                "Points, Flags, UiOrder, IconFileID, CriteriaTree, SharesCriteria FROM achievement");
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_LOCALE, "SELECT ID, Description_lang, Title_lang, Reward_lang FROM achievement_locale WHERE locale = ?");
 
             // AchievementCategory.db2
@@ -177,7 +177,9 @@ namespace Framework.Database
 
             // BattlemasterList.db2
             PrepareStatement(HotfixStatements.SEL_BATTLEMASTER_LIST, "SELECT ID, Name, GameType, ShortDescription, LongDescription, InstanceType, MinLevel, MaxLevel, " +
-                "RatedPlayers, MinPlayers, MaxPlayers, GroupsAllowed, MaxGroupSize, HolidayWorldState, Flags, IconFileDataID FROM battlemaster_list");
+                "RatedPlayers, MinPlayers, MaxPlayers, GroupsAllowed, MaxGroupSize, HolidayWorldState, Flags, IconFileDataID, RequiredPlayerConditionID, " +
+                "MapID1, MapID2, MapID3, MapID4, MapID5, MapID6, MapID7, MapID8, MapID9, MapID10, MapID11, MapID12, MapID13, MapID14, MapID15, MapID16" +
+                " FROM battlemaster_list");
             PrepareStatement(HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE, "SELECT ID, Name_lang, GameType_lang, ShortDescription_lang, LongDescription_lang" +
                 " FROM battlemaster_list_locale WHERE locale = ?");
 
@@ -233,7 +235,7 @@ namespace Framework.Database
 
             // ChrCustomizationOption.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION, "SELECT Name, ID, SecondaryID, Flags, ChrModelID, SortIndex, ChrCustomizationCategoryID, " +
-                "OptionType, BarberShopCostModifier, ChrCustomizationID, Requirement, UiOrderIndex FROM chr_customization_option");
+                "OptionType, BarberShopCostModifier, ChrCustomizationID, ChrCustomizationReqID, UiOrderIndex FROM chr_customization_option");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION_LOCALE, "SELECT ID, Name_lang FROM chr_customization_option_locale WHERE locale = ?");
 
             // ChrCustomizationReq.db2
@@ -340,10 +342,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CURVE_POINT, "SELECT ID, PosX, PosY, CurveID, OrderIndex FROM curve_point");
 
             // DestructibleModelData.db2
-            PrepareStatement(HotfixStatements.SEL_DESTRUCTIBLE_MODEL_DATA, "SELECT ID, State0ImpactEffectDoodadSet, State0AmbientDoodadSet, State1WMO, " +
-                "State1DestructionDoodadSet, State1ImpactEffectDoodadSet, State1AmbientDoodadSet, State2WMO, State2DestructionDoodadSet, " +
-                "State2ImpactEffectDoodadSet, State2AmbientDoodadSet, State3WMO, State3InitDoodadSet, State3AmbientDoodadSet, EjectDirection, DoNotHighlight, " +
-                "State0WMO, HealEffect, HealEffectSpeed, State0NameSet, State1NameSet, State2NameSet, State3NameSet FROM destructible_model_data");
+            PrepareStatement(HotfixStatements.SEL_DESTRUCTIBLE_MODEL_DATA, "SELECT ID, State0ImpactEffectDoodadSet, State0AmbientDoodadSet, State1Wmo, " +
+                "State1DestructionDoodadSet, State1ImpactEffectDoodadSet, State1AmbientDoodadSet, State2Wmo, State2DestructionDoodadSet, " +
+                "State2ImpactEffectDoodadSet, State2AmbientDoodadSet, State3Wmo, State3InitDoodadSet, State3AmbientDoodadSet, EjectDirection, DoNotHighlight, " +
+                "State0Wmo, HealEffect, HealEffectSpeed, State0NameSet, State1NameSet, State2NameSet, State3NameSet FROM destructible_model_data");
 
             // Difficulty.db2
             PrepareStatement(HotfixStatements.SEL_DIFFICULTY, "SELECT ID, Name, InstanceType, OrderIndex, OldEnumValue, FallbackDifficultyID, MinPlayers, MaxPlayers, " +
@@ -490,7 +492,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GLYPH_BINDABLE_SPELL, "SELECT ID, SpellID, GlyphPropertiesID FROM glyph_bindable_spell");
 
             // GlyphProperties.db2
-            PrepareStatement(HotfixStatements.SEL_GLYPH_PROPERTIES, "SELECT ID, SpellID, GlyphType, GlyphExclusiveCategoryID, SpellIconFileDataID FROM glyph_properties");
+            PrepareStatement(HotfixStatements.SEL_GLYPH_PROPERTIES, "SELECT ID, SpellID, GlyphType, GlyphExclusiveCategoryID, SpellIconFileDataID, GlyphSlotFlags" +
+                " FROM glyph_properties");
 
             // GlyphRequiredSpec.db2
             PrepareStatement(HotfixStatements.SEL_GLYPH_REQUIRED_SPEC, "SELECT ID, ChrSpecializationID, GlyphPropertiesID FROM glyph_required_spec");
@@ -516,10 +519,9 @@ namespace Framework.Database
             // Holidays.db2
             PrepareStatement(HotfixStatements.SEL_HOLIDAYS, "SELECT ID, Region, Looping, HolidayNameID, HolidayDescriptionID, Priority, CalendarFilterType, Flags, " +
                 "WorldStateExpressionID, Duration1, Duration2, Duration3, Duration4, Duration5, Duration6, Duration7, Duration8, Duration9, Duration10, " +
-                "Date1, Date2, Date3, Date4, Date5, Date6, Date7, Date8, Date9, Date10, Date11, Date12, Date13, Date14, Date15, Date16, Date17, Date18, " +
-                "Date19, Date20, Date21, Date22, Date23, Date24, Date25, Date26, CalendarFlags1, CalendarFlags2, CalendarFlags3, CalendarFlags4, " +
-                "CalendarFlags5, CalendarFlags6, CalendarFlags7, CalendarFlags8, CalendarFlags9, CalendarFlags10, TextureFileDataID1, TextureFileDataID2, " +
-                "TextureFileDataID3 FROM holidays");
+                "Date1, Date2, Date3, Date4, Date5, Date6, Date7, Date8, Date9, Date10, Date11, Date12, Date13, Date14, Date15, Date16, CalendarFlags1, " +
+                "CalendarFlags2, CalendarFlags3, CalendarFlags4, CalendarFlags5, CalendarFlags6, CalendarFlags7, CalendarFlags8, CalendarFlags9, " +
+                "CalendarFlags10, TextureFileDataID1, TextureFileDataID2, TextureFileDataID3 FROM holidays");
 
             // ImportPriceArmor.db2
             PrepareStatement(HotfixStatements.SEL_IMPORT_PRICE_ARMOR, "SELECT ID, ClothModifier, LeatherModifier, ChainModifier, PlateModifier FROM import_price_armor");
@@ -1023,7 +1025,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT, "SELECT ID, Name, HordeName, EffectArg1, EffectArg2, EffectArg3, EffectScalingPoints1, " +
                 "EffectScalingPoints2, EffectScalingPoints3, GemItemID, TransmogUseConditionID, TransmogCost, IconFileDataID, EffectPointsMin1, " +
                 "EffectPointsMin2, EffectPointsMin3, ItemVisual, Flags, RequiredSkillID, RequiredSkillRank, ItemLevel, Charges, Effect1, Effect2, Effect3, " +
-                "ScalingClass, ScalingClassRestricted, Condition_ID, MinLevel, MaxLevel FROM spell_item_enchantment");
+                "ScalingClass, ScalingClassRestricted, ConditionID, MinLevel, MaxLevel FROM spell_item_enchantment");
             PrepareStatement(HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_LOCALE, "SELECT ID, Name_lang, HordeName_lang FROM spell_item_enchantment_locale WHERE locale = ?");
 
             // SpellItemEnchantmentCondition.db2
@@ -1346,8 +1348,6 @@ namespace Framework.Database
         SEL_BROADCAST_TEXT,
         SEL_BROADCAST_TEXT_LOCALE,
 
-        SEL_BROADCAST_TEXT_DURATION,
-
         SEL_CFG_REGIONS,
 
         SEL_CHAR_TITLES,
@@ -1589,9 +1589,6 @@ namespace Framework.Database
 
         SEL_ITEM_PRICE_BASE,
 
-        SEL_ITEM_SEARCH_NAME,
-        SEL_ITEM_SEARCH_NAME_LOCALE,
-
         SEL_ITEM_SET,
         SEL_ITEM_SET_LOCALE,
 
@@ -1605,8 +1602,6 @@ namespace Framework.Database
         SEL_ITEM_SPEC_OVERRIDE,
 
         SEL_ITEM_X_BONUS_TREE,
-
-        SEL_ITEM_X_ITEM_EFFECT,
 
         SEL_JOURNAL_ENCOUNTER,
         SEL_JOURNAL_ENCOUNTER_LOCALE,

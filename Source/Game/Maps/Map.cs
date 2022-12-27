@@ -3308,16 +3308,21 @@ namespace Game.Maps
             return i_mapRecord != null && i_mapRecord.IsGarrison();
         }
 
-        private bool GetEntrancePos(out uint mapid, out float x, out float y)
+        private bool GetEntrancePos(out uint mapid, out Vector2 pos)
         {
             mapid = 0;
-            x = 0;
-            y = 0;
+            pos = new Vector2();
 
             if (i_mapRecord == null)
                 return false;
 
-            return i_mapRecord.GetEntrancePos(out mapid, out x, out y);
+            if (i_mapRecord.CorpseMapID < 0)
+                return false;
+
+            Vector2 corpse = Global.ObjectMgr.GetMapCorpsePosition(i_mapRecord.Id);
+            mapid = (uint)i_mapRecord.CorpseMapID;
+            pos = corpse;
+            return true;
         }
 
         void ResetMarkedCells()

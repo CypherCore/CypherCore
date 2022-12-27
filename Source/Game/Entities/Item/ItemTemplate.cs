@@ -271,7 +271,7 @@ namespace Game.Entities
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
         public uint GetSubClass() { return BasicData.SubclassID; }
         public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
-        public uint GetOtherFactionItemId() { return ExtendedData.OppositeFactionItemID; }
+        public uint GetOtherFactionItemId() { return (uint)ExtendedData.OppositeFactionItemID; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }

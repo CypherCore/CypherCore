@@ -22,7 +22,6 @@ using Game.Arenas;
 using Game.BattleGrounds;
 using Game.Cache;
 using Game.DataStorage;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Guilds;
 using Game.Mails;
@@ -3194,14 +3193,6 @@ namespace Game.Entities
 
             _LoadCUFProfiles(holder.GetResult(PlayerLoginQueryLoad.CufProfiles));
 
-            var garrison = new Garrison(this);
-            if (garrison.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Garrison),
-                holder.GetResult(PlayerLoginQueryLoad.GarrisonBlueprints),
-                holder.GetResult(PlayerLoginQueryLoad.GarrisonBuildings),
-                holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowers),
-                holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowerAbilities)))
-                _garrison = garrison;
-
             _InitHonorLevelOnLoadFromDB(honor, honorLevel);
 
             _restMgr.LoadRestBonus(RestTypes.Honor, honorRestState, honorRestBonus);
@@ -3592,8 +3583,6 @@ namespace Game.Entities
             _SaveInstanceTimeRestrictions(characterTransaction);
             _SaveCurrency(characterTransaction);
             _SaveCUFProfiles(characterTransaction);
-            if (_garrison != null)
-                _garrison.SaveToDB(characterTransaction);
 
             // check if stats should only be saved on logout
             // save stats can be out of transaction
@@ -4091,8 +4080,6 @@ namespace Game.Entities
                     loginTransaction.Append(stmt);
 
                     Corpse.DeleteFromDB(playerGuid, trans);
-
-                    Garrison.DeleteFromDB(guid, trans);
 
                     Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
                     break;

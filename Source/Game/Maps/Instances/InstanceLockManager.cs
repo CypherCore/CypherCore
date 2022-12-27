@@ -180,11 +180,11 @@ namespace Game.Maps
             {
                 SharedInstanceLockData sharedData = new();
                 _instanceLockDataById[instanceId] = sharedData;
-                instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                instanceLock = new SharedInstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), 0, sharedData);
             }
             else
-                instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                instanceLock = new InstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), 0);
 
             if (!_temporaryInstanceLocksByPlayer.ContainsKey(playerGuid))
@@ -233,12 +233,12 @@ namespace Game.Maps
                     var sharedDataItr = _instanceLockDataById.LookupByKey(updateEvent.InstanceId);
                     Cypher.Assert(sharedDataItr != null);
 
-                    instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new SharedInstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId, sharedDataItr);
                     Cypher.Assert((instanceLock as SharedInstanceLock).GetSharedData().InstanceId == updateEvent.InstanceId);
                 }
                 else
-                    instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new InstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
 
                 lock(_lockObject)
@@ -595,7 +595,7 @@ namespace Game.Maps
 
         public InstanceLockKey GetKey()
         {
-            return Tuple.Create(MapDifficulty.MapID, (uint)MapDifficulty.LockID);
+            return Tuple.Create((uint)MapDifficulty.MapID, (uint)MapDifficulty.LockID);
         }
 
         public bool IsInstanceIdBound()

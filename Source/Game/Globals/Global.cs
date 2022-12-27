@@ -28,7 +28,6 @@ using Game.Collision;
 using Game.DataStorage;
 using Game.DungeonFinding;
 using Game.Entities;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Guilds;
 using Game.Loots;
@@ -84,9 +83,6 @@ public static class Global
     //Account
     public static AccountManager AccountMgr { get { return AccountManager.Instance; } }
     public static BNetAccountManager BNetAccountMgr { get { return BNetAccountManager.Instance; } }
-
-    //Garrison
-    public static GarrisonManager GarrisonMgr { get { return GarrisonManager.Instance; } }
 
     //Achievement
     public static AchievementGlobalMgr AchievementMgr { get { return AchievementGlobalMgr.Instance; } }

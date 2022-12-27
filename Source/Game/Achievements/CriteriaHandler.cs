@@ -21,7 +21,6 @@ using Game.Arenas;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Garrisons;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
@@ -1939,182 +1938,48 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.GarrisonTierEqualOrGreaterThan: // 126
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset || garrison.GetSiteLevel().GarrLevel < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowersWithLevelEqualOrGreaterThan: // 127
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.PacketInfo.FollowerLevel >= secondaryAsset;
-                    });
-
-                    if (followerCount < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowersWithQualityEqualOrGreaterThan: // 128
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.PacketInfo.Quality >= secondaryAsset;
-                    });
-
-                    if (followerCount < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerWithAbilityAtLevelEqualOrGreaterThan: // 129
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
-                    });
-
-                    if (followerCount < 1)
-                        return false;
-                    break;
+                        break;
                 }
                 case ModifierTreeType.GarrisonFollowerWithTraitAtLevelEqualOrGreaterThan: // 130
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(secondaryAsset);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerWithAbilityAssignedToBuilding: // 131
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
-                        if (followerBuilding == null)
-                            return false;
-
-                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerWithTraitAssignedToBuilding: // 132
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
-                        if (followerBuilding == null)
-                            return false;
-
-                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerWithLevelAssignedToBuilding: // 133
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        if (follower.PacketInfo.FollowerLevel < reqValue)
-                            return false;
-
-                        GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
-                        if (followerBuilding == null)
-                            return false;
-
-                        return followerBuilding.BuildingType == secondaryAsset;
-                    });
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonBuildingWithLevelEqualOrGreaterThan: // 134
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    foreach (Garrison.Plot plot in garrison.GetPlots())
-                    {
-                        if (plot.BuildingInfo.PacketInfo == null)
-                            continue;
-
-                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
-                        if (building == null || building.UpgradeLevel < reqValue || building.BuildingType != secondaryAsset)
-                            continue;
-
-                        return true;
-                    }
-                    return false;
+                    break;
                 }
                 case ModifierTreeType.HasBlueprintForGarrisonBuilding: // 135
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
-                        return false;
-
-                    if (!garrison.HasBlueprint(reqValue))
-                        return false;
                     break;
                 }
                 case ModifierTreeType.HasGarrisonBuildingSpecialization: // 136
                     return false; // OBSOLETE
                 case ModifierTreeType.AllGarrisonPlotsAreFull: // 137
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)reqValue)
-                        return false;
-
-                    foreach (var plot in garrison.GetPlots())
-                        if (plot.BuildingInfo.PacketInfo == null)
-                            return false;
                     break;
                 }
                 case ModifierTreeType.PlayerIsInOwnGarrison: // 138
@@ -2125,145 +1990,28 @@ namespace Game.Achievements
                     return false;
                 case ModifierTreeType.GarrisonBuildingIsUnderConstruction: // 140
                 {
-                    GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
-                    if (building == null)
-                        return false;
-
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    foreach (Garrison.Plot plot in garrison.GetPlots())
-                    {
-                        if (plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.GarrBuildingID != reqValue)
-                            continue;
-
-                        return !plot.BuildingInfo.PacketInfo.Active;
-                    }
-                    return false;
+                        break;
                 }
                 case ModifierTreeType.GarrisonMissionHasBeenCompleted: // 141 NYI
                     return false;
                 case ModifierTreeType.GarrisonBuildingLevelEqual: // 142
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    foreach (Garrison.Plot plot in garrison.GetPlots())
-                    {
-                        if (plot.BuildingInfo.PacketInfo == null)
-                            continue;
-
-                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
-                        if (building == null || building.UpgradeLevel != secondaryAsset || building.BuildingType != reqValue)
-                            continue;
-
-                        return true;
-                    }
-                    return false;
+                        break;
                 }
                 case ModifierTreeType.GarrisonFollowerHasAbility: // 143
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
-                        return false;
-
-                    if (miscValue1 != 0)
-                    {
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null)
-                            return false;
-
-                        if (!follower.HasAbility(reqValue))
-                            return false;
-                    }
-                    else
-                    {
-                        uint followerCount = garrison.CountFollowers(follower =>
-                        {
-                            return follower.HasAbility(reqValue);
-                        });
-
-                        if (followerCount < 1)
-                            return false;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerHasTrait: // 144
                 {
-                    GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
-                        return false;
-
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
-                        return false;
-
-                    if (miscValue1 != 0)
-                    {
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || !follower.HasAbility(reqValue))
-                            return false;
-                    }
-                    else
-                    {
-                        uint followerCount = garrison.CountFollowers(follower =>
-                        {
-                            return follower.HasAbility(reqValue);
-                        });
-
-                        if (followerCount < 1)
-                            return false;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerQualityEqual: // 145
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison)
-                        return false;
-
-                    if (miscValue1 != 0)
-                    {
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.PacketInfo.Quality < reqValue)
-                            return false;
-                    }
-                    else
-                    {
-                        uint followerCount = garrison.CountFollowers(follower =>
-                        {
-                            return follower.PacketInfo.Quality >= reqValue;
-                        });
-
-                        if (followerCount < 1)
-                            return false;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerLevelEqual: // 146
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
-                        return false;
-
-                    if (miscValue1 != 0)
-                    {
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.PacketInfo.FollowerLevel != reqValue)
-                            return false;
-                    }
-                    else
-                    {
-                        uint followerCount = garrison.CountFollowers(follower =>
-                        {
-                            return follower.PacketInfo.FollowerLevel == reqValue;
-                        });
-
-                        if (followerCount < 1)
-                            return false;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonMissionIsRare: // 147 NYI
@@ -2271,39 +2019,11 @@ namespace Game.Achievements
                     return false;
                 case ModifierTreeType.CurrentGarrisonBuildingLevelEqual: // 149
                 {
-                    if (miscValue1 == 0)
-                        return false;
-
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    foreach (var plot in garrison.GetPlots())
-                    {
-                        if (plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.GarrBuildingID != miscValue1)
-                            continue;
-
-                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
-                        if (building == null || building.UpgradeLevel != reqValue)
-                            continue;
-
-                        return true;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonPlotInstanceHasBuildingThatIsReadyToActivate: // 150
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    var plot = garrison.GetPlot(reqValue);
-                    if (plot == null)
-                        return false;
-
-                    if (!plot.BuildingInfo.CanActivate() || plot.BuildingInfo.PacketInfo == null || plot.BuildingInfo.PacketInfo.Active)
-                        return false;
-                    break;
+                        break;
                 }
                 case ModifierTreeType.BattlePetTeamWithSpeciesEqualOrGreaterThan: // 151
                 {
@@ -2349,17 +2069,6 @@ namespace Game.Achievements
                     return false; // OBSOLETE
                 case ModifierTreeType.HasGarrisonFollower: // 157
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        return follower.PacketInfo.GarrFollowerID == reqValue;
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.PlayerQuestObjectiveProgressEqual: // 158
@@ -2396,63 +2105,20 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.AllGarrisonPlotsFilledWithBuildingsWithLevelEqualOrGreater: // 166
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)reqValue)
-                        return false;
-
-                    foreach (var plot in garrison.GetPlots())
-                    {
-                        if (plot.BuildingInfo.PacketInfo == null)
-                            return false;
-
-                        var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.GarrBuildingID);
-                        if (building == null || building.UpgradeLevel != reqValue)
-                            return false;
-                    }
                     break;
                 }
                 case ModifierTreeType.GarrisonMissionType: // 167 NYI
                     return false;
                 case ModifierTreeType.GarrisonFollowerItemLevelEqualOrGreaterThan: // 168
                 {
-                    if (miscValue1 == 0)
-                        return false;
-
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        return follower.PacketInfo.GarrFollowerID == miscValue1 && follower.GetItemLevel() >= reqValue;
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerCountWithItemLevelEqualOrGreaterThan: // 169
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.GetItemLevel() >= secondaryAsset;
-                    });
-
-                    if (followerCount < reqValue)
-                        return false;
-
                     break;
                 }
                 case ModifierTreeType.GarrisonTierEqual: // 170
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset || garrison.GetSiteLevel().GarrLevel != reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.InstancePlayerCountEqual: // 171
@@ -2479,55 +2145,16 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.GarrisonFollowerCountWithLevelEqualOrGreaterThan: // 175
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        return garrFollower?.GarrFollowerTypeID == tertiaryAsset && follower.PacketInfo.FollowerLevel == secondaryAsset;
-                    });
-
-                    if (followerCount < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerIsInBuilding: // 176
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        return follower.PacketInfo.GarrFollowerID == reqValue && follower.PacketInfo.CurrentBuildingID == secondaryAsset;
-                    });
-
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonMissionCountLessThan: // 177 NYI
                     return false;
                 case ModifierTreeType.GarrisonPlotInstanceCountEqualOrGreaterThan: // 178
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)reqValue)
-                        return false;
-
-                    uint plotCount = 0;
-                    foreach (var plot in garrison.GetPlots())
-                    {
-                        var garrPlotInstance = CliDB.GarrPlotInstanceStorage.LookupByKey(plot.PacketInfo.GarrPlotInstanceID);
-                        if (garrPlotInstance == null || garrPlotInstance.GarrPlotID != secondaryAsset)
-                            continue;
-
-                        ++plotCount;
-                    }
-
-                    if (plotCount < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.CurrencySource: // 179 NYI
@@ -2538,13 +2165,6 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.HasActiveGarrisonFollower: // 181
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower => follower.PacketInfo.GarrFollowerID == reqValue && (follower.PacketInfo.FollowerStatus & (byte)GarrisonFollowerStatus.Inactive) == 0);
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.PlayerDailyRandomValueMod_X_Equals: // 182 NYI
@@ -2564,32 +2184,10 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.GarrisonFollowerCountWithInactiveWithItemLevelEqualOrGreaterThan: // 184
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower =>
-                    {
-                        GarrFollowerRecord garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
-                        if (garrFollower == null)
-                            return false;
-
-                        return follower.GetItemLevel() >= secondaryAsset && garrFollower.GarrFollowerTypeID == tertiaryAsset;
-                    });
-
-                    if (followerCount < reqValue)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerIsOnAMission: // 185
                 {
-                    Garrison garrison = referencePlayer.GetGarrison();
-                    if (garrison == null)
-                        return false;
-
-                    uint followerCount = garrison.CountFollowers(follower => follower.PacketInfo.GarrFollowerID == reqValue && follower.PacketInfo.CurrentMissionID != 0);
-                    if (followerCount < 1)
-                        return false;
                     break;
                 }
                 case ModifierTreeType.GarrisonMissionCountInSetLessThan: // 186 NYI

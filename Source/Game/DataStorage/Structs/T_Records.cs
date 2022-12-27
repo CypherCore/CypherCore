@@ -29,7 +29,7 @@ namespace Game.DataStorage
     public sealed class TalentRecord
     {
         public uint Id;
-        public string Description;
+        public LocalizedString Description;
         public byte TierID;
         public byte Flags;
         public byte ColumnIndex;

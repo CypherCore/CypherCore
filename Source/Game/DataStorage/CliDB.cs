@@ -433,7 +433,6 @@ namespace Game.DataStorage
             RegenHPPerSptGameTable = ReadGameTable<GtRegenHPPerSptRecord>("RegenHPPerSpt.txt");
             RegenMPPerSptGameTable = ReadGameTable<GtRegenMPPerSptRecord>("RegenMPPerSpt.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
-            StaminaMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
             XpGameTable = ReadGameTable<GtXpRecord>("xp.txt");
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -741,7 +740,6 @@ namespace Game.DataStorage
         public static GameTable<GtRegenHPPerSptRecord> RegenHPPerSptGameTable;
         public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;        
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
-        public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;
         #endregion
 
@@ -831,10 +829,6 @@ namespace Game.DataStorage
                     return row.Gem3;
                 case -6:
                     return row.Health;
-                case -8:
-                    return row.DamageReplaceStat;
-                case -9:
-                    return row.DamageSecondary;
                 default:
                     break;
             }

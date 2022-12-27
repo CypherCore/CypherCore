@@ -75,9 +75,9 @@ namespace Game.Spells
                 Speed = _misc.Speed;
                 LaunchDelay = _misc.LaunchDelay;
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
-                IconFileDataId = _misc.SpellIconFileDataID;
-                ActiveIconFileDataId = _misc.ActiveIconFileDataID;
-                ContentTuningId = _misc.ContentTuningID;
+                IconFileDataId = (uint)_misc.SpellIconFileDataID;
+                ActiveIconFileDataId = (uint)_misc.ActiveIconFileDataID;
+                ContentTuningId = (uint)_misc.ContentTuningID;
                 ShowFutureSpellPlayerConditionID = (uint)_misc.ShowFutureSpellPlayerConditionID;
             }
 
@@ -97,7 +97,7 @@ namespace Game.Spells
                 ProcFlags = new ProcFlagsInit(_options.ProcTypeMask);
                 ProcChance = _options.ProcChance;
                 ProcCharges = (uint)_options.ProcCharges;
-                ProcCooldown = _options.ProcCategoryRecovery;
+                ProcCooldown = (uint)_options.ProcCategoryRecovery;
                 StackAmount = _options.CumulativeAura;
 
                 SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
@@ -158,9 +158,9 @@ namespace Game.Spells
             SpellCooldownsRecord _cooldowns = data.Cooldowns;
             if (_cooldowns != null)
             {
-                RecoveryTime = _cooldowns.RecoveryTime;
-                CategoryRecoveryTime = _cooldowns.CategoryRecoveryTime;
-                StartRecoveryTime = _cooldowns.StartRecoveryTime;
+                RecoveryTime = (uint)_cooldowns.RecoveryTime;
+                CategoryRecoveryTime = (uint)_cooldowns.CategoryRecoveryTime;
+                StartRecoveryTime = (uint)_cooldowns.StartRecoveryTime;
             }
 
             EquippedItemClass = ItemClass.None;
@@ -193,9 +193,9 @@ namespace Game.Spells
             SpellLevelsRecord _levels = data.Levels;
             if (_levels != null)
             {
-                MaxLevel = _levels.MaxLevel;
-                BaseLevel = _levels.BaseLevel;
-                SpellLevel = _levels.SpellLevel;
+                MaxLevel = (uint)_levels.MaxLevel;
+                BaseLevel = (uint)_levels.BaseLevel;
+                SpellLevel = (uint)_levels.SpellLevel;
             }
 
             // SpellPowerEntry
@@ -2850,7 +2850,7 @@ namespace Game.Spells
                             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
                             if (powerTypeEntry != null)
                             {
-                                powerCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
+                                powerCost += (int)MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
                                 break;
                             }
 
@@ -4238,17 +4238,6 @@ namespace Game.Spells
                                 tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.inventoryType);
                         }
                     }
-
-                    if (Scaling.Class == -6)
-                    {
-                        GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(effectiveItemLevel);
-                        if (staminaMult != null)
-                        {
-                            ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
-                            if (itemSparse != null)
-                                tempValue *= CliDB.GetIlvlStatMultiplier(staminaMult, itemSparse.inventoryType);
-                        }
-                    }
                 }
 
                 tempValue *= Scaling.Coefficient;
@@ -4267,11 +4256,7 @@ namespace Game.Spells
                         stat = ExpectedStatType.CreatureAutoAttackDps;
 
                     // TODO - add expansion and content tuning id args?
-                    uint contentTuningId = _spellInfo.ContentTuningId; // content tuning should be passed as arg, the one stored in SpellInfo is fallback
                     int expansion = -2;
-                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
-                    if (contentTuning != null)
-                        expansion = contentTuning.ExpansionID;
 
                     uint level = caster != null && caster.IsUnit() ? caster.ToUnit().GetLevel() : 1;
                     tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None) * BasePoints / 100.0f;

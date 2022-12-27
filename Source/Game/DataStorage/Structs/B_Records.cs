@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 using Framework.Constants;
+using System;
 
 namespace Game.DataStorage
 {
@@ -88,9 +89,9 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public string GameType;
-        public string ShortDescription;
-        public string LongDescription;
+        public LocalizedString GameType;
+        public LocalizedString ShortDescription;
+        public LocalizedString LongDescription;
         public sbyte InstanceType;
         public byte MinLevel;
         public byte MaxLevel;
@@ -102,6 +103,8 @@ namespace Game.DataStorage
         public ushort HolidayWorldState;
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
+        public int RequiredPlayerConditionID;
+        public short[] MapID = new short[16];
     }
 
     public sealed class BroadcastTextRecord

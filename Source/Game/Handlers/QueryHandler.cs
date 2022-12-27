@@ -227,9 +227,7 @@ namespace Game
             WorldLocation corpseLocation = player.GetCorpseLocation();
             uint corpseMapID = corpseLocation.GetMapId();
             uint mapID = corpseLocation.GetMapId();
-            float x = corpseLocation.GetPositionX();
-            float y = corpseLocation.GetPositionY();
-            float z = corpseLocation.GetPositionZ();
+            var pos = corpseLocation.GetPosition3D();
 
             // if corpse at different map
             if (mapID != player.GetMapId())
@@ -245,9 +243,9 @@ namespace Game
                         if (entranceTerrain != null)
                         {
                             mapID = (uint)corpseMapEntry.CorpseMapID;
-                            x = corpseMapEntry.Corpse.X;
-                            y = corpseMapEntry.Corpse.Y;
-                            z = entranceTerrain.GetStaticHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
+
+                            pos = new Vector3(Global.ObjectMgr.GetMapCorpsePosition(corpseMapEntry.Id),
+                                entranceTerrain.GetStaticHeight(player.GetPhaseShift(), pos.X, pos.Y, MapConst.MaxHeight));
                         }
                     }
                 }
@@ -257,7 +255,7 @@ namespace Game
             packet.Player = queryCorpseLocation.Player;
             packet.MapID = (int)corpseMapID;
             packet.ActualMapID = (int)mapID;
-            packet.Position = new Vector3(x, y, z);
+            packet.Position = pos;
             packet.Transport = ObjectGuid.Empty;
             SendPacket(packet);
         }

@@ -3635,10 +3635,6 @@ namespace Game.Entities
                         UpdateStatBuffMod(Stats.Spirit);
                         break;
                     case ItemModType.Stamina:                          //modify stamina
-                        GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(itemLevel);
-                        if (staminaMult != null)
-                            val = (int)(val * CliDB.GetIlvlStatMultiplier(staminaMult, proto.GetInventoryType()));
-
                         HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Stamina);
                         break;

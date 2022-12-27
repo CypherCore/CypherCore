@@ -532,6 +532,8 @@ namespace Framework.Constants
         Unk508 = 508,
         Unk509 = 509,
         ModifiedRaidInstance = 510, // Related to "Fated" raid affixes
+        Unk511 = 511,
+        Unk512 = 512,
         Total
     }
 

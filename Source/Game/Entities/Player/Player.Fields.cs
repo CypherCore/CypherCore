@@ -20,7 +20,6 @@ using Game.Achievements;
 using Game.BattleGrounds;
 using Game.Chat;
 using Game.DataStorage;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Loots;
 using Game.Mails;
@@ -177,8 +176,6 @@ namespace Game.Entities
         bool m_MonthlyQuestChanged;
         bool m_SeasonalQuestChanged;
         long m_lastDailyQuestTime;
-
-        Garrison _garrison;
 
         CinematicManager _cinematicMgr;
 

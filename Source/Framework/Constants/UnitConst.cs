@@ -150,7 +150,7 @@ namespace Framework.Constants
         Rage,
         Focus,
         Energy,
-        ComboPoints,
+        Happiness,
         Runes,
         RunicPower,
         SoulShards,
@@ -160,11 +160,15 @@ namespace Framework.Constants
         Maelstrom,
         Chi,
         Insanity,
-        BurningEmbers,
+        ComboPoints,
         DemonicFury,
         ArcaneCharges,
         Fury,
         Pain,
+        Unused_19,
+        RuneBlood,
+        RuneFrost,
+        RuneUnholy,
         Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
@@ -184,7 +188,7 @@ namespace Framework.Constants
         ResistanceStart = Armor,
         ResistanceEnd = ResistanceArcane + 1,
         PowerStart = Mana,
-        PowerEnd = Pain + 1
+        PowerEnd = RuneUnholy + 1
     }
     public enum UnitModifierFlatType
     {

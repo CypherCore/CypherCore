@@ -33,8 +33,8 @@ namespace Game.Entities
 
         static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
         {
-            if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
-                Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
+            if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, (uint)mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
+                Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, (uint)mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
         }
 
         static uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)

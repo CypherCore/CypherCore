@@ -35,6 +35,7 @@ namespace Framework.Constants
         public const int MaxHolidayDates = 16;
         public const int MaxHolidayFlags = 10;
         public const int DefaultMaxLevel = 60;
+        public const int MinLevel = 1;
         public const int MaxLevel = 123;
         public const int StrongMaxLevel = 255;
         public const int MaxOverrideSpell = 10;
@@ -748,30 +749,47 @@ namespace Framework.Constants
 
         MaxAccountExpansions
     }
-    public enum PowerType : sbyte
+    public enum PowerType: sbyte
     {
+        Health = -2,            // (-2 as signed value)
         Mana = 0,
         Rage = 1,
         Focus = 2,
         Energy = 3,
-        ComboPoints = 4,
+        Happinnes = 4,
         Runes = 5,
         RunicPower = 6,
+        ///<summary>(unused 3.4.0)</summary> 
         SoulShards = 7,
-        LunarPower = 8,
+        ///<summary>(unused 3.4.0)</summary> 
+        LunarPower = 8,       
+        ///<summary>(unused 3.4.0)</summary> 
         HolyPower = 9,
-        AlternatePower = 10,           // Used in some quests
+        ///<summary>(unused 3.4.0)</summary> 
+        AlternatePower = 10,
+        ///<summary>(unused 3.4.0)</summary> 
         Maelstrom = 11,
+        ///<summary>(unused 3.4.0)</summary> 
         Chi = 12,
+        ///<summary>(unused 3.4.0)</summary> 
         Insanity = 13,
-        BurningEmbers = 14,
+        ComboPoints = 14,
+        ///<summary>(unused 3.4.0)</summary> 
         DemonicFury = 15,
+        ///<summary>(unused 3.4.0)</summary> 
         ArcaneCharges = 16,
+        ///<summary>(unused 3.4.0)</summary> 
         Fury = 17,
+        ///<summary>(unused 3.4.0)</summary> 
         Pain = 18,
-        Max = 19,
-        All = 127,          // default for class?
-        Health = -2,    // (-2 as signed value)
+        ///<summary>(unused 3.4.0)</summary> 
+        Unused_19 = 19,
+        RuneBlood = 20,
+        RuneFrost = 21,
+        RuneUnholy = 22,
+        Max = 23,
+        All = 127,              // default for class?
+        
         MaxPerClass = 7
     }
 

@@ -479,9 +479,6 @@ namespace Game.DataStorage
                     _skillRaceClassInfoBySkill.Add((uint)entry.SkillID, entry);
             }
 
-            foreach (SoulbindConduitRankRecord soulbindConduitRank in SoulbindConduitRankStorage.Values)
-                _soulbindConduitRanks[Tuple.Create((int)soulbindConduitRank.SoulbindConduitID, soulbindConduitRank.RankIndex)] = soulbindConduitRank;
-
             foreach (var specSpells in SpecializationSpellsStorage.Values)
                 _specializationSpellsBySpec.Add(specSpells.SpecID, specSpells);
 
@@ -490,12 +487,6 @@ namespace Game.DataStorage
 
             foreach (SpellClassOptionsRecord classOption in SpellClassOptionsStorage.Values)
                 _spellFamilyNames.Add(classOption.SpellClassSet);
-
-            foreach (SpellProcsPerMinuteModRecord ppmMod in SpellProcsPerMinuteModStorage.Values)
-                _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID, ppmMod);
-
-            foreach (SpellVisualMissileRecord spellVisualMissile in SpellVisualMissileStorage.Values)
-                _spellVisualMissilesBySet.Add(spellVisualMissile.SpellVisualMissileSetID, spellVisualMissile);
 
             for (var i = 0; i < (int)Class.Max; ++i)
             {
@@ -1025,32 +1016,22 @@ namespace Game.DataStorage
             if (forItem && contentTuning.GetFlags().HasFlag(ContentTuningFlag.DisabledForItem))
                 return null;
 
-            static int getLevelAdjustment(ContentTuningCalcType type) => type switch
-            {
-                ContentTuningCalcType.PlusOne => 1,
-                ContentTuningCalcType.PlusMaxLevelForExpansion => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),
-                _ => 0
-            };
+            //static int getLevelAdjustment(ContentTuningCalcType type) => type switch
+            //{
+            //    ContentTuningCalcType.PlusOne => 1,
+            //    ContentTuningCalcType.PlusMaxLevelForExpansion => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),
+            //    _ => 0
+            //};
 
             ContentTuningLevels levels = new();
-            levels.MinLevel = (short)(contentTuning.MinLevel + getLevelAdjustment((ContentTuningCalcType)contentTuning.MinLevelType));
-            levels.MaxLevel = (short)(contentTuning.MaxLevel + getLevelAdjustment((ContentTuningCalcType)contentTuning.MaxLevelType));
-            levels.MinLevelWithDelta = (short)Math.Clamp(levels.MinLevel + contentTuning.TargetLevelDelta, 1, SharedConst.MaxLevel);
-            levels.MaxLevelWithDelta = (short)Math.Clamp(levels.MaxLevel + contentTuning.TargetLevelMaxDelta, 1, SharedConst.MaxLevel);
+            levels.MinLevel = (short)Math.Clamp(contentTuning.MinLevel, SharedConst.MinLevel, SharedConst.MaxLevel);
+            levels.MaxLevel = (short)Math.Clamp(contentTuning.MaxLevel, SharedConst.MinLevel, SharedConst.MaxLevel);
 
-            // clamp after calculating levels with delta (delta can bring "overflown" level back into correct range)
-            levels.MinLevel = (short)Math.Clamp((int)levels.MinLevel, 1, SharedConst.MaxLevel);
-            levels.MaxLevel = (short)Math.Clamp((int)levels.MaxLevel, 1, SharedConst.MaxLevel);
+            levels.MinLevelWithDelta = levels.MinLevel;
+            levels.MaxLevelWithDelta = levels.MaxLevel;
 
-            if (contentTuning.TargetLevelMin != 0)
-                levels.TargetLevelMin = (short)contentTuning.TargetLevelMin;
-            else
-                levels.TargetLevelMin = levels.MinLevelWithDelta;
-
-            if (contentTuning.TargetLevelMax != 0)
-                levels.TargetLevelMax = (short)contentTuning.TargetLevelMax;
-            else
-                levels.TargetLevelMax = levels.MaxLevelWithDelta;
+            levels.TargetLevelMin = levels.MinLevel;
+            levels.TargetLevelMax = levels.MaxLevel;
 
             return levels;
         }
@@ -1266,63 +1247,46 @@ namespace Game.DataStorage
                     break;
             }
 
-            List<ContentTuningXExpectedRecord> contentTuningMods = _expectedStatModsByContentTuning.LookupByKey(contentTuningId);
             float value = 0.0f;
             switch (stat)
             {
                 case ExpectedStatType.CreatureHealth:
                     value = expectedStatRecord.CreatureHealth;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureHealthMod;
                     break;
                 case ExpectedStatType.PlayerHealth:
                     value = expectedStatRecord.PlayerHealth;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerHealthMod;
                     break;
                 case ExpectedStatType.CreatureAutoAttackDps:
                     value = expectedStatRecord.CreatureAutoAttackDps;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureAutoAttackDPSMod;
                     break;
                 case ExpectedStatType.CreatureArmor:
                     value = expectedStatRecord.CreatureArmor;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureArmorMod;
                     break;
                 case ExpectedStatType.PlayerMana:
                     value = expectedStatRecord.PlayerMana;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerManaMod;
                     break;
                 case ExpectedStatType.PlayerPrimaryStat:
                     value = expectedStatRecord.PlayerPrimaryStat;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerPrimaryStatMod;
                     break;
                 case ExpectedStatType.PlayerSecondaryStat:
                     value = expectedStatRecord.PlayerSecondaryStat;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerSecondaryStatMod;
                     break;
                 case ExpectedStatType.ArmorConstant:
                     value = expectedStatRecord.ArmorConstant;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.ArmorConstantMod;
                     break;
@@ -1330,8 +1294,6 @@ namespace Game.DataStorage
                     break;
                 case ExpectedStatType.CreatureSpellDamage:
                     value = expectedStatRecord.CreatureSpellDamage;
-                    if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureSpellDamageMod;
                     break;
@@ -1456,24 +1418,6 @@ namespace Game.DataStorage
 
                         if (itemSelectorQuality != null)
                             bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
-                    }
-                }
-
-                AzeriteUnlockMappingRecord azeriteUnlockMapping = _azeriteUnlockMappings.LookupByKey((proto.Id, itemContext));
-                if (azeriteUnlockMapping != null)
-                {
-                    switch (proto.inventoryType)
-                    {
-                        case InventoryType.Head:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListHead);
-                            break;
-                        case InventoryType.Shoulders:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListShoulders);
-                            break;
-                        case InventoryType.Chest:
-                        case InventoryType.Robe:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListChest);
-                            break;
                     }
                 }
             }
@@ -1956,7 +1900,7 @@ namespace Game.DataStorage
             return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
         }
 
-        static bool CheckUiMapAssignmentStatus(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
+        static bool CheckUiMapAssignmentStatus(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
         {
             status = new UiMapAssignmentStatus();
             status.UiMapAssignment = uiMapAssignment;
@@ -2033,7 +1977,7 @@ namespace Game.DataStorage
                 status.AreaPriority = areaPriority;
             }
 
-            if (mapId >= 0 && uiMapAssignment.MapID >= 0)
+            if (mapId.HasValue && mapId >= 0 && uiMapAssignment.MapID >= 0)
             {
                 if (mapId != uiMapAssignment.MapID)
                 {
@@ -2085,7 +2029,7 @@ namespace Game.DataStorage
             return true;
         }
 
-        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
+        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
         {
             UiMapAssignmentStatus nearestMapAssignment = new();
             var iterateUiMapAssignments = new Action<MultiMap<int, UiMapAssignmentRecord>, int>((assignments, id) =>
@@ -2109,7 +2053,7 @@ namespace Game.DataStorage
                 areaEntry = AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
             }
 
-            if (mapId > 0)
+            if (mapId.HasValue && mapId > 0)
             {
                 MapRecord mapEntry = MapStorage.LookupByKey(mapId);
                 if (mapEntry != null)
@@ -2146,17 +2090,17 @@ namespace Game.DataStorage
             return uiPosition;
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
+        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
         {
             uiMapId = -1;
             newPos = new Vector2();
@@ -2209,7 +2153,7 @@ namespace Game.DataStorage
         public void Map2ZoneCoordinates(int areaId, ref float x, ref float y)
         {
             Vector2 zoneCoords;
-            if (!GetUiMapPosition(x, y, 0.0f, -1, areaId, 0, 0, UiMapSystem.World, true, out zoneCoords))
+            if (!GetUiMapPosition(x, y, 0.0f, null, areaId, 0, 0, UiMapSystem.World, true, out zoneCoords))
                 return;
 
             x = zoneCoords.Y * 100.0f;

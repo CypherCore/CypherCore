@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.Database;
 using Game.BattleGrounds;
 using Game.DataStorage;
-using Game.Garrisons;
 using Game.Groups;
 using Game.Maps;
 using Game.Scripting;
@@ -114,13 +113,6 @@ namespace Game.Entities
             return map;
         }
 
-        GarrisonMap CreateGarrison(uint mapId, uint instanceId, Player owner)
-        {
-            GarrisonMap map = new GarrisonMap(mapId, i_gridCleanUpDelay, instanceId, owner.GetGUID());
-            Cypher.Assert(map.IsGarrison());
-            return map;
-        }
-
         /// <summary>
         /// create the instance if it's not created already
         /// the player is not actually added to the instance(only in InstanceMap::Add)
@@ -210,13 +202,6 @@ namespace Game.Entities
                         else
                             player.SetRecentInstance(mapId, newInstanceId);
                     }
-                }
-                else if (entry.IsGarrison())
-                {
-                    newInstanceId = (uint)player.GetGUID().GetCounter();
-                    map = FindMap_i(mapId, newInstanceId);
-                    if (!map)
-                        map = CreateGarrison(mapId, newInstanceId, player);
                 }
                 else
                 {

@@ -224,13 +224,13 @@ namespace Game.Chat.Commands
                     if (talentInfo.SpecID != 0 && player.GetPrimarySpecialization() != talentInfo.SpecID)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
                     // learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
                     player.AddTalent(talentInfo, player.GetActiveTalentGroup(), true);
-                    player.LearnSpell(talentInfo.SpellID, false);
+                    player.LearnSpell((uint)talentInfo.SpellID, false);
                 }
 
                 player.SendTalentsInfoData();

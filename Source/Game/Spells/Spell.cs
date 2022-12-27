@@ -5525,9 +5525,9 @@ namespace Game.Spells
                         if (talent == null)
                             return SpellCastResult.DontReport;
 
-                        if (playerCaster.GetSpellHistory().HasCooldown(talent.SpellID))
+                        if (playerCaster.GetSpellHistory().HasCooldown((uint)talent.SpellID))
                         {
-                            param1 = (int)talent.SpellID;
+                            param1 = talent.SpellID;
                             return SpellCastResult.CantUntalent;
                         }
                         break;

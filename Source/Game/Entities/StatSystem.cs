@@ -140,7 +140,7 @@ namespace Game.Entities
                 case UnitMods.Rage:
                 case UnitMods.Focus:
                 case UnitMods.Energy:
-                case UnitMods.ComboPoints:
+                case UnitMods.Happiness:
                 case UnitMods.Runes:
                 case UnitMods.RunicPower:
                 case UnitMods.SoulShards:
@@ -150,11 +150,15 @@ namespace Game.Entities
                 case UnitMods.Maelstrom:
                 case UnitMods.Chi:
                 case UnitMods.Insanity:
-                case UnitMods.BurningEmbers:
+                case UnitMods.ComboPoints:
                 case UnitMods.DemonicFury:
                 case UnitMods.ArcaneCharges:
                 case UnitMods.Fury:
                 case UnitMods.Pain:
+                case UnitMods.Unused_19:
+                case UnitMods.RuneBlood:
+                case UnitMods.RuneFrost:
+                case UnitMods.RuneUnholy:
                     UpdateMaxPower((PowerType)(unitMod - UnitMods.PowerStart));
                     break;
                 case UnitMods.ResistanceHoly:
@@ -663,7 +667,7 @@ namespace Game.Entities
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
-                return powerTypeEntry.MaxBasePower;
+                return (int)powerTypeEntry.MaxBasePower;
 
             return 0;
         }

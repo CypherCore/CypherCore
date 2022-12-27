@@ -1740,6 +1740,15 @@ namespace Framework.Constants
 
         Max = 0x3FFF,
         Unknown = 0xbadd,
-        None = 0
+        None = 0,
+
+        // Deleted opcodes, here only to allow compile
+        AuctionListBucketsResult = 0xbadd,
+        OpenArtifactForge = 0xbadd,
+        ArtifactRespecPrompt = 0xbadd,
+        EnableBarberShop = 0xbadd,
+        GuildEventStatusChange = 0xbadd,
+        SocialContractRequestResponse = 0xbadd,
+        BarberShopResult = 0xbadd,
     }
 }

@@ -955,9 +955,6 @@ namespace Game
             //Log.outInfo(LogFilter.ServerLoading, "Loading GM surveys...");
             //Global.SupportMgr.LoadSurveys();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading garrison info...");
-            Global.GarrisonMgr.Initialize();
-
             // Handle outdated emails (delete/return)
             Log.outInfo(LogFilter.ServerLoading, "Returning old mails...");
             Global.ObjectMgr.ReturnOrDeleteOldMails(false);
@@ -1125,6 +1122,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
             Global.ObjectMgr.LoadPhaseNames();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading map corpse positions...");
+            Global.ObjectMgr.LoadMapCorpsePositions();
         }
 
         public void LoadConfigSettings(bool reload = false)
