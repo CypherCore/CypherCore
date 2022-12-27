@@ -334,11 +334,11 @@ namespace Game.Entities
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell(talentInfo.SpellID, true);
+                RemoveSpell((uint)talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -346,7 +346,7 @@ namespace Game.Entities
                         RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
                 if (talentInfo.OverridesSpellID != 0)
-                    RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
+                    RemoveOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
             }
 
             // Remove spec specific spells
@@ -595,7 +595,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent spell: {talentInfo.SpellID}");
@@ -680,9 +680,9 @@ namespace Game.Entities
                 if (!HasPlayerFlag(PlayerFlags.Resting) && !HasUnitFlag2(UnitFlags2.AllowChangingTalents))
                     return TalentLearnResult.FailedRestArea;
 
-                if (GetSpellHistory().HasCooldown(talent.SpellID))
+                if (GetSpellHistory().HasCooldown((uint)talent.SpellID))
                 {
-                    spellOnCooldown = talent.SpellID;
+                    spellOnCooldown = (uint)talent.SpellID;
                     return TalentLearnResult.FailedCantRemoveTalent;
                 }
 
@@ -698,7 +698,7 @@ namespace Game.Entities
         bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
         {
             //ASSERT(talent);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
@@ -713,11 +713,11 @@ namespace Game.Entities
 
             if (activeTalentGroup == GetActiveTalentGroup() && HasAuraType(AuraType.PvpTalents))
             {
-                LearnSpell(talent.SpellID, true);
+                LearnSpell((uint)talent.SpellID, true);
 
                 // Move this to toggle ?
                 if (talent.OverridesSpellID != 0)
-                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+                    AddOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
             }
 
             GetPvpTalentMap(activeTalentGroup)[slot] = talent.Id;
@@ -727,15 +727,15 @@ namespace Game.Entities
 
         void RemovePvpTalent(PvpTalentRecord talent, byte activeTalentGroup)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
-            RemoveSpell(talent.SpellID, true);
+            RemoveSpell((uint)talent.SpellID, true);
 
             // Move this to toggle ?
             if (talent.OverridesSpellID != 0)
-                RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+                RemoveOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
 
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             var talents = GetPvpTalentMap(activeTalentGroup);
@@ -756,15 +756,15 @@ namespace Game.Entities
                 {
                     if (enable)
                     {
-                        LearnSpell(pvpTalentInfo.SpellID, false);
+                        LearnSpell((uint)pvpTalentInfo.SpellID, false);
                         if (pvpTalentInfo.OverridesSpellID != 0)
-                            AddOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
+                            AddOverrideSpell((uint)pvpTalentInfo.OverridesSpellID, (uint)pvpTalentInfo.SpellID);
                     }
                     else
                     {
                         if (pvpTalentInfo.OverridesSpellID != 0)
-                            RemoveOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
-                        RemoveSpell(pvpTalentInfo.SpellID, true);
+                            RemoveOverrideSpell((uint)pvpTalentInfo.OverridesSpellID, (uint)pvpTalentInfo.SpellID);
+                        RemoveSpell((uint)pvpTalentInfo.SpellID, true);
                     }
                 }
             }
