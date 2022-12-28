@@ -4171,11 +4171,11 @@ namespace Game.Spells
         public int CalcValue(out float variance, WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
-            float basePointsPerLevel = RealPointsPerLevel;
+            double basePointsPerLevel = RealPointsPerLevel;
             // TODO: this needs to be a float, not rounded
             int basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
-            float value = bp.HasValue ? bp.Value : basePoints;
-            float comboDamage = PointsPerResource;
+            double value = bp.HasValue ? bp.Value : basePoints;
+            double comboDamage = PointsPerResource;
 
             Unit casterUnit = null;
             if (caster != null)
@@ -4184,9 +4184,9 @@ namespace Game.Spells
             if (Scaling.Variance != 0)
             {
                 float delta = Math.Abs(Scaling.Variance * 0.5f);
-                float valueVariance = RandomHelper.FRand(-delta, delta);
-                value += basePoints * valueVariance;
-                variance = valueVariance;
+                double valueVariance = RandomHelper.FRand(-delta, delta);
+                value += (double)basePoints * valueVariance;
+                variance = (float)valueVariance;
             }
 
             // base amount modification based on spell lvl vs caster lvl

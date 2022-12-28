@@ -2765,6 +2765,16 @@ namespace Game.Entities
             basevalue = (float)(basevalue + totalflat) * totalmul;
         }
 
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref double basevalue, Spell spell = null)
+        {
+            float totalmul = 1.0f;
+            int totalflat = 0;
+
+            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
+
+            basevalue = (double)(basevalue + totalflat) * totalmul;
+        }
+
         public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T : IComparable
         {
             flat = 0;
