@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+
+using System;
 
 namespace Framework.Constants
 {
@@ -60,6 +62,7 @@ namespace Framework.Constants
         WorldPvp = 4,
     }
 
+    [Flags]
     public enum GroupFlags
     {
         None = 0x00,
@@ -71,6 +74,7 @@ namespace Framework.Constants
         OnePersonParty = 0x020, // Script_IsOnePersonParty()
         EveryoneAssistant = 0x040, // Script_IsEveryoneAssistant()
         GuildGroup = 0x100,
+        CrossFaction = 0x200,
 
         MaskBgRaid = FakeRaid | Raid
     }

@@ -120,6 +120,10 @@ namespace Game.Spells
                 TargetAuraSpell = _aura.TargetAuraSpell;
                 ExcludeCasterAuraSpell = _aura.ExcludeCasterAuraSpell;
                 ExcludeTargetAuraSpell = _aura.ExcludeTargetAuraSpell;
+                CasterAuraType = (AuraType)_aura.CasterAuraType;
+                TargetAuraType = (AuraType)_aura.TargetAuraType;
+                ExcludeCasterAuraType = (AuraType)_aura.ExcludeCasterAuraType;
+                ExcludeTargetAuraType = (AuraType)_aura.ExcludeTargetAuraType;
             }
 
             RequiredAreasID = -1;
@@ -161,6 +165,7 @@ namespace Game.Spells
                 RecoveryTime = _cooldowns.RecoveryTime;
                 CategoryRecoveryTime = _cooldowns.CategoryRecoveryTime;
                 StartRecoveryTime = _cooldowns.StartRecoveryTime;
+                CooldownAuraSpellId = _cooldowns.AuraSpellID;
             }
 
             EquippedItemClass = ItemClass.None;
@@ -2855,7 +2860,7 @@ namespace Game.Spells
                             }
 
                             Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
-                            return default;
+                            return null;
                         }
                     }
                 }
@@ -2863,6 +2868,36 @@ namespace Game.Spells
             else
             {
                 powerCost = (int)power.OptionalCost;
+
+                if (power.OptionalCostPct != 0)
+                {
+                    switch (power.PowerType)
+                    {
+                        // health as power used
+                        case PowerType.Health:
+                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetMaxHealth(), power.OptionalCostPct);
+                            break;
+                        case PowerType.Mana:
+                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.OptionalCostPct);
+                            break;
+                        case PowerType.AlternatePower:
+                            Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unsupported power type POWER_ALTERNATE_POWER in spell {Id} for optional cost percent");
+                            return null;
+                        default:
+                        {
+                            var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
+                            if (powerTypeEntry != null)
+                            {
+                                powerCost += (int)MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.OptionalCostPct);
+                                break;
+                            }
+
+                            Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id} for optional cost percent");
+                            return null;
+                        }
+                    }
+                }
+
                 powerCost += unitCaster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
                 {
                     return aurEff.GetMiscValue() == (int)power.PowerType && aurEff.IsAffectingSpell(this);
@@ -3964,11 +3999,16 @@ namespace Game.Spells
         public uint TargetAuraSpell { get; set; }
         public uint ExcludeCasterAuraSpell { get; set; }
         public uint ExcludeTargetAuraSpell { get; set; }
+        public AuraType CasterAuraType { get; set; }
+        public AuraType TargetAuraType  { get; set; }
+        public AuraType ExcludeCasterAuraType  { get; set; }
+        public AuraType ExcludeTargetAuraType { get; set; }
         public SpellCastTimesRecord CastTimeEntry { get; set; }
         public uint RecoveryTime { get; set; }
         public uint CategoryRecoveryTime { get; set; }
         public uint StartRecoveryCategory { get; set; }
         public uint StartRecoveryTime { get; set; }
+        public uint CooldownAuraSpellId { get; set; }
         public SpellInterruptFlags InterruptFlags { get; set; }
         public SpellAuraInterruptFlags AuraInterruptFlags { get; set; }
         public SpellAuraInterruptFlags2 AuraInterruptFlags2 { get; set; }
@@ -4777,8 +4817,23 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 285 SPELL_EFFECT_MODIFY_KEYSTONE_2
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 286 SPELL_EFFECT_GRANT_BATTLEPET_EXPERIENCE
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 287 SPELL_EFFECT_SET_GARRISON_FOLLOWER_LEVEL
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 288 SPELL_EFFECT_288
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 289 SPELL_EFFECT_289
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 288 SPELL_EFFECT_CRAFT_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 289 SPELL_EFFECT_MODIFY_AURA_STACKS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 290 SPELL_EFFECT_MODIFY_COOLDOWN
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 291 SPELL_EFFECT_MODIFY_COOLDOWNS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 292 SPELL_EFFECT_MODIFY_COOLDOWNS_BY_CATEGORY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 293 SPELL_EFFECT_MODIFY_CHARGES
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 294 SPELL_EFFECT_CRAFT_LOOT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 295 SPELL_EFFECT_SALVAGE_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 296 SPELL_EFFECT_CRAFT_SALVAGE_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 297 SPELL_EFFECT_RECRAFT_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 298 SPELL_EFFECT_CANCEL_ALL_PRIVATE_CONVERSATIONS
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 299 SPELL_EFFECT_299
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 300 SPELL_EFFECT_300
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 301 SPELL_EFFECT_CRAFT_ENCHANT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.None), // 302 SPELL_EFFECT_GATHERING
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 303 SPELL_EFFECT_CREATE_TRAIT_TREE_CONFIG
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 304 SPELL_EFFECT_CHANGE_ACTIVE_COMBAT_TRAIT_CONFIG
         };
 
         #region Fields

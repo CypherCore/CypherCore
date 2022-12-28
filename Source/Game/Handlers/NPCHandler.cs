@@ -20,6 +20,7 @@ using Framework.Database;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -48,9 +49,11 @@ namespace Game
 
         public void SendTabardVendorActivate(ObjectGuid guid)
         {
-            PlayerTabardVendorActivate packet = new();
-            packet.Vendor = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.TabardVendor;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
@@ -172,7 +175,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GossipSelectOption)]
         void HandleGossipSelectOption(GossipSelectOption packet)
         {
-            if (GetPlayer().PlayerTalkClass.GetGossipMenu().GetItem(packet.GossipIndex) == null)
+            GossipMenuItem gossipMenuItem = _player.PlayerTalkClass.GetGossipMenu().GetItem(packet.GossipOptionID);
+            if (gossipMenuItem == null)
                 return;
 
             // Prevent cheating on C# scripted menus
@@ -224,26 +228,26 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
-                        GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
+                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                        GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
-                        _player.OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                        _player.OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
                 }
             }
             else
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
-                        GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
+                    if (!unit.GetAI().OnGossipSelect(_player, packet.GossipID, gossipMenuItem.OrderIndex))
+                        GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
-                        GetPlayer().OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+                    if (!go.GetAI().OnGossipSelect(_player, packet.GossipID, gossipMenuItem.OrderIndex))
+                        GetPlayer().OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
                 }
             }
         }

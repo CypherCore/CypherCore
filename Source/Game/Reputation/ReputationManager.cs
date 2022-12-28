@@ -239,7 +239,6 @@ namespace Game
         public void SendState(FactionState faction)
         {
             SetFactionStanding setFactionStanding = new();
-            setFactionStanding.ReferAFriendBonus = 0.0f;
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
             if (faction != null)
                 setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, faction.Standing));

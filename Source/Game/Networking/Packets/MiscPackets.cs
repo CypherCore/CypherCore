@@ -58,21 +58,6 @@ namespace Game.Networking.Packets
         uint AreaID;
     }
 
-    public class BinderConfirm : ServerPacket
-    {
-        public BinderConfirm(ObjectGuid unit) : base(ServerOpcodes.BinderConfirm)
-        {
-            Unit = unit;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Unit);
-        }
-
-        ObjectGuid Unit;
-    }
-
     public class InvalidatePlayer : ServerPacket
     {
         public InvalidatePlayer() : base(ServerOpcodes.InvalidatePlayer) { }
@@ -124,11 +109,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WeeklyQuantity.HasValue);
             _worldPacket.WriteBit(TrackedQuantity.HasValue);
             _worldPacket.WriteBit(MaxQuantity.HasValue);
-            _worldPacket.WriteBit(Unused901.HasValue);
+            _worldPacket.WriteBit(TotalEarned.HasValue);
             _worldPacket.WriteBit(SuppressChatLog);
             _worldPacket.WriteBit(QuantityChange.HasValue);
-            _worldPacket.WriteBit(QuantityGainSource.HasValue);
             _worldPacket.WriteBit(QuantityLostSource.HasValue);
+            _worldPacket.WriteBit(QuantityGainSource.HasValue);
+            _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
+            _worldPacket.WriteBit(LastSpendTime.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -140,29 +127,38 @@ namespace Game.Networking.Packets
             if (MaxQuantity.HasValue)
                 _worldPacket.WriteInt32(MaxQuantity.Value);
 
-            if (Unused901.HasValue)
-                _worldPacket.WriteInt32(Unused901.Value);
+            if (TotalEarned.HasValue)
+                _worldPacket.WriteInt32(TotalEarned.Value);
 
             if (QuantityChange.HasValue)
                 _worldPacket.WriteInt32(QuantityChange.Value);
 
+            if (QuantityLostSource.HasValue)
+                _worldPacket.WriteInt32(QuantityLostSource.Value);
+
             if (QuantityGainSource.HasValue)
                 _worldPacket.WriteInt32(QuantityGainSource.Value);
 
-            if (QuantityLostSource.HasValue)
-                _worldPacket.WriteInt32(QuantityLostSource.Value);
+            if (FirstCraftOperationID.HasValue)
+                _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
+
+            if (LastSpendTime.HasValue)
+                _worldPacket.WriteInt64(LastSpendTime.Value);
         }
 
         public uint Type;
         public int Quantity;
         public uint Flags;
+        public List<UiEventToast> Toasts = new();
         public int? WeeklyQuantity;
         public int? TrackedQuantity;
         public int? MaxQuantity;
-        public int? Unused901;
+        public int? TotalEarned;
         public int? QuantityChange;
         public int? QuantityGainSource;
         public int? QuantityLostSource;
+        public uint? FirstCraftOperationID;
+        public long? LastSpendTime;
         public bool SuppressChatLog;
     }
 
@@ -209,7 +205,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
                 _worldPacket.WriteBit(data.TrackedQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxQuantity.HasValue);
-                _worldPacket.WriteBit(data.Unused901.HasValue);
+                _worldPacket.WriteBit(data.TotalEarned.HasValue);
+                _worldPacket.WriteBit(data.LastSpendTime.HasValue);
                 _worldPacket.WriteBits(data.Flags, 5);
                 _worldPacket.FlushBits();
 
@@ -221,8 +218,10 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteUInt32(data.TrackedQuantity.Value);
                 if (data.MaxQuantity.HasValue)
                     _worldPacket.WriteInt32(data.MaxQuantity.Value);
-                if (data.Unused901.HasValue)
-                    _worldPacket.WriteInt32(data.Unused901.Value);
+                if (data.TotalEarned.HasValue)
+                    _worldPacket.WriteInt32(data.TotalEarned.Value);
+                if (data.LastSpendTime.HasValue)
+                    _worldPacket.WriteInt64(data.LastSpendTime.Value);
             }
         }
 
@@ -236,7 +235,8 @@ namespace Game.Networking.Packets
             public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
             public uint? TrackedQuantity;
             public int? MaxQuantity;
-            public int? Unused901;
+            public int? TotalEarned;
+            public long? LastSpendTime;
             public byte Flags;                      // 0 = none, 
         }
     }

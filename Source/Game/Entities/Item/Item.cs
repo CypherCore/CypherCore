@@ -187,7 +187,7 @@ namespace Game.Entities
 
                     ss.Clear();
 
-                    foreach (int bonusListID in (List<uint>)m_itemData.BonusListIDs)
+                    foreach (int bonusListID in GetBonusListIDs())
                         ss.Append($"{bonusListID} ");
 
                     stmt.AddValue(++index, ss.ToString());
@@ -802,9 +802,13 @@ namespace Game.Entities
             return m_container != null ? m_container.GetSlot() : InventorySlots.Bag0;
         }
 
-        public bool IsEquipped() { return !IsInBag() && m_slot < EquipmentSlot.End; }
+        public bool IsEquipped()
+        {
+            return !IsInBag() && ((m_slot >= EquipmentSlot.Start && m_slot < EquipmentSlot.End)
+                || (m_slot >= ProfessionSlots.Start && m_slot < ProfessionSlots.End));
+        }
 
-        public bool CanBeTraded(bool mail = false, bool trade = false)
+            public bool CanBeTraded(bool mail = false, bool trade = false)
         {
             if (m_lootGenerated)
                 return false;
@@ -1603,7 +1607,13 @@ namespace Game.Entities
             -1,                                                     // INVTYPE_THROWN
             EquipmentSlot.MainHand,                                // INVTYPE_RANGEDRIGHT
             -1,                                                     // INVTYPE_QUIVER
-            -1                                                      // INVTYPE_RELIC
+            -1,                                                      // INVTYPE_RELIC
+            -1,                                                     // INVTYPE_PROFESSION_TOOL
+            -1,                                                     // INVTYPE_PROFESSION_GEAR
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_OFFENSIVE
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_UTILITY
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_DEFENSIVE
+            -1                                                      // INVTYPE_EQUIPABLE_SPELL_MOBILITY
         };
 
         public static bool CanTransmogrifyItemWithItem(Item item, ItemModifiedAppearanceRecord itemModifiedAppearance)
@@ -2075,17 +2085,22 @@ namespace Game.Entities
             return 0;
         }
 
+        public List<uint> GetBonusListIDs() { return m_itemData.ItemBonusKey.GetValue().BonusListIDs; }
+        
         public void AddBonuses(uint bonusListID)
         {
-            var bonusListIDs = (List<uint>)m_itemData.BonusListIDs;
+            var bonusListIDs = GetBonusListIDs();
             if (bonusListIDs.Contains(bonusListID))
                 return;
 
             var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListID);
             if (bonuses != null)
             {
-                bonusListIDs.Add(bonusListID);
-                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
+                ItemBonusKey itemBonusKey = new();
+                itemBonusKey.ItemID = GetEntry();
+                itemBonusKey.BonusListIDs = GetBonusListIDs();
+                itemBonusKey.BonusListIDs.Add(bonusListID);
+                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
                 foreach (ItemBonusRecord bonus in bonuses)
                     _bonusData.AddBonus(bonus.BonusType, bonus.Value);
 
@@ -2098,9 +2113,12 @@ namespace Game.Entities
             if (bonusListIDs == null)
                 bonusListIDs = new List<uint>();
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            itemBonusKey.BonusListIDs = bonusListIDs;
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
 
-            foreach (uint bonusListID in (List<uint>)m_itemData.BonusListIDs)
+            foreach (uint bonusListID in GetBonusListIDs())
                 _bonusData.AddBonusList(bonusListID);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
@@ -2108,7 +2126,9 @@ namespace Game.Entities
 
         public void ClearBonuses()
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), new List<uint>());
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
             _bonusData = new BonusData(GetTemplate());
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
@@ -2721,6 +2741,8 @@ namespace Game.Entities
                             if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.CookingSupp))
                                 return false;
                             return true;
+                        case ItemSubClassContainer.ReagentContainer:
+                            return pProto.IsCraftingReagent();
                         default:
                             return false;
                     }

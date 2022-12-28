@@ -2758,7 +2758,7 @@ namespace Game.Achievements
 
                     bool bagScanReachedEnd = referencePlayer.ForEachItem(ItemSearchLocation.Everywhere, item =>
                     {
-                        bool hasBonus = item.m_itemData.BonusListIDs._value.Any(bonusListID => bonusListIDs.Contains(bonusListID));
+                        bool hasBonus = item.GetBonusListIDs().Any(bonusListID => bonusListIDs.Contains(bonusListID));
                         return !hasBonus;
                     });
 
@@ -2880,7 +2880,7 @@ namespace Game.Achievements
                     if (pvpTier == null)
                         return false;
 
-                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.Size())
                         return false;
 
                     var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[pvpTier.BracketID];
@@ -2918,7 +2918,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerPvpTierInBracketEqualOrGreaterThan: // 239
                 {
-                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.Size())
                         return false;
 
                     var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[secondaryAsset];
@@ -3475,7 +3475,7 @@ namespace Game.Achievements
                     if (pvpTier == null)
                         return false;
 
-                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.Size())
                         return false;
 
                     var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[pvpTier.BracketID];
@@ -3486,7 +3486,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerBestWeeklyWinPvpTierInBracketEqualOrGreaterThan: // 325
                 {
-                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.Size())
                         return false;
 
                     var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[secondaryAsset];
@@ -3516,6 +3516,109 @@ namespace Game.Achievements
                     if (bagScanReachedEnd)
                         return false;
 
+                    break;
+                }
+                case ModifierTreeType.PlayerAuraWithLabelStackCountEqualOrGreaterThan: // 335
+                {
+                    uint count = 0;
+                    referencePlayer.HasAura(aura =>
+                    {
+                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
+                            count += aura.GetStackAmount();
+                        return false;
+                    });
+                    if (count < reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerAuraWithLabelStackCountEqual: // 336
+                {
+                    uint count = 0;
+                    referencePlayer.HasAura(aura =>
+                    {
+                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
+                            count += aura.GetStackAmount();
+                        return false;
+                    });
+                    if (count != reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerAuraWithLabelStackCountEqualOrLessThan: // 337
+                {
+                    uint count = 0;
+                    referencePlayer.HasAura(aura =>
+                    {
+                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
+                            count += aura.GetStackAmount();
+                        return false;
+                    });
+                    if (count > reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerIsInCrossFactionGroup: // 338
+                {
+                    var group = referencePlayer.GetGroup();
+                    if (!group.GetGroupFlags().HasFlag(GroupFlags.CrossFaction))
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasTraitNodeEntryInActiveConfig: // 340
+                {
+                    bool hasTraitNodeEntry()
+                    {
+                        foreach (var traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
+                        {
+                            if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
+                            {
+                                if (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
+                                    || !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                                    continue;
+                            }
+
+                            foreach (var traitEntry in traitConfig.Entries)
+                                if (traitEntry.TraitNodeEntryID == reqValue)
+                                    return true;
+                        }
+                        return false;
+                    }
+                    if (!hasTraitNodeEntry())
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasTraitNodeEntryInActiveConfigRankGreaterOrEqualThan: // 341
+                {
+                    var traitNodeEntryRank = new Func<short?>(() =>
+                    {
+                        foreach (var traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
+                        {
+                            if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
+                            {
+                                if (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
+                                    || !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                                    continue;
+                            }
+
+                            foreach (var traitEntry in traitConfig.Entries)
+                                if (traitEntry.TraitNodeEntryID == secondaryAsset)
+                                    return (short)traitEntry.Rank;
+                        }
+                        return null;
+                    })();
+                    if (!traitNodeEntryRank.HasValue || traitNodeEntryRank < reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerDaysSinceLogout: // 344
+                    if (GameTime.GetGameTime() - referencePlayer.m_playerData.LogoutTime < reqValue * Time.Day)
+                        return false;
+                    break;
+                case ModifierTreeType.PlayerCanUseItem: // 351
+                {
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(reqValue);
+                    if (itemTemplate == null || referencePlayer.CanUseItem(itemTemplate) != InventoryResult.Ok)
+                        return false;
                     break;
                 }
                 default:

@@ -138,6 +138,7 @@ namespace Game.Networking.Packets
                         _worldPacket.WriteUInt8(classAvailability.ClassID);
                         _worldPacket.WriteUInt8(classAvailability.ActiveExpansionLevel);
                         _worldPacket.WriteUInt8(classAvailability.AccountExpansionLevel);
+                        _worldPacket.WriteUInt8(classAvailability.MinActiveExpansionLevel);
                     }
                 }
 
@@ -166,7 +167,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteUInt16(SuccessInfo.NumPlayersAlliance.Value);
 
                 if(SuccessInfo.ExpansionTrialExpiration.HasValue)
-                    _worldPacket.WriteInt32(SuccessInfo.ExpansionTrialExpiration.Value);
+                    _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
 
                 foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
                     virtualRealm.Write(_worldPacket);
@@ -220,7 +221,7 @@ namespace Game.Networking.Packets
             public bool ForceCharacterTemplate; // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
             public ushort? NumPlayersHorde; // number of horde players in this realm. @todo implement
             public ushort? NumPlayersAlliance; // number of alliance players in this realm. @todo implement
-            public int? ExpansionTrialExpiration; // expansion trial expiration unix timestamp
+            public long? ExpansionTrialExpiration; // expansion trial expiration unix timestamp
 
             public struct GameTime
             {

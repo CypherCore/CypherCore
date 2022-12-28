@@ -192,6 +192,15 @@ namespace Game
             if (req.ItemModifiedAppearanceID != 0 && !GetCollectionMgr().HasItemAppearance(req.ItemModifiedAppearanceID).PermAppearance)
                 return false;
 
+            if (req.QuestID != 0)
+            {
+                if (!_player)
+                    return false;
+
+                if (!_player.IsQuestRewarded((uint)req.QuestID))
+                    return false;
+            }
+
             if (checkRequiredDependentChoices)
             {
                 var requiredChoices = Global.DB2Mgr.GetRequiredCustomizationChoices(req.Id);
@@ -318,14 +327,14 @@ namespace Game
             RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
             if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Player, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
-                SendCharCreate(ResponseCodes.AccountCreateFailed);
+                Log.outError(LogFilter.Cheat, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                SendCharCreate(ResponseCodes.CharCreateFailed);
                 return;
             }
 
             if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
             {
-                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
+                Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
                 return;
             }
@@ -338,18 +347,33 @@ namespace Game
             //    return;
             //}
 
-            // prevent character creating Expansion class without Expansion account
-            ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
-            if (classExpansionRequirement == null)
+            // prevent character creating Expansion race without Expansion account
+            ClassAvailability raceClassExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
+            if (raceClassExpansionRequirement != null)
             {
-                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
-                SendCharCreate(ResponseCodes.CharCreateExpansionClass);
-                return;
+                if (raceClassExpansionRequirement.ActiveExpansionLevel > (byte)GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                {
+                    Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                        $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
+                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                    return;
+                }
             }
-
-            if (classExpansionRequirement.ActiveExpansionLevel > (int)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (int)GetAccountExpansion())
+            else
             {
-                Log.outError(LogFilter.Player, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback((byte)charCreate.CreateInfo.ClassId);
+                if (classExpansionRequirement != null)
+                {
+                    if (classExpansionRequirement.MinActiveExpansionLevel > (byte)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                    {
+                        Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                            $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                        SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                        return;
+                    }
+                }
+                else
+                    Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }
@@ -450,9 +474,14 @@ namespace Game
 
                 int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
                 bool hasDemonHunterReqLevel = demonHunterReqLevel == 0;
+                uint evokerReqLevel = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingMinLevelForEvoker);
+                bool hasEvokerReqLevel = (evokerReqLevel == 0);
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
                 int skipCinematics = WorldConfig.GetIntValue(WorldCfg.SkipCinematics);
-                bool checkDemonHunterReqs = createInfo.ClassId == Class.DemonHunter && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
+                bool checkClassLevelReqs = (createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker)
+                                            && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
+                int evokerLimit = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingEvokersPerRealm);
+                bool hasEvokerLimit = evokerLimit != 0;
 
                 void finalizeCharacterCreation(SQLResult result1)
                 {
@@ -461,8 +490,9 @@ namespace Game
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
                         byte accRace = result1.Read<byte>(1);
+                        byte accClass = result1.Read<byte>(2);
 
-                        if (checkDemonHunterReqs)
+                        if (checkClassLevelReqs)
                         {
                             if (!hasDemonHunterReqLevel)
                             {
@@ -470,7 +500,16 @@ namespace Game
                                 if (accLevel >= demonHunterReqLevel)
                                     hasDemonHunterReqLevel = true;
                             }
+                            if (!hasEvokerReqLevel)
+                            {
+                                byte accLevel = result1.Read<byte>(0);
+                                if (accLevel >= evokerReqLevel)
+                                    hasEvokerReqLevel = true;
+                            }
                         }
+
+                        if (accClass == (byte)Class.Evoker)
+                            --evokerLimit;
 
                         // need to check team only for first character
                         // @todo what to if account already has characters of both races?
@@ -489,17 +528,18 @@ namespace Game
 
                         // search same race for cinematic or same class if need
                         // @todo check if cinematic already shown? (already logged in?; cinematic field)
-                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.DemonHunter)
+                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker)
                         {
                             if (!result1.NextRow())
                                 break;
 
                             accRace = result1.Read<byte>(1);
+                            accClass = result1.Read<byte>(2);
 
                             if (!haveSameRace)
                                 haveSameRace = createInfo.RaceId == (Race)accRace;
 
-                            if (checkDemonHunterReqs)
+                            if (checkClassLevelReqs)
                             {
                                 if (!hasDemonHunterReqLevel)
                                 {
@@ -507,11 +547,33 @@ namespace Game
                                     if (acc_level >= demonHunterReqLevel)
                                         hasDemonHunterReqLevel = true;
                                 }
+                                if (!hasEvokerReqLevel)
+                                {
+                                    byte accLevel = result1.Read<byte>(0);
+                                    if (accLevel >= evokerReqLevel)
+                                        hasEvokerReqLevel = true;
+                                }
                             }
+                            if (accClass == (byte)Class.Evoker)
+                                --evokerLimit;
                         }
                     }
 
-                    if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
+                    if (checkClassLevelReqs)
+                    {
+                        if (!hasDemonHunterReqLevel)
+                        {
+                            SendCharCreate(ResponseCodes.CharCreateNewPlayer);
+                            return;
+                        }
+                        if (!hasEvokerReqLevel)
+                        {
+                            SendCharCreate(ResponseCodes.CharCreateDracthyrLevelRequirement);
+                            return;
+                        }
+                    }
+
+                    if (createInfo.ClassId == Class.Evoker && hasEvokerLimit && evokerLimit < 1)
                     {
                         SendCharCreate(ResponseCodes.CharCreateNewPlayer);
                         return;
@@ -520,7 +582,7 @@ namespace Game
                     // Check name uniqueness in the same step as saving to database
                     if (Global.CharacterCacheStorage.GetCharacterCacheByName(createInfo.Name) != null)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateNameInUse);
+                        SendCharCreate(ResponseCodes.CharCreateDracthyrDuplicate);
                         return;
                     }
 
@@ -580,7 +642,7 @@ namespace Game
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_CREATE_INFO);
                 stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
+                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
                 queryCallback.WithCallback(finalizeCharacterCreation).SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }));
         }

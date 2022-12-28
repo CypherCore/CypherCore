@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -47,7 +47,7 @@ namespace Game.Networking.Packets
         {
             Language = (Language)_worldPacket.ReadInt32();
             uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            uint textLen = _worldPacket.ReadBits<uint>(11);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
             Language = (Language)_worldPacket.ReadInt32();
             ChannelGUID = _worldPacket.ReadPackedGuid();
             uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            uint textLen = _worldPacket.ReadBits<uint>(11);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -112,7 +112,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -125,7 +125,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -138,7 +138,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 

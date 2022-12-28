@@ -297,10 +297,11 @@ namespace Game
 
         public void SendShowBank(ObjectGuid guid)
         {
-            m_currentBankerGUID = guid;
-            ShowBank packet = new();
-            packet.Guid = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Banker;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

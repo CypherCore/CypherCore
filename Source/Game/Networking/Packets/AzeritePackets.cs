@@ -34,25 +34,6 @@ namespace Game.Networking.Packets
         public ulong XP;
     }
 
-    class OpenHeartForge : ServerPacket
-    {
-        public OpenHeartForge() : base(ServerOpcodes.OpenHeartForge) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(ForgeGUID);
-        }
-
-        public ObjectGuid ForgeGUID;
-    }
-
-    class CloseHeartForge : ServerPacket
-    {
-        public CloseHeartForge() : base(ServerOpcodes.CloseHeartForge) { }
-
-        public override void Write() { }
-    }
-
     class AzeriteEssenceUnlockMilestone : ClientPacket
     {
         public AzeriteEssenceUnlockMilestone(WorldPacket packet) : base(packet) { }
@@ -140,20 +121,5 @@ namespace Game.Networking.Packets
         }
 
         public bool IsHeartEquipped;
-    }
-
-    class AzeriteRespecNPC : ServerPacket
-    {
-        public AzeriteRespecNPC(ObjectGuid npcGuid) : base(ServerOpcodes.AzeriteRespecNpc)
-        {
-            NpcGUID = npcGuid;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(NpcGUID);
-        }
-
-        public ObjectGuid NpcGUID;
     }
 }

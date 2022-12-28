@@ -99,6 +99,7 @@ namespace Game.DataStorage
         public byte MaxPVPRank;
         public uint ContentTuningID;
         public int CovenantID;
+        public uint TraitNodeEntryLogic;
         public ushort[] SkillID = new ushort[4];
         public ushort[] MinSkill = new ushort[4];
         public ushort[] MaxSkill = new ushort[4];
@@ -123,6 +124,9 @@ namespace Game.DataStorage
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
+        public int[]TraitNodeEntryID = new int[4];
+        public ushort[]TraitNodeEntryMinRank = new ushort[4];
+        public ushort[]TraitNodeEntryMaxRank = new ushort[4];
     }
 
     public sealed class PowerDisplayRecord
@@ -141,12 +145,12 @@ namespace Game.DataStorage
         public string CostGlobalStringTag;
         public uint Id;
         public PowerType PowerTypeEnum;
-        public sbyte MinPower;
-        public short MaxBasePower;
-        public sbyte CenterPower;
-        public sbyte DefaultPower;
-        public sbyte DisplayModifier;
-        public short RegenInterruptTimeMS;
+        public int MinPower;
+        public int MaxBasePower;
+        public int CenterPower;
+        public int DefaultPower;
+        public int DisplayModifier;
+        public int RegenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
         public short Flags;
@@ -197,6 +201,7 @@ namespace Game.DataStorage
         public int ActionBarSpellID;
         public int PvpTalentCategoryID;
         public int LevelRequired;
+        public int PlayerConditionID;
     }
 
     public sealed class PvpTalentCategoryRecord

@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Game.Networking.Packets
 {
@@ -429,14 +430,26 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BattlePetBreedQuality);
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
+            _worldPacket.WriteInt32(Toasts.Count);
+            foreach (UiEventToast uiEventToast in Toasts)
+                uiEventToast.Write(_worldPacket);
+
             _worldPacket.WriteBit(Pushed);
             _worldPacket.WriteBit(Created);
             _worldPacket.WriteBits((uint)DisplayText, 3);
             _worldPacket.WriteBit(IsBonusRoll);
             _worldPacket.WriteBit(IsEncounterLoot);
+            _worldPacket.WriteBit(CraftingData != null);
+            _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.FlushBits();
 
-            Item.Write(_worldPacket);            
+            Item.Write(_worldPacket);
+
+            if (FirstCraftOperationID.HasValue)
+                _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
+
+            if (CraftingData != null)
+                CraftingData.Write(_worldPacket);
         }
 
         public ObjectGuid PlayerGUID;
@@ -444,7 +457,7 @@ namespace Game.Networking.Packets
         public int SlotInBag;
         public ItemInstance Item;
         public int QuestLogItemID;// Item ID used for updating quest progress
-                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
+                                  // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;
         public uint QuantityInInventory;
         public int DungeonEncounterID;
@@ -453,6 +466,9 @@ namespace Game.Networking.Packets
         public uint BattlePetBreedQuality;
         public int BattlePetLevel;
         public ObjectGuid ItemGUID;
+        public List<UiEventToast> Toasts = new();
+        public CraftingData CraftingData;
+        public uint? FirstCraftOperationID;
         public bool Pushed;
         public DisplayType DisplayText;
         public bool Created;
@@ -528,7 +544,7 @@ namespace Game.Networking.Packets
         public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
 
         public override void Write()
-        {    
+        {
             _worldPacket.WritePackedGuid(Owner);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(ItemGUID);
@@ -572,7 +588,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public uint Cooldown;
     }
-    
+
     class ItemEnchantTimeUpdate : ServerPacket
     {
         public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance) { }
@@ -741,7 +757,7 @@ namespace Game.Networking.Packets
     }
 
     public class ItemMod
-    {  
+    {
         public uint Value;
         public ItemModifier Type;
 
@@ -858,7 +874,7 @@ namespace Game.Networking.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            List<uint> bonusListIds = item.m_itemData.BonusListIDs;
+            List<uint> bonusListIds = item.GetBonusListIDs();
             if (!bonusListIds.Empty())
             {
                 ItemBonus = new();
@@ -984,8 +1000,44 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class ItemBonusKey : IEquatable<ItemBonusKey>
+    {
+        public uint ItemID;
+        public List<uint> BonusListIDs = new();
+        public List<ItemMod> Modifications = new();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ItemID);
+            data.WriteInt32(BonusListIDs.Count);
+            data.WriteInt32(Modifications.Count);
+
+            if (!BonusListIDs.Empty())
+                foreach (var id in BonusListIDs)
+                    data.WriteUInt32(id);
+
+            foreach (ItemMod modification in Modifications)
+                modification.Write(data);
+        }
+
+        public bool Equals(ItemBonusKey right)
+        {
+            if (ItemID != right.ItemID)
+                return false;
+
+            if (BonusListIDs != right.BonusListIDs)
+                return false;
+
+            if (Modifications != right.Modifications)
+                return false;
+
+            return true;
+        }
+    }
+
     public class ItemEnchantData
     {
+        public ItemEnchantData() { }
         public ItemEnchantData(uint id, uint expiration, int charges, byte slot)
         {
             ID = id;
@@ -1092,5 +1144,17 @@ namespace Game.Networking.Packets
         public ulong Money;
         public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
         public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
+    }
+
+    public struct UiEventToast
+    {
+        public int UiEventToastID;
+        public int Asset;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(UiEventToastID);
+            data.WriteInt32(Asset);
+        }
     }
 }

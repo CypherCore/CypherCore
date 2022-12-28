@@ -106,7 +106,7 @@ namespace Game.Entities
             DeleteFromDB(trans);
 
             StringBuilder items = new();
-            for (var i = 0; i < EquipmentSlot.End; ++i)
+            for (var i = 0; i < m_corpseData.Items.GetSize(); ++i)
                 items.Append($"{m_corpseData.Items[i]} ");
 
             byte index = 0;
@@ -187,8 +187,9 @@ namespace Game.Entities
             SetObjectScale(1.0f);
             SetDisplayId(field.Read<uint>(5));
             StringArray items = new(field.Read<string>(6), ' ');
-            for (uint index = 0; index < EquipmentSlot.End; ++index)
-                SetItem(index, uint.Parse(items[(int)index]));
+            if (items.Length == m_corpseData.Items.GetSize())
+                for (uint index = 0; index < m_corpseData.Items.GetSize(); ++index)
+                    SetItem(index, uint.Parse(items[(int)index]));
 
             SetRace(field.Read<byte>(7));
             SetClass(field.Read<byte>(8));

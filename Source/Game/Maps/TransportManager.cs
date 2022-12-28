@@ -370,11 +370,7 @@ namespace Game.Maps
             {
                 foreach (uint mapId in transport.MapIds)
                     Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
-
-                transport.InInstance = false;
             }
-            else
-                transport.InInstance = CliDB.MapStorage.LookupByKey(transport.MapIds.First()).Instanceable();
 
             transport.TotalPathTime = totalTime;
         }
@@ -424,6 +420,12 @@ namespace Game.Maps
                 return null;
             }
 
+            if (!tInfo.MapIds.Contains(map.GetId()))
+            {
+                Log.outError(LogFilter.Transport, $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
+                return null;
+            }
+
             Position startingPosition = tInfo.ComputePosition(0, out _, out _);
             if (startingPosition == null)
             {
@@ -435,7 +437,6 @@ namespace Game.Maps
             Transport trans = new();
 
             // ...at first waypoint
-            uint mapId = tInfo.PathLegs.First().MapId;
             float x = startingPosition.GetPositionX();
             float y = startingPosition.GetPositionY();
             float z = startingPosition.GetPositionZ();
@@ -447,16 +448,6 @@ namespace Game.Maps
                 return null;
 
             PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
-
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-            if (mapEntry != null)
-            {
-                if (mapEntry.Instanceable() != tInfo.InInstance)
-                {
-                    Log.outError(LogFilter.Transport, "Transport {0} (name: {1}) attempted creation in instance map (id: {2}) but it is not an instanced transport!", entry, trans.GetName(), mapId);
-                    //return null;
-                }
-            }
 
             // use preset map for instances (need to know which instance)
             trans.SetMap(map);
@@ -536,7 +527,6 @@ namespace Game.Maps
         public List<TransportPathEvent> Events = new();
 
         public HashSet<uint> MapIds = new();
-        public bool InInstance;
 
         public Position ComputePosition(uint time, out TransportMovementState moveState, out int legIndex)
         {

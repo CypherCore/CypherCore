@@ -293,18 +293,6 @@ namespace Game.Networking.Packets
         public float Delay = 0.0f;
     }
 
-    class ShowMailbox : ServerPacket
-    {
-        public ShowMailbox() : base(ServerOpcodes.ShowMailbox) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(PostmasterGUID);
-        }
-
-        public ObjectGuid PostmasterGUID;
-    }
-
     //Structs
     public class MailAttachedItem
     {

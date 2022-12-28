@@ -113,7 +113,7 @@ namespace Game
         public string BuildItemAuctionMailSubject(AuctionMailType type, AuctionPosting auction)
         {
             return BuildAuctionMailSubject(auction.Items[0].GetEntry(), type, auction.Id, auction.GetTotalItemCount(),
-                auction.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId), auction.Items[0].GetContext(), auction.Items[0].m_itemData.BonusListIDs);
+                auction.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId), auction.Items[0].GetContext(), auction.Items[0].GetBonusListIDs());
         }
 
         public string BuildCommodityAuctionMailSubject(AuctionMailType type, uint itemId, uint itemCount)
@@ -1998,7 +1998,7 @@ namespace Game
         public class SubclassFilter
         {
             public FilterType SubclassMask;
-            public uint[] InvTypes = new uint[ItemConst.MaxItemSubclassTotal];
+            public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
         } 
         
         public enum FilterType : uint

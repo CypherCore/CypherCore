@@ -342,7 +342,11 @@ namespace Game
 
         public void SendOpenTransmogrifier(ObjectGuid guid)
         {
-            SendPacket(new TransmogrifyNPC(guid));
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Transmogrifier;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

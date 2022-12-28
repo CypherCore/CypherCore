@@ -59,6 +59,7 @@ namespace Game.DataStorage
         public byte ItemGroupSoundsID;
         public int ContentTuningID;
         public int ModifiedCraftingReagentItemID;
+        public int CraftingQualityID;
     }
 
     public sealed class ItemAppearanceRecord
@@ -215,7 +216,7 @@ namespace Game.DataStorage
         public byte ArenaBracket;                                             // arena slot restrictions (min slot value)
         public byte Flags;
         public byte MinFactionID;
-        public byte MinReputation;
+        public int MinReputation;
         public byte RequiredAchievement;                                      // required personal arena rating
         public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];                          // required item id
         public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems];                      // required count of 1st item
@@ -305,7 +306,7 @@ namespace Game.DataStorage
         public byte OverallQualityID;
         public int ExpansionID;
         public ushort MinFactionID;
-        public byte MinReputation;
+        public int MinReputation;
         public int AllowableClass;
         public sbyte RequiredLevel;
         public ushort RequiredSkill;
@@ -356,6 +357,7 @@ namespace Game.DataStorage
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
         public uint Stackable;
         public uint MaxCount;
+        public uint MinReputation;
         public uint RequiredAbility;
         public uint SellPrice;
         public uint BuyPrice;
@@ -395,7 +397,6 @@ namespace Game.DataStorage
         public byte DamageType;
         public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];
         public byte ContainerSlots;
-        public byte MinReputation;
         public byte RequiredPVPMedal;
         public byte RequiredPVPRank;
         public sbyte RequiredLevel;

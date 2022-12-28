@@ -118,7 +118,9 @@ namespace Game.DataStorage
                 if (battlemaster.MaxPlayers < battlemaster.MinPlayers)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinPlayers ({battlemaster.MinPlayers}) and MaxPlayers ({battlemaster.MaxPlayers}). Swapping values.");
-                    MathFunctions.Swap(ref battlemaster.MaxPlayers, ref battlemaster.MinPlayers);
+                    sbyte minPlayers = battlemaster.MinPlayers;
+                    battlemaster.MinPlayers = (sbyte)battlemaster.MaxPlayers;
+                    battlemaster.MaxPlayers = minPlayers;
                 }
             }
 
@@ -196,16 +198,16 @@ namespace Game.DataStorage
                 ChrModelRecord model = ChrModelStorage.LookupByKey(raceModel.ChrModelID);
                 if (model != null)
                 {
-                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex)] = model;
+                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex)] = model;
 
                     var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
                     if (customizationOptionsForModel != null)
                     {
-                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex), customizationOptionsForModel);
+                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex), customizationOptionsForModel);
 
                         uint parentRace = parentRaces.LookupByKey(raceModel.ChrRacesID);
                         if (parentRace != 0)
-                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)model.Sex), customizationOptionsForModel);
+                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)raceModel.Sex), customizationOptionsForModel);
                     }
 
                     // link shapeshift displays to race/gender/form
@@ -220,7 +222,7 @@ namespace Game.DataStorage
                                 data.Displays.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
                         }
 
-                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex, shapeshiftOptionsForModel.Item2)] = data;
+                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex, shapeshiftOptionsForModel.Item2)] = data;
                     }
                 }
             }
@@ -2396,7 +2398,7 @@ namespace Game.DataStorage
         Dictionary<short, uint> _itemLevelDeltaToBonusListContainer = new();
         MultiMap<uint, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
-        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[19];
+        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
         MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();

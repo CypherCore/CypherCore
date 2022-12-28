@@ -3281,8 +3281,10 @@ namespace Scripts.Spells.Generic
             Unit target = GetHitUnit();
             if (target)
             {
-                SpiritHealerConfirm spiritHealerConfirm = new();
-                spiritHealerConfirm.Unit = target.GetGUID();
+                NPCInteractionOpenResult spiritHealerConfirm = new();
+                spiritHealerConfirm.Npc = target.GetGUID();
+                spiritHealerConfirm.InteractionType = PlayerInteractionType.SpiritHealer;
+                spiritHealerConfirm.Success = true;
                 originalCaster.SendPacket(spiritHealerConfirm);
             }
         }

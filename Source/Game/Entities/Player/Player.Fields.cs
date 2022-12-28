@@ -294,6 +294,7 @@ namespace Game.Entities
         public CreatePosition createPosition;
         public CreatePosition? createPositionNPE;
 
+        public ItemContext itemContext;
         public List<PlayerCreateInfoItem> item = new();
         public List<uint> customSpells = new();
         public List<uint>[] castSpells = new List<uint>[(int)PlayerCreateMode.Max];

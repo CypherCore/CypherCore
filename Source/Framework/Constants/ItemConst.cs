@@ -102,27 +102,63 @@ namespace Framework.Constants
         };
     }
 
+    public struct ProfessionSlots
+    {
+        public const byte Profession1Tool = 19;
+        public const byte Profession1Gear1 = 20;
+        public const byte Profession1Gear2 = 21;
+        public const byte Profession2Tool = 22;
+        public const byte Profession2Gear1 = 23;
+        public const byte Profession2Gear2 = 24;
+        public const byte CookingTool = 25;
+        public const byte CookingGear1 = 26;
+        public const byte FishingTool = 27;
+        public const byte FishingGear1 = 28;
+        public const byte FishingGear2 = 29;
+
+        public const byte End = 30;
+        public const byte Start = Profession1Tool;
+    }
+
     public struct InventorySlots
     {
-        public const byte BagStart = 19;
-        public const byte BagEnd = 23;
-        public const byte ItemStart = 23;
-        public const byte ItemEnd = 51;
+        public const byte BagStart = 30;
+        public const byte BagEnd = 34;
 
-        public const byte BankItemStart = 51;
-        public const byte BankItemEnd = 79;
-        public const byte BankBagStart = 79;
-        public const byte BankBagEnd = 86;
+        public const byte ReagentBagStart = 34;
+        public const byte ReagentBagEnd = 35;
 
-        public const byte BuyBackStart = 86;
-        public const byte BuyBackEnd = 98;
-        public const byte ReagentStart = 98;
-        public const byte ReagentEnd = 196;
-        public const byte ChildEquipmentStart = 196;
-        public const byte ChildEquipmentEnd = 199;
+        public const byte ItemStart = 35;
+        public const byte ItemEnd = 63;
+
+        public const byte BankItemStart = 63;
+        public const byte BankItemEnd = 91;
+
+        public const byte BankBagStart = 91;
+        public const byte BankBagEnd = 98;
+
+        public const byte BuyBackStart = 98;
+        public const byte BuyBackEnd = 110;
+
+        public const byte ReagentStart = 110;
+        public const byte ReagentEnd = 208;
+
+        public const byte ChildEquipmentStart = 208;
+        public const byte ChildEquipmentEnd = 211;
 
         public const byte Bag0 = 255;
         public const byte DefaultSize = 16;
+    }
+
+    enum EquipableSpellSlots
+    {
+        OffensiveSlot1 = 211,
+        OffensiveSlot2 = 212,
+        OffensiveSlot3 = 213,
+        OffensiveSlot4 = 214,
+        UtilitySlot1 = 215,
+        DefensiveSlot1 = 216,
+        MobilitySlot1 = 217
     }
 
     public struct EquipmentSlot
@@ -462,6 +498,20 @@ namespace Framework.Constants
         RaidHeroicExtended = 84,
         RaidMythicExtended = 85,
         CharacterTemplate91 = 86,
+        ChallengeMode4 = 87,
+        PvpRanked9 = 88,
+        RaidNormalExtended2 = 89,
+        RaidFinderExtended2 = 90,
+        RaidHeroicExtended2 = 91,
+        RaidMythicExtended2 = 92,
+        RaidNormalExtended3 = 93,
+        RaidFinderExtended3 = 94,
+        RaidHeroicExtended3 = 95,
+        RaidMythicExtended3 = 96,
+        TemplateCharacter1 = 97,
+        TemplateCharacter2 = 98,
+        TemplateCharacter3 = 99,
+        TemplateCharacter4 = 100,
 
         Max
     }
@@ -537,7 +587,13 @@ namespace Framework.Constants
         RangedRight = 26,
         Quiver = 27,
         Relic = 28,
-        Max = 29
+        ProfessionTool = 29,
+        ProfessionGear = 30,
+        EquipableSpellOffensive = 31,
+        EquipableSpellUtility = 32,
+        EquipableSpellDefensive = 33,
+        EquipableSpellMobility = 34,
+        Max
     }
 
     public enum VisibleEquipmentSlot
@@ -586,7 +642,8 @@ namespace Framework.Constants
         Glyph = 16,
         BattlePets = 17,
         WowToken = 18,
-        Max = 19
+        Profession = 19,
+        Max
     }
 
     public enum ItemSubClassConsumable
@@ -601,7 +658,7 @@ namespace Framework.Constants
         Bandage = 7,
         ConsumableOther = 8,
         VantusRune = 9,
-        Max = 10
+        Max
     }
 
     public enum ItemSubClassContainer
@@ -617,7 +674,8 @@ namespace Framework.Constants
         InscriptionContainer = 8,
         TackleContainer = 9,
         CookingContainer = 10,
-        Max = 11
+        ReagentContainer = 11,
+        Max
     }
 
     public enum ItemSubClassWeapon
@@ -664,7 +722,7 @@ namespace Framework.Constants
         Other = 9,
         MultipleStats = 10,
         ArtifactRelic = 11,
-        Max = 12
+        Max
     }
 
     public enum ItemSubClassArmor
@@ -681,14 +739,15 @@ namespace Framework.Constants
         Totem = 9,
         Sigil = 10,
         Relic = 11,
-        Max = 12
+        Max
     }
 
     public enum ItemSubClassReagent
     {
         Reagent = 0,
         Keystone = 1,
-        Max = 2
+        ContextToken = 2,
+        Max
     }
 
     public enum ItemSubClassProjectile
@@ -698,7 +757,7 @@ namespace Framework.Constants
         Arrow = 2,
         Bullet = 3,
         Thrown = 4,  // Obsolete
-        Max = 5
+        Max
     }
 
     public enum ItemSubClassTradeGoods
@@ -721,7 +780,9 @@ namespace Framework.Constants
         WeaponEnchantment = 15,
         Inscription = 16,
         ExplosivesDevices = 17,
-        Max = 18
+        OptionalReagent = 18,
+        FinishingReagent = 19,
+        Max
     }
 
     public enum ItemSubclassItemEnhancement
@@ -740,7 +801,8 @@ namespace Framework.Constants
         Weapon = 11,
         TwoHandedWeapon = 12,
         ShieldOffHand = 13,
-        Max = 14
+        Misc = 14,
+        Max
     }
 
     public enum ItemSubClassRecipe
@@ -804,7 +866,8 @@ namespace Framework.Constants
         Holiday = 3,
         Other = 4,
         Mount = 5,
-        Max = 6
+        MountEquipment = 6,
+        Max
     }
 
     public enum ItemSubClassGlyph
@@ -834,6 +897,25 @@ namespace Framework.Constants
     {
         WowToken = 0,
         Max = 1
+    }
+
+    public enum ItemSubclassPorfession
+    {
+        Blacksmithing = 0,
+        Leatherworking = 1,
+        Alchemy = 2,
+        Herbalism = 3,
+        Cooking = 4,
+        Mining = 5,
+        Tailoring = 6,
+        Engineering = 7,
+        Enchanting = 8,
+        Fishing = 9,
+        Skinning = 10,
+        Jewelcrafting = 11,
+        Inscription = 12,
+        Archaeology = 13,
+        Max
     }
 
     public enum ItemQuality
@@ -1144,6 +1226,11 @@ namespace Framework.Constants
         NotInNPE = 110,// Not available during the tutorial
         ItemCooldown = 111,// Item is not ready yet.
         NotInRatedBattleground = 112,// You can't do that in a rated battleground.
+        EquipableSpellsSlotsFull = 113,
+        CantBeRecrafted = 114,// You can't recraft that itemv
+        ReagentBagWrongSlot = 115,// Reagent Bags can only be placed in the reagent bag slot.
+        SlotOnlyReagentBag = 116,// Only Reagent Bags can be placed in the reagent bag slot.
+        ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.
     }
 
     public enum BuyResult

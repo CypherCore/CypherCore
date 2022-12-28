@@ -279,6 +279,93 @@ namespace Game
             }
         }
 
+        void LoadConditionalConditionalQuestDescription(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+                return;
+            }
+
+            QuestConditionalText text = ConditionalQuestDescription.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<int>(2));
+            if (text == null)
+            {
+                text = new();
+                ConditionalQuestDescription.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        void LoadConditionalConditionalRequestItemsText(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+                return;
+            }
+
+            QuestConditionalText text = ConditionalRequestItemsText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new();
+                ConditionalRequestItemsText.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        void LoadConditionalConditionalOfferRewardText(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+                return;
+            }
+
+            QuestConditionalText text = ConditionalOfferRewardText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new();
+                ConditionalOfferRewardText.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        void LoadConditionalConditionalQuestCompletionLog(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+                return;
+            }
+
+            QuestConditionalText text = ConditionalQuestCompletionLog.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new();
+                ConditionalQuestCompletionLog.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
         public uint XPValue(Player player)
         {
             if (player)
@@ -498,6 +585,20 @@ namespace Game
             response.Info.PortraitTurnInText = PortraitTurnInText;
             response.Info.PortraitTurnInName = PortraitTurnInName;
 
+            response.Info.ConditionalQuestDescription = ConditionalQuestDescription.Select(text =>
+            {
+                string content = text.Text[(int)Locale.enUS];
+                ObjectManager.GetLocaleString(text.Text, loc, ref content);
+                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
+            }).ToList();
+
+            response.Info.ConditionalQuestCompletionLog = ConditionalQuestCompletionLog.Select(text =>
+            {
+                string content = text.Text[(int)Locale.enUS];
+                ObjectManager.GetLocaleString(text.Text, loc, ref content);
+                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
+            }).ToList();
+
             if (loc != Locale.enUS)
             {
                 var questTemplateLocale = Global.ObjectMgr.GetQuestLocale(Id);
@@ -596,6 +697,7 @@ namespace Game
             response.Info.Expansion = Expansion;
             response.Info.ManagedWorldStateID = ManagedWorldStateID;
             response.Info.QuestSessionBonus = 0; //GetQuestSessionBonus(); // this is only sent while quest session is active
+            response.Info.QuestGiverCreatureID = 0; // only sent during npc interaction
 
             foreach (QuestObjective questObjective in Objectives)
             {
@@ -744,6 +846,12 @@ namespace Game
         public string PortraitTurnInName = "";
         public string QuestCompletionLog = "";
 
+        // quest_description_conditional
+        public List<QuestConditionalText> ConditionalQuestDescription = new();
+
+        // quest_completion_log_conditional
+        public List<QuestConditionalText> ConditionalQuestCompletionLog = new();
+
         // quest_detais table
         public uint[] DetailsEmote = new uint[SharedConst.QuestEmoteCount];
         public uint[] DetailsEmoteDelay = new uint[SharedConst.QuestEmoteCount];
@@ -755,10 +863,16 @@ namespace Game
         public uint EmoteOnIncompleteDelay;
         public string RequestItemsText = "";
 
+        // quest_request_items_conditional
+        public List<QuestConditionalText> ConditionalRequestItemsText = new();
+
         // quest_offer_reward table
         public int[] OfferRewardEmote = new int[SharedConst.QuestEmoteCount];
         public uint[] OfferRewardEmoteDelay = new uint[SharedConst.QuestEmoteCount];
         public string OfferRewardText = "";
+
+        // quest_offer_reward_conditional
+        public List<QuestConditionalText> ConditionalOfferRewardText = new();
 
         // quest_template_addon table (custom data)
         public uint MaxLevel { get; set; }
@@ -862,6 +976,13 @@ namespace Game
             SpellId = spellId;
             PlayerConditionId = playerConditionId;
         }
+    }
+
+    public class QuestConditionalText
+    {
+        public int PlayerConditionId;
+        public int QuestgiverCreatureId;
+        public StringArray Text = new((int)Locale.Total);
     }
 
     public class QuestObjective

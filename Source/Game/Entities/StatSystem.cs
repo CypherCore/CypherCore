@@ -1634,7 +1634,9 @@ namespace Game.Entities
                 0.9830f,  // Warlock
                 0.9830f,  // Monk
                 0.9720f,  // Druid
-                0.9830f   // Demon Hunter
+                0.9830f,  // Demon Hunter
+                0.9880f,  // Evoker
+                1.0f,     // Adventurer
             };
 
             //  1     1     k              cx
@@ -1670,7 +1672,9 @@ namespace Game.Entities
             0.0f,           // Warlock
             90.6425f,       // Monk
             0.0f,           // Druid
-            65.631440f      // Demon Hunter
+            65.631440f,     // Demon Hunter
+            0.0f,           // Evoker
+            0.0f,           // Adventurer
         };
 
         public void UpdateParryPercentage()
@@ -1708,7 +1712,9 @@ namespace Game.Entities
             150.375940f,    // Warlock
             145.560408f,    // Monk
             116.890707f,    // Druid
-            145.560408f     // Demon Hunter
+            145.560408f,    // Demon Hunter
+            145.560408f,    // Evoker
+            0.0f,           // Adventurer
         };
 
         public void UpdateDodgePercentage()

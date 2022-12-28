@@ -51,6 +51,7 @@ namespace Game.DataStorage
         public short WindSettingsID;
         public int ZmpFileDataID;
         public int WdtFileDataID;
+        public int NavigationMaxDistance;
         public uint[] Flags = new uint[3];
 
         // Helpers
@@ -98,6 +99,7 @@ namespace Game.DataStorage
                 case 1642:
                 case 1643:
                 case 2222:
+                case 2444:
                     return true;
                 default:
                     return false;
@@ -107,7 +109,7 @@ namespace Game.DataStorage
         public bool IsDynamicDifficultyMap() { return GetFlags().HasFlag(MapFlags.DynamicDifficulty); }
         public bool IsFlexLocking() { return GetFlags().HasFlag(MapFlags.FlexibleRaidLocking); }
         public bool IsGarrison() { return GetFlags().HasFlag(MapFlags.Garrison); }
-        public bool IsSplitByFaction() { return Id == 609 || Id == 2175; }
+        public bool IsSplitByFaction() { return Id == 609 || Id == 2175 || Id == 2570; }
 
         public MapFlags GetFlags() { return (MapFlags)Flags[0]; }
         public MapFlags2 GetFlags2() { return (MapFlags2)Flags[1]; }
@@ -213,6 +215,7 @@ namespace Game.DataStorage
         public uint ModSpellAuraID;
         public short ReqMapID;
         public int PlayerConditionID;
+        public int FlightCapabilityID;
     }
 
     public sealed class MountTypeXCapabilityRecord

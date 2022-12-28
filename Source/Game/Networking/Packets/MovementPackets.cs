@@ -106,6 +106,7 @@ namespace Game.Networking.Packets
             data.ReadBit(); // HeightChangeFailed
             data.ReadBit(); // RemoteTimeValid
             bool hasInertia = data.HasBit();
+            bool hasAdvFlying = data.HasBit();
 
             if (hasTransport)
                 ReadTransportInfo(data, ref movementInfo.transport);
@@ -113,11 +114,20 @@ namespace Game.Networking.Packets
             if (hasInertia)
             {
                 MovementInfo.Inertia inertia = new();
-                inertia.guid = data.ReadPackedGuid();
+                inertia.id = data.ReadInt32();
                 inertia.force = data.ReadPosition();
                 inertia.lifetime = data.ReadUInt32();
 
                 movementInfo.inertia = inertia;
+            }
+
+            if (hasAdvFlying)
+            {
+                MovementInfo.AdvFlying advFlying = new();
+
+                advFlying.forwardVelocity = data.ReadFloat();
+                advFlying.upVelocity = data.ReadFloat();
+                movementInfo.advFlying = advFlying;
             }
 
             if (hasFall)
@@ -146,6 +156,7 @@ namespace Game.Networking.Packets
             bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
             bool hasSpline = false; // todo 6.x send this infos
             bool hasInertia = movementInfo.inertia.HasValue;
+            bool hasAdvFlying = movementInfo.advFlying.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
             data.WriteUInt32((uint)movementInfo.GetMovementFlags());
@@ -176,6 +187,7 @@ namespace Game.Networking.Packets
             data.WriteBit(false); // HeightChangeFailed
             data.WriteBit(false); // RemoteTimeValid
             data.WriteBit(hasInertia);
+            data.WriteBit(hasAdvFlying);
             data.FlushBits();
 
             if (hasTransportData)
@@ -183,9 +195,15 @@ namespace Game.Networking.Packets
 
             if (hasInertia)
             {
-                data.WritePackedGuid(movementInfo.inertia.Value.guid);
+                data.WriteInt32(movementInfo.inertia.Value.id);
                 data.WriteXYZ(movementInfo.inertia.Value.force);
                 data.WriteUInt32(movementInfo.inertia.Value.lifetime);
+            }
+
+            if (hasAdvFlying)
+            {
+                data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
+                data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
             }
 
             if (hasFallData)
@@ -514,7 +532,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex = 0; // Unit movement packet index, incremented each time
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
         public float Speed = 1.0f;
     }
 
@@ -555,7 +573,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex = 0; // Unit movement packet index, incremented each time
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
     }
 
     public class TransferPending : ServerPacket
@@ -1167,6 +1185,12 @@ namespace Game.Networking.Packets
             public float InitVertSpeed;
         }
 
+        public class SpeedRange
+        {
+            public float Min;
+            public float Max;
+        }
+
         public class MoveStateChange
         {
             public MoveStateChange(ServerOpcodes messageId, uint sequenceIndex)
@@ -1180,12 +1204,13 @@ namespace Game.Networking.Packets
                 data.WriteUInt16((ushort)MessageID);
                 data.WriteUInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
+                data.WriteBit(SpeedRange != null);
                 data.WriteBit(KnockBack.HasValue);
                 data.WriteBit(VehicleRecID.HasValue);
                 data.WriteBit(CollisionHeight.HasValue);
                 data.WriteBit(@MovementForce != null);
                 data.WriteBit(MovementForceGUID.HasValue);
-                data.WriteBit(MovementInertiaGUID.HasValue);
+                data.WriteBit(MovementInertiaID.HasValue);
                 data.WriteBit(MovementInertiaLifetimeMs.HasValue);
                 data.FlushBits();
 
@@ -1194,6 +1219,12 @@ namespace Game.Networking.Packets
 
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
+
+                if (SpeedRange != null)
+                {
+                    data.WriteFloat(SpeedRange.Min);
+                    data.WriteFloat(SpeedRange.Max);
+                }
 
                 if (KnockBack.HasValue)
                 {
@@ -1216,8 +1247,8 @@ namespace Game.Networking.Packets
                 if (MovementForceGUID.HasValue)
                     data.WritePackedGuid(MovementForceGUID.Value);
 
-                if (MovementInertiaGUID.HasValue)
-                    data.WritePackedGuid(MovementInertiaGUID.Value);
+                if (MovementInertiaID.HasValue)
+                    data.WriteInt32(MovementInertiaID.Value);
 
                 if (MovementInertiaLifetimeMs.HasValue)
                     data.WriteUInt32(MovementInertiaLifetimeMs.Value);
@@ -1226,12 +1257,13 @@ namespace Game.Networking.Packets
             public ServerOpcodes MessageID;
             public uint SequenceIndex;
             public float? Speed;
+            public SpeedRange SpeedRange;
             public KnockBackInfo? KnockBack;
             public int? VehicleRecID;
             public CollisionHeightInfo? CollisionHeight;
             public MovementForce MovementForce;
             public ObjectGuid? MovementForceGUID;
-            public ObjectGuid? MovementInertiaGUID;
+            public int? MovementInertiaID;
             public uint? MovementInertiaLifetimeMs;
         }
     }

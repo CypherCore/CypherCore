@@ -296,7 +296,7 @@ namespace Game.Entities
 
             // original items
             foreach (PlayerCreateInfoItem initialItem in info.item)
-                StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount);
+                StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount, info.itemContext);
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -685,7 +685,7 @@ namespace Game.Entities
 
             if (target == this)
             {
-                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -693,23 +693,7 @@ namespace Game.Entities
                     m_items[i].DestroyForPlayer(target);
                 }
 
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -2329,7 +2313,7 @@ namespace Game.Entities
                 {
                     switch (gossipMenuItem.OptionNpc)
                     {
-                        case GossipOptionNpc.TaxiNode:
+                        case GossipOptionNpc.Taxinode:
                             if (GetSession().SendLearnNewTaxiNode(creature))
                                 return;
                             break;
@@ -2337,7 +2321,7 @@ namespace Game.Entities
                             if (!IsDead())
                                 canTalk = false;
                             break;
-                        case GossipOptionNpc.BattleMaster:
+                        case GossipOptionNpc.Battlemaster:
                             if (!creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
@@ -2347,7 +2331,7 @@ namespace Game.Entities
                             if (!creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
-                        case GossipOptionNpc.StableMaster:
+                        case GossipOptionNpc.Stablemaster:
                         case GossipOptionNpc.PetSpecializationMaster:
                             if (GetClass() != Class.Hunter)
                                 canTalk = false;
@@ -2376,32 +2360,32 @@ namespace Game.Entities
                             canTalk = false;                               // Deprecated
                             break;
                         case GossipOptionNpc.GuildBanker:
-                        case GossipOptionNpc.SpellClick:
-                        case GossipOptionNpc.WorldPVPQueue:
+                        case GossipOptionNpc.Spellclick:
+                        case GossipOptionNpc.WorldPvPQueue:
                         case GossipOptionNpc.LFGDungeon:
                         case GossipOptionNpc.ArtifactRespec:
                         case GossipOptionNpc.QueueScenario:
                         case GossipOptionNpc.GarrisonArchitect:
-                        case GossipOptionNpc.GarrisonMission:
+                        case GossipOptionNpc.GarrisonMissionNpc:
                         case GossipOptionNpc.ShipmentCrafter:
-                        case GossipOptionNpc.GarrisonTradeskill:
+                        case GossipOptionNpc.GarrisonTradeskillNpc:
                         case GossipOptionNpc.GarrisonRecruitment:
                         case GossipOptionNpc.AdventureMap:
                         case GossipOptionNpc.GarrisonTalent:
                         case GossipOptionNpc.ContributionCollector:
-                        case GossipOptionNpc.IslandsMission:
+                        case GossipOptionNpc.IslandsMissionNpc:
                         case GossipOptionNpc.UIItemInteraction:
                         case GossipOptionNpc.WorldMap:
                         case GossipOptionNpc.Soulbind:
-                        case GossipOptionNpc.ChromieTime:
-                        case GossipOptionNpc.CovenantPreview:
+                        case GossipOptionNpc.ChromieTimeNpc:
+                        case GossipOptionNpc.CovenantPreviewNpc:
                         case GossipOptionNpc.RuneforgeLegendaryCrafting:
                         case GossipOptionNpc.NewPlayerGuide:
                         case GossipOptionNpc.RuneforgeLegendaryUpgrade:
-                        case GossipOptionNpc.CovenantRenown:
+                        case GossipOptionNpc.CovenantRenownNpc:
                             break;                                         // NYI
                         default:
-                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuId}.");
+                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuID}.");
                             canTalk = false;
                             break;
                     }
@@ -2421,45 +2405,7 @@ namespace Game.Entities
                 }
 
                 if (canTalk)
-                {
-                    string strOptionText;
-                    string strBoxText;
-                    BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.OptionBroadcastTextId);
-                    BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.BoxBroadcastTextId);
-                    Locale locale = GetSession().GetSessionDbLocaleIndex();
-
-                    if (optionBroadcastText != null)
-                        strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, locale, GetGender());
-                    else
-                        strOptionText = gossipMenuItem.OptionText;
-
-                    if (boxBroadcastText != null)
-                        strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, locale, GetGender());
-                    else
-                        strBoxText = gossipMenuItem.BoxText;
-
-                    if (locale != Locale.enUS)
-                    {
-                        if (optionBroadcastText == null)
-                        {
-                            // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
-                            if (gossipMenuLocale != null)
-                                ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
-                        }
-
-                        if (boxBroadcastText == null)
-                        {
-                            // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
-                            if (gossipMenuLocale != null)
-                                ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
-                        }
-                    }
-
-                    menu.GetGossipMenu().AddMenuItem((int)gossipMenuItem.OptionId, gossipMenuItem.OptionNpc, strOptionText, 0, (uint)gossipMenuItem.OptionNpc, strBoxText, gossipMenuItem.BoxMoney, gossipMenuItem.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(gossipMenuItem.OptionId, gossipMenuItem.ActionMenuId, gossipMenuItem.ActionPoiId);
-                }
+                    menu.GetGossipMenu().AddMenuItem(gossipMenuItem, gossipMenuItem.MenuID, gossipMenuItem.OrderIndex);
             }
         }
         public void SendPreparedGossip(WorldObject source)
@@ -2486,7 +2432,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
-        public void OnGossipSelect(WorldObject source, uint gossipListId, uint menuId)
+        public void OnGossipSelect(WorldObject source, int gossipOptionId, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
 
@@ -2494,7 +2440,7 @@ namespace Game.Entities
             if (menuId != gossipMenu.GetMenuId())
                 return;
 
-            GossipMenuItem item = gossipMenu.GetItem(gossipListId);
+            GossipMenuItem item = gossipMenu.GetItem(gossipOptionId);
             if (item == null)
                 return;
 
@@ -2510,10 +2456,6 @@ namespace Game.Entities
                 }
             }
 
-            GossipMenuItemData menuItemData = gossipMenu.GetItemData(gossipListId);
-            if (menuItemData == null)
-                return;
-
             long cost = item.BoxMoney;
             if (!HasEnoughMoney(cost))
             {
@@ -2522,51 +2464,37 @@ namespace Game.Entities
                 return;
             }
 
+            if (item.ActionPoiID != 0)
+                PlayerTalkClass.SendPointOfInterest(item.ActionPoiID);
+
+            if (item.ActionMenuID != 0)
+            {
+                PrepareGossipMenu(source, item.ActionMenuID);
+                SendPreparedGossip(source);
+            }
+
+            // types that have their dedicated open opcode dont send WorldPackets::NPC::GossipOptionNPCInteraction
+            bool handled = true;
             switch (gossipOptionNpc)
             {
-                case GossipOptionNpc.None:
-                {
-                    if (menuItemData.GossipActionPoi != 0)
-                        PlayerTalkClass.SendPointOfInterest(menuItemData.GossipActionPoi);
-
-                    if (menuItemData.GossipActionMenuId != 0)
-                    {
-                        PrepareGossipMenu(source, menuItemData.GossipActionMenuId);
-                        SendPreparedGossip(source);
-                    }
-
-                    break;
-                }
                 case GossipOptionNpc.Vendor:
                     GetSession().SendListInventory(guid);
                     break;
-                case GossipOptionNpc.TaxiNode:
+                case GossipOptionNpc.Taxinode:
                     GetSession().SendTaxiMenu(source.ToCreature());
                     break;
                 case GossipOptionNpc.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, gossipListId));
+                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, (uint)gossipOptionId));
                     break;
                 case GossipOptionNpc.SpiritHealer:
-                    if (IsDead())
-                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCaster(GetGUID()));
-                    break;
-                case GossipOptionNpc.Binder:
-                    PlayerTalkClass.SendCloseGossip();
-                    SetBindPoint(guid);
-                    break;
-                case GossipOptionNpc.Banker:
-                    GetSession().SendShowBank(guid);
+                    source.CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));
+                    handled = false;
                     break;
                 case GossipOptionNpc.PetitionVendor:
                     PlayerTalkClass.SendCloseGossip();
                     GetSession().SendPetitionShowList(guid);
                     break;
-                case GossipOptionNpc.TabardVendor:
-                    PlayerTalkClass.SendCloseGossip();
-                    GetSession().SendTabardVendorActivate(guid);
-                    break;
-                case GossipOptionNpc.BattleMaster:
+                case GossipOptionNpc.Battlemaster:
                 {
                     BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
 
@@ -2586,12 +2514,24 @@ namespace Game.Entities
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
                     break;
-                case GossipOptionNpc.StableMaster:
+                case GossipOptionNpc.Stablemaster:
                     GetSession().SendStablePet(guid);
                     break;
                 case GossipOptionNpc.PetSpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
+                    break;
+                case GossipOptionNpc.GuildBanker:
+                    Guild guild = GetGuild();
+                    if (guild != null)
+                        guild.SendBankList(GetSession(), 0, true);
+                    else
+                        Guild.SendCommandResult(GetSession(), GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
+                    break;
+                case GossipOptionNpc.Spellclick:
+                    Unit sourceUnit = source.ToUnit();
+                    if (sourceUnit != null)
+                        sourceUnit.HandleSpellClick(this);
                     break;
                 case GossipOptionNpc.DisableXPGain:
                     PlayerTalkClass.SendCloseGossip();
@@ -2603,9 +2543,6 @@ namespace Game.Entities
                     RemoveAurasDueToSpell(PlayerConst.SpellExperienceEliminated);
                     RemovePlayerFlag(PlayerFlags.NoXPGain);
                     break;
-                case GossipOptionNpc.Mailbox:
-                    GetSession().SendShowMailBox(guid);
-                    break;
                 case GossipOptionNpc.SpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, 0, SpecResetType.Specialization);
@@ -2614,22 +2551,74 @@ namespace Game.Entities
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, 0, SpecResetType.Glyphs);
                     break;
-                case GossipOptionNpc.GarrisonTalent:
+                case GossipOptionNpc.GarrisonTradeskillNpc: // NYI
+                    break;
+                case GossipOptionNpc.GarrisonRecruitment: // NYI
+                    break;
+                case GossipOptionNpc.ChromieTimeNpc: // NYI
+                    break;
+                case GossipOptionNpc.RuneforgeLegendaryCrafting: // NYI
+                    break;
+                case GossipOptionNpc.RuneforgeLegendaryUpgrade: // NYI
+                    break;
+                case GossipOptionNpc.ProfessionsCraftingOrder: // NYI
+                    break;
+                case GossipOptionNpc.ProfessionsCustomerOrder: // NYI
+                    break;
+                case GossipOptionNpc.BarbersChoice: // NYI - unknown if needs sending
+                default:
+                    handled = false;
+                    break;
+            }
+
+            if (!handled)
+            {
+                if (item.GossipNpcOptionID.HasValue)
                 {
                     GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(menuId);
-                    GossipMenuItemAddon itemAddon = Global.ObjectMgr.GetGossipMenuItemAddon(menuId, gossipListId);
-                    SendGarrisonOpenTalentNpc(guid, itemAddon != null ? itemAddon.GarrTalentTreeID.GetValueOrDefault(0) : 0, addon != null ? addon.FriendshipFactionID : 0);
-                    break;
+
+                    GossipOptionNPCInteraction npcInteraction = new();
+                    npcInteraction.GossipGUID = source.GetGUID();
+                    npcInteraction.GossipNpcOptionID = item.GossipNpcOptionID.Value;
+                    if (addon != null && addon.FriendshipFactionID != 0)
+                        npcInteraction.FriendshipFactionID = addon.FriendshipFactionID;
+
+                    SendPacket(npcInteraction);
                 }
-                case GossipOptionNpc.Transmogrify:
-                    GetSession().SendOpenTransmogrifier(guid);
-                    break;
-                case GossipOptionNpc.AzeriteRespec:
-                    PlayerTalkClass.SendCloseGossip();
-                    GetSession().SendAzeriteRespecNPC(guid);
-                    break;
-                default:
-                    break;
+                else
+                {
+                    PlayerInteractionType[] GossipOptionNpcToInteractionType =
+                    {
+                        PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
+                        PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
+                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.TabardVendor,
+                        PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
+                        PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
+                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
+                        PlayerInteractionType.MailInfo, PlayerInteractionType.None, PlayerInteractionType.LFGDungeon,
+                        PlayerInteractionType.ArtifactForge, PlayerInteractionType.None, PlayerInteractionType.SpecializationMaster,
+                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.GarrArchitect,
+                        PlayerInteractionType.GarrMission, PlayerInteractionType.ShipmentCrafter, PlayerInteractionType.GarrTradeskill,
+                        PlayerInteractionType.GarrRecruitment, PlayerInteractionType.AdventureMap, PlayerInteractionType.GarrTalent,
+                        PlayerInteractionType.ContributionCollector, PlayerInteractionType.Transmogrifier, PlayerInteractionType.AzeriteRespec,
+                        PlayerInteractionType.IslandQueue, PlayerInteractionType.ItemInteraction, PlayerInteractionType.WorldMap,
+                        PlayerInteractionType.Soulbind, PlayerInteractionType.ChromieTime, PlayerInteractionType.CovenantPreview,
+                        PlayerInteractionType.LegendaryCrafting, PlayerInteractionType.NewPlayerGuide, PlayerInteractionType.LegendaryCrafting,
+                        PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
+                        PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
+                        PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown
+                    };
+
+                    PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
+                    if (interactionType != PlayerInteractionType.None)
+                    {
+                        NPCInteractionOpenResult npcInteraction = new();
+                        npcInteraction.Npc = source.GetGUID();
+                        npcInteraction.InteractionType = interactionType;
+                        npcInteraction.Success = true;
+                        SendPacket(npcInteraction);
+                    }
+                }
             }
 
             ModifyMoney(-cost);
@@ -2916,8 +2905,11 @@ namespace Game.Entities
         }
         public void SetBindPoint(ObjectGuid guid)
         {
-            BinderConfirm packet = new(guid);
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Binder;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
         public void SendBindPointUpdate()
         {
@@ -4021,7 +4013,7 @@ namespace Game.Entities
             corpse.SetDisplayId(GetNativeDisplayId());
             corpse.SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(GetRace()).FactionID);
 
-            for (byte i = 0; i < EquipmentSlot.End; i++)
+            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
             {
                 if (m_items[i] != null)
                 {
@@ -6240,7 +6232,6 @@ namespace Game.Entities
             packet.Reason = victim ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
             packet.Amount = (int)xp;
             packet.GroupBonus = group_rate;
-            packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
             uint nextLvlXP = GetXPForNextLevel();
@@ -7238,7 +7229,7 @@ namespace Game.Entities
         {
             if (target == this)
             {
-                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -7246,23 +7237,7 @@ namespace Game.Entities
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
                 }
 
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -7392,9 +7367,18 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void AddGossipItem(GossipOptionNpc icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
-        public void AddGossipItem(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
-        public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionNpc icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action) 
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, false, 0, "", null, null, sender, action);
+        }
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded) 
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, coded, popupMoney, popupText, null, null, sender, action);
+        }
+        public void AddGossipItem(uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
+        }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)
         public void SendGossipMenu(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }

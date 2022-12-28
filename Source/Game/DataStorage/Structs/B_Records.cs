@@ -47,6 +47,7 @@ namespace Game.DataStorage
     public sealed class BattlePetBreedQualityRecord
     {
         public uint Id;
+        public int MaxQualityRoll;
         public float StateMultiplier;
         public sbyte QualityEnum;
     }
@@ -68,7 +69,7 @@ namespace Game.DataStorage
         public uint SummonSpellID;
         public int IconFileDataID;
         public sbyte PetTypeEnum;
-        public ushort Flags;
+        public int Flags;
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
@@ -96,8 +97,8 @@ namespace Game.DataStorage
         public byte MinLevel;
         public byte MaxLevel;
         public sbyte RatedPlayers;
-        public byte MinPlayers;
-        public byte MaxPlayers;
+        public sbyte MinPlayers;
+        public int MaxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
         public ushort HolidayWorldState;

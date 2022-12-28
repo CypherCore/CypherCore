@@ -164,6 +164,7 @@ namespace Game.DataStorage
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
             GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
+            GossipNPCOptionStorage = ReadDB2<GossipNPCOptionRecord>("GossipNPCOption.db2", HotfixStatements.SEL_GOSSIP_NPC_OPTION);
             GuildColorBackgroundStorage = ReadDB2<GuildColorBackgroundRecord>("GuildColorBackground.db2", HotfixStatements.SEL_GUILD_COLOR_BACKGROUND);
             GuildColorBorderStorage = ReadDB2<GuildColorBorderRecord>("GuildColorBorder.db2", HotfixStatements.SEL_GUILD_COLOR_BORDER);
             GuildColorEmblemStorage = ReadDB2<GuildColorEmblemRecord>("GuildColorEmblem.db2", HotfixStatements.SEL_GUILD_COLOR_EMBLEM);
@@ -401,13 +402,13 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(14083) ||               // last area added in 9.2.7 (45114)
-                !CharTitlesStorage.ContainsKey(727) ||                // last char title added in 9.2.7 (45114)
-                !GemPropertiesStorage.ContainsKey(3922) ||            // last gem property added in 9.2.7 (45114)
-                !ItemStorage.ContainsKey(199202) ||                   // last item added in 9.2.7 (45114)
-                !ItemExtendedCostStorage.ContainsKey(7316) ||         // last item extended cost added in 9.2.7 (45114)
-                !MapStorage.ContainsKey(2559) ||                      // last map added in 9.2.7 (45114)
-                !SpellNameStorage.ContainsKey(387936))                // last spell added in 9.2.7 (45114)
+            if (!CliDB.AreaTableStorage.ContainsKey(14618) ||               // last area added in 10.0.2 (46741)
+                !CliDB.CharTitlesStorage.ContainsKey(749) ||                // last char title added in 10.0.2 (46741)
+                !CliDB.GemPropertiesStorage.ContainsKey(4028) ||            // last gem property added in 10.0.2 (46741)
+                !CliDB.ItemStorage.ContainsKey(202712) ||                   // last item added in 10.0.2 (46741)
+                !CliDB.ItemExtendedCostStorage.ContainsKey(7862) ||         // last item extended cost added in 10.0.2 (46741)
+                !CliDB.MapStorage.ContainsKey(2582) ||                      // last map added in 10.0.2 (46741)
+                !CliDB.SpellNameStorage.ContainsKey(399311))                // last spell added in 10.0.2 (46741)
             {
                 Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
@@ -562,6 +563,7 @@ namespace Game.DataStorage
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
         public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
         public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
+        public static DB6Storage<GossipNPCOptionRecord> GossipNPCOptionStorage;
         public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage;
         public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage;
         public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage;
@@ -799,6 +801,10 @@ namespace Game.DataStorage
                     return row.Druid;
                 case Class.DemonHunter:
                     return row.DemonHunter;
+                case Class.Evoker:
+                    return row.Evoker;
+                case Class.Adventurer:
+                    return row.Adventurer;
                 default:
                     break;
             }
@@ -834,6 +840,10 @@ namespace Game.DataStorage
                     return row.Druid;
                 case (int)Class.DemonHunter:
                     return row.DemonHunter;
+                case (int)Class.Evoker:
+                    return row.Evoker;
+                case (int)Class.Adventurer:
+                    return row.Adventurer;
                 case -1:
                 case -7:
                     return row.Item;
@@ -851,6 +861,8 @@ namespace Game.DataStorage
                     return row.DamageReplaceStat;
                 case -9:
                     return row.DamageSecondary;
+                case -10:
+                    return row.ManaConsumable;
                 default:
                     break;
             }

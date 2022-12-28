@@ -514,20 +514,25 @@ namespace Game.Spells
             }
         }
 
-        public void ModifySpellCooldown(uint spellId, TimeSpan offset, bool withoutCategoryCooldown = false)
+        public void ModifySpellCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
-            if (offset.TotalMilliseconds == 0 || cooldownEntry == null)
+            if (cooldownMod.TotalMilliseconds == 0 || cooldownEntry == null)
                 return;
 
+            ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
+        }
+
+        void ModifySpellCooldown(CooldownEntry cooldownEntry, TimeSpan cooldownMod, bool withoutCategoryCooldown)
+        {
             DateTime now = GameTime.GetSystemTime();
 
-            cooldownEntry.CooldownEnd += offset;
+            cooldownEntry.CooldownEnd += cooldownMod;
 
             if (cooldownEntry.CategoryId != 0)
             {
                 if (!withoutCategoryCooldown)
-                    cooldownEntry.CategoryEnd += offset;
+                    cooldownEntry.CategoryEnd += cooldownMod;
 
                 // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
                 if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
@@ -535,9 +540,9 @@ namespace Game.Spells
             }
 
             if (cooldownEntry.CooldownEnd <= now)
-            {
+            {                
                 _categoryCooldowns.Remove(cooldownEntry.CategoryId);
-                _spellCooldowns.Remove(spellId);
+                _spellCooldowns.Remove(cooldownEntry.SpellId);
             }
 
             Player playerOwner = GetPlayerOwner();
@@ -545,8 +550,8 @@ namespace Game.Spells
             {
                 ModifyCooldown modifyCooldown = new();
                 modifyCooldown.IsPet = _owner != playerOwner;
-                modifyCooldown.SpellID = spellId;
-                modifyCooldown.DeltaTime = (int)offset.TotalMilliseconds;
+                modifyCooldown.SpellID = cooldownEntry.SpellId;
+                modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
                 modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
                 playerOwner.SendPacket(modifyCooldown);
             }
@@ -569,7 +574,16 @@ namespace Game.Spells
             else
                 ModifySpellCooldown(spellInfo.Id, cooldownMod, withoutCategoryCooldown);
         }
-        
+
+        public void ModifyCoooldowns(Func<CooldownEntry, bool> predicate, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
+        {
+            foreach (var cooldownEntry in _spellCooldowns.Values.ToList())
+            {
+                if (predicate(cooldownEntry))
+                    ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
+            }
+        }
+
         public void ResetCooldown(uint spellId, bool update = false)
         {
             var entry = _spellCooldowns.LookupByKey(spellId);
@@ -633,6 +647,9 @@ namespace Game.Spells
         public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0)
         {
             if (_spellCooldowns.ContainsKey(spellInfo.Id))
+                return true;
+
+            if (spellInfo.CooldownAuraSpellId != 0 && _owner.HasAura(spellInfo.CooldownAuraSpellId))
                 return true;
 
             uint category = 0;

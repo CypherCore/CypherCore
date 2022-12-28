@@ -860,12 +860,12 @@ namespace Game.BattleGrounds
 
         public ushort GetMinPlayersPerTeam()
         {
-            return BattlemasterEntry.MinPlayers;
+            return (ushort)BattlemasterEntry.MinPlayers;
         }
 
         public ushort GetMaxPlayersPerTeam()
         {
-            return BattlemasterEntry.MaxPlayers;
+            return (ushort)BattlemasterEntry.MaxPlayers;
         }
 
         public byte GetMinLevel()

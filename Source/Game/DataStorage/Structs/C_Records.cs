@@ -44,8 +44,8 @@ namespace Game.DataStorage
         public uint Id;
         public long RaceMask;
         public sbyte ChrClassID;
-        public sbyte Purpose;
-        public sbyte Unused910;
+        public int Purpose;
+        public sbyte ItemContext;
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -131,6 +131,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationReqID;
+        public int ChrCustomizationVisReqID;
         public ushort SortOrder;
         public ushort UiOrderIndex;
         public int Flags;
@@ -159,6 +160,7 @@ namespace Game.DataStorage
         public int ChrCustomizationCondModelID;
         public int ChrCustomizationDisplayInfoID;
         public int ChrCustItemGeoModifyID;
+        public int ChrCustomizationVoiceID;
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -181,9 +183,11 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationReqRecord
     {
         public uint Id;
+        public string ReqSource;
         public int Flags;
         public int ClassMask;
         public int AchievementID;
+        public int QuestID;
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
         public uint ItemModifiedAppearanceID;
 
@@ -223,6 +227,8 @@ namespace Game.DataStorage
         public uint Id;
         public int ChrRacesID;
         public int ChrModelID;
+        public int Sex;
+        public int AllowedTransmogSlots;
     }
 
     public sealed class ChrRacesRecord
@@ -273,6 +279,7 @@ namespace Game.DataStorage
         public float AlteredFormCustomizeRotationFallback;
         public float[] Unknown910_1 = new float[3];
         public float[] Unknown910_2 = new float[3];
+        public int Unknown1000;
         public sbyte BaseLanguage;
         public sbyte CreatureType;
         public sbyte MaleModelFallbackSex;
@@ -312,7 +319,7 @@ namespace Game.DataStorage
         public uint SoundID;                                         // Sound ID       (voiceover for cinematic)
         public float OriginFacing;                                     // Orientation in map used for basis for M2 co
         public uint FileDataID;                                      // Model
-        public int Unknown915;
+        public uint ConversationID;
     }
 
     public sealed class CinematicSequencesRecord
@@ -409,7 +416,7 @@ namespace Game.DataStorage
         public sbyte Gender;
         public int DissolveOutEffectID;
         public sbyte CreatureModelMinLod;
-        public int[] TextureVariationFileDataID = new int[3];
+        public int[] TextureVariationFileDataID = new int[4];
     }
 
     public sealed class CreatureDisplayInfoExtraRecord
@@ -542,6 +549,8 @@ namespace Game.DataStorage
         public int XpQuestDifficulty;
         public int AwardConditionID;
         public int MaxQtyWorldStateID;
+        public uint RechargingAmountPerCycle;
+        public uint RechargingCycleDurationMS;
         public int[] Flags = new int[2];
     }
 
@@ -554,9 +563,9 @@ namespace Game.DataStorage
 
     public sealed class CurvePointRecord
     {
-        public uint Id;
         public Vector2 Pos;
         public Vector2 PreSLSquishPos;
+        public uint Id;
         public ushort CurveID;
         public byte OrderIndex;
     }

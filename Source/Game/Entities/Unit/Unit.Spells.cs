@@ -301,6 +301,11 @@ namespace Game.Entities
                     {
                         return aurEff.GetCasterGUID() == caster.GetGUID() && aurEff.IsAffectingSpell(spellProto);
                     });
+
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageTakenFromCasterByLabel, aurEff =>
+                    {
+                        return aurEff.GetCasterGUID() == caster.GetGUID() && spellProto.HasLabel((uint)aurEff.GetMiscValue());
+                    });
                 }
 
                 if (damagetype == DamageEffectType.DOT)

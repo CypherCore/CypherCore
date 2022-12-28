@@ -164,6 +164,7 @@ namespace Framework.Constants
         ArcaneCharges,
         Fury,
         Pain,
+        Essence,
         Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
@@ -183,7 +184,7 @@ namespace Framework.Constants
         ResistanceStart = Armor,
         ResistanceEnd = ResistanceArcane + 1,
         PowerStart = Mana,
-        PowerEnd = Pain + 1
+        PowerEnd = Essence + 1
     }
     public enum UnitModifierFlatType
     {

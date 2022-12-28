@@ -33,21 +33,6 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class BlackMarketOpenResult : ServerPacket
-    {
-        public BlackMarketOpenResult() : base(ServerOpcodes.BlackMarketOpenResult) { }
-
-        public override void Write()
-        {
-            _worldPacket .WritePackedGuid(Guid);
-            _worldPacket.WriteBit(Enable);
-            _worldPacket.FlushBits();
-        }
-
-        public ObjectGuid Guid;
-        public bool Enable = true;
-    }
-
     class BlackMarketRequestItems : ClientPacket
     {
         public BlackMarketRequestItems(WorldPacket packet) : base(packet) { }

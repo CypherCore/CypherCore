@@ -808,8 +808,8 @@ namespace Game
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
                     gemData[i].Context = (byte)gem.m_itemData.Context;
-                    for (int b = 0; b < ((List<uint>)gem.m_itemData.BonusListIDs).Count && b < 16; ++b)
-                        gemData[i].BonusListIDs[b] = (ushort)((List<uint>)gem.m_itemData.BonusListIDs)[b];
+                    for (int b = 0; b < gem.GetBonusListIDs().Count && b < 16; ++b)
+                        gemData[i].BonusListIDs[b] = (ushort)gem.GetBonusListIDs()[b];
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());
                 }

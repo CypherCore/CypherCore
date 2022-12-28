@@ -69,21 +69,6 @@ namespace Game.Networking.Packets
         public List<uint> NewAppearances = new();
     }
 
-    class TransmogrifyNPC : ServerPacket
-    {
-        public TransmogrifyNPC(ObjectGuid guid) : base(ServerOpcodes.TransmogrifyNpc, ConnectionType.Instance)
-        {
-            Guid = guid;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Guid);
-        }
-
-        ObjectGuid Guid;
-    }
-
     struct TransmogrifyItem
     {
         public void Read(WorldPacket data)

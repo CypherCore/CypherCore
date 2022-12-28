@@ -29,8 +29,10 @@ namespace Game.DataStorage
         public ushort ParentFactionID;
         public byte Expansion;
         public uint FriendshipRepID;
-        public byte Flags;
+        public int Flags;
         public ushort ParagonFactionID;
+        public int RenownFactionID;
+        public int RenownCurrencyID;
         public short[] ReputationClassMask = new short[4];
         public ushort[] ReputationFlags = new ushort[4];
         public int[] ReputationBase = new int[4];
@@ -47,14 +49,16 @@ namespace Game.DataStorage
 
     public sealed class FactionTemplateRecord
     {
+        static int MAX_FACTION_RELATIONS = 8;
+
         public uint Id;
         public ushort Faction;
         public ushort Flags;
         public byte FactionGroup;
         public byte FriendGroup;
         public byte EnemyGroup;
-        public ushort[] Enemies = new ushort[4];
-        public ushort[] Friend = new ushort[4];
+        public ushort[] Enemies = new ushort[MAX_FACTION_RELATIONS];
+        public ushort[] Friend = new ushort[MAX_FACTION_RELATIONS];
 
         // helpers
         public bool IsFriendlyTo(FactionTemplateRecord entry)
@@ -64,10 +68,10 @@ namespace Game.DataStorage
 
             if (entry.Faction != 0)
             {
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
                     if (Enemies[i] == entry.Faction)
                         return false;
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
                     if (Friend[i] == entry.Faction)
                         return true;
             }
@@ -80,10 +84,10 @@ namespace Game.DataStorage
 
             if (entry.Faction != 0)
             {
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
                     if (Enemies[i] == entry.Faction)
                         return true;
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
                     if (Friend[i] == entry.Faction)
                         return false;
             }
@@ -92,7 +96,7 @@ namespace Game.DataStorage
         public bool IsHostileToPlayers() { return (EnemyGroup & (byte)FactionMasks.Player) != 0; }
         public bool IsNeutralToAll()
         {
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
                 if (Enemies[i] != 0)
                     return false;
             return EnemyGroup == 0 && FriendGroup == 0;

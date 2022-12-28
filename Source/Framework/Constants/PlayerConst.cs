@@ -21,7 +21,7 @@ namespace Framework.Constants
 {
     public struct PlayerConst
     {
-        public const Expansion CurrentExpansion = Expansion.ShadowLands;
+        public const Expansion CurrentExpansion = Expansion.Dragonflight;
 
         public const int MaxTalentTiers = 7;
         public const int MaxTalentColumns = 3;
@@ -35,7 +35,7 @@ namespace Framework.Constants
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 192;
         public const ulong MaxMoneyAmount = 99999999999UL;
-        public const int MaxActionButtons = 132;
+        public const int MaxActionButtons = 180;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 
         public const int MaxDailyQuests = 25;
@@ -54,8 +54,6 @@ namespace Framework.Constants
 
         public const int MaxRunes = 7;
         public const int MaxRechargingRunes = 3;
-
-        public const int CustomDisplaySize = 3;
 
         public const int ArtifactsAllWeaponsGeneralWeaponEquippedPassive = 197886;
 
@@ -152,7 +150,9 @@ namespace Framework.Constants
         Com = 0x08, // Commentator
         Dev = 0x10,
         BossSound = 0x20, // Plays "RaidBossEmoteWarning" sound on raid boss emote/whisper
-        Mobile = 0x40
+        Mobile = 0x40,
+        Guide = 0x1000,
+        Newcomer = 0x2000
     }
 
     public enum DrunkenState
@@ -558,7 +558,7 @@ namespace Framework.Constants
         // first slot for item stored (in any way in player items data)
         Start = 0,
         // last+1 slot for item stored (in any way in player items data)
-        End = 199,
+        End = 218,
         Count = (End - Start)
     }
 
@@ -753,7 +753,9 @@ namespace Framework.Constants
         FailedAffectingCombat = 5,
         FailedCantRemoveTalent = 6,
         FailedCantDoThatChallengeModeActive = 7,
-        FailedRestArea = 8
+        FailedRestArea = 8,
+        UnspentTalentPoints = 9,
+        InPvpMatch = 10
     }
 
     public enum TutorialsFlag

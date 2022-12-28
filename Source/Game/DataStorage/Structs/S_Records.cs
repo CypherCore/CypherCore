@@ -97,6 +97,8 @@ namespace Game.DataStorage
         public int ParentTierIndex;
         public ushort Flags;
         public int SpellBookSpellID;
+        public int ExpansionNameSharedStringID;
+        public int HordeExpansionNameSharedStringID;
 
         public SkillLineFlags GetFlags() => (SkillLineFlags)Flags;
     }
@@ -104,6 +106,8 @@ namespace Game.DataStorage
     public sealed class SkillLineAbilityRecord
     {
         public long RaceMask;
+        public string AbilityVerb;
+        public string AbilityAllVerb;
         public uint Id;
         public ushort SkillLine;
         public uint Spell;
@@ -146,7 +150,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint SoundType;
         public float VolumeFloat;
-        public ushort Flags;
+        public int Flags;
         public float MinDistance;
         public float DistanceCutoff;
         public byte EAXDef;
@@ -159,6 +163,7 @@ namespace Game.DataStorage
         public float PitchAdjust;
         public ushort BusOverwriteID;
         public byte MaxInstances;
+        public uint SoundMixGroupID;
     }
 
     public sealed class SpecializationSpellsRecord
@@ -194,15 +199,19 @@ namespace Game.DataStorage
     public sealed class SpellAuraRestrictionsRecord
     {
         public uint Id;
-        public byte DifficultyID;
-        public byte CasterAuraState;
-        public byte TargetAuraState;
-        public byte ExcludeCasterAuraState;
-        public byte ExcludeTargetAuraState;
+        public uint DifficultyID;
+        public int CasterAuraState;
+        public int TargetAuraState;
+        public int ExcludeCasterAuraState;
+        public int ExcludeTargetAuraState;
         public uint CasterAuraSpell;
         public uint TargetAuraSpell;
         public uint ExcludeCasterAuraSpell;
         public uint ExcludeTargetAuraSpell;
+        public int CasterAuraType;
+        public int TargetAuraType;
+        public int ExcludeCasterAuraType;
+        public int ExcludeTargetAuraType;
         public uint SpellID;
     }
 
@@ -219,7 +228,7 @@ namespace Game.DataStorage
         public uint SpellID;
         public byte FacingCasterFlags;
         public ushort MinFactionID;
-        public sbyte MinReputation;
+        public int MinReputation;
         public ushort RequiredAreasID;
         public byte RequiredAuraVision;
         public ushort RequiresSpellFocus;
@@ -266,6 +275,7 @@ namespace Game.DataStorage
         public uint CategoryRecoveryTime;
         public uint RecoveryTime;
         public uint StartRecoveryTime;
+        public uint AuraSpellID;
         public uint SpellID;
     }
 
@@ -340,6 +350,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public string HordeName;
+        public int Duration;
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
         public uint IconFileDataID;
@@ -439,6 +450,7 @@ namespace Game.DataStorage
         public int AltPowerBarID;
         public float PowerCostPct;
         public float PowerCostMaxPct;
+        public float OptionalCostPct;
         public float PowerPctPerSecond;
         public PowerType PowerType;
         public uint RequiredAuraSpellID;
@@ -495,6 +507,8 @@ namespace Game.DataStorage
         public uint SpellID;
         public int[] Reagent = new int[SpellConst.MaxReagents];
         public ushort[] ReagentCount = new ushort[SpellConst.MaxReagents];
+        public short[] ReagentRecraftCount = new short[SpellConst.MaxReagents];
+        public byte[] ReagentSource = new byte[SpellConst.MaxReagents];
     }
 
     public sealed class SpellReagentsCurrencyRecord
@@ -638,6 +652,7 @@ namespace Game.DataStorage
         public byte DifficultyID;
         public uint SpellVisualID;
         public float Probability;
+        public int Flags;
         public int Priority;
         public int SpellIconFileID;
         public int ActiveIconFileID;

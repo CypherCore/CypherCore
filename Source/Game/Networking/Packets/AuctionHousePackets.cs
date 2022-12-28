@@ -784,12 +784,12 @@ namespace Game.Networking.Packets
     public struct AuctionListFilterSubClass
     {
         public int ItemSubclass;
-        public uint InvTypeMask;
+        public ulong InvTypeMask;
 
         public AuctionListFilterSubClass(WorldPacket data)
         {
+            InvTypeMask = data.ReadUInt64();
             ItemSubclass = data.ReadInt32();
-            InvTypeMask = data.ReadUInt32();
         }
     }
 

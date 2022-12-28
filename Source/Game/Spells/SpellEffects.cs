@@ -2127,30 +2127,7 @@ namespace Game.Spells
             }
 
             // select enchantment duration
-            uint duration;
-
-            // rogue family enchantments exception by duration
-            if (m_spellInfo.Id == 38615)
-                duration = 1800;                                    // 30 mins
-            // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
-            else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Rogue)
-                duration = 3600;                                    // 1 hour
-            // shaman family enchantments
-            else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Shaman)
-                duration = 3600;                                    // 30 mins
-            // other cases with this SpellVisual already selected
-            else if (m_spellInfo.GetSpellVisual() == 215)
-                duration = 1800;                                    // 30 mins
-            // some fishing pole bonuses except Glow Worm which lasts full hour
-            else if (m_spellInfo.GetSpellVisual() == 563 && m_spellInfo.Id != 64401)
-                duration = 600;                                     // 10 mins
-            else if (m_spellInfo.Id == 29702)
-                duration = 300;                                     // 5 mins
-            else if (m_spellInfo.Id == 37360)
-                duration = 300;                                     // 5 mins
-            // default case
-            else
-                duration = 3600;                                    // 1 hour
+            uint duration = (uint)pEnchant.Duration;
 
             // item can be in trade slot and have owner diff. from caster
             Player item_owner = itemTarget.GetOwner();
@@ -5208,19 +5185,11 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsCreature())
                 return;
 
-            var quality = BattlePetBreedQuality.Poor;
-            switch (damage)
-            {
-                case 85:
-                    quality = BattlePetBreedQuality.Rare;
-                    break;
-                case 75:
-                    quality = BattlePetBreedQuality.Uncommon;
-                    break;
-                default:
-                    // Ignore Epic Battle-Stones
-                    break;
-            }
+            var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < damage);
+
+            BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
+            if (qualityRecord != null)
+                quality = (BattlePetBreedQuality)qualityRecord.QualityEnum;
 
             playerCaster.GetSession().GetBattlePetMgr().ChangeBattlePetQuality(unitTarget.GetBattlePetCompanionGUID(), quality);
         }
@@ -5633,6 +5602,79 @@ namespace Game.Spells
                 return;
 
             player.GetSession().GetCollectionMgr().AddTransmogIllusion(illusionId);
+        }
+
+        [SpellEffectHandler(SpellEffectName.ModifyAuraStacks)]
+        void EffectModifyAuraStacks()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Aura targetAura = unitTarget.GetAura(effectInfo.TriggerSpell);
+            if (targetAura == null)
+                return;
+
+            switch (effectInfo.MiscValue)
+            {
+                case 0:
+                    targetAura.ModStackAmount(damage);
+                    break;
+                case 1:
+                    targetAura.SetStackAmount((byte)damage);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectName.ModifyCooldown)]
+        void EffectModifyCooldown()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            unitTarget.GetSpellHistory().ModifyCooldown(effectInfo.TriggerSpell, TimeSpan.FromMilliseconds(damage));
+        }
+
+        [SpellEffectHandler(SpellEffectName.ModifyCooldowns)]
+        void EffectModifyCooldowns()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            unitTarget.GetSpellHistory().ModifyCoooldowns(itr =>
+            {
+                SpellInfo spellOnCooldown = Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None);
+                if ((int)spellOnCooldown.SpellFamilyName != effectInfo.MiscValue)
+                    return false;
+
+                int bitIndex = effectInfo.MiscValueB - 1;
+                if (bitIndex < 0 || bitIndex >= sizeof(uint) * 8)
+                    return false;
+
+                FlagArray128 reqFlag = new();
+                reqFlag[bitIndex / 32] = 1u << (bitIndex % 32);
+                return (spellOnCooldown.SpellFamilyFlags & reqFlag);
+            }, TimeSpan.FromMilliseconds(damage));
+        }
+
+        [SpellEffectHandler(SpellEffectName.ModifyCooldownsByCategory)]
+        void EffectModifyCooldownsByCategory()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            unitTarget.GetSpellHistory().ModifyCoooldowns(itr => Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None).CategoryId == effectInfo.MiscValue, TimeSpan.FromMilliseconds(damage));
+        }
+
+        [SpellEffectHandler(SpellEffectName.ModifyCharges)]
+        void EffectModifySpellCharges()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            for (int i = 0; i < damage; ++i)
+                unitTarget.GetSpellHistory().RestoreCharge((uint)effectInfo.MiscValue);
         }
     }
 

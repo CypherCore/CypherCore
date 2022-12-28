@@ -372,7 +372,7 @@ namespace Game
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
-            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 50);
+            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 60);
             if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 200)
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..200. Set to 200.", Values[WorldCfg.CharactersPerRealm]);
@@ -380,14 +380,22 @@ namespace Game
             }
 
             // must be after CharactersPerRealm
-            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 50);
+            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 60);
             if ((int)Values[WorldCfg.CharactersPerAccount] < (int)Values[WorldCfg.CharactersPerRealm])
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerAccount ({0}) can't be less than CharactersPerRealm ({1}).", Values[WorldCfg.CharactersPerAccount], Values[WorldCfg.CharactersPerRealm]);
                 Values[WorldCfg.CharactersPerAccount] = Values[WorldCfg.CharactersPerRealm];
             }
 
+            Values[WorldCfg.CharacterCreatingEvokersPerRealm] = GetDefaultValue("CharacterCreating.EvokersPerRealm", 1);
+            if ((int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] < 0 || (int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] > 10)
+            {
+                Log.outError(LogFilter.ServerLoading, $"CharacterCreating.EvokersPerRealm ({Values[WorldCfg.CharacterCreatingEvokersPerRealm]}) must be in range 0..10. Set to 1.");
+                Values[WorldCfg.CharacterCreatingEvokersPerRealm] = 1;
+            }
+
             Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 0);
+            Values[WorldCfg.CharacterCreatingMinLevelForEvoker] = GetDefaultValue("CharacterCreating.MinLevelForEvoker", 50);
             Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement] = GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false);
 
             Values[WorldCfg.SkipCinematics] = GetDefaultValue("SkipCinematics", 0);

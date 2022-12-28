@@ -2058,10 +2058,12 @@ namespace Game.Entities
             // prevent duplicated entires in spell book, also not send if not in world (loading)
             if (learning && IsInWorld)
             {
-                LearnedSpells packet = new();
-                packet.SpellID.Add(spellId);
-                packet.SuppressMessaging = suppressMessaging;
-                SendPacket(packet);
+                LearnedSpells learnedSpells = new();
+                LearnedSpellInfo learnedSpellInfo = new();
+                learnedSpellInfo.SpellID = spellId;
+                learnedSpells.SuppressMessaging = suppressMessaging;
+                learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
+                SendPacket(learnedSpells);
             }
 
             // learn all disabled higher ranks and required spells (recursive)
@@ -3046,8 +3048,10 @@ namespace Game.Entities
         void SendSupercededSpell(uint oldSpell, uint newSpell)
         {
             SupercededSpells supercededSpells = new();
-            supercededSpells.SpellID.Add(newSpell);
-            supercededSpells.Superceded.Add(oldSpell);
+            LearnedSpellInfo learnedSpellInfo = new();
+            learnedSpellInfo.SpellID = newSpell;
+            learnedSpellInfo.Superceded = (int)oldSpell;
+            supercededSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
             SendPacket(supercededSpells);
         }
 

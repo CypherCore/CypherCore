@@ -61,6 +61,7 @@ namespace Game.DataStorage
         public int ParentUiMapID;
         public int OrderIndex;
         public int ChildUiMapID;
+        public int PlayerConditionID;
         public int OverrideHighlightFileDataID;
         public int OverrideHighlightAtlasID;
         public int Flags;

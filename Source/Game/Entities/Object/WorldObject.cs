@@ -278,6 +278,7 @@ namespace Game.Entities
                 bool HasFall = HasFallDirection || unit.m_movementInfo.jump.fallTime != 0;
                 bool HasSpline = unit.IsSplineEnabled();
                 bool HasInertia = unit.m_movementInfo.inertia.HasValue;
+                bool HasAdvFlying = unit.m_movementInfo.advFlying.HasValue;
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
 
@@ -312,9 +313,15 @@ namespace Game.Entities
 
                 if (HasInertia)
                 {
-                    data.WritePackedGuid(unit.m_movementInfo.inertia.Value.guid);
+                    data.WriteInt32(unit.m_movementInfo.inertia.Value.id);
                     data.WriteXYZ(unit.m_movementInfo.inertia.Value.force);
                     data.WriteUInt32(unit.m_movementInfo.inertia.Value.lifetime);
+                }
+
+                if (HasAdvFlying)
+                {
+                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.forwardVelocity);
+                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.upVelocity);
                 }
 
                 if (HasFall)
@@ -351,6 +358,24 @@ namespace Game.Entities
                     data.WriteUInt32(0);
                     data.WriteFloat(1.0f);                                       // MovementForcesModMagnitude
                 }
+
+                data.WriteFloat(2.0f);                                           // advFlyingAirFriction
+                data.WriteFloat(65.0f);                                          // advFlyingMaxVel
+                data.WriteFloat(1.0f);                                           // advFlyingLiftCoefficient
+                data.WriteFloat(3.0f);                                           // advFlyingDoubleJumpVelMod
+                data.WriteFloat(10.0f);                                          // advFlyingGlideStartMinHeight
+                data.WriteFloat(100.0f);                                         // advFlyingAddImpulseMaxSpeed
+                data.WriteFloat(90.0f);                                          // advFlyingMinBankingRate
+                data.WriteFloat(140.0f);                                         // advFlyingMaxBankingRate
+                data.WriteFloat(180.0f);                                         // advFlyingMinPitchingRateDown
+                data.WriteFloat(360.0f);                                         // advFlyingMaxPitchingRateDown
+                data.WriteFloat(90.0f);                                          // advFlyingMinPitchingRateUp
+                data.WriteFloat(270.0f);                                         // advFlyingMaxPitchingRateUp
+                data.WriteFloat(30.0f);                                          // advFlyingMinTurnVelocityThreshold
+                data.WriteFloat(80.0f);                                          // advFlyingMaxTurnVelocityThreshold
+                data.WriteFloat(2.75f);                                          // advFlyingSurfaceFriction
+                data.WriteFloat(7.0f);                                           // advFlyingOverMaxDeceleration
+                data.WriteFloat(0.4f);                                           // advFlyingLaunchSpeedCoefficient
 
                 data.WriteBit(HasSpline);
                 data.FlushBits();
@@ -425,6 +450,7 @@ namespace Game.Entities
                 bool hasFaceMovementDir = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
                 bool hasFollowsTerrain = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
                 bool hasUnk1 = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
+                bool hasUnk2 = false;
                 bool hasTargetRollPitchYaw = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
                 bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
                 bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
@@ -435,6 +461,7 @@ namespace Game.Entities
                 bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
                 bool hasAreaTriggerCylinder = shape.IsCylinder();
                 bool hasDisk = shape.IsDisk();
+                bool hasBoundedPlane = shape.IsBoudedPlane();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
@@ -445,6 +472,7 @@ namespace Game.Entities
                 data.WriteBit(hasFaceMovementDir);
                 data.WriteBit(hasFollowsTerrain);
                 data.WriteBit(hasUnk1);
+                data.WriteBit(hasUnk2);
                 data.WriteBit(hasTargetRollPitchYaw);
                 data.WriteBit(hasScaleCurveID);
                 data.WriteBit(hasMorphCurveID);
@@ -455,6 +483,7 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerPolygon);
                 data.WriteBit(hasAreaTriggerCylinder);
                 data.WriteBit(hasDisk);
+                data.WriteBit(hasBoundedPlane);
                 data.WriteBit(hasAreaTriggerSpline);
                 data.WriteBit(hasOrbit);
                 data.WriteBit(hasMovementScript);
@@ -538,6 +567,17 @@ namespace Game.Entities
                     data.WriteFloat(shape.DiskDatas.HeightTarget);
                     data.WriteFloat(shape.DiskDatas.LocationZOffset);
                     data.WriteFloat(shape.DiskDatas.LocationZOffsetTarget);
+                }
+
+                if (hasBoundedPlane)
+                {
+                    unsafe
+                    {
+                        data.WriteFloat(shape.BoundedPlaneDatas.Extents[0]);
+                        data.WriteFloat(shape.BoundedPlaneDatas.Extents[1]);
+                        data.WriteFloat(shape.BoundedPlaneDatas.ExtentsTarget[0]);
+                        data.WriteFloat(shape.BoundedPlaneDatas.ExtentsTarget[1]);
+                    }
                 }
 
                 //if (hasMovementScript)
@@ -3745,6 +3785,7 @@ namespace Game.Entities
         public Inertia? inertia;
         public JumpInfo jump;
         public float stepUpStartElevation { get; set; }
+        public AdvFlying? advFlying;
 
         public MovementInfo()
         {
@@ -3810,7 +3851,7 @@ namespace Game.Entities
         }
         public struct Inertia
         {
-            public ObjectGuid guid;
+            public int id;
             public Position force;
             public uint lifetime;
         }
@@ -3827,6 +3868,12 @@ namespace Game.Entities
             public float sinAngle;
             public float cosAngle;
             public float xyspeed;
+        }
+        // advflying
+        public struct AdvFlying
+        {
+            public float forwardVelocity;
+            public float upVelocity;
         }
     }
 

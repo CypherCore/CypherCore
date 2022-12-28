@@ -45,10 +45,11 @@ namespace Game
 
         void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
         {
-            BlackMarketOpenResult packet = new();
-            packet.Guid = guid;
-            packet.Enable = Global.BlackMarketMgr.IsEnabled();
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.BlackMarketAuctioneer;
+            npcInteraction.Success = Global.BlackMarketMgr.IsEnabled();
+            SendPacket(npcInteraction);
         }
 
         [WorldPacketHandler(ClientOpcodes.BlackMarketRequestItems)]

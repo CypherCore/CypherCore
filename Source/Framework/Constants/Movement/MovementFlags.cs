@@ -99,5 +99,7 @@ namespace Framework.Constants
     {
         None = 0x00,
         DisableInertia = 0x01,
+        CanAdvFly = 0x02,
+        AdvFlying = 0x04,
     }
 }

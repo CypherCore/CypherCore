@@ -380,6 +380,8 @@ namespace Game
             if (!result.IsEmpty())
             {
                 Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new();
+                byte[] minRequirementForClass = new byte[(int)Class.Max];
+                Array.Fill(minRequirementForClass, (byte)Expansion.Max);
                 uint count = 0;
                 do
                 {
@@ -418,6 +420,7 @@ namespace Game
                         temp[raceID] = new Dictionary<byte, Tuple<byte, byte>>();
 
                     temp[raceID][classID] = Tuple.Create(activeExpansionLevel, accountExpansionLevel);
+                    minRequirementForClass[classID] = Math.Min(minRequirementForClass[classID], activeExpansionLevel);
 
                     ++count;
                 }
@@ -434,6 +437,7 @@ namespace Game
                         classAvailability.ClassID = class_.Key;
                         classAvailability.ActiveExpansionLevel = class_.Value.Item1;
                         classAvailability.AccountExpansionLevel = class_.Value.Item2;
+                        classAvailability.MinActiveExpansionLevel = minRequirementForClass[class_.Key];
 
                         raceClassAvailability.Classes.Add(classAvailability);
                     }
@@ -530,6 +534,15 @@ namespace Game
 
             return classAvailability;
         }
+        public ClassAvailability GetClassExpansionRequirementFallback(byte classId)
+        {
+            foreach (RaceClassAvailability raceClassAvailability in _classExpansionRequirementStorage)
+                foreach (ClassAvailability classAvailability in raceClassAvailability.Classes)
+                    if (classAvailability.ClassID == classId)
+                        return classAvailability;
+
+            return null;
+        }
         public PlayerChoice GetPlayerChoice(int choiceId)
         {
             return _playerChoices.LookupByKey(choiceId);
@@ -578,9 +591,10 @@ namespace Game
 
             gossipMenuItemsStorage.Clear();
 
-            //                                         0       1         2          3           4                      5         6             7            8         9         10       11
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, OptionNpc, OptionText, OptionBroadcastTextID, Language, ActionMenuID, ActionPoiID, BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID " +
-                "FROM gossip_menu_option ORDER BY MenuID, OptionID");
+            //                                         0       1               2         3          4           5                      6         7      8             9            10
+            SQLResult result = DB.World.Query("SELECT MenuID, GossipOptionID, OptionID, OptionNpc, OptionText, OptionBroadcastTextID, Language, Flags, ActionMenuID, ActionPoiID, GossipNpcOptionID, " +
+                //11        12        13       14                  15       16
+                "BoxCoded, BoxMoney, BoxText, BoxBroadcastTextID, SpellID, OverrideIconID FROM gossip_menu_option ORDER BY MenuID, OptionID");
 
             if (result.IsEmpty())
             {
@@ -588,26 +602,40 @@ namespace Game
                 return;
             }
 
+            Dictionary<int, uint> optionToNpcOption = new();
+            foreach (var (_, npcOption) in CliDB.GossipNPCOptionStorage)
+                optionToNpcOption[npcOption.GossipOptionID] = npcOption.Id;
+
             do
             {
                 GossipMenuItems gMenuItem = new();
 
-                gMenuItem.MenuId = result.Read<uint>(0);
-                gMenuItem.OptionId = result.Read<uint>(1);
-                gMenuItem.OptionNpc = (GossipOptionNpc)result.Read<byte>(2);
-                gMenuItem.OptionText = result.Read<string>(3);
-                gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
-                gMenuItem.Language = result.Read<uint>(5);
-                gMenuItem.ActionMenuId = result.Read<uint>(6);
-                gMenuItem.ActionPoiId = result.Read<uint>(7);
-                gMenuItem.BoxCoded = result.Read<bool>(8);
-                gMenuItem.BoxMoney = result.Read<uint>(9);
-                gMenuItem.BoxText = result.Read<string>(10);
-                gMenuItem.BoxBroadcastTextId = result.Read<uint>(11);
+                gMenuItem.MenuID = result.Read<uint>(0);
+                gMenuItem.GossipOptionID = result.Read<int>(1);
+                gMenuItem.OrderIndex = result.Read<uint>(2);
+                gMenuItem.OptionNpc = (GossipOptionNpc)result.Read<byte>(3);
+                gMenuItem.OptionText = result.Read<string>(4);
+                gMenuItem.OptionBroadcastTextId = result.Read<uint>(5);
+                gMenuItem.Language = result.Read<uint>(6);
+                gMenuItem.Flags = (GossipOptionFlags)result.Read<int>(7);
+                gMenuItem.ActionMenuID = result.Read<uint>(8);
+                gMenuItem.ActionPoiID = result.Read<uint>(9);
+                if (!result.IsNull(10))
+                    gMenuItem.GossipNpcOptionID = result.Read<int>(10);
+
+                gMenuItem.BoxCoded = result.Read<bool>(11);
+                gMenuItem.BoxMoney = result.Read<uint>(12);
+                gMenuItem.BoxText = result.Read<string>(13);
+                gMenuItem.BoxBroadcastTextId = result.Read<uint>(14);
+                if (!result.IsNull(15))
+                    gMenuItem.SpellID = result.Read<int>(15);
+
+                if (!result.IsNull(16))
+                    gMenuItem.OverrideIconID = result.Read<int>(16);
 
                 if (gMenuItem.OptionNpc >= GossipOptionNpc.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} has unknown NPC option id {gMenuItem.OptionNpc}. Replacing with GossipOptionNpc.None");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} has unknown NPC option id {gMenuItem.OptionNpc}. Replacing with GossipOptionNpc.None");
                     gMenuItem.OptionNpc = GossipOptionNpc.None;
                 }
 
@@ -615,47 +643,71 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.Language != 0 && !CliDB.LanguagesStorage.ContainsKey(gMenuItem.Language))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing Language {gMenuItem.Language}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Language {gMenuItem.Language}, ignoring");
                     gMenuItem.Language = 0;
                 }
 
-                if (gMenuItem.ActionMenuId != 0 && gMenuItem.OptionNpc != GossipOptionNpc.None)
+                if (gMenuItem.ActionMenuID != 0 && gMenuItem.OptionNpc != GossipOptionNpc.None)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
-                    gMenuItem.ActionMenuId = 0;
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                    gMenuItem.ActionMenuID = 0;
                 }
 
-                if (gMenuItem.ActionPoiId != 0)
+                if (gMenuItem.ActionPoiID != 0)
                 {
                     if (gMenuItem.OptionNpc != GossipOptionNpc.None)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
-                        gMenuItem.ActionPoiId = 0;
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                        gMenuItem.ActionPoiID = 0;
                     }
-                    else if (GetPointOfInterest(gMenuItem.ActionPoiId) == null)
+                    else if (GetPointOfInterest(gMenuItem.ActionPoiID) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuId}, id {gMenuItem.OptionId} use non-existing ActionPoiID {gMenuItem.ActionPoiId}, ignoring");
-                        gMenuItem.ActionPoiId = 0;
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing ActionPoiID {gMenuItem.ActionPoiID}, ignoring");
+                        gMenuItem.ActionPoiID = 0;
                     }
+                }
+
+                if (gMenuItem.GossipNpcOptionID.HasValue)
+                {
+                    if (!CliDB.GossipNPCOptionStorage.ContainsKey(gMenuItem.GossipNpcOptionID.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing GossipNPCOption {gMenuItem.GossipNpcOptionID}, ignoring");
+                        gMenuItem.GossipNpcOptionID = null;
+                    }
+                }
+                else
+                {
+                    uint npcOptionId = optionToNpcOption.LookupByKey(gMenuItem.GossipOptionID);
+                    if (npcOptionId != 0)
+                        gMenuItem.GossipNpcOptionID = (int)npcOptionId;
                 }
 
                 if (gMenuItem.BoxBroadcastTextId != 0)
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionId} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
 
-                gossipMenuItemsStorage.Add(gMenuItem.MenuId, gMenuItem);
+                if (gMenuItem.SpellID.HasValue)
+                {
+                    if (!Global.SpellMgr.HasSpellInfo((uint)gMenuItem.SpellID.Value, Difficulty.None))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Spell {gMenuItem.SpellID}, ignoring");
+                        gMenuItem.SpellID = null;
+                    }
+                }
+
+                gossipMenuItemsStorage.Add(gMenuItem.MenuID, gMenuItem);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
@@ -699,42 +751,6 @@ namespace Game
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuAddonStorage.Count} gossip_menu_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-        public void LoadGossipMenuItemAddon()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            _gossipMenuItemAddonStorage.Clear();
-
-            //                                         0       1         2
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionId, GarrTalentTreeID FROM gossip_menu_option_addon");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_option_addon IDs. DB table `gossip_menu_option_addon` is empty!");
-                return;
-            }
-
-            do
-            {
-                uint menuId = result.Read<uint>(0);
-                uint optionId = result.Read<uint>(1);
-                GossipMenuItemAddon  addon = new();
-                if (!result.IsNull(2))
-                {
-                    addon.GarrTalentTreeID = result.Read<int>(2);
-
-                    if (!CliDB.GarrTalentTreeStorage.ContainsKey(addon.GarrTalentTreeID.Value))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table gossip_menu_option_addon: MenuID {menuId} OptionID {optionId} is using non-existing GarrTalentTree {addon.GarrTalentTreeID.Value}");
-                        addon.GarrTalentTreeID = null;
-                    }
-                }
-
-                _gossipMenuItemAddonStorage[Tuple.Create(menuId, optionId)] = addon;
-
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuItemAddonStorage.Count} gossip_menu_option_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadPointsOfInterest()
@@ -790,10 +806,6 @@ namespace Game
         public GossipMenuAddon GetGossipMenuAddon(uint menuId)
         {
             return _gossipMenuAddonStorage.LookupByKey(menuId);
-        }
-        public GossipMenuItemAddon GetGossipMenuItemAddon(uint menuId, uint optionId)
-        {
-            return _gossipMenuItemAddonStorage.LookupByKey(Tuple.Create(menuId, optionId));
         }
         public PointOfInterest GetPointOfInterest(uint id)
         {
@@ -3392,7 +3404,7 @@ namespace Game
                         var gossipMenuItems = GetGossipMenuItemsMapBounds(gossipMenuId);
                         var gossipOptionItr = gossipMenuItems.Find(entry =>
                         {
-                            return entry.OptionId == gossipOptionIndex;
+                            return entry.OrderIndex == gossipOptionIndex;
                         });
 
                         if (gossipOptionItr == null)
@@ -4999,6 +5011,12 @@ namespace Game
             0.00f, // INVTYPE_RANGEDRIGHT
             0.00f, // INVTYPE_QUIVER
             0.00f, // INVTYPE_RELIC
+            0.00f, // INVTYPE_PROFESSION_TOOL
+            0.00f, // INVTYPE_PROFESSION_GEAR
+            0.00f, // INVTYPE_EQUIPABLE_SPELL_OFFENSIVE
+            0.00f, // INVTYPE_EQUIPABLE_SPELL_UTILITY
+            0.00f, // INVTYPE_EQUIPABLE_SPELL_DEFENSIVE
+            0.00f, // INVTYPE_EQUIPABLE_SPELL_MOBILITY
         };
 
         static float[] weaponMultipliers = new float[]
@@ -5944,9 +5962,6 @@ namespace Game
         //Player
         public void LoadPlayerInfo()
         {
-            for (uint race = 0; race < (int)Race.Max; ++race)
-                _playerInfo[race] = new PlayerInfo[(int)Class.Max];
-
             var time = Time.GetMSTime();
             // Load playercreate
             {
@@ -6059,7 +6074,7 @@ namespace Game
                             Log.outError(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
-                    _playerInfo[currentrace][currentclass] = info;
+                    _playerInfo[Tuple.Create((Race)currentrace, (Class)currentclass)] = info;
 
                     ++count;
                 } while (result.NextRow());
@@ -6092,9 +6107,11 @@ namespace Game
                         if (!characterLoadout.RaceMask.HasAnyFlag(SharedConst.GetMaskForRace(raceIndex)))
                             continue;
 
-                        PlayerInfo playerInfo = _playerInfo[(int)raceIndex][characterLoadout.ChrClassID];
+                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)raceIndex, (Class)characterLoadout.ChrClassID));
                         if (playerInfo != null)
                         {
+                            playerInfo.itemContext = (ItemContext)characterLoadout.ItemContext;
+
                             foreach (ItemTemplate itemTemplate in items)
                             {
                                 // BuyCount by default
@@ -6200,11 +6217,11 @@ namespace Game
                         {
                             if (rcInfo.RaceMask == -1 || Convert.ToBoolean(SharedConst.GetMaskForRace(raceIndex) & rcInfo.RaceMask))
                             {
-                                for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
+                                for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
-                                    if (rcInfo.ClassMask == -1 || Convert.ToBoolean((1 << (classIndex - 1)) & rcInfo.ClassMask))
+                                    if (rcInfo.ClassMask == -1 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & rcInfo.ClassMask))
                                     {
-                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
+                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
                                         if (info != null)
                                             info.skills.Add(rcInfo);
                                     }
@@ -6251,14 +6268,14 @@ namespace Game
                         {
                             if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
                             {
-                                for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
+                                for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
-                                    if (classMask == 0 || Convert.ToBoolean((1 << (classIndex - 1)) & classMask))
+                                    if (classMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
-                                        if (info != null)
+                                        PlayerInfo playerInfo = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
+                                        if (playerInfo != null)
                                         {
-                                            info.customSpells.Add(spellId);
+                                            playerInfo.customSpells.Add(spellId);
                                             ++count;
                                         }
                                         // We need something better here, the check is not accounting for spells used by multiple races/classes but not all of them.
@@ -6316,11 +6333,11 @@ namespace Game
                         {
                             if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
                             {
-                                for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
+                                for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
-                                    if (classMask == 0 || Convert.ToBoolean((1 << (classIndex - 1)) & classMask))
+                                    if (classMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
+                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
                                         if (info != null)
                                         {
                                             info.castSpells[playerCreateMode].Add(spellId);
@@ -6350,20 +6367,20 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        uint currentrace = result.Read<uint>(0);
-                        if (currentrace >= (int)Race.Max)
+                        Race currentrace = (Race)result.Read<uint>(0);
+                        if (currentrace >= Race.Max)
                         {
                             Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo_action` table, ignoring.", currentrace);
                             continue;
                         }
 
-                        uint currentclass = result.Read<uint>(1);
-                        if (currentclass >= (int)Class.Max)
+                        Class currentclass = (Class)result.Read<uint>(1);
+                        if (currentclass >= Class.Max)
                         {
                             Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo_action` table, ignoring.", currentclass);
                             continue;
                         }
-                        PlayerInfo info = _playerInfo[currentrace][currentclass];
+                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(currentrace, currentclass));
                         if (info != null)
                             info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<uint>(3), result.Read<byte>(4)));
 
@@ -6381,7 +6398,6 @@ namespace Game
                 for (var i = 0; i < (int)Race.Max; ++i)
                     raceStatModifiers[i] = new short[(int)Stats.Max];
 
-
                 //                                         0     1    2    3    4 
                 SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte FROM player_racestats");
                 if (result.IsEmpty())
@@ -6393,15 +6409,15 @@ namespace Game
 
                 do
                 {
-                    uint currentrace = result.Read<uint>(0);
-                    if (currentrace >= (int)Race.Max)
+                    Race currentrace = (Race)result.Read<uint>(0);
+                    if (currentrace >= Race.Max)
                     {
                         Log.outError(LogFilter.Sql, $"Wrong race {currentrace} in `player_racestats` table, ignoring.");
                         continue;
                     }
 
                     for (int i = 0; i < (int)Stats.Max; ++i)
-                        raceStatModifiers[currentrace][i] = result.Read<short>(i + 1);
+                        raceStatModifiers[(int)currentrace][i] = result.Read<short>(i + 1);
 
                 } while (result.NextRow());
 
@@ -6418,8 +6434,8 @@ namespace Game
 
                 do
                 {
-                    uint currentclass = result.Read<byte>(0);
-                    if (currentclass >= (int)Class.Max)
+                    Class currentclass = (Class)result.Read<byte>(0);
+                    if (currentclass >= Class.Max)
                     {
                         Log.outError(LogFilter.Sql, "Wrong class {0} in `player_classlevelstats` table, ignoring.", currentclass);
                         continue;
@@ -6438,14 +6454,14 @@ namespace Game
 
                     for (var race = 0; race < raceStatModifiers.Length; ++race)
                     {
-                        var pInfo = _playerInfo[race][currentclass];
-                        if (pInfo == null)
+                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race, currentclass));
+                        if (playerInfo == null)
                             continue;
 
-                        if (pInfo.levelInfo[currentlevel - 1] == null)
-                            pInfo.levelInfo[currentlevel - 1] = new PlayerLevelInfo();
+                        if (playerInfo.levelInfo[currentlevel - 1] == null)
+                            playerInfo.levelInfo[currentlevel - 1] = new PlayerLevelInfo();
 
-                        var levelinfo = pInfo.levelInfo[currentlevel - 1];
+                        var levelinfo = playerInfo.levelInfo[currentlevel - 1];
 
                         for (var i = 0; i < (int)Stats.Max; i++)
                             levelinfo.stats[i] = (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
@@ -6455,38 +6471,38 @@ namespace Game
                 } while (result.NextRow());
 
                 // Fill gaps and check integrity
-                for (uint race = 0; race < (int)Race.Max; ++race)
+                for (Race race = 0; race < Race.Max; ++race)
                 {
                     // skip non existed races
-                    if (!CliDB.ChrRacesStorage.ContainsKey(race) || _playerInfo[race][0] == null)
+                    if (!CliDB.ChrRacesStorage.ContainsKey(race))
                         continue;
 
-                    for (uint _class = 0; _class < (int)Class.Max; ++_class)
+                    for (Class _class = 0; _class < Class.Max; ++_class)
                     {
                         // skip non existed classes
-                        if (CliDB.ChrClassesStorage.LookupByKey(_class) == null || _playerInfo[race][_class] == null)
+                        if (CliDB.ChrClassesStorage.LookupByKey(_class) == null)
                             continue;
 
-                        PlayerInfo pInfo = _playerInfo[race][_class];
-                        if (pInfo == null)
+                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create(race, _class));
+                        if (playerInfo == null)
                             continue;
 
                         // skip expansion races if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == (int)Race.BloodElf || race == (int)Race.Draenei))
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == Race.BloodElf || race == Race.Draenei))
                             continue;
 
                         // skip expansion classes if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == (int)Class.Deathknight)
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.Deathknight)
                             continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == (int)Race.PandarenNeutral || race == (int)Race.PandarenHorde || race == (int)Race.PandarenAlliance))
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
                             continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == (int)Class.DemonHunter)
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
                             continue;
 
                         // fatal error if no level 1 data
-                        if (pInfo.levelInfo == null || pInfo.levelInfo[0] == null)
+                        if (playerInfo.levelInfo == null || playerInfo.levelInfo[0].stats[0] == 0)
                         {
                             Log.outError(LogFilter.Sql, "Race {0} Class {1} Level 1 does not have stats data!", race, _class);
                             Global.WorldMgr.StopNow();
@@ -6496,10 +6512,10 @@ namespace Game
                         // fill level gaps
                         for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
                         {
-                            if (pInfo.levelInfo[level] == null)
+                            if (playerInfo.levelInfo[level].stats[0] == 0)
                             {
                                 Log.outError(LogFilter.Sql, "Race {0} Class {1} Level {2} does not have stats data. Using stats data of level {3}.", race, _class, level + 1, level);
-                                pInfo.levelInfo[level] = pInfo.levelInfo[level - 1];
+                                playerInfo.levelInfo[level] = playerInfo.levelInfo[level - 1];
                             }
                         }
                     }
@@ -6561,18 +6577,18 @@ namespace Game
         }
         void PlayerCreateInfoAddItemHelper(uint race, uint class_, uint itemId, int count)
         {
-            if (_playerInfo[race][class_] == null)
+            var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race, (Class)class_));
+            if (playerInfo == null)
                 return;
 
             if (count > 0)
-                _playerInfo[race][class_].item.Add(new PlayerCreateInfoItem(itemId, (uint)count));
+                playerInfo.item.Add(new PlayerCreateInfoItem(itemId, (uint)count));
             else
             {
                 if (count < -1)
                     Log.outError(LogFilter.Sql, "Invalid count {0} specified on item {1} be removed from original player create info (use -1)!", count, itemId);
 
-                var items = _playerInfo[race][class_].item;
-                items.RemoveAll(item => { return item.item_id == itemId; });
+                playerInfo.item.RemoveAll(item => item.item_id == itemId);
             }
         }
 
@@ -6584,7 +6600,7 @@ namespace Game
             if (classId >= Class.Max)
                 return null;
 
-            var info = _playerInfo[(int)raceId][(int)classId];
+            var info = _playerInfo.LookupByKey(Tuple.Create(raceId, classId));
             if (info == null)
                 return null;
 
@@ -6613,7 +6629,7 @@ namespace Game
             if (level < 1 || race >= Race.Max || _class >= Class.Max)
                 return null;
 
-            PlayerInfo pInfo = _playerInfo[(int)race][(int)_class];
+            PlayerInfo pInfo = _playerInfo.LookupByKey(Tuple.Create(race, _class));
             if (pInfo == null)
                 return null;
 
@@ -6626,7 +6642,7 @@ namespace Game
         PlayerLevelInfo BuildPlayerLevelInfo(Race race, Class _class, uint level)
         {
             // base data (last known level)
-            var info = _playerInfo[(byte)race][(int)_class].levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
+            var info = _playerInfo.LookupByKey(Tuple.Create(race, _class)).levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
 
             for (int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1; lvl < level; ++lvl)
             {
@@ -10911,7 +10927,6 @@ namespace Game
         MultiMap<uint, GossipMenus> gossipMenusStorage = new();
         MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
         Dictionary<uint, GossipMenuAddon> _gossipMenuAddonStorage = new();
-        Dictionary<Tuple<uint, uint>, GossipMenuItemAddon> _gossipMenuItemAddonStorage = new();
         Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature
@@ -10946,7 +10961,7 @@ namespace Game
         Dictionary<uint, ItemTemplate> ItemTemplateStorage = new();
 
         //Player
-        PlayerInfo[][] _playerInfo = new PlayerInfo[(int)Race.Max][];
+        Dictionary<Tuple<Race, Class>, PlayerInfo> _playerInfo = new();
 
         //Faction Change
         public Dictionary<uint, uint> FactionChangeAchievements = new();
@@ -12007,6 +12022,7 @@ namespace Game
         public byte ClassID;
         public byte ActiveExpansionLevel;
         public byte AccountExpansionLevel;
+        public byte MinActiveExpansionLevel;
     }
 
     public class RaceClassAvailability

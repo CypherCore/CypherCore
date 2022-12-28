@@ -246,7 +246,11 @@ namespace Game
 
         public void SendAzeriteRespecNPC(ObjectGuid npc)
         {
-            SendPacket(new AzeriteRespecNPC(npc));
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = npc;
+            npcInteraction.InteractionType = PlayerInteractionType.AzeriteRespec;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

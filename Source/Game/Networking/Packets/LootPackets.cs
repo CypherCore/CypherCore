@@ -29,9 +29,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Unit = _worldPacket.ReadPackedGuid();
+            IsSoftInteract = _worldPacket.HasBit();
         }
 
         public ObjectGuid Unit;
+        public bool IsSoftInteract;
     }
 
     public class LootResponse : ServerPacket
@@ -273,6 +275,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32(RollTime);
             _worldPacket.WriteUInt8((byte)ValidRolls);
+            foreach (var reason in LootRollIneligibleReason)
+                _worldPacket.WriteUInt32((uint)reason);
+
             _worldPacket.WriteUInt8((byte)Method);
             Item.Write(_worldPacket);
         }
@@ -282,6 +287,7 @@ namespace Game.Networking.Packets
         public uint RollTime;
         public LootMethod Method;
         public RollMask ValidRolls;
+        public Array<LootRollIneligibilityReason> LootRollIneligibleReason = new Array<LootRollIneligibilityReason>(4);
         public LootItemData Item = new();
     }
 

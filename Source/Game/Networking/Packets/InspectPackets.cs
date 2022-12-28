@@ -75,7 +75,9 @@ namespace Game.Networking.Packets
                 GuildData.Value.Write(_worldPacket);
 
             if (AzeriteLevel.HasValue)
-                _worldPacket.WriteUInt32((uint)AzeriteLevel);
+                _worldPacket.WriteUInt32(AzeriteLevel.Value);
+
+            TalentTraits.Write(_worldPacket);
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
@@ -83,7 +85,7 @@ namespace Game.Networking.Packets
         public List<ushort> Talents = new();
         public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
         public InspectGuildData? GuildData;
-        public Array<PVPBracketData> Bracket = new(6, default);
+        public Array<PVPBracketData> Bracket = new(7, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
@@ -91,6 +93,7 @@ namespace Game.Networking.Packets
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
+        public TraitInspectInfo TalentTraits;
     }
 
     public class QueryInspectAchievements : ClientPacket
@@ -290,6 +293,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Bracket);
+            data.WriteInt32(Unused3);
             data.WriteInt32(Rating);
             data.WriteInt32(Rank);
             data.WriteInt32(WeeklyPlayed);
@@ -302,6 +306,10 @@ namespace Game.Networking.Packets
             data.WriteInt32(WeeklyBestWinPvpTierID);
             data.WriteInt32(Unused1);
             data.WriteInt32(Unused2);
+            data.WriteInt32(RoundsSeasonPlayed);
+            data.WriteInt32(RoundsSeasonWon);
+            data.WriteInt32(RoundsWeeklyPlayed);
+            data.WriteInt32(RoundsWeeklyWon);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
@@ -318,8 +326,27 @@ namespace Game.Networking.Packets
         public int WeeklyBestWinPvpTierID;
         public int Unused1;
         public int Unused2;
+        public int Unused3;
+        public int RoundsSeasonPlayed;
+        public int RoundsSeasonWon;
+        public int RoundsWeeklyPlayed;
+        public int RoundsWeeklyWon;
         public byte Bracket;
         public bool Disqualified;
+    }
+
+    public struct TraitInspectInfo
+    {
+        public int Level;
+        public int ChrSpecializationID;
+        public TraitConfig Config;
+
+        public void Write(WorldPacket data)
+        {
+            data . WriteInt32(Level);
+            data . WriteInt32(ChrSpecializationID);
+            Config.Write(data);
+        }
     }
 
     public struct AzeriteEssenceData

@@ -328,7 +328,7 @@ namespace Game.Entities
                     return;
                 }
 
-                List<uint> bonusListIDs = item.m_itemData.BonusListIDs;
+                List<uint> bonusListIDs = item.GetBonusListIDs();
                 foreach (uint bonusId in bonusListIDs)
                 {
                     if (bonusId != data.bonusId)

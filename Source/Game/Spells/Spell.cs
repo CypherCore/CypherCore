@@ -4763,6 +4763,11 @@ namespace Game.Spells
                     if (m_spellInfo.ExcludeCasterAuraSpell != 0 && unitCaster.HasAura(m_spellInfo.ExcludeCasterAuraSpell))
                         return SpellCastResult.CasterAurastate;
 
+                    if (m_spellInfo.CasterAuraType != 0 && !unitCaster.HasAuraType(m_spellInfo.CasterAuraType))
+                        return SpellCastResult.CasterAurastate;
+                    if (m_spellInfo.ExcludeCasterAuraType != 0 && unitCaster.HasAuraType(m_spellInfo.ExcludeCasterAuraType))
+                        return SpellCastResult.CasterAurastate;
+
                     if (reqCombat && unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat())
                         return SpellCastResult.AffectingCombat;
                 }
@@ -5589,21 +5594,15 @@ namespace Game.Spells
 
                                     if (spellEffectInfo.Effect == SpellEffectName.ChangeBattlepetQuality)
                                     {
+                                        var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < spellEffectInfo.BasePoints);
+
                                         BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
-                                        switch (spellEffectInfo.BasePoints)
-                                        {
-                                            case 85:
-                                                quality = BattlePetBreedQuality.Rare;
-                                                break;
-                                            case 75:
-                                                quality = BattlePetBreedQuality.Uncommon;
-                                                break;
-                                            default:
-                                                // Ignore Epic Battle-Stones
-                                                break;
-                                        }
+                                        if (qualityRecord != null)
+                                            quality = (BattlePetBreedQuality)qualityRecord.QualityEnum;
+
                                         if (battlePet.PacketInfo.Quality >= (byte)quality)
                                             return SpellCastResult.CantUpgradeBattlePet;
+
                                     }
 
                                     if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetLevel || spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
@@ -6634,21 +6633,21 @@ namespace Game.Spells
                     {
                         Item item = m_targets.GetItemTarget();
                         if (!item)
-                            return SpellCastResult.CantBeDisenchanted;
+                            return SpellCastResult.CantBeSalvaged;
 
                         // prevent disenchanting in trade slot
                         if (item.GetOwnerGUID() != player.GetGUID())
-                            return SpellCastResult.CantBeDisenchanted;
+                            return SpellCastResult.CantBeSalvaged;
 
                         ItemTemplate itemProto = item.GetTemplate();
                         if (itemProto == null)
-                            return SpellCastResult.CantBeDisenchanted;
+                            return SpellCastResult.CantBeSalvaged;
 
                         ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
                         if (itemDisenchantLoot == null)
-                            return SpellCastResult.CantBeDisenchanted;
+                            return SpellCastResult.CantBeSalvaged;
                         if (itemDisenchantLoot.SkillRequired > player.GetSkillValue(SkillType.Enchanting))
-                            return SpellCastResult.LowCastlevel;
+                            return SpellCastResult.CantBeSalvagedSkill;
                         break;
                     }
                     case SpellEffectName.Prospecting:

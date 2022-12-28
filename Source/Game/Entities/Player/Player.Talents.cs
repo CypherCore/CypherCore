@@ -698,6 +698,11 @@ namespace Game.Entities
             if (HasPvpTalent(talentID, GetActiveTalentGroup()))
                 return TalentLearnResult.FailedUnknown;
 
+            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(talentInfo.PlayerConditionID);
+            if (playerCondition != null)
+                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    return TalentLearnResult.FailedCantDoThatRightNow;
+
             PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
             if (talent != null)
             {

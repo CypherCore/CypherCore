@@ -31,7 +31,7 @@ namespace Game.DataStorage
         public LocalizedString InfoName;
         public sbyte Type;
         public int Modifiers;
-        public ushort Profession;
+        public int Profession;
     }
 
     public sealed class QuestLineXQuestRecord
@@ -69,6 +69,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort UniqueBitFlag;
+        public int UiQuestDetailsTheme;
     }
 
     public sealed class QuestXPRecord

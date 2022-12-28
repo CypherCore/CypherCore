@@ -73,7 +73,6 @@ namespace Game.DataStorage
         public int OrderIndex;
         public int CompleteWorldStateID;
         public sbyte Bit;
-        public int CreatureDisplayID;
         public int Flags;
         public int SpellIconFileID;
         public int Faction;

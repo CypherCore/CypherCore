@@ -157,7 +157,7 @@ namespace Game
 
                 VoidStorageItem itemVS = new(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
                     item.GetItemRandomBonusListId(), item.GetModifier(ItemModifier.TimewalkerLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
-                    item.GetContext(), item.m_itemData.BonusListIDs);
+                    item.GetContext(), item.GetBonusListIDs());
 
                 VoidItem voidItem;
                 voidItem.Guid = ObjectGuid.Create(HighGuid.Item, itemVS.ItemId);

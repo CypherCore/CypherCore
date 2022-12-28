@@ -22,7 +22,7 @@ namespace Game.Networking.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        const ushort FactionCount = 400;
+        const ushort FactionCount = 443;
 
         public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
 
@@ -30,7 +30,7 @@ namespace Game.Networking.Packets
         {
             for (ushort i = 0; i < FactionCount; ++i)
             {
-                _worldPacket.WriteUInt8((byte)((ushort)FactionFlags[i] & 0xFF));
+                _worldPacket.WriteUInt16((ushort)((ushort)FactionFlags[i] & 0xFF));
                 _worldPacket.WriteInt32(FactionStandings[i]);
             }
 
@@ -72,7 +72,6 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteFloat(ReferAFriendBonus);
             _worldPacket.WriteFloat(BonusFromAchievementSystem);
 
             _worldPacket.WriteInt32(Faction.Count);
@@ -83,7 +82,6 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public float ReferAFriendBonus;
         public float BonusFromAchievementSystem;
         public List<FactionStandingData> Faction = new();
         public bool ShowVisual;

@@ -682,9 +682,11 @@ namespace Game
 
         public void SendShowMailBox(ObjectGuid guid)
         {
-            ShowMailbox packet = new();
-            packet.PostmasterGUID = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.MailInfo;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

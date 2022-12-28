@@ -65,7 +65,6 @@ namespace Game.DataStorage
         public int ButtonFileDataID;
         public int ButtonSmallFileDataID;
         public int LoreFileDataID;
-        public byte OrderIndex;
         public int Flags;
         public ushort AreaID;
     }

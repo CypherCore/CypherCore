@@ -147,7 +147,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_azeriteEmpoweredItemData).ModifyValue(m_azeriteEmpoweredItemData.Selections, i), 0);
 
             _bonusData = new BonusData(GetTemplate());
-            foreach (uint bonusListID in (List<uint>)m_itemData.BonusListIDs)
+            foreach (uint bonusListID in GetBonusListIDs())
                 _bonusData.AddBonusList(bonusListID);
         }
 

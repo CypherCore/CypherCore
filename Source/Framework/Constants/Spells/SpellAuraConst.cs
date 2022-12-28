@@ -528,10 +528,34 @@ namespace Framework.Constants
         ModHealingTakenFromCaster = 504,
         ModPlayerChoiceRerolls = 505, // NYI
         DisableInertia = 506, // NYI
-        Unk507 = 507,
+        ModDamageTakenFromCasterByLabel = 507,
         Unk508 = 508,
         Unk509 = 509,
-        ModifiedRaidInstance = 510, // Related to "Fated" raid affixes
+        ModifiedRaidInstance = 510, // NYI; Related to "Fated" raid affixes
+        ApplyProfessionEffect = 511, // Nyi; Miscvalue[0] = Professioneffectid
+        Unk512 = 512,
+        Unk513 = 513,
+        Unk514 = 514,
+        Unk515 = 515,
+        Unk516 = 516,
+        Unk517 = 517,
+        Unk518 = 518,
+        ModCooldownRecoveryRateAll = 519, // Nyi; Applies To All Spells, Not Filtered By Familyflags Or Label
+        Unk520 = 520,
+        Unk521 = 521,
+        Unk522 = 522,
+        Unk523 = 523,
+        Unk524 = 524,
+        DisplayProfessionEquipment = 525, // Nyi; Miscvalue[0] = Profession (Enum, Not Id)
+        Unk526 = 526,
+        Unk527 = 527,
+        AllowBlockingSpells = 528, // Nyi
+        ModSpellBlockChance = 529, // Nyi
+        Unk530 = 530,
+        Unk531 = 531,
+        Unk532 = 532,
+        DisableNavigation = 533, // Disables Map Pins
+        Unk534 = 534,
         Total
     }
 

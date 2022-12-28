@@ -2422,8 +2422,9 @@ namespace Game.Entities
                             if (!item)
                                 return;
 
-                            OpenHeartForge openHeartForge = new();
-                            openHeartForge.ForgeGUID = GetGUID();
+                            GameObjectInteraction openHeartForge = new();
+                            openHeartForge.ObjectGUID = GetGUID();
+                            openHeartForge.InteractionType = PlayerInteractionType.AzeriteForge;
                             player.SendPacket(openHeartForge);
                             break;
                         }
@@ -2438,9 +2439,25 @@ namespace Game.Entities
                     if (!player)
                         return;
 
-                    GameObjectUILink gameObjectUILink = new();
+                    GameObjectInteraction gameObjectUILink = new();
                     gameObjectUILink.ObjectGUID = GetGUID();
-                    gameObjectUILink.UILink = (int)GetGoInfo().UILink.UILinkType;
+                    switch (GetGoInfo().UILink.UILinkType)
+                    {
+                        case 0:
+                            gameObjectUILink.InteractionType = PlayerInteractionType.AdventureJournal;
+                            break;
+                        case 1:
+                            gameObjectUILink.InteractionType = PlayerInteractionType.ObliterumForge;
+                            break;
+                        case 2:
+                            gameObjectUILink.InteractionType = PlayerInteractionType.ScrappingMachine;
+                            break;
+                        case 3:
+                            gameObjectUILink.InteractionType = PlayerInteractionType.ItemInteraction;
+                            break;
+                        default:
+                            break;
+                    }
                     player.SendPacket(gameObjectUILink);
                     return;
                 }

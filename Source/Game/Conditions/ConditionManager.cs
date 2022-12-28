@@ -656,7 +656,7 @@ namespace Game
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var gossipMenuItem in pMenuItemBounds)
             {
-                if (gossipMenuItem.MenuId == cond.SourceGroup && gossipMenuItem.OptionId == cond.SourceEntry)
+                if (gossipMenuItem.MenuID == cond.SourceGroup && gossipMenuItem.OrderIndex == cond.SourceEntry)
                 {
                     gossipMenuItem.Conditions.Add(cond);
                     return true;
@@ -2442,6 +2442,45 @@ namespace Game
             if (condition.CovenantID != 0 && player.m_playerData.CovenantID != condition.CovenantID)
                 return false;
 
+            if (condition.TraitNodeEntryID.Any(traitNodeEntryId => traitNodeEntryId != 0))
+            {
+                var getTraitNodeEntryRank = ushort? (int traitNodeEntryId) =>
+                {
+                    foreach (var traitConfig in player.m_activePlayerData.TraitConfigs)
+                    {
+                        if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
+                        {
+                            if (player.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
+                                || !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                                continue;
+                        }
+
+                        foreach (var traitEntry in traitConfig.Entries)
+                            if (traitEntry.TraitNodeEntryID == traitNodeEntryId)
+                                return (ushort)traitEntry.Rank;
+                    }
+                    return null;
+                };
+
+                results = new bool[condition.TraitNodeEntryID.Length];
+                Array.Fill(results, true);
+                for (var i = 0; i < condition.TraitNodeEntryID.Count(); ++i)
+                {
+                    if (condition.TraitNodeEntryID[i] == 0)
+                        continue;
+
+                    var rank = getTraitNodeEntryRank(condition.TraitNodeEntryID[i]);
+                    if (!rank.HasValue)
+                        results[i] = false;
+                    else if (condition.TraitNodeEntryMinRank[i] != 0 && rank < condition.TraitNodeEntryMinRank[i])
+                        results[i] = false;
+                    else if (condition.TraitNodeEntryMaxRank[i] != 0 && rank > condition.TraitNodeEntryMaxRank[i])
+                        results[i] = false;
+                }
+
+                if (!PlayerConditionLogic(condition.TraitNodeEntryLogic, results))
+                    return false;
+            }
             return true;
         }
 

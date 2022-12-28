@@ -1363,7 +1363,7 @@ namespace Game.Entities
                 eqSet.Data.AssignedSpecIndex = result.Read<int>(5);
                 eqSet.state = EquipmentSetUpdateState.Unchanged;
 
-                for (int i = 0; i < EquipmentSlot.End; ++i)
+                for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                 {
                     ulong guid = result.Read<uint>(6 + i);
                     if (guid != 0)
@@ -1400,7 +1400,7 @@ namespace Game.Entities
                 eqSet.Data.IgnoreMask = result.Read<uint>(4);
                 eqSet.state = EquipmentSetUpdateState.Unchanged;
 
-                for (int i = 0; i < EquipmentSlot.End; ++i)
+                for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                     eqSet.Data.Appearances[i] = result.Read<int>(5 + i);
 
                 for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
@@ -2298,7 +2298,7 @@ namespace Game.Entities
                             stmt.AddValue(j++, eqSet.Data.IgnoreMask);
                             stmt.AddValue(j++, eqSet.Data.AssignedSpecIndex);
 
-                            for (byte i = 0; i < EquipmentSlot.End; ++i)
+                            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Pieces[i].GetCounter());
 
                             stmt.AddValue(j++, GetGUID().GetCounter());
@@ -2312,7 +2312,7 @@ namespace Game.Entities
                             stmt.AddValue(j++, eqSet.Data.SetIcon);
                             stmt.AddValue(j++, eqSet.Data.IgnoreMask);
 
-                            for (byte i = 0; i < EquipmentSlot.End; ++i)
+                            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Appearances[i]);
 
                             for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
@@ -2338,7 +2338,7 @@ namespace Game.Entities
                             stmt.AddValue(j++, eqSet.Data.IgnoreMask);
                             stmt.AddValue(j++, eqSet.Data.AssignedSpecIndex);
 
-                            for (byte i = 0; i < EquipmentSlot.End; ++i)
+                            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Pieces[i].GetCounter());
                         }
                         else
@@ -2351,7 +2351,7 @@ namespace Game.Entities
                             stmt.AddValue(j++, eqSet.Data.SetIcon);
                             stmt.AddValue(j++, eqSet.Data.IgnoreMask);
 
-                            for (byte i = 0; i < EquipmentSlot.End; ++i)
+                            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Appearances[i]);
 
                             for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
@@ -2680,15 +2680,6 @@ namespace Game.Entities
 
             InitDisplayIds();
 
-            // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
-            for (byte slot = EquipmentSlot.Start; slot < EquipmentSlot.End; ++slot)
-            {
-                SetInvSlot(slot, ObjectGuid.Empty);
-                SetVisibleItemSlot(slot, null);
-
-                m_items[slot] = null;
-            }
-
             //Need to call it to initialize m_team (m_team can be calculated from race)
             //Other way is to saves m_team into characters table.
             SetFactionForRace(GetRace());
@@ -2981,6 +2972,8 @@ namespace Game.Entities
 
             long now = GameTime.GetGameTime();
             long logoutTime = logout_time;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LogoutTime), logoutTime);
 
             // since last logout (in seconds)
             uint time_diff = (uint)(now - logoutTime);
@@ -3431,7 +3424,7 @@ namespace Game.Entities
 
                 ss.Clear();
                 // cache equipment...
-                for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+                for (byte i = 0; i < InventorySlots.ReagentBagEnd; ++i)
                 {
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)
@@ -3577,7 +3570,7 @@ namespace Game.Entities
 
                 ss.Clear();
                 // cache equipment...
-                for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+                for (byte i = 0; i < InventorySlots.ReagentBagEnd; ++i)
                 {
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)
