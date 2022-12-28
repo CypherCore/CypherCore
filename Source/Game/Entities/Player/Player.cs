@@ -1327,12 +1327,6 @@ namespace Game.Entities
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): spell not exist");
                         return false;
                     }
-
-                    if (!HasSpell((uint)action))
-                    {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): player don't known this spell");
-                        return false;
-                    }
                     break;
                 case ActionButtonType.Item:
                     if (Global.ObjectMgr.GetItemTemplate((uint)action) == null)
