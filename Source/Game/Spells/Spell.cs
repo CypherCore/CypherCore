@@ -7968,6 +7968,7 @@ namespace Game.Spells
         public bool m_fromClient;
         public SpellCastFlagsEx m_castFlagsEx;
         public SpellMisc m_misc;
+        public object m_customArg;
         public SpellCastVisual m_SpellVisual;
         public SpellCastTargets m_targets;
         public sbyte m_comboPointGain;
@@ -9202,6 +9203,7 @@ namespace Game.Spells
         public ObjectGuid OriginalCastId = ObjectGuid.Empty;
         public int? OriginalCastItemLevel;
         public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
+        public object CustomArg;
 
         public CastSpellExtraArgs() { }
 
@@ -9296,6 +9298,12 @@ namespace Game.Spells
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
         {
             SpellValueOverrides.Add(mod, val);
+            return this;
+        }
+
+        public CastSpellExtraArgs SetCustomArg(object customArg)
+        {
+            CustomArg = customArg;
             return this;
         }
     }

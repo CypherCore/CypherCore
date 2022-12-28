@@ -2428,6 +2428,8 @@ namespace Game.Entities
                 }
             }
 
+            spell.m_customArg = args.CustomArg;
+
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 
