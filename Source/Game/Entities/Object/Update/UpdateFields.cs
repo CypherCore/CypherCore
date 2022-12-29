@@ -2992,27 +2992,28 @@ namespace Game.Entities
         public UpdateField<int> PvpLastWeeksTierMaxFromWins = new(98, 104);
         public UpdateField<byte> NumBankSlots = new(98, 105);
         public UpdateField<int> TransportServerTime = new(98, 106);
-        public UpdateField<byte> GlyphsEnabled = new(98, 107); 
-        public UpdateFieldArray<ObjectGuid> InvSlots = new(129, 108, 109);
-        public UpdateFieldArray<uint> TrackResourceMask = new(2, 238, 239);
-        public UpdateFieldArray<float> SpellCritPercentage = new(7, 241, 242);
-        public UpdateFieldArray<int> ModDamageDonePos = new(7, 241, 249);
-        public UpdateFieldArray<int> ModDamageDoneNeg = new(7, 241, 256);
-        public UpdateFieldArray<float> ModDamageDonePercent = new(7, 241, 263);
-        public UpdateFieldArray<ulong> ExploredZones = new(240, 270, 271);
-        public UpdateFieldArray<RestInfo> RestInfo = new(2, 511, 512);
-        public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 514, 515);
-        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 514, 518);
-        public UpdateFieldArray<uint> BuybackPrice = new(12, 521, 522);
-        public UpdateFieldArray<long> BuybackTimestamp = new(12, 521, 534);
-        public UpdateFieldArray<uint> CombatRatings = new(32, 546, 547);
-        public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 579, 580);
-        public UpdateFieldArray<uint> NoReagentCostMask = new(4, 586, 587);
-        public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 591, 592);
-        public UpdateFieldArray<uint> BagSlotFlags = new(4, 594, 595);
-        public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 599, 600);
-        public UpdateFieldArray<ulong> QuestCompleted = new(875, 607, 608);
-        public UpdateFieldArray<GlyphInfo> GlyphInfos = new (6, 1483, 1484);
+        public UpdateField<byte> GlyphsEnabled = new(98, 107);
+        public UpdateField<byte> Unk340 = new(98, 108);
+        public UpdateFieldArray<ObjectGuid> InvSlots = new(129, 109, 110);
+        public UpdateFieldArray<uint> TrackResourceMask = new(2, 239, 240);
+        public UpdateFieldArray<float> SpellCritPercentage = new(7, 242, 243);
+        public UpdateFieldArray<int> ModDamageDonePos = new(7, 242, 250);
+        public UpdateFieldArray<int> ModDamageDoneNeg = new(7, 242, 257);
+        public UpdateFieldArray<float> ModDamageDonePercent = new(7, 242, 264);
+        public UpdateFieldArray<ulong> ExploredZones = new(240, 271, 272);
+        public UpdateFieldArray<RestInfo> RestInfo = new(2, 512, 513);
+        public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 515, 516);
+        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 515, 519);
+        public UpdateFieldArray<uint> BuybackPrice = new(12, 522, 523);
+        public UpdateFieldArray<long> BuybackTimestamp = new(12, 522, 535);
+        public UpdateFieldArray<uint> CombatRatings = new(32, 547, 548);
+        public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 580, 581);
+        public UpdateFieldArray<uint> NoReagentCostMask = new(4, 587, 588);
+        public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 592, 593);
+        public UpdateFieldArray<uint> BagSlotFlags = new(4, 595, 596);
+        public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 600, 601);
+        public UpdateFieldArray<ulong> QuestCompleted = new(875, 608, 609);
+        public UpdateFieldArray<GlyphInfo> GlyphInfos = new (6, 1484, 1485);
 
         public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1554)
         {
@@ -3195,6 +3196,7 @@ namespace Game.Entities
                 GlyphInfos[i].WriteCreate(data, owner, receiver);
             }
             data.WriteUInt8(GlyphsEnabled);
+            data.WriteUInt8(Unk340);
             for (int i = 0; i < KnownTitles.Size(); ++i)
             {
                 data.WriteUInt64(KnownTitles[i]);
@@ -3919,172 +3921,176 @@ namespace Game.Entities
                 {
                     data.WriteUInt8(GlyphsEnabled);
                 }
+                if (changesMask[108])
+                {
+                    data.WriteUInt8(Unk340);
+                }
             }
-            if (changesMask[108])
+            if (changesMask[109])
             {
                 for (int i = 0; i < 129; ++i)
                 {
-                    if (changesMask[109 + i])
+                    if (changesMask[110 + i])
                     {
                         data.WritePackedGuid(InvSlots[i]);
                     }
                 }
             }
-            if (changesMask[238])
+            if (changesMask[239])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[239 + i])
+                    if (changesMask[240 + i])
                     {
                         data.WriteUInt32(TrackResourceMask[i]);
                     }
                 }
             }
-            if (changesMask[241])
+            if (changesMask[242])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[242 + i])
+                    if (changesMask[243 + i])
                     {
                         data.WriteFloat(SpellCritPercentage[i]);
                     }
-                    if (changesMask[249 + i])
+                    if (changesMask[250 + i])
                     {
                         data.WriteInt32(ModDamageDonePos[i]);
                     }
-                    if (changesMask[256 + i])
+                    if (changesMask[257 + i])
                     {
                         data.WriteInt32(ModDamageDoneNeg[i]);
                     }
-                    if (changesMask[263 + i])
+                    if (changesMask[264 + i])
                     {
                         data.WriteFloat(ModDamageDonePercent[i]);
                     }
                 }
             }
-            if (changesMask[270])
+            if (changesMask[271])
             {
                 for (int i = 0; i < 240; ++i)
                 {
-                    if (changesMask[271 + i])
+                    if (changesMask[272 + i])
                     {
                         data.WriteUInt64(ExploredZones[i]);
                     }
                 }
             }
-            if (changesMask[511])
+            if (changesMask[512])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[512 + i])
+                    if (changesMask[513 + i])
                     {
                         RestInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[514])
+            if (changesMask[515])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (changesMask[515 + i])
+                    if (changesMask[516 + i])
                     {
                         data.WriteFloat(WeaponDmgMultipliers[i]);
                     }
-                    if (changesMask[518 + i])
+                    if (changesMask[519 + i])
                     {
                         data.WriteFloat(WeaponAtkSpeedMultipliers[i]);
                     }
                 }
             }
-            if (changesMask[521])
+            if (changesMask[522])
             {
                 for (int i = 0; i < 12; ++i)
                 {
-                    if (changesMask[522 + i])
+                    if (changesMask[523 + i])
                     {
                         data.WriteUInt32(BuybackPrice[i]);
                     }
-                    if (changesMask[534 + i])
+                    if (changesMask[535 + i])
                     {
                         data.WriteInt64(BuybackTimestamp[i]);
                     }
                 }
             }
-            if (changesMask[546])
+            if (changesMask[547])
             {
                 for (int i = 0; i < 32; ++i)
                 {
-                    if (changesMask[547 + i])
+                    if (changesMask[548 + i])
                     {
                         data.WriteUInt32(CombatRatings[i]); //TODO: may be Int32? this is in TC
                     }
                 }
             }
-            if (changesMask[586])
+            if (changesMask[587])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[587 + i])
+                    if (changesMask[588 + i])
                     {
                         data.WriteUInt32(NoReagentCostMask[i]);
                     }
                 }
             }
-            if (changesMask[591])
+            if (changesMask[592])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[592 + i])
+                    if (changesMask[593 + i])
                     {
                         data.WriteUInt32(ProfessionSkillLine[i]); //TODO: may be Int32? this is in TC
                     }
                 }
             }
-            if (changesMask[594])
+            if (changesMask[595])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[595 + i])
+                    if (changesMask[596 + i])
                     {
                         data.WriteUInt32(BagSlotFlags[i]);
                     }
                 }
             }
-            if (changesMask[599])
+            if (changesMask[600])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[600 + i])
+                    if (changesMask[601 + i])
                     {
                         data.WriteUInt32(BankBagSlotFlags[i]);
                     }
                 }
             }
-            if (changesMask[607])
+            if (changesMask[608])
             {
                 for (int i = 0; i < 875; ++i)
                 {
-                    if (changesMask[608 + i])
+                    if (changesMask[609 + i])
                     {
                         data.WriteUInt64(QuestCompleted[i]);
                     }
                 }
             }
-            if (changesMask[1483])
+            if (changesMask[1484])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[1484 + i])
+                    if (changesMask[1485 + i])
                     {
                         GlyphInfos[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[579])
+            if (changesMask[580])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[580 + i])
+                    if (changesMask[581 + i])
                     {
                         PvpInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
@@ -4198,6 +4204,7 @@ namespace Game.Entities
             ClearChangesMask(NumBankSlots);
             ClearChangesMask(TransportServerTime);
             ClearChangesMask(GlyphsEnabled);
+            ClearChangesMask(Unk340);
             ClearChangesMask(InvSlots);
             ClearChangesMask(TrackResourceMask);
             ClearChangesMask(SpellCritPercentage);
