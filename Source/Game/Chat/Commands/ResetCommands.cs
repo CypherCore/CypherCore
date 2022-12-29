@@ -206,8 +206,8 @@ namespace Game.Chat
             if (target)
             {
                 target.ResetTalents(true);
-                target.ResetTalentSpecialization();
-                target.SendTalentsInfoData();
+                //target.ResetTalentSpecialization();
+                target.SendTalentsInfoData(false);
                 target.SendSysMessage(CypherStrings.ResetTalents);
                 if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
                     handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));

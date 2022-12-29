@@ -27,6 +27,7 @@ using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -363,18 +364,21 @@ namespace Game.Entities
         {
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                Talents[i] = new Dictionary<uint, PlayerSpellState>();
+                Talents[i] = new Dictionary<uint, PlayerTalent>();
                 PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
-                Glyphs[i] = new List<uint>();
+                Glyphs[i] = new List<ushort>();
             }
         }
 
-        public Dictionary<uint, PlayerSpellState>[] Talents = new Dictionary<uint, PlayerSpellState>[PlayerConst.MaxSpecializations];
+        public Dictionary<uint, PlayerTalent>[] Talents = new Dictionary<uint, PlayerTalent>[PlayerConst.MaxSpecializations];
         public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
-        public List<uint>[] Glyphs = new List<uint>[PlayerConst.MaxSpecializations];
+        public List<ushort>[] Glyphs = new List<ushort>[PlayerConst.MaxSpecializations];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
+        public uint UsedTalentCount;
+        public uint QuestRewardTalentCount;
         public byte ActiveGroup;
+        public byte TalentGroupCount;
     }
 
     public class Runes
@@ -674,4 +678,10 @@ namespace Game.Entities
         public (uint QuestID, QuestStatusData Status) QuestStatusPair;
         public QuestObjective Objective;
     }
+
+    public class PlayerTalent
+    {
+        public PlayerSpellState state;
+        public byte spec;
+    };
 }

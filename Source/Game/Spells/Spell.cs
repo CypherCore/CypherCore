@@ -8059,6 +8059,10 @@ namespace Game.Spells
         [FieldOffset(0)]
         public uint ItemId;
 
+        // SPELL_EFFECT_APPLY_GLYPH
+        [FieldOffset(0)]
+        public uint GlyphIndex;
+
         [FieldOffset(0)]
         public uint Data0;
 

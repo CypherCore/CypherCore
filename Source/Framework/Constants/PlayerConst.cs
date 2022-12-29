@@ -21,11 +21,17 @@ namespace Framework.Constants
 {
     public struct PlayerConst
     {
-        public const Expansion CurrentExpansion = Expansion.ShadowLands;
-
+        public const Expansion CurrentExpansion = Expansion.Classic;
+        public const int MaxTalentSpec = 1;
+        public const int MinTalentSpec = 0;
+        public const int MaxTalentSpecs = 2;
+        public const int MinTalentSpecs = 1;
+        public const int MaxGlyphSlotIndex = 6;
+        public const int MaxTalentTabs = 3;
         public const int MaxTalentTiers = 11;
         public const int MaxTalentColumns = 4;
         public const int MaxTalentRank = 5;
+        public const int MaxPetTalentRank = 3;
         public const int MaxPvpTalentSlots = 4;
         public const int MinSpecializationLevel = 10;
         public const int MaxSpecializations = 5;

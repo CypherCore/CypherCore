@@ -549,8 +549,8 @@ namespace Game.DataStorage
         public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
         public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
-        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
         public static DB6Storage<GlyphSlotRecord> GlyphSlotStorage;
+        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;        
         public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage;
         public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage;
         public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage;
@@ -617,7 +617,7 @@ namespace Game.DataStorage
         public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage;
         public static DB6Storage<MountRecord> MountStorage;
         public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage;
-        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;
+        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;        
         public static DB6Storage<MovieRecord> MovieStorage;
         public static DB6Storage<NameGenRecord> NameGenStorage;
         public static DB6Storage<NamesProfanityRecord> NamesProfanityStorage;
@@ -751,9 +751,16 @@ namespace Game.DataStorage
         public static byte[] TaxiNodesMask;
         public static byte[] OldContinentsNodesMask;
         public static byte[] HordeTaxiNodesMask;
-        public static byte[] AllianceTaxiNodesMask;
+        public static byte[] AllianceTaxiNodesMask;        
         public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+        #endregion
+
+        #region Talent Collections
+        public static Dictionary<uint, TalentSpellPos> TalentSpellPosMap;
+        public static HashSet<uint> PetTalentSpells = new();
+        /// <summary>store absolute bit position for first rank for talent inspect</summary>        
+        public static uint[][] TalentTabPages = new uint[(uint)Class.Max][];
         #endregion
 
         #region Helper Methods

@@ -959,19 +959,20 @@ namespace Game.Entities
 
             m_MonthlyQuestChanged = false;
         }
+
         void _LoadTalents(SQLResult result)
         {
+            //"SELECT spell, talentGroup FROM character_talent WHERE guid = ?"
             if (!result.IsEmpty())
             {
                 do
                 {
-                    TalentRecord talent = CliDB.TalentStorage.LookupByKey(result.Read<uint>(0));
-                    if (talent != null)
-                        AddTalent(talent, result.Read<byte>(1), false);
+                    AddTalent(result.Read<uint>(0), result.Read<byte>(1), false);
                 }
                 while (result.NextRow());
             }
         }
+
         void _LoadPvpTalents(SQLResult result)
         {
             // "SELECT talentID0, talentID1, talentID2, talentID3, talentGroup FROM character_pvp_talent WHERE guid = ?"
@@ -981,7 +982,7 @@ namespace Game.Entities
                 {
                     for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
                     {
-                        PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(result.Read<uint>(slot));
+                        PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(result.Read<byte>(slot));
                         if (talent != null)
                             AddPvpTalent(talent, result.Read<byte>(4), slot);
                     }
@@ -989,31 +990,62 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
         void _LoadGlyphs(SQLResult result)
         {
-            // SELECT talentGroup, glyphId from character_glyphs WHERE guid = ?
+            // SELECT talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = ?
             if (result.IsEmpty())
                 return;
 
             do
             {
                 byte spec = result.Read<byte>(0);
-                if (spec >= PlayerConst.MaxSpecializations || Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), spec) == null)
+                if (spec >= PlayerConst.MaxTalentSpecs && spec >= GetTalentGroupCount())
                     continue;
 
-                ushort glyphId = result.Read<ushort>(1);
-                if (!CliDB.GlyphPropertiesStorage.ContainsKey(glyphId))
-                    continue;
-
-                GetGlyphs(spec).Add(glyphId);
+                for (byte slotIndex = 0; slotIndex < PlayerConst.MaxGlyphSlotIndex; ++slotIndex)
+                {
+                    uint glyphId = result.Read<ushort>(slotIndex + 1);
+                    if (CliDB.GlyphPropertiesStorage.LookupByKey(glyphId) is GlyphPropertiesRecord)
+                        GetGlyphs(spec)[slotIndex] = 0;
+                    else
+                        GetGlyphs(spec)[slotIndex] = (ushort)glyphId;
+                }
 
             } while (result.NextRow());
         }
+
         void _LoadGlyphAuras()
         {
-            foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
-                CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
+            for (byte i = 0; i < PlayerConst.MaxGlyphSlotIndex; ++i)
+            {
+                if (GetGlyph(i) is uint glyph && glyph != 0)
+                {
+                    CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp);
+                    if (gp != null)
+                    {
+                        CliDB.GlyphSlotStorage.TryGetValue(GetGlyphSlot(i), out GlyphSlotRecord gs);
+                        if (gs != null)
+                        {
+                            if (gp.GlyphSlotFlags == gs.Type)
+                            {
+                                CastSpell(this, gp.SpellID, true);
+                                    continue;
+                            }
+                            else
+                                Log.outError(LogFilter.Player, "Player::_LoadGlyphAuras: Player '{0}' ({1}) has glyph with typeflags {2} in slot with typeflags {3}, removing.", GetName(), GetGUID().ToString(), gp.GlyphSlotFlags, gs.Type);
+                        }
+                        else
+                            Log.outError(LogFilter.Player, "Player::_LoadGlyphAuras: Player '{0}' ({1}) has not existing glyph slot entry {2} on index {3}", GetName(), GetGUID().ToString(), GetGlyphSlot(i), i);
+                    }
+                    else
+                        Log.outError(LogFilter.Player, "Player::_LoadGlyphAuras: Player '{0}' ({1}) has not existing glyph entry {2} on index {3}", GetName(), GetGUID().ToString(), glyph, i);
+
+                // On any error remove glyph
+                SetGlyph(i, 0);
+            }
         }
+    }
         public void LoadCorpse(SQLResult result)
         {
             if (IsAlive() || HasAtLoginFlag(AtLoginFlags.Resurrect))
@@ -1739,19 +1771,19 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
+            for (byte spec = 0; spec < PlayerConst.MaxTalentSpecs; ++spec)
             {
-                foreach (uint glyphId in GetGlyphs(spec))
-                {
+                
                     byte index = 0;
 
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GLYPHS);
                     stmt.AddValue(index++, GetGUID().GetCounter());
                     stmt.AddValue(index++, spec);
-                    stmt.AddValue(index++, glyphId);
+                    foreach (var glyphId in GetGlyphs(spec))
+                        stmt.AddValue(index++, glyphId);
 
                     trans.Append(stmt);
-                }
+                
             }
         }
         void _SaveCurrency(SQLTransaction trans)
@@ -2056,6 +2088,7 @@ namespace Game.Entities
 
             m_MonthlyQuestChanged = false;
         }
+
         void _SaveTalents(SQLTransaction trans)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TALENT);
@@ -2067,7 +2100,7 @@ namespace Game.Entities
                 var talents = GetTalentMap(group);
                 foreach (var pair in talents.ToList())
                 {
-                    if (pair.Value == PlayerSpellState.Removed)
+                    if (pair.Value.state == PlayerSpellState.Removed)
                     {
                         talents.Remove(pair.Key);
                         continue;
@@ -2098,6 +2131,7 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
+
         public void _SaveMail(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -2980,6 +3014,7 @@ namespace Game.Entities
 
             // reset stats before loading any modifiers
             InitStatsForLevel();
+            InitGlyphsForLevel();
             InitTaxiNodesForLevel();
             InitRunes();
 
@@ -2993,16 +3028,16 @@ namespace Game.Entities
             SetNumRespecs(numRespecs);
             SetPrimarySpecialization(primarySpecialization);
             SetActiveTalentGroup(activeTalentGroup);
-            ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
-            if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
-                ResetTalentSpecialization();
+            //ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            //if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
+            //    ResetTalentSpecialization();
 
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
-            if (chrSpec != null)
-            {
-                if (chrSpec.ClassID == (uint)GetClass())
-                    SetLootSpecId(lootSpecId);
-            }
+            //ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
+            //if (chrSpec != null)
+            //{
+            //    if (chrSpec.ClassID == (uint)GetClass())
+            //        SetLootSpecId(lootSpecId);
+            //}
 
             UpdateDisplayPower();
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));

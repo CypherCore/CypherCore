@@ -2992,7 +2992,7 @@ namespace Game.Entities
         public UpdateField<int> PvpLastWeeksTierMaxFromWins = new(98, 104);
         public UpdateField<byte> NumBankSlots = new(98, 105);
         public UpdateField<int> TransportServerTime = new(98, 106);
-        public UpdateField<byte> Unk340_2 = new(98, 107); 
+        public UpdateField<byte> GlyphsEnabled = new(98, 107); 
         public UpdateFieldArray<ObjectGuid> InvSlots = new(129, 108, 109);
         public UpdateFieldArray<uint> TrackResourceMask = new(2, 238, 239);
         public UpdateFieldArray<float> SpellCritPercentage = new(7, 241, 242);
@@ -3012,7 +3012,7 @@ namespace Game.Entities
         public UpdateFieldArray<uint> BagSlotFlags = new(4, 594, 595);
         public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 599, 600);
         public UpdateFieldArray<ulong> QuestCompleted = new(875, 607, 608);
-        UpdateFieldArray<GlyphInfo> GlyphInfos = new (6, 1483, 1484);
+        public UpdateFieldArray<GlyphInfo> GlyphInfos = new (6, 1483, 1484);
 
         public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1554)
         {
@@ -3194,7 +3194,7 @@ namespace Game.Entities
             {
                 GlyphInfos[i].WriteCreate(data, owner, receiver);
             }
-            data.WriteUInt8(Unk340_2);
+            data.WriteUInt8(GlyphsEnabled);
             for (int i = 0; i < KnownTitles.Size(); ++i)
             {
                 data.WriteUInt64(KnownTitles[i]);
@@ -3917,7 +3917,7 @@ namespace Game.Entities
                 }
                 if (changesMask[107])
                 {
-                    data.WriteUInt8(Unk340_2);
+                    data.WriteUInt8(GlyphsEnabled);
                 }
             }
             if (changesMask[108])
@@ -4197,7 +4197,7 @@ namespace Game.Entities
             ClearChangesMask(PvpLastWeeksTierMaxFromWins);
             ClearChangesMask(NumBankSlots);
             ClearChangesMask(TransportServerTime);
-            ClearChangesMask(Unk340_2);
+            ClearChangesMask(GlyphsEnabled);
             ClearChangesMask(InvSlots);
             ClearChangesMask(TrackResourceMask);
             ClearChangesMask(SpellCritPercentage);

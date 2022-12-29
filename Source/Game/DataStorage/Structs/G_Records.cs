@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.Entities;
 using System;
 using System.Numerics;
 
@@ -293,7 +294,8 @@ namespace Game.DataStorage
         public uint SpellID;
         public byte GlyphType;
         public byte GlyphExclusiveCategoryID;
-        public uint SpellIconID;
+        public uint SpellIconFileDataID;
+        public uint GlyphSlotFlags;
     }
 
     public sealed class GlyphRequiredSpecRecord

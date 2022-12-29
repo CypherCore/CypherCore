@@ -2359,7 +2359,7 @@ namespace Game.Entities
             {
                 uint next_active_spell_id = 0;
                 // fix activate state for non-stackable low rank (and find next spell for !active case)
-                if (spellInfo.IsRanked())
+                if (!spellInfo.IsStackableWithRanks() && spellInfo.IsRanked())
                 {
                     uint next = Global.SpellMgr.GetNextSpellInChain(spellId);
                     if (next != 0)
@@ -2410,7 +2410,11 @@ namespace Game.Entities
                     else if (IsInWorld)
                     {
                         if (next_active_spell_id != 0)
+                        {
                             SendSupercededSpell(spellId, next_active_spell_id);
+                            // if (IsUnlearnSpellsPacketNeededForSpell(spellId))
+                            //     SendUnlearnSpells();
+                        }
                         else
                         {
                             UnlearnedSpells removedSpells = new();
@@ -2458,9 +2462,25 @@ namespace Game.Entities
 
             if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
             {
+                // talent: unlearn all other talent ranks (high and low)
+                if (Global.DB2Mgr.GetTalentSpellPos(spellId) is TalentSpellPos talentPos)
+                {
+                    CliDB.TalentStorage.TryGetValue(talentPos.TalentID, out TalentRecord talentInfo);
+                    if (talentInfo != null)
+                    {
+                        for (byte rank = 0; rank < PlayerConst.MaxTalentRank; ++rank)
+                        {
+                            // skip learning spell and no rank spell case
+                            uint rankSpellId = (uint)talentInfo.SpellRank[rank];
+                            if (rankSpellId == 0 || rankSpellId == spellId)
+                                continue;
+
+                            RemoveSpell(rankSpellId, false, false);
+                        }
+                    }
+                }
                 // non talent spell: learn low ranks (recursive call)
-                uint prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
-                if (prev_spell != 0)
+                else if (Global.SpellMgr.GetPrevSpellInChain(spellId) is uint prev_spell && prev_spell != 0)
                 {
                     if (!IsInWorld || disabled)                    // at spells loading, no output, but allow save
                         AddSpell(prev_spell, active, true, true, disabled, false, fromSkill);
@@ -2474,8 +2494,10 @@ namespace Game.Entities
                 newspell.Dependent = dependent;
                 newspell.Disabled = disabled;
 
+                bool needsUnlearnSpellsPacket = false;
+
                 // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-                if (newspell.Active && !newspell.Disabled && spellInfo.IsRanked())
+                if (newspell.Active && !newspell.Disabled && !spellInfo.IsStackableWithRanks() && spellInfo.IsRanked())
                 {
                     foreach (var _spell in m_spells)
                     {
@@ -2493,7 +2515,10 @@ namespace Game.Entities
                                 if (spellInfo.IsHighRankOf(i_spellInfo))
                                 {
                                     if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
+                                    {
                                         SendSupercededSpell(_spell.Key, spellId);
+                                        // needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(_spell.Key);
+                                    }
 
                                     // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                                     _spell.Value.Active = false;
@@ -2504,7 +2529,10 @@ namespace Game.Entities
                                 else
                                 {
                                     if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
+                                    {
                                         SendSupercededSpell(spellId, _spell.Key);
+                                        // needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(spellId);
+                                    }
 
                                     // mark new spell as disable (not learned yet for client and will not learned)
                                     newspell.Active = false;
@@ -2517,14 +2545,19 @@ namespace Game.Entities
                 }
                 m_spells[spellId] = newspell;
 
+                if (needsUnlearnSpellsPacket)
+                    SendUnlearnSpells();
+
                 // return false if spell disabled
                 if (newspell.Disabled)
                     return false;
             }
 
+            uint talentCost = Global.DB2Mgr.GetTalentSpellCost(spellId);
+
             // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
             // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
-            if (!loading && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
+            if (!loading && talentCost > 0 && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
             {
                 // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
                 CastSpell(this, spellId, true);
@@ -2542,6 +2575,9 @@ namespace Game.Entities
             }
             else if (spellInfo.HasAttribute(SpellAttr1.CastWhenLearned))
                 CastSpell(this, spellId, true);
+
+            // update used talent points count
+            SetUsedTalentCount(GetUsedTalentCount() + talentCost);
 
             // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
             uint freeProfs = GetFreePrimaryProfessionPoints();

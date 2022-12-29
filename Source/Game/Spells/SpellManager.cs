@@ -2623,7 +2623,13 @@ namespace Game.Entities
 
             List<uint> talentSpells = new();
             foreach (var talentInfo in CliDB.TalentStorage.Values)
-                talentSpells.Add((uint)talentInfo.SpellID);
+            {
+                if (talentInfo != null)
+                {
+                    foreach (uint spellRank in talentInfo.SpellRank)
+                        talentSpells.Add(spellRank);
+                }
+            }
 
             foreach (var spellInfo in mSpellInfoMap.Values)
             {

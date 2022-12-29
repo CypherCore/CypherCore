@@ -214,26 +214,42 @@ namespace Game.Chat.Commands
             static bool HandleLearnAllTalentsCommand(CommandHandler handler)
             {
                 Player player = handler.GetSession().GetPlayer();
-                uint playerClass = (uint)player.GetClass();
+                uint classMask = player.GetClassMask();
 
                 foreach (var (_, talentInfo) in CliDB.TalentStorage)
                 {
-                    if (playerClass != talentInfo.ClassID)
+                    TalentTabRecord talentTabInfo = CliDB.TalentTabStorage.LookupByKey(talentInfo.TabID);
+                    if (talentTabInfo == null)
                         continue;
 
-                    if (talentInfo.SpecID != 0 && player.GetPrimarySpecialization() != talentInfo.SpecID)
+                    if ((classMask & talentTabInfo.ClassMask) == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
+                    // search highest talent rank
+                    uint spellId = 0;
+                    for (byte rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
+                    {
+                        if (talentInfo.SpellRank[rank] != 0)
+                        {
+                            spellId = (uint)talentInfo.SpellRank[rank];
+                            break;
+                        }
+                    }
+
+                    if (spellId == 0)    // ??? none spells in talent
+                        continue;
+
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
                     // learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
-                    player.AddTalent(talentInfo, player.GetActiveTalentGroup(), true);
+                    player.AddTalent(spellId, player.GetActiveTalentGroup(), true);
                     player.LearnSpell((uint)talentInfo.SpellID, false);
                 }
 
-                player.SendTalentsInfoData();
+                player.SetFreeTalentPoints(0);
+                player.SendTalentsInfoData(false);
 
                 handler.SendSysMessage(CypherStrings.CommandLearnClassTalents);
                 return true;

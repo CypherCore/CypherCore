@@ -50,7 +50,7 @@ namespace Game
                 var talents = player.GetTalentMap(player.GetActiveTalentGroup());
                 foreach (var v in talents)
                 {
-                    if (v.Value != PlayerSpellState.Removed)
+                    if (v.Value.state != PlayerSpellState.Removed)
                         inspectResult.Talents.Add((ushort)v.Key);
                 }
             }

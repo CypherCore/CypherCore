@@ -716,7 +716,8 @@ namespace Framework.Constants
         BfMgrQueueExitRequest = 0xbadd,
 
         Max = 0x3FFF,
-        Unknown = 0xbadd
+        Unknown = 0xbadd,
+        LearnPvpTalents = 0xbadd,
     }
 
     public enum ServerOpcodes : uint

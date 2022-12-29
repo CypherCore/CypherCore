@@ -420,7 +420,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum PlayerSpellState
+    public enum PlayerSpellState : byte
     {
         Unchanged = 0,
         Changed = 1,

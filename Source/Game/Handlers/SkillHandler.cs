@@ -26,31 +26,38 @@ namespace Game
 {
     public partial class WorldSession
     {
-        //[WorldPacketHandler(ClientOpcodes.LearnTalents, Processing = PacketProcessing.Inplace)]
-        //void HandleLearnTalents(LearnTalents packet)
-        //{
-        //    LearnTalentFailed learnTalentFailed = new();
-        //    bool anythingLearned = false;
-        //    foreach (uint talentId in packet.Talents)
-        //    {
-        //        TalentLearnResult result = _player.LearnTalent(talentId, ref learnTalentFailed.SpellID);
-        //        if (result != 0)
-        //        {
-        //            if (learnTalentFailed.Reason == 0)
-        //                learnTalentFailed.Reason = (uint)result;
+        [WorldPacketHandler(ClientOpcodes.LearnTalent, Processing = PacketProcessing.Inplace)]
+        void HandleLearnTalent(LearnTalents packet)
+        {
+            _player.LearnTalent((uint)packet.TalentID, packet.Rank);
+            _player.SendTalentsInfoData(false);
+        }
 
-        //            learnTalentFailed.Talents.Add((ushort)talentId);
-        //        }
-        //        else
-        //            anythingLearned = true;
-        //    }
+        [WorldPacketHandler(ClientOpcodes.LearnPvpTalents, Processing = PacketProcessing.Inplace)]
+        void HandleLearnPvpTalents(LearnPvpTalents packet)
+        {
+            LearnPvpTalentFailed learnPvpTalentFailed = new();
+            bool anythingLearned = false;
+            foreach (var pvpTalent in packet.Talents)
+            {
+                TalentLearnResult result = _player.LearnPvpTalent(pvpTalent.PvPTalentID, pvpTalent.Slot, ref learnPvpTalentFailed.SpellID);
+                if (result != 0)
+                {
+                    if (learnPvpTalentFailed.Reason == 0)
+                        learnPvpTalentFailed.Reason = (uint)result;
 
-        //    if (learnTalentFailed.Reason != 0)
-        //        SendPacket(learnTalentFailed);
+                    learnPvpTalentFailed.Talents.Add(pvpTalent);
+                }
+                else
+                    anythingLearned = true;
+            }
 
-        //    if (anythingLearned)
-        //        GetPlayer().SendTalentsInfoData();
-        //}
+            if (learnPvpTalentFailed.Reason != 0)
+                SendPacket(learnPvpTalentFailed);
+
+            if (anythingLearned)
+                _player.SendTalentsInfoData(false);
+        }
 
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]
         void HandleConfirmRespecWipe(ConfirmRespecWipe confirmRespecWipe)
@@ -78,7 +85,7 @@ namespace Game
             if (!GetPlayer().ResetTalents())
                 return;
 
-            GetPlayer().SendTalentsInfoData();
+            GetPlayer().SendTalentsInfoData(false);
             unit.CastSpell(GetPlayer(), 14867, true);                  //spell: "Untalent Visual Effect"
         }
 

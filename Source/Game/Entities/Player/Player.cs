@@ -267,6 +267,7 @@ namespace Game.Entities
             // base stats and related field values
             InitStatsForLevel();
             InitTaxiNodesForLevel();
+            InitGlyphsForLevel();
             InitTalentForLevel();
             InitializeSkillFields();
             InitPrimaryProfessions();                               // to max set before any spell added
@@ -4784,7 +4785,11 @@ namespace Game.Entities
             return GetGuildId() != 0 ? Global.GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
         }
 
-        public void SetFreePrimaryProfessions(uint profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
+        public void SetFreePrimaryProfessions(uint profs)
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs);
+        }
+
         public void GiveLevel(uint level)
         {
             var oldLevel = GetLevel();
@@ -4839,7 +4844,7 @@ namespace Game.Entities
 
             SetCreateHealth(0);
             SetCreateMana(basemana);
-
+            UpdateGlyphsEnabled();
             InitTalentForLevel();
             InitTaxiNodesForLevel();
 
@@ -5060,7 +5065,7 @@ namespace Game.Entities
             // SMSG_SET_FLAT_SPELL_MODIFIER
 
             // SMSG_TALENTS_INFO
-            SendTalentsInfoData();
+            SendTalentsInfoData(false);
 
             // SMSG_INITIAL_SPELLS
             SendKnownSpells();
@@ -5224,14 +5229,14 @@ namespace Game.Entities
             SendItemDurations();                                    // must be after add to map
 
             // raid downscaling - send difficulty to player
-            if (GetMap().IsRaid())
-            {
-                Difficulty mapDifficulty = GetMap().GetDifficultyID();
-                var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-                SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
-            }
-            else if (GetMap().IsNonRaidDungeon())
-                SendDungeonDifficulty((int)GetMap().GetDifficultyID());
+            //if (GetMap().IsRaid())
+            //{
+            //    Difficulty mapDifficulty = GetMap().GetDifficultyID();
+            //    var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
+            //    SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
+            //}
+            //else if (GetMap().IsNonRaidDungeon())
+            //    SendDungeonDifficulty((int)GetMap().GetDifficultyID());
 
             PhasingHandler.OnMapChange(this);
 

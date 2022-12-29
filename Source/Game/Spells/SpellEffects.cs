@@ -3023,44 +3023,60 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            if (m_misc.GlyphIndex >= PlayerConst.MaxGlyphSlotIndex)
+                return;
+
             Player player = m_caster.ToPlayer();
             if (player == null)
                 return;
 
-            List<uint> glyphs = player.GetGlyphs(player.GetActiveTalentGroup());
-            int replacedGlyph = glyphs.Count;
-            for (int i = 0; i < glyphs.Count; ++i)
+            // glyph sockets level requirement
+            byte minLevel = 0;
+            switch (m_misc.GlyphIndex)
             {
-                List<uint> activeGlyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphs[i]);
-                if (activeGlyphBindableSpells.Contains(m_misc.SpellId))
+                case 0:
+                case 1: minLevel = 15; break;
+                case 2: minLevel = 50; break;
+                case 3: minLevel = 30; break;
+                case 4: minLevel = 70; break;
+                case 5: minLevel = 80; break;
+            }
+            if (minLevel !=0  && player.GetLevel() < minLevel)
+            {
+                SendCastResult(SpellCastResult.GlyphSocketLocked);
+                return;
+            }
+
+            // apply new one
+            uint glyph = (uint)effectInfo.MiscValue;
+            if (glyph != 0)
+            {
+                if (CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp))
                 {
-                    replacedGlyph = i;
-                    player.RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphs[i]).SpellID);
-                    break;
+                    if (CliDB.GlyphSlotStorage.TryGetValue(player.GetGlyphSlot((byte)m_misc.GlyphIndex), out GlyphSlotRecord gs))
+                    {
+                        if (gp.GlyphSlotFlags != gs.Type)
+                        {
+                            SendCastResult(SpellCastResult.InvalidGlyph);
+                            return;                                 // glyph slot mismatch
+                        }
+                    }
+
+                    // remove old glyph
+                    if (player.GetGlyph((byte)m_misc.GlyphIndex) is uint oldglyph && oldglyph != 0)
+                    {
+                        if (CliDB.GlyphPropertiesStorage.TryGetValue(oldglyph, out GlyphPropertiesRecord old_gp))
+                        {
+                            player.RemoveAurasDueToSpell(old_gp.SpellID);
+                            player.SetGlyph((byte)m_misc.GlyphIndex, 0);
+                        }
+                    }
+
+                    player.CastSpell(player, gp.SpellID, true);
+                    player.SetGlyph((byte)m_misc.GlyphIndex, glyph);
+                    player.SendTalentsInfoData(false);
                 }
             }
-
-            uint glyphId = (uint)effectInfo.MiscValue;
-            if (replacedGlyph < glyphs.Count)
-            {
-                if (glyphId != 0)
-                    glyphs[replacedGlyph] = glyphId;
-                else
-                    glyphs.RemoveAt(replacedGlyph);
-            }
-            else if (glyphId != 0)
-                glyphs.Add(glyphId);
-
-            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeGlyph);
-
-            GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
-            if (glyphProperties != null)
-                player.CastSpell(player, glyphProperties.SpellID, new CastSpellExtraArgs(this));
-
-            ActiveGlyphs activeGlyphs = new();
-            activeGlyphs.Glyphs.Add(new GlyphBinding(m_misc.SpellId, (ushort)glyphId));
-            activeGlyphs.IsFullUpdate = false;
-            player.SendPacket(activeGlyphs);
         }
 
         [SpellEffectHandler(SpellEffectName.EnchantHeldItem)]
@@ -5024,8 +5040,9 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            player.RemoveTalent(talent);
-            player.SendTalentsInfoData();
+            foreach (uint spellId in talent.SpellRank)
+                player.RemoveTalent(spellId);
+            player.SendTalentsInfoData(false);
         }
 
         [SpellEffectHandler(SpellEffectName.DestroyItem)]

@@ -17,12 +17,14 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Entities;
 using Game.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 
 namespace Game.DataStorage
 {
@@ -500,12 +502,49 @@ namespace Game.DataStorage
                 }
             }
 
+            // create talent spells set
             foreach (TalentRecord talentInfo in TalentStorage.Values)
             {
-                //ASSERT(talentInfo.ClassID < MAX_CLASSES);
-                //ASSERT(talentInfo.TierID < MAX_TALENT_TIERS, "MAX_TALENT_TIERS must be at least {0}", talentInfo.TierID);
-                //ASSERT(talentInfo.ColumnIndex < MAX_TALENT_COLUMNS, "MAX_TALENT_COLUMNS must be at least {0}", talentInfo.ColumnIndex);
+                TalentTabRecord talentTab = TalentTabStorage.LookupByKey(talentInfo.TabID);
+                for (byte j = 0; j < PlayerConst.MaxTalentRank; ++j)
+                {
+                    if (talentInfo.SpellRank[j] != 0)
+                    {
+                        TalentSpellPosMap[(uint)talentInfo.SpellRank[j]] = new TalentSpellPos((ushort)talentInfo.Id, j);
+                        if (talentTab != null && talentTab.PetTalentMask != 0)
+                            PetTalentSpells.Add((uint)talentInfo.SpellRank[j]);
+                    }
+                }
+            }
+
+            foreach (TalentRecord talentInfo in TalentStorage.Values)
+            {
+                Cypher.Assert(talentInfo.ClassID < (byte)Class.Max);
+                Cypher.Assert(talentInfo.TierID < PlayerConst.MaxTalentTiers);
+                Cypher.Assert(talentInfo.ColumnIndex < PlayerConst.MaxTalentColumns);
                 _talentsByPosition[talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
+            }
+
+            // prepare fast data access to bit pos of talent ranks for use at inspecting
+            {
+                // now have all max ranks (and then bit amount used for store talent ranks in inspect)
+                foreach (TalentTabRecord talentTabInfo in TalentTabStorage.Values)
+                {
+                    // prevent memory corruption; otherwise cls will become 12 below
+                    if (((Class)talentTabInfo.ClassMask & Class.ClassMaskAllPlayable) == 0)
+                        continue;
+
+                    // store class talent tab pages
+                    for (int cls = 1; cls < (int)Class.Max; ++cls)
+                    {
+                        if ((talentTabInfo.ClassMask & (1 << (cls - 1))) != 0)
+                        {
+                            if (TalentTabPages[cls] == null)
+                                TalentTabPages[cls] = new uint[PlayerConst.MaxTalentTabs];
+                            TalentTabPages[cls][talentTabInfo.OrderIndex] = talentTabInfo.Id;
+                        }
+                    }
+                }
             }
 
             foreach (ToyRecord toy in ToyStorage.Values)
@@ -1523,6 +1562,11 @@ namespace Game.DataStorage
             return 0;
         }
 
+        public uint[] GetTalentTabPages(uint cls)
+        {
+            return TalentTabPages[cls];
+        }
+
         public uint GetLiquidFlags(uint liquidType)
         {
             LiquidTypeRecord liq = LiquidTypeStorage.LookupByKey(liquidType);
@@ -2128,6 +2172,21 @@ namespace Game.DataStorage
             return true;
         }
 
+
+        public TalentSpellPos GetTalentSpellPos(uint spellId)
+        {
+            TalentSpellPosMap.TryGetValue(spellId, out TalentSpellPos tsp);
+            return tsp;
+        }
+
+        public uint GetTalentSpellCost(uint spellId)
+        {
+            if (GetTalentSpellPos(spellId) is TalentSpellPos pos)
+                return (uint)pos.Rank + 1;
+
+            return 0;
+        }
+
         public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
         {
             AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
@@ -2538,4 +2597,16 @@ namespace Game.DataStorage
         Bezier = 5,
         Constant = 6,
     }
+
+    public class TalentSpellPos
+    {
+        public TalentSpellPos(ushort TalentID, byte Rank)
+        {
+            this.TalentID = TalentID;
+            this.Rank = Rank;
+        }
+
+        public ushort TalentID;
+        public byte Rank;
+    };
 }
