@@ -1696,23 +1696,6 @@ namespace Game.DataStorage
             return ResponseCodes.CharNameSuccess;
         }
 
-        public uint GetNumTalentsAtLevel(uint level, Class playerClass)
-        {
-            NumTalentsAtLevelRecord numTalentsAtLevel = NumTalentsAtLevelStorage.LookupByKey(level);
-            if (numTalentsAtLevel == null)
-                numTalentsAtLevel = NumTalentsAtLevelStorage.LastOrDefault().Value;
-            if (numTalentsAtLevel != null)
-            {
-                return playerClass switch
-                {
-                    Class.Deathknight => numTalentsAtLevel.NumTalentsDeathKnight,
-                    Class.DemonHunter => numTalentsAtLevel.NumTalentsDemonHunter,
-                    _ => numTalentsAtLevel.NumTalents,
-                };
-            }
-            return 0;
-        }
-
         public ParagonReputationRecord GetParagonReputation(uint factionId)
         {
             return _paragonReputations.LookupByKey(factionId);

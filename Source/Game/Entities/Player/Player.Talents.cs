@@ -51,7 +51,7 @@ namespace Game.Entities
                     SetActiveTalentGroup(0);
                 }
 
-                uint talentPointsForLevel = GetNumTalentsAtLevel(GetLevel(), GetClass());
+                uint talentPointsForLevel = GetNumTalentsAtLevel(GetLevel());
 
                 // if used more that have then reset
                 if (GetUsedTalentCount() > talentPointsForLevel)
@@ -516,7 +516,7 @@ namespace Game.Entities
             if (HasAtLoginFlag(AtLoginFlags.ResetTalents))
                 RemoveAtLoginFlag(AtLoginFlags.ResetTalents, true);
 
-            uint talentPointsForLevel = GetNumTalentsAtLevel(GetLevel(), GetClass());
+            uint talentPointsForLevel = GetNumTalentsAtLevel(GetLevel());
 
             if (GetUsedTalentCount() == 0)
             {
@@ -810,7 +810,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), points);
         }
 
-        public uint GetNumTalentsAtLevel(uint level, Class playerClass)
+        public uint GetNumTalentsAtLevel(uint level)
         {
             var talentsAtLevel = CliDB.NumTalentsAtLevelStorage;
             talentsAtLevel.TryGetValue(level, out NumTalentsAtLevelRecord numTalentsAtLevel);
