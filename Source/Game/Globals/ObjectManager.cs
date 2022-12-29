@@ -1910,10 +1910,12 @@ namespace Game
             creature.WidgetSetID = fields.Read<int>(64);
             creature.WidgetSetUnitConditionID = fields.Read<int>(65);
             creature.RegenHealth = fields.Read<bool>(66);
-            creature.MechanicImmuneMask = fields.Read<uint>(67);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(68);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(69);
-            creature.ScriptID = GetScriptId(fields.Read<string>(70));
+            creature.Civilian = fields.Read<bool>(67);
+            creature.PetSpellDataId = fields.Read<uint>(68);
+            creature.MechanicImmuneMask = fields.Read<uint>(69);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(70);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(71);
+            creature.ScriptID = GetScriptId(fields.Read<string>(72));
 
             creatureTemplateStorage[entry] = creature;
         }

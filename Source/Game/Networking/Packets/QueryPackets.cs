@@ -82,6 +82,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBits(Stats.Title.IsEmpty() ? 0 : Stats.Title.GetByteCount() + 1, 11);
                 _worldPacket.WriteBits(Stats.TitleAlt.IsEmpty() ? 0 : Stats.TitleAlt.GetByteCount() + 1, 11);
                 _worldPacket.WriteBits(Stats.CursorName.IsEmpty() ? 0 : Stats.CursorName.GetByteCount() + 1, 6);
+                _worldPacket.WriteBit(Stats.Civilian);
                 _worldPacket.WriteBit(Stats.Leader);
 
                 for (var i = 0; i < SharedConst.MaxCreatureNames; ++i)
@@ -104,6 +105,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Stats.CreatureType);
                 _worldPacket.WriteInt32(Stats.CreatureFamily);
                 _worldPacket.WriteInt32(Stats.Classification);
+                _worldPacket.WriteInt32((int)Stats.PetSpellDataId);
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
@@ -748,9 +750,11 @@ namespace Game.Networking.Packets
         public int CreatureType;
         public int CreatureFamily;
         public int Classification;
+        public uint PetSpellDataId;
         public CreatureDisplayStats Display = new();
         public float HpMulti;
         public float EnergyMulti;
+        public bool Civilian;
         public bool Leader;
         public List<uint> QuestItems = new();
         public uint CreatureMovementInfoID;

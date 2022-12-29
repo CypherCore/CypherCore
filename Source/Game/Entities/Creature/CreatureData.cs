@@ -48,6 +48,7 @@ namespace Game.Entities
         public float SpeedRun;
         public float Scale;
         public CreatureEliteType Rank;
+        public uint PetSpellDataId;
         public uint DmgSchool;
         public uint BaseAttackTime;
         public uint RangeAttackTime;
@@ -82,6 +83,7 @@ namespace Game.Entities
         public float ModArmor;
         public float ModDamage;
         public float ModExperience;
+        public bool Civilian;
         public bool RacialLeader;
         public uint MovementId;
         public int CreatureDifficultyID;
@@ -237,6 +239,7 @@ namespace Game.Entities
             QueryData.Allow = true;
 
             CreatureStats stats = new();
+            stats.Civilian = Civilian;
             stats.Leader = RacialLeader;
 
             stats.Name[0] = Name;
@@ -248,6 +251,7 @@ namespace Game.Entities
             stats.CreatureType = (int)CreatureType;
             stats.CreatureFamily = (int)Family;
             stats.Classification = (int)Rank;
+            stats.PetSpellDataId = PetSpellDataId;
 
             for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                 stats.ProxyCreatureID[i] = KillCredit[i];
