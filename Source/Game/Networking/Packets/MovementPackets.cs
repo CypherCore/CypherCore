@@ -287,17 +287,6 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(0);
                     data.WriteUInt8(moveSpline.anim_tier.AnimTier);
                 }
-
-                //if (HasUnknown901)
-                //{
-                //    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
-                //    {
-                //        data << int32(unkInner.Unknown_1);
-                //        data << int32(unkInner.Unknown_2);
-                //        data << int32(unkInner.Unknown_3);
-                //        data << uint32(unkInner.Unknown_4);
-                //    }
-                //}
             }
         }
 
@@ -1345,28 +1334,6 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class MonsterSplineUnknown901
-    {    
-        public Array<Inner> Data = new(16);
-
-        public void Write(WorldPacket data)
-        {
-            foreach (var unkInner in Data)
-            {
-                data.WriteInt32(unkInner.Unknown_1);
-                unkInner.Visual.Write(data);
-                data.WriteUInt32(unkInner.Unknown_4);
-            }
-        }
-
-        public struct Inner
-        {
-            public int Unknown_1;
-            public SpellCastVisual Visual;
-            public uint Unknown_4;
-        }
-    }
-
     public class TeleportLocation
     {
         public Position Pos;
@@ -1401,7 +1368,6 @@ namespace Game.Networking.Packets
             data.WriteBit(SpellEffectExtraData.HasValue);
             data.WriteBit(JumpExtraData.HasValue);
             data.WriteBit(AnimTierTransition.HasValue);
-            data.WriteBit(Unknown901 != null);
             data.FlushBits();
 
             if (SplineFilter != null)
@@ -1435,9 +1401,6 @@ namespace Game.Networking.Packets
 
             if (AnimTierTransition.HasValue)
                 AnimTierTransition.Value.Write(data);
-
-            if (Unknown901 != null)
-                Unknown901.Write(data);
         }
 
         public uint Flags; // Spline flags
@@ -1456,7 +1419,6 @@ namespace Game.Networking.Packets
         public MonsterSplineSpellEffectExtraData? SpellEffectExtraData;
         public MonsterSplineJumpExtraData? JumpExtraData;
         public MonsterSplineAnimTierTransition? AnimTierTransition;
-        public MonsterSplineUnknown901 Unknown901;
         public float FaceDirection;
         public ObjectGuid FaceGUID;
         public Vector3 FaceSpot;
