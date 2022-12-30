@@ -21,6 +21,8 @@ using Framework.IO;
 using Game.Entities;
 using Game.Loots;
 using Game.Spells;
+using System.Runtime.CompilerServices;
+using System;
 
 namespace Game.Chat
 {
@@ -402,12 +404,12 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("item_random_bonus_list_template", RBACPermissions.CommandReloadItemRandomBonusListTemplate, true)]
-        static bool HandleReloadItemRandomBonusListTemplatesCommand(CommandHandler handler)
+        [Command("item_enchantment_template", RBACPermissions.CommandReloadItemEnchantmentTemplate, true)]
+        static bool HandleReloadItemEnchantementsCommand(CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Random item bonus list definitions...");
-            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
-            handler.SendGlobalGMSysMessage("DB table `item_random_bonus_list_template` reloaded.");
+            Log.outInfo(LogFilter.Server, "Re - Loading Item Random Enchantments Table...");
+            ItemEnchantmentManager.LoadRandomEnchantmentsTable();
+            handler.SendGlobalGMSysMessage("DB table `item_enchantment_template` reloaded.");
             return true;
         }
 
@@ -700,7 +702,7 @@ namespace Game.Chat
         }
 
         static bool HandleReloadSkillPerfectItemTemplateCommand(CommandHandler handler)
-        { // latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group (and i don't want to chance all the command IDs)
+        { // latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group (and i don't want to Chance all the command IDs)
             Log.outInfo(LogFilter.Misc, "Re-Loading Skill Perfection Data Table...");
             SkillPerfectItems.LoadSkillPerfectItemTable();
             handler.SendGlobalGMSysMessage("DB table `skill_perfect_item_template` (perfect item procs when crafting) reloaded.");
@@ -1029,7 +1031,7 @@ namespace Game.Chat
             static bool HandleReloadAllItemCommand(CommandHandler handler)
             {
                 HandleReloadPageTextsCommand(handler);
-                HandleReloadItemRandomBonusListTemplatesCommand(handler);
+                HandleReloadItemEnchantementsCommand(handler);
                 return true;
             }
 

@@ -223,7 +223,7 @@ namespace Game.Entities
 
             if (goInfo.type == GameObjectTypes.MapObjTransport)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
                 return false;
             }
 
@@ -243,7 +243,7 @@ namespace Game.Entities
 
             if (goInfo.type >= GameObjectTypes.Max)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
+                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO Type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
                 return false;
             }
 
@@ -504,7 +504,7 @@ namespace Game.Entities
                                     SendCustomAnim(GetGoAnimProgress());
                                 }
 
-                                m_lootState = LootState.Ready;                 // can be successfully open with some chance
+                                m_lootState = LootState.Ready;                 // can be successfully open with some Chance
                             }
                             return;
                         }
@@ -621,7 +621,7 @@ namespace Game.Entities
                                 break;
                             }
 
-                            // Type 0 despawns after being triggered, type 1 does not.
+                            // Type 0 despawns after being triggered, Type 1 does not.
                             // @todo This is activation radius. Casting radius must be selected from spell 
                             float radius;
                             if (goInfo.Trap.radius == 0f)
@@ -758,7 +758,7 @@ namespace Game.Entities
                             Unit target = Global.ObjAccessor.GetUnit(this, m_lootStateUnitGUID);
                             if (goInfo.Trap.charges == 2 && goInfo.Trap.spell != 0)
                             {
-                                //todo NULL target won't work for target type 1
+                                //todo NULL target won't work for target Type 1
                                 CastSpell(null, goInfo.Trap.spell);
                                 SetLootState(LootState.JustDeactivated);
                             }
@@ -804,7 +804,7 @@ namespace Game.Entities
                     if (linkedTrap)
                         linkedTrap.DespawnOrUnsummon();
 
-                    //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
+                    //if Gameobject should cast spell, then this, but some GOs (Type = 10) should be destroyed
                     if (GetGoType() == GameObjectTypes.Goober)
                     {
                         uint spellId = GetGoInfo().Goober.spell;
@@ -1490,7 +1490,7 @@ namespace Game.Entities
             switch (action)
             {
                 case GameObjectActions.None:
-                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action type NONE in effect {effectIndex}");
+                    Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action Type NONE in effect {effectIndex}");
                     break;
                 case GameObjectActions.AnimateCustom0:
                 case GameObjectActions.AnimateCustom1:
@@ -2051,7 +2051,7 @@ namespace Game.Entities
 
                             int roll = RandomHelper.IRand(1, 100);
 
-                            Log.outDebug(LogFilter.Server, "Fishing check (skill: {0} zone min skill: {1} chance {2} roll: {3}", skill, zone_skill, chance, roll);
+                            Log.outDebug(LogFilter.Server, "Fishing check (skill: {0} zone min skill: {1} Chance {2} roll: {3}", skill, zone_skill, chance, roll);
 
                             player.UpdateFishingSkill();
 
@@ -2493,7 +2493,7 @@ namespace Game.Entities
                 }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
-                        Log.outError(LogFilter.Server, "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",
+                        Log.outError(LogFilter.Server, "GameObject.Use(): unit (Type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown Type ({6})",
                             user.GetTypeId(), user.GetGUID().ToString(), user.GetName(), GetGUID().ToString(), GetEntry(), GetGoInfo().name, GetGoType());
                     break;
             }
@@ -3776,7 +3776,7 @@ namespace Game.Entities
         GameObject _owner;
     }
 
-    // Base class for GameObject type specific implementations
+    // Base class for GameObject Type specific implementations
     class GameObjectTypeBase
     {
         protected GameObject _owner;

@@ -161,7 +161,7 @@ namespace Scripts.Pets
 
             void OnPeriodic(AuraEffect aurEff)
             {
-                // The chance to cast this spell is not 100%.
+                // The Chance to cast this spell is not 100%.
                 // Triggered spell roots creature for 3 sec and plays anim and sound (doesn't require any script).
                 // Emote and sound never shows up in sniffs because both comes from spell visual directly.
                 // Both 69683 and 70050 can trigger spells at once and are not linked together in any way.

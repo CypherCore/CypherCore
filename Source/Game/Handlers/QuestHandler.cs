@@ -50,7 +50,7 @@ namespace Game
                     questStatus = GetPlayer().GetQuestDialogStatus(questgiver);
                     break;
                 default:
-                    Log.outError(LogFilter.Network, "QuestGiver called for unexpected type {0}", questgiver.GetTypeId());
+                    Log.outError(LogFilter.Network, "QuestGiver called for unexpected Type {0}", questgiver.GetTypeId());
                     break;
             }
 
@@ -828,7 +828,7 @@ namespace Game
                     List<ItemPosCount> dest = new();
                     if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
                     {
-                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
+                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
                         _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
                     }
                 }

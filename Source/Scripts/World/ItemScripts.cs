@@ -154,7 +154,7 @@ namespace Scripts.World.ItemScripts
             List<ItemPosCount> dest = new();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(39883));
+                player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(39883));
 
             return true;
         }
@@ -170,7 +170,7 @@ namespace Scripts.World.ItemScripts
             List<ItemPosCount> dest = new();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(44718));
+                player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(44718));
 
             return true;
         }
@@ -256,14 +256,14 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
         {
-            // spell proc chance gets severely reduced on victims > 60 (formula unknown)
+            // spell proc Chance gets severely reduced on victims > 60 (formula unknown)
             if (victim.GetLevel() > 60)
             {
-                // gives ~0.1% proc chance at lvl 70
+                // gives ~0.1% proc Chance at lvl 70
                 float lvlPenaltyFactor = 9.93f;
                 float failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
 
-                // base ppm chance was already rolled, only roll success chance
+                // base ppm Chance was already rolled, only roll success Chance
                 return !RandomHelper.randChance(failureChance);
             }
 

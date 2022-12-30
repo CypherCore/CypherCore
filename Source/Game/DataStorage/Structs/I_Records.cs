@@ -299,6 +299,21 @@ namespace Game.DataStorage
         public float Weapon;
     }
 
+    public sealed class ItemRandomPropertiesRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public ushort[] Enchantment = new ushort[ItemConst.MaxItemRandomProperties];
+    };
+
+    public sealed class ItemRandomSuffixRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public ushort[] Enchantment = new ushort[ItemConst.MaxItemRandomProperties];
+        public ushort[] AllocationPct = new ushort[ItemConst.MaxItemRandomProperties];
+    };
+
     public sealed class ItemSetRecord
     {
         public uint Id;

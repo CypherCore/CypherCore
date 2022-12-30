@@ -947,7 +947,7 @@ namespace Game
                         continue;
                 }
 
-                // TODO: this one needs to access loot history to know highest item level for every inventory type
+                // TODO: this one needs to access loot history to know highest item level for every inventory Type
                 //if (filters.HasFlag(AuctionHouseFilterMask.UpgradesOnly))
                 //{
                 //}
@@ -1666,7 +1666,7 @@ namespace Game
             {
                 auctionItem.Item = new ItemInstance(Items[0]);
                 auctionItem.Charges = new[] { Items[0].GetSpellCharges(0), Items[0].GetSpellCharges(1), Items[0].GetSpellCharges(2), Items[0].GetSpellCharges(3), Items[0].GetSpellCharges(4) }.Max();
-                for (EnchantmentSlot enchantmentSlot = 0; enchantmentSlot < EnchantmentSlot.MaxInspected; enchantmentSlot++)
+                for (EnchantmentSlot enchantmentSlot = 0; enchantmentSlot < EnchantmentSlot.EnhancementMax; enchantmentSlot++)
                 {
                     uint enchantId = Items[0].GetEnchantmentId(enchantmentSlot);
                     if (enchantId == 0)

@@ -83,7 +83,7 @@ namespace Game
             }
 
             GetPlayer().ModifyMoney(-cost);
-            Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true);
+            Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true, new ItemRandomEnchantmentId());
             if (!charter)
                 return;
 
@@ -91,7 +91,7 @@ namespace Game
             charter.SetState(ItemUpdateState.Changed, GetPlayer());
             GetPlayer().SendNewItem(charter, 1, true, false);
 
-            // a petition is invalid, if both the owner and the type matches
+            // a petition is invalid, if both the owner and the Type matches
             // we checked above, if this player is in an arenateam, so this must be
             // datacorruption
             Petition petition = Global.PetitionMgr.GetPetitionByOwner(_player.GetGUID());

@@ -517,7 +517,7 @@ namespace Game.Entities
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move type ({0})", mtype);
+                    Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move Type ({0})", mtype);
                     return;
             }
 

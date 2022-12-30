@@ -1112,7 +1112,7 @@ namespace Game.Entities
             {
                 float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
 
-                // Creatures without inhabit type air should begin falling after exiting the vehicle
+                // Creatures without inhabit Type air should begin falling after exiting the vehicle
                 if (IsTypeId(TypeId.Unit) && !CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight(), ref height))
                     init.SetFall();
 
@@ -1448,7 +1448,7 @@ namespace Game.Entities
                     InterruptNonMeleeSpells(false);
 
                 ExitVehicle();                                      // Exit vehicle before calling RemoveAllControlled
-                // vehicles use special type of charm that is not removed by the next function
+                // vehicles use special Type of charm that is not removed by the next function
                 // triggering an assert
                 UnsummonAllTotems();
                 RemoveAllControlled();
@@ -2452,7 +2452,7 @@ namespace Game.Entities
 
             if (damagetype != DamageEffectType.NoDamage)
             {
-                // interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that type of auras)
+                // interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that Type of auras)
                 if (spellProto != null)
                 {
                     if (!spellProto.HasAttribute(SpellAttr4.ReactiveDamageProc))
@@ -2615,7 +2615,7 @@ namespace Game.Entities
 
                         uint tempAbsorb = (uint)currentAbsorb;
 
-                        // This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
+                        // This aura Type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
                         // repurpose PreventDefaultAction for this
                         bool deathFullyPrevented = false;
 
@@ -2824,10 +2824,10 @@ namespace Game.Entities
                 !IsTypeId(TypeId.Player) && !ToCreature().IsControlledByPlayer() && !victim.HasInArc(MathFunctions.PI, this)
                 && (victim.IsTypeId(TypeId.Player) || !victim.ToCreature().IsWorldBoss()) && !victim.IsVehicle())
             {
-                // 20% base chance
+                // 20% base Chance
                 float chance = 20.0f;
 
-                // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
+                // there is a newbie protection, at level 10 just 7% base Chance; assuming linear function
                 if (victim.GetLevel() < 30)
                     chance = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
 
@@ -3120,11 +3120,11 @@ namespace Game.Entities
 
         public float GetPPMProcChance(uint WeaponSpeed, float PPM, SpellInfo spellProto)
         {
-            // proc per minute chance calculation
+            // proc per minute Chance calculation
             if (PPM <= 0)
                 return 0.0f;
 
-            // Apply chance modifer aura
+            // Apply Chance modifer aura
             if (spellProto != null)
             {
                 Player modOwner = GetSpellModOwner();
@@ -3132,7 +3132,7 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellProto, SpellModOp.ProcFrequency, ref PPM);
             }
 
-            return (float)Math.Floor((WeaponSpeed * PPM) / 600.0f);   // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
+            return (float)Math.Floor((WeaponSpeed * PPM) / 600.0f);   // result is Chance in percents (probability = Speed_in_sec * (PPM / 60))
         }
 
         public Unit GetNextRandomRaidMemberOrPet(float radius)
@@ -3765,21 +3765,21 @@ namespace Game.Entities
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
 
-            // ..done (base at attack power for marked target and base at attack power for creature type)
+            // ..done (base at attack power for marked target and base at attack power for creature Type)
             int APbonus = 0;
 
             if (attType == WeaponAttackType.RangedAttack)
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
-                // ..done (base at attack power and creature type)
+                // ..done (base at attack power and creature Type)
                 APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
-                // ..done (base at attack power and creature type)
+                // ..done (base at attack power and creature Type)
                 APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
             }
 

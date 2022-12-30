@@ -423,7 +423,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Cypher Strings...");
             Global.ObjectMgr.LoadCypherStrings();
 
-            // not send custom type REALM_FFA_PVP to realm list
+            // not send custom Type REALM_FFA_PVP to realm list
             RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
             uint realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
@@ -585,8 +585,8 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
-            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
+            ItemEnchantmentManager.LoadRandomEnchantmentsTable();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Disables");                         // must be before loading quests and items
             Global.DisableMgr.LoadDisables();

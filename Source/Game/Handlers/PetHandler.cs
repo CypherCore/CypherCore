@@ -197,12 +197,12 @@ namespace Game
                                     else
                                         AI.AttackStart(TargetUnit);
 
-                                    //10% chance to play special pet attack talk, else growl
+                                    //10% Chance to play special pet attack talk, else growl
                                     if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.IRand(0, 100) < 10)
                                         pet.SendPetTalk(PetTalk.Attack);
                                     else
                                     {
-                                        // 90% chance for pet and 100% chance for charmed creature
+                                        // 90% Chance for pet and 100% Chance for charmed creature
                                         pet.SendPetAIReaction(guid1);
                                     }
                                 }
@@ -345,7 +345,7 @@ namespace Game
                     {
                         unit_target = spell.m_targets.GetUnitTarget();
 
-                        //10% chance to play special pet attack talk, else growl
+                        //10% Chance to play special pet attack talk, else growl
                         //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
                         if (pet.IsPet() && (pet.ToPet().GetPetType() == PetType.Summon) && (pet != unit_target) && (RandomHelper.IRand(0, 100) < 10))
                             pet.SendPetTalk(PetTalk.SpecialSpell);
@@ -716,7 +716,7 @@ namespace Game
                     Pet pet = creature.ToPet();
                     if (pet)
                     {
-                        // 10% chance to play special pet attack talk, else growl
+                        // 10% Chance to play special pet attack talk, else growl
                         // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
                         if (pet.GetPetType() == PetType.Summon && (RandomHelper.IRand(0, 100) < 10))
                             pet.SendPetTalk(PetTalk.SpecialSpell);

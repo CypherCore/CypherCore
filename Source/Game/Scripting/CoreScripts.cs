@@ -42,8 +42,8 @@ namespace Game.Scripting
 
         public string GetName() { return _name; }
 
-        // Do not override this in scripts; it should be overridden by the various script type classes. It indicates
-        // whether or not this script type must be assigned in the database.
+        // Do not override this in scripts; it should be overridden by the various script Type classes. It indicates
+        // whether or not this script Type must be assigned in the database.
         public virtual bool IsDatabaseBound() { return false; }
 
         public static T GetInstanceAI<T>(WorldObject obj) where T : class
@@ -275,7 +275,7 @@ namespace Game.Scripting
         // Called when the item is destroyed.
         public virtual bool OnRemove(Player player, Item item) { return false; }
 
-        // Called before casting a combat spell from this item (chance on hit spells of item template, can be used to prevent cast if returning false)
+        // Called before casting a combat spell from this item (Chance on hit spells of item template, can be used to prevent cast if returning false)
         public virtual bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item) { return true; }
     }
 
@@ -449,7 +449,7 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Should return a fully valid Battlegroundobject for the type ID.
+        // Should return a fully valid Battlegroundobject for the Type ID.
         public virtual Battleground GetBattleground() { return null; }
     }
 
@@ -462,7 +462,7 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Should return a fully valid OutdoorPvP object for the type ID.
+        // Should return a fully valid OutdoorPvP object for the Type ID.
         public virtual OutdoorPvP GetOutdoorPvP(Map map) { return null; }
     }
 

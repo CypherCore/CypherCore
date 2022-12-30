@@ -1986,7 +1986,7 @@ namespace Game.Entities
                 int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
                 int levelBasedHitDiff = leveldif;
 
-                // Base hit chance from attacker and victim levels
+                // Base hit Chance from attacker and victim levels
                 int modHitChance = 100;
                 if (levelBasedHitDiff >= 0)
                 {
@@ -2019,7 +2019,7 @@ namespace Game.Entities
                 }
 
                 float HitChance = modHitChance;
-                // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
+                // Increase hit Chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
                 Unit unit = ToUnit();
                 if (unit != null)
                     HitChance += unit.ModSpellHitChance;
@@ -2038,7 +2038,7 @@ namespace Game.Entities
             // Chance resist mechanic (select max value from every mechanic spell effect)
             int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
 
-            // Roll chance
+            // Roll Chance
             if (resist_chance > 0 && rand < (tmp += resist_chance))
                 return SpellMissInfo.Resist;
 
@@ -2138,7 +2138,7 @@ namespace Game.Entities
                             Log.outError(LogFilter.Unit, $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) has invalid faction (faction template Id) #{factionId}");
                         break;
                     default:
-                        Log.outError(LogFilter.Unit, $"Object (name={GetName()}, type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
+                        Log.outError(LogFilter.Unit, $"Object (name={GetName()}, Type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
                         break;
                 }
             }
@@ -2754,7 +2754,7 @@ namespace Game.Entities
                             return false;
                 }
             }
-            // PvC case - player can assist creature only if has specific type flags
+            // PvC case - player can assist creature only if has specific Type flags
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
             else if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
             {

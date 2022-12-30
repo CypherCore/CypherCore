@@ -928,7 +928,7 @@ namespace Game.BattleGrounds.Zones
 
         ObjectGuid m_FlagKeeper;                                // keepers guid
         ObjectGuid m_DroppedFlagGUID;
-        uint m_FlagCapturedBgObjectType;                  // type that should be despawned when flag is captured
+        uint m_FlagCapturedBgObjectType;                  // Type that should be despawned when flag is captured
         EotSFlagState m_FlagState;                                  // for checking flag state
         int m_FlagsTimer;
         int m_TowerCapCheckTimer;

@@ -65,9 +65,9 @@ namespace Game.Entities
                         }
 
 
-                        ulong counter = result.Read<ulong>(51);
+                        ulong counter = result.Read<ulong>(52);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(52);
+                        byte slot = result.Read<byte>(53);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -1067,6 +1067,7 @@ namespace Game.Entities
 
             RemoveAtLoginFlag(AtLoginFlags.Resurrect);
         }
+
         void _LoadVoidStorage(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1079,12 +1080,17 @@ namespace Game.Entities
                 uint itemEntry = result.Read<uint>(1);
                 byte slot = result.Read<byte>(2);
                 ObjectGuid creatorGuid = result.Read<ulong>(3) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3)) : ObjectGuid.Empty;
-                uint randomBonusListId = result.Read<uint>(4);
-                uint fixedScalingLevel = result.Read<uint>(5);
-                uint artifactKnowledgeLevel = result.Read<uint>(6);
-                ItemContext context = (ItemContext)result.Read<byte>(7);
+                ItemRandomEnchantmentId randomProperty = new()
+                {
+                    Type = (ItemRandomEnchantmentType)result.Read<byte>(4),
+                    Id = result.Read<uint>(5),
+                };
+                uint suffixFactor = result.Read<uint>(6);
+                uint fixedScalingLevel = result.Read<uint>(7);
+                uint artifactKnowledgeLevel = result.Read<uint>(8);
+                ItemContext context = (ItemContext)result.Read<byte>(9);
                 List<uint> bonusListIDs = new();
-                var bonusListIdTokens = new StringArray(result.Read<string>(8), ' ');
+                var bonusListIdTokens = new StringArray(result.Read<string>(10), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
                 {
                     if (uint.TryParse(bonusListIdTokens[i], out uint id))
@@ -1109,7 +1115,7 @@ namespace Game.Entities
                     continue;
                 }
 
-                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
+                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomProperty, suffixFactor, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
 
                 BonusData bonus = new(new ItemInstance(_voidStorageItems[slot]));
                 GetSession().GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
@@ -2381,17 +2387,19 @@ namespace Game.Entities
 
                 else
                 {
-                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, suffixFactor, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM);
                     stmt.AddValue(0, _voidStorageItems[i].ItemId);
                     stmt.AddValue(1, GetGUID().GetCounter());
                     stmt.AddValue(2, _voidStorageItems[i].ItemEntry);
                     stmt.AddValue(3, i);
                     stmt.AddValue(4, _voidStorageItems[i].CreatorGuid.GetCounter());
-                    stmt.AddValue(5, (byte)_voidStorageItems[i].RandomBonusListId);
-                    stmt.AddValue(6, _voidStorageItems[i].FixedScalingLevel);
-                    stmt.AddValue(7, _voidStorageItems[i].ArtifactKnowledgeLevel);
-                    stmt.AddValue(8, (byte)_voidStorageItems[i].Context);
+                    stmt.AddValue(5, (byte)_voidStorageItems[i].ItemRandomPropertyId.Type);
+                    stmt.AddValue(6, _voidStorageItems[i].ItemRandomPropertyId.Id);
+                    stmt.AddValue(7, _voidStorageItems[i].ItemSuffixFactor);
+                    stmt.AddValue(8, _voidStorageItems[i].FixedScalingLevel);
+                    stmt.AddValue(9, _voidStorageItems[i].ArtifactKnowledgeLevel);
+                    stmt.AddValue(10, (byte)_voidStorageItems[i].Context);
 
                     StringBuilder bonusListIDs = new();
                     foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)
@@ -3647,7 +3655,7 @@ namespace Game.Entities
             stmt.AddValue(6, GameTime.GetGameTime());
             loginTransaction.Append(stmt);
 
-            // save pet (hunter pet level and experience and all type pets health/mana).
+            // save pet (hunter pet level and experience and all Type pets health/mana).
             Pet pet = GetPet();
             if (pet)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);

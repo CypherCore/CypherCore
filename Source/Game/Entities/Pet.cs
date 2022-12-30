@@ -241,7 +241,7 @@ namespace Game.Entities
                     break;
                 default:
                     if (!IsPetGhoul())
-                        Log.outError(LogFilter.Pet, "Pet have incorrect type ({0}) for pet loading.", GetPetType());
+                        Log.outError(LogFilter.Pet, "Pet have incorrect Type ({0}) for pet loading.", GetPetType());
                     break;
             }
 

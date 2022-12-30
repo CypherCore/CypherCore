@@ -573,7 +573,7 @@ namespace Game.Maps
             if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, (byte)ReqLiquidType, ref liquid_level, ref ground_level, ref liquid_type, ref mogpFlags))
             {
                 useGridLiquid = !IsInWMOInterior(mogpFlags);
-                Log.outDebug(LogFilter.Maps, $"GetLiquidStatus(): vmap liquid level: {liquid_level} ground: {ground_level} type: {liquid_type}");
+                Log.outDebug(LogFilter.Maps, $"GetLiquidStatus(): vmap liquid level: {liquid_level} ground: {ground_level} Type: {liquid_type}");
                 // Check water level and ground level
                 if (liquid_level > ground_level && MathFunctions.fuzzyGe(z, ground_level - MapConst.GroundHeightTolerance))
                 {

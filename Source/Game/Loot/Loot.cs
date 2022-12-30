@@ -41,12 +41,12 @@ namespace Game.Loots
             follow_loot_rules = !li.needs_quest || (proto != null && proto.FlagsCu.HasAnyFlag(ItemFlagsCustom.FollowLootRules));
 
             needs_quest = li.needs_quest;
-
-            randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
+            randomSuffix = ItemEnchantmentManager.GenerateEnchSuffixFactor(itemid);
+            randomPropertyId = ItemEnchantmentManager.GenerateItemRandomPropertyId(itemid);
         }
 
         /// <summary>
-        /// Basic checks for player/item compatibility - if false no chance to see the item in the loot - used only for loot generation
+        /// Basic checks for player/item compatibility - if false no Chance to see the item in the loot - used only for loot generation
         /// </summary>
         /// <param name="player"></param>
         /// <param name="loot"></param>
@@ -191,7 +191,8 @@ namespace Game.Loots
 
         public uint itemid;
         public uint LootListId;
-        public uint randomBonusListId;
+        public uint randomSuffix;
+        public ItemRandomEnchantmentId randomPropertyId;
         public List<uint> BonusListIDs = new();
         public ItemContext context;
         public List<Condition> conditions = new();                               // additional loot condition
@@ -734,7 +735,7 @@ namespace Game.Loots
 
                 --unlootedCount;
 
-                Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
+                Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomPropertyId, null, lootItem.context, lootItem.BonusListIDs);
                 player.SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
                 player.ApplyItemLootedSpell(pItem, true);
             }

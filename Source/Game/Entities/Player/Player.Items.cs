@@ -124,7 +124,7 @@ namespace Game.Entities
                     List<ItemPosCount> dest = new();
                     InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemid, count);
                     Cypher.Assert(msg == InventoryResult.Ok); // Already checked before
-                    Item it = StoreNewItem(dest, itemid, true);
+                    Item it = StoreNewItem(dest, itemid, true, new ItemRandomEnchantmentId());
                     SendNewItem(it, count, true, false, true);
                 }
             }
@@ -1349,7 +1349,7 @@ namespace Game.Entities
             msg = CanStoreNewItem(InventorySlots.Bag0, ItemConst.NullSlot, sDest, titem_id, titem_amount);
             if (msg == InventoryResult.Ok)
             {
-                StoreNewItem(sDest, titem_id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(titem_id), null, itemContext, bonusListIDs);
+                StoreNewItem(sDest, titem_id, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(titem_id), null, itemContext, bonusListIDs);
                 return true;                                        // stored
             }
 
@@ -1357,7 +1357,7 @@ namespace Game.Entities
             Log.outError(LogFilter.Player, "STORAGE: Can't equip or store initial item {0} for race {1} class {2}, error msg = {3}", titem_id, GetRace(), GetClass(), msg);
             return false;
         }
-        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomBonusListId = 0, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
+        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, ItemRandomEnchantmentId randomPropertyId, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
         {
             uint count = 0;
             foreach (var itemPosCount in pos)
@@ -1377,7 +1377,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
                 item.SetFixedLevel(GetLevel());
-                item.SetItemRandomBonusList(randomBonusListId);
+                item.SetItemRandomProperties(randomPropertyId);
 
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                 {
@@ -1407,7 +1407,7 @@ namespace Game.Entities
                     {
                         List<ItemPosCount> childDest = new();
                         CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, childDest, childTemplate, ref count, false, null, ItemConst.NullBag, ItemConst.NullSlot);
-                        Item childItem = StoreNewItem(childDest, childTemplate.GetId(), update, 0, null, context, null, addToCollection);
+                        Item childItem = StoreNewItem(childDest, childTemplate.GetId(), update, new ItemRandomEnchantmentId(), null, context, null, addToCollection);
                         if (childItem)
                         {
                             childItem.SetCreator(item.GetGUID());
@@ -1645,6 +1645,7 @@ namespace Game.Entities
 
             return null;
         }
+
         public Item EquipItem(ushort pos, Item pItem, bool update)
         {
             AddEnchantmentDurations(pItem);
@@ -1754,6 +1755,7 @@ namespace Game.Entities
 
             return pItem;
         }
+
         public void EquipChildItem(byte parentBag, byte parentSlot, Item parentItem)
         {
             ItemChildEquipmentRecord itemChildEquipment = Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry());
@@ -1941,7 +1943,7 @@ namespace Game.Entities
                 return false;
             }
 
-            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId));
+            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
             if (item != null)
                 SendNewItem(item, count, true, false);
             else
@@ -2564,7 +2566,7 @@ namespace Game.Entities
                 }
             }
 
-            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, ItemContext.Vendor, true);
+            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, ItemContext.Vendor, true);
             if (it != null)
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
@@ -2689,7 +2691,7 @@ namespace Game.Entities
                     continue;
 
                 //cycle all (gem)enchants
-                for (EnchantmentSlot enchant_slot = EnchantmentSlot.Sock1; enchant_slot < EnchantmentSlot.Sock1 + 3; ++enchant_slot)
+                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket1; enchant_slot < EnchantmentSlot.EnhancementSocket1 + 3; ++enchant_slot)
                 {
                     uint enchant_id = pItem.GetEnchantmentId(enchant_slot);
                     if (enchant_id == 0)                                 //if no enchant go to next enchant(slot)
@@ -3930,7 +3932,7 @@ namespace Game.Entities
 
             foreach (ItemEffectRecord effectData in item.GetEffects())
             {
-                // wrong triggering type
+                // wrong triggering Type
                 if (apply && effectData.TriggerType != ItemSpelltriggerType.OnEquip)
                     continue;
 
@@ -4016,7 +4018,7 @@ namespace Game.Entities
                 if (effectData.SpellID == 0)
                     continue;
 
-                // wrong triggering type
+                // wrong triggering Type
                 if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
@@ -4297,7 +4299,7 @@ namespace Game.Entities
                 // non empty stack with space
                 need_space = pProto.GetMaxStackSize();
             }
-            // non empty slot, check item type
+            // non empty slot, check item Type
             else
             {
                 // can be merged at least partly
@@ -5892,7 +5894,7 @@ namespace Game.Entities
             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
             if (msg == InventoryResult.Ok)
             {
-                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                 if (ffaItem != null)
                 {
                     //freeforall case, notify only one player of the removal

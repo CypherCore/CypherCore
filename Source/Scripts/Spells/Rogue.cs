@@ -441,9 +441,9 @@ namespace Scripts.Spells.Rogue
             var possibleBuffs = Spells.Shuffle().ToArray();
 
             // https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-rotation-cooldowns-abilities
-            // 1 Roll the Bones buff  : 100.0 % chance;
-            // 2 Roll the Bones buffs : 19 % chance;
-            // 5 Roll the Bones buffs : 1 % chance.
+            // 1 Roll the Bones buff  : 100.0 % Chance;
+            // 2 Roll the Bones buffs : 19 % Chance;
+            // 5 Roll the Bones buffs : 1 % Chance.
             int chance = RandomHelper.IRand(1, 100);
             int numBuffs = 1;
             if (chance <= 1)

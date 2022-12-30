@@ -34,7 +34,7 @@ namespace Game.Spells
             SkillDiscoveryStorage.Clear();                            // need for reload
 
             //                                                0        1         2              3
-            SQLResult result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, chance FROM skill_discovery_template");
+            SQLResult result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, Chance FROM skill_discovery_template");
 
             if (result.IsEmpty())
             {
@@ -54,9 +54,9 @@ namespace Game.Spells
                 uint reqSkillValue = result.Read<uint>(2);
                 float chance = result.Read<float>(3);
 
-                if (chance <= 0)                                    // chance
+                if (chance <= 0)                                    // Chance
                 {
-                    ssNonDiscoverableEntries.AppendFormat("spellId = {0} reqSkillOrSpell = {1} reqSkillValue = {2} chance = {3} (chance problem)\n", spellId, reqSkillOrSpell, reqSkillValue, chance);
+                    ssNonDiscoverableEntries.AppendFormat("spellId = {0} reqSkillOrSpell = {1} reqSkillValue = {2} Chance = {3} (Chance problem)\n", spellId, reqSkillOrSpell, reqSkillValue, chance);
                     continue;
                 }
 
@@ -82,7 +82,7 @@ namespace Game.Spells
                         if (!reportedReqSpells.Contains(absReqSkillOrSpell))
                         {
                             Log.outError(LogFilter.Sql, "Spell (ID: {0}) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc" +
-                                " and not 100%% chance random discovery ability but listed for spellId {1} (and maybe more) in `skill_discovery_template` table",
+                                " and not 100%% Chance random discovery ability but listed for spellId {1} (and maybe more) in `skill_discovery_template` table",
                                 absReqSkillOrSpell, spellId);
                             reportedReqSpells.Add(absReqSkillOrSpell);
                         }
@@ -115,7 +115,7 @@ namespace Game.Spells
             while (result.NextRow());
 
             if (ssNonDiscoverableEntries.Length != 0)
-                Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
+                Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in Chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
 
             // report about empty data for explicit discovery spells
             foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
@@ -129,7 +129,7 @@ namespace Game.Spells
                     continue;
 
                 if (!SkillDiscoveryStorage.ContainsKey((int)spellEntry.Id))
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% chance random discovery ability but not have data in `skill_discovery_template` table", spellEntry.Id);
+                    Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% Chance random discovery ability but not have data in `skill_discovery_template` table", spellEntry.Id);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill discovery definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -253,6 +253,6 @@ namespace Game.Spells
 
         public uint spellId;                                        // discavered spell
         public uint reqSkillValue;                                  // skill level limitation
-        public float chance;                                         // chance
+        public float chance;                                         // Chance
     }
 }

@@ -330,7 +330,7 @@ namespace Game.DataStorage
                                 buffer.WriteUInt32(flagArray128[3]);
                                 break;
                             default:
-                                throw new Exception($"Unhandled Custom type: {type.Name}");
+                                throw new Exception($"Unhandled Custom Type: {type.Name}");
                         }
                         break;
                 }

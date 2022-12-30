@@ -55,7 +55,7 @@ namespace Game.Spells
             m_fromClient = false;
             m_needComboPoints = m_spellInfo.NeedsComboPoints();
 
-            // Get data for type of attack
+            // Get data for Type of attack
             m_attackType = info.GetAttackType();
 
             m_spellSchoolMask = m_spellInfo.GetSchoolMask();           // Can be override for some spell (wand shoot for example)
@@ -258,7 +258,7 @@ namespace Game.Spells
                 if (!spellEffectInfo.IsEffect())
                     continue;
 
-                // set expected type of implicit targets to be sent to client
+                // set expected Type of implicit targets to be sent to client
                 SpellCastTargetFlags implicitTargetMask = SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetB.GetObjectType());
                 if (Convert.ToBoolean(implicitTargetMask & SpellCastTargetFlags.Unit))
                     m_targets.SetTargetFlag(SpellCastTargetFlags.Unit);
@@ -268,10 +268,10 @@ namespace Game.Spells
                 SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, ref processedAreaEffectsMask);
                 SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, ref processedAreaEffectsMask);
 
-                // Select targets of effect based on effect type
-                // those are used when no valid target could be added for spell effect based on spell target type
+                // Select targets of effect based on effect Type
+                // those are used when no valid target could be added for spell effect based on spell target Type
                 // some spell effects use explicit target as a default target added to target map (like SPELL_EFFECT_LEARN_SPELL)
-                // some spell effects add target to target map only when target type specified (like SPELL_EFFECT_WEAPON)
+                // some spell effects add target to target map only when target Type specified (like SPELL_EFFECT_WEAPON)
                 // some spell effects don't add anything to target map (confirmed with sniffs) (like SPELL_EFFECT_DESTROY_ALL_TOTEMS)
                 SelectEffectTypeImplicitTargets(spellEffectInfo);
 
@@ -437,7 +437,7 @@ namespace Game.Spells
                                     m_targets.SetSrc(m_caster);
                                     break;
                                 default:
-                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_SRC");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT_SRC");
                                     break;
                             }
                             break;
@@ -454,7 +454,7 @@ namespace Game.Spells
                                     SelectImplicitDestDestTargets(spellEffectInfo, targetType);
                                     break;
                                 default:
-                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT_DEST");
                                     break;
                             }
                             break;
@@ -468,14 +468,14 @@ namespace Game.Spells
                                     SelectImplicitTargetObjectTargets(spellEffectInfo, targetType);
                                     break;
                                 default:
-                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT");
                                     break;
                             }
                             break;
                     }
                     break;
                 case SpellTargetSelectionCategories.Nyi:
-                    Log.outDebug(LogFilter.Spells, "SPELL: target type {0}, found in spellID {1}, effect {2} is not implemented yet!", m_spellInfo.Id, spellEffectInfo.EffectIndex, targetType.GetTarget());
+                    Log.outDebug(LogFilter.Spells, "SPELL: target Type {0}, found in spellID {1}, effect {2} is not implemented yet!", m_spellInfo.Id, spellEffectInfo.EffectIndex, targetType.GetTarget());
                     break;
                 default:
                     Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target category");
@@ -487,7 +487,7 @@ namespace Game.Spells
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
-                Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference type");
+                Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference Type");
                 return;
             }
 
@@ -552,7 +552,7 @@ namespace Game.Spells
                     break;
                 }
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
+                    Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target Type");
                     break;
             }
         }
@@ -561,7 +561,7 @@ namespace Game.Spells
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
-                Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference type");
+                Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference Type");
                 return;
             }
 
@@ -582,7 +582,7 @@ namespace Game.Spells
                     range = m_spellInfo.GetMaxRange(IsPositive(), m_caster, this);
                     break;
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check type");
+                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check Type");
                     break;
             }
 
@@ -658,7 +658,7 @@ namespace Game.Spells
                         AddUnitTarget(unitTarget, effMask, true, false);
                     else
                     {
-                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
+                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong Type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
                         SendCastResult(SpellCastResult.BadImplicitTargets);
                         Finish(false);
                         return;
@@ -670,7 +670,7 @@ namespace Game.Spells
                         AddGOTarget(gobjTarget, effMask);
                     else
                     {
-                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
+                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong Type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
                         SendCastResult(SpellCastResult.BadImplicitTargets);
                         Finish(false);
                         return;
@@ -682,7 +682,7 @@ namespace Game.Spells
                         AddCorpseTarget(corpseTarget, effMask);
                     else
                     {
-                        Log.outDebug(LogFilter.Spells, $"Spell::SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected corpse, got {target.GetGUID().GetTypeId()}, effect {effMask}");
+                        Log.outDebug(LogFilter.Spells, $"Spell::SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong Type, expected corpse, got {target.GetGUID().GetTypeId()}, effect {effMask}");
                         SendCastResult(SpellCastResult.BadImplicitTargets);
                         Finish(false);
                         return;
@@ -697,7 +697,7 @@ namespace Game.Spells
                     m_targets.SetDst(dest);
                     break;
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object type");
+                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object Type");
                     break;
             }
 
@@ -796,7 +796,7 @@ namespace Game.Spells
                     break;
                 }
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference Type");
                     return;
             }
             if (referer == null)
@@ -817,7 +817,7 @@ namespace Game.Spells
                     center = referer.GetPosition();
                     break;
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference Type");
                     return;
             }
 
@@ -1420,7 +1420,7 @@ namespace Game.Spells
                     dst = m_targets.GetUnitTarget();
                     break;
                 default:
-                    Cypher.Assert(false, "Spell.SelectImplicitLineTargets: received not implemented target reference type");
+                    Cypher.Assert(false, "Spell.SelectImplicitLineTargets: received not implemented target reference Type");
                     return;
             }
 
@@ -1506,7 +1506,7 @@ namespace Game.Spells
                     break;
             }
 
-            // select spell implicit targets based on effect type
+            // select spell implicit targets based on effect Type
             if (spellEffectInfo.GetImplicitTargetType() == 0)
                 return;
 
@@ -1573,7 +1573,7 @@ namespace Game.Spells
             // this function selects which containers need to be searched for spell target
             GridMapTypeMask retMask = GridMapTypeMask.All;
 
-            // filter searchers based on searched object type
+            // filter searchers based on searched object Type
             switch (objType)
             {
                 case SpellTargetObjectTypes.Unit:
@@ -1766,7 +1766,7 @@ namespace Game.Spells
             //==========================================================================================
 
             m_procVictim = m_procAttacker = new ProcFlagsInit();
-            // Get data for type of attack and fill base info for trigger
+            // Get data for Type of attack and fill base info for trigger
             switch (m_spellInfo.DmgClass)
             {
                 case SpellDmgClass.Melee:
@@ -3284,7 +3284,7 @@ namespace Game.Spells
             {
                 // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
                 // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
-                // however, checking what type of movement the spline is for every single spline would be really expensive
+                // however, checking what Type of movement the spline is for every single spline would be really expensive
                 if (!m_caster.ToUnit().GetCharmerGUID().IsCreature())
                     Cancel();
             }
@@ -4406,7 +4406,7 @@ namespace Game.Spells
 
                 if (cost.Power >= PowerType.Max)
                 {
-                    Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power type '{0}'", cost.Power);
+                    Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power Type '{0}'", cost.Power);
                     continue;
                 }
 
@@ -4945,7 +4945,7 @@ namespace Game.Spells
                 }
             }
 
-            // always (except passive spells) check items (focus object can be required for any type casts)
+            // always (except passive spells) check items (focus object can be required for any Type casts)
             if (!m_spellInfo.IsPassive())
             {
                 castResult = CheckItems(ref param1, ref param2);
@@ -5742,7 +5742,7 @@ namespace Game.Spells
                         break;
                 }
 
-                // check if target already has the same type, but more powerful aura
+                // check if target already has the same Type, but more powerful aura
                 if (!m_spellInfo.HasAttribute(SpellAttr4.AuraNeverBounces)
                     && (nonAuraEffectMask == 0 || m_spellInfo.HasAttribute(SpellAttr4.AuraBounceFailsSpell))
                     && (approximateAuraEffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0
@@ -6237,10 +6237,10 @@ namespace Game.Spells
                     continue;
                 }
 
-                // Check valid power type
+                // Check valid power Type
                 if (cost.Power >= PowerType.Max)
                 {
-                    Log.outError(LogFilter.Spells, "Spell.CheckPower: Unknown power type '{0}'", cost.Power);
+                    Log.outError(LogFilter.Spells, "Spell.CheckPower: Unknown power Type '{0}'", cost.Power);
                     return SpellCastResult.Unknown;
                 }
 
@@ -6577,7 +6577,7 @@ namespace Game.Spells
                                             if (targetItem.GetSocketColor(socket) != 0)
                                                 ++numSockets;
 
-                                        if (numSockets == ItemConst.MaxGemSockets || targetItem.GetEnchantmentId(EnchantmentSlot.Prismatic) != 0)
+                                        if (numSockets == ItemConst.MaxGemSockets || targetItem.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic) != 0)
                                             return SpellCastResult.MaxSockets;
                                         break;
                                     }
@@ -6585,7 +6585,7 @@ namespace Game.Spells
                             }
                         }
 
-                        // Not allow enchant in trade slot for some enchant type
+                        // Not allow enchant in trade slot for some enchant Type
                         if (targetItem.GetOwner() != player)
                         {
                             if (enchantEntry == null)
@@ -6600,7 +6600,7 @@ namespace Game.Spells
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
                             return SpellCastResult.ItemNotFound;
-                        // Not allow enchant in trade slot for some enchant type
+                        // Not allow enchant in trade slot for some enchant Type
                         if (item.GetOwner() != player)
                         {
                             int enchant_id = spellEffectInfo.MiscValue;
@@ -7661,7 +7661,7 @@ namespace Game.Spells
 
             // handle SPELL_AURA_ADD_TARGET_TRIGGER auras:
             // save auras which were present on spell caster on cast, to prevent triggered auras from affecting caster
-            // and to correctly calculate proc chance when combopoints are present
+            // and to correctly calculate proc Chance when combopoints are present
             var targetTriggers = unitCaster.GetAuraEffectsByType(AuraType.AddTargetTrigger);
             foreach (var aurEff in targetTriggers)
             {
@@ -7671,10 +7671,10 @@ namespace Game.Spells
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(aurEff.GetSpellEffectInfo().TriggerSpell, GetCastDifficulty());
                 if (spellInfo != null)
                 {
-                    // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
+                    // calculate the Chance using spell base amount, because aura amount is not updated on combo-points change
                     // this possibly needs fixing
                     int auraBaseAmount = aurEff.GetBaseAmount();
-                    // proc chance is stored in effect amount
+                    // proc Chance is stored in effect amount
                     int chance = unitCaster.CalculateSpellDamage(null, aurEff.GetSpellEffectInfo(), auraBaseAmount);
                     chance *= aurEff.GetBase().GetStackAmount();
 

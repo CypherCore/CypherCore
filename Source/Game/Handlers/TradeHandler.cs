@@ -65,8 +65,8 @@ namespace Game
                     if (!item.IsWrapped())
                     {
                         TradeUpdated.UnwrappedTradeItem unwrappedItem = new();
-                        unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.Perm);
-                        unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.Use);
+                        unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
+                        unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
                         unwrappedItem.Creator = item.GetCreator();
                         unwrappedItem.Charges = item.GetSpellCharges();
                         unwrappedItem.Lock = item.GetTemplate().GetLockID() != 0 && !item.HasItemFlag(ItemFieldFlags.Unlocked);

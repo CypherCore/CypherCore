@@ -585,7 +585,7 @@ namespace Game.Entities
             // player specific logic for mirror timers
             if (GetLiquidStatus() != 0 && newLiquidData != null)
             {
-                // Breath bar state (under water in any liquid type)
+                // Breath bar state (under water in any liquid Type)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.AllLiquids))
                     if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.UnderWater))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;

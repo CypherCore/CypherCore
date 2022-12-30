@@ -925,7 +925,7 @@ namespace Game.Entities
                         List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID));
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
@@ -945,7 +945,7 @@ namespace Game.Entities
                         List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID));
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
@@ -999,7 +999,7 @@ namespace Game.Entities
                         List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId));
+                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
                         }
                         else if (quest.IsDFQuest())
@@ -1021,7 +1021,7 @@ namespace Game.Entities
                                 List<ItemPosCount> dest = new();
                                 if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
-                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(rewardId));
+                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(rewardId));
                                     SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
                                 }
                             }
@@ -1723,7 +1723,7 @@ namespace Game.Entities
                 InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
                 if (msg == InventoryResult.Ok)
                 {
-                    Item item = StoreNewItem(dest, srcitem, true);
+                    Item item = StoreNewItem(dest, srcitem, true, new ItemRandomEnchantmentId());
                     SendNewItem(item, count, true, false);
                     return true;
                 }
@@ -1968,7 +1968,7 @@ namespace Game.Entities
                 }
                 default:
                     // it's impossible, but check
-                    Log.outError(LogFilter.Player, "GetQuestDialogStatus called for unexpected type {0}", questgiver.GetTypeId());
+                    Log.outError(LogFilter.Player, "GetQuestDialogStatus called for unexpected Type {0}", questgiver.GetTypeId());
                     return QuestGiverStatus.None;
             }
 
@@ -2430,7 +2430,7 @@ namespace Game.Entities
                                 objectiveIsNowComplete = IsQuestObjectiveProgressBarComplete(logSlot, quest);
                                 break;
                             default:
-                                Cypher.Assert(false, "Unhandled quest objective type {objectiveType}");
+                                Cypher.Assert(false, "Unhandled quest objective Type {objectiveType}");
                                 break;
                         }
                     }
@@ -2671,7 +2671,7 @@ namespace Game.Entities
                         return false;
                     break;
                 default:
-                    Log.outError(LogFilter.Player, "Player.CanCompleteQuest: Player '{0}' ({1}) tried to complete a quest (ID: {2}) with an unknown objective type {3}",
+                    Log.outError(LogFilter.Player, "Player.CanCompleteQuest: Player '{0}' ({1}) tried to complete a quest (ID: {2}) with an unknown objective Type {3}",
                         GetName(), GetGUID().ToString(), objective.QuestID, objective.Type);
                     return false;
             }

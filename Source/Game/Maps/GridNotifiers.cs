@@ -2873,7 +2873,7 @@ namespace Game.Maps
         }
     }
     
-    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain Type)
     class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
     {
         public NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range)

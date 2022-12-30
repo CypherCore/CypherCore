@@ -1055,7 +1055,7 @@ namespace Game.DataStorage
             if (forItem && contentTuning.GetFlags().HasFlag(ContentTuningFlag.DisabledForItem))
                 return null;
 
-            //static int getLevelAdjustment(ContentTuningCalcType type) => type switch
+            //static int getLevelAdjustment(ContentTuningCalcType Type) => Type switch
             //{
             //    ContentTuningCalcType.PlusOne => 1,
             //    ContentTuningCalcType.PlusMaxLevelForExpansion => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),

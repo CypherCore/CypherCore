@@ -192,7 +192,7 @@ namespace Game.Chat
                     var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
                     if (msg == InventoryResult.Ok)
                     {
-                        Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
+                        Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true, new ItemRandomEnchantmentId());
                         player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
                     }
                     break;

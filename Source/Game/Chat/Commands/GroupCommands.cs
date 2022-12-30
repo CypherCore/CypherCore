@@ -198,7 +198,7 @@ namespace Game.Chat
 
             // To avoid a cluster fuck, namely trying multiple queries to simply get a group member count...
             handler.SendSysMessage(CypherStrings.GroupType, (groupTarget.IsRaidGroup() ? "raid" : "party"), members.Count);
-            // ... we simply move the group type and member count print after retrieving the slots and simply output it's size.
+            // ... we simply move the group Type and member count print after retrieving the slots and simply output it's size.
 
             // While rather dirty codestyle-wise, it saves space (if only a little). For each member, we look several informations up.
             foreach (var slot in members)

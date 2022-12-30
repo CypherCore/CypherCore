@@ -71,7 +71,7 @@ namespace Game
 
             if (confirmRespecWipe.RespecType != SpecResetType.Talents)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleConfirmRespecWipe - reset type {0} is not implemented.", confirmRespecWipe.RespecType);
+                Log.outDebug(LogFilter.Network, "WORLD: HandleConfirmRespecWipe - reset Type {0} is not implemented.", confirmRespecWipe.RespecType);
                 return;
             }
 

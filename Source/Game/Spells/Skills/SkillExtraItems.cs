@@ -60,7 +60,7 @@ namespace Game.Spells
                 float additionalCreateChance = result.Read<float>(2);
                 if (additionalCreateChance <= 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Skill specialization {0} has too low additional create chance in `skill_extra_item_template`!", spellId);
+                    Log.outError(LogFilter.Sql, "Skill specialization {0} has too low additional create Chance in `skill_extra_item_template`!", spellId);
                     continue;
                 }
 
@@ -117,7 +117,7 @@ namespace Game.Spells
 
         // the spell id of the specialization required to create extra items
         public uint requiredSpecialization;
-        // the chance to create one additional item
+        // the Chance to create one additional item
         public float additionalCreateChance;
         // maximum number of extra items created per crafting
         public byte additionalMaxNum;
@@ -160,7 +160,7 @@ namespace Game.Spells
                 float perfectCreateChance = result.Read<float>(2);
                 if (perfectCreateChance <= 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has impossibly low proc chance in `skill_perfect_item_template`!", spellId);
+                    Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has impossibly low proc Chance in `skill_perfect_item_template`!", spellId);
                     continue;
                 }
 
@@ -215,7 +215,7 @@ namespace Game.Spells
 
         // the spell id of the spell required - it's named "specialization" to conform with SkillExtraItemEntry
         public uint requiredSpecialization;
-        // perfection proc chance
+        // perfection proc Chance
         public float perfectCreateChance;
         // itemid of the resulting perfect item
         public uint perfectItemType;

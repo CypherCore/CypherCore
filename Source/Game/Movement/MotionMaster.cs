@@ -324,7 +324,7 @@ namespace Game.Movement
             if (top.HasFlag(MovementGeneratorFlags.Deactivated))
                 top.Reset(_owner);
 
-            Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
+            Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (Type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
 
             if (!top.Update(_owner, diff))
             {

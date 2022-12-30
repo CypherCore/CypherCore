@@ -526,7 +526,7 @@ namespace Game.Spells
                 else
                 {
                     // needs readding - remove now, will be applied in next update cycle
-                    // (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
+                    // (dbcs do not have auras which apply on same Type of targets but have different radius, so this is not really needed)
                     if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), caster, true) || !CanBeAppliedOn(app.Value.GetTarget()))
                     {
                         targetsToRemove.Add(app.Value.GetTarget());
@@ -1101,8 +1101,8 @@ namespace Game.Spells
 
         public int CalcDispelChance(Unit auraTarget, bool offensive)
         {
-            // we assume that aura dispel chance is 100% on start
-            // need formula for level difference based chance
+            // we assume that aura dispel Chance is 100% on start
+            // need formula for level difference based Chance
             int resistChance = 0;
 
             // Apply dispel mod from aura caster
@@ -1577,7 +1577,7 @@ namespace Game.Spells
 
             if (!sameCaster)
             {
-                // Channeled auras can stack if not forbidden by db or aura type
+                // Channeled auras can stack if not forbidden by db or aura Type
                 if (existingAura.GetSpellInfo().IsChanneled())
                     return true;
 
@@ -1866,11 +1866,11 @@ namespace Game.Spells
         {
             float chance = procEntry.Chance;
             // calculate chances depending on unit with caster's data
-            // so talents modifying chances and judgements will have properly calculated proc chance
+            // so talents modifying chances and judgements will have properly calculated proc Chance
             Unit caster = GetCaster();
             if (caster != null)
             {
-                // calculate ppm chance if present and we're using weapon
+                // calculate ppm Chance if present and we're using weapon
                 if (eventInfo.GetDamageInfo() != null && procEntry.ProcsPerMinute != 0)
                 {
                     uint WeaponSpeed = caster.GetBaseAttackTime(eventInfo.GetDamageInfo().GetAttackType());
@@ -1880,13 +1880,13 @@ namespace Game.Spells
                 if (GetSpellInfo().ProcBasePPM > 0.0f)
                     chance = CalcPPMProcChance(caster);
 
-                // apply chance modifer aura, applies also to ppm chance (see improved judgement of light spell)
+                // apply Chance modifer aura, applies also to ppm Chance (see improved judgement of light spell)
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
                     modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcChance, ref chance);
             }
 
-            // proc chance is reduced by an additional 3.333% per level past 60
+            // proc Chance is reduced by an additional 3.333% per level past 60
             if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReduceProc60) && eventInfo.GetActor().GetLevel() > 60)
                 chance = Math.Max(0.0f, (1.0f - ((eventInfo.GetActor().GetLevel() - 60) * 1.0f / 30.0f)) * chance);
 
@@ -2883,7 +2883,7 @@ namespace Game.Spells
                 if (!HasEffect(spellEffectInfo.EffectIndex))
                     continue;
 
-                // we can't use effect type like area auras to determine check type, check targets
+                // we can't use effect Type like area auras to determine check Type, check targets
                 SpellTargetCheckTypes selectionType = spellEffectInfo.TargetA.GetCheckType();
                 if (spellEffectInfo.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
                     selectionType = spellEffectInfo.TargetB.GetCheckType();

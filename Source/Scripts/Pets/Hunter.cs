@@ -108,7 +108,7 @@ namespace Scripts.Pets
                 {
                     if (_spellTimer <= diff)
                     {
-                        if (RandomHelper.URand(0, 2) == 0) // 33% chance to cast
+                        if (RandomHelper.URand(0, 2) == 0) // 33% Chance to cast
                             DoCastVictim(RandomHelper.RAND(SpellIds.MindNumbingPoison, SpellIds.CripplingPoison));
 
                         _spellTimer = 3000;

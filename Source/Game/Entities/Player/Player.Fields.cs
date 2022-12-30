@@ -495,12 +495,13 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, uint randomBonusListId, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<uint> bonuses)
+        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint itemSuffixFactor, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<uint> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
             CreatorGuid = creator;
-            RandomBonusListId = randomBonusListId;
+            ItemRandomPropertyId = randomPropertyId;
+            ItemSuffixFactor = itemSuffixFactor;
             FixedScalingLevel = fixedScalingLevel;
             ArtifactKnowledgeLevel = artifactKnowledgeLevel;
             Context = context;
@@ -512,7 +513,8 @@ namespace Game.Entities
         public ulong ItemId;
         public uint ItemEntry;
         public ObjectGuid CreatorGuid;
-        public uint RandomBonusListId;
+        public ItemRandomEnchantmentId ItemRandomPropertyId;
+        public uint ItemSuffixFactor;
         public uint FixedScalingLevel;
         public uint ArtifactKnowledgeLevel;
         public ItemContext Context;

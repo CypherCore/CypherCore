@@ -41,7 +41,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
         public const uint Corrosiveacid = 23313;   //Corrosive Acid 23313; 23314
         public const uint Igniteflesh = 23315;   //Ignite Flesh 23315; 23316
         public const uint Frostburn = 23187;   //Frost burn 23187; 23189
-                                               // Brood Affliction 23173 - Scripted Spell that cycles through all targets within 100 yards and has a chance to cast one of the afflictions on them
+                                               // Brood Affliction 23173 - Scripted Spell that cycles through all targets within 100 yards and has a Chance to cast one of the afflictions on them
                                                // Since Scripted spells arn't coded I'll just write a function that does the same thing
         public const uint BroodafBlue = 23153;   //Blue affliction 23153
         public const uint BroodafBlack = 23154;   //Black affliction 23154

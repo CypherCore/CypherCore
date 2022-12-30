@@ -47,9 +47,9 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
         public const uint Shadownova = 30852;                       //Shadownova used during all phases
         public const uint SwPain = 30854;                       //Shadow word pain during phase 1 and 3 (different targeting rules though)
-        public const uint ThrashPassive = 12787;                       //Extra attack chance during phase 2
+        public const uint ThrashPassive = 12787;                       //Extra attack Chance during phase 2
         public const uint SunderArmor = 30901;                       //Sunder armor during phase 2
-        public const uint ThrashAura = 12787;                       //Passive proc chance for thrash
+        public const uint ThrashAura = 12787;                       //Passive proc Chance for thrash
         public const uint EquipAxes = 30857;                       //Visual for axe equiping
         public const uint AmplifyDamage = 39095;                       //Amplifiy during phase 3
         public const uint Cleave = 30131;                     //Same as Nightbane.

@@ -1552,7 +1552,7 @@ namespace Game.Scripting
         // where function is: void function (AuraEffect aurEff, SpellModifier& spellMod);
         public List<EffectCalcSpellModHandler> DoEffectCalcSpellMod = new();
 
-        // executed when aura effect calculates crit chance for dots and hots
+        // executed when aura effect calculates crit Chance for dots and hots
         // example: DoEffectCalcCritChance += AuraEffectCalcCritChanceFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect const* aurEff, Unit* victim, float& critChance);
         public List<EffectCalcCritChanceHandler> DoEffectCalcCritChance = new();
@@ -1699,7 +1699,7 @@ namespace Game.Scripting
         // returns aura object of script
         public Aura GetAura() { return m_aura; }
 
-        // returns type of the aura, may be dynobj owned aura or unit owned aura
+        // returns Type of the aura, may be dynobj owned aura or unit owned aura
         AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
 
         // aura duration manipulation - when duration goes to 0 aura is removed
@@ -1739,7 +1739,7 @@ namespace Game.Scripting
         // returns aura effect of given effect index or null
         public AuraEffect GetEffect(byte effIndex) { return m_aura.GetEffect(effIndex); }
 
-        // check if aura has effect of given aura type
+        // check if aura has effect of given aura Type
         bool HasEffectType(AuraType type)
         {
             return m_aura.HasEffectType(type);

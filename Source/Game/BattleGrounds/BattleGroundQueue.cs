@@ -429,8 +429,8 @@ namespace Game.BattleGrounds
 
         /*
         This function is inviting players to already running Battlegrounds
-        Invitation type is based on config file
-        large groups are disadvantageous, because they will be kicked first if invitation type = 1
+        Invitation Type is based on config file
+        large groups are disadvantageous, because they will be kicked first if invitation Type = 1
         */
         void FillPlayersToBG(Battleground bg, BattlegroundBracketId bracket_id)
         {

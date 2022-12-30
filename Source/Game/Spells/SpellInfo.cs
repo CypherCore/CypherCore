@@ -1122,11 +1122,11 @@ namespace Game.Spells
                 return SpellCastResult.BadTargets;
 
             /* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
-            not allow passengers to be implicitly hit by spells, however this target type should be an exception,
+            not allow passengers to be implicitly hit by spells, however this target Type should be an exception,
             if this is left it kills spells that award kill credit from vehicle to master (few spells),
             the use of these 2 covers passenger target check, logically, if vehicle cast this to master it should always hit
             him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
-            cannot be solved from within the check in other way since target type cannot be called for the spell currently
+            cannot be solved from within the check in other way since target Type cannot be called for the spell currently
             Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
             Unit unitCaster = caster.ToUnit();
             if (unitCaster != null)
@@ -2802,7 +2802,7 @@ namespace Game.Spells
             // Spell drain all exist power on cast (Only paladin lay of Hands)
             if (HasAttribute(SpellAttr1.UseAllMana))
             {
-                // If power type - health drain all
+                // If power Type - health drain all
                 if (power.PowerType == PowerType.Health)
                 {
                     cost.Power = PowerType.Health;
@@ -2817,7 +2817,7 @@ namespace Game.Spells
                     return cost;
                 }
 
-                Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
                 return default;
             }
 
@@ -2842,7 +2842,7 @@ namespace Game.Spells
                             powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.PowerCostPct);
                             break;
                         case PowerType.AlternatePower:
-                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
                             return null;
                         default:
                         {
@@ -2853,7 +2853,7 @@ namespace Game.Spells
                                 break;
                             }
 
-                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
                             return default;
                         }
                     }
@@ -2893,7 +2893,7 @@ namespace Game.Spells
             {
                 if (!optionalCost)
                 {
-                    // Flat mod from caster auras by spell school and power type
+                    // Flat mod from caster auras by spell school and power Type
                     foreach (AuraEffect aura in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
                     {
                         if ((aura.GetMiscValue() & (int)schoolMask) == 0)
@@ -2906,7 +2906,7 @@ namespace Game.Spells
                     }
                 }
 
-                // PCT mod from user auras by spell school and power type
+                // PCT mod from user auras by spell school and power Type
                 foreach (var schoolCostPct in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
                 {
                     if ((schoolCostPct.GetMiscValue() & (int)schoolMask) == 0)
@@ -4459,13 +4459,13 @@ namespace Game.Spells
                 UsedTargetObjectType = usedtarget;
             }
 
-            public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target type provided for effect
-            public SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object type for spell effect
+            public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target Type provided for effect
+            public SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object Type for spell effect
         }
 
         static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
         {
-            // implicit target type           used target object type
+            // implicit target Type           used target object Type
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 0
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 1 SPELL_EFFECT_INSTAKILL
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 2 SPELL_EFFECT_SCHOOL_DAMAGE
@@ -4966,7 +4966,7 @@ namespace Game.Spells
                 SelectionCheckType = selectionCheck;
                 DirectionType = direction;
             }
-            public SpellTargetObjectTypes ObjectType;    // type of object returned by target type
+            public SpellTargetObjectTypes ObjectType;    // Type of object returned by target Type
             public SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
             public SpellTargetSelectionCategories SelectionCategory;
             public SpellTargetCheckTypes SelectionCheckType; // defines selection criteria

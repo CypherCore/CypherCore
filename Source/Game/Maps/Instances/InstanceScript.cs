@@ -548,7 +548,7 @@ namespace Game.Maps
                         go.ResetDoorOrButton();
                 }
                 else
-                    Log.outError(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton can't use gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+                    Log.outError(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton failed");
@@ -568,7 +568,7 @@ namespace Game.Maps
                         go.ResetDoorOrButton();
                 }
                 else
-                    Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+                    Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
             }
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
@@ -586,7 +586,7 @@ namespace Game.Maps
                     case GameObjectTypes.Trap:
                     case GameObjectTypes.FishingNode:
                         // not expect any of these should ever be handled
-                        Log.outError(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject can't respawn gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+                        Log.outError(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject can't respawn gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
                         return;
                     default:
                         break;

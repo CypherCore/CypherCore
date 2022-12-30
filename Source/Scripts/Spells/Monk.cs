@@ -293,7 +293,7 @@ namespace Scripts.Spells.Monk
                 }
                 else
                 {
-                    // amount changed the stagger type so we need to change the stagger amount (e.g. from medium to light)
+                    // amount changed the stagger Type so we need to change the stagger amount (e.g. from medium to light)
                     GetTarget().RemoveAura(auraStagger);
                     AddNewStagger(target, spellId, newAmount);
                 }

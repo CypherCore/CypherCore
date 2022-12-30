@@ -1343,7 +1343,7 @@ namespace Game.Entities
                 case ActionButtonType.Eqset:
                     break;
                 default:
-                    Log.outError(LogFilter.Player, $"Unknown action type {type}");
+                    Log.outError(LogFilter.Player, $"Unknown action Type {type}");
                     return false;                                          // other cases not checked at this moment
             }
 
@@ -1366,7 +1366,7 @@ namespace Game.Entities
             // set data and update to CHANGED if not NEW
             ab.SetActionAndType(action, (ActionButtonType)type);
 
-            Log.outDebug(LogFilter.Player, $"Player::AddActionButton: Player '{GetName()}' ({GetGUID()}) added action '{action}' (type {type}) to button '{button}'");
+            Log.outDebug(LogFilter.Player, $"Player::AddActionButton: Player '{GetName()}' ({GetGUID()}) added action '{action}' (Type {type}) to button '{button}'");
             return ab;
         }
         public void RemoveActionButton(byte _button)
@@ -1473,7 +1473,7 @@ namespace Game.Entities
                         break;
                 }
 
-                // for custom, a rate of 0.0 will totally disable reputation gain for this faction/type
+                // for custom, a rate of 0.0 will totally disable reputation gain for this faction/Type
                 if (repRate <= 0.0f)
                     return 0;
 
@@ -3188,7 +3188,7 @@ namespace Game.Entities
 
         void Regenerate(PowerType power)
         {
-            // Skip regeneration for power type we cannot have
+            // Skip regeneration for power Type we cannot have
             uint powerIndex = GetPowerIndex(power);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
@@ -3439,7 +3439,7 @@ namespace Game.Entities
 
             damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModEnvironmentalDamageTaken));
 
-            // Absorb, resist some environmental damage type
+            // Absorb, resist some environmental damage Type
             uint absorb = 0;
             uint resist = 0;
             switch (type)
@@ -4267,7 +4267,7 @@ namespace Game.Entities
                             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true);
+                                Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
                                 if (IsInWorld)
                                     SendNewItem(item, spellInfo.ReagentCount[i], true, false);
                             }
@@ -4977,7 +4977,7 @@ namespace Game.Entities
             if (!creature.IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.InteractWhileDead))
                 return null;
 
-            // appropriate npc type
+            // appropriate npc Type
             bool hasNpcFlags()
             {
                 if (npcFlags == 0 && npcFlags2 == 0)
@@ -6246,7 +6246,7 @@ namespace Game.Entities
             if (item == null)
                 return;
 
-            for (var slot = EnchantmentSlot.Perm; slot < EnchantmentSlot.Max; ++slot)
+            for (var slot = EnchantmentSlot.EnhancementPermanent; slot < EnchantmentSlot.Max; ++slot)
             {
                 if (skipEnchantSlot == (int)slot)
                     continue;
@@ -6373,7 +6373,7 @@ namespace Game.Entities
                 return false;
             }
 
-            // not let cheating with start flight in time of logout process || while in combat || has type state: stunned || has type state: root
+            // not let cheating with start flight in time of logout process || while in combat || has Type state: stunned || has Type state: root
             if (GetSession().IsLogingOut() || IsInCombat() || HasUnitState(UnitState.Stunned) || HasUnitState(UnitState.Root))
             {
                 GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);

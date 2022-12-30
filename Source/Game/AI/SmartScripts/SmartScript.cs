@@ -836,7 +836,7 @@ namespace Game.AI
                             }
                         }
                     }
-                    else // Specific target type
+                    else // Specific target Type
                     {
                         foreach (var target in targets)
                         {
@@ -2504,7 +2504,7 @@ namespace Game.AI
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                    Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action Type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;
             }
 
@@ -3612,7 +3612,7 @@ namespace Game.AI
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event type {0}", e.GetEventType());
+                    Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event Type {0}", e.GetEventType());
                     break;
             }
         }
@@ -3869,7 +3869,7 @@ namespace Game.AI
         {
             RaisePriority(e);
 
-            // This allows to retry the action later without rolling again the chance roll (which might fail and end up not executing the action)
+            // This allows to retry the action later without rolling again the Chance roll (which might fail and end up not executing the action)
             if (ignoreChanceRoll)
                 e.Event.event_flags |= SmartEventFlags.TempIgnoreChanceRoll;
 

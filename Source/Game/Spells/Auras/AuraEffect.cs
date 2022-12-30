@@ -994,7 +994,7 @@ namespace Game.Spells
                     }
                     if (!found)
                     {
-                        // if not have invisibility auras of type INVISIBILITY_GENERAL
+                        // if not have invisibility auras of Type INVISIBILITY_GENERAL
                         // remove glow vision
                         if (playerTarget != null && type == InvisibilityType.General)
                             playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
@@ -4049,7 +4049,7 @@ namespace Game.Spells
                 {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << (int)i)))
                     {
-                        // only aura type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
+                        // only aura Type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
                         float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
                         thisPlayer.SetModDamageDonePercent(i, amount);
                     }
@@ -4470,7 +4470,7 @@ namespace Game.Spells
                     return;
             }
 
-            Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true);
+            Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true, new ItemRandomEnchantmentId());
             if (newitem == null)
             {
                 plCaster.SendEquipError(InventoryResult.ItemNotFound);

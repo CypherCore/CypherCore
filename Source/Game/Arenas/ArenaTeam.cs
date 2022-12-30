@@ -84,7 +84,7 @@ namespace Game.Arenas
             string playerName;
             Class playerClass;
 
-            // Check if arena team is full (Can't have more than type * 2 players)
+            // Check if arena team is full (Can't have more than Type * 2 players)
             if (GetMembersSize() >= GetArenaType() * 2)
                 return false;
 
@@ -107,7 +107,7 @@ namespace Game.Arenas
             // Check if player is already in a similar arena team
             if ((player && player.GetArenaTeamId(GetSlot()) != 0) || Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
             {
-                Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of type {2}", playerGuid.ToString(), playerName, GetArenaType());
+                Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of Type {2}", playerGuid.ToString(), playerName, GetArenaType());
                 return false;
             }
 
@@ -168,7 +168,7 @@ namespace Game.Arenas
                     player.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 1);
             }
 
-            Log.outDebug(LogFilter.Arena, "Player: {0} [{1}] joined arena team type: {2} [Id: {3}, Name: {4}].", playerName, playerGuid.ToString(), GetArenaType(), GetId(), GetName());
+            Log.outDebug(LogFilter.Arena, "Player: {0} [{1}] joined arena team Type: {2} [Id: {3}, Name: {4}].", playerName, playerGuid.ToString(), GetArenaType(), GetId(), GetName());
 
             return true;
         }
@@ -314,7 +314,7 @@ namespace Game.Arenas
                 // delete all info regarding this team
                 for (uint i = 0; i < (int)ArenaTeamInfoType.End; ++i)
                     player.SetArenaTeamInfoField(GetSlot(), (ArenaTeamInfoType)i, 0);
-                Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] left arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+                Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] left arena team Type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
             }
 
             // Only used for single member deletion, for arena team disband we use a single query for more efficiency
@@ -334,7 +334,7 @@ namespace Game.Arenas
             {
                 Player player = session.GetPlayer();
                 if (player)
-                    Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+                    Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team Type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
             }
 
             // Remove all members from arena team
@@ -426,7 +426,7 @@ namespace Game.Arenas
                 default:
                     break;
             }
-            Log.outError(LogFilter.Arena, "FATAL: Unknown arena team type {0} for some arena team", type);
+            Log.outError(LogFilter.Arena, "FATAL: Unknown arena team Type {0} for some arena team", type);
             return 0xFF;
         }
 
@@ -485,7 +485,7 @@ namespace Game.Arenas
 
         float GetChanceAgainst(uint ownRating, uint opponentRating)
         {
-            // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
+            // Returns the Chance to win against a team with the given rating, used in the rating adjustment calculation
             // ELO system
             return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
         }

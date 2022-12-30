@@ -1335,7 +1335,7 @@ namespace Game.Guilds
                     m_id,                                       // guild id
                     field.Read<uint>(1),                      // guid
                     field.Read<long>(6),              // timestamp
-                    (GuildEventLogTypes)field.Read<byte>(2),   // event type
+                    (GuildEventLogTypes)field.Read<byte>(2),   // event Type
                     field.Read<ulong>(3),                      // player guid 1
                     field.Read<ulong>(4),                      // player guid 2
                     field.Read<byte>(5)));                     // rank
@@ -1374,7 +1374,7 @@ namespace Game.Guilds
                         guid,                                   // guid
                         field.Read<long>(8),          // timestamp
                         dbTabId,                                // tab id
-                        eventType,                              // event type
+                        eventType,                              // event Type
                         field.Read<ulong>(4),                  // player guid
                         field.Read<ulong>(5),                  // item or money
                         field.Read<ushort>(6),                  // itam stack count
@@ -1393,7 +1393,7 @@ namespace Game.Guilds
                 m_id,                                       // guild id
                 field.Read<uint>(1),                      // guid
                 field.Read<long>(6),                      // timestamp //64 bits?
-                (GuildNews)field.Read<byte>(2),            // type
+                (GuildNews)field.Read<byte>(2),            // Type
                 ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(3)),                      // player guid
                 field.Read<uint>(4),                      // Flags
                 field.Read<uint>(5));                    // value)
@@ -1413,7 +1413,7 @@ namespace Game.Guilds
 
         public bool LoadBankItemFromDB(SQLFields field)
         {
-            byte tabId = field.Read<byte>(52);
+            byte tabId = field.Read<byte>(53);
             if (tabId >= _GetPurchasedTabsSize())
             {
                 Log.outError(LogFilter.Guild, "Invalid tab for item (GUID: {0}, id: {1}) in guild bank, skipped.",
@@ -2270,9 +2270,9 @@ namespace Game.Guilds
                     itemInfo.Slot = slot;
                     itemInfo.Item.ItemID = tabItem ? tabItem.GetEntry() : 0;
                     itemInfo.Count = (int)(tabItem ? tabItem.GetCount() : 0);
-                    itemInfo.EnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Perm) : 0);
+                    itemInfo.EnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent) : 0);
                     itemInfo.Charges = tabItem ? Math.Abs(tabItem.GetSpellCharges()) : 0;
-                    itemInfo.OnUseEnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Use) : 0);
+                    itemInfo.OnUseEnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementUse) : 0);
                     itemInfo.Flags = 0;
                     itemInfo.Locked = false;
 
@@ -2353,8 +2353,8 @@ namespace Game.Guilds
                             itemInfo.Item.ItemID = tabItem.GetEntry();
                             itemInfo.Count = (int)tabItem.GetCount();
                             itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
-                            itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
-                            itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Use);
+                            itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
+                            itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
                             itemInfo.Flags = tabItem.m_itemData.DynamicFlags;
 
                             byte i = 0;
@@ -3365,7 +3365,7 @@ namespace Game.Guilds
 
             public bool LoadItemFromDB(SQLFields field)
             {
-                byte slotId = field.Read<byte>(53);
+                byte slotId = field.Read<byte>(54);
                 uint itemGuid = field.Read<uint>(0);
                 uint itemEntry = field.Read<uint>(1);
                 if (slotId >= GuildConst.MaxBankSlots)

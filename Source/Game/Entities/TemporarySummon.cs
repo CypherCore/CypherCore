@@ -173,7 +173,7 @@ namespace Game.Entities
                 }
                 default:
                     UnSummon();
-                    Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown type {1} of ", GetEntry(), m_type);
+                    Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown Type {1} of ", GetEntry(), m_type);
                     break;
             }
         }
@@ -534,7 +534,7 @@ namespace Game.Entities
 
             SetLevel(petlevel);
 
-            //Determine pet type
+            //Determine pet Type
             PetType petType = PetType.Max;
             if (IsPet() && GetOwner().IsTypeId(TypeId.Player))
             {
@@ -551,7 +551,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Unit, "Unknown type pet {0} is summoned by player class {1}", GetEntry(), GetOwner().GetClass());
+                    Log.outError(LogFilter.Unit, "Unknown Type pet {0} is summoned by player class {1}", GetEntry(), GetOwner().GetClass());
                 }
             }
 
@@ -1150,7 +1150,7 @@ namespace Game.Entities
     {
         public uint entry;        // Entry of summoned creature
         public Position pos;        // Position, where should be creature spawned
-        public TempSummonType type; // Summon type, see TempSummonType for available types
+        public TempSummonType type; // Summon Type, see TempSummonType for available types
         public uint time;         // Despawn time, usable only with certain temp summon types
     }
 

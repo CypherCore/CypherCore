@@ -628,7 +628,7 @@ namespace Game.Entities
                     return 0f;
             }
             // percent done
-            // only players use intelligence for critical chance computations
+            // only players use intelligence for critical Chance computations
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
                 modOwner.ApplySpellMod(spellInfo, SpellModOp.CritChance, ref crit_chance);
@@ -651,13 +651,13 @@ namespace Game.Entities
                     // taken
                     if (!spellInfo.IsPositive())
                     {
-                        // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+                        // Modify critical Chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
                         crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
                     }
 
                     if (caster)
                     {
-                        // scripted (increase crit chance ... against ... target by x%
+                        // scripted (increase crit Chance ... against ... target by x%
                         var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
                         foreach (var eff in mOverrideClassScript)
                         {
@@ -741,7 +741,7 @@ namespace Game.Entities
 
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
-            // Check damage class instead of attack type to correctly handle judgements
+            // Check damage class instead of attack Type to correctly handle judgements
             // - they are meele, but can't be dodged/parried/deflected because of ranged dmg class
             if (spellInfo.DmgClass == SpellDmgClass.Ranged)
                 attType = WeaponAttackType.RangedAttack;
@@ -1114,7 +1114,7 @@ namespace Game.Entities
                 for (var i = 0; i < m_modAuras[aType].Count;)
                 {
                     var eff = m_modAuras[aType][i];
-                    // Get auras with disease dispel type by caster
+                    // Get auras with disease dispel Type by caster
                     if (eff.GetSpellInfo().Dispel == DispelType.Disease && eff.GetCasterGUID() == casterGUID)
                     {
                         ++diseases;
@@ -1366,7 +1366,7 @@ namespace Game.Entities
                 });
             }
 
-            // If m_immuneToEffect type contain this effect type, IMMUNE effect.
+            // If m_immuneToEffect Type contain this effect Type, IMMUNE effect.
             var effectList = m_spellImmune[(int)SpellImmunity.Effect];
             if (hasImmunity(effectList, (uint)spellEffectInfo.Effect))
                 return true;
@@ -1408,12 +1408,12 @@ namespace Game.Entities
             if (schoolMask == SpellSchoolMask.None)
                 return false;
 
-            // If m_immuneToSchool type contain this school type, IMMUNE damage.
+            // If m_immuneToSchool Type contain this school Type, IMMUNE damage.
             uint schoolImmunityMask = GetSchoolImmunityMask();
             if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
                 return true;
 
-            // If m_immuneToDamage type contain magic, IMMUNE damage.
+            // If m_immuneToDamage Type contain magic, IMMUNE damage.
             uint damageImmunityMask = GetDamageImmunityMask();
             if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
                 return true;
@@ -1436,7 +1436,7 @@ namespace Game.Entities
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
             if (schoolMask != 0)
             {
-                // If m_immuneToSchool type contain this school type, IMMUNE damage.
+                // If m_immuneToSchool Type contain this school Type, IMMUNE damage.
                 uint schoolImmunityMask = 0;
                 var schoolList = m_spellImmune[(int)SpellImmunity.School];
                 foreach (var pair in schoolList)
@@ -1447,7 +1447,7 @@ namespace Game.Entities
                 if ((schoolImmunityMask & schoolMask) == schoolMask)
                     return true;
 
-                // If m_immuneToDamage type contain magic, IMMUNE damage.
+                // If m_immuneToDamage Type contain magic, IMMUNE damage.
                 uint damageImmunityMask = GetDamageImmunityMask();
                 if ((damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
                     return true;
@@ -2823,7 +2823,7 @@ namespace Game.Entities
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% Chance to dispell
                     // Polymorph instead of 1 / (5 + 1) . 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
@@ -3071,7 +3071,7 @@ namespace Game.Entities
             // leading to assertion failures if the aura was cast on a player that can
             // (and is changing map at the point where this function is called).
             // Such situation occurs when player is logging in inside an instance and fails the entry check for any reason.
-            // The aura that was loaded from db (indirectly, via linked casts) gets removed before it has a chance
+            // The aura that was loaded from db (indirectly, via linked casts) gets removed before it has a Chance
             // to register in m_appliedAuras
             foreach (var pair in GetOwnedAuras())
             {
@@ -3965,7 +3965,7 @@ namespace Game.Entities
             if (createInfo.CasterGUID.IsEmpty() && !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
                 createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
-            // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
+            // passive and Incanter's Absorption and auras with different Type can stack with themselves any number of times
             if (!createInfo.GetSpellInfo().IsMultiSlotAura())
             {
                 // check if cast item changed

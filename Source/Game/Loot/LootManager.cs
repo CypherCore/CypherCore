@@ -492,7 +492,7 @@ namespace Game.Loots
     {
         public uint itemid;                 // id of the item
         public uint reference;              // referenced TemplateleId
-        public float chance;                // chance to drop for both quest and non-quest items, chance to be used for refs
+        public float chance;                // Chance to drop for both quest and non-quest items, Chance to be used for refs
         public ushort lootmode;
         public bool needs_quest;            // quest drop (negative ChanceOrQuestChance in DB)
         public byte groupid;
@@ -544,15 +544,15 @@ namespace Game.Loots
                     return false;
                 }
 
-                if (chance == 0 && groupid == 0)                      // Zero chance is allowed for grouped entries only
+                if (chance == 0 && groupid == 0)                      // Zero Chance is allowed for grouped entries only
                 {
                     Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
                     return false;
                 }
 
-                if (chance != 0 && chance < 0.000001f)             // loot with low chance
+                if (chance != 0 && chance < 0.000001f)             // loot with low Chance
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low chance ({3}) - skipped",
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low Chance ({3}) - skipped",
                         store.GetName(), entry, itemid, chance);
                     return false;
                 }
@@ -566,10 +566,10 @@ namespace Game.Loots
             else                                                    // mincountOrRef < 0
             {
                 if (needs_quest)
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest chance will be treated as non-quest chance", store.GetName(), entry, itemid);
-                else if (chance == 0)                              // no chance for the reference
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest Chance will be treated as non-quest Chance", store.GetName(), entry, itemid);
+                else if (chance == 0)                              // no Chance for the reference
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero Chance is specified for a reference, skipped", store.GetName(), entry, itemid);
                     return false;
                 }
             }
@@ -1186,10 +1186,10 @@ namespace Game.Loots
             {
                 float chance = RawTotalChance();
                 if (chance > 101.0f)                                    // @todo replace with 100% when DBs will be ready
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has total chance > 100% ({3})", lootstore.GetName(), id, group_id, chance);
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has total Chance > 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
                 if (chance >= 100.0f && !EqualChanced.Empty())
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has items with chance=0% but group total chance >= 100% ({3})", lootstore.GetName(), id, group_id, chance);
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has items with Chance=0% but group total Chance >= 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
             }
             public void CheckLootRefs(LootTemplateMap store, List<uint> ref_set)
@@ -1228,7 +1228,7 @@ namespace Game.Loots
             }
 
             LootStoreItemList ExplicitlyChanced = new();                // Entries with chances defined in DB
-            LootStoreItemList EqualChanced = new();                     // Zero chances - every entry takes the same chance
+            LootStoreItemList EqualChanced = new();                     // Zero chances - every entry takes the same Chance
 
             LootStoreItem Roll(ushort lootMode, Player personalLooter = null)
             {
@@ -1239,7 +1239,7 @@ namespace Game.Loots
                 {
                     float roll = (float)RandomHelper.randChance();
 
-                    foreach (var item in possibleLoot)   // check each explicitly chanced entry in the template and modify its chance based on quality.
+                    foreach (var item in possibleLoot)   // check each explicitly chanced entry in the template and modify its Chance based on quality.
                     {
                         if (item.chance >= 100.0f)
                             return item;

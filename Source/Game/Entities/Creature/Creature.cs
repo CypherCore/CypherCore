@@ -3457,7 +3457,7 @@ namespace Game.Entities
         }
         public override bool Execute(ulong e_time, uint p_time)
         {
-            m_owner.DespawnOrUnsummon(TimeSpan.Zero, m_respawnTimer);    // since we are here, we are not TempSummon as object type cannot change during runtime
+            m_owner.DespawnOrUnsummon(TimeSpan.Zero, m_respawnTimer);    // since we are here, we are not TempSummon as object Type cannot change during runtime
             return true;
         }
 

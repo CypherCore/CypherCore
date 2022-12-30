@@ -829,7 +829,7 @@ namespace Game
         public float questWeeklyRate;
         public float questMonthlyRate;
         public float questRepeatableRate;
-        public float creatureRate;         // no reputation are given at all for this faction/rate type.
+        public float creatureRate;         // no reputation are given at all for this faction/rate Type.
         public float spellRate;
     }
     public class ReputationOnKillEntry

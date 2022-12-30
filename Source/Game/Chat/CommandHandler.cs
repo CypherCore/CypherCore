@@ -257,7 +257,7 @@ namespace Game.Chat
                     }
             }
 
-            // unknown type?
+            // unknown Type?
             return 0;
         }
 
@@ -312,7 +312,7 @@ namespace Game.Chat
                     }
             }
 
-            // unknown type?
+            // unknown Type?
             return 0;
         }
 

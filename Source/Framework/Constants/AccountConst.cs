@@ -528,7 +528,7 @@ namespace Framework.Constants
         CommandReloadSupportSystem = 650,
         CommandReloadGossipMenu = 651,
         CommandReloadGossipMenuOption = 652,
-        CommandReloadItemRandomBonusListTemplate = 653,
+        CommandReloadItemEnchantmentTemplate = 653,
         CommandReloadItemLootTemplate = 654,
         CommandReloadItemSetNames = 655,
         CommandReloadLfgDungeonRewards = 656,

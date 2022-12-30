@@ -204,7 +204,7 @@ namespace Game
                 var conditions = conditionStorage[sourceType].LookupByKey(entry);
                 if (!conditions.Empty())
                 {
-                    Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for type {0} and entry {1}", sourceType, entry);
+                    Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for Type {0} and entry {1}", sourceType, entry);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
             }
@@ -675,7 +675,7 @@ namespace Game
                 List<uint> sharedMasks = new();
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    // additional checks by condition type
+                    // additional checks by condition Type
                     if ((conditionEffMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
                     {
                         switch (cond.ConditionType)
@@ -1239,7 +1239,7 @@ namespace Game
                 {
                     if (cond.SourceGroup <= 0 || cond.SourceGroup >= (uint)TypeId.Max)
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, is no valid object type, ignoring.");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, is no valid object Type, ignoring.");
                         return false;
                     }
 
@@ -1261,7 +1261,7 @@ namespace Game
                     }
                     else
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked type id, ignoring.");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked Type id, ignoring.");
                         return false;
                     }
                     break;
@@ -1696,7 +1696,7 @@ namespace Game
                 }
                 case ConditionTypes.SpawnmaskDeprecated:
                 {
-                    Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition type CONDITION_SPAWNMASK.");
+                    Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition Type CONDITION_SPAWNMASK.");
                     return false;
                 }
                 case ConditionTypes.UnitState:
@@ -1768,7 +1768,7 @@ namespace Game
                 case ConditionTypes.PetType:
                     if (cond.ConditionValue1 >= (1 << (int)PetType.Max))
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non-existing pet type {1}, skipped.", cond.ToString(true), cond.ConditionValue1);
+                        Log.outError(LogFilter.Sql, "{0} has non-existing pet Type {1}, skipped.", cond.ToString(true), cond.ConditionValue1);
                         return false;
                     }
                     break;
@@ -3027,7 +3027,7 @@ namespace Game
             new ConditionTypeInfo("Sit/stand state",      true, true, false),
             new ConditionTypeInfo("Daily Quest Completed",true, false, false),
             new ConditionTypeInfo("Charmed",              false,false, false),
-            new ConditionTypeInfo("Pet type",             true, false, false),
+            new ConditionTypeInfo("Pet Type",             true, false, false),
             new ConditionTypeInfo("On Taxi",              false,false, false),
             new ConditionTypeInfo("Quest state mask",     true, true, false),
             new ConditionTypeInfo("Quest objective progress",   true, false, true),

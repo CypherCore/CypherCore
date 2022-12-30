@@ -471,7 +471,7 @@ namespace Game.DungeonFinding
                             isRaid = true;
                             break;
                         default:
-                            Log.outError(LogFilter.Lfg, "Wrong dungeon type {0} for dungeon {1}", type, it);
+                            Log.outError(LogFilter.Lfg, "Wrong dungeon Type {0} for dungeon {1}", type, it);
                             joinData.result = LfgJoinResult.InvalidSlot;
                             break;
                     }

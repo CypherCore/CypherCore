@@ -875,7 +875,7 @@ namespace Game.Entities
             Player plrVictim = victim.ToPlayer();
             if (plrVictim != null)
             {
-                // remember victim PvP death for corpse type and corpse reclaim delay
+                // remember victim PvP death for corpse Type and corpse reclaim delay
                 // at original death (not at SpiritOfRedemtionTalent timeout)
                 plrVictim.SetPvPDeath(player != null);
 
@@ -1056,7 +1056,7 @@ namespace Game.Entities
             if (!IsAlive() || !victim.IsAlive())
                 return;
 
-            // Select HitInfo/procAttacker/procVictim flag based on attack type
+            // Select HitInfo/procAttacker/procVictim flag based on attack Type
             switch (attackType)
             {
                 case WeaponAttackType.BaseAttack:
@@ -1228,10 +1228,10 @@ namespace Game.Entities
             if (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks())
                 return MeleeHitOutcome.Evade;
 
-            // Miss chance based on melee
+            // Miss Chance based on melee
             int miss_chance = (int)(MeleeSpellMissChance(victim, attType, null) * 100.0f);
 
-            // Critical hit chance
+            // Critical hit Chance
             int crit_chance = (int)((GetUnitCriticalChanceAgainst(attType, victim) + GetTotalAuraModifier(AuraType.ModAutoAttackCritChance)) * 100.0f);
 
             int dodge_chance = (int)(GetUnitDodgeChance(attType, victim) * 100.0f);
@@ -1267,7 +1267,7 @@ namespace Game.Entities
             if (tmp > 0 && roll < (sum += tmp))
                 return MeleeHitOutcome.Miss;
 
-            // always crit against a sitting target (except 0 crit chance)
+            // always crit against a sitting target (except 0 crit Chance)
             if (victim.IsTypeId(TypeId.Player) && crit_chance > 0 && !victim.IsStandState())
                 return MeleeHitOutcome.Crit;
 
@@ -1290,7 +1290,7 @@ namespace Game.Entities
             }
 
             // 4. GLANCING
-            // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
+            // Max 40% Chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
             if ((IsTypeId(TypeId.Player) || IsPet()) &&
                 !victim.IsTypeId(TypeId.Player) && !victim.IsPet() &&
                 attackerLevel + 3 < victimLevel)
@@ -1322,7 +1322,7 @@ namespace Game.Entities
                 !IsControlledByPlayer() &&
                 !(GetTypeId() == TypeId.Unit && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrushingBlows)))
             {
-                // add 2% chance per level, min. is 15%
+                // add 2% Chance per level, min. is 15%
                 tmp = (int)(attackerLevel - victimLevel * 1000 - 1500);
                 if (roll < (sum += tmp))
                 {

@@ -170,7 +170,7 @@ namespace Game
 
         static ushort GetCheckPacketSize(WardenCheck check)
         {
-            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check type
+            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check Type
             if (!check.Str.IsEmpty())
                 size += (check.Str.Length + 1); // 1 byte string length
             if (!check.Data.Empty())

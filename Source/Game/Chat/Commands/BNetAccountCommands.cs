@@ -169,7 +169,7 @@ namespace Game.Chat.Commands
         [Command("password", RBACPermissions.CommandBnetAccountPassword, true)]
         static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string passwordConfirmation)
         {
-            // We compare the old, saved password to the entered old password - no chance for the unauthorized.
+            // We compare the old, saved password to the entered old password - no Chance for the unauthorized.
             if (!Global.BNetAccountMgr.CheckPassword(handler.GetSession().GetBattlenetAccountId(), oldPassword))
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);

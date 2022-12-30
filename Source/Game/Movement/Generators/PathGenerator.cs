@@ -508,7 +508,7 @@ namespace Game.Movement
                 }
             }
 
-            // by now we know what type of path we can get
+            // by now we know what Type of path we can get
             if (_pathPolyRefs[_polyLength - 1] == endPoly && !pathType.HasAnyFlag(PathType.Incomplete))
                 pathType = PathType.Normal;
             else
@@ -611,7 +611,7 @@ namespace Game.Movement
 
                 pathType = (PathType.Normal | PathType.NotUsingPath);
             }
-            Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
+            Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path Type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
         }
 
         uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)

@@ -81,7 +81,7 @@ namespace Game.Entities
             ObjectGuid victim_guid = ObjectGuid.Empty;
             uint victim_rank = 0;
 
-            // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
+            // need call before fields update to have Chance move yesterday data to appropriate fields before today data change.
             UpdateHonorFields();
 
             // do not reward honor in arenas, but return true to enable onkill spellproc

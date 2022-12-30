@@ -831,7 +831,7 @@ namespace Game
                 if (itemTarget.GetSocketColor(i) == 0)
                 {
                     // no prismatic socket
-                    if (itemTarget.GetEnchantmentId(EnchantmentSlot.Prismatic) == 0)
+                    if (itemTarget.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic) == 0)
                         return;
 
                     if (i != firstPrismatic)
@@ -883,7 +883,7 @@ namespace Game
                     }
                 }
 
-                // unique limit type item
+                // unique limit Type item
                 int limit_newcount = 0;
                 if (iGemProto.GetItemLimitCategory() != 0)
                 {
@@ -950,7 +950,7 @@ namespace Game
                     itemTarget.SetGem(i, gemData[i], gemScalingLevel);
 
                     if (gemProperties[i] != null && gemProperties[i].EnchantId != 0)
-                        itemTarget.SetEnchantment(EnchantmentSlot.Sock1 + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
+                        itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocket1 + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
 
                     uint gemCount = 1;
                     GetPlayer().DestroyItemCount(gems[i], ref gemCount, true);
@@ -973,9 +973,9 @@ namespace Game
             bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
             if (SocketBonusActivated ^ SocketBonusToBeActivated)     //if there was a change...
             {
-                GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.Bonus, false);
-                itemTarget.SetEnchantment(EnchantmentSlot.Bonus, SocketBonusToBeActivated ? itemTarget.GetTemplate().GetSocketBonus() : 0, 0, 0, GetPlayer().GetGUID());
-                GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.Bonus, true);
+                GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, false);
+                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketBonus, SocketBonusToBeActivated ? itemTarget.GetTemplate().GetSocketBonus() : 0, 0, 0, GetPlayer().GetGUID());
+                GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, true);
                 //it is not displayed, client has an inbuilt system to determine if the bonus is activated
             }
 
@@ -998,11 +998,11 @@ namespace Game
             if (!item)
                 return;
 
-            if (item.GetEnchantmentId(EnchantmentSlot.Temp) == 0)
+            if (item.GetEnchantmentId(EnchantmentSlot.EnhancementTemporary) == 0)
                 return;
 
-            GetPlayer().ApplyEnchantment(item, EnchantmentSlot.Temp, false);
-            item.ClearEnchantment(EnchantmentSlot.Temp);
+            GetPlayer().ApplyEnchantment(item, EnchantmentSlot.EnhancementTemporary, false);
+            item.ClearEnchantment(EnchantmentSlot.EnhancementTemporary);
         }
 
         [WorldPacketHandler(ClientOpcodes.GetItemPurchaseData, Processing = PacketProcessing.Inplace)]

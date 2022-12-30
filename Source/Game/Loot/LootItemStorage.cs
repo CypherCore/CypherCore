@@ -19,6 +19,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -56,10 +57,12 @@ namespace Game.Loots
                     lootItem.is_blocked = result.Read<bool>(6);
                     lootItem.is_counted = result.Read<bool>(7);
                     lootItem.is_underthreshold = result.Read<bool>(8);
-                    lootItem.needs_quest = result.Read<bool>(9);
-                    lootItem.randomBonusListId = result.Read<uint>(10);
-                    lootItem.context = (ItemContext)result.Read<byte>(11);
-                    StringArray bonusLists = new(result.Read<string>(12), ' ');
+                    lootItem.needs_quest = result.Read<bool>(9);                    
+                    lootItem.randomPropertyId.Type = (ItemRandomEnchantmentType)result.Read<byte>(10);
+                    lootItem.randomPropertyId.Id = result.Read<uint>(11);
+                    lootItem.randomSuffix = result.Read<uint>(12);
+                    lootItem.context = (ItemContext)result.Read<byte>(13);
+                    StringArray bonusLists = new(result.Read<string>(14), ' ');
 
                     foreach (string str in bonusLists)
                         lootItem.BonusListIDs.Add(uint.Parse(str));
@@ -122,7 +125,8 @@ namespace Game.Loots
                     li.is_counted = storedItem.Counted;
                     li.is_underthreshold = storedItem.UnderThreshold;
                     li.needs_quest = storedItem.NeedsQuest;
-                    li.randomBonusListId = storedItem.RandomBonusListId;
+                    li.randomPropertyId = storedItem.RandomPropertyId;
+                    li.randomSuffix = storedItem.RandomSuffix;
                     li.context = storedItem.Context;
                     li.BonusListIDs = storedItem.BonusListIDs;
 
@@ -252,9 +256,11 @@ namespace Game.Loots
             stmt.AddValue(6, lootItem.is_blocked);
             stmt.AddValue(7, lootItem.is_counted);
             stmt.AddValue(8, lootItem.is_underthreshold);
-            stmt.AddValue(9, lootItem.needs_quest);
-            stmt.AddValue(10, lootItem.randomBonusListId);
-            stmt.AddValue(11, (uint)lootItem.context);
+            stmt.AddValue(9, lootItem.needs_quest); 
+            stmt.AddValue(10, (byte)lootItem.randomPropertyId.Type);
+            stmt.AddValue(11, lootItem.randomPropertyId.Id);
+            stmt.AddValue(13, lootItem.randomSuffix);
+            stmt.AddValue(14, (uint)lootItem.context);
 
             StringBuilder bonusListIDs = new();
             foreach (int bonusListID in lootItem.BonusListIDs)
@@ -334,7 +340,8 @@ namespace Game.Loots
             Counted = lootItem.is_counted;
             UnderThreshold = lootItem.is_underthreshold;
             NeedsQuest = lootItem.needs_quest;
-            RandomBonusListId = lootItem.randomBonusListId;
+            RandomSuffix = lootItem.randomSuffix;
+            RandomPropertyId = lootItem.randomPropertyId;
             Context = lootItem.context;
             BonusListIDs = lootItem.BonusListIDs;
         }
@@ -348,7 +355,8 @@ namespace Game.Loots
         public bool Counted;
         public bool UnderThreshold;
         public bool NeedsQuest;
-        public uint RandomBonusListId;
+        public uint RandomSuffix;
+        public ItemRandomEnchantmentId RandomPropertyId;
         public ItemContext Context;
         public List<uint> BonusListIDs = new();
     }

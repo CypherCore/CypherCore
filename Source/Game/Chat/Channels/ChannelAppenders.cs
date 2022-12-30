@@ -29,7 +29,7 @@ namespace Game.Chat
         ChatNotify GetNotificationType();
     }
 
-    // initial packet data (notify type and channel name)
+    // initial packet data (notify Type and channel name)
     class ChannelNameBuilder : MessageBuilder
     {
         public ChannelNameBuilder(Channel source, IChannelAppender modifier)

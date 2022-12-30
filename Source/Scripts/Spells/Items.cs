@@ -1114,9 +1114,9 @@ namespace Scripts.Spells.Items
         }
     }
 
-    // 8342  - Defibrillate (Goblin Jumper Cables) have 33% chance on success
-    // 22999 - Defibrillate (Goblin Jumper Cables XL) have 50% chance on success
-    // 54732 - Defibrillate (Gnomish Army Knife) have 67% chance on success
+    // 8342  - Defibrillate (Goblin Jumper Cables) have 33% Chance on success
+    // 22999 - Defibrillate (Goblin Jumper Cables XL) have 50% Chance on success
+    // 54732 - Defibrillate (Gnomish Army Knife) have 67% Chance on success
     [Script("spell_item_goblin_jumper_cables", 33u, SpellIds.GoblinJumperCablesFail)]
     [Script("spell_item_goblin_jumper_cables_xl", 50u, SpellIds.GoblinJumperCablesXlFail)]
     [Script("spell_item_gnomish_army_knife", 67u, 0u)]
@@ -1777,9 +1777,9 @@ namespace Scripts.Spells.Items
             {
                 uint spellId = SpellIds.NetOMaticTriggered3;
                 uint roll = RandomHelper.URand(0, 99);
-                if (roll < 2)                            // 2% for 30 sec self root (off-like chance unknown)
+                if (roll < 2)                            // 2% for 30 sec self root (off-like Chance unknown)
                     spellId = SpellIds.NetOMaticTriggered1;
-                else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like chance unknown)
+                else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like Chance unknown)
                     spellId = SpellIds.NetOMaticTriggered2;
 
                 GetCaster().CastSpell(target, spellId, true);
@@ -2340,21 +2340,21 @@ namespace Scripts.Spells.Items
             {
                 uint spellId;
                 uint rand = RandomHelper.URand(0, 99);
-                if (rand < 25)                      // Fireball (25% chance)
+                if (rand < 25)                      // Fireball (25% Chance)
                     spellId = SpellIds.Fireball;
-                else if (rand < 50)                 // Frostball (25% chance)
+                else if (rand < 50)                 // Frostball (25% Chance)
                     spellId = SpellIds.Frostbolt;
-                else if (rand < 70)                 // Chain Lighting (20% chance)
+                else if (rand < 70)                 // Chain Lighting (20% Chance)
                     spellId = SpellIds.ChainLightning;
-                else if (rand < 80)                 // Polymorph (10% chance)
+                else if (rand < 80)                 // Polymorph (10% Chance)
                 {
                     spellId = SpellIds.Polymorph;
-                    if (RandomHelper.URand(0, 100) <= 30)        // 30% chance to self-cast
+                    if (RandomHelper.URand(0, 100) <= 30)        // 30% Chance to self-cast
                         target = caster;
                 }
-                else if (rand < 95)                 // Enveloping Winds (15% chance)
+                else if (rand < 95)                 // Enveloping Winds (15% Chance)
                     spellId = SpellIds.EnvelopingWinds;
-                else                                // Summon Felhund minion (5% chance)
+                else                                // Summon Felhund minion (5% Chance)
                 {
                     spellId = SpellIds.SummonFelhoundMinion;
                     target = caster;
@@ -2663,7 +2663,7 @@ namespace Scripts.Spells.Items
             uint sound_id = RandomHelper.RAND(SoundIds.Ashbringer1, SoundIds.Ashbringer2, SoundIds.Ashbringer3, SoundIds.Ashbringer4, SoundIds.Ashbringer5, SoundIds.Ashbringer6,
                             SoundIds.Ashbringer7, SoundIds.Ashbringer8, SoundIds.Ashbringer9, SoundIds.Ashbringer10, SoundIds.Ashbringer11, SoundIds.Ashbringer12);
 
-            // Ashbringers effect (SpellIds.ID 28441) retriggers every 5 seconds, with a chance of making it say one of the above 12 sounds
+            // Ashbringers effect (SpellIds.ID 28441) retriggers every 5 seconds, with a Chance of making it say one of the above 12 sounds
             if (RandomHelper.URand(0, 60) < 1)
                 player.PlayDirectSound(sound_id, player);
         }
@@ -3607,7 +3607,7 @@ namespace Scripts.Spells.Items
                 if (RandomHelper.randChance(95))
                     caster.CastSpell(target, RandomHelper.randChance(32) ? SpellIds.Dullard : SpellIds.GnomishMindControlCap, new CastSpellExtraArgs(GetCastItem()));
                 else
-                    target.CastSpell(caster, SpellIds.GnomishMindControlCap, true); // backfire - 5% chance
+                    target.CastSpell(caster, SpellIds.GnomishMindControlCap, true); // backfire - 5% Chance
             }
         }
 

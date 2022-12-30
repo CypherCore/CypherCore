@@ -472,7 +472,7 @@ namespace Game.Networking.Packets
     class AuctionCommandResult : ServerPacket
     {   
         public uint AuctionID; ///< the id of the auction that triggered this notification
-        public int Command; ///< the type of action that triggered this notification. Possible values are @ref AuctionAction
+        public int Command; ///< the Type of action that triggered this notification. Possible values are @ref AuctionAction
         public int ErrorCode; ///< the error code that was generated when trying to perform the action. Possible values are @ref AuctionError
         public int BagResult; ///< the bid error. Possible values are @ref AuctionError
         public ObjectGuid Guid;          ///< the GUID of the bidder for this auction.

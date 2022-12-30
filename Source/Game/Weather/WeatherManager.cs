@@ -57,19 +57,19 @@ namespace Game
                     if (wzc.data[season].rainChance > 100)
                     {
                         wzc.data[season].rainChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong rain chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong rain Chance > 100%", zone_id, season);
                     }
 
                     if (wzc.data[season].snowChance > 100)
                     {
                         wzc.data[season].snowChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong snow chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong snow Chance > 100%", zone_id, season);
                     }
 
                     if (wzc.data[season].stormChance > 100)
                     {
                         wzc.data[season].stormChance = 25;
-                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong storm chance > 100%", zone_id, season);
+                        Log.outError(LogFilter.Sql, "Weather for zone {0} season {1} has wrong storm Chance > 100%", zone_id, season);
                     }
                 }
 
@@ -138,7 +138,7 @@ namespace Game
 
             // Weather statistics:
             // 30% - no change
-            // 30% - weather gets better (if not fine) or change weather type
+            // 30% - weather gets better (if not fine) or change weather Type
             // 30% - weather worsens (if not fine)
             // 10% - radical change (if not fine)
             uint u = RandomHelper.URand(0, 99);
@@ -180,8 +180,8 @@ namespace Game
             {
                 // Radical change:
                 // if light . heavy
-                // if medium . change weather type
-                // if heavy . 50% light, 50% change weather type
+                // if medium . change weather Type
+                // if heavy . 50% light, 50% change weather Type
 
                 if (m_intensity < 0.33333334f)
                 {

@@ -670,7 +670,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                // Update movement type
+                // Update movement Type
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
                 stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
                 stmt.AddValue(1, lowGuid);
@@ -897,7 +897,7 @@ namespace Game.Chat
                 }
 
                 creature.GetAI().SetData(data_1, data_2);
-                string AIorScript = creature.GetAIName() != "" ? "AI type: " + creature.GetAIName() : (creature.GetScriptName() != "" ? "Script Name: " + creature.GetScriptName() : "No AI or Script Name Set");
+                string AIorScript = creature.GetAIName() != "" ? "AI Type: " + creature.GetAIName() : (creature.GetScriptName() != "" ? "Script Name: " + creature.GetScriptName() : "No AI or Script Name Set");
                 handler.SendSysMessage(CypherStrings.NpcSetdata, creature.GetGUID(), creature.GetEntry(), creature.GetName(), data_1, data_2, AIorScript);
                 return true;
             }
@@ -1125,7 +1125,7 @@ namespace Game.Chat
 
                 if (creature)
                 {
-                    // update movement type
+                    // update movement Type
                     if (!doNotDelete)
                         creature.LoadPath(0);
 

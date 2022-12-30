@@ -75,7 +75,7 @@ namespace Game.Movement
 
             bool transport = !unit.GetTransGUID().IsEmpty();
             Vector4 real_position = new();            
-            // there is a big chance that current position is unknown if current state is not finalized, need compute it
+            // there is a big Chance that current position is unknown if current state is not finalized, need compute it
             // this also allows calculate spline position and update map position in much greater intervals
             // Don't compute for transport movement if the unit is in a motion between two transports
             if (!move_spline.Finalized() && move_spline.onTransport == transport)

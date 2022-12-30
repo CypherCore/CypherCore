@@ -39,6 +39,10 @@ namespace Framework.Constants
         public const int MaxItemSetItems = 17;
         public const int MaxItemSetSpells = 8;
 
+        public const int MaxItemRandomProperties = 5;
+        /// <summary>2 fields per visible item (entry+enchantment)</summary>
+        public const int MaxVisibleItemOffset = 2;
+        public const int MaxSpellEffects = 32;
         public static uint[] ItemQualityColors =
         {
             0xff9d9d9d, // GREY
@@ -469,6 +473,45 @@ namespace Framework.Constants
 
         Max
     }
+
+    // -1 from client enchantment slot number
+    public enum EnchantmentSlot : ushort
+    {
+        /// <summary>Obtained through the Enchantment Profession</summary>
+        EnhancementPermanent = 0,
+        /// <summary>Temporary weapon enchantment</summary>
+        EnhancementTemporary = 1,
+        EnhancementSocket1 = 2,
+        EnhancementSocket2 = 3,
+        EnhancementSocket3 = 4,
+        /// <summary>Active when color matches all sockets</summary>
+        EnhancementSocketBonus = 5,
+        /// <summary>Added at apply special permanent enchantment</summary>
+        EnhancementSocketPrismatic = 6,
+        /// <summary>TODO: need a comment (may be active spell?) </summary>
+        EnhancementUse = 7,
+
+        EnhancementStart = EnhancementPermanent,
+        EnhancementEnd = EnhancementUse,
+        EnhancementMax = EnhancementEnd - EnhancementStart + 1,
+
+        /// <summary>Used with RandomSuffix</summary>
+        Property0 = 8,
+        /// <summary>Used with RandomSuffix</summary>
+        Property1 = 9,
+        /// <summary>Used with RandomSuffix and RandomProperty</summary>
+        Property2 = 10,
+        /// <summary>Used with RandomProperty</summary>
+        Property3 = 11,
+        /// <summary>Used with RandomProperty</summary>
+        Property4 = 12, 
+        
+        Max = 13,
+
+        PropertyStart = Property0,
+        PropertyEnd = Property4,
+        PropertyMax = PropertyEnd - PropertyStart + 1,
+    };
 
     public enum ItemEnchantmentType : byte
     {
@@ -1172,27 +1215,6 @@ namespace Framework.Constants
         Unk = 5,       // Nothing Appears...
         OnlyEmptyBag = 6, // You can only do that with empty bags.
         CantSellToThisMerchant = 7        // You cannot sell items to this merchant.
-    }
-
-    public enum EnchantmentSlot
-    {
-        Perm = 0,
-        Temp = 1,
-        Sock1 = 2,
-        Sock2 = 3,
-        Sock3 = 4,
-        Bonus = 5,
-        Prismatic = 6,                    // added at apply special permanent enchantment
-        Use = 7,
-
-        MaxInspected = 8,
-
-        Prop0 = 8,                   // used with RandomSuffix
-        Prop1 = 9,                   // used with RandomSuffix
-        Prop2 = 10,                   // used with RandomSuffix and RandomProperty
-        Prop3 = 11,                   // used with RandomProperty
-        Prop4 = 12,                   // used with RandomProperty
-        Max = 13
     }
 
     public enum ItemUpdateState

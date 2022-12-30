@@ -2330,7 +2330,7 @@ namespace Scripts.Spells.Generic
                             return;
                     }
 
-                    // If target isn't a training dummy there's a chance of failing the charge
+                    // If target isn't a training dummy there's a Chance of failing the charge
                     if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
                         spellId = SpellIds.MissEffect;
 
@@ -2448,7 +2448,7 @@ namespace Scripts.Spells.Generic
             Unit target = GetHitUnit();
             if (target)
             {
-                // 25% chance of casting a random buff
+                // 25% Chance of casting a random buff
                 if (RandomHelper.randChance(75))
                     return;
 
@@ -2485,7 +2485,7 @@ namespace Scripts.Spells.Generic
             Unit target = GetHitUnit();
             if (target)
             {
-                // 25% chance of casting Nightmare Pollen
+                // 25% Chance of casting Nightmare Pollen
                 if (RandomHelper.randChance(25))
                     target.CastSpell(target, SpellIds.NightmarePollen, true);
             }

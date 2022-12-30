@@ -156,7 +156,7 @@ namespace Game
                 }
 
                 VoidStorageItem itemVS = new(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
-                    item.GetItemRandomBonusListId(), item.GetModifier(ItemModifier.TimewalkerLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
+                    item.GetItemRandomEnchantmentId(), item.GetItemSuffixFactor(), item.GetModifier(ItemModifier.TimewalkerLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
                     item.GetContext(), item.m_itemData.BonusListIDs);
 
                 VoidItem voidItem;
@@ -194,7 +194,7 @@ namespace Game
                     return;
                 }
 
-                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.RandomBonusListId, null, itemVS.Context, itemVS.BonusListIDs);
+                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.ItemRandomPropertyId, null, itemVS.Context, itemVS.BonusListIDs);
                 item.SetCreator(itemVS.CreatorGuid);
                 item.SetBinding(true);
                 GetCollectionMgr().AddItemAppearance(item);

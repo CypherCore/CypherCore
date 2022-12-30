@@ -1151,7 +1151,7 @@ namespace Game.BattleFields
             _state = (WGGameObjectState)Global.WorldStateMgr.GetValue((int)_worldState, _wg.GetMap());
             if (_state == WGGameObjectState.None)
             {
-                // set to default state based on type
+                // set to default state based on Type
                 switch (_teamControl)
                 {
                     case TeamId.Alliance:

@@ -370,7 +370,7 @@ namespace Game
                         break;
                     }
                 default:
-                    Log.outError(LogFilter.ChatSystem, "CHAT: unknown message type {0}, lang: {1}", type, lang);
+                    Log.outError(LogFilter.ChatSystem, "CHAT: unknown message Type {0}, lang: {1}", type, lang);
                     break;
             }
         }
@@ -457,7 +457,7 @@ namespace Game
                     break;
 
                 default:
-                    Log.outError(LogFilter.Server, "HandleAddonMessagechat: unknown addon message type {0}", type);
+                    Log.outError(LogFilter.Server, "HandleAddonMessagechat: unknown addon message Type {0}", type);
                     break;
             }
         }

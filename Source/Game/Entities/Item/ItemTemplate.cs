@@ -264,8 +264,11 @@ namespace Game.Entities
 
         public static int CalculateItemSpecBit(ChrSpecializationRecord spec)
         {
-            return (int)((spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex);
+            return (spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex;
         }
+
+        public uint GetRandomProperty()  { return ExtendedData.RandomSelect; }
+        public uint GetRandomSuffix()  { return ExtendedData.ItemRandomSuffixGroupID; }
 
         public uint GetId() { return BasicData.Id; }
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }

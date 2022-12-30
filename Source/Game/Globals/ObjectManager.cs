@@ -1211,7 +1211,7 @@ namespace Game
                         {
                             if (tmp.Talk.ChatType > ChatMsg.RaidBossWhisper)
                             {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
+                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk Type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
                                     tableName, tmp.Talk.ChatType, tmp.id);
                                 continue;
                             }
@@ -1330,7 +1330,7 @@ namespace Game
                             if (info.type == GameObjectTypes.FishingNode || info.type == GameObjectTypes.FishingHole || info.type == GameObjectTypes.Door ||
                                 info.type == GameObjectTypes.Button || info.type == GameObjectTypes.Trap)
                             {
-                                Log.outError(LogFilter.Sql, "Table `{0}` have gameobject type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
+                                Log.outError(LogFilter.Sql, "Table `{0}` have gameobject Type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
                                     tableName, info.entry, tmp.id);
                                 continue;
                             }
@@ -1376,7 +1376,7 @@ namespace Game
 
                             if (info.type != GameObjectTypes.Door)
                             {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has gameobject type ({1}) non supported by command {2} for script id {3}",
+                                Log.outError(LogFilter.Sql, "Table `{0}` has gameobject Type ({1}) non supported by command {2} for script id {3}",
                                     tableName, info.entry, tmp.command, tmp.id);
                                 continue;
                             }
@@ -1409,7 +1409,7 @@ namespace Game
                                     tableName, tmp.CastSpell.SpellID, tmp.id);
                                 continue;
                             }
-                            if ((int)tmp.CastSpell.Flags > 4)                      // targeting type
+                            if ((int)tmp.CastSpell.Flags > 4)                      // targeting Type
                             {
                                 Log.outError(LogFilter.Sql, "Table `{0}` using unknown target in datalong2 ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                     tableName, tmp.CastSpell.Flags, tmp.id);
@@ -1552,7 +1552,7 @@ namespace Game
             {
                 var id = evt_scripts.Find(p => p == script.Key);
                 if (id == 0)
-                    Log.outError(LogFilter.Sql, "Table `event_scripts` has script (Id: {0}) not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field or any spell effect {1}",
+                    Log.outError(LogFilter.Sql, "Table `event_scripts` has script (Id: {0}) not referring to any gameobject_template Type 10 data2 field, Type 3 data6 field, Type 13 data 2 field or any spell effect {1}",
                         script.Key, SpellEffectName.SendEvent);
             }
         }
@@ -2244,7 +2244,7 @@ namespace Game
                 if (creData.movementType == (byte)MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
                 {
                     creData.movementType = (byte)MovementGeneratorType.Idle;
-                    Log.outError(LogFilter.Sql, "Creature (GUID {0}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned", guid);
+                    Log.outError(LogFilter.Sql, "Creature (GUID {0}) has movement Type set to WAYPOINTMOTIONTYPE but no path assigned", guid);
                 }
 
                 creatureAddon.mount = result.Read<uint>(2);
@@ -2767,7 +2767,7 @@ namespace Game
 
                 if (cInfo.CreatureType != difficultyInfo.CreatureType)
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, type: {1}) has different `type` in difficulty {2} mode (Entry: {3}, type: {4}).",
+                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, Type: {1}) has different `Type` in difficulty {2} mode (Entry: {3}, Type: {4}).",
                         cInfo.Entry, cInfo.CreatureType, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.CreatureType);
                 }
 
@@ -2878,7 +2878,7 @@ namespace Game
 
             if (cInfo.CreatureType != 0 && !CliDB.CreatureTypeStorage.ContainsKey((uint)cInfo.CreatureType))
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature type ({1}) in `type`.", cInfo.Entry, cInfo.CreatureType);
+                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature Type ({1}) in `Type`.", cInfo.Entry, cInfo.CreatureType);
                 cInfo.CreatureType = CreatureType.Humanoid;
             }
 
@@ -2916,7 +2916,7 @@ namespace Game
 
             if (cInfo.MovementType >= (uint)MovementGeneratorType.MaxDB)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong movement generator type ({1}), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
+                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong movement generator Type ({1}), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
                 cInfo.MovementType = (uint)MovementGeneratorType.Idle;
             }
 
@@ -3426,7 +3426,7 @@ namespace Game
 
             List<uint> skipvendors = new();
 
-            SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
+            SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Vendors. DB table `npc_vendor` is empty!");
@@ -3540,7 +3540,7 @@ namespace Game
                 "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
                 //22                     23                      24                25                   26                       27
                 "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName " +
-                "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_members ON pool_members.type = 0 AND creature.guid = pool_members.spawnId");
+                "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_members ON pool_members.Type = 0 AND creature.guid = pool_members.spawnId");
 
             if (result.IsEmpty())
             {
@@ -3655,7 +3655,7 @@ namespace Game
                 {
                     if (MathFunctions.fuzzyEq(data.WanderDistance, 0.0f))
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=1 (random movement) but with `wander_distance`=0, replace by idle movement type (0).", guid, data.Id);
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `MovementType`=1 (random movement) but with `wander_distance`=0, replace by idle movement Type (0).", guid, data.Id);
                         data.movementType = (byte)MovementGeneratorType.Idle;
                     }
                 }
@@ -3978,7 +3978,7 @@ namespace Game
             if (modelInfo == null)
                 return null;
 
-            // If a model for another gender exists, 50% chance to use it
+            // If a model for another gender exists, 50% Chance to use it
             if (modelInfo.DisplayIdOtherGender != 0 && RandomHelper.URand(0, 1) == 0)
             {
                 CreatureModelInfo minfotmp = GetCreatureModelInfo(modelInfo.DisplayIdOtherGender);
@@ -4044,7 +4044,7 @@ namespace Game
             }
 
             //                                          0      1     2          3     4         5               6     7
-            SQLResult result = DB.World.Query("SELECT entry, type, displayId, name, IconName, castBarCaption, unk1, size, " +
+            SQLResult result = DB.World.Query("SELECT entry, Type, displayId, name, IconName, castBarCaption, unk1, size, " +
                 //8      9      10     11     12     13     14     15     16     17     18      19      20
                 "Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Data11, Data12, " +
                 //21      22      23      24      25      26      27      28      29      30      31      32      33      34      35      36
@@ -4342,7 +4342,7 @@ namespace Game
                 //17             18       19          20              21
                 "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName " +
                 "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid " +
-                "LEFT OUTER JOIN pool_members ON pool_members.type = 1 AND gameobject.guid = pool_members.spawnId");
+                "LEFT OUTER JOIN pool_members ON pool_members.Type = 1 AND gameobject.guid = pool_members.spawnId");
 
             if (result.IsEmpty())
             {
@@ -4811,7 +4811,7 @@ namespace Game
             if (trapInfo != null)
             {
                 if (trapInfo.type != GameObjectTypes.Trap)
-                    Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but GO (Entry {4}) have not GAMEOBJECT_TYPE_TRAP type.", goInfo.entry, goInfo.type, N, dataN, dataN);
+                    Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but GO (Entry {4}) have not GAMEOBJECT_TYPE_TRAP Type.", goInfo.entry, goInfo.type, N, dataN, dataN);
             }
         }
         void CheckGOSpellId(GameObjectTemplate goInfo, uint dataN, uint N)
@@ -5193,7 +5193,7 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.ItemNotFound, vItem.item, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` for Vendor (Entry: {0}) have in item list non-existed item ({1}, type {2}), ignore", vendorentry, vItem.item, vItem.Type);
+                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` for Vendor (Entry: {0}) have in item list non-existed item ({1}, Type {2}), ignore", vendorentry, vItem.item, vItem.Type);
                 return false;
             }
 
@@ -5250,13 +5250,13 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.ItemAlreadyInList, vItem.item, vItem.ExtendedCost, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `npcvendor` has duplicate items {0} (with extended cost {1}, type {2}) for vendor (Entry: {3}), ignoring", vItem.item, vItem.ExtendedCost, vItem.Type, vendorentry);
+                    Log.outError(LogFilter.Sql, "Table `npcvendor` has duplicate items {0} (with extended cost {1}, Type {2}) for vendor (Entry: {3}), ignoring", vItem.item, vItem.ExtendedCost, vItem.Type, vendorentry);
                 return false;
             }
 
             if (vItem.Type == ItemVendorType.Currency && vItem.maxcount == 0)
             {
-                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}, type: {1}) with missing maxcount for vendor ({2}), ignore", vItem.item, vItem.Type, vendorentry);
+                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}, Type: {1}) with missing maxcount for vendor ({2}), ignore", vItem.item, vItem.Type, vendorentry);
                 return false;
             }
 
@@ -5586,7 +5586,7 @@ namespace Game
                         }
                         break;
                     default:
-                        Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid credit type ({0}) for encounter {1} ({2}), skipped!",
+                        Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid credit Type ({0}) for encounter {1} ({2}), skipped!",
                             creditType, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
                         continue;
                 }
@@ -5686,7 +5686,7 @@ namespace Game
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
                 if (!SpawnData.TypeIsValid(spawnType))
                 {
-                    Log.outError(LogFilter.Sql, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
+                    Log.outError(LogFilter.Sql, $"Spawn data with invalid Type {spawnType} listed for spawn group {groupId}. Skipped.");
                     continue;
                 }
                 ulong spawnId = result.Read<ulong>(2);
@@ -5933,7 +5933,7 @@ namespace Game
                 case SpawnObjectType.AreaTrigger:
                     return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
                 default:
-                    Cypher.Assert(false, $"Invalid spawn object type {type}");
+                    Cypher.Assert(false, $"Invalid spawn object Type {type}");
                     return null;
             }
         }
@@ -6339,7 +6339,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Action Data...");
             {
                 //                                         0     1      2       3       4
-                SQLResult result = DB.World.Query("SELECT race, class, button, action, type FROM playercreateinfo_action");
+                SQLResult result = DB.World.Query("SELECT race, class, button, action, Type FROM playercreateinfo_action");
 
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create actions. DB table `playercreateinfo_action` is empty.");
@@ -7616,7 +7616,7 @@ namespace Game
                             case QuestObjectiveType.AreaTrigger:
                             case QuestObjectiveType.WinPetBattleAgainstNpc:
                             case QuestObjectiveType.ObtainCurrency:
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid StorageIndex = {2} for objective type {3}", qinfo.Id, obj.Id, obj.StorageIndex, obj.Type);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid StorageIndex = {2} for objective Type {3}", qinfo.Id, obj.Id, obj.StorageIndex, obj.Type);
                                 break;
                             default:
                                 break;
@@ -7689,7 +7689,7 @@ namespace Game
                         case QuestObjectiveType.ProgressBar:
                             break;
                         default:
-                            Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);
+                            Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled Type {2}", qinfo.Id, obj.Id, obj.Type);
                             break;
                     }
 
@@ -7742,7 +7742,7 @@ namespace Game
                                 }
                                 break;
                             default:
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemType{j + 1}` = {qinfo.RewardChoiceItemType[j]} but it is not a valid item type, reward removed.");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemType{j + 1}` = {qinfo.RewardChoiceItemType[j]} but it is not a valid item Type, reward removed.");
                                 qinfo.RewardChoiceItemId[j] = 0;
                                 break;
                         }
@@ -8290,7 +8290,7 @@ namespace Game
                 _questGreetingStorage[i] = new Dictionary<uint, QuestGreeting>();
 
             //                                         0   1          2                3     
-            SQLResult result = DB.World.Query("SELECT ID, type, GreetEmoteType, GreetEmoteDelay, Greeting FROM quest_greeting");
+            SQLResult result = DB.World.Query("SELECT ID, Type, GreetEmoteType, GreetEmoteDelay, Greeting FROM quest_greeting");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 npc texts, table is empty!");
@@ -8604,7 +8604,7 @@ namespace Game
 
                 SpellClickUserTypes userType = (SpellClickUserTypes)result.Read<byte>(3);
                 if (userType >= SpellClickUserTypes.Max)
-                    Log.outError(LogFilter.Sql, "Table npc_spellclick_spells creature: {0} references unknown user type {1}. Skipping entry.", npc_entry, userType);
+                    Log.outError(LogFilter.Sql, "Table npc_spellclick_spells creature: {0} references unknown user Type {1}. Skipping entry.", npc_entry, userType);
 
                 byte castFlags = result.Read<byte>(2);
                 SpellClickInfo info = new();
@@ -8861,7 +8861,7 @@ namespace Game
                 _questGreetingLocaleStorage[i] = new Dictionary<uint, QuestGreetingLocale>();
 
             //                                         0   1     2       3
-            SQLResult result = DB.World.Query("SELECT Id, type, locale, Greeting FROM quest_greeting_locale");
+            SQLResult result = DB.World.Query("SELECT Id, Type, locale, Greeting FROM quest_greeting_locale");
             if (result.IsEmpty())
                 return;
 
@@ -9487,26 +9487,26 @@ namespace Game
                     case SummonerType.Creature:
                         if (GetCreatureTemplate(summonerId) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for creature summoner type, skipped.", summonerId);
+                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for creature summoner Type, skipped.", summonerId);
                             continue;
                         }
                         break;
                     case SummonerType.GameObject:
                         if (GetGameObjectTemplate(summonerId) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for gameobject summoner type, skipped.", summonerId);
+                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for gameobject summoner Type, skipped.", summonerId);
                             continue;
                         }
                         break;
                     case SummonerType.Map:
                         if (!CliDB.MapStorage.ContainsKey(summonerId))
                         {
-                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for map summoner type, skipped.", summonerId);
+                            Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has summoner with non existing entry {0} for map summoner Type, skipped.", summonerId);
                             continue;
                         }
                         break;
                     default:
-                        Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has unhandled summoner type {0} for summoner {1}, skipped.", summonerType, summonerId);
+                        Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has unhandled summoner Type {0} for summoner {1}, skipped.", summonerType, summonerId);
                         continue;
                 }
 
@@ -9531,7 +9531,7 @@ namespace Game
 
                 if (data.type > TempSummonType.ManualDespawn)
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has unhandled temp summon type {0} in group [Summoner ID: {1}, Summoner Type: {2}, Group ID: {3}] for creature entry {4}, skipped.",
+                    Log.outError(LogFilter.Sql, "Table `creature_summon_groups` has unhandled temp summon Type {0} in group [Summoner ID: {1}, Summoner Type: {2}, Group ID: {3}] for creature entry {4}, skipped.",
                         data.type, summonerId, summonerType, group, data.entry);
                     continue;
                 }
@@ -10648,7 +10648,7 @@ namespace Game
                     mount_entry = node.MountCreatureID[0];
 
                 // Fix for Alliance not being able to use Acherus taxi
-                // only one mount type for both sides
+                // only one mount Type for both sides
                 if (mount_entry == 0 && allowed_alt_team)
                 {
                     // Simply reverse the selection. At least one team in theory should have a valid mount ID to choose.
@@ -11139,7 +11139,7 @@ namespace Game
         Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new();
 
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
-        // first free id for selected id type
+        // first free id for selected id Type
         uint _auctionId;
         ulong _equipmentSetGuid;
         uint _mailId;

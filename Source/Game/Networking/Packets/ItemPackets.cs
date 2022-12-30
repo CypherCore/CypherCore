@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -240,7 +241,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt8((sbyte)BagResult);
             _worldPacket.WritePackedGuid(Item[0]);
             _worldPacket.WritePackedGuid(Item[1]);
-            _worldPacket.WriteUInt8(ContainerBSlot); // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
+            _worldPacket.WriteUInt8(ContainerBSlot); // bag Type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
 
             switch (BagResult)
             {
@@ -843,6 +844,8 @@ namespace Game.Networking.Packets
     public class ItemInstance
     {
         public uint ItemID;
+        public uint RandomPropertiesSeed;
+        public uint RandomPropertiesID;
         public ItemBonuses ItemBonus;
         public ItemModList Modifications = new();
 
@@ -855,6 +858,8 @@ namespace Game.Networking.Packets
             if (!bonusListIds.Empty())
             {
                 ItemBonus = new();
+                RandomPropertiesSeed = item.GetItemSuffixFactor();
+                RandomPropertiesID = (uint)item.GetItemRandomPropertyId();
                 ItemBonus.BonusListIDs.AddRange(bonusListIds);
                 ItemBonus.Context = item.GetContext();
             }
@@ -866,20 +871,26 @@ namespace Game.Networking.Packets
         public ItemInstance(Loots.LootItem lootItem)
         {
             ItemID = lootItem.itemid;
+            RandomPropertiesSeed = lootItem.randomSuffix;
 
-            if (!lootItem.BonusListIDs.Empty() || lootItem.randomBonusListId != 0)
+            if (lootItem.randomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
+                RandomPropertiesID = lootItem.randomPropertyId.Id;
+
+            if (!lootItem.BonusListIDs.Empty())
             {
                 ItemBonus = new();
                 ItemBonus.BonusListIDs = lootItem.BonusListIDs;
                 ItemBonus.Context = lootItem.context;
-                if (lootItem.randomBonusListId != 0)
-                    ItemBonus.BonusListIDs.Add(lootItem.randomBonusListId);
             }
         }
 
         public ItemInstance(VoidStorageItem voidItem)
         {
             ItemID = voidItem.ItemEntry;
+            RandomPropertiesSeed = voidItem.ItemSuffixFactor;
+
+            if (voidItem.ItemRandomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
+                RandomPropertiesID = voidItem.ItemRandomPropertyId.Id;
 
             if (voidItem.FixedScalingLevel != 0)
                 Modifications.Values.Add(new ItemMod(voidItem.FixedScalingLevel, ItemModifier.TimewalkerLevel));
@@ -913,6 +924,9 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(ItemID);
 
+            data.WriteInt32((int)RandomPropertiesSeed);
+            data.WriteInt32((int)RandomPropertiesID);
+
             data.WriteBit(ItemBonus != null);
             data.FlushBits();
 
@@ -925,6 +939,8 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             ItemID = data.ReadUInt32();
+            RandomPropertiesSeed = data.ReadUInt32();
+            RandomPropertiesID = data.ReadUInt32();
 
             if (data.HasBit())
                 ItemBonus = new();
@@ -959,7 +975,7 @@ namespace Game.Networking.Packets
             if (ReferenceEquals(right, null))
                 return false;
 
-            if (left.ItemID != right.ItemID)
+            if (left.ItemID != right.ItemID || left.RandomPropertiesID != right.RandomPropertiesID || left.RandomPropertiesSeed != right.RandomPropertiesSeed)
                 return false;
 
             if (left.ItemBonus != null && right.ItemBonus != null && left.ItemBonus != right.ItemBonus)

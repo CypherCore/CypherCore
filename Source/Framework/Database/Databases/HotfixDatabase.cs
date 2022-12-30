@@ -650,6 +650,16 @@ namespace Framework.Database
             // ItemPriceBase.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base");
 
+            // ItemRandomProperties.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES, "SELECT ID, Name, Enchantment1, Enchantment2, Enchantment3, Enchantment4, Enchantment5" +       
+                " FROM item_random_properties");
+            PrepareStatement(HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES_LOCALE, "SELECT ID, Name_lang FROM item_random_properties_locale WHERE locale = ?");
+
+            // ItemRandomSuffix.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_RANDOM_SUFFIX, "SELECT ID, Name, Enchantment1, Enchantment2, Enchantment3, Enchantment4, Enchantment5, " +        
+                "AllocationPct1, AllocationPct2, AllocationPct3, AllocationPct4, AllocationPct5 FROM item_random_suffix");
+            PrepareStatement(HotfixStatements.SEL_ITEM_RANDOM_SUFFIX_LOCALE, "SELECT ID, Name_lang FROM item_random_suffix_locale WHERE locale = ?");
+
             // ItemSet.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_SET, "SELECT ID, Name, SetFlags, RequiredSkill, RequiredSkillRank, ItemID1, ItemID2, ItemID3, ItemID4, ItemID5, " +
                 "ItemID6, ItemID7, ItemID8, ItemID9, ItemID10, ItemID11, ItemID12, ItemID13, ItemID14, ItemID15, ItemID16, ItemID17 FROM item_set");
@@ -1598,6 +1608,12 @@ namespace Framework.Database
         SEL_ITEM_NAME_DESCRIPTION_LOCALE,
 
         SEL_ITEM_PRICE_BASE,
+
+        SEL_ITEM_RANDOM_PROPERTIES,
+        SEL_ITEM_RANDOM_PROPERTIES_LOCALE,
+
+        SEL_ITEM_RANDOM_SUFFIX,
+        SEL_ITEM_RANDOM_SUFFIX_LOCALE,
 
         SEL_ITEM_SET,
         SEL_ITEM_SET_LOCALE,

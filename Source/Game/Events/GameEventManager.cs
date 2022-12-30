@@ -754,7 +754,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                               0           1     2     3         4         5             6     7             8                  9
-                SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
+                SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
                 else
@@ -873,7 +873,7 @@ namespace Game
 
                         if (!Global.PoolMgr.CheckPool(entry))
                         {
-                            Log.outError(LogFilter.Sql, "Pool Id ({0}) has all creatures or gameobjects with explicit chance sum <>100 and no equal chance defined. The pool system cannot pick one to spawn.", entry);
+                            Log.outError(LogFilter.Sql, "Pool Id ({0}) has all creatures or gameobjects with explicit Chance sum <>100 and no equal Chance defined. The pool system cannot pick one to spawn.", entry);
                             continue;
                         }
 
@@ -1586,7 +1586,7 @@ namespace Game
 
         void RunSmartAIScripts(ushort event_id, bool activate)
         {
-            //! Iterate over every supported source type (creature and gameobject)
+            //! Iterate over every supported source Type (creature and gameobject)
             //! Not entirely sure how this will affect units in non-loaded grids.
             Global.MapMgr.DoForAllMaps(map =>
             {

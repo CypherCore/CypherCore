@@ -72,7 +72,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 0");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 0");
 
                 if (result.IsEmpty())
                 {
@@ -100,7 +100,7 @@ namespace Game
                         }
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_creature` has an invalid Chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
                             continue;
                         }
 
@@ -139,7 +139,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 1");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 1");
 
                 if (result.IsEmpty())
                 {
@@ -167,7 +167,7 @@ namespace Game
                             goinfo.type != GameObjectTypes.GatheringNode &&
                             goinfo.type != GameObjectTypes.Goober)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, Type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
                             continue;
                         }
 
@@ -179,7 +179,7 @@ namespace Game
 
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid chance ({0}) for gameobject guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid Chance ({0}) for gameobject guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
                             continue;
                         }
 
@@ -218,7 +218,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 2");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 2");
 
                 if (result.IsEmpty())
                 {
@@ -250,7 +250,7 @@ namespace Game
                         }
                         if (chance < 0 || chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_pool` has an invalid Chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
                             continue;
                         }
                         PoolTemplateData pPoolTemplateMother = mPoolTemplate[mother_pool_id];
@@ -330,7 +330,7 @@ namespace Game
 
                 SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
                     " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
-                    " LEFT JOIN pool_members ON pool_members.type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
+                    " LEFT JOIN pool_members ON pool_members.Type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
 
                 if (result.IsEmpty())
                 {
@@ -352,9 +352,9 @@ namespace Game
                             if (pool_pool_id != 0)
                                 // The pool is a child pool in pool_pool table. Ideally we should remove it from the pool handler to ensure it never gets spawned,
                                 // however that could recursively invalidate entire chain of mother pools. It can be done in the future but for now we'll do nothing.
-                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal chance pooled entites defined and explicit chance sum is not 100. This broken pool is a child pool of Id {1} and cannot be safely removed.", pool_entry, result.Read<uint>(2));
+                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal Chance pooled entites defined and explicit Chance sum is not 100. This broken pool is a child pool of Id {1} and cannot be safely removed.", pool_entry, result.Read<uint>(2));
                             else
-                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal chance pooled entites defined and explicit chance sum is not 100. The pool will not be spawned.", pool_entry);
+                                Log.outError(LogFilter.Sql, "Pool Id {0} has no equal Chance pooled entites defined and explicit Chance sum is not 100. The pool will not be spawned.", pool_entry);
                             continue;
                         }
 
@@ -491,7 +491,7 @@ namespace Game
             return 0;
         }
 
-        // Selects proper template overload to call based on passed type
+        // Selects proper template overload to call based on passed Type
         public uint IsPartOfAPool(SpawnObjectType type, ulong spawnId)
         {
             switch (type)
@@ -503,7 +503,7 @@ namespace Game
                 case SpawnObjectType.AreaTrigger:
                     return 0;
                 default:
-                    Cypher.Assert(false, $"Invalid spawn type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+                    Cypher.Assert(false, $"Invalid spawn Type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
                     return 0;
             }
         }
@@ -863,7 +863,7 @@ namespace Game
                 case SpawnObjectType.GameObject:
                     return mSpawnedGameobjects.Contains(db_guid_or_pool_id);
                 default:
-                    Log.outFatal(LogFilter.Misc, $"Invalid spawn type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
+                    Log.outFatal(LogFilter.Misc, $"Invalid spawn Type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
                     return false;
             }
         }

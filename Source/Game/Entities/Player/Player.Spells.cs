@@ -394,7 +394,7 @@ namespace Game.Entities
             if (skillId == 0)
                 return false;
 
-            if (chance <= 0)                                         // speedup in 0 chance case
+            if (chance <= 0)                                         // speedup in 0 Chance case
             {
                 Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:D3}% missed", chance / 10.0f);
                 return false;
@@ -467,10 +467,10 @@ namespace Game.Entities
 
                         // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
                         // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-                        if ((slot == EnchantmentSlot.Sock1 || slot == EnchantmentSlot.Sock2 || slot == EnchantmentSlot.Sock3)
-                            && m_items[i].GetSocketColor((uint)(slot - EnchantmentSlot.Sock1)) == 0)
+                        if ((slot == EnchantmentSlot.EnhancementSocket1 || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3)
+                            && m_items[i].GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket1)) == 0)
                         {
-                            SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(m_items[i].GetEnchantmentId(EnchantmentSlot.Prismatic));
+                            SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(m_items[i].GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
 
                             if (pPrismaticEnchant != null && pPrismaticEnchant.RequiredSkillID == skill_id)
                             {
@@ -539,18 +539,18 @@ namespace Game.Entities
 
             // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
             // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-            if ((slot == EnchantmentSlot.Sock1 || slot == EnchantmentSlot.Sock2 || slot == EnchantmentSlot.Sock3))
+            if ((slot == EnchantmentSlot.EnhancementSocket1 || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3))
             {
-                if (item.GetSocketColor((uint)(slot - EnchantmentSlot.Sock1)) == 0)
+                if (item.GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket1)) == 0)
                 {
                     // Check if the requirements for the prismatic socket are met before applying the gem stats
-                    SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.Prismatic));
+                    SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
                     if (pPrismaticEnchant == null || (pPrismaticEnchant.RequiredSkillID > 0 && pPrismaticEnchant.RequiredSkillRank > GetSkillValue((SkillType)pPrismaticEnchant.RequiredSkillID)))
                         return;
                 }
 
                 // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
-                SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.Sock1));
+                SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.EnhancementSocket1));
                 if (gem != null)
                 {
                     ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
@@ -586,7 +586,34 @@ namespace Game.Entities
                             if (enchant_spell_id != 0)
                             {
                                 if (apply)
+                                {
+                                    int basepoints = 0;
+                                    // Random Property Exist - try found basepoints for spell (basepoints depends from item suffix factor)
+                                    if (item.GetItemRandomPropertyId() < 0)
+                                    {
+                                        ItemRandomSuffixRecord item_rand = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
+                                        if (item_rand != null)
+                                        {
+                                            // Search enchant_amount
+                                            for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
+                                            {
+                                                if (item_rand.Enchantment[k] == enchant_id)
+                                                {
+                                                    basepoints = (int)(item_rand.AllocationPct[k] * item.GetItemSuffixFactor() / 10000);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    CastSpellExtraArgs args = new(item);
+                                    // Cast custom spell vs all equal basepoints got from enchant_amount
+                                    if (basepoints != 0)
+                                        for (uint i = 0; i < ItemConst.MaxSpellEffects; ++i)
+                                            args.AddSpellMod((SpellValueMod)((uint)SpellValueMod.BasePoint0 + i), basepoints);
+
                                     CastSpell(this, enchant_spell_id, item);
+                                }
                                 else
                                     RemoveAurasDueToItemSpell(enchant_spell_id, item.GetGUID());
                             }
@@ -610,6 +637,22 @@ namespace Game.Entities
                                 GtSpellScalingRecord spellScaling = CliDB.SpellScalingGameTable.GetRow(scalingLevel);
                                 if (spellScaling != null)
                                     enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
+                            }
+
+                            if (enchant_amount == 0)
+                            {
+                                ItemRandomSuffixRecord item_rand = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
+                                if (item_rand != null)
+                                {
+                                    for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
+                                    {
+                                        if (item_rand.Enchantment[k] == enchant_id)
+                                        {
+                                            enchant_amount = item_rand.AllocationPct[k] * item.GetItemSuffixFactor() / 10000;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
 
                             enchant_amount = Math.Max(enchant_amount, 1u);
@@ -637,7 +680,23 @@ namespace Game.Entities
                                     enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
                             }
 
-                            enchant_amount = Math.Max(enchant_amount, 1u);
+                                if (enchant_amount == 0)
+                                {
+                                    ItemRandomSuffixRecord item_rand_suffix = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
+                                    if (item_rand_suffix != null)
+                                    {
+                                        for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
+                                        {
+                                            if (item_rand_suffix.Enchantment[k] == enchant_id)
+                                            {
+                                                enchant_amount = item_rand_suffix.AllocationPct[k] * item.GetItemSuffixFactor() / 10000;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                enchant_amount = Math.Max(enchant_amount, 1u);
 
                             Log.outDebug(LogFilter.Player, "Adding {0} to stat nb {1}", enchant_amount, enchant_spell_id);
                             switch ((ItemModType)enchant_spell_id)
@@ -811,14 +870,14 @@ namespace Game.Entities
                             // nothing do..
                             break;
                         default:
-                            Log.outError(LogFilter.Player, "Unknown item enchantment (id = {0}) display type: {1}", enchant_id, enchant_display_type);
+                            Log.outError(LogFilter.Player, "Unknown item enchantment (id = {0}) display Type: {1}", enchant_id, enchant_display_type);
                             break;
                     }
                 }
             }
 
             // visualize enchantment at player and equipped items
-            if (slot == EnchantmentSlot.Perm)
+            if (slot == EnchantmentSlot.EnhancementPermanent)
             {
                 VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.GetSlot());
                 SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
@@ -1285,7 +1344,7 @@ namespace Game.Entities
                 greenLevel = (yellowLevel + grayLevel) / 2;
             }
 
-            // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
+            // For skinning and Mining Chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
             switch (SkillId)
             {
                 case SkillType.Herbalism:
@@ -1462,7 +1521,7 @@ namespace Game.Entities
                 if (pItem == null || pItem.GetSocketColor(0) == 0)
                     continue;
 
-                for (EnchantmentSlot enchant_slot = EnchantmentSlot.Sock1; enchant_slot < EnchantmentSlot.Sock3; ++enchant_slot)
+                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket1; enchant_slot < EnchantmentSlot.EnhancementSocket3; ++enchant_slot)
                 {
                     uint enchant_id = pItem.GetEnchantmentId(enchant_slot);
                     if (enchant_id == 0)
@@ -1496,7 +1555,7 @@ namespace Game.Entities
                 // item spells casted at use
                 foreach (ItemEffectRecord effectData in item.GetEffects())
                 {
-                    // wrong triggering type
+                    // wrong triggering Type
                     if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                         continue;
 
@@ -2849,7 +2908,7 @@ namespace Game.Entities
                     }
                     break;
                 }
-                // special case if two mods apply 100% critical chance, only consume one
+                // special case if two mods apply 100% critical Chance, only consume one
                 case SpellModOp.CritChance:
                 {
                     SpellModifier modCritical = null;
@@ -3320,7 +3379,7 @@ namespace Game.Entities
                 {
                     foreach (ItemEffectRecord effectData in item.GetEffects())
                     {
-                        // wrong triggering type
+                        // wrong triggering Type
                         if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
                             continue;
 
@@ -3400,8 +3459,8 @@ namespace Game.Entities
                     // Apply spell mods
                     ApplySpellMod(spellInfo, SpellModOp.ProcChance, ref chance);
 
-                    // Shiv has 100% chance to apply the poison
-                    if (FindCurrentSpellBySpellId(5938) != null && e_slot == (byte)EnchantmentSlot.Temp)
+                    // Shiv has 100% Chance to apply the poison
+                    if (FindCurrentSpellBySpellId(5938) != null && e_slot == (byte)EnchantmentSlot.EnhancementTemporary)
                         chance = 100.0f;
 
                     if (RandomHelper.randChance(chance))
@@ -3440,7 +3499,7 @@ namespace Game.Entities
 
         float GetWeaponProcChance()
         {
-            // normalized proc chance for weapon attack speed
+            // normalized proc Chance for weapon attack speed
             // (odd formula...)
             if (IsAttackReady(WeaponAttackType.BaseAttack))
                 return (GetBaseAttackTime(WeaponAttackType.BaseAttack) * 1.8f / 1000.0f);

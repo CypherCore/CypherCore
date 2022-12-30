@@ -327,7 +327,7 @@ namespace Game
                     break;
             }
 
-            if (!updater.ProcessUnsafe()) // <=> updater is of type MapSessionFilter
+            if (!updater.ProcessUnsafe()) // <=> updater is of Type MapSessionFilter
             {
                 // Send time sync packet every 10s.
                 if (_timeSyncTimer > 0)
@@ -404,7 +404,7 @@ namespace Game
             ConnectionType conIdx = packet.GetConnection();
             if (conIdx != ConnectionType.Instance && PacketManager.IsInstanceOnlyOpcode(packet.GetOpcode()))
             {
-                Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
+                Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection Type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
                 return;
             }
 
@@ -529,14 +529,14 @@ namespace Game
                 int type = result.Read<byte>(0);
                 if (type >= (int)AccountDataTypes.Max)
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account data type ({1}), ignore.",
+                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account data Type ({1}), ignore.",
                         mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }
 
                 if (((int)mask & (1 << type)) == 0)
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data type ({1}), ignore.",
+                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data Type ({1}), ignore.",
                         mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }

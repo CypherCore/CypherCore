@@ -941,25 +941,25 @@ namespace Game.Spells
 
             // this is bad, should be done using spell_loot_template (and conditions)
 
-            // the chance of getting a perfect result
+            // the Chance of getting a perfect result
             float perfectCreateChance = 0.0f;
             // the resulting perfect item if successful
             uint perfectItemType = itemId;
-            // get perfection capability and chance
+            // get perfection capability and Chance
             if (SkillPerfectItems.CanCreatePerfectItem(player, m_spellInfo.Id, ref perfectCreateChance, ref perfectItemType))
                 if (RandomHelper.randChance(perfectCreateChance)) // if the roll succeeds...
                     newitemid = perfectItemType;        // the perfect item replaces the regular one
 
             // init items_count to 1, since 1 item will be created regardless of specialization
             int items_count = 1;
-            // the chance to create additional items
+            // the Chance to create additional items
             float additionalCreateChance = 0.0f;
             // the maximum number of created additional items
             byte additionalMaxNum = 0;
-            // get the chance and maximum number for creating extra items
+            // get the Chance and maximum number for creating extra items
             if (SkillExtraItems.CanCreateExtraItems(player, m_spellInfo.Id, ref additionalCreateChance, ref additionalMaxNum))
             {
-                // roll with this chance till we roll not to create or we create the max num
+                // roll with this Chance till we roll not to create or we create the max num
                 while (RandomHelper.randChance(additionalCreateChance) && items_count <= additionalMaxNum)
                     ++items_count;
             }
@@ -987,7 +987,7 @@ namespace Game.Spells
             if (num_to_add != 0)
             {
                 // create the new item and store it
-                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
+                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(newitemid), null, context, bonusListIds);
 
                 // was it successful? return error if not
                 if (pItem == null)
@@ -1344,7 +1344,7 @@ namespace Game.Spells
             if (pNewItem == null)
                 return;
 
-            for (var j = EnchantmentSlot.Perm; j <= EnchantmentSlot.Temp; ++j)
+            for (var j = EnchantmentSlot.EnhancementPermanent; j <= EnchantmentSlot.EnhancementTemporary; ++j)
                 if (m_CastItem.GetEnchantmentId(j) != 0)
                     pNewItem.SetEnchantment(j, m_CastItem.GetEnchantmentId(j), m_CastItem.GetEnchantmentDuration(j), (uint)m_CastItem.GetEnchantmentCharges(j));
 
@@ -1465,7 +1465,7 @@ namespace Game.Spells
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(effectInfo.MiscValueB);
             if (properties == null)
             {
-                Log.outError(LogFilter.Spells, "EffectSummonType: Unhandled summon type {0}", effectInfo.MiscValueB);
+                Log.outError(LogFilter.Spells, "EffectSummonType: Unhandled summon Type {0}", effectInfo.MiscValueB);
                 return;
             }
 
@@ -1715,7 +1715,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            // Create dispel mask by dispel type
+            // Create dispel mask by dispel Type
             uint dispel_type = (uint)effectInfo.MiscValue;
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)dispel_type);
 
@@ -2026,12 +2026,12 @@ namespace Game.Spells
                 }
 
                 // remove old enchanting before applying new if equipped
-                item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Perm, false);
+                item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementPermanent, false);
 
-                itemTarget.SetEnchantment(EnchantmentSlot.Perm, enchant_id, 0, 0, m_caster.GetGUID());
+                itemTarget.SetEnchantment(EnchantmentSlot.EnhancementPermanent, enchant_id, 0, 0, m_caster.GetGUID());
 
                 // add new enchanting if equipped
-                item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Perm, true);
+                item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementPermanent, true);
 
                 item_owner.RemoveTradeableItem(itemTarget);
                 itemTarget.ClearSoulboundTradeable(item_owner);
@@ -2090,12 +2090,12 @@ namespace Game.Spells
             }
 
             // remove old enchanting before applying new if equipped
-            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Prismatic, false);
+            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketPrismatic, false);
 
-            itemTarget.SetEnchantment(EnchantmentSlot.Prismatic, enchantId, 0, 0, m_caster.GetGUID());
+            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketPrismatic, enchantId, 0, 0, m_caster.GetGUID());
 
             // add new enchanting if equipped
-            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Prismatic, true);
+            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketPrismatic, true);
 
             item_owner.RemoveTradeableItem(itemTarget);
             itemTarget.ClearSoulboundTradeable(item_owner);
@@ -2166,12 +2166,12 @@ namespace Game.Spells
             }
 
             // remove old enchanting before applying new if equipped
-            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Temp, false);
+            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementTemporary, false);
 
-            itemTarget.SetEnchantment(EnchantmentSlot.Temp, enchant_id, duration * 1000, 0, m_caster.GetGUID());
+            itemTarget.SetEnchantment(EnchantmentSlot.EnhancementTemporary, enchant_id, duration * 1000, 0, m_caster.GetGUID());
 
             // add new enchanting if equipped
-            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.Temp, true);
+            item_owner.ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementTemporary, true);
         }
 
         [SpellEffectHandler(SpellEffectName.Tamecreature)]
@@ -2257,7 +2257,7 @@ namespace Game.Spells
 
             Pet OldSummon = owner.GetPet();
 
-            // if pet requested type already exist
+            // if pet requested Type already exist
             if (OldSummon != null)
             {
                 if (petentry == 0 || OldSummon.GetEntry() == petentry)
@@ -2708,7 +2708,7 @@ namespace Game.Spells
                                     byte slot = 0;
                                     Item item;
 
-                                    while (bag != 0) // 256 = 0 due to var type
+                                    while (bag != 0) // 256 = 0 due to var Type
                                     {
                                         item = m_caster.ToPlayer().GetItemByPos(bag, slot);
                                         if (item != null && item.GetEntry() == 38587)
@@ -3116,7 +3116,7 @@ namespace Game.Spells
                     return;
 
                 // Always go to temp enchantment slot
-                EnchantmentSlot slot = EnchantmentSlot.Temp;
+                EnchantmentSlot slot = EnchantmentSlot.EnhancementTemporary;
 
                 // Enchantment will not be applied if a different one already exists
                 if (item.GetEnchantmentId(slot) != 0 && item.GetEnchantmentId(slot) != enchant_id)
@@ -4314,7 +4314,7 @@ namespace Game.Spells
 
             List<DispelableAura> stealList = new();
 
-            // Create dispel mask by dispel type
+            // Create dispel mask by dispel Type
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
             var auras = unitTarget.GetOwnedAuras();
             foreach (var map in auras)
@@ -4336,7 +4336,7 @@ namespace Game.Spells
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% Chance to dispell
                     // Polymorph instead of 1 / (5 + 1) . 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();

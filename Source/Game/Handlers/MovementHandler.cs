@@ -537,7 +537,7 @@ namespace Game
                     move_type = UnitMoveType.PitchRate;
                     break;
                 default:
-                    Log.outError(LogFilter.Network, "WorldSession.HandleForceSpeedChangeAck: Unknown move type opcode: {0}", opcode);
+                    Log.outError(LogFilter.Network, "WorldSession.HandleForceSpeedChangeAck: Unknown move Type opcode: {0}", opcode);
                     return;
             }
 

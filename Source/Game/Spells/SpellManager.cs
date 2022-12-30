@@ -465,7 +465,7 @@ namespace Game.Entities
 
         public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
-            // proc type doesn't match
+            // proc Type doesn't match
             if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
                 return false;
 
@@ -506,7 +506,7 @@ namespace Game.Entities
                     if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
                         return false;
 
-                // check spell type mask (if set)
+                // check spell Type mask (if set)
                 if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
                     return false;
             }
@@ -1503,7 +1503,7 @@ namespace Game.Entities
                     {
                         if (spellEffectInfo.IsAura())
                         {
-                            Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura type, it probably needs an entry in `spell_proc` table to be handled correctly.");
+                            Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura Type, it probably needs an entry in `spell_proc` table to be handled correctly.");
                             break;
                         }
                     }
@@ -1546,7 +1546,7 @@ namespace Game.Entities
                         case AuraType.ModBlockPercent:
                             procEntry.HitMask = ProcFlagsHit.Block;
                             break;
-                        // proc auras with another aura reducing hit chance (eg 63767) only proc on missed attack
+                        // proc auras with another aura reducing hit Chance (eg 63767) only proc on missed attack
                         case AuraType.ModHitChance:
                             if (spellEffectInfo.CalcValue() <= -100)
                                 procEntry.HitMask = ProcFlagsHit.Miss;
@@ -1732,7 +1732,7 @@ namespace Game.Entities
             mSpellLinkedMap.Clear();    // need for reload case
 
             //                                                0              1             2
-            SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, type FROM spell_linked_spell");
+            SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, Type FROM spell_linked_spell");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 linked spells. DB table `spell_linked_spell` is empty.");
@@ -2429,25 +2429,25 @@ namespace Game.Entities
 
                     if (effect.Effect >= (uint)SpellEffectName.TotalSpellEffects)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect type {effect.Effect} at index {effect.EffectIndex}, skipped");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.EffectAura >= (uint)AuraType.Total)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.ImplicitTarget[0] >= (uint)Targets.TotalSpellTargets)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA Type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.ImplicitTarget[1] >= (uint)Targets.TotalSpellTargets)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB Type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
@@ -4203,7 +4203,7 @@ namespace Game.Entities
             ApplySpellFix(new[] { 40453 }, spellInfo =>
             {
                 // Bad DBC data? Copying 25820 here due to spell description
-                // either is a periodic with chance on tick, or a proc
+                // either is a periodic with Chance on tick, or a proc
 
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
@@ -4827,8 +4827,8 @@ namespace Game.Entities
         public ProcFlagsHit HitMask { get; set; }                                    // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
         public ProcAttributes AttributesMask { get; set; }                             // bitmask, see ProcAttributes
         public uint DisableEffectsMask { get; set; }                            // bitmask
-        public float ProcsPerMinute { get; set; }                              // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
-        public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines chance of proc to occur, not used if ProcsPerMinute set
+        public float ProcsPerMinute { get; set; }                              // if nonzero - Chance to proc is equal to value * aura caster's weapon speed / 60
+        public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines Chance of proc to occur, not used if ProcsPerMinute set
         public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura
         public uint Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
     }
@@ -5012,7 +5012,7 @@ namespace Game.Entities
     public class SpellEnchantProcEntry
     {
         public float Chance;         // if nonzero - overwrite SpellItemEnchantment value
-        public float ProcsPerMinute; // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
+        public float ProcsPerMinute; // if nonzero - Chance to proc is equal to value * aura caster's weapon speed / 60
         public uint HitMask;        // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
         public EnchantProcAttributes AttributesMask; // bitmask, see EnchantProcAttributes
     }

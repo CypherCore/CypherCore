@@ -49,7 +49,7 @@ namespace Game
             }
 
             //                                         0   1     2     3       4        5       6    7
-            SQLResult result = DB.World.Query("SELECT id, type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
+            SQLResult result = DB.World.Query("SELECT id, Type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden checks. DB table `warden_checks` is empty!");
@@ -66,7 +66,7 @@ namespace Game
 
                 if (category == WardenCheckCategory.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check type {checkType} in `warden_checks`, which is not supported. Skipped.");
+                    Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check Type {checkType} in `warden_checks`, which is not supported. Skipped.");
                     continue;
                 }
 

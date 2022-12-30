@@ -198,7 +198,9 @@ namespace Game.DataStorage
             ItemModifiedAppearanceStorage = ReadDB2<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemModifiedAppearanceExtraStorage = ReadDB2<ItemModifiedAppearanceExtraRecord>("ItemModifiedAppearanceExtra.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA);
             ItemNameDescriptionStorage = ReadDB2<ItemNameDescriptionRecord>("ItemNameDescription.db2", HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE);
-            ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);            
+            ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
+            ItemRandomPropertiesStorage = ReadDB2<ItemRandomPropertiesRecord> ("ItemRandomProperties.db2", HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES);
+            ItemRandomSuffixStorage = ReadDB2<ItemRandomSuffixRecord> ("ItemRandomSuffix.db2", HotfixStatements.SEL_ITEM_RANDOM_SUFFIX);
             ItemSetStorage = ReadDB2<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
             ItemSetSpellStorage = ReadDB2<ItemSetSpellRecord>("ItemSetSpell.db2", HotfixStatements.SEL_ITEM_SET_SPELL);
             ItemSparseStorage = ReadDB2<ItemSparseRecord>("ItemSparse.db2", HotfixStatements.SEL_ITEM_SPARSE, HotfixStatements.SEL_ITEM_SPARSE_LOCALE);
@@ -590,6 +592,8 @@ namespace Game.DataStorage
         public static DB6Storage<ItemModifiedAppearanceExtraRecord> ItemModifiedAppearanceExtraStorage;
         public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
+        public static DB6Storage<ItemRandomPropertiesRecord> ItemRandomPropertiesStorage;
+        public static DB6Storage<ItemRandomSuffixRecord> ItemRandomSuffixStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;
         public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
         public static DB6Storage<ItemSparseRecord> ItemSparseStorage;

@@ -316,12 +316,12 @@ namespace Game
                 bg = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
                 if (!bg)
                 {
-                    Log.outError(LogFilter.Network, "BattlegroundHandler: bg_template not found for type id {0}.", bgTypeId);
+                    Log.outError(LogFilter.Network, "BattlegroundHandler: bg_template not found for Type id {0}.", bgTypeId);
                     return;
                 }
             }
 
-            // get real bg type
+            // get real bg Type
             bgTypeId = bg.GetTypeID();
 
             // expected bracket entry
@@ -552,7 +552,7 @@ namespace Game
             var err = grp.CanJoinBattlegroundQueue(bg, bgQueueTypeId, (uint)arenatype, (uint)arenatype, true, packet.TeamSizeIndex, out errorGuid);
             if (err == 0)
             {
-                Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
+                Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for Type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
 
                 ginfo = bgQueue.AddGroup(GetPlayer(), grp, _player.GetTeam(), bracketEntry, false, arenaRating, matchmakerRating, ateamId);
                 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());

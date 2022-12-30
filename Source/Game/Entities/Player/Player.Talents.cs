@@ -436,7 +436,7 @@ namespace Game.Entities
             UpdateDisplayPower();
             PowerType pw = GetPowerType();
             if (pw != PowerType.Mana)
-                SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power type.
+                SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power Type.
 
             SetPower(pw, 0);
             UpdateItemSetAuras(false);

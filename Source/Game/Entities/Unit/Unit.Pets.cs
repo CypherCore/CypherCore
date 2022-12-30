@@ -264,7 +264,7 @@ namespace Game.Entities
             Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
             Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() && GetVehicleKit().IsControllableVehicle()));
 
-            Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
+            Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), Type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
 
             if (this == charmer)
             {

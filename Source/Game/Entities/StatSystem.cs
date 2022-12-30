@@ -793,10 +793,10 @@ namespace Game.Entities
             if (spellInfo != null && spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
                 return 0.0f;
 
-            //calculate miss chance
+            //calculate miss Chance
             float missChance = victim.GetUnitMissChance();
 
-            // melee attacks while dual wielding have +19% chance to miss
+            // melee attacks while dual wielding have +19% Chance to miss
             if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm() && !HasAuraType(AuraType.IgnoreDualWieldHitPenalty))
                 missChance += 19.0f;
 
@@ -816,7 +816,7 @@ namespace Game.Entities
             else
                 missChance -= ModMeleeHitChance;
 
-            // miss chance from auras after calculating skill based miss
+            // miss Chance from auras after calculating skill based miss
             missChance -= GetTotalAuraModifier(AuraType.ModHitChance);
             if (attType == WeaponAttackType.RangedAttack)
                 missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
@@ -909,13 +909,13 @@ namespace Game.Entities
 
             chance += levelBonus;
 
-            // Reduce enemy dodge chance by SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+            // Reduce enemy dodge Chance by SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
             chance += GetTotalAuraModifierByMiscValue(AuraType.ModCombatResultChance, (int)VictimState.Dodge);
 
             // reduce dodge by SPELL_AURA_MOD_ENEMY_DODGE
             chance += GetTotalAuraModifier(AuraType.ModEnemyDodge);
 
-            // Reduce dodge chance by attacker expertise rating
+            // Reduce dodge Chance by attacker expertise rating
             if (IsTypeId(TypeId.Player))
                 chance -= ToPlayer().GetExpertiseDodgeOrParryReduction(attType);
             else
@@ -955,7 +955,7 @@ namespace Game.Entities
 
             chance += levelBonus;
 
-            // Reduce parry chance by attacker expertise rating
+            // Reduce parry Chance by attacker expertise rating
             if (IsTypeId(TypeId.Player))
                 chance -= ToPlayer().GetExpertiseDodgeOrParryReduction(attType);
             else
@@ -1648,8 +1648,8 @@ namespace Game.Entities
             // where:
             // k  is m_diminishing_k for that class
             // c  is capArray for that class
-            // x  is chance before DR (diminishValue)
-            // x' is chance after DR (our result)
+            // x  is Chance before DR (diminishValue)
+            // x' is Chance after DR (our result)
 
             uint classIdx = (byte)playerClass - 1u;
 
@@ -1690,7 +1690,7 @@ namespace Game.Entities
                 // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
                 nondiminishing += GetTotalAuraModifier(AuraType.ModParryPercent);
 
-                // apply diminishing formula to diminishing parry chance
+                // apply diminishing formula to diminishing parry Chance
                 value = CalculateDiminishingReturns(parry_cap, GetClass(), nondiminishing, diminishing);
 
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
@@ -1723,7 +1723,7 @@ namespace Game.Entities
             nondiminishing += GetTotalAuraModifier(AuraType.ModDodgePercent);
             // Dodge from rating
             diminishing += GetRatingBonusValue(CombatRating.Dodge);
-            // apply diminishing formula to diminishing dodge chance
+            // apply diminishing formula to diminishing dodge Chance
             float value = CalculateDiminishingReturns(dodge_cap, GetClass(), nondiminishing, diminishing);
 
             if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))

@@ -2224,7 +2224,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId), null, itemContext, bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
@@ -2304,7 +2304,7 @@ namespace Game.Chat
                         bonusListIDsForItem.AddRange(contextBonuses);
                     }
 
-                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem);
+                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, new ItemRandomEnchantmentId(), null, itemContext, bonusListIDsForItem);
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
@@ -2464,7 +2464,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId), null, itemContext, bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
