@@ -81,8 +81,8 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public string Filename;
-        public string NameMale;
-        public string NameFemale;
+        public LocalizedString NameMale;
+        public LocalizedString NameFemale;
         public string PetNameToken;
         public uint Id;
         public uint CreateScreenFileDataID;
@@ -91,7 +91,6 @@ namespace Game.DataStorage
         public uint LowResScreenFileDataID;
         public int Flags;
         public int StartingLevel;
-        public uint SpellTextureBlobFileDataID;
         public uint RolesMask;
         public uint ArmorTypeMask;
         public ushort CinematicSequenceID;
@@ -317,6 +316,7 @@ namespace Game.DataStorage
 
     public sealed class ContentTuningRecord
     {
+        public uint Id;
         public int MinLevel;
         public int MaxLevel;
         public int Flags;

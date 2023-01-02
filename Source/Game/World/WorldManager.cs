@@ -1823,7 +1823,7 @@ namespace Game
                 //- ... and it is overdue, stop the world
                 if (m_ShutdownTimer <= elapsed)
                 {
-                    if (!m_ShutdownMask.HasAnyFlag(ShutdownMask.Idle) || GetActiveAndQueuedSessionCount() == 0)
+                    if (!m_ShutdownMask.HasAnyFlag(ShutdownMask.Idle) || GetActiveAndQueuedSessionCount() == 0)                    
                         IsStopped = true;                         // exist code already set
                     else
                         m_ShutdownTimer = 1;                        // minimum timer value to wait idle state

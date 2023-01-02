@@ -76,10 +76,8 @@ namespace Game.Maps
                 }
 
                 // paths are generated per template, saves us from generating it again in case of instanced transports
-                TransportTemplate transport = new();
-
-                GeneratePath(goInfo, transport);
-                _transportTemplates[entry] = transport;
+                if (GeneratePath(goInfo, out TransportTemplate transport))
+                    _transportTemplates[entry] = transport;
 
                 ++count;
             } while (result.NextRow());
@@ -324,11 +322,12 @@ namespace Game.Maps
                 leg.Segments[i].SegmentEndArrivalTimestamp += leg.StartTimestamp;
         }
 
-        void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
+        bool GeneratePath(GameObjectTemplate goInfo, out TransportTemplate transport)
         {
             uint pathId = goInfo.MoTransport.taxiPathID;
             TaxiPathNodeRecord[] path = CliDB.TaxiPathNodesByPath[pathId];
 
+            transport = new();
             transport.Speed = (double)goInfo.MoTransport.moveSpeed;
             transport.AccelerationRate = (double)goInfo.MoTransport.accelRate;
             transport.AccelerationTime = transport.Speed / transport.AccelerationRate;
@@ -344,6 +343,7 @@ namespace Game.Maps
             leg.MapId = path[0].ContinentID;
             bool prevNodeWasTeleport = false;
             uint totalTime = 0;
+
             foreach (TaxiPathNodeRecord node in path)
             {
                 if (node.ContinentID != leg.MapId || prevNodeWasTeleport)
@@ -375,14 +375,25 @@ namespace Game.Maps
             if (transport.MapIds.Count > 1)
             {
                 foreach (uint mapId in transport.MapIds)
-                    Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
+                {
+                    if (CliDB.MapStorage.TryGetValue(transport.MapIds.First(), out MapRecord mapRecord))
+                        Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
+                    else
+                        return false;
+                }
 
                 transport.InInstance = false;
             }
+            else if (CliDB.MapStorage.TryGetValue(transport.MapIds.First(), out MapRecord mapRecord))
+            {
+                transport.InInstance = mapRecord.Instanceable();
+            }
             else
-                transport.InInstance = CliDB.MapStorage.LookupByKey(transport.MapIds.First()).Instanceable();
+                return false;
 
             transport.TotalPathTime = totalTime;
+
+            return true;
         }
         
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)

@@ -208,7 +208,7 @@ namespace Game.DataStorage
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
-        public int ParentItemID;
+        public uint ParentItemID;
     }
 
     public sealed class ItemExtendedCostRecord

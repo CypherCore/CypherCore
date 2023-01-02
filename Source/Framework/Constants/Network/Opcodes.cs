@@ -711,13 +711,15 @@ namespace Framework.Constants
         WorldPortResponse = 0x35fa,
         WrapItem = 0x3994,
 
-        BfMgrEntryInviteResponse = 0xbadd,
-        BfMgrQueueInviteResponse = 0xbadd,
-        BfMgrQueueExitRequest = 0xbadd,
+        Unknown_3743 = 0x3743,
+               
 
         Max = 0x3FFF,
         Unknown = 0xbadd,
         LearnPvpTalents = 0xbadd,
+        BfMgrEntryInviteResponse = 0xbadd,
+        BfMgrQueueInviteResponse = 0xbadd,
+        BfMgrQueueExitRequest = 0xbadd,
     }
 
     public enum ServerOpcodes : uint

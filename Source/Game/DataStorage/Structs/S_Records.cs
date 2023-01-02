@@ -619,7 +619,7 @@ namespace Game.DataStorage
         public uint Flags;
         public ushort SpellMissileMotionID;
         public uint AnimKitID;
-        public short SpellVisualMissileSetID;
+        public uint SpellVisualMissileSetID;
     }    
 
     public sealed class SpellXSpellVisualRecord

@@ -393,18 +393,18 @@ namespace Game.DataStorage
                     OldContinentsNodesMask[field] |= submask;
             }
 
-            // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(14083) ||               // last area added in 9.2.7 (45114)
-                !CharTitlesStorage.ContainsKey(727) ||                // last char title added in 9.2.7 (45114)
-                !GemPropertiesStorage.ContainsKey(3922) ||            // last gem property added in 9.2.7 (45114)
-                !ItemStorage.ContainsKey(199202) ||                   // last item added in 9.2.7 (45114)
-                !ItemExtendedCostStorage.ContainsKey(7316) ||         // last item extended cost added in 9.2.7 (45114)
-                !MapStorage.ContainsKey(2559) ||                      // last map added in 9.2.7 (45114)
-                !SpellNameStorage.ContainsKey(387936))                // last spell added in 9.2.7 (45114)
-            {
-                Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
-                Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
-            }
+            //// Check loaded DB2 files proper version
+            //if (!AreaTableStorage.ContainsKey(14083) ||               // last area added in 9.2.7 (45114)
+            //    !CharTitlesStorage.ContainsKey(727) ||                // last char title added in 9.2.7 (45114)
+            //    !GemPropertiesStorage.ContainsKey(3922) ||            // last gem property added in 9.2.7 (45114)
+            //    !ItemStorage.ContainsKey(199202) ||                   // last item added in 9.2.7 (45114)
+            //    !ItemExtendedCostStorage.ContainsKey(7316) ||         // last item extended cost added in 9.2.7 (45114)
+            //    !MapStorage.ContainsKey(2559) ||                      // last map added in 9.2.7 (45114)
+            //    !SpellNameStorage.ContainsKey(387936))                // last spell added in 9.2.7 (45114)
+            //{
+            //    Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
+            //    Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
+            //}
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
 
@@ -761,7 +761,7 @@ namespace Game.DataStorage
         #endregion
 
         #region Talent Collections
-        public static Dictionary<uint, TalentSpellPos> TalentSpellPosMap;
+        public static Dictionary<uint, TalentSpellPos> TalentSpellPosMap = new();
         public static HashSet<uint> PetTalentSpells = new();
         /// <summary>store absolute bit position for first rank for talent inspect</summary>        
         public static uint[][] TalentTabPages = new uint[(uint)Class.Max][];

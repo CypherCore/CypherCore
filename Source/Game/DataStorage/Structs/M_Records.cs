@@ -120,8 +120,8 @@ namespace Game.DataStorage
         public MapDifficultyResetInterval ResetInterval;
         public byte MaxPlayers;
         public byte ItemContext;
-        public int Flags;
-        public int MapID;
+        public byte Flags;
+        public uint MapID;
 
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
         public bool IsUsingEncounterLocks() { return GetFlags().HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }

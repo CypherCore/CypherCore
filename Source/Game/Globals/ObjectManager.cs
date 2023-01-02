@@ -4866,7 +4866,7 @@ namespace Game
                     continue;
                 }
 
-                if (!isTransportMap && !mapDifficulties.Contains(difficultyId))
+                if (!isTransportMap && (mapDifficulties == null || !mapDifficulties.Contains(difficultyId)))
                 {
                     Log.outError(LogFilter.Sql, $"Table `{table}` has {table} (GUID: {spawnId}) has unsupported difficulty {difficultyId} for map (Id: {mapId}).");
                     continue;
@@ -9314,7 +9314,7 @@ namespace Game
                     if (repTemplate.faction[i] != 0)
                     {
                         var factionSpillover = CliDB.FactionStorage.LookupByKey(repTemplate.faction[i]);
-                        if (factionSpillover.Id == 0)
+                        if (factionSpillover == null || factionSpillover.Id == 0)
                         {
                             Log.outError(LogFilter.Sql, "Spillover faction (faction.dbc) {0} does not exist but is used in `reputation_spillover_template` for faction {1}, skipping", repTemplate.faction[i], factionId);
                             invalidSpilloverFaction = true;
