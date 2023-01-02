@@ -1038,20 +1038,10 @@ namespace Game.Chat
 
                                 if (handler.GetSession() != null)
                                 {
-                                    int maxLevel = 0;
-                                    var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, 0);
-                                    if (questLevels.HasValue)
-                                        maxLevel = questLevels.Value.MaxLevel;
-
-                                    int scalingFactionGroup = 0;
-                                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
-                                    if (contentTuning != null)
-                                        scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
                                     handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
                                         handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
                                         handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                        maxLevel, scalingFactionGroup,
+                                        qInfo.MaxLevel, qInfo.ScalingFactionGroup,
                                         title, statusStr);
                                 }
                                 else
@@ -1101,20 +1091,10 @@ namespace Game.Chat
 
                         if (handler.GetSession() != null)
                         {
-                            int maxLevel = 0;
-                            var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, 0);
-                            if (questLevels.HasValue)
-                                maxLevel = questLevels.Value.MaxLevel;
-
-                            int scalingFactionGroup = 0;
-                            ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
-                            if (contentTuning != null)
-                                scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
                             handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
                                 handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
                                 handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                maxLevel, scalingFactionGroup,
+                                qInfo.MaxLevel, qInfo.ScalingFactionGroup,
                                 _title, statusStr);
                         }
                         else
@@ -1169,20 +1149,10 @@ namespace Game.Chat
 
                     if (handler.GetSession())
                     {
-                        int maxLevel = 0;
-                        var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, 0);
-                        if (questLevels.HasValue)
-                            maxLevel = questLevels.Value.MaxLevel;
-
-                        int scalingFactionGroup = 0;
-                        var contentTuning = CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId);
-                        if (contentTuning != null)
-                            scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
                         handler.SendSysMessage(CypherStrings.QuestListChat, id, id,
                             handler.GetSession().GetPlayer().GetQuestLevel(quest),
                             handler.GetSession().GetPlayer().GetQuestMinLevel(quest),
-                            maxLevel, scalingFactionGroup,
+                            quest.MaxLevel, quest.ScalingFactionGroup,
                             title, statusStr);
                     }
                     else

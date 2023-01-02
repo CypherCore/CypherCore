@@ -269,8 +269,9 @@ namespace Game.Misc
                 {
                     ClientGossipText gossipText = new();
                     gossipText.QuestID = questID;
-                    gossipText.ContentTuningID = quest.ContentTuningId;
                     gossipText.QuestType = item.QuestIcon;
+                    gossipText.QuestLevel = quest.Level;
+                    gossipText.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     gossipText.QuestFlags = (uint)quest.Flags;
                     gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
                     gossipText.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
@@ -361,7 +362,8 @@ namespace Game.Misc
                 {
                     ClientGossipText text = new();
                     text.QuestID = questID;
-                    text.ContentTuningID = quest.ContentTuningId;
+                    text.QuestLevel = quest.Level;
+                    text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;

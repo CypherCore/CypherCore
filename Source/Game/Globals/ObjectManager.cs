@@ -7102,39 +7102,39 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0  1          2               3                4            5            6                  7                8                   9
-                "ID, QuestType, QuestPackageID, ContentTuningID, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //10                    11                     12                13           14           15               16
+                //0  1          2           3                    4                5               6         7            8            9                  10               11                  12
+                "ID, QuestType, QuestLevel, ScalingFactionGroup, MaxScalingLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
+                //13                    14                     15                16           17           18               19
                 "RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //17                         18                          19                        20     21       22
+                //20                         21                          22                        23     24       25
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, FlagsEx2, " +
-                //23          24             25         26                 27           28             29         30
+                //26          27             28         29                 30           31             32         33
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //31          32             33         34                 35           36             37         38
+                //34          35             36         37                 38           39             40         41
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //39                  40                         41                          42                   43                         44
+                //42                  43                         44                          45                   46                         47
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //45                  46                         47                          48                   49                         50
+                //48                  49                         50                          51                   52                         53
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //51                  52                         53                          54                   55                         56
+                //54                  55                         56                          57                   58                         59
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //57           58    59    60           61           62                 63                 64
+                //60           61    62    63           64           65                 66                 67
                 "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, " +
-                //65            66                  67                         68
+                //68            69                  70                         71
                 "PortraitGiver, PortraitGiverMount, PortraitGiverModelSceneID, PortraitTurnIn, " +
-                //69               70                   71                      72                   73                74                   75                      76
+                //72               73                   74                      75                   76                77                   78                      79
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //77               78                   79                      80                   81                82                   83                      84
+                //80               81                   82                      83                   84                85                   86                      87
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //85               86                   87                      88                   89
+                //88               89                   90                      91                   92
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //90                91                  92                 93                  94                 95                  96                 97
+                //93                94                  95                 96                  97                 98                  99                 100
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //98                 99                  100          101          102             103               104        105                  106
-                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
-                //107      108             109               110              111                112                113                 114                 115
+                //101                102                 103          104          105             106               107
+                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, " +
+                //108      109             110               111              112                113                114                 115                 116
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog " +
-                " FROM quest_template");
+                "FROM quest_template");
 
             if (result.IsEmpty())
             {
@@ -7179,7 +7179,7 @@ namespace Game
 
             // Load `quest_reward_display_spell`
             //                               0        1        2
-            result = DB.World.Query("SELECT QuestID, SpellID, PlayerConditionID FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
+            result = DB.World.Query("SELECT QuestID, SpellID, Idx FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest reward display spells. DB table `quest_reward_display_spell` is empty.");
@@ -7434,8 +7434,11 @@ namespace Game
                     }
                 }
 
-                if (qinfo.ContentTuningId != 0 && !CliDB.ContentTuningStorage.ContainsKey(qinfo.ContentTuningId))
-                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `ContentTuningID` = {qinfo.ContentTuningId} but content tuning with this id does not exist.");
+                if(qinfo.MinLevel == -1 || qinfo.MinLevel > SharedConst.DefaultMaxLevel)
+                {
+                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should be disabled because `MinLevel` = {qinfo.MinLevel}");
+                    // no changes needed, sending -1 in SMSG_QUEST_QUERY_RESPONSE is valid
+                }
 
                 // client quest log visual (area case)
                 if (qinfo.QuestSortID > 0)

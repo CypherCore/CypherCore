@@ -361,6 +361,8 @@ namespace Game.Networking.Packets
         public uint QuestID;
         public uint ContentTuningID;
         public int QuestType;
+        public int QuestLevel;
+        public int QuestMaxScalingLevel;
         public bool Repeatable;
         public string QuestTitle;
         public uint QuestFlags;
@@ -371,6 +373,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(QuestID);
             data.WriteUInt32(ContentTuningID);
             data.WriteInt32(QuestType);
+            data.WriteInt32(QuestLevel);
+            data.WriteInt32(QuestMaxScalingLevel);
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);
 

@@ -50,19 +50,16 @@ namespace Game.Entities
 
         public int GetQuestMinLevel(Quest quest)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, 0);
-            if (questLevels.HasValue)
+            if (quest.Level == -1 && quest.ScalingFactionGroup != 0)
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
                 FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                int questFactionGroup = CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId).GetScalingFactionGroup();
-                if (questFactionGroup != 0 && raceFaction.FactionGroup != questFactionGroup)
-                    return questLevels.Value.MaxLevel;
 
-                return questLevels.Value.MinLevelWithDelta;
+                if (raceFaction.FactionGroup != quest.ScalingFactionGroup)
+                    return quest.MaxScalingLevel;
             }
 
-            return 0;
+            return quest.MinLevel;
         }
 
         public int GetQuestLevel(Quest quest)
@@ -70,18 +67,17 @@ namespace Game.Entities
             if (quest == null)
                 return 0;
 
-            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, 0);
-            if (questLevels.HasValue)
+            if (quest.Level == -1)
             {
                 int minLevel = GetQuestMinLevel(quest);
-                int maxLevel = questLevels.Value.MaxLevel;
+                int maxLevel = quest.MaxScalingLevel;
                 int level = (int)GetLevel();
                 if (level >= minLevel)
                     return Math.Min(level, maxLevel);
                 return minLevel;
             }
 
-            return 0;
+            return quest.Level; 
         }
 
         public int GetRewardedQuestCount() { return m_RewardedQuests.Count; }
@@ -1144,14 +1140,12 @@ namespace Game.Entities
             }
             else
             {
-                foreach (QuestRewardDisplaySpell displaySpell in quest.RewardDisplaySpell)
+                for (uint i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
                 {
-                    var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
-                    if (playerCondition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                            continue;
+                    if (quest.RewardDisplaySpell[(int)i] == 0)
+                        continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[(int)i], GetMap().GetDifficultyID());
                     Unit caster = this;
                     if (questGiver && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                     {
@@ -1315,7 +1309,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestMinLevel(Quest qInfo, bool msg)
         {
-            if (GetLevel() < GetQuestMinLevel(qInfo))
+            if (qInfo.MinLevel > 0 && GetLevel() < qInfo.MinLevel)
             {
                 if (msg)
                 {
