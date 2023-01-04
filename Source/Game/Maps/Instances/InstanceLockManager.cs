@@ -310,8 +310,9 @@ namespace Game.Maps
         {
             var sharedData = _instanceLockDataById.LookupByKey(updateEvent.InstanceId);
             Cypher.Assert(sharedData != null);
-            Cypher.Assert(sharedData.InstanceId == updateEvent.InstanceId);
+            Cypher.Assert(sharedData.InstanceId == 0 || sharedData.InstanceId == updateEvent.InstanceId);
             sharedData.Data = updateEvent.NewData;
+            sharedData.InstanceId = updateEvent.InstanceId;
             if (updateEvent.CompletedEncounter != null)
             {
                 sharedData.CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
@@ -519,7 +520,7 @@ namespace Game.Maps
 
         public uint GetInstanceId() { return _instanceId; }
 
-        public virtual void SetInstanceId(uint instanceId) { _instanceId = instanceId; }
+        public void SetInstanceId(uint instanceId) { _instanceId = instanceId; }
 
         public DateTime GetExpiryTime() { return _expiryTime; }
 
@@ -552,7 +553,6 @@ namespace Game.Maps
 
     class SharedInstanceLock : InstanceLock
     {
-
         /// <summary>
         /// Instance id based locks have two states
         /// One shared by everyone, which is the real state used by instance
@@ -563,12 +563,6 @@ namespace Game.Maps
         public SharedInstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
         {
             _sharedData = sharedData;            
-        }
-
-        public override void SetInstanceId(uint instanceId)
-        {
-            base.SetInstanceId(instanceId);
-            _sharedData.InstanceId = instanceId;
         }
 
         public override InstanceLockData GetInstanceInitializationData() { return _sharedData; }
