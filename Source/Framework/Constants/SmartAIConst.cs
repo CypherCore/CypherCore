@@ -361,7 +361,7 @@ namespace Framework.Constants
         GameEventStop = 111,    // GameEventId
         GameEventStart = 112,    // GameEventId
         StartClosestWaypoint = 113, // wp1, wp2, wp3, wp4, wp5, wp6, wp7
-        MoveOffset = 114,
+        MoveOffset = 114, // PointId
         RandomSound = 115,    // SoundId1, SoundId2, SoundId3, SoundId4, SoundId5, onlySelf
         SetCorpseDelay = 116,    // timer
         DisableEvade = 117,    // 0/1 (1 = disabled, 0 = enabled)

@@ -1111,7 +1111,7 @@ namespace Game.AI
                         float x = (float)(pos.GetPositionX() + (Math.Cos(o - (Math.PI / 2)) * e.Target.x) + (Math.Cos(o) * e.Target.y));
                         float y = (float)(pos.GetPositionY() + (Math.Sin(o - (Math.PI / 2)) * e.Target.x) + (Math.Sin(o) * e.Target.y));
                         float z = pos.GetPositionZ() + e.Target.z;
-                        target.ToCreature().GetMotionMaster().MovePoint(EventId.SmartRandomPoint, x, y, z);
+                        target.ToCreature().GetMotionMaster().MovePoint(e.Action.moveOffset.PointId, x, y, z);
                     }
                     break;
                 }

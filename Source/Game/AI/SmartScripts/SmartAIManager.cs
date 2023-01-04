@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static Game.AI.SmartAction;
 
 namespace Game.AI
 {
@@ -3063,6 +3064,9 @@ namespace Game.AI
         public ClosestWaypointFromList closestWaypointFromList;
 
         [FieldOffset(4)]
+        public MoveOffset moveOffset;
+
+        [FieldOffset(4)]
         public RandomSound randomSound;
 
         [FieldOffset(4)]
@@ -3552,6 +3556,10 @@ namespace Game.AI
             public uint wp4;
             public uint wp5;
             public uint wp6;
+        }
+        public struct MoveOffset
+        {
+            public uint PointId;
         }
         public struct RandomSound
         {
