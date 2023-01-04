@@ -2198,6 +2198,25 @@ namespace Game.Entities
             if (this == target)
                 return ReputationRank.Friendly;
 
+            bool isAttackableBySummoner(Unit me, ObjectGuid targetGuid)
+            {
+                if (!me)
+                    return false;
+
+                TempSummon tempSummon = me.ToTempSummon();
+                if (tempSummon == null || tempSummon.m_Properties == null)
+                    return false;
+
+                if (tempSummon.m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.AttackableBySummoner)
+                    && targetGuid == tempSummon.GetSummonerGUID())
+                    return true;
+
+                return false;
+            }
+
+            if (isAttackableBySummoner(ToUnit(), target.GetGUID()) || isAttackableBySummoner(target.ToUnit(), GetGUID()))
+                return ReputationRank.Neutral;
+
             // always friendly to charmer or owner
             if (GetCharmerOrOwnerOrSelf() == target.GetCharmerOrOwnerOrSelf())
                 return ReputationRank.Friendly;
