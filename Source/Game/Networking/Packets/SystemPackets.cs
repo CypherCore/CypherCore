@@ -278,15 +278,18 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
+            _worldPacket.WriteBit(false); // unused, 10.0.2
             _worldPacket.WriteBit(TrialBoostEnabled);
             _worldPacket.WriteBit(TokenBalanceEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
-            _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
 
+            _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
+            _worldPacket.WriteBit(false); // unused, 10.0.2
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
+            _worldPacket.WriteBit(false); // unused, 10.0.2
             _worldPacket.WriteBit(LaunchETA.HasValue);
             _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
