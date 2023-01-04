@@ -225,14 +225,14 @@ namespace Game.Collision
         public bool IsMapObject() { return isWmo; }
         public byte GetNameSetId() { return owner.GetNameSetId(); }
         
-        public static void LoadGameObjectModelList()
+        public static bool LoadGameObjectModelList()
         {
             uint oldMSTime = Time.GetMSTime();
             var filename = Global.WorldMgr.GetDataPath() + "/vmaps/GameObjectModels.dtree";
             if (!File.Exists(filename))
             {
                 Log.outWarn(LogFilter.Server, "Unable to open '{0}' file.", filename);
-                return;
+                return false;
             }
             try
             {
@@ -241,7 +241,7 @@ namespace Game.Collision
                 if (magic != MapConst.VMapMagic)
                 {
                     Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
-                    return;
+                    return false;
                 }
 
                 long length = reader.BaseStream.Length;
@@ -266,6 +266,7 @@ namespace Game.Collision
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            return true;
         }
 
         bool _collisionEnabled;

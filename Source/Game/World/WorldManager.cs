@@ -410,7 +410,7 @@ namespace Game
                 || !TerrainManager.ExistMapAndVMap(1, 10311.3f, 832.463f) || !TerrainManager.ExistMapAndVMap(1, -2917.58f, -257.98f)
                 || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!TerrainManager.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !TerrainManager.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
             {
-                Log.outError(LogFilter.ServerLoading, "Unable to load critical files - server shutting down !!!");
+                Log.outError(LogFilter.ServerLoading, "Unable to load map and vmap data for starting zones - server shutting down!");
                 Environment.Exit(1);
             }
 
@@ -508,6 +508,11 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             GameObjectModel.LoadGameObjectModelList();
+            if (!GameObjectModel.LoadGameObjectModelList())
+            {
+                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models, objects using WMO models will crash the client - server shutting down!");                
+                ShutdownServ(0, ShutdownMask.Force, ShutdownExitCode.Shutdown);
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
             Global.ObjectMgr.LoadInstanceTemplate();
