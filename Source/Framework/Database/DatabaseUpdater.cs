@@ -54,10 +54,10 @@ namespace Framework.Database
                     fileName = @"/sql/base/characters_database.sql";
                     break;
                 case "WorldDatabase":
-                    fileName = @"/sql/TDB_full_world_927.22111_2022_11_20.sql";
+                    fileName = @"/sql/TDB_full_world_1002.22121_2022_12_20.sql";
                     break;
                 case "HotfixDatabase":
-                    fileName = @"/sql/TDB_full_hotfixes_927.22111_2022_11_20.sql";
+                    fileName = @"/sql/TDB_full_hotfixes_1002.22121_2022_12_20.sql";
                     break;
             }
 
