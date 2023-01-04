@@ -270,8 +270,8 @@ namespace Framework.Constants
 
     public enum UnitVisFlags
     {
-        Unk1 = 0x01,
-        Creep = 0x02,
+        Invisible = 0x01,
+        Stealthed = 0x02,
         Untrackable = 0x04,
         Unk4 = 0x08,
         Unk5 = 0x10,

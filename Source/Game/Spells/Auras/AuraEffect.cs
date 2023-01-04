@@ -968,6 +968,8 @@ namespace Game.Spells
 
                 target.m_invisibility.AddFlag(type);
                 target.m_invisibility.AddValue(type, GetAmount());
+
+                target.SetVisFlag(UnitVisFlags.Invisible);
             }
             else
             {
@@ -1000,6 +1002,8 @@ namespace Game.Spells
                             playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
                         target.m_invisibility.DelFlag(type);
+
+                        target.RemoveVisFlag(UnitVisFlags.Invisible);
                     }
                 }
 
@@ -1057,7 +1061,7 @@ namespace Game.Spells
             {
                 target.m_stealth.AddFlag(type);
                 target.m_stealth.AddValue(type, GetAmount());
-                target.SetVisFlag(UnitVisFlags.Creep);
+                target.SetVisFlag(UnitVisFlags.Stealthed);
                 Player playerTarget = target.ToPlayer();
                 if (playerTarget != null)
                     playerTarget.AddAuraVision(PlayerFieldByte2Flags.Stealth);
@@ -1070,7 +1074,7 @@ namespace Game.Spells
                 {
                     target.m_stealth.DelFlag(type);
 
-                    target.RemoveVisFlag(UnitVisFlags.Creep);
+                    target.RemoveVisFlag(UnitVisFlags.Stealthed);
                     Player playerTarget = target.ToPlayer();
                     if (playerTarget != null)
                         playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.Stealth);
