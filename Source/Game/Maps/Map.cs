@@ -2382,7 +2382,7 @@ namespace Game.Maps
             return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
         }
 
-        void UpdateSpawnGroupConditions()
+        public void UpdateSpawnGroupConditions()
         {
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
             foreach (uint spawnGroupId in spawnGroups)
