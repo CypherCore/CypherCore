@@ -2513,7 +2513,7 @@ namespace Game.Entities
             bool canHover = CanHover();
             bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + (canHover ? m_unitData.HoverHeight : 0.0f) + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
 
-            if (GetMovementTemplate().IsFlightAllowed() && isInAir && !IsFalling())
+            if (GetMovementTemplate().IsFlightAllowed() && (isInAir || !GetMovementTemplate().IsGroundAllowed()) && !IsFalling())
             {
                 if (GetMovementTemplate().Flight == CreatureFlightMovementType.CanFly)
                     SetCanFly(true);
