@@ -127,7 +127,7 @@ namespace Game.Entities
                 return new ItemRandomEnchantmentId();
 
             // item can have not null only one from field values
-            if (itemProto.GetRandomProperty() == 0 && itemProto.GetRandomSuffix() == 0)
+            if (itemProto.GetRandomProperty() != 0 && itemProto.GetRandomSuffix() != 0)
             {
                 Log.outError(LogFilter.Sql, $"Item template {itemProto.GetId()} have RandomProperty == {itemProto.GetRandomProperty()} and RandomSuffix == {itemProto.GetRandomSuffix()}, but must have one from field =0");
                 return new ItemRandomEnchantmentId();

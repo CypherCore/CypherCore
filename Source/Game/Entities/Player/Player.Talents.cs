@@ -259,7 +259,7 @@ namespace Game.Entities
 
             ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             SetPrimarySpecialization(defaultSpec.Id);
-            SetActiveTalentGroup(defaultSpec.OrderIndex);
+            SetActiveTalentGroup((byte)defaultSpec.OrderIndex);
 
             LearnSpecializationSpells();
 
@@ -374,7 +374,7 @@ namespace Game.Entities
             foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
-            SetActiveTalentGroup(spec.OrderIndex);
+            SetActiveTalentGroup((byte)spec.OrderIndex);
             SetPrimarySpecialization(spec.Id);
 
             foreach (var talentInfo in CliDB.TalentStorage.Values)
@@ -412,7 +412,7 @@ namespace Game.Entities
             {
                 for (uint i = 0; i < PlayerConst.MaxMasterySpells; ++i)
                 {
-                    uint mastery = spec.MasterySpellID[i];
+                    uint mastery = (uint)spec.MasterySpellID[i];
                     if (mastery != 0)
                         LearnSpell(mastery, true);
                 }
@@ -449,11 +449,11 @@ namespace Game.Entities
                     SetVisibleItemSlot(i, equippedItem);
             }
 
-            foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
+            foreach (uint glyphId in GetGlyphs((byte)spec.OrderIndex))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
 
             ActiveGlyphs activeGlyphs = new();
-            foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
+            foreach (uint glyphId in GetGlyphs((byte)spec.OrderIndex))
             {
                 List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
                 foreach (uint bindableSpell in bindableSpells)
@@ -473,7 +473,7 @@ namespace Game.Entities
         }
 
         public Dictionary<uint, PlayerTalent> GetTalentMap(uint spec) { return _specializationInfo.Talents[spec]; }
-        public List<ushort> GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
+        public ushort[] GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
 
         public uint GetNextResetTalentsCost()
         {
@@ -803,11 +803,11 @@ namespace Game.Entities
         void SetQuestRewardTalentCount(uint count) { _specializationInfo.QuestRewardTalentCount = count; }
         byte GetTalentGroupCount() { return _specializationInfo.TalentGroupCount; }
         void SetTalentGroupCount(byte count) { _specializationInfo.TalentGroupCount = count; }
-        uint GetFreeTalentPoints() { return m_activePlayerData.CharacterPoints; }
+        uint GetFreeTalentPoints() { return (uint)m_activePlayerData.CharacterPoints.GetValue(); }
         public void SetFreeTalentPoints(uint points)
         {
             Global.ScriptMgr.OnPlayerFreeTalentPointsChanged(this, points);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), points);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)points);
         }
 
         public uint GetNumTalentsAtLevel(uint level)

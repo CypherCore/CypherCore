@@ -1386,25 +1386,25 @@ namespace Game.Networking.Packets
 
     public struct SpellCastVisual
     {
-        public uint SpellXSpellVisualID;
-        public uint ScriptVisualID;
+        public int SpellXSpellVisualID;
+        public int ScriptVisualID;
 
         public SpellCastVisual(uint spellXSpellVisualID, uint scriptVisualID)
         {
-            SpellXSpellVisualID = spellXSpellVisualID;
-            ScriptVisualID = scriptVisualID;
+            SpellXSpellVisualID = (int)spellXSpellVisualID;
+            ScriptVisualID = (int)scriptVisualID;
         }
 
         public void Read(WorldPacket data)
         {
-            SpellXSpellVisualID = data.ReadUInt32();
-            ScriptVisualID = data.ReadUInt32();
+            SpellXSpellVisualID = data.ReadInt32();
+            ScriptVisualID = data.ReadInt32();
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SpellXSpellVisualID);
-            data.WriteUInt32(ScriptVisualID);
+            data.WriteInt32(SpellXSpellVisualID);
+            data.WriteInt32(ScriptVisualID);
         }
     }
 
@@ -1626,9 +1626,9 @@ namespace Game.Networking.Packets
     public class SpellCastRequest
     {   
         public ObjectGuid CastID;
-        public uint SpellID;
+        public int SpellID;
         public SpellCastVisual Visual;
-        public uint SendCastFlags;
+        public byte SendCastFlags;
         public SpellTargetData Target = new();
         public MissileTrajectoryRequest MissileTrajectory;
         public MovementInfo MoveUpdate;
@@ -1636,14 +1636,15 @@ namespace Game.Networking.Packets
         public Array<SpellOptionalReagent> OptionalReagents = new(3);
         public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
         public ObjectGuid CraftingNPC;
-        public uint[] Misc = new uint[2];
+        public int[] Misc = new int[2];
 
         public void Read(WorldPacket data)
         {
-            CastID = data.ReadPackedGuid();
-            Misc[0] = data.ReadUInt32();
-            Misc[1] = data.ReadUInt32();
-            SpellID = data.ReadUInt32();
+            // TODO: need update paket (crushing)
+            /*CastID = data.ReadPackedGuid();
+            Misc[0] = data.ReadInt32();
+            Misc[1] = data.ReadInt32();
+            SpellID = data.ReadInt32();
 
             Visual.Read(data);
 
@@ -1659,7 +1660,7 @@ namespace Game.Networking.Packets
             for (var i = 0; i < optionalCurrencies; ++i)
                 OptionalCurrencies[i].Read(data);
 
-            SendCastFlags = data.ReadBits<uint>(5);
+            SendCastFlags = (byte)data.ReadBits<uint>(5);
             bool hasMoveUpdate = data.HasBit();
 
             var weightCount = data.ReadBits<uint>(2);
@@ -1676,7 +1677,7 @@ namespace Game.Networking.Packets
                 weight.ID = data.ReadInt32();
                 weight.Quantity = data.ReadUInt32();
                 Weight.Add(weight);
-            }
+            }*/
         }
     }
 

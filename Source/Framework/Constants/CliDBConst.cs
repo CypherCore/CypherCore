@@ -1052,7 +1052,7 @@ namespace Framework.Constants
         InternalOnly = 0x100000,
     }
 
-    public enum ChrSpecializationFlag
+    public enum ChrSpecializationFlag : uint
     {
         Caster = 0x01,
         Ranged = 0x02,

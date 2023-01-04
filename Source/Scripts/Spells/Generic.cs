@@ -1412,7 +1412,7 @@ namespace Scripts.Spells.Generic
                 return;
 
             int damage = 0;
-            SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(caster.m_unitData.CreatedBySpell, GetCastDifficulty());
+            SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo((uint)caster.m_unitData.CreatedBySpell.GetValue(), GetCastDifficulty());
             if (createdBySpell != null)
                 damage = createdBySpell.GetEffect(2).CalcValue();
 

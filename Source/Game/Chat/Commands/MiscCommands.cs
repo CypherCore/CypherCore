@@ -2145,7 +2145,7 @@ namespace Game.Chat
             if (count == 0)
                 count = 1;
 
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
             var bonuses = args.NextString();
             var context = args.NextString();
 
@@ -2155,7 +2155,7 @@ namespace Game.Chat
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
                 {
-                    if (uint.TryParse(tokens[i], out uint id))
+                    if (int.TryParse(tokens[i], out int id))
                         bonusListIDs.Add(id);
                 }
             }
@@ -2261,7 +2261,7 @@ namespace Game.Chat
                 return false;
             }
 
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
             if (!bonuses.IsEmpty())
@@ -2269,7 +2269,7 @@ namespace Game.Chat
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
                 {
-                    if (uint.TryParse(tokens[i], out uint id))
+                    if (int.TryParse(tokens[i], out int id))
                         bonusListIDs.Add(id);
                 }
             }
@@ -2297,7 +2297,7 @@ namespace Game.Chat
                 InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
                 if (msg == InventoryResult.Ok)
                 {
-                    List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
+                    List<int> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
                     if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
                     {
                         var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(template.Value.GetId(), itemContext);
@@ -2389,7 +2389,7 @@ namespace Game.Chat
             if (count == 0)
                 count = 1;
 
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
             string bonuses = tailArgs.NextString();
 
             string context = tailArgs.NextString();
@@ -2410,7 +2410,7 @@ namespace Game.Chat
             {
                 foreach (var token in bonuses.Split(';', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    if (uint.TryParse(token, out uint bonusListId))
+                    if (int.TryParse(token, out int bonusListId))
                         bonusListIDs.Add(bonusListId);
                 }
             }

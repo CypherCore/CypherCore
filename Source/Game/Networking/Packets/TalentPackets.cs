@@ -38,7 +38,7 @@ namespace Game.Networking.Packets
 
         public uint UnspentTalentPoints;
         public byte ActiveGroup;
-        public List<TalentGroupInfo> TalentGroupInfos;        
+        public List<TalentGroupInfo> TalentGroupInfos = new();        
     }
 
     class LearnTalents : ClientPacket
@@ -209,11 +209,11 @@ namespace Game.Networking.Packets
 
         public byte SpecID;
         public List<TalentInfo> TalentInfos;
-        public List<ushort> GlyphInfo;
+        public ushort[] GlyphInfo;
 
         public TalentGroupInfo()
         {
-            GlyphInfo = new List<ushort>(PlayerConst.MaxGlyphSlotIndex);
+            GlyphInfo = new ushort[PlayerConst.MaxGlyphSlotIndex];
             TalentInfos = new();
         }
     }

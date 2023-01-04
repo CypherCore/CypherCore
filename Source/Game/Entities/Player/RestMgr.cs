@@ -17,7 +17,7 @@ namespace Game.Entities
 
         public void SetRestBonus(RestTypes restType, float restBonus)
         {
-            uint next_level_xp;
+            int next_level_xp;
             bool affectedByRaF = false;
 
             switch (restType)

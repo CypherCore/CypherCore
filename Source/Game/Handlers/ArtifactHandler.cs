@@ -75,7 +75,7 @@ namespace Game
                 return;
             if (!artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.NoLinkRequired))
             {
-                var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks(artifactPower.ArtifactPowerId);
+                var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks((uint)artifactPower.ArtifactPowerId);
                 if (artifactPowerLinks != null)
                 {
                     bool hasAnyLink = false;
@@ -101,11 +101,11 @@ namespace Game
                 }
             }
 
-            ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(artifactPower.CurrentRankWithBonus + 1 - 1)); // need data for next rank, but -1 because of how db2 data is structured
+            ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(artifactPower.CurrentRankWithBonus + 1 - 1)); // need data for next rank, but -1 because of how db2 data is structured
             if (artifactPowerRank == null)
                 return;
 
-            artifact.SetArtifactPower(artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank + 1), (byte)(artifactPower.CurrentRankWithBonus + 1));
+            artifact.SetArtifactPower((ushort)artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank + 1), (byte)(artifactPower.CurrentRankWithBonus + 1));
 
             if (artifact.IsEquipped())
             {
@@ -121,7 +121,7 @@ namespace Game
                     if (scaledArtifactPowerRank == null)
                         continue;
 
-                    artifact.SetArtifactPower(power.ArtifactPowerId, power.PurchasedRank, (byte)(power.CurrentRankWithBonus + 1));
+                    artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, (byte)(power.CurrentRankWithBonus + 1));
 
                     _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
                     _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, true);
@@ -235,11 +235,11 @@ namespace Game
                 if (oldPurchasedRank == 0)
                     continue;
 
-                artifact.SetArtifactPower(artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank - oldPurchasedRank), (byte)(artifactPower.CurrentRankWithBonus - oldPurchasedRank));
+                artifact.SetArtifactPower((ushort)artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank - oldPurchasedRank), (byte)(artifactPower.CurrentRankWithBonus - oldPurchasedRank));
 
                 if (artifact.IsEquipped())
                 {
-                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, 0);
+                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, 0);
                     if (artifactPowerRank != null)
                         _player.ApplyArtifactPowerRank(artifact, artifactPowerRank, false);
                 }
@@ -255,7 +255,7 @@ namespace Game
                 if (scaledArtifactPowerRank == null)
                     continue;
 
-                artifact.SetArtifactPower(power.ArtifactPowerId, power.PurchasedRank, 0);
+                artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, 0);
 
                 _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
             }

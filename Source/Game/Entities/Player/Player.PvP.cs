@@ -117,7 +117,7 @@ namespace Game.Entities
                     //  [29..38] Other title and player name
                     //  [39+]    Nothing
                     // this is all wrong, should be going off PvpTitle, not PlayerTitle
-                    uint victim_title = plrVictim.m_playerData.PlayerTitle;
+                    uint victim_title = (uint)plrVictim.m_playerData.PlayerTitle.GetValue();
                     // Get Killer titles, CharTitlesEntry.bit_index
                     // Ranks:
                     //  title[1..14]  . rank[5..18]
@@ -226,7 +226,7 @@ namespace Game.Entities
 
         void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HonorLevel), honorLevel);
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HonorLevel), (int)honorLevel);
             UpdateHonorNextLevel();
 
             AddHonorXP(honor);
@@ -259,8 +259,8 @@ namespace Game.Entities
 
         public void AddHonorXP(uint xp)
         {
-            uint currentHonorXP = m_activePlayerData.Honor;
-            uint nextHonorLevelXP = m_activePlayerData.HonorNextLevel;
+            uint currentHonorXP = (uint)m_activePlayerData.Honor.GetValue();
+            uint nextHonorLevelXP = (uint)m_activePlayerData.HonorNextLevel.GetValue();
             uint newHonorXP = currentHonorXP + xp;
             uint honorLevel = GetHonorLevel();
 
@@ -275,10 +275,10 @@ namespace Game.Entities
                     SetHonorLevel((byte)(honorLevel + 1));
 
                 honorLevel = GetHonorLevel();
-                nextHonorLevelXP = m_activePlayerData.HonorNextLevel;
+                nextHonorLevelXP = (uint)m_activePlayerData.HonorNextLevel.GetValue();
             }
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Honor), IsMaxHonorLevel() ? 0 : (int)newHonorXP);
         }
 
         void SetHonorLevel(byte level)
@@ -298,10 +298,10 @@ namespace Game.Entities
             // 5500 at honor level 1
             // no idea what between here
             // 8800 at honor level ~14 (never goes above 8800)
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HonorNextLevel), 8800u);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HonorNextLevel), 8800);
         }
 
-        public uint GetHonorLevel() { return m_playerData.HonorLevel; }
+        public uint GetHonorLevel() { return (uint)m_playerData.HonorLevel.GetValue(); }
         public bool IsMaxHonorLevel() { return GetHonorLevel() == PlayerConst.MaxHonorLevel; }
 
         public void ActivatePvpItemLevels(bool activate) { _usePvpItemLevels = activate; }

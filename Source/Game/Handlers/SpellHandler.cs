@@ -298,7 +298,7 @@ namespace Game
             if (mover != GetPlayer() && mover.IsTypeId(TypeId.Player))
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "WORLD: unknown spell id {0}", cast.Cast.SpellID);
@@ -386,8 +386,8 @@ namespace Game
             SendPacket(spellPrepare);
 
             spell.m_fromClient = true;
-            spell.m_misc.Data0 = cast.Cast.Misc[0];
-            spell.m_misc.Data1 = cast.Cast.Misc[1];
+            spell.m_misc.Data0 = (uint)cast.Cast.Misc[0];
+            spell.m_misc.Data1 = (uint)cast.Cast.Misc[1];
             spell.Prepare(targets);
         }
 
@@ -548,8 +548,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SelfRes)]
         void HandleSelfRes(SelfRes selfRes)
         {
-            List<uint> selfResSpells = _player.m_activePlayerData.SelfResSpells;
-            if (!selfResSpells.Contains(selfRes.SpellId))
+            List<int> selfResSpells = _player.m_activePlayerData.SelfResSpells;
+            if (!selfResSpells.Contains((int)selfRes.SpellId))
                 return;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());

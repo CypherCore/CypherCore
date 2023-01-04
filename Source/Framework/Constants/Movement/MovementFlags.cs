@@ -20,7 +20,7 @@ using System;
 namespace Framework.Constants
 {
     [Flags]
-    public enum MovementFlag
+    public enum MovementFlag : uint
     {
         None                 = 0x0,
         Forward              = 0x1,
@@ -70,7 +70,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum MovementFlag2
+    public enum MovementFlag2 : uint
     {
         None                                = 0x0,
         NoStrafe                            = 0x1,
@@ -95,7 +95,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum MovementFlags3
+    public enum MovementFlags3 : uint
     {
         None = 0x00,
         DisableInertia = 0x01,

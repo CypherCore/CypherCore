@@ -38,12 +38,12 @@ namespace Game.BlackMarket
             Chance = fields.Read<float>(6);
 
             var bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
             if (!bonusListIDsTok.IsEmpty())
             {
                 foreach (string token in bonusListIDsTok)
                 {
-                    if (uint.TryParse(token, out uint id))
+                    if (int.TryParse(token, out int id))
                         bonusListIDs.Add(id);
                 }
             }

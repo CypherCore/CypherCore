@@ -319,7 +319,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Title:
                     if (player != null)
-                        condMeets = player.HasTitle(ConditionValue1);
+                        condMeets = player.HasTitle((int)ConditionValue1);
                     break;
                 case ConditionTypes.UnitState:
                     if (unit != null)

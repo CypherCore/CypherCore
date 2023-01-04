@@ -642,7 +642,7 @@ namespace Game.Chat
                     {
                         foreach (string token in bonusListIDsTok)
                         {
-                            if (uint.TryParse(token, out uint id))
+                            if (int.TryParse(token, out int id))
                                 vItem.BonusListIDs.Add(id);
                         }
                     }

@@ -1764,7 +1764,7 @@ namespace Game.Entities
             if (slot >= SharedConst.MaxEquipmentItems)
                 return 0;
 
-            return m_unitData.VirtualItems[slot].ItemID;
+            return (uint)m_unitData.VirtualItems[slot].ItemID.GetValue();
         }
 
         public ushort GetVirtualItemAppearanceMod(uint slot)
@@ -1781,7 +1781,7 @@ namespace Game.Entities
                 return;
 
             var virtualItemField = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VirtualItems, (int)slot);
-            SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemID), itemId);
+            SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemID), (int)itemId);
             SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemAppearanceModID), appearanceModId);
             SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemVisual), itemVisual);
         }
@@ -1789,7 +1789,7 @@ namespace Game.Entities
         //Unit
         public void SetLevel(uint lvl, bool sendUpdate = true)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), (int)lvl);
 
             if (!sendUpdate)
                 return;
@@ -1803,7 +1803,7 @@ namespace Game.Entities
                 Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
             }
         }
-        public uint GetLevel() { return m_unitData.Level; }
+        public uint GetLevel() { return (uint)m_unitData.Level.GetValue(); }
         public override uint GetLevelForTarget(WorldObject target) { return GetLevel(); }
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
@@ -1827,11 +1827,11 @@ namespace Game.Entities
 
         public virtual float GetNativeObjectScale() { return 1.0f; }
         
-        public uint GetDisplayId() { return m_unitData.DisplayID; }
+        public uint GetDisplayId() { return (uint)m_unitData.DisplayID.GetValue(); }
 
         public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), modelId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), (int)modelId);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayScale), displayScale);
             // Set Gender by modelId
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
@@ -1900,10 +1900,10 @@ namespace Game.Entities
             // no auras found - set modelid to default
             SetDisplayId(GetNativeDisplayId());
         }
-        public uint GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
+        public uint GetNativeDisplayId() { return (uint)m_unitData.NativeDisplayID.GetValue(); }
         public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), displayId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), (int)displayId);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
         }
         public float GetNativeDisplayScale() { return m_unitData.NativeXDisplayScale; }
@@ -1912,8 +1912,8 @@ namespace Game.Entities
         {
             return HasUnitFlag(UnitFlags.Mount);
         }
-        public uint GetMountDisplayId() { return m_unitData.MountDisplayID; }
-        public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
+        public uint GetMountDisplayId() { return (uint)m_unitData.MountDisplayID.GetValue(); }
+        public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), (int)mountDisplayId); }
 
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
@@ -1986,8 +1986,8 @@ namespace Game.Entities
 
         public uint GetBattlePetCompanionNameTimestamp() { return m_unitData.BattlePetCompanionNameTimestamp; }
         public void SetBattlePetCompanionNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), timestamp); }
-        public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
-        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
+        public uint GetWildBattlePetLevel() { return (uint)m_unitData.WildBattlePetLevel.GetValue(); }
+        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), (int)wildBattlePetLevel); }
 
         public bool HasUnitFlag(UnitFlags flags) { return (m_unitData.Flags & (uint)flags) != 0; }
         public void SetUnitFlag(UnitFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
@@ -2008,7 +2008,7 @@ namespace Game.Entities
         public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
         public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
-        public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
+        public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), (int)spellId); }
 
         public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
@@ -2113,8 +2113,8 @@ namespace Game.Entities
             return false;
         }
 
-        public override uint GetFaction() { return m_unitData.FactionTemplate; }
-        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+        public override uint GetFaction() { return (uint)m_unitData.FactionTemplate.GetValue(); }
+        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), (int)faction); }
 
         public void RestoreFaction()
         {
@@ -2236,16 +2236,16 @@ namespace Game.Entities
             }
         }
 
-        public uint GetChannelSpellId() { return ((UnitChannel)m_unitData.ChannelData).SpellID; }
+        public uint GetChannelSpellId() { return (uint)((UnitChannel)m_unitData.ChannelData).SpellID; }
         public void SetChannelSpellId(uint channelSpellId)
         {
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, (int)channelSpellId);
         }
-        public uint GetChannelSpellXSpellVisualId() { return m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
+        public uint GetChannelSpellXSpellVisualId() { return (uint)m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
         public void SetChannelSpellXSpellVisual(uint spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
-            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, spellXSpellVisualId);
+            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, (int)spellXSpellVisualId);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }

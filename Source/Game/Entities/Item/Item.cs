@@ -189,7 +189,7 @@ namespace Game.Entities
 
                     ss.Clear();
 
-                    foreach (int bonusListID in (List<uint>)m_itemData.BonusListIDs)
+                    foreach (int bonusListID in (List<int>)m_itemData.BonusListIDs)
                         ss.Append($"{bonusListID} ");
 
                     stmt.AddValue(++index, ss.ToString());
@@ -220,7 +220,7 @@ namespace Game.Entities
                         {
                             if (gemData.ItemId != 0)
                             {
-                                stmt.AddValue(1 + i * gemFields, (uint)gemData.ItemId);
+                                stmt.AddValue(1 + i * gemFields, (int)gemData.ItemId);
                                 StringBuilder gemBonusListIDs = new();
                                 foreach (ushort bonusListID in gemData.BonusListIDs)
                                 {
@@ -469,10 +469,10 @@ namespace Game.Entities
             SetContext((ItemContext)fields.Read<byte>(18));
 
             var bonusListString = new StringArray(fields.Read<string>(19), ' ');
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
             for (var i = 0; i < bonusListString.Length; ++i)
             {
-                if (uint.TryParse(bonusListString[i], out uint bonusListID))
+                if (int.TryParse(bonusListString[i], out int bonusListID))
                     bonusListIDs.Add(bonusListID);
             }
             SetBonuses(bonusListIDs);
@@ -538,7 +538,7 @@ namespace Game.Entities
                 for (int i = 0; i < (int)EnchantmentSlot.Max; ++i)
                 {
                     ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, i);
-                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), uint.Parse(enchantmentTokens[i * 3 + 0]));
+                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), int.Parse(enchantmentTokens[i * 3 + 0]));
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * 3 + 1]));
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * 3 + 2]));
                 }
@@ -1085,7 +1085,7 @@ namespace Game.Entities
             ApplyArtifactPowerEnchantmentBonuses(slot, id, true, owner);
 
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), id);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), (int)id);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), duration);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)charges);
             SetState(ItemUpdateState.Changed, owner);
@@ -1118,7 +1118,7 @@ namespace Game.Entities
                 return;
 
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0u);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), 0u);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)0);
             SetState(ItemUpdateState.Changed, GetOwner());
@@ -1196,7 +1196,7 @@ namespace Game.Entities
             }
 
             SocketedGem gemField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Gems, slot);
-            SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), gem.ItemId);
+            SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), (int)gem.ItemId);
             SetUpdateFieldValue(gemField.ModifyValue(gemField.Context), gem.Context);
             for (int i = 0; i < 16; ++i)
                 SetUpdateFieldValue(ref gemField.ModifyValue(gemField.BonusListIDs, i), gem.BonusListIDs[i]);
@@ -1213,7 +1213,7 @@ namespace Game.Entities
 
                 SocketColor GemColor = 0;
 
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
+                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
                 if (gemProto != null)
                 {
                     GemPropertiesRecord gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
@@ -1238,7 +1238,7 @@ namespace Game.Entities
             var list = (List<SocketedGem>)m_itemData.Gems;
             return (byte)list.Count(gemData =>
             {
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
+                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
                 if (gemProto == null)
                     return false;
 
@@ -1890,9 +1890,9 @@ namespace Game.Entities
         public uint GetItemLevel(Player owner)
         {
             ItemTemplate itemTemplate = GetTemplate();
-            uint minItemLevel = owner.m_unitData.MinItemLevel;
-            uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
-            uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
+            uint minItemLevel = (uint)owner.m_unitData.MinItemLevel.GetValue();
+            uint minItemLevelCutoff = (uint)owner.m_unitData.MinItemLevelCutoff.GetValue();
+            uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : (uint)owner.m_unitData.MaxItemLevel.GetValue();
             bool pvpBonus = owner.IsUsingPvpItemLevels();
             
             return GetItemLevel(itemTemplate, _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
@@ -2044,7 +2044,7 @@ namespace Game.Entities
             });
 
             if (modifierIndex != -1)
-                return m_itemData.Modifiers._value.Values[modifierIndex].Value;
+                return (uint)m_itemData.Modifiers._value.Values[modifierIndex].Value;
 
             return 0;
         }
@@ -2061,7 +2061,7 @@ namespace Game.Entities
                 if (modifierIndex == -1)
                 {
                     ItemMod mod = new();
-                    mod.Value = value;
+                    mod.Value = (int)value;
                     mod.Type = (byte)modifier;
 
                     AddDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers)._value.ModifyValue(m_itemData.Modifiers._value.Values), mod);
@@ -2070,7 +2070,7 @@ namespace Game.Entities
                 {
                     ItemModList itemModList = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers);
                     itemModList.ModifyValue(itemModList.Values, modifierIndex);
-                    SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, value);
+                    SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, (int)value);
                 }
             }
             else
@@ -2140,14 +2140,14 @@ namespace Game.Entities
 
         public void AddBonuses(uint bonusListID)
         {
-            var bonusListIDs = (List<uint>)m_itemData.BonusListIDs;
-            if (bonusListIDs.Contains(bonusListID))
+            var bonusListIDs = (List<int>)m_itemData.BonusListIDs;
+            if (bonusListIDs.Contains((int)bonusListID))
                 return;
 
             var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListID);
             if (bonuses != null)
             {
-                bonusListIDs.Add(bonusListID);
+                bonusListIDs.Add((int)bonusListID);
                 SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
                 foreach (ItemBonusRecord bonus in bonuses)
                     _bonusData.AddBonus(bonus.BonusType, bonus.Value);
@@ -2156,14 +2156,14 @@ namespace Game.Entities
             }
         }
 
-        public void SetBonuses(List<uint> bonusListIDs)
+        public void SetBonuses(List<int> bonusListIDs)
         {
             if (bonusListIDs == null)
-                bonusListIDs = new List<uint>();
+                bonusListIDs = new List<int>();
 
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
 
-            foreach (uint bonusListID in (List<uint>)m_itemData.BonusListIDs)
+            foreach (uint bonusListID in (List<int>)m_itemData.BonusListIDs)
                 _bonusData.AddBonusList(bonusListID);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
@@ -2171,7 +2171,7 @@ namespace Game.Entities
 
         public void ClearBonuses()
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), new List<uint>());
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), new List<int>());
             _bonusData = new BonusData(GetTemplate());
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
@@ -2200,7 +2200,7 @@ namespace Game.Entities
             m_artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
 
             ArtifactPower powerField = new();
-            powerField.ArtifactPowerId = (ushort)artifactPower.ArtifactPowerId;
+            powerField.ArtifactPowerId = (short)artifactPower.ArtifactPowerId;
             powerField.PurchasedRank = artifactPower.PurchasedRank;
             powerField.CurrentRankWithBonus = artifactPower.CurrentRankWithBonus;
 
@@ -2296,7 +2296,7 @@ namespace Game.Entities
 
                                     if (IsEquipped())
                                     {
-                                        ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+                                        ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
                                         if (artifactPowerRank != null)
                                             owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
                                     }
@@ -2320,7 +2320,7 @@ namespace Game.Entities
 
                                 if (IsEquipped())
                                 {
-                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(m_itemData.ArtifactPowers[artifactPowerIndex].ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)m_itemData.ArtifactPowers[artifactPowerIndex].ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
                                     if (artifactPowerRank != null)
                                         owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
                                 }
@@ -2352,7 +2352,7 @@ namespace Game.Entities
 
                                                 if (IsEquipped())
                                                 {
-                                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+                                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
                                                     if (artifactPowerRank != null)
                                                         owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
                                                 }
@@ -2417,7 +2417,7 @@ namespace Game.Entities
         public void SetPetitionId(uint petitionId)
         {
             ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
-            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), petitionId);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), (int)petitionId);
         }
         public void SetPetitionNumSignatures(uint signatures)
         {
@@ -2666,7 +2666,7 @@ namespace Game.Entities
         public int GetItemRandomPropertyId() { return m_itemData.RandomPropertiesID; }
         public uint GetItemSuffixFactor() { return (uint)(int)m_itemData.PropertySeed; }       
         public ItemRandomEnchantmentId GetItemRandomEnchantmentId() { return m_randomEnchantment; }
-        public uint GetEnchantmentId(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].ID; }
+        public uint GetEnchantmentId(EnchantmentSlot slot) { return (uint)m_itemData.Enchantment[(int)slot].ID.GetValue(); }
         public uint GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
         public int GetEnchantmentCharges(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Charges; }
 

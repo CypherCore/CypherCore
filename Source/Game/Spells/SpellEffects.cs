@@ -917,7 +917,7 @@ namespace Game.Spells
             }
         }
 
-        public void DoCreateItem(uint itemId, ItemContext context = 0, List<uint> bonusListIds = null)
+        public void DoCreateItem(uint itemId, ItemContext context = 0, List<int> bonusListIds = null)
         {
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
@@ -3977,8 +3977,8 @@ namespace Game.Spells
                 Creature totem = unitCaster.GetMap().GetCreature(unitCaster.m_SummonSlot[slot]);
                 if (totem != null && totem.IsTotem())
                 {
-                    uint spell_id = totem.m_unitData.CreatedBySpell;
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
+                    int spell_id = totem.m_unitData.CreatedBySpell;
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spell_id, GetCastDifficulty());
                     if (spellInfo != null)
                     {
                         var costs = spellInfo.CalcPowerCost(unitCaster, spellInfo.GetSchoolMask());
@@ -4649,7 +4649,7 @@ namespace Game.Spells
                     if (weapon.ItemID != 0)
                     {
                         summon.SetDisplayId(11686);
-                        summon.SetVirtualItem(0, weapon.ItemID, weapon.ItemAppearanceModID, weapon.ItemVisual);
+                        summon.SetVirtualItem(0, (uint)weapon.ItemID.GetValue(), weapon.ItemAppearanceModID, weapon.ItemVisual);
                     }
                     else
                         summon.SetDisplayId(1126);
@@ -5124,8 +5124,8 @@ namespace Game.Spells
             if (collectionMgr == null)
                 return;
 
-            List<uint> bonusList = new();
-            bonusList.Add(collectionMgr.GetHeirloomBonus(m_misc.Data0));
+            List<int> bonusList = new();
+            bonusList.Add((int)collectionMgr.GetHeirloomBonus(m_misc.Data0));
 
             DoCreateItem(m_misc.Data0, ItemContext.None, bonusList);
             ExecuteLogEffectCreateItem(effectInfo.Effect, m_misc.Data0);

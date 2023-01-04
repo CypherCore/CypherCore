@@ -862,7 +862,7 @@ namespace Game.Entities
                     if (quest == null)
                         continue;
 
-                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), (int)quest_id);
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
@@ -1089,11 +1089,11 @@ namespace Game.Entities
                 uint fixedScalingLevel = result.Read<uint>(7);
                 uint artifactKnowledgeLevel = result.Read<uint>(8);
                 ItemContext context = (ItemContext)result.Read<byte>(9);
-                List<uint> bonusListIDs = new();
+                List<int> bonusListIDs = new();
                 var bonusListIdTokens = new StringArray(result.Read<string>(10), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
                 {
-                    if (uint.TryParse(bonusListIdTokens[i], out uint id))
+                    if (int.TryParse(bonusListIdTokens[i], out int id))
                         bonusListIDs.Add(id);
                 }
 
@@ -1771,6 +1771,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveGlyphs(SQLTransaction trans)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GLYPHS);
@@ -1779,19 +1780,18 @@ namespace Game.Entities
 
             for (byte spec = 0; spec < PlayerConst.MaxTalentSpecs; ++spec)
             {
-                
-                    byte index = 0;
+                byte index = 0;
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GLYPHS);
-                    stmt.AddValue(index++, GetGUID().GetCounter());
-                    stmt.AddValue(index++, spec);
-                    foreach (var glyphId in GetGlyphs(spec))
-                        stmt.AddValue(index++, glyphId);
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GLYPHS);
+                stmt.AddValue(index++, GetGUID().GetCounter());
+                stmt.AddValue(index++, spec);
+                foreach (var glyphId in GetGlyphs(spec))
+                    stmt.AddValue(index++, glyphId);
 
-                    trans.Append(stmt);
-                
+                trans.Append(stmt);
             }
         }
+
         void _SaveCurrency(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -3104,7 +3104,7 @@ namespace Game.Entities
 
             // check PLAYER_CHOSEN_TITLE compatibility with PLAYER__FIELD_KNOWN_TITLES
             // note: PLAYER__FIELD_KNOWN_TITLES updated at quest status loaded
-            if (chosenTitle != 0 && !HasTitle(chosenTitle))
+            if (chosenTitle != 0 && !HasTitle((int)chosenTitle))
                 chosenTitle = 0;
 
             SetChosenTitle(chosenTitle);
@@ -3136,9 +3136,9 @@ namespace Game.Entities
             {
                 if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
                 {
-                    uint savedPower = powers[loadedPowers];
-                    uint maxPower = m_unitData.MaxPower[loadedPowers];
-                    SetPower(i, (int)(savedPower > maxPower ? maxPower : savedPower));
+                    int savedPower = (int)powers[loadedPowers];
+                    int maxPower = m_unitData.MaxPower[loadedPowers];
+                    SetPower(i, (savedPower > maxPower ? maxPower : savedPower));
                     if (++loadedPowers >= (int)PowerType.MaxPerClass)
                         break;
                 }
@@ -3315,7 +3315,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
-                stmt.AddValue(index++, GetLevel());
+                stmt.AddValue(index++, (byte)GetLevel());
                 stmt.AddValue(index++, GetXP());
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());

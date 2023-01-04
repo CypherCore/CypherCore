@@ -452,7 +452,7 @@ namespace Game.Entities
         public uint incrtime;                                        // time for restore items amount if maxcount != 0
         public uint ExtendedCost;
         public ItemVendorType Type;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
         public uint PlayerConditionId;
         public bool IgnoreFiltering;
 

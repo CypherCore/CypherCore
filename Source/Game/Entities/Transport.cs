@@ -777,7 +777,7 @@ namespace Game.Entities
         public ObjectGuid GetTransportGUID() { return GetGUID(); }
         public float GetTransportOrientation() { return GetOrientation(); }
 
-        public uint GetTransportPeriod() { return m_gameObjectData.Level; }
+        public uint GetTransportPeriod() { return (uint)m_gameObjectData.Level.GetValue(); }
         public void SetPeriod(uint period) { SetLevel(period); }
         public uint GetTimer() { return _pathProgress; }
 

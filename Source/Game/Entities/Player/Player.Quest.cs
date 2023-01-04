@@ -1652,7 +1652,7 @@ namespace Game.Entities
                 return true;
             }
 
-            return m_activePlayerData.DailyQuestsCompleted.FindIndex(qInfo.Id) == -1;
+            return m_activePlayerData.DailyQuestsCompleted.FindIndex((int)qInfo.Id) == -1;
         }
 
         public bool SatisfyQuestWeek(Quest qInfo, bool msg)
@@ -2094,7 +2094,7 @@ namespace Game.Entities
 
         public uint GetQuestSlotQuestId(ushort slot)
         {
-            return m_playerData.QuestLog[slot].QuestID;
+            return (uint)m_playerData.QuestLog[slot].QuestID.GetValue();
         }
 
         public uint GetQuestSlotState(ushort slot, byte counter)
@@ -2143,7 +2143,7 @@ namespace Game.Entities
         public void SetQuestSlot(ushort slot, uint quest_id)
         {
             var questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
+            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), (int)quest_id);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.AcceptTime), 0u);
@@ -2995,7 +2995,7 @@ namespace Game.Entities
             {
                 if (!qQuest.IsDFQuest())
                 {
-                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), (int)quest_id);
                     m_lastDailyQuestTime = GameTime.GetGameTime();              // last daily quest time
                     m_DailyQuestChanged = true;
 
@@ -3011,7 +3011,7 @@ namespace Game.Entities
 
         public bool IsDailyQuestDone(uint quest_id)
         {
-            return m_activePlayerData.DailyQuestsCompleted.FindIndex(quest_id) >= 0;
+            return m_activePlayerData.DailyQuestsCompleted.FindIndex((int)quest_id) >= 0;
         }
 
         void SetWeeklyQuestStatus(uint quest_id)

@@ -366,13 +366,13 @@ namespace Game.Entities
             {
                 Talents[i] = new Dictionary<uint, PlayerTalent>();
                 PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
-                Glyphs[i] = new List<ushort>();
+                Glyphs[i] = new ushort[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
         public Dictionary<uint, PlayerTalent>[] Talents = new Dictionary<uint, PlayerTalent>[PlayerConst.MaxSpecializations];
         public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
-        public List<ushort>[] Glyphs = new List<ushort>[PlayerConst.MaxSpecializations];
+        public ushort[][] Glyphs = new ushort[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
         public uint UsedTalentCount;
@@ -495,7 +495,7 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint itemSuffixFactor, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<uint> bonuses)
+        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint itemSuffixFactor, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
@@ -518,7 +518,7 @@ namespace Game.Entities
         public uint FixedScalingLevel;
         public uint ArtifactKnowledgeLevel;
         public ItemContext Context;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
     }
 
     public class EquipmentSetInfo

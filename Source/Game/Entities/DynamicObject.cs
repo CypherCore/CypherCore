@@ -99,8 +99,8 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Caster), caster.GetGUID());
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Type), (byte)type);            
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellXSpellVisualID), spellVisual.SpellXSpellVisualID);
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellID), spell.Id);
+            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellXSpellVisualID), (int)spellVisual.SpellXSpellVisualID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellID), (int)spell.Id);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Radius), radius);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
@@ -313,7 +313,7 @@ namespace Game.Entities
         }
 
         public Unit GetCaster() { return _caster; }
-        public uint GetSpellId() { return m_dynamicObjectData.SpellID; }
+        public uint GetSpellId() { return (uint)m_dynamicObjectData.SpellID.GetValue(); }
         public ObjectGuid GetCasterGUID() { return m_dynamicObjectData.Caster; }
         public override ObjectGuid GetOwnerGUID() { return GetCasterGUID(); }
         public float GetRadius() { return m_dynamicObjectData.Radius; }

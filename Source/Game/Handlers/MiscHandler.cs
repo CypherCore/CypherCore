@@ -568,7 +568,7 @@ namespace Game
             // -1 at none
             if (packet.TitleID > 0)
             {
-                if (!GetPlayer().HasTitle((uint)packet.TitleID))
+                if (!GetPlayer().HasTitle(packet.TitleID))
                     return;
             }
             else

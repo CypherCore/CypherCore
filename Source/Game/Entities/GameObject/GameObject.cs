@@ -3003,7 +3003,7 @@ namespace Game.Entities
         
         public void SetDisplayId(uint displayid)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), displayid);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), (int)displayid);
             UpdateModel();
         }
 
@@ -3561,7 +3561,7 @@ namespace Game.Entities
         public void SetFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
-        public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
+        public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), (int)level); }
 
         public GameObjectDynamicLowFlags GetDynamicFlags() { return (GameObjectDynamicLowFlags)(uint)m_objectData.DynamicFlags; }
         public bool HasDynamicFlag(GameObjectDynamicLowFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
@@ -3642,10 +3642,10 @@ namespace Game.Entities
 
         public T GetAI<T>() where T : GameObjectAI { return (T)m_AI; }
 
-        public uint GetDisplayId() { return m_gameObjectData.DisplayID; }
+        public uint GetDisplayId() { return (uint)m_gameObjectData.DisplayID.GetValue(); }
 
-        public override uint GetFaction() { return m_gameObjectData.FactionTemplate; }
-        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
+        public override uint GetFaction() { return (uint)m_gameObjectData.FactionTemplate.GetValue(); }
+        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), (int)faction); }
 
         public override float GetStationaryX() { return StationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }

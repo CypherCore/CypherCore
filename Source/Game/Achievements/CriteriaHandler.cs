@@ -1458,7 +1458,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.HasTitle: // 38
-                    if (!referencePlayer.HasTitle(reqValue))
+                    if (!referencePlayer.HasTitle((int)reqValue))
                         return false;
                     break;
                 case ModifierTreeType.PlayerLevelEqual: // 39
@@ -2356,7 +2356,7 @@ namespace Game.Achievements
 
                     bool bagScanReachedEnd = referencePlayer.ForEachItem(ItemSearchLocation.Everywhere, item =>
                     {
-                        bool hasBonus = item.m_itemData.BonusListIDs._value.Any(bonusListID => bonusListIDs.Contains(bonusListID));
+                        bool hasBonus = item.m_itemData.BonusListIDs._value.Any(bonusListID => bonusListIDs.Contains((uint)bonusListID));
                         return !hasBonus;
                     });
 
@@ -2426,14 +2426,14 @@ namespace Game.Achievements
                 {
                     var visibleItem = referencePlayer.m_playerData.VisibleItems[EquipmentSlot.MainHand];
                     uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
-                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(visibleItem.ItemID);
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)visibleItem.ItemID.GetValue());
                     if (itemTemplate != null)
                     {
                         if (itemTemplate.GetClass() == ItemClass.Weapon)
                         {
                             itemSubclass = itemTemplate.GetSubClass();
 
-                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(visibleItem.ItemID, visibleItem.ItemAppearanceModID);
+                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance((uint)visibleItem.ItemID.GetValue(), visibleItem.ItemAppearanceModID);
                             if (itemModifiedAppearance != null)
                             {
                                 var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);
@@ -2451,14 +2451,14 @@ namespace Game.Achievements
                 {
                     var visibleItem = referencePlayer.m_playerData.VisibleItems[EquipmentSlot.OffHand];
                     uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
-                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(visibleItem.ItemID);
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)visibleItem.ItemID.GetValue());
                     if (itemTemplate != null)
                     {
                         if (itemTemplate.GetClass() == ItemClass.Weapon)
                         {
                             itemSubclass = itemTemplate.GetSubClass();
 
-                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(visibleItem.ItemID, visibleItem.ItemAppearanceModID);
+                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance((uint)visibleItem.ItemID.GetValue(), visibleItem.ItemAppearanceModID);
                             if (itemModifiedAppearance != null)
                             {
                                 var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);

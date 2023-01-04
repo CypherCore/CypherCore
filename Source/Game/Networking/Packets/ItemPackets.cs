@@ -687,10 +687,10 @@ namespace Game.Networking.Packets
             Context = (ItemContext)data.ReadUInt8();
             uint bonusListIdSize = data.ReadUInt32();
 
-            BonusListIDs = new List<uint>();
+            BonusListIDs = new List<int>();
             for (uint i = 0u; i < bonusListIdSize; ++i)
             {
-                uint bonusId = data.ReadUInt32();
+                int bonusId = (int)data.ReadUInt32();
                 BonusListIDs.Add(bonusId);
             }
         }
@@ -731,7 +731,7 @@ namespace Game.Networking.Packets
         }
 
         public ItemContext Context;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
     }
 
     public class ItemMod
@@ -854,7 +854,7 @@ namespace Game.Networking.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            List<uint> bonusListIds = item.m_itemData.BonusListIDs;
+            List<int> bonusListIds = item.m_itemData.BonusListIDs;
             if (!bonusListIds.Empty())
             {
                 ItemBonus = new();
@@ -865,7 +865,7 @@ namespace Game.Networking.Packets
             }
 
             foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
-                Modifications.Values.Add(new ItemMod(mod.Value, (ItemModifier)mod.Type));
+                Modifications.Values.Add(new ItemMod((uint)mod.Value, (ItemModifier)mod.Type));
         }
 
         public ItemInstance(Loots.LootItem lootItem)
@@ -908,7 +908,7 @@ namespace Game.Networking.Packets
 
         public ItemInstance(SocketedGem gem)
         {
-            ItemID = gem.ItemId;
+            ItemID = (uint)gem.ItemId.GetValue();
 
             ItemBonuses bonus = new();
             bonus.Context = (ItemContext)(byte)gem.Context;

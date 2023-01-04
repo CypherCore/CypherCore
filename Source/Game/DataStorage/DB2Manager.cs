@@ -1038,7 +1038,15 @@ namespace Game.DataStorage
 
         public ChrSpecializationRecord GetChrSpecializationByIndex(Class class_, uint index)
         {
-            return _chrSpecializationsByIndex[(int)class_][index];
+            var classSet = _chrSpecializationsByIndex.LookupByIndex((int)class_);
+            if (classSet != null)
+            {
+                var specialization = classSet.LookupByIndex((int)index);
+                if (specialization != null)
+                    return specialization;               
+            }
+
+            return new ChrSpecializationRecord();
         }
 
         public ChrSpecializationRecord GetDefaultChrSpecializationForClass(Class class_)
@@ -1391,9 +1399,9 @@ namespace Game.DataStorage
             }
         }
 
-        public List<uint> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
+        public List<int> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
         {
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
 
             ItemSparseRecord proto = ItemSparseStorage.LookupByKey(itemId);
             if (proto == null)
@@ -1439,7 +1447,7 @@ namespace Game.DataStorage
 
                 uint bonus = GetItemBonusListForItemLevelDelta(delta);
                 if (bonus != 0)
-                    bonusListIDs.Add(bonus);
+                    bonusListIDs.Add((int)bonus);
 
                 ItemLevelSelectorQualitySetRecord selectorQualitySet = ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
                 if (selectorQualitySet != null)
@@ -1456,7 +1464,7 @@ namespace Game.DataStorage
                         var itemSelectorQuality = itemSelectorQualities.Find(p => p.Quality < (sbyte)quality);
 
                         if (itemSelectorQuality != null)
-                            bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
+                            bonusListIDs.Add((int)itemSelectorQuality.QualityItemBonusListID);
                     }
                 }
             }

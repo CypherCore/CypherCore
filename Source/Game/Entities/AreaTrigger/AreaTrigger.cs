@@ -122,9 +122,9 @@ namespace Game.Entities
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Caster), caster.GetGUID());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.CreatingEffectGUID), castId);
 
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spell.Id);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spell.Id);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellXSpellVisualID), spellVisual.SpellXSpellVisualID);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), (int)spell.Id);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), (int)spell.Id);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellXSpellVisualID), (int)spellVisual.SpellXSpellVisualID);
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
@@ -153,7 +153,7 @@ namespace Game.Entities
             }
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
-            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), GetCreateProperties().AnimId);
+            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), (uint)GetCreateProperties().AnimId);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimKitID), GetCreateProperties().AnimKitId);
             if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.Unk3))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.Field_C), true);
@@ -1052,7 +1052,7 @@ namespace Game.Entities
         }
 
         public bool IsRemoved() { return _isRemoved; }
-        public uint GetSpellId() { return m_areaTriggerData.SpellID; }
+        public uint GetSpellId() { return (uint)m_areaTriggerData.SpellID.GetValue(); }
         public AuraEffect GetAuraEffect() { return _aurEff; }
         public uint GetTimeSinceCreated() { return _timeSinceCreated; }
         public uint GetTimeToTarget() { return m_areaTriggerData.TimeToTarget; }

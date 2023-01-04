@@ -271,8 +271,8 @@ namespace Game.Entities
                 item.AddBonuses(bonusId);
 
             // Get heirloom offset to update only one part of dynamic field
-            List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
-            int offset = heirlooms.IndexOf(itemId);
+            List<int> heirlooms = player.m_activePlayerData.Heirlooms;
+            int offset = heirlooms.IndexOf((int)itemId);
 
             player.SetHeirloomFlags(offset, (uint)flags);
             data.flags = flags;
@@ -314,8 +314,8 @@ namespace Game.Entities
 
                 if (newItemId != 0)
                 {
-                    List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
-                    int offset = heirlooms.IndexOf(item.GetEntry());
+                    List<int> heirlooms = player.m_activePlayerData.Heirlooms;
+                    int offset = heirlooms.IndexOf((int)item.GetEntry());
 
                     player.SetHeirloom(offset, newItemId);
                     player.SetHeirloomFlags(offset, 0);
@@ -326,7 +326,7 @@ namespace Game.Entities
                     return;
                 }
 
-                List<uint> bonusListIDs = item.m_itemData.BonusListIDs;
+                List<int> bonusListIDs = item.m_itemData.BonusListIDs;
                 foreach (uint bonusId in bonusListIDs)
                 {
                     if (bonusId != data.bonusId)
@@ -336,7 +336,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!bonusListIDs.Contains(data.bonusId))
+                if (!bonusListIDs.Contains((int)data.bonusId))
                     item.AddBonuses(data.bonusId);
             }
         }

@@ -2965,8 +2965,8 @@ namespace Game.Entities
         public void SetName(string name) { _name = name; }
 
         public ObjectGuid GetGUID() { return m_guid; }
-        public uint GetEntry() { return m_objectData.EntryId; }
-        public void SetEntry(uint entry) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.EntryId), entry); }
+        public uint GetEntry() { return (uint)m_objectData.EntryId.GetValue(); }
+        public void SetEntry(uint entry) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.EntryId), (int)entry); }
 
         public float GetObjectScale() { return m_objectData.Scale; }
         public virtual void SetObjectScale(float scale) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.Scale), scale); }

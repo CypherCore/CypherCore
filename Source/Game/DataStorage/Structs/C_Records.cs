@@ -278,19 +278,19 @@ namespace Game.DataStorage
 
     public sealed class ChrSpecializationRecord
     {
-        public string Name;
-        public string FemaleName;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString FemaleName;
+        public LocalizedString Description;
         public uint Id;
         public byte ClassID;
-        public byte OrderIndex;
+        public sbyte OrderIndex;
         public sbyte PetTalentType;
         public sbyte Role;
         public ChrSpecializationFlag Flags;
         public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
         public int AnimReplacements;
-        public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
+        public int[] MasterySpellID = new int[PlayerConst.MaxMasterySpells];
 
         public bool IsPetSpecialization()
         {

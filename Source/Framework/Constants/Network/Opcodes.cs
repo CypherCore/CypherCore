@@ -711,8 +711,10 @@ namespace Framework.Constants
         WorldPortResponse = 0x35fa,
         WrapItem = 0x3994,
 
+        /// <summary>May be "addon option"</summary>        
         Unknown_3743 = 0x3743,
-               
+        Unknown_3197 = 0x3197,
+
 
         Max = 0x3FFF,
         Unknown = 0xbadd,

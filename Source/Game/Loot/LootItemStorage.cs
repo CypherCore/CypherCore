@@ -64,8 +64,8 @@ namespace Game.Loots
                     lootItem.context = (ItemContext)result.Read<byte>(13);
                     StringArray bonusLists = new(result.Read<string>(14), ' ');
 
-                    foreach (string str in bonusLists)
-                        lootItem.BonusListIDs.Add(uint.Parse(str));
+                    foreach (int str in bonusLists)
+                        lootItem.BonusListIDs.Add(str);
 
                     storedContainer.AddLootItem(lootItem, null);
 
@@ -358,6 +358,6 @@ namespace Game.Loots
         public uint RandomSuffix;
         public ItemRandomEnchantmentId RandomPropertyId;
         public ItemContext Context;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
     }
 }

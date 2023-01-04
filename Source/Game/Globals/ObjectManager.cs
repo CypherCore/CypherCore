@@ -3457,10 +3457,9 @@ namespace Game
                     var bonusListIDsTok = new StringArray(result.Read<string>(6), ' ');
                     if (!bonusListIDsTok.IsEmpty())
                     {
-                        foreach (string token in bonusListIDsTok)
+                        foreach (int token in bonusListIDsTok)
                         {
-                            if (uint.TryParse(token, out uint id))
-                                vItem.BonusListIDs.Add(id);
+                            vItem.BonusListIDs.Add(token);
                         }
                     }
 
@@ -3509,10 +3508,11 @@ namespace Game
                     var bonusListIDsTok = new StringArray(result.Read<string>(5), ' ');
                     if (!bonusListIDsTok.IsEmpty())
                     {
-                        foreach (string token in bonusListIDsTok)
+                        foreach (int token in bonusListIDsTok)
                         {
-                            if (uint.TryParse(token, out uint id))
-                                vItem.BonusListIDs.Add(id);
+                            //if (uint.TryParse(token, out uint id))
+                            //    vItem.BonusListIDs.Add(id);
+                            vItem.BonusListIDs.Add(token);
                         }
                     }
 
@@ -9917,10 +9917,10 @@ namespace Game
                     int responseId = rewardItem.Read<int>(1);
                     uint itemId = rewardItem.Read<uint>(2);
                     StringArray bonusListIDsTok = new(rewardItem.Read<string>(3), ' ');
-                    List<uint> bonusListIds = new();
+                    List<int> bonusListIds = new();
                     if (!bonusListIDsTok.IsEmpty())
                     {
-                        foreach (uint token in bonusListIDsTok)
+                        foreach (int token in bonusListIDsTok)
                             bonusListIds.Add(token);
                     }
 
@@ -10051,9 +10051,9 @@ namespace Game
                     int responseId = rewardItems.Read<int>(1);
                     uint itemId = rewardItems.Read<uint>(2);
                     StringArray bonusListIDsTok = new(rewardItems.Read<string>(3), ' ');
-                    List<uint> bonusListIds = new();
-                    foreach (string token in bonusListIDsTok)
-                        bonusListIds.Add(uint.Parse(token));
+                    List<int> bonusListIds = new();
+                    foreach (int token in bonusListIDsTok)
+                        bonusListIds.Add(token);
 
                     int quantity = rewardItems.Read<int>(4);
 
@@ -12061,7 +12061,7 @@ namespace Game
     public class PlayerChoiceResponseRewardItem
     {
         public PlayerChoiceResponseRewardItem() { }
-        public PlayerChoiceResponseRewardItem(uint id, List<uint> bonusListIDs, int quantity)
+        public PlayerChoiceResponseRewardItem(uint id, List<int> bonusListIDs, int quantity)
         {
             Id = id;
             BonusListIDs = bonusListIDs;
@@ -12069,7 +12069,7 @@ namespace Game
         }
 
         public uint Id;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
         public int Quantity;
     }
 

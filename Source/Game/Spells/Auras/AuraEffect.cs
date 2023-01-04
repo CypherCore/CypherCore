@@ -5600,7 +5600,7 @@ namespace Game.Spells
             if (currSpec == null)
                 return;
 
-            pet.SetSpecialization(Global.DB2Mgr.GetChrSpecializationByIndex(apply ? Class.Max : 0, currSpec.OrderIndex).Id);
+            pet.SetSpecialization(Global.DB2Mgr.GetChrSpecializationByIndex(apply ? Class.Max : 0, (uint)currSpec.OrderIndex).Id);
         }
 
         [AuraEffectHandler(AuraType.AllowUsingGameobjectsWhileMounted)]

@@ -71,7 +71,7 @@ namespace Game
             inspectResult.TodayHK = player.m_activePlayerData.TodayHonorableKills;
             inspectResult.YesterdayHK = player.m_activePlayerData.YesterdayHonorableKills;
             inspectResult.LifetimeHK = player.m_activePlayerData.LifetimeHonorableKills;
-            inspectResult.HonorLevel = player.m_playerData.HonorLevel;
+            inspectResult.HonorLevel = (uint)player.m_playerData.HonorLevel.GetValue();
 
             SendPacket(inspectResult);
         }

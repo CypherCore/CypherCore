@@ -663,7 +663,7 @@ namespace Game
                 return;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petCastSpell.Cast.SpellID, caster.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)petCastSpell.Cast.SpellID, caster.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "WorldSession.HandlePetCastSpell: unknown spell id {0} tried to cast by {1}", petCastSpell.Cast.SpellID, petCastSpell.PetGUID.ToString());
@@ -702,8 +702,8 @@ namespace Game
 
             Spell spell = new(caster, spellInfo, triggerCastFlags);
             spell.m_fromClient = true;
-            spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];
-            spell.m_misc.Data1 = petCastSpell.Cast.Misc[1];
+            spell.m_misc.Data0 = (uint)petCastSpell.Cast.Misc[0];
+            spell.m_misc.Data1 = (uint)petCastSpell.Cast.Misc[1];
             spell.m_targets = targets;
 
             SpellCastResult result = spell.CheckPetCast(null);

@@ -3024,7 +3024,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum ConversationActorType
+    public enum ConversationActorType : uint
     {
         WorldObject = 0,
         TalkingHead = 1

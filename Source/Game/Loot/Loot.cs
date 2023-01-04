@@ -193,7 +193,7 @@ namespace Game.Loots
         public uint LootListId;
         public uint randomSuffix;
         public ItemRandomEnchantmentId randomPropertyId;
-        public List<uint> BonusListIDs = new();
+        public List<int> BonusListIDs = new();
         public ItemContext context;
         public List<Condition> conditions = new();                               // additional loot condition
         public List<ObjectGuid> allowedGUIDs = new();
@@ -686,7 +686,7 @@ namespace Game.Loots
                 generatedLoot.LootListId = (uint)items.Count;
                 if (_itemContext != 0)
                 {
-                    List<uint> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
+                    List<int> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
                     generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
 

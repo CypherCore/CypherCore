@@ -383,8 +383,8 @@ namespace Game.Entities
         //Stats
         public float GetStat(Stats stat) { return m_unitData.Stats[(int)stat]; }
         public void SetStat(Stats stat, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Stats, (int)stat), val); }
-        public uint GetCreateMana() { return m_unitData.BaseMana; }
-        public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
+        public uint GetCreateMana() { return (uint)m_unitData.BaseMana.GetValue(); }
+        public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), (int)val); }
         public uint GetArmor()
         {
             return (uint)GetResistance(SpellSchools.Normal);
@@ -460,9 +460,9 @@ namespace Game.Entities
         }
 
         //Health  
-        public uint GetCreateHealth() { return m_unitData.BaseHealth; }
-        public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
-        public ulong GetHealth() { return m_unitData.Health; }
+        public uint GetCreateHealth() { return (uint)m_unitData.BaseHealth.GetValue(); }
+        public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), (int)val); }
+        public ulong GetHealth() { return (uint)m_unitData.Health.GetValue(); }
         public void SetHealth(ulong val)
         {
             if (GetDeathState() == DeathState.JustDied || GetDeathState() == DeathState.Corpse)
@@ -477,7 +477,7 @@ namespace Game.Entities
             }
 
             ulong oldVal = GetHealth();
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Health), val);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Health), (int)val);
 
             TriggerOnHealthChangeAuras(oldVal, val);
 
@@ -495,13 +495,13 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.CurHp);
             }
         }
-        public ulong GetMaxHealth() { return m_unitData.MaxHealth; }
+        public ulong GetMaxHealth() { return (ulong)m_unitData.MaxHealth.GetValue(); }
         public void SetMaxHealth(ulong val)
         {
             if (val == 0)
                 val = 1;
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), val);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), (long)val);
             ulong health = GetHealth();
 
             // group update
@@ -588,7 +588,7 @@ namespace Game.Entities
                 return;
 
             int cur_power = GetPower(powerType);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxPower, (int)powerIndex), (uint)val);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxPower, (int)powerIndex), val);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -1462,8 +1462,8 @@ namespace Game.Entities
             if (amount < 0)
                 amount = 0;
 
-            uint oldRating = m_activePlayerData.CombatRatings[(int)cr];
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)cr), (uint)amount);
+            int oldRating = m_activePlayerData.CombatRatings[(int)cr];
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)cr), amount);
 
             bool affectStats = CanModifyStats();
 
@@ -1620,7 +1620,7 @@ namespace Game.Entities
         void UpdateArmorPenetration(int amount)
         {
             // Store Rating Value
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), (uint)amount);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), amount);
         }
 
         float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)

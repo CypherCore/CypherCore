@@ -548,7 +548,7 @@ namespace Game
                     createInfo.CharCount += 1;
 
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
-                    stmt.AddValue(0, createInfo.CharCount);
+                    stmt.AddValue(0, (uint)createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
                     stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);
                     loginTransaction.Append(stmt);

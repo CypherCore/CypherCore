@@ -176,7 +176,7 @@ namespace Game.Entities
             if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            return skillInfo.SkillTempBonus[skillStatusData.Pos];
+            return (ushort)skillInfo.SkillTempBonus[skillStatusData.Pos];
         }
 
         void InitializeSelfResurrectionSpells()
@@ -283,7 +283,7 @@ namespace Game.Entities
             return base.GetCastSpellInfo(spellInfo);
         }
 
-        public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), overrideSpellsId); }
+        public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), (int)overrideSpellsId); }
 
         public void AddOverrideSpell(uint overridenSpellId, uint newSpellId)
         {
@@ -335,7 +335,7 @@ namespace Game.Entities
 
                     for (uint j = 0; j < PlayerConst.MaxMasterySpells; ++j)
                     {
-                        uint mastery = specialization.MasterySpellID[j];
+                        uint mastery = (uint)specialization.MasterySpellID[j];
                         if (mastery != 0)
                             RemoveAurasDueToSpell(mastery);
                     }
@@ -553,7 +553,7 @@ namespace Game.Entities
                 SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.EnhancementSocket1));
                 if (gem != null)
                 {
-                    ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
+                    ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate((uint)gem.ItemId.GetValue());
                     if (gemTemplate != null)
                         if (gemTemplate.GetRequiredSkill() != 0 && GetSkillValue((SkillType)gemTemplate.GetRequiredSkill()) < gemTemplate.GetRequiredSkillRank())
                             return;
@@ -1077,7 +1077,7 @@ namespace Game.Entities
         {
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
             if (chrSpec != null)
-                return HasSpell(chrSpec.MasterySpellID[0]) || HasSpell(chrSpec.MasterySpellID[1]);
+                return HasSpell((uint)chrSpec.MasterySpellID[0]) || HasSpell((uint)chrSpec.MasterySpellID[1]);
 
             return false;
         }
@@ -1179,9 +1179,9 @@ namespace Game.Entities
 
                     // Clear profession lines
                     if (m_activePlayerData.ProfessionSkillLine[0] == id)
-                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 0), 0u);
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 0), 0);
                     else if (m_activePlayerData.ProfessionSkillLine[1] == id)
-                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 1), 0u);
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 1), 0);
                 }
             }
             else
@@ -1241,7 +1241,7 @@ namespace Game.Entities
                     {
                         int freeProfessionSlot = FindProfessionSlotFor(id);
                         if (freeProfessionSlot != -1)
-                            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
+                            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), (int)id);
                     }
                 }
 
@@ -1458,7 +1458,7 @@ namespace Game.Entities
                 {
                     foreach (SocketedGem gemData in pItem2.m_itemData.Gems)
                     {
-                        ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
+                        ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
                         if (gemProto == null)
                             continue;
 
@@ -1548,7 +1548,7 @@ namespace Game.Entities
             }
         }
 
-        public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
+        public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, int[] misc)
         {
             if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
             {
@@ -1575,8 +1575,8 @@ namespace Game.Entities
 
                     spell.m_fromClient = true;
                     spell.m_CastItem = item;
-                    spell.m_misc.Data0 = misc[0];
-                    spell.m_misc.Data1 = misc[1];
+                    spell.m_misc.Data0 = (uint)misc[0];
+                    spell.m_misc.Data1 = (uint)misc[1];
                     spell.Prepare(targets);
                     return;
                 }
@@ -1610,8 +1610,8 @@ namespace Game.Entities
 
                     spell.m_fromClient = true;
                     spell.m_CastItem = item;
-                    spell.m_misc.Data0 = misc[0];
-                    spell.m_misc.Data1 = misc[1];
+                    spell.m_misc.Data0 = (uint)misc[0];
+                    spell.m_misc.Data1 = (uint)misc[1];
                     spell.Prepare(targets);
                     return;
                 }
@@ -3559,7 +3559,7 @@ namespace Game.Entities
             LearnQuestRewardedSpells();
         }
 
-        public void SetPetSpellPower(uint spellPower) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetSpellPower), spellPower); }
+        public void SetPetSpellPower(uint spellPower) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetSpellPower), (int)spellPower); }
 
         public void SetSkillLineId(uint pos, ushort skillLineId)
         {
@@ -3589,7 +3589,7 @@ namespace Game.Entities
         public void SetSkillTempBonus(uint pos, ushort bonus)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
-            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillTempBonus, (int)pos), bonus);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillTempBonus, (short)pos), (short)bonus);
         }
         public void SetSkillPermBonus(uint pos, ushort bonus)
         {

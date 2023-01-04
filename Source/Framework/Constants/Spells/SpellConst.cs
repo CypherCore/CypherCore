@@ -1400,7 +1400,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum SpellCastTargetFlags
+    public enum SpellCastTargetFlags :uint
     {
         None = 0x0,
         Unused1 = 0x01,               // Not Used

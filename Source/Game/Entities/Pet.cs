@@ -369,7 +369,7 @@ namespace Game.Entities
                     ushort specId = specializationId;
                     var petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
                     if (petSpec != null)
-                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
+                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, (uint)petSpec.OrderIndex).Id;
 
                     SetSpecialization(specId);
 
@@ -517,7 +517,7 @@ namespace Game.Entities
             petInfo.Mana = (uint)GetPower(PowerType.Mana);
             petInfo.ActionBar = GenerateActionBarData();
             petInfo.LastSaveTime = (uint)GameTime.GetGameTime();
-            petInfo.CreatedBySpellId = m_unitData.CreatedBySpell;
+            petInfo.CreatedBySpellId = (uint)m_unitData.CreatedBySpell.GetValue();
             petInfo.Type = GetPetType();
             petInfo.SpecializationId = GetSpecialization();
         }

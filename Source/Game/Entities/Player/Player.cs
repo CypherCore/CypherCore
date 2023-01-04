@@ -332,7 +332,7 @@ namespace Game.Entities
             ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             if (defaultSpec != null)
             {
-                SetActiveTalentGroup(defaultSpec.OrderIndex);
+                SetActiveTalentGroup((byte)defaultSpec.OrderIndex);
                 SetPrimarySpecialization(defaultSpec.Id);
             }
 
@@ -886,7 +886,7 @@ namespace Game.Entities
             if (m_temporaryUnsummonedPetNumber == 0 && pet.IsControlled() && !pet.IsTemporarySummoned())
             {
                 m_temporaryUnsummonedPetNumber = pet.GetCharmInfo().GetPetNumber();
-                m_oldpetspell = pet.m_unitData.CreatedBySpell;
+                m_oldpetspell = (uint)pet.m_unitData.CreatedBySpell.GetValue();
             }
 
             RemovePet(pet, PetSaveMode.AsCurrent);
@@ -4254,7 +4254,7 @@ namespace Game.Entities
             if (returnreagent && (pet || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
             {
                 //returning of reagents only for players, so best done here
-                uint spellId = pet ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
+                uint spellId = pet ? (uint)pet.m_unitData.CreatedBySpell.GetValue() : m_oldpetspell;
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
@@ -4770,8 +4770,8 @@ namespace Game.Entities
         }
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
         public uint GetGuildRank() { return m_playerData.GuildRankID; }
-        public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), level); }
-        public uint GetGuildLevel() { return m_playerData.GuildLevel; }
+        public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), (int)level); }
+        public uint GetGuildLevel() { return (uint)m_playerData.GuildLevel.GetValue(); }
         public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
         public ulong GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
         public Guild GetGuild()
@@ -4787,7 +4787,7 @@ namespace Game.Entities
 
         public void SetFreePrimaryProfessions(uint profs)
         { 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)profs);
         }
 
         public void GiveLevel(uint level)
@@ -4825,7 +4825,7 @@ namespace Game.Entities
 
             SendPacket(packet);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(level));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), (int)Global.ObjectMgr.GetXPForLevel(level));
 
             //update level, max level of skills
             m_PlayedTimeLevel = 0;                   // Level Played Time reset
@@ -5308,7 +5308,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(GetLevel()));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), (int)Global.ObjectMgr.GetXPForLevel(GetLevel()));
             if (m_activePlayerData.XP >= m_activePlayerData.NextLevelXP)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), m_activePlayerData.NextLevelXP - 1);
 
@@ -5346,7 +5346,7 @@ namespace Game.Entities
 
             //reset rating fields values
             for (int index = 0; index < (int)CombatRating.Max; ++index)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, index), 0u);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, index), 0);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), 0);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingPercent), 1.0f);
@@ -5394,7 +5394,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), 0.0f);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BlockPercentage), 0.0f);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), 0u);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), 0);
 
             // Dodge percentage
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DodgePercentage), 0.0f);
@@ -6115,12 +6115,12 @@ namespace Game.Entities
         public bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
         public void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
 
-        public uint GetXP() { return m_activePlayerData.XP; }
-        public uint GetXPForNextLevel() { return m_activePlayerData.NextLevelXP; }
+        public uint GetXP() { return (uint)m_activePlayerData.XP.GetValue(); }
+        public uint GetXPForNextLevel() { return  (uint)m_activePlayerData.NextLevelXP.GetValue(); }
 
         public void SetXP(uint xp)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), xp);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), (int)xp);
 
             int playerLevelDelta = 0;
 
@@ -6784,7 +6784,7 @@ namespace Game.Entities
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));
         }
-        public uint GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }
+        public uint GetFreePrimaryProfessionPoints() { return (uint)m_activePlayerData.CharacterPoints.GetValue(); }
         void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
         public bool HaveAtClient(WorldObject u)
         {
@@ -6794,9 +6794,9 @@ namespace Game.Entities
             return one || two;
         }
         public bool HasTitle(CharTitlesRecord title) { return HasTitle(title.MaskID); }
-        public bool HasTitle(uint bitIndex)
+        public bool HasTitle(int bitIndex)
         {
-            uint fieldIndexOffset = bitIndex / 64;
+            uint fieldIndexOffset = (uint)bitIndex / 64;
             if (fieldIndexOffset >= m_activePlayerData.KnownTitles.Size())
                 return false;
 
@@ -6827,7 +6827,7 @@ namespace Game.Entities
             packet.Index = title.MaskID;
             SendPacket(packet);
         }
-        public void SetChosenTitle(uint title) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), title); }
+        public void SetChosenTitle(uint title) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), (int)title); }
         public void SetKnownTitles(int index, ulong mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, index), mask); }
 
         public void SetViewpoint(WorldObject target, bool apply)
@@ -7083,32 +7083,32 @@ namespace Game.Entities
 
         public void AddHeirloom(uint itemId, uint flags)
         {
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms), itemId);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms), (int)itemId);
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags), flags);
         }
-        public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), itemId); }
+        public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), (int)itemId); }
         public void SetHeirloomFlags(int slot, uint flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), flags); }
 
         public void AddToy(uint itemId, uint flags)
         {
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), itemId);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), (int)itemId);
         }
 
         public void AddTransmogBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog), blockValue); }
         public void AddTransmogFlag(int slot, uint flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog, slot), flag); }
 
-        public void AddConditionalTransmog(uint itemModifiedAppearanceId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), itemModifiedAppearanceId); }
+        public void AddConditionalTransmog(uint itemModifiedAppearanceId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), (int)itemModifiedAppearanceId); }
         public void RemoveConditionalTransmog(uint itemModifiedAppearanceId)
         {
-            int index = m_activePlayerData.ConditionalTransmog.FindIndex(itemModifiedAppearanceId);
+            int index = m_activePlayerData.ConditionalTransmog.FindIndex((int)itemModifiedAppearanceId);
             if (index >= 0)
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), index);
         }
 
-        public void AddSelfResSpell(uint spellId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), spellId); }
+        public void AddSelfResSpell(uint spellId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), (int)spellId); }
         public void RemoveSelfResSpell(uint spellId)
         {
-            int index = m_activePlayerData.SelfResSpells.FindIndex(spellId);
+            int index = m_activePlayerData.SelfResSpells.FindIndex((int)spellId);
             if (index >= 0)
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), index);
         }
@@ -7131,7 +7131,7 @@ namespace Game.Entities
         public byte GetNumRespecs() { return m_activePlayerData.NumRespecs; }
         public void SetNumRespecs(byte numRespecs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumRespecs), numRespecs); }
 
-        public void SetWatchedFactionIndex(uint index) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WatchedFactionIndex), index); }
+        public void SetWatchedFactionIndex(uint index) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WatchedFactionIndex), (int)index); }
 
         public void AddAuraVision(PlayerFieldByte2Flags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }

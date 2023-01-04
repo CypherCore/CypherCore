@@ -799,7 +799,7 @@ namespace Game
 
                         var bonusListIDsTok = new StringArray(result.Read<string>(7), ' ');
                         if (!bonusListIDsTok.IsEmpty())
-                            foreach (uint token in bonusListIDsTok)
+                            foreach (int token in bonusListIDsTok)
                                 vItem.BonusListIDs.Add(token);
 
                         // check validity with event's npcflag

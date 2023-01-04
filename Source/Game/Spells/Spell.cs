@@ -49,7 +49,7 @@ namespace Game.Spells
 
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
             m_originalCastId = originalCastId;
-            m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
+            m_SpellVisual.SpellXSpellVisualID = (int)caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             m_customError = SpellCustomErrors.None;
             m_fromClient = false;
@@ -3399,7 +3399,7 @@ namespace Game.Spells
             if (unitCaster.IsTypeId(TypeId.Unit) && unitCaster.ToCreature().IsSummon())
             {
                 // Unsummon statue
-                uint spell = unitCaster.m_unitData.CreatedBySpell;
+                uint spell = (uint)unitCaster.m_unitData.CreatedBySpell.GetValue();
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, GetCastDifficulty());
                 if (spellInfo != null && spellInfo.IconFileDataId == 134230)
                 {
@@ -4250,7 +4250,7 @@ namespace Game.Spells
                         creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, unitCaster.m_unitData.ChannelObjects[0]));
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
-            unitCaster.SetChannelSpellXSpellVisual(m_SpellVisual.SpellXSpellVisualID);
+            unitCaster.SetChannelSpellXSpellVisual((uint)m_SpellVisual.SpellXSpellVisualID);
         }
 
         void SendResurrectRequest(Player target)

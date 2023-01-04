@@ -142,8 +142,8 @@ namespace Game.Entities
                 actorIndices.Add(line.ActorIdx);
 
                 ConversationLine lineField = new();
-                lineField.ConversationLineID = line.Id;
-                lineField.UiCameraID = line.UiCameraID;
+                lineField.ConversationLineID = (int)line.Id;
+                lineField.UiCameraID = (int)line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
 

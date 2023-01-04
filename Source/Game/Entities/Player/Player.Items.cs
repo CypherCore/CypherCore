@@ -1357,7 +1357,7 @@ namespace Game.Entities
             Log.outError(LogFilter.Player, "STORAGE: Can't equip or store initial item {0} for race {1} class {2}, error msg = {3}", titem_id, GetRace(), GetClass(), msg);
             return false;
         }
-        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, ItemRandomEnchantmentId randomPropertyId, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
+        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, ItemRandomEnchantmentId randomPropertyId, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<int> bonusListIDs = null, bool addToCollection = true)
         {
             uint count = 0;
             foreach (var itemPosCount in pos)
@@ -2566,7 +2566,7 @@ namespace Game.Entities
                 }
             }
 
-            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, ItemContext.Vendor, true);
+            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item), null, ItemContext.Vendor, (List<int>)crItem.BonusListIDs.Cast<int>(), false) : EquipNewItem(uiDest, item, ItemContext.Vendor, true);
             if (it != null)
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
@@ -3917,7 +3917,7 @@ namespace Game.Entities
             {
                 HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)armor, apply);
                 if (proto.GetClass() == ItemClass.Armor && (ItemSubClassArmor)proto.GetSubClass() == ItemSubClassArmor.Shield)
-                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? (uint)(armor * 2.5f) : 0);
+                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? (int)(armor * 2.5f) : 0);
             }
 
             WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
@@ -5129,7 +5129,7 @@ namespace Game.Entities
             // check unique-equipped on gems
             foreach (SocketedGem gemData in pItem.m_itemData.Gems)
             {
-                ItemTemplate pGem = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
+                ItemTemplate pGem = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
                 if (pGem == null)
                     continue;
 
@@ -5234,10 +5234,10 @@ namespace Game.Entities
                 if (rank == 0)
                     continue;
 
-                if (CliDB.ArtifactPowerStorage[artifactPower.ArtifactPowerId].Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
+                if (CliDB.ArtifactPowerStorage[(uint)artifactPower.ArtifactPowerId].Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
                     rank = 1;
 
-                ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(rank - 1));
+                ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(rank - 1));
                 if (artifactPowerRank == null)
                     continue;
 
@@ -5376,13 +5376,13 @@ namespace Game.Entities
             var itemField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, (int)slot);
             if (pItem != null)
             {
-                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), pItem.GetVisibleEntry(this));
+                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), (int)pItem.GetVisibleEntry(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), pItem.GetVisibleAppearanceModId(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), pItem.GetVisibleItemVisual(this));
             }
             else
             {
-                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), 0u);
+                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), 0);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), (ushort)0);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), (ushort)0);
             }

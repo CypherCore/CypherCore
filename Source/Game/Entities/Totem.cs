@@ -63,12 +63,12 @@ namespace Game.Entities
                     packet.Totem = GetGUID();
                     packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;
-                    packet.SpellID = m_unitData.CreatedBySpell;
+                    packet.SpellID = (uint)m_unitData.CreatedBySpell.GetValue();
                     owner.ToPlayer().SendPacket(packet);
                 }
 
                 // set display id depending on caster's race
-                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(m_unitData.CreatedBySpell, owner.GetRace());
+                uint totemDisplayId = Global.SpellMgr.GetModelForTotem((uint)m_unitData.CreatedBySpell.GetValue(), owner.GetRace());
                 if (totemDisplayId != 0)
                     SetDisplayId(totemDisplayId);
                 else
@@ -125,7 +125,7 @@ namespace Game.Entities
             {
                 owner.SendAutoRepeatCancel(this);
 
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)m_unitData.CreatedBySpell.GetValue(), GetMap().GetDifficultyID());
                 if (spell != null)
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
