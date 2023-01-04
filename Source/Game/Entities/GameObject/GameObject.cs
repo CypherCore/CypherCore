@@ -514,10 +514,7 @@ namespace Game.Entities
                             // If there is no restock timer, or if the restock timer passed, the chest becomes ready to loot
                             m_restockTime = 0;
                             m_lootState = LootState.Ready;
-                            loot = null;
-                            m_personalLoot.Clear();
-                            m_unique_users.Clear();
-                            m_usetimes = 0;
+                            ClearLoot();
                             UpdateDynamicFlagsForNearbyPlayers();
                             break;
                         default:
@@ -745,10 +742,7 @@ namespace Game.Entities
                             {
                                 m_restockTime = 0;
                                 m_lootState = LootState.Ready;
-                                loot = null;
-                                m_personalLoot.Clear();
-                                m_unique_users.Clear();
-                                m_usetimes = 0;
+                                ClearLoot();
                                 UpdateDynamicFlagsForNearbyPlayers();
                             }
                             break;
@@ -833,10 +827,7 @@ namespace Game.Entities
                             return;
                     }
 
-                    loot = null;
-                    m_personalLoot.Clear();
-                    m_unique_users.Clear();
-                    m_usetimes = 0;
+                    ClearLoot();
 
                     // Do not delete chests or goobers that are not consumed on loot, while still allowing them to despawn when they expire if summoned
                     bool isSummonedAndExpired = (GetOwner() != null || GetSpellId() != 0) && m_respawnTime == 0;
@@ -2934,6 +2925,15 @@ namespace Game.Entities
 
                 EnableCollision(collision);
             }
+        }
+
+        void ClearLoot()
+        {
+            // Unlink loot objects from this GameObject before destroying to avoid accessing freed memory from Loot destructor
+            loot = null;
+            m_personalLoot.Clear();
+            m_unique_users.Clear();
+            m_usetimes = 0;
         }
 
         public bool IsFullyLooted()
