@@ -3387,7 +3387,7 @@ namespace Game.Entities
             }
 
             ulong price = 0;
-            if (crItem.IsGoldRequired(pProto) && pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
+            if (pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
             {
                 float buyPricePerItem = (float)pProto.GetBuyPrice() / pProto.GetBuyCount();
                 ulong maxCount = (ulong)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
@@ -3400,6 +3400,7 @@ namespace Game.Entities
 
                 // reputation discount
                 price = (ulong)Math.Floor(price * GetReputationPriceDiscount(creature));
+                price = pProto.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
 
                 int priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)
