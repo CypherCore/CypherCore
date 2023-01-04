@@ -33,7 +33,7 @@ using System.Numerics;
 
 namespace Game.BattleGrounds
 {
-    public class Battleground : IDisposable
+    public class Battleground : ZoneScript, IDisposable
     {
         public Battleground(BattlegroundTemplate battlegroundTemplate)
         {
@@ -1836,9 +1836,10 @@ namespace Game.BattleGrounds
             return Global.ObjectMgr.GetClosestGraveYard(player, GetPlayerTeam(player.GetGUID()), player);
         }
 
-        public void TriggerGameEvent(uint gameEventId)
+        public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
         {
-            GameEvents.TriggerForMap(gameEventId, GetBgMap());
+            ProcessEvent(target, gameEventId, source);
+            GameEvents.TriggerForMap(gameEventId, GetBgMap(), source, target);
             foreach (var guid in GetPlayers().Keys)
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -2035,7 +2036,7 @@ namespace Game.BattleGrounds
         public virtual void EventPlayerDroppedFlag(Player player) { }
         public virtual void EventPlayerClickedOnFlag(Player player, GameObject target_obj) { }
 
-        public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker = null) { }
+        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker = null) { }
 
         // this function can be used by spell to interact with the BG map
         public virtual void DoAction(uint action, ulong arg) { }

@@ -70,9 +70,6 @@ namespace Game
 
         public static void TriggerForMap(uint gameEventId, Map map, WorldObject source = null, WorldObject target = null)
         {
-            BattlegroundMap bgMap = map.ToBattlegroundMap();
-            if (bgMap != null)
-                bgMap.GetBG().ProcessEvent(target, gameEventId, source);
             map.ScriptsStart(ScriptsType.Event, gameEventId, source, target);
         }
     }
