@@ -89,7 +89,7 @@ namespace Game.Entities
             }
         }
 
-        public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
+        public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null, bool autoStart = true)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             if (conversationTemplate == null)
@@ -98,13 +98,14 @@ namespace Game.Entities
             ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
 
             Conversation conversation = new();
-            if (!conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, privateObjectOwner, spellInfo))
+            conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, privateObjectOwner, spellInfo);
+            if (autoStart && !conversation.Start())
                 return null;
 
             return conversation;
         }
 
-        bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
+        void Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             //ASSERT(conversationTemplate);
@@ -132,14 +133,11 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
-            List<ushort> actorIndices = new();
             List<ConversationLine> lines = new();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
             {
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.ConversationLine, line.Id, creator))
                     continue;
-
-                actorIndices.Add(line.ActorIdx);
 
                 ConversationLine lineField = new();
                 lineField.ConversationLineID = line.Id;
@@ -176,14 +174,16 @@ namespace Game.Entities
             _duration += TimeSpan.FromSeconds(10);
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
+        }
 
-            // All actors need to be set
-            foreach (ushort actorIndex in actorIndices)
+        bool Start()
+        {
+            foreach (ConversationLine line in m_conversationData.Lines.GetValue())
             {
-                ConversationActorField actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
+                ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
                 if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
                 {
-                    Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
+                    Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
                     return false;
                 }
             }
