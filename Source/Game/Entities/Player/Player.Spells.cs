@@ -2029,7 +2029,7 @@ namespace Game.Entities
         void SendKnownSpells()
         {
             SendKnownSpells knownSpells = new();
-            knownSpells.InitialLogin = false; // @todo
+            knownSpells.InitialLogin = IsLoading();
 
             foreach (var spell in m_spells.ToList())
             {
@@ -2040,6 +2040,8 @@ namespace Game.Entities
                     continue;
 
                 knownSpells.KnownSpells.Add(spell.Key);
+                if (spell.Value.Favorite)
+                    knownSpells.FavoriteSpells.Add(spell.Key);
             }
 
             SendPacket(knownSpells);
@@ -2056,8 +2058,9 @@ namespace Game.Entities
 
             bool disabled = (spell != null) && spell.Disabled;
             bool active = !disabled || spell.Active;
+            bool favorite = spell != null ? spell.Favorite : false;
 
-            bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill, traitDefinitionId);
+            bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill, favorite, traitDefinitionId);
 
             // prevent duplicated entires in spell book, also not send if not in world (loading)
             if (learning && IsInWorld)
@@ -2065,6 +2068,7 @@ namespace Game.Entities
                 LearnedSpells learnedSpells = new();
                 LearnedSpellInfo learnedSpellInfo = new();
                 learnedSpellInfo.SpellID = spellId;
+                learnedSpellInfo.IsFavorite = favorite;
                 learnedSpellInfo.TraitDefinitionID = traitDefinitionId;
                 learnedSpells.SuppressMessaging = suppressMessaging;
                 learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
@@ -2268,6 +2272,18 @@ namespace Game.Entities
                 SendPacket(unlearnedSpells);
             }
         }
+
+        public void SetSpellFavorite(uint spellId, bool favorite)
+        {
+            var spell = m_spells.LookupByKey(spellId);
+            if (spell == null)
+                return;
+
+            spell.Favorite = favorite;
+            if (spell.State == PlayerSpellState.Unchanged)
+                spell.State = PlayerSpellState.Changed;
+        }
+
         bool HandlePassiveSpellLearn(SpellInfo spellInfo)
         {
             // note: form passives activated with shapeshift spells be implemented by HandleShapeshiftBoosts instead of spell_learn_spell
@@ -2320,7 +2336,7 @@ namespace Game.Entities
             return null;
         }
 
-        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0, int? traitDefinitionId = null)
+        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0, bool favorite = false, int? traitDefinitionId = null)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -2411,6 +2427,8 @@ namespace Game.Entities
                     spell.TraitDefinitionId = traitDefinitionId;
                 }
 
+                spell.Favorite = favorite;
+
                 // update active state for known spell
                 if (spell.Active != active && spell.State != PlayerSpellState.Removed && !spell.Disabled)
                 {
@@ -2492,6 +2510,7 @@ namespace Game.Entities
                 newspell.Active = active;
                 newspell.Dependent = dependent;
                 newspell.Disabled = disabled;
+                newspell.Favorite = favorite;
                 if (traitDefinitionId.HasValue)
                     newspell.TraitDefinitionId = traitDefinitionId.Value;
 
@@ -3591,6 +3610,7 @@ namespace Game.Entities
         public bool Active;
         public bool Dependent;
         public bool Disabled;
+        public bool Favorite;
         public int? TraitDefinitionId;
     }
 }

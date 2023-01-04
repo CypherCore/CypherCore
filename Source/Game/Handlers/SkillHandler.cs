@@ -117,5 +117,14 @@ namespace Game
 
             GetPlayer().SetSkill(packet.SkillLine, 0, 0, 0);
         }
+
+        [WorldPacketHandler(ClientOpcodes.TradeSkillSetFavorite, Processing = PacketProcessing.Inplace)]
+        void HandleTradeSkillSetFavorite(TradeSkillSetFavorite tradeSkillSetFavorite)
+        {
+            if (!_player.HasSpell(tradeSkillSetFavorite.RecipeID))
+                return;
+
+            _player.SetSpellFavorite(tradeSkillSetFavorite.RecipeID, tradeSkillSetFavorite.IsFavorite);
+        }
     }
 }

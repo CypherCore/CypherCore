@@ -1160,6 +1160,20 @@ namespace Game.Networking.Packets
         public bool Reverse;
         public uint SpellID;
     }
+
+    class TradeSkillSetFavorite : ClientPacket
+    {
+        public uint RecipeID;
+        public bool IsFavorite;
+
+        public TradeSkillSetFavorite(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            RecipeID = _worldPacket.ReadUInt32();
+            IsFavorite = _worldPacket.HasBit();
+        }
+    }
     
     //Structs
     public struct SpellLogPowerData

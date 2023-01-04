@@ -451,9 +451,6 @@ namespace Game.Entities
         public List<uint> BonusListIDs = new();
         public uint PlayerConditionId;
         public bool IgnoreFiltering;
-
-        //helpers
-        public bool IsGoldRequired(ItemTemplate pProto) { return pProto.HasFlag(ItemFlags2.DontIgnoreBuyPrice) || ExtendedCost == 0; }
     }
 
     public class VendorItemData

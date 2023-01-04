@@ -450,7 +450,7 @@ namespace Game.Entities
             if (HasSkill(SkillType.FistWeapons))
                 SetSkill(SkillType.FistWeapons, 0, GetSkillValue(SkillType.Unarmed), GetMaxSkillValueForLevel());
         }
-        void _LoadSpells(SQLResult result)
+        void _LoadSpells(SQLResult result, SQLResult favoritesResult)
         {
             if (!result.IsEmpty())
             {
@@ -459,6 +459,16 @@ namespace Game.Entities
                     AddSpell(result.Read<uint>(0), result.Read<bool>(1), false, false, result.Read<bool>(2), true);
                 }
                 while (result.NextRow());
+            }
+
+            if (!favoritesResult.IsEmpty())
+            {
+                do
+                {
+                    var spell = m_spells.LookupByKey(favoritesResult.Read<uint>(0));
+                    if (spell !=null)
+                        spell.Favorite = true;
+                } while (favoritesResult.NextRow());
             }
         }
 
@@ -1823,35 +1833,51 @@ namespace Game.Entities
         {
             PreparedStatement stmt;
 
-            foreach (var spell in m_spells.ToList())
+            foreach (var (id, spell) in m_spells.ToList())
             {
-                if (spell.Value.State == PlayerSpellState.Removed || spell.Value.State == PlayerSpellState.Changed)
+                if (spell.State == PlayerSpellState.Removed || spell.State == PlayerSpellState.Changed)
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_BY_SPELL);
-                    stmt.AddValue(0, spell.Key);
+                    stmt.AddValue(0, id);
                     stmt.AddValue(1, GetGUID().GetCounter());
                     trans.Append(stmt);
                 }
 
-                // add only changed/new not dependent spells
-                if (!spell.Value.Dependent && (spell.Value.State == PlayerSpellState.New || spell.Value.State == PlayerSpellState.Changed))
+                if (spell.State == PlayerSpellState.New || spell.State == PlayerSpellState.Changed)
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL);
-                    stmt.AddValue(0, GetGUID().GetCounter());
-                    stmt.AddValue(1, spell.Key);
-                    stmt.AddValue(2, spell.Value.Active);
-                    stmt.AddValue(3, spell.Value.Disabled);
+                    // add only changed/new not dependent spells
+                    if (!spell.Dependent)
+                    {
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, id);
+                        stmt.AddValue(2, spell.Active);
+                        stmt.AddValue(3, spell.Disabled);
+                        trans.Append(stmt);
+                    }
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE);
+                    stmt.AddValue(0, id);
+                    stmt.AddValue(1, GetGUID().GetCounter());
                     trans.Append(stmt);
+
+                    if (spell.Favorite)
+                    {
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_FAVORITE);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, id);
+                        trans.Append(stmt);
+                    }
                 }
 
-                if (spell.Value.State == PlayerSpellState.Removed)
+                if (spell.State == PlayerSpellState.Removed)
                 {
-                    m_spells.Remove(spell.Key);
+                    m_spells.Remove(id);
                     continue;
                 }
 
-                if (spell.Value.State != PlayerSpellState.Temporary)
-                    spell.Value.State = PlayerSpellState.Unchanged;
+                if (spell.State != PlayerSpellState.Temporary)
+                    spell.State = PlayerSpellState.Unchanged;
             }
         }
         void _SaveAuras(SQLTransaction trans)
@@ -3294,7 +3320,7 @@ namespace Game.Entities
             UpdateDisplayPower();
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
             _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
-            _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells));
+            _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells), holder.GetResult(PlayerLoginQueryLoad.SpellFavorites));
             GetSession().GetCollectionMgr().LoadToys();
             GetSession().GetCollectionMgr().LoadHeirlooms();
             GetSession().GetCollectionMgr().LoadMounts();

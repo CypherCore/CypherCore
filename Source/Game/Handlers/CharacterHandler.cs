@@ -2659,6 +2659,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Spells, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL_FAVORITES);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.SpellFavorites, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatus, stmt);
@@ -2930,6 +2934,7 @@ namespace Game
         AuraEffects,
         AuraStoredLocations,
         Spells,
+        SpellFavorites,
         QuestStatus,
         QuestStatusObjectives,
         QuestStatusObjectivesCriteria,
