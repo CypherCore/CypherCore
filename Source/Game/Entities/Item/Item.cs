@@ -804,11 +804,11 @@ namespace Game.Entities
 
         public bool IsEquipped()
         {
-            return !IsInBag() && ((m_slot >= EquipmentSlot.Start && m_slot < EquipmentSlot.End)
+            return !IsInBag() && (m_slot < EquipmentSlot.End
                 || (m_slot >= ProfessionSlots.Start && m_slot < ProfessionSlots.End));
         }
-
-            public bool CanBeTraded(bool mail = false, bool trade = false)
+        
+        public bool CanBeTraded(bool mail = false, bool trade = false)
         {
             if (m_lootGenerated)
                 return false;
