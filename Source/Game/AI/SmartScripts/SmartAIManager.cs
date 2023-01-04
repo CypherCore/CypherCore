@@ -777,7 +777,7 @@ namespace Game.AI
                 SmartActions.GameEventStop => Marshal.SizeOf(typeof(SmartAction.GameEventStop)),
                 SmartActions.GameEventStart => Marshal.SizeOf(typeof(SmartAction.GameEventStart)),
                 SmartActions.StartClosestWaypoint => Marshal.SizeOf(typeof(SmartAction.ClosestWaypointFromList)),
-                SmartActions.MoveOffset => 0,
+                SmartActions.MoveOffset => Marshal.SizeOf(typeof(SmartAction.MoveOffset)),
                 SmartActions.RandomSound => Marshal.SizeOf(typeof(SmartAction.RandomSound)),
                 SmartActions.SetCorpseDelay => Marshal.SizeOf(typeof(SmartAction.CorpseDelay)),
                 SmartActions.DisableEvade => Marshal.SizeOf(typeof(SmartAction.DisableEvade)),
