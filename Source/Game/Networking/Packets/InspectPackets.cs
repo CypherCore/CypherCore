@@ -339,12 +339,12 @@ namespace Game.Networking.Packets
     {
         public int Level;
         public int ChrSpecializationID;
-        public TraitConfig Config;
+        public TraitConfigPacket Config;
 
         public void Write(WorldPacket data)
         {
-            data . WriteInt32(Level);
-            data . WriteInt32(ChrSpecializationID);
+            data.WriteInt32(Level);
+            data.WriteInt32(ChrSpecializationID);
             Config.Write(data);
         }
     }

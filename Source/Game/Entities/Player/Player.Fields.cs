@@ -257,6 +257,8 @@ namespace Game.Entities
         uint m_PlayedTimeTotal;
         uint m_PlayedTimeLevel;
 
+        Dictionary<int, PlayerSpellState> m_traitConfigStates = new();
+
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
         uint m_sharedQuestId;

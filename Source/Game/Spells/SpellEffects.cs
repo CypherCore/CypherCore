@@ -5676,6 +5676,41 @@ namespace Game.Spells
             for (int i = 0; i < damage; ++i)
                 unitTarget.GetSpellHistory().RestoreCharge((uint)effectInfo.MiscValue);
         }
+
+        [SpellEffectHandler(SpellEffectName.CreateTraitTreeConfig)]
+        void EffectCreateTraitTreeConfig()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            TraitConfigPacket newConfig = new();
+            newConfig.Type = TraitMgr.GetConfigTypeForTree(effectInfo.MiscValue);
+            if (newConfig.Type != TraitConfigType.Generic)
+                return;
+
+            newConfig.TraitSystemID = CliDB.TraitTreeStorage.LookupByKey(effectInfo.MiscValue).TraitSystemID;
+            target.CreateTraitConfig(newConfig);
+        }
+
+        [SpellEffectHandler(SpellEffectName.ChangeActiveCombatTraitConfig)]
+        void EffectChangeActiveCombatTraitConfig()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            if (m_customArg is not TraitConfigPacket)
+                return;
+
+            target.UpdateTraitConfig(m_customArg as TraitConfigPacket, damage, false);
+        }
     }
 
     public class DispelableAura

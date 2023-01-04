@@ -6839,7 +6839,9 @@ namespace Game.Entities
             return false;
         }
 
-        //New shit
+
+        void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), (uint)traitConfigId); }
+
         void InitPrimaryProfessions()
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));

@@ -1010,6 +1010,146 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
+        void _LoadTraits(SQLResult configsResult, SQLResult entriesResult)
+        {
+            MultiMap<int, TraitEntryPacket> traitEntriesByConfig = new();
+            if (!entriesResult.IsEmpty())
+            {
+                //                    0            1,                2     3             4
+                // SELECT traitConfigId, traitNodeId, traitNodeEntryId, rank, grantedRanks FROM character_trait_entry WHERE guid = ?
+                do
+                {
+                    TraitEntryPacket traitEntry = new();
+                    traitEntry.TraitNodeID = entriesResult.Read<int>(1);
+                    traitEntry.TraitNodeEntryID = entriesResult.Read<int>(2);
+                    traitEntry.Rank = entriesResult.Read<int>(3);
+                    traitEntry.GrantedRanks = entriesResult.Read<int>(4);
+
+                    if (!TraitMgr.IsValidEntry(traitEntry))
+                        continue;
+
+                    traitEntriesByConfig.Add(entriesResult.Read<int>(0), traitEntry);
+
+                } while (entriesResult.NextRow());
+            }
+
+            if (!configsResult.IsEmpty())
+            {
+                //                    0     1                    2                  3                4            5              6      7
+                // SELECT traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name` FROM character_trait_config WHERE guid = ?
+                do
+                {
+                    TraitConfigPacket traitConfig = new();
+                    traitConfig.ID = configsResult.Read<int>(0);
+                    traitConfig.Type = (TraitConfigType)configsResult.Read<int>(1);
+                    switch (traitConfig.Type)
+                    {
+                        case TraitConfigType.Combat:
+                            traitConfig.ChrSpecializationID = configsResult.Read<int>(2);
+                            traitConfig.CombatConfigFlags = (TraitCombatConfigFlags)configsResult.Read<int>(3);
+                            traitConfig.LocalIdentifier = configsResult.Read<int>(4);
+                            break;
+                        case TraitConfigType.Profession:
+                            traitConfig.SkillLineID = configsResult.Read<uint>(5);
+                            break;
+                        case TraitConfigType.Generic:
+                            traitConfig.TraitSystemID = configsResult.Read<int>(6);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    traitConfig.Name = configsResult.Read<string>(7);
+
+                    foreach (var traitEntry in traitEntriesByConfig.LookupByKey(traitConfig.ID))
+                        traitConfig.Entries.Add(traitEntry);
+
+                    if (TraitMgr.ValidateConfig(traitConfig, this) != TalentLearnResult.LearnOk)
+                    {
+                        traitConfig.Entries.Clear();
+                        foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
+                            traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
+                    }
+
+                    AddTraitConfig(traitConfig);
+
+                } while (configsResult.NextRow());
+            }
+
+            bool hasConfigForSpec(int specId)
+            {
+                return m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                {
+                    return traitConfig.Type == (int)TraitConfigType.Combat
+                        && traitConfig.ChrSpecializationID == specId
+                        && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0;
+                }) >= 0;
+            }
+
+            int findFreeLocalIdentifier(int specId)
+            {
+                int index = 1;
+                while (m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                {
+                    return traitConfig.Type == (int)TraitConfigType.Combat
+                        && traitConfig.ChrSpecializationID == specId
+                        && traitConfig.LocalIdentifier == index;
+                }) >= 0)
+                    ++index;
+
+                return index;
+            }
+
+            for (uint i = 0; i < PlayerConst.MaxSpecializations - 1 /*initial spec doesnt get a config*/; ++i)
+            {
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), i);
+                if (spec != null)
+                {
+                    if (hasConfigForSpec((int)spec.Id))
+                        continue;
+
+                    TraitConfigPacket traitConfig = new();
+                    traitConfig.Type = TraitConfigType.Combat;
+                    traitConfig.ChrSpecializationID = (int)spec.Id;
+                    traitConfig.CombatConfigFlags = TraitCombatConfigFlags.ActiveForSpec;
+                    traitConfig.LocalIdentifier = findFreeLocalIdentifier((int)spec.Id);
+                    traitConfig.Name = spec.Name[GetSession().GetSessionDbcLocale()];
+
+                    CreateTraitConfig(traitConfig);
+                }
+            }
+
+            int activeConfig = m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+            {
+                return traitConfig.Type == (int)TraitConfigType.Combat
+                    && traitConfig.ChrSpecializationID == GetPrimarySpecialization()
+                    && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0;
+            });
+
+            if (activeConfig >= 0)
+                SetActiveCombatTraitConfigID(m_activePlayerData.TraitConfigs[activeConfig].ID);
+
+            foreach (TraitConfig traitConfig in m_activePlayerData.TraitConfigs)
+            {
+                switch ((TraitConfigType)(int)traitConfig.Type)
+                {
+                    case TraitConfigType.Combat:
+                        if (traitConfig.ID != m_activePlayerData.ActiveCombatTraitConfigID)
+                            continue;
+                        break;
+                    case TraitConfigType.Profession:
+                        if (!HasSkill((uint)(int)traitConfig.SkillLineID))
+                            continue;
+                        break;
+                    default:
+                        break;
+                }
+
+                ApplyTraitConfig(traitConfig.ID, true);
+            }
+        }
+
         void _LoadGlyphs(SQLResult result)
         {
             // SELECT talentGroup, glyphId from character_glyphs WHERE guid = ?
@@ -1863,6 +2003,23 @@ namespace Game.Entities
 
         void _SaveActions(SQLTransaction trans)
         {
+            int traitConfigId = 0;
+            
+            TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
+            if (traitConfig != null)
+            {
+                int usedSavedTraitConfigIndex = m_activePlayerData.TraitConfigs.FindIndexIf(savedConfig =>
+                {
+                    return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat
+                        && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None
+                        && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None
+                        && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier;
+                });
+
+                if (usedSavedTraitConfigIndex >= 0)
+                    traitConfigId = m_activePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
+            }
+
             PreparedStatement stmt;
 
             foreach (var pair in m_actionButtons.ToList())
@@ -1873,9 +2030,10 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_ACTION);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, GetActiveTalentGroup());
-                        stmt.AddValue(2, pair.Key);
-                        stmt.AddValue(3, pair.Value.GetAction());
-                        stmt.AddValue(4, (byte)pair.Value.GetButtonType());
+                        stmt.AddValue(2, traitConfigId);
+                        stmt.AddValue(3, pair.Key);
+                        stmt.AddValue(4, pair.Value.GetAction());
+                        stmt.AddValue(5, (byte)pair.Value.GetButtonType());
                         trans.Append(stmt);
 
                         pair.Value.uState = ActionButtonUpdateState.UnChanged;
@@ -1887,6 +2045,7 @@ namespace Game.Entities
                         stmt.AddValue(2, GetGUID().GetCounter());
                         stmt.AddValue(3, pair.Key);
                         stmt.AddValue(4, GetActiveTalentGroup());
+                        stmt.AddValue(5, traitConfigId);
                         trans.Append(stmt);
 
                         pair.Value.uState = ActionButtonUpdateState.UnChanged;
@@ -1896,6 +2055,7 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, pair.Key);
                         stmt.AddValue(2, GetActiveTalentGroup());
+                        stmt.AddValue(3, traitConfigId);
                         trans.Append(stmt);
 
                         m_actionButtons.Remove(pair.Key);
@@ -2135,6 +2295,99 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
+
+        void _SaveTraits(SQLTransaction trans)
+        {
+            PreparedStatement stmt = null;
+            foreach (var (traitConfigId, state) in m_traitConfigStates)
+            {
+                switch (state)
+                {
+                    case PlayerSpellState.Changed:
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_ENTRIES);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, traitConfigId);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, traitConfigId);
+                        trans.Append(stmt);
+
+                        TraitConfig traitConfig = GetTraitConfig(traitConfigId);
+                        if (traitConfig != null)
+                        {
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_TRAIT_CONFIGS);
+                            stmt.AddValue(0, GetGUID().GetCounter());
+                            stmt.AddValue(1, traitConfig.ID);
+                            stmt.AddValue(2, traitConfig.Type);
+                            switch ((TraitConfigType)(int)traitConfig.Type)
+                            {
+                                case TraitConfigType.Combat:
+                                    stmt.AddValue(3, traitConfig.ChrSpecializationID);
+                                    stmt.AddValue(4, traitConfig.CombatConfigFlags);
+                                    stmt.AddValue(5, traitConfig.LocalIdentifier);
+                                    stmt.AddNull(6);
+                                    stmt.AddNull(7);
+                                    break;
+                                case TraitConfigType.Profession:
+                                    stmt.AddNull(3);
+                                    stmt.AddNull(4);
+                                    stmt.AddNull(5);
+                                    stmt.AddValue(6, traitConfig.SkillLineID);
+                                    stmt.AddNull(7);
+                                    break;
+                                case TraitConfigType.Generic:
+                                    stmt.AddNull(3);
+                                    stmt.AddNull(4);
+                                    stmt.AddNull(5);
+                                    stmt.AddNull(6);
+                                    stmt.AddValue(7, traitConfig.TraitSystemID);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            stmt.AddValue(8, traitConfig.Name);
+                            trans.Append(stmt);
+
+                            foreach (var traitEntry in traitConfig.Entries)
+                            {
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_TRAIT_ENTRIES);
+                                stmt.AddValue(0, GetGUID().GetCounter());
+                                stmt.AddValue(1, traitConfig.ID);
+                                stmt.AddValue(2, traitEntry.TraitNodeID);
+                                stmt.AddValue(3, traitEntry.TraitNodeEntryID);
+                                stmt.AddValue(4, traitEntry.Rank);
+                                stmt.AddValue(5, traitEntry.GrantedRanks);
+                                trans.Append(stmt);
+                            }
+                        }
+                        break;
+                    case PlayerSpellState.Removed:
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_ENTRIES);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, traitConfigId);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, traitConfigId);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION_BY_TRAIT_CONFIG);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, traitConfigId);
+                        trans.Append(stmt);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            m_traitConfigStates.Clear();
+        }
+        
         public void _SaveMail(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -3074,6 +3327,8 @@ namespace Game.Entities
             LearnDefaultSkills();
             LearnCustomSpells();
 
+            _LoadTraits(holder.GetResult(PlayerLoginQueryLoad.TraitConfigs), holder.GetResult(PlayerLoginQueryLoad.TraitEntries)); // must be after loading spells
+
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
@@ -3086,7 +3341,7 @@ namespace Game.Entities
             // update items with duration and realtime
             UpdateItemDuration(time_diff, true);
 
-            _LoadActions(holder.GetResult(PlayerLoginQueryLoad.Actions));
+            StartLoadingActionButtons();
 
             // unread mails and next delivery time, actual mails not loaded
             _LoadMail(holder.GetResult(PlayerLoginQueryLoad.Mails),
@@ -3633,6 +3888,7 @@ namespace Game.Entities
             _SaveMonthlyQuestStatus(characterTransaction);
             _SaveGlyphs(characterTransaction);
             _SaveTalents(characterTransaction);
+            _SaveTraits(characterTransaction);
             _SaveSpells(characterTransaction);
             GetSpellHistory().SaveToDB<Player>(characterTransaction);
             _SaveActions(characterTransaction);
@@ -4182,6 +4438,14 @@ namespace Game.Entities
                     Corpse.DeleteFromDB(playerGuid, trans);
 
                     Garrison.DeleteFromDB(guid, trans);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_ENTRIES_BY_CHAR);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS_BY_CHAR);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
 
                     Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
                     break;

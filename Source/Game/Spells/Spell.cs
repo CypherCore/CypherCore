@@ -3394,7 +3394,14 @@ namespace Game.Spells
                 Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
 
             if (!ok)
+            {
+                // on failure (or manual cancel) send TraitConfigCommitFailed to revert talent UI saved config selection
+                if (m_caster.IsPlayer() && m_spellInfo.HasEffect(SpellEffectName.ChangeActiveCombatTraitConfig))
+                    if (m_customArg is TraitConfig)
+                        m_caster.ToPlayer().SendPacket(new TraitConfigCommitFailed((m_customArg as TraitConfig).ID));
+
                 return;
+            }
 
             if (unitCaster.IsTypeId(TypeId.Unit) && unitCaster.ToCreature().IsSummon())
             {

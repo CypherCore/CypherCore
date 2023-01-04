@@ -124,6 +124,14 @@ namespace Game.DataStorage
         public ushort SkillupSkillLineID;
     }
 
+    public sealed class SkillLineXTraitTreeRecord
+    {
+        public uint Id;
+        public int SkillLineID;
+        public int TraitTreeID;
+        public int OrderIndex;
+    }
+
     public sealed class SkillRaceClassInfoRecord
     {
         public uint Id;

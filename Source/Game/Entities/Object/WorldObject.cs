@@ -824,7 +824,7 @@ namespace Game.Entities
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
         public abstract void BuildValuesUpdate(WorldPacket data, Player target);
 
-        public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue) where T : new()
+        public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue)
         {
             if (!newValue.Equals(updateField.GetValue()))
             {
@@ -863,7 +863,7 @@ namespace Game.Entities
             SetUpdateFieldValue(ref value, (T)(value | (dynamic)flag));
         }
 
-        public void RemoveUpdateFieldFlagValue<T>(IUpdateField<T> updateField, T flag) where T : new()
+        public void RemoveUpdateFieldFlagValue<T>(IUpdateField<T> updateField, T flag)
         {
             //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
             SetUpdateFieldValue(updateField, (T)(updateField.GetValue() & ~(dynamic)flag));

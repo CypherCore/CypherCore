@@ -141,7 +141,7 @@ namespace Game.Entities
 
         public bool HasValue() { return _hasValue; }
     }
-    
+
     public class UpdateFieldArray<T> where T : new()
     {
         public T[] _values;
@@ -437,6 +437,12 @@ namespace Game.Entities
             return updateField;
         }
 
+        public UpdateFieldString ModifyValue(UpdateFieldString updateField)
+        {
+            MarkChanged(updateField);
+            return updateField;
+        }
+
         public ref U ModifyValue<U>(UpdateFieldArray<U> updateField, int index) where U : new()
         {
             MarkChanged(updateField, index);
@@ -467,6 +473,12 @@ namespace Game.Entities
         }
 
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Set(updateField.BlockBit);
+            _changesMask.Set(updateField.Bit);
+        }
+
+        public void MarkChanged(UpdateFieldString updateField)
         {
             _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);

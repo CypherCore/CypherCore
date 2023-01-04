@@ -292,7 +292,7 @@ namespace Game.DataStorage
 
     public sealed class ChrSpecializationRecord
     {
-        public string Name;
+        public LocalizedString Name;
         public string FemaleName;
         public string Description;
         public uint Id;

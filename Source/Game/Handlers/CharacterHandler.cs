@@ -2723,10 +2723,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.Actions, stmt);
-
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Mails, stmt);
@@ -2877,6 +2873,14 @@ namespace Game
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_FOLLOWER_ABILITIES);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.GarrisonFollowerAbilities, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_ENTRIES);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TraitEntries, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_CONFIGS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TraitConfigs, stmt);
         }
 
         public ObjectGuid GetGuid() { return m_guid; }
@@ -2938,7 +2942,6 @@ namespace Game
         AzeriteMilestonePowers,
         AzeriteUnlockedEssences,
         AzeriteEmpowered,
-        Actions,
         Mails,
         MailItems,
         MailItemsArtifact,
@@ -2980,6 +2983,8 @@ namespace Game
         GarrisonBuildings,
         GarrisonFollowers,
         GarrisonFollowerAbilities,
+        TraitEntries,
+        TraitConfigs,
         Max
     }
 

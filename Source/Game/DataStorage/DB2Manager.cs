@@ -1985,19 +1985,24 @@ namespace Game.DataStorage
         public SkillRaceClassInfoRecord GetSkillRaceClassInfo(uint skill, Race race, Class class_)
         {
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
-            foreach (var record in bounds)
+            foreach (var skllRaceClassInfo in bounds)
             {
-                if (record.RaceMask != 0 && !Convert.ToBoolean(record.RaceMask & SharedConst.GetMaskForRace(race)))
+                if (skllRaceClassInfo.RaceMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.RaceMask & SharedConst.GetMaskForRace(race)))
                     continue;
-                if (record.ClassMask != 0 && !Convert.ToBoolean(record.ClassMask & (1 << ((byte)class_ - 1))))
+                if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;
 
-                return record;
+                return skllRaceClassInfo;
             }
 
             return null;
         }
 
+        public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(uint skill)
+        {
+            return _skillRaceClassInfoBySkill.LookupByKey(skill);
+        }
+        
         public SoulbindConduitRankRecord GetSoulbindConduitRank(int soulbindConduitId, int rank)
         {
             return _soulbindConduitRanks.LookupByKey(Tuple.Create(soulbindConduitId, rank));
