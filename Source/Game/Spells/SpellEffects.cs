@@ -5144,6 +5144,34 @@ namespace Game.Spells
             playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetLevel(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage);
         }
 
+        [SpellEffectHandler(SpellEffectName.GiveExperience)]
+        void EffectGiveExperience()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerTarget = unitTarget?.ToPlayer();
+            if (!playerTarget)
+                return;
+
+            uint xp = Quest.XPValue(playerTarget, (uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB);
+            playerTarget.GiveXP(xp, null);
+        }
+
+        [SpellEffectHandler(SpellEffectName.GiveRestedEcperienceBonus)]
+        void EffectGiveRestedExperience()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerTarget = unitTarget?.ToPlayer();
+            if (!playerTarget)
+                return;
+
+            // effect value is number of resting hours
+            playerTarget.GetRestMgr().AddRestBonus(RestTypes.XP, damage * Time.Hour * playerTarget.GetRestMgr().CalcExtraPerSec(RestTypes.XP, 0.125f));
+        }
+
         [SpellEffectHandler(SpellEffectName.HealBattlepetPct)]
         void EffectHealBattlePetPct()
         {
