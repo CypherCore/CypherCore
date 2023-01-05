@@ -1269,7 +1269,7 @@ namespace Game.Entities
 
         public virtual bool CanNeverSee(WorldObject obj)
         {
-            return GetMap() != obj.GetMap() || !IsInPhase(obj);
+            return GetMap() != obj.GetMap() || !InSamePhase(obj);
         }
 
         public virtual bool CanAlwaysSee(WorldObject obj) { return false; }
@@ -2911,25 +2911,35 @@ namespace Game.Entities
             return playerList;
         }
 
-        public bool IsInPhase(WorldObject obj)
+        public PhaseShift GetPhaseShift() { return _phaseShift; }
+
+        public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = new PhaseShift(phaseShift); }
+
+        public PhaseShift GetSuppressedPhaseShift() { return _suppressedPhaseShift; }
+
+        public void SetSuppressedPhaseShift(PhaseShift phaseShift) { _suppressedPhaseShift = new PhaseShift(phaseShift); }
+
+        public bool InSamePhase(PhaseShift phaseShift)
+        {
+            return GetPhaseShift().CanSee(phaseShift);
+        }
+
+        public bool InSamePhase(WorldObject obj)
         {
             return GetPhaseShift().CanSee(obj.GetPhaseShift());
         }
-
+        
         public static bool InSamePhase(WorldObject a, WorldObject b)
         {
-            return a != null && b != null && a.IsInPhase(b);
+            return a != null && b != null && a.InSamePhase(b);
         }
 
-        public virtual float GetCombatReach() { return 0.0f; } // overridden (only) in Unit
-        public PhaseShift GetPhaseShift() { return _phaseShift; }
-        public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = new PhaseShift(phaseShift); }
-        public PhaseShift GetSuppressedPhaseShift() { return _suppressedPhaseShift; }
-        public void SetSuppressedPhaseShift(PhaseShift phaseShift) { _suppressedPhaseShift = new PhaseShift(phaseShift); }
         public int GetDBPhase() { return _dbPhase; }
 
         // if negative it is used as PhaseGroupId
         public void SetDBPhase(int p) { _dbPhase = p; }
+
+        public virtual float GetCombatReach() { return 0.0f; } // overridden (only) in Unit
 
         public void PlayDistanceSound(uint soundId, Player target = null)
         {
@@ -3228,7 +3238,7 @@ namespace Game.Entities
 
         public bool IsWithinDistInMap(WorldObject obj, float dist2compare, bool is3D = true, bool incOwnRadius = true, bool incTargetRadius = true)
         {
-            return obj && IsInMap(obj) && IsInPhase(obj) && _IsWithinDist(obj, dist2compare, is3D, incOwnRadius, incTargetRadius);
+            return obj && IsInMap(obj) && InSamePhase(obj) && _IsWithinDist(obj, dist2compare, is3D, incOwnRadius, incTargetRadius);
         }
 
         public bool IsWithinLOS(float ox, float oy, float oz, LineOfSightChecks checks = LineOfSightChecks.All, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags.Nothing)

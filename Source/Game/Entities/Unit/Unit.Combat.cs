@@ -1467,7 +1467,7 @@ namespace Game.Entities
 
         public bool IsWithinMeleeRangeAt(Position pos, Unit obj)
         {
-            if (!obj || !IsInMap(obj) || !IsInPhase(obj))
+            if (!obj || !IsInMap(obj) || !InSamePhase(obj))
                 return false;
 
             float dx = pos.GetPositionX() - obj.GetPositionX();

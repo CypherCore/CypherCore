@@ -679,7 +679,7 @@ namespace Game.Entities
         
         public bool IsWithinBoundaryRadius(Unit obj)
         {
-            if (!obj || !IsInMap(obj) || !IsInPhase(obj))
+            if (!obj || !IsInMap(obj) || !InSamePhase(obj))
                 return false;
 
             float objBoundaryRadius = Math.Max(obj.GetBoundingRadius(), SharedConst.MinMeleeReach);
@@ -1110,7 +1110,7 @@ namespace Game.Entities
 
         public bool IsWithinCombatRange(Unit obj, float dist2compare)
         {
-            if (!obj || !IsInMap(obj) || !IsInPhase(obj))
+            if (!obj || !IsInMap(obj) || !InSamePhase(obj))
                 return false;
 
             float dx = GetPositionX() - obj.GetPositionX();

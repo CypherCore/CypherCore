@@ -481,7 +481,7 @@ namespace Game.Maps
                 // Broadcast creation to players
                 foreach (var player in GetPlayers())
                 {
-                    if (player.GetTransport() != obj && player.IsInPhase(obj))
+                    if (player.GetTransport() != obj && player.InSamePhase(obj))
                     {
                         var data = new UpdateData(GetId());
                         obj.BuildCreateUpdateBlockForPlayer(data, player);
@@ -1744,7 +1744,7 @@ namespace Game.Maps
 
             foreach (Transport transport in _transports)
             {
-                if (transport.IsInWorld && transport != player.GetTransport() && player.IsInPhase(transport))
+                if (transport.IsInWorld && transport != player.GetTransport() && player.InSamePhase(transport))
                 {
                     transport.BuildCreateUpdateBlockForPlayer(transData, player);
                     player.m_visibleTransports.Add(transport.GetGUID());
@@ -1783,7 +1783,7 @@ namespace Game.Maps
                     continue;
 
                 var hasTransport = player.m_visibleTransports.Contains(transport.GetGUID());
-                if (player.IsInPhase(transport))
+                if (player.InSamePhase(transport))
                 {
                     if (!hasTransport)
                     {

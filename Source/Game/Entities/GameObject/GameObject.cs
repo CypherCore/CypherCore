@@ -2704,7 +2704,7 @@ namespace Game.Entities
 
         public bool IsWithinDistInMap(Player player)
         {
-            return IsInMap(player) && IsInPhase(player) && IsAtInteractDistance(player);
+            return IsInMap(player) && InSamePhase(player) && IsAtInteractDistance(player);
         }
 
         public SpellInfo GetSpellForLock(Player player)

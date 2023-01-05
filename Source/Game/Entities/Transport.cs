@@ -691,7 +691,7 @@ namespace Game.Entities
 
                 foreach (var player in GetMap().GetPlayers())
                 {
-                    if (player.GetTransport() != this && player.IsInPhase(this))
+                    if (player.GetTransport() != this && player.InSamePhase(this))
                     {
                         UpdateData data = new(GetMap().GetId());
                         BuildCreateUpdateBlockForPlayer(data, player);
@@ -761,7 +761,7 @@ namespace Game.Entities
                 return;
 
             foreach (var playerReference in players)
-                if (playerReference.IsInPhase(this))
+                if (playerReference.InSamePhase(this))
                     BuildFieldsUpdate(playerReference, data_map);
 
             ClearUpdateMask(true);
