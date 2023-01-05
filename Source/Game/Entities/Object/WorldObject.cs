@@ -243,7 +243,7 @@ namespace Game.Entities
             updateData.BuildPacket(out UpdateObject packet);
             target.SendPacket(packet);
         }
-        
+
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags, Player target)
         {
             List<uint> PauseTimes = null;
@@ -402,7 +402,7 @@ namespace Game.Entities
 
             if (flags.CombatVictim)
                 data.WritePackedGuid(ToUnit().GetVictim().GetGUID());                      // CombatVictim
-            
+
             if (flags.ServerTime)
                 data.WriteUInt32(GameTime.GetGameTimeMS());
 
@@ -816,11 +816,11 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: { GetName()}";
+            return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: {GetName()}";
         }
 
         public virtual Loot GetLootForPlayer(Player player) { return null; }
-        
+
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
         public abstract void BuildValuesUpdate(WorldPacket data, Player target);
 
@@ -1163,7 +1163,7 @@ namespace Game.Entities
         }
 
         public SmoothPhasing GetSmoothPhasing() { return _smoothPhasing; }
-        
+
         public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
@@ -1504,7 +1504,7 @@ namespace Game.Entities
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(map, GetZoneId());
                     if (bf != null)
                         return bf;
-                    
+
                     return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(map, GetZoneId());
                 }
             }
@@ -1664,10 +1664,13 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public Creature FindNearestCreatureWithAura(uint entry, uint spellId, float range, bool alive = true)
+        public Creature FindNearestCreatureWithOptions(float range, FindCreatureOptions options)
         {
-            var checker = new NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(this, entry, spellId, alive, range);
+            var checker = new NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(this, range, options);
             var searcher = new CreatureLastSearcher(this, checker);
+            if (options.IgnorePhases)
+                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+
             Cell.VisitAllObjects(this, searcher, range);
             return searcher.GetTarget();
         }
@@ -2627,7 +2630,7 @@ namespace Game.Entities
             Unit unitOrOwner = unit;
             GameObject go = ToGameObject();
             if (go?.GetGoType() == GameObjectTypes.Trap)
-                    unitOrOwner = go.GetOwner();
+                unitOrOwner = go.GetOwner();
 
             // ignore immunity flags when assisting
             if (unitOrOwner != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc)))
@@ -2928,7 +2931,7 @@ namespace Game.Entities
         {
             return GetPhaseShift().CanSee(obj.GetPhaseShift());
         }
-        
+
         public static bool InSamePhase(WorldObject a, WorldObject b)
         {
             return a != null && b != null && a.InSamePhase(b);
@@ -3056,7 +3059,7 @@ namespace Game.Entities
         public void SetIsNewObject(bool enable) { _isNewObject = enable; }
         public bool IsDestroyedObject() { return _isDestroyedObject; }
         public void SetDestroyedObject(bool destroyed) { _isDestroyedObject = destroyed; }
-        
+
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
         public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
@@ -3066,7 +3069,7 @@ namespace Game.Entities
         public bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
         public bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
         public bool IsSceneObject() { return GetTypeId() == TypeId.SceneObject; }
-        
+
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
         public GameObject ToGameObject() { return IsGameObject() ? (this as GameObject) : null; }
@@ -3678,7 +3681,7 @@ namespace Game.Entities
                     dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
                 }
             }
-            
+
             // check dynamic collision
             col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
@@ -4042,5 +4045,42 @@ namespace Game.Entities
 
             player.SendPacket(i_message);
         }
+    }
+
+    public struct FindCreatureOptions
+    {
+        public FindCreatureOptions SetCreatureId(uint creatureId) { CreatureId = creatureId; return this; }
+
+        public FindCreatureOptions SetIsAlive(bool isAlive) { IsAlive = isAlive; return this; }
+        public FindCreatureOptions SetIsInCombat(bool isInCombat) { IsInCombat = isInCombat; return this; }
+        public FindCreatureOptions SetIsSummon(bool isSummon) { IsSummon = isSummon; return this; }
+
+        public FindCreatureOptions SetIgnorePhases(bool ignorePhases) { IgnorePhases = ignorePhases; return this; }
+        public FindCreatureOptions SetIgnoreNotOwnedPrivateObjects(bool ignoreNotOwnedPrivateObjects) { IgnoreNotOwnedPrivateObjects = ignoreNotOwnedPrivateObjects; return this; }
+        public FindCreatureOptions SetIgnorePrivateObjects(bool ignorePrivateObjects) { IgnorePrivateObjects = ignorePrivateObjects; return this; }
+
+        public FindCreatureOptions SetHasAura(uint spellId) { AuraSpellId = spellId; return this; }
+        public FindCreatureOptions SetOwner(ObjectGuid ownerGuid) { OwnerGuid = ownerGuid; return this; }
+        public FindCreatureOptions SetCharmer(ObjectGuid charmerGuid) { CharmerGuid = charmerGuid; return this; }
+        public FindCreatureOptions SetCreator(ObjectGuid creatorGuid) { CreatorGuid = creatorGuid; return this; }
+        public FindCreatureOptions SetDemonCreator(ObjectGuid demonCreatorGuid) { DemonCreatorGuid = demonCreatorGuid; return this; }
+        public FindCreatureOptions SetPrivateObjectOwner(ObjectGuid privateObjectOwnerGuid) { PrivateObjectOwnerGuid = privateObjectOwnerGuid; return this; }
+
+        public uint? CreatureId;
+
+        public bool? IsAlive;
+        public bool? IsInCombat;
+        public bool? IsSummon;
+
+        public bool IgnorePhases;
+        public bool IgnoreNotOwnedPrivateObjects;
+        public bool IgnorePrivateObjects;
+
+        public uint? AuraSpellId;
+        public ObjectGuid? OwnerGuid;
+        public ObjectGuid? CharmerGuid;
+        public ObjectGuid? CreatorGuid;
+        public ObjectGuid? DemonCreatorGuid;
+        public ObjectGuid? PrivateObjectOwnerGuid;
     }
 }

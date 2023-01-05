@@ -1713,7 +1713,7 @@ namespace Game.Maps
 
     public class CreatureLastSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        internal PhaseShift i_phaseShift;
         Creature i_object;
         ICheck<Creature> i_check;
 
@@ -2433,37 +2433,60 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck : ICheck<Creature>
+    public class NearestCreatureEntryWithOptionsInObjectRangeCheck : ICheck<Creature>
     {
         WorldObject i_obj;
-        uint i_entry;
-        uint i_spellId;
-        bool i_alive;
+        FindCreatureOptions i_args;
         float i_range;
 
-        public NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(WorldObject obj, uint entry, uint spellId, bool alive, float range)
+        public NearestCreatureEntryWithOptionsInObjectRangeCheck(WorldObject obj, float range, FindCreatureOptions args)
         {
             i_obj = obj;
-            i_entry = entry;
-            i_spellId = spellId;
-            i_alive = alive;
+            i_args = args;
             i_range = range;
         }
 
         public bool Invoke(Creature u)
         {
-            if (u.GetDeathState() != DeathState.Dead
-                && u.GetEntry() == i_entry
-                && u.HasAura(i_spellId)
-                && u.IsAlive() == i_alive
-                && u.GetGUID() != i_obj.GetGUID()
-                && i_obj.IsWithinDistInMap(u, i_range)
-                && u.CheckPrivateObjectOwnerVisibility(i_obj))
-            {
-                i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
-                return true;
-            }
-            return false;
+            if (u.GetDeathState() == DeathState.Dead) // Despawned
+                return false;
+
+            if (u.GetGUID() == i_obj.GetGUID())
+                return false;
+
+            if (!i_obj.IsWithinDistInMap(u, i_range))
+                return false;
+
+            if (i_args.CreatureId.HasValue && u.GetEntry() != i_args.CreatureId)
+                return false;
+
+            if (i_args.IsAlive.HasValue && u.IsAlive() != i_args.IsAlive)
+                return false;
+
+            if (i_args.IsSummon.HasValue && u.IsSummon() != i_args.IsSummon)
+                return false;
+
+            if (i_args.IsInCombat.HasValue && u.IsInCombat() != i_args.IsInCombat)
+                return false;
+
+            if ((i_args.OwnerGuid.HasValue && u.GetOwnerGUID() != i_args.OwnerGuid)
+                || (i_args.CharmerGuid.HasValue && u.GetCharmerGUID() != i_args.CharmerGuid)
+                || (i_args.CreatorGuid.HasValue && u.GetCreatorGUID() != i_args.CreatorGuid)
+                || (i_args.DemonCreatorGuid.HasValue && u.GetDemonCreatorGUID() != i_args.DemonCreatorGuid)
+                || (i_args.PrivateObjectOwnerGuid.HasValue && u.GetPrivateObjectOwner() != i_args.PrivateObjectOwnerGuid))
+                return false;
+
+            if (i_args.IgnorePrivateObjects && u.IsPrivateObject())
+                return false;
+
+            if (i_args.IgnoreNotOwnedPrivateObjects && !u.CheckPrivateObjectOwnerVisibility(i_obj))
+                return false;
+
+            if (i_args.AuraSpellId.HasValue && !u.HasAura((uint)i_args.AuraSpellId))
+                return false;
+
+            i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+            return true;
         }
     }
     

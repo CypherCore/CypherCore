@@ -33,6 +33,13 @@ namespace Game
     public class PhasingHandler
     {
         public static PhaseShift EmptyPhaseShift = new();
+        public static PhaseShift AlwaysVisible;
+
+        static PhasingHandler()
+        {
+            AlwaysVisible = new();
+            InitDbPhaseShift(AlwaysVisible, PhaseUseFlagsValues.AlwaysVisible, 0, 0);
+        }
 
         public static PhaseFlags GetPhaseFlags(uint phaseId)
         {
@@ -500,6 +507,11 @@ namespace Game
                 partyMemberPhases.List.Add(new PartyMemberPhase((uint)pair.Value.Flags, pair.Key));
         }
 
+        public static PhaseShift GetAlwaysVisiblePhaseShift()
+        {
+            return AlwaysVisible;
+        }
+        
         public static void InitDbPhaseShift(PhaseShift phaseShift, PhaseUseFlagsValues phaseUseFlags, uint phaseId, uint phaseGroupId)
         {
             phaseShift.ClearPhases();
