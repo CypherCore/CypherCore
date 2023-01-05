@@ -1798,7 +1798,7 @@ namespace Game.Entities
                 if (apply)
                 {
                     if (!HasAura((uint)spellId))
-                        CastSpell(this, (uint)spellId, item);
+                        CastSpell(this, (uint)spellId, new CastSpellExtraArgs().SetCastItem(item));
                 }
                 else
                     RemoveAurasDueToSpell((uint)spellId);

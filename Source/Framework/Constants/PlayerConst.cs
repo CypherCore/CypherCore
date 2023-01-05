@@ -505,9 +505,9 @@ namespace Framework.Constants
 
     public enum PlayerRestState
     {
-        Rested = 0x01,
-        NotRAFLinked = 0x02,
-        RAFLinked = 0x06
+        Rested = 1,
+        Normal = 2,
+        RAFLinked = 6
     }
 
     public enum CharacterCustomizeFlags

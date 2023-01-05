@@ -246,8 +246,8 @@ namespace Game.Entities
             SetWatchedFactionIndex(0xFFFFFFFF);
 
             SetCustomizations(createInfo.Customizations);
-            SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
-            SetRestState(RestTypes.Honor, PlayerRestState.NotRAFLinked);
+            SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.Normal));
+            SetRestState(RestTypes.Honor, PlayerRestState.Normal);
             SetNativeGender(createInfo.Sex);
             SetInventorySlotCount(InventorySlots.DefaultSize);
 

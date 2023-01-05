@@ -49,25 +49,23 @@ namespace Game.Entities
             if (restBonus > rest_bonus_max)
                 restBonus = rest_bonus_max;
 
+            uint oldBonus = (uint)(_restBonus[(int)restType]);
             _restBonus[(int)restType] = restBonus;
 
-            uint oldBonus = (uint)_restBonus[(int)restType];
-            if (oldBonus == restBonus)
+            PlayerRestState oldRestState = (PlayerRestState)(int)_player.m_activePlayerData.RestInfo[(int)restType].StateID;
+            PlayerRestState newRestState = PlayerRestState.Normal;
+
+            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+                newRestState = PlayerRestState.RAFLinked;
+            else if (_restBonus[(int)restType] >= 1)
+                newRestState = PlayerRestState.Rested;
+
+            if (oldBonus == restBonus && oldRestState == newRestState)
                 return;
 
             // update data for client
-            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
-                _player.SetRestState(restType, PlayerRestState.RAFLinked);
-            else
-            {
-                if (_restBonus[(int)restType] > 10)
-                    _player.SetRestState(restType, PlayerRestState.Rested);
-                else if (_restBonus[(int)restType] <= 1)
-                    _player.SetRestState(restType, PlayerRestState.NotRAFLinked);
-            }
-
-            // RestTickUpdate
             _player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
+            _player.SetRestState(restType, newRestState);
         }
 
         public void AddRestBonus(RestTypes restType, float restBonus)

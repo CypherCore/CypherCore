@@ -368,11 +368,16 @@ namespace Game
 
         public uint XPValue(Player player)
         {
+            return XPValue(player, ContentTuningId, RewardXPDifficulty, RewardXPMultiplier, Expansion);
+        }
+
+        public static uint XPValue(Player player, uint contentTuningId, uint xpDifficulty, float xpMultiplier = 1.0f, int expansion = -1)
+        {
             if (player)
             {
-                uint questLevel = (uint)player.GetQuestLevel(this);
+                uint questLevel = (uint)player.GetQuestLevel(contentTuningId);
                 QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
-                if (questXp == null || RewardXPDifficulty >= 10)
+                if (questXp == null || xpDifficulty >= 10)
                     return 0;
 
                 int diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
@@ -381,15 +386,15 @@ namespace Game
                 else if (diffFactor > 10)
                     diffFactor = 10;
 
-                uint xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10);
-                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && Expansion < (int)PlayerConst.CurrentExpansion)
+                uint xp = (uint)(diffFactor * questXp.Difficulty[xpDifficulty] * xpMultiplier / 10);
+                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && expansion >= 0 && expansion < (int)PlayerConst.CurrentExpansion)
                     xp = (uint)(xp / 9.0f);
 
                 xp = RoundXPValue(xp);
 
                 if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
                 {
-                    uint minScaledXP = RoundXPValue((uint)(questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
+                    uint minScaledXP = RoundXPValue((uint)(questXp.Difficulty[xpDifficulty] * xpMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
                     xp = Math.Max(minScaledXP, xp);
                 }
 

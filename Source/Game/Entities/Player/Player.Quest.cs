@@ -50,12 +50,17 @@ namespace Game.Entities
 
         public int GetQuestMinLevel(Quest quest)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            return GetQuestMinLevel(quest.ContentTuningId);
+        }
+
+        int GetQuestMinLevel(uint contentTuningId)
+        {
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
             if (questLevels.HasValue)
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
                 FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                int questFactionGroup = CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId).GetScalingFactionGroup();
+                int questFactionGroup = CliDB.ContentTuningStorage.LookupByKey(contentTuningId).GetScalingFactionGroup();
                 if (questFactionGroup != 0 && raceFaction.FactionGroup != questFactionGroup)
                     return questLevels.Value.MaxLevel;
 
@@ -69,11 +74,15 @@ namespace Game.Entities
         {
             if (quest == null)
                 return 0;
+            return GetQuestLevel(quest.ContentTuningId);
+        }
 
-            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+        public int GetQuestLevel(uint contentTuningId)
+        {
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
             if (questLevels.HasValue)
             {
-                int minLevel = GetQuestMinLevel(quest);
+                int minLevel = GetQuestMinLevel(contentTuningId);
                 int maxLevel = questLevels.Value.MaxLevel;
                 int level = (int)GetLevel();
                 if (level >= minLevel)
