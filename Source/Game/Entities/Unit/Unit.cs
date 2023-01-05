@@ -3423,7 +3423,7 @@ namespace Game.Entities
                     tempAbsorb = (uint)currentAbsorb;
                     absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
 
-                    // Check if our aura is using amount to count damage
+                    // Check if our aura is using amount to count heal
                     if (absorbAurEff.GetAmount() >= 0)
                     {
                         // Reduce shield amount
@@ -3641,7 +3641,7 @@ namespace Game.Entities
                         absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
                         // Aura cannot absorb anything more - remove it
                         if (absorbAurEff.GetAmount() <= 0)
-                            absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                            existExpired = true;
                     }
                 }
 
