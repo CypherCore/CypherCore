@@ -44,7 +44,7 @@ namespace Game.Chat
             uint oldMSTime = Time.GetMSTime();
             uint days = WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelDuration);
             if (days != 0)
-    {
+            {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
                 stmt.AddValue(0, days * Time.Day);
                 DB.Characters.Execute(stmt);
@@ -86,7 +86,7 @@ namespace Game.Chat
             } while (result.NextRow());
 
             foreach (var (name, team) in toDelete)
-    {
+            {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHANNEL);
                 stmt.AddValue(0, name);
                 stmt.AddValue(1, (uint)team);
@@ -165,7 +165,7 @@ namespace Game.Chat
         {
             return _customChannels.LookupByKey(name.ToLower());
         }
-        
+
         public Channel GetChannel(uint channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)
         {
             Channel result = null;
