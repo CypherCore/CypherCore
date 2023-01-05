@@ -1819,7 +1819,7 @@ namespace Game.Entities
         public bool HasInvisibilityAura() { return HasAuraType(AuraType.ModInvisibility); }
         public bool IsFeared() { return HasAuraType(AuraType.ModFear); }
         public bool IsFrozen() { return HasAuraState(AuraStateType.Frozen); }
-        public bool HasRootAura() { return HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2); }
+        public bool HasRootAura() { return HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity); }
         public bool IsPolymorphed()
         {
             uint transformId = GetTransformSpell();

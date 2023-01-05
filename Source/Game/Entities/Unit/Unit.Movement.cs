@@ -1223,7 +1223,7 @@ namespace Game.Entities
                         SetStunned(false);
                         break;
                     case UnitState.Root:
-                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || GetVehicle() != null || (IsCreature() && ToCreature().GetMovementTemplate().IsRooted()))
+                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity) || GetVehicle() != null || (IsCreature() && ToCreature().GetMovementTemplate().IsRooted()))
                             return;
 
                         ClearUnitState(state);
@@ -1258,7 +1258,7 @@ namespace Game.Entities
             if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
                 SetStunned(true);
 
-            if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
+            if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
                 SetRooted(true);
 
             if (HasUnitState(UnitState.Confused) || HasAuraType(AuraType.ModConfuse))

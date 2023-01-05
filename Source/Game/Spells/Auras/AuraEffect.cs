@@ -2467,6 +2467,28 @@ namespace Game.Spells
             target.SetControlled(false, UnitState.Fleeing);
         }
 
+        [AuraEffectHandler(AuraType.ModRootDisableGravity)]
+        void HandleAuraModRootAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            target.SetControlled(apply, UnitState.Root);
+
+            // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
+            if (!apply
+                && (target.HasAuraType(GetAuraType())
+                    || target.HasAuraType(AuraType.ModStunDisableGravity)
+                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+                return;
+
+            if (target.SetDisableGravity(apply))
+                if (!apply && !target.IsFlying())
+                    target.GetMotionMaster().MoveFall();
+        }
+        
         [AuraEffectHandler(AuraType.ModStunDisableGravity)]
         void HandleAuraModStunAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

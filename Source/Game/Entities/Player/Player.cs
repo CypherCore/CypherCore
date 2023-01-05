@@ -5245,7 +5245,7 @@ namespace Game.Entities
 
             MoveSetCompoundState setCompoundState = new();
             // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that must not be re-applied.
-            if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
+            if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveRoot, m_movementCounter++));
 
             if (HasAuraType(AuraType.FeatherFall))
@@ -5256,6 +5256,9 @@ namespace Game.Entities
 
             if (HasAuraType(AuraType.Hover))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetHovering, m_movementCounter++));
+
+            if (HasAuraType(AuraType.ModRootDisableGravity) || HasAuraType(AuraType.ModStunDisableGravity))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveDisableGravity, m_movementCounter++));
 
             if (HasAuraType(AuraType.CanTurnWhileFalling))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetCanTurnWhileFalling, m_movementCounter++));
