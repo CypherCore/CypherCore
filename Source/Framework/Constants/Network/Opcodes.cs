@@ -601,7 +601,7 @@ namespace Framework.Constants
         ServerTimeOffsetRequest = 0x369a,
         SetAchievementsHidden = 0x3224,
         SetActionBarToggles = 0x3532,
-        SetActionButton = 0x3637,
+        SetActionButton = 0x355D,
         SetActiveMover = 0x3a3d,
         SetAdvancedCombatLogging = 0x32ae,
         SetAssistantLeader = 0x3651,
