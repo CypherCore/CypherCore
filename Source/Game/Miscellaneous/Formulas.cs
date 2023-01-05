@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using System;
+using System.Reflection.Metadata;
 
 namespace Game
 {
@@ -40,18 +41,14 @@ namespace Game
         {
             uint level;
 
-            if (pl_level < 7)
+            if (pl_level <= 5)
                 level = 0;
-            else if (pl_level < 35)
-            {
-                byte count = 0;
-                for (int i = 15; i <= pl_level; ++i)
-                    if (i % 5 == 0) ++count;
-
-                level = (uint)((pl_level - 7) - (count - 1));
-            }
+            else if (pl_level <= 39)
+                level = pl_level - 5 - pl_level / 10;
+            else if (pl_level <= 59)
+                level = pl_level - 1 - pl_level / 5;
             else
-                level = pl_level - 10;
+                level = pl_level - 9;
 
             Global.ScriptMgr.OnGrayLevelCalculation(level, pl_level);
             return level;
@@ -109,12 +106,27 @@ namespace Game
             return diff;
         }
 
-        public static uint BaseGain(uint pl_level, uint mob_level)
+        public static uint BaseGain(uint pl_level, uint mob_level, ContentLevels content)
         {
             uint baseGain;
+            uint nBaseExp;
 
-            GtXpRecord xpPlayer = CliDB.XpGameTable.GetRow(pl_level);
-            GtXpRecord xpMob = CliDB.XpGameTable.GetRow(mob_level);
+            switch (content)
+            {
+                case ContentLevels.Content_1_60:
+                    nBaseExp = 45;
+                    break;
+                case ContentLevels.Content_61_70:
+                    nBaseExp = 235;
+                    break;
+                case ContentLevels.Content_71_80:
+                    nBaseExp = 580;
+                    break;
+                default:
+                    Log.outError(LogFilter.Misc, $"BaseGain: Unsupported content level {content}");
+                    nBaseExp = 45;
+                    break;
+            }
 
             if (mob_level >= pl_level)
             {
@@ -122,7 +134,7 @@ namespace Game
                 if (nLevelDiff > 4)
                     nLevelDiff = 4;
 
-                baseGain = (uint)Math.Round(xpPlayer.PerKill * (1 + 0.05f * nLevelDiff));
+                baseGain = ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
             }
             else
             {
@@ -130,20 +142,20 @@ namespace Game
                 if (mob_level > gray_level)
                 {
                     uint ZD = GetZeroDifference(pl_level);
-                    baseGain = (uint)Math.Round(xpMob.PerKill * ((1 - ((pl_level - mob_level) / ZD)) * (xpMob.Divisor / xpPlayer.Divisor)));
+                    baseGain = (pl_level * 5 + nBaseExp) * (ZD + mob_level - pl_level) / ZD;
                 }
                 else
                     baseGain = 0;
             }
 
-            if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0 && pl_level != mob_level)
+            if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0)
             {
                 // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
-                uint baseGainMin = BaseGain(pl_level, pl_level) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
+                uint baseGainMin = (mob_level * 5 + nBaseExp) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
                 baseGain = Math.Max(baseGainMin, baseGain);
             }
 
-            Global.ScriptMgr.OnBaseGainCalculation(baseGain, pl_level, mob_level);
+            Global.ScriptMgr.OnBaseGainCalculation(baseGain, pl_level, mob_level, content);
             return baseGain;
         }
 
@@ -156,14 +168,10 @@ namespace Game
             {
                 float xpMod = 1.0f;
 
-                gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player));
+                gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player), Global.DB2Mgr.GetContentLevelsForMapAndZone(u.GetMapId(), u.GetZoneId()));
 
                 if (gain != 0 && creature)
                 {
-                    // Players get only 10% xp for killing creatures of lower expansion levels than himself
-                    if ((creature.GetCreatureTemplate().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
-                        gain = (uint)Math.Round(gain / 10.0f);
-
                     if (creature.IsElite())
                     {
                         // Elites in instances have a 2.75x XP bonus instead of the regular 2x world bonus.

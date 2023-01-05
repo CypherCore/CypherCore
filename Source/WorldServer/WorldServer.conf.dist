@@ -671,17 +671,11 @@ DeclinedNames = 0
 #    Expansion
 #        Description: Allow server to use content from expansions. Checks for expansion-related
 #                     map files, client compatibility and class/race character creation.
-#        Default:     8 - (Expansion 8)
-#					  7 - (Expansion 7)
-#					  6 - (Expansion 6)
-#       		      5 - (Expansion 5)
-#                     4 - (Expansion 4)
-#                     3 - (Expansion 3)
-#                     2 - (Expansion 2)
-#                     1 - (Expansion 1)
+#        Default:     2 - (Expansion WrathOfTheLichKing)
+#                     1 - (Expansion BurningCrusade)
 #                     0 - (Disabled, Ignore and disable expansion content (maps, races, classes)
 
-Expansion = 8
+Expansion = 2
 
 #
 #    MinPlayerName
@@ -842,9 +836,9 @@ SkipCinematics = 0
 #        Description: Maximum level that can be reached by players.
 #        Important:   Levels beyond 110 are not recommended at all.
 #        Range:       1-255
-#        Default:     60
+#        Default:     80
 
-MaxPlayerLevel = 60
+MaxPlayerLevel = 80
 
 #
 #    MinDualSpecLevel

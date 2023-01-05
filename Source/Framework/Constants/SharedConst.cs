@@ -521,7 +521,7 @@ namespace Framework.Constants
         Green,
         Gray
     }
-    public enum ContentLevels
+    public enum ContentLevels : byte
     {
         Content_1_60 = 0,
         Content_61_70 = 1,

@@ -6524,54 +6524,57 @@ namespace Game
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} level stats definitions in {1} ms", count, Time.GetMSTimeDiffToNow(time));
             }
+
             time = Time.GetMSTime();
             // Loading xp per level data
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create XP Data...");
             {
-                _playerXPperLevel = new uint[CliDB.XpGameTable.GetTableRowCount() + 1];
+                _playerXPperLevel = new uint[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
                 //                                          0      1
                 SQLResult result = DB.World.Query("SELECT Level, Experience FROM player_xp_for_level");
 
-                // load the DBC's levels at first...
-                for (uint level = 1; level < CliDB.XpGameTable.GetTableRowCount(); ++level)
-                    _playerXPperLevel[level] = (uint)CliDB.XpGameTable.GetRow(level).Total;
+                if (result.IsEmpty())
+                {
+                    Log.outError(LogFilter.ServerLoading, $"Loaded 0 xp for level definitions. DB table `player_xp_for_level` is empty.");
+                    Global.WorldMgr.StopNow();
+                    return;
+                }
 
                 uint count = 0;
                 // ...overwrite if needed (custom values)
-                if (!result.IsEmpty())
+
+                do
                 {
-                    do
-                    {
-                        uint currentlevel = result.Read<byte>(0);
-                        uint currentxp = result.Read<uint>(1);
+                    uint currentlevel = result.Read<byte>(0);
+                    uint currentxp = result.Read<uint>(1);
 
-                        if (currentlevel >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                        {
-                            if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
-                                Log.outError(LogFilter.Sql, "Wrong (> {0}) level {1} in `player_xp_for_level` table, ignoring.", 255, currentlevel);
-                            else
-                            {
-                                Log.outError(LogFilter.Sql, "Unused (> MaxPlayerLevel in worldserver.conf) level {0} in `player_xp_for_levels` table, ignoring.", currentlevel);
-                                ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
-                            }
-                            continue;
-                        }
-                        //PlayerXPperLevel
-                        _playerXPperLevel[currentlevel] = currentxp;
-                        ++count;
-                    } while (result.NextRow());
-
-                    // fill level gaps
-                    for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                    if (currentlevel >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
-                        if (_playerXPperLevel[level] == 0)
+                        if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
+                            Log.outError(LogFilter.Sql, "Wrong (> {0}) level {1} in `player_xp_for_level` table, ignoring.", 255, currentlevel);
+                        else
                         {
-                            Log.outError(LogFilter.Sql, "Level {0} does not have XP for level data. Using data of level [{1}] + 12000.", level + 1, level);
-                            _playerXPperLevel[level] = _playerXPperLevel[level - 1] + 12000;
+                            Log.outError(LogFilter.Sql, "Unused (> MaxPlayerLevel in worldserver.conf) level {0} in `player_xp_for_levels` table, ignoring.", currentlevel);
+                            ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                         }
+                        continue;
+                    }
+                    //PlayerXPperLevel
+                    _playerXPperLevel[currentlevel] = currentxp;
+                    ++count;
+                } while (result.NextRow());
+
+                // fill level gaps
+                for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                {
+                    if (_playerXPperLevel[level] == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Level {level + 1} does not have XP for level data. Using data of level [{level}] + 100XP.");
+                        _playerXPperLevel[level] = _playerXPperLevel[level - 1] + 100;
                     }
                 }
+
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} xp for level definition(s) from database in {1} ms", count, Time.GetMSTimeDiffToNow(time));
             }

@@ -177,7 +177,7 @@ namespace Game.Scripting
         public virtual void OnZeroDifferenceCalculation(uint diff, uint playerLevel) { }
 
         // Called after calculating base experience gain.
-        public virtual void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel) { }
+        public virtual void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel, ContentLevels content) { }
 
         // Called after calculating experience gain.
         public virtual void OnGainCalculation(uint gain, Player player, Unit unit) { }

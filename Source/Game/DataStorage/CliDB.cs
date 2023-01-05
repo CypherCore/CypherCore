@@ -437,7 +437,6 @@ namespace Game.DataStorage
             RegenHPPerSptGameTable = ReadGameTable<GtRegenHPPerSptRecord>("RegenHPPerSpt.txt");
             RegenMPPerSptGameTable = ReadGameTable<GtRegenMPPerSptRecord>("RegenMPPerSpt.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
-            XpGameTable = ReadGameTable<GtXpRecord>("xp.txt");
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -748,7 +747,6 @@ namespace Game.DataStorage
         public static GameTable<GtRegenHPPerSptRecord> RegenHPPerSptGameTable;
         public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;        
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
-        public static GameTable<GtXpRecord> XpGameTable;
         #endregion
 
         #region Taxi Collections

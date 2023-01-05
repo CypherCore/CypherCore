@@ -2178,6 +2178,44 @@ namespace Game.DataStorage
             return 0;
         }
 
+        public ContentLevels GetContentLevelsForMapAndZone(uint mapid, uint zoneId)
+        {
+            if (mapid == 530 || mapid == 571)
+            {
+                switch (zoneId)
+                {
+                    case 3430: // Eversong Woods
+                    case 3433: // Ghostlands
+                    case 3487: // SilvermoonCity
+                        return ContentLevels.Content_1_60;
+                    case 3524: // Azurmyst Isle
+                    case 3557: // The Exodar
+                    case 3525: // Bloodmyst Isle
+                        return ContentLevels.Content_1_60;
+                    default:
+                        break;
+                }
+            }
+
+            // Special Case
+            if (mapid == 609) // DeathknightStart Ebon Hold
+                return ContentLevels.Content_61_70;
+
+            if (mapid < 2)
+                return ContentLevels.Content_1_60;
+
+            MapRecord mapEntry = MapStorage.LookupByKey(mapid);
+            if (mapEntry == null)
+                return ContentLevels.Content_1_60;
+
+            switch (mapEntry.Expansion())
+            {
+                default: return ContentLevels.Content_1_60;
+                case Expansion.BurningCrusade: return ContentLevels.Content_61_70;
+                case Expansion.WrathOfTheLichKing: return ContentLevels.Content_71_80;
+            }
+        }
+
         public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
         {
             AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);

@@ -522,9 +522,9 @@ namespace Game.Scripting
         {
             ForEach<FormulaScript>(p => p.OnZeroDifferenceCalculation(diff, playerLevel));
         }
-        public void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel)
+        public void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel, ContentLevels content)
         {
-            ForEach<FormulaScript>(p => p.OnBaseGainCalculation(gain, playerLevel, mobLevel));
+            ForEach<FormulaScript>(p => p.OnBaseGainCalculation(gain, playerLevel, mobLevel, content));
         }
         public void OnGainCalculation(uint gain, Player player, Unit unit)
         {
