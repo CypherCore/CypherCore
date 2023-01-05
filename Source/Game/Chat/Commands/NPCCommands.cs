@@ -150,6 +150,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
             handler.SendSysMessage(CypherStrings.NpcinfoPosition, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
             handler.SendSysMessage(CypherStrings.ObjectinfoAiInfo, target.GetAIName(), target.GetScriptName());
+            handler.SendSysMessage(CypherStrings.ObjectinfoStringIds, target.GetStringIds()[0], target.GetStringIds()[1], target.GetStringIds()[2]);
             handler.SendSysMessage(CypherStrings.NpcinfoReactstate, target.GetReactState());
             var ai = target.GetAI();
             if (ai != null)

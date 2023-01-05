@@ -41,6 +41,7 @@ namespace Game.Maps
         public int spawntimesecs;
         public List<Difficulty> SpawnDifficulties;
         public uint ScriptId;
+        public string StringId;
 
         public SpawnData(SpawnObjectType t) : base(t)
         {

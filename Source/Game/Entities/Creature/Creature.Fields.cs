@@ -27,6 +27,9 @@ namespace Game.Entities
         CreatureTemplate m_creatureInfo;
         CreatureData m_creatureData;
 
+        string[] m_stringIds = new string[3];
+        string m_scriptStringId;
+
         SpellFocusInfo _spellFocusInfo;
 
         long _lastDamagedTime; // Part of Evade mechanics

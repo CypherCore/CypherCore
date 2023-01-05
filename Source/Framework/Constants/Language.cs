@@ -1187,8 +1187,9 @@ namespace Framework.Constants
         NpcinfoNpcFlags = 5086,
         NpcinfoPhaseIds = 5087,
         Scenario = 5088,
+        ObjectinfoStringIds = 5089,
 
-        // Room For More Trinity Strings        5089-6603
+        // Room For More Trinity Strings        5090-6603
 
         // Level Requirement Notifications
         SayReq = 6604,

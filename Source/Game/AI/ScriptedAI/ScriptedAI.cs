@@ -456,6 +456,11 @@ namespace Game.AI
             return source.FindNearestCreature(entry, maxSearchRange, alive);
         }
 
+        public static Creature GetClosestCreatureWithOptions(WorldObject source, float maxSearchRange, FindCreatureOptions options)
+        {
+            return source.FindNearestCreatureWithOptions(maxSearchRange, options);
+        }
+        
         public static GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange, bool spawnedOnly = true)
         {
             return source.FindNearestGameObject(entry, maxSearchRange, spawnedOnly);

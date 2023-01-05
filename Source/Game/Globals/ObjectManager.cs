@@ -1918,6 +1918,7 @@ namespace Game
             creature.SpellSchoolImmuneMask = fields.Read<uint>(68);
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(69);
             creature.ScriptID = GetScriptId(fields.Read<string>(70));
+            creature.StringId = fields.Read<string>(71);
 
             creatureTemplateStorage[entry] = creature;
         }
@@ -3540,8 +3541,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, wander_distance, " +
                 //11               12         13       14            15                 16          17           18                19                   20                    21
                 "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //22                     23                      24                25                   26                       27
-                "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName " +
+                //   22                     23                      24                25                   26                       27                   28
+                "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.StringId " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_members ON pool_members.type = 0 AND creature.guid = pool_members.spawnId");
 
             if (result.IsEmpty())
@@ -3604,6 +3605,7 @@ namespace Game
                 data.PhaseGroup = result.Read<uint>(25);
                 data.terrainSwapMap = result.Read<int>(26);
                 data.ScriptId = GetScriptId(result.Read<string>(27));
+                data.StringId = result.Read<string>(28);
                 data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.MapId) ? 1 : 0u]; // transport spawns default to compatibility group
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.MapId);

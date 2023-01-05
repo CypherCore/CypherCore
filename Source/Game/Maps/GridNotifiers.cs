@@ -189,7 +189,7 @@ namespace Game.Maps
                 {
                     if (visionPlayer.seerView == player)
                         visionPlayer.UpdateVisibilityOf(i_objects);
-                }                
+                }
             }
         }
 
@@ -1741,7 +1741,7 @@ namespace Game.Maps
 
     public class CreatureListSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        internal PhaseShift i_phaseShift;
         List<Creature> i_objects;
         ICheck<Creature> i_check;
 
@@ -1911,7 +1911,7 @@ namespace Game.Maps
             return false;
         }
     }
-    
+
     public class FriendlyBelowHpPctEntryInRange : ICheck<Unit>
     {
         public FriendlyBelowHpPctEntryInRange(Unit obj, uint entry, float range, byte pct, bool excludeSelf)
@@ -2094,7 +2094,7 @@ namespace Game.Maps
         public bool Invoke(Unit u)
         {
             if (_playerOnly && !u.IsPlayer())
-                    return false;
+                return false;
 
             if (_raid)
             {
@@ -2433,17 +2433,17 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class NearestCreatureEntryWithOptionsInObjectRangeCheck : ICheck<Creature>
+    public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : NoopCheckCustomizer
     {
         WorldObject i_obj;
         FindCreatureOptions i_args;
-        float i_range;
+        T i_customizer;
 
-        public NearestCreatureEntryWithOptionsInObjectRangeCheck(WorldObject obj, float range, FindCreatureOptions args)
+        public CreatureWithOptionsInObjectRangeCheck(WorldObject obj, T customizer, FindCreatureOptions args)
         {
             i_obj = obj;
             i_args = args;
-            i_range = range;
+            i_customizer = customizer;
         }
 
         public bool Invoke(Creature u)
@@ -2454,10 +2454,13 @@ namespace Game.Maps
             if (u.GetGUID() == i_obj.GetGUID())
                 return false;
 
-            if (!i_obj.IsWithinDistInMap(u, i_range))
+            if (!i_customizer.Test(u))
                 return false;
 
             if (i_args.CreatureId.HasValue && u.GetEntry() != i_args.CreatureId)
+                return false;
+
+            if (i_args.StringId != null && u.HasStringId(i_args.StringId))
                 return false;
 
             if (i_args.IsAlive.HasValue && u.IsAlive() != i_args.IsAlive)
@@ -2485,11 +2488,11 @@ namespace Game.Maps
             if (i_args.AuraSpellId.HasValue && !u.HasAura((uint)i_args.AuraSpellId))
                 return false;
 
-            i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+            i_customizer.Update(u);
             return true;
         }
     }
-    
+
     public class AnyPlayerInObjectRangeCheck : ICheck<Player>
     {
         public AnyPlayerInObjectRangeCheck(WorldObject obj, float range, bool reqAlive = true)
@@ -2539,7 +2542,7 @@ namespace Game.Maps
         float _range;
         bool _reqAlive;
     }
-    
+
     class NearestPlayerInObjectRangeCheck : ICheck<Player>
     {
         public NearestPlayerInObjectRangeCheck(WorldObject obj, float range)
@@ -2793,7 +2796,7 @@ namespace Game.Maps
             return obj.GetEntry() == _entry && (!obj.IsPrivateObject() || obj.GetPrivateObjectOwner() == _ownerGUID);
         }
     }
-    
+
     class GameObjectFocusCheck : ICheck<GameObject>
     {
         public GameObjectFocusCheck(WorldObject caster, uint focusId)
@@ -2914,7 +2917,7 @@ namespace Game.Maps
             return false;
         }
     }
-    
+
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
     class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
     {
@@ -2940,6 +2943,36 @@ namespace Game.Maps
         float i_range;
     }
 
+    // CHECK modifiers
+    public class NoopCheckCustomizer
+    {
+        public virtual bool Test(WorldObject o) { return true; }
+
+        public virtual void Update(WorldObject o) { }
+    }
+
+    class NearestCheckCustomizer : NoopCheckCustomizer
+    {
+        WorldObject i_obj;
+        float i_range;
+
+        public NearestCheckCustomizer(WorldObject obj, float range)
+        {
+            i_obj = obj;
+            i_range = range;
+        }
+
+        public override bool Test(WorldObject o)
+        {
+            return i_obj.IsWithinDistInMap(o, i_range);
+        }
+
+        public override void Update(WorldObject o)
+        {
+            i_range = i_obj.GetDistance(o);
+        }
+    }
+    
     public class AnyDeadUnitObjectInRangeCheck<T> : ICheck<T> where T : WorldObject
     {
         public AnyDeadUnitObjectInRangeCheck(WorldObject searchObj, float range)

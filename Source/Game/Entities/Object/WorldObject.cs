@@ -1666,8 +1666,9 @@ namespace Game.Entities
 
         public Creature FindNearestCreatureWithOptions(float range, FindCreatureOptions options)
         {
-            var checker = new NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck(this, range, options);
-            var searcher = new CreatureLastSearcher(this, checker);
+            NearestCheckCustomizer checkCustomizer = new(this, range);
+            CreatureWithOptionsInObjectRangeCheck<NearestCheckCustomizer> checker = new(this, checkCustomizer, options);
+            CreatureLastSearcher searcher = new(this, checker);
             if (options.IgnorePhases)
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
@@ -2571,7 +2572,6 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisualKit, true);
         }
 
-
         // function based on function Unit::CanAttack from 13850 client
         public bool IsValidAttackTarget(WorldObject target, SpellInfo bySpell = null)
         {
@@ -2883,7 +2883,7 @@ namespace Game.Entities
         {
             return spellInfo.GetSpellXSpellVisualId(this);
         }
-
+        
         public List<GameObject> GetGameObjectListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
         {
             List<GameObject> gameobjectList = new();
@@ -2903,6 +2903,20 @@ namespace Game.Entities
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
             return creatureList;
         }
+
+        public List<Creature> GetCreatureListWithOptionsInGrid(float maxSearchRange, FindCreatureOptions options)
+        {
+            List<Creature> creatureList = new();
+            NoopCheckCustomizer checkCustomizer = new();
+            CreatureWithOptionsInObjectRangeCheck<NoopCheckCustomizer> check = new(this, checkCustomizer, options);
+            CreatureListSearcher searcher = new(this, creatureList, check);
+            if (options.IgnorePhases)
+                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+
+            Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            return creatureList;
+        }
+
 
         public List<Unit> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
         {
@@ -4050,6 +4064,7 @@ namespace Game.Entities
     public struct FindCreatureOptions
     {
         public FindCreatureOptions SetCreatureId(uint creatureId) { CreatureId = creatureId; return this; }
+        public FindCreatureOptions SetStringId(string stringId) { StringId = stringId; return this; }
 
         public FindCreatureOptions SetIsAlive(bool isAlive) { IsAlive = isAlive; return this; }
         public FindCreatureOptions SetIsInCombat(bool isInCombat) { IsInCombat = isInCombat; return this; }
@@ -4067,6 +4082,7 @@ namespace Game.Entities
         public FindCreatureOptions SetPrivateObjectOwner(ObjectGuid privateObjectOwnerGuid) { PrivateObjectOwnerGuid = privateObjectOwnerGuid; return this; }
 
         public uint? CreatureId;
+        public string StringId;
 
         public bool? IsAlive;
         public bool? IsInCombat;
