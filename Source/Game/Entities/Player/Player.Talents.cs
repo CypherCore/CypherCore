@@ -830,12 +830,12 @@ namespace Game.Entities
                             if (talentPointsForLevel > numTalentsAtLevel.NumTalents)
                                 talentPointsForLevel = numTalentsAtLevel.NumTalents;
 
-                            return talentPointsForLevel * (uint)WorldCfg.RateTalent;
+                            return talentPointsForLevel * WorldConfig.GetUIntValue(WorldCfg.RateTalent);
                         }
                     case Class.DemonHunter:
                         return numTalentsAtLevel.NumTalentsDemonHunter;
                     default:
-                        return numTalentsAtLevel.NumTalents * (uint)WorldCfg.RateTalent;
+                        return numTalentsAtLevel.NumTalents * WorldConfig.GetUIntValue(WorldCfg.RateTalent);
                 }
             }
 
