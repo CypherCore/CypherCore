@@ -155,7 +155,9 @@ namespace Game.Collision
             Vector3 pModel = iInvRot.Multiply(point - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
-            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
+
+            GroupLocationInfo groupInfo = new();
+            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
                 float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;

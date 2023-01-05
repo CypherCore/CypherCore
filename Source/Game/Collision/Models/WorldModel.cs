@@ -350,7 +350,7 @@ namespace Game.Collision
             return false;
         }
 
-        public bool GetLocationInfo(Vector3 p, Vector3 down, out float dist, LocationInfo info)
+        public bool GetLocationInfo(Vector3 p, Vector3 down, out float dist, GroupLocationInfo info)
         {
             dist = 0f;
             if (groupModels.Empty())

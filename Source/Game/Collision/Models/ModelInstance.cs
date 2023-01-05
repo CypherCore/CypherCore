@@ -194,7 +194,9 @@ namespace Game.Collision
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
-            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
+
+            GroupLocationInfo groupInfo = new();
+            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
                 // Transform back to world space. Note that:
@@ -203,6 +205,8 @@ namespace Game.Collision
                 float world_Z = (iInvRot.Multiply(modelGround * iScale) + iPos).Z;
                 if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
+                    info.rootId = groupInfo.rootId;
+                    info.hitModel = groupInfo.hitModel;
                     info.ground_Z = world_Z;
                     info.hitInstance = this;
                     return true;

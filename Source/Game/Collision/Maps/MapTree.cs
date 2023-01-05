@@ -24,6 +24,12 @@ using System.Numerics;
 
 namespace Game.Collision
 {
+    public class GroupLocationInfo
+    {
+        public GroupModel hitModel;
+        public int rootId = -1;
+    }
+
     public class LocationInfo
     {
         public LocationInfo()
