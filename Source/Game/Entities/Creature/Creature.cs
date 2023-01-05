@@ -2649,10 +2649,8 @@ namespace Game.Entities
         ulong GetMaxHealthByLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
-
-            return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateHealth(cInfo);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
@@ -2670,8 +2668,8 @@ namespace Game.Entities
         public float GetBaseDamageForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateBaseDamage(cInfo);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2687,9 +2685,8 @@ namespace Game.Entities
         float GetBaseArmorForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
-            return baseArmor * cInfo.ModArmor;
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateArmor(cInfo);
         }
 
         public override float GetArmorMultiplierForTarget(WorldObject target)
@@ -3197,6 +3194,11 @@ namespace Game.Entities
 
         public override SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return m_meleeDamageSchoolMask; }
         public void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = (SpellSchoolMask)(1 << (int)school); }
+        /// <summary>don't know the value of the mob block</summary>
+        public override uint GetShieldBlockValue()
+        {
+            return GetLevel() / 2 + (uint)(GetStat(Stats.Strength) / 20);
+        }
 
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }
         public byte GetCurrentEquipmentId() { return m_equipmentId; }

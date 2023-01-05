@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -922,6 +923,7 @@ namespace Game.Entities
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
             return Math.Max(chance, 0.0f);
         }
+
         float GetUnitParryChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
@@ -962,12 +964,14 @@ namespace Game.Entities
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
             return Math.Max(chance, 0.0f);
         }
+
         float GetUnitMissChance()
         {
             float miss_chance = 5.0f;
 
             return miss_chance;
         }
+
         float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
@@ -998,6 +1002,23 @@ namespace Game.Entities
 
             chance += levelBonus;
             return Math.Max(chance, 0.0f);
+        }
+
+        public abstract uint GetShieldBlockValue();        
+
+        public uint GetShieldBlockValue(uint soft_cap, uint hard_cap)
+        {
+            uint value = GetShieldBlockValue();
+            if (value >= hard_cap)
+            {
+                value = (soft_cap + hard_cap) / 2;
+            }
+            else if (value > soft_cap)
+            {
+                value = soft_cap + ((value - soft_cap) / 2);
+            }
+
+            return value;
         }
 
         public int GetMechanicResistChance(SpellInfo spellInfo)
@@ -1047,6 +1068,7 @@ namespace Game.Entities
             UpdateBlockPercentage();
             UpdateParryPercentage();
             UpdateDodgePercentage();
+            UpdateShieldBlockValue();
             UpdateSpellDamageAndHealingBonus();
             UpdateManaRegen();
             UpdateExpertise(WeaponAttackType.BaseAttack);
@@ -1073,6 +1095,9 @@ namespace Game.Entities
 
             switch (stat)
             {
+                case Stats.Strength:
+                    UpdateShieldBlockValue();
+                    break;
                 case Stats.Agility:
                     UpdateAllCritPercentages();
                     UpdateDodgePercentage();
@@ -1375,6 +1400,11 @@ namespace Game.Entities
                 if (guardian != null && guardian.IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
                     guardian.UpdateAttackPowerAndDamage();
             }
+        }
+
+        public void UpdateShieldBlockValue()
+        {
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), (int)GetShieldBlockValue());
         }
 
         public override void UpdateArmor()

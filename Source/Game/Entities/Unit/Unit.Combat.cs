@@ -33,7 +33,7 @@ using System.Linq;
 
 namespace Game.Entities
 {
-    public partial class Unit
+    public abstract partial class Unit
     {
         public virtual void AtEnterCombat()
         {
@@ -1156,8 +1156,8 @@ namespace Game.Entities
                 case MeleeHitOutcome.Block:
                     damageInfo.TargetState = VictimState.Hit;
                     damageInfo.HitInfo |= HitInfo.Block;
-                    // 30% damage blocked, double blocked amount if block is critical
-                    damageInfo.Blocked = MathFunctions.CalculatePct(damageInfo.Damage, damageInfo.Target.GetBlockPercent(GetLevel()));
+                    damageInfo.Blocked = damageInfo.Target.GetShieldBlockValue();
+                    // double blocked amount if block is critical
                     if (damageInfo.Target.IsBlockCritical())
                         damageInfo.Blocked *= 2;
 

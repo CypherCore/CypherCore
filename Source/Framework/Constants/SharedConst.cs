@@ -739,14 +739,15 @@ namespace Framework.Constants
         Classic = 0,
         BurningCrusade = 1,
         WrathOfTheLichKing = 2,
+        Max,
         Cataclysm = 3,
         MistsOfPandaria = 4,
         WarlordsOfDraenor = 5,
         Legion = 6,
         BattleForAzeroth = 7,
-        ShadowLands = 8,
-        Max,
+        ShadowLands = 8,       
 
+        Current = WrathOfTheLichKing,
         MaxAccountExpansions
     }
     public enum PowerType: sbyte

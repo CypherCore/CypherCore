@@ -595,7 +595,7 @@ namespace Game.Entities
                 CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
                 ApplyLevelScaling();
 
-                SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), (uint)m_unitData.ContentTuningID.GetValue(), (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
+                SetCreateHealth(stats.BaseHealth[cinfo.HealthScalingExpansion]);
                 SetCreateMana(stats.GenerateMana(cinfo));
 
                 SetCreateStat(Stats.Strength, 22);

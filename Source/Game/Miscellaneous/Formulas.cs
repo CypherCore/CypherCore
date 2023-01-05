@@ -229,15 +229,9 @@ namespace Game
             else if (level < 70)
                 return Expansion.BurningCrusade;
             else if (level < 80)
-                return Expansion.WrathOfTheLichKing;
-            else if (level < 85)
-                return Expansion.Cataclysm;
-            else if (level < 90)
-                return Expansion.MistsOfPandaria;
-            else if (level < 100)
-                return Expansion.WarlordsOfDraenor;
+                return Expansion.WrathOfTheLichKing;            
             else
-                return Expansion.Legion;
+                return Expansion.Current;
         }
 
         public static uint ConquestRatingCalculator(uint rate)

@@ -3838,6 +3838,9 @@ namespace Game.Entities
                     case ItemModType.SpellPenetration:
                         ApplySpellPenetrationBonus((int)val, apply);
                         break;
+                    case ItemModType.BlockValue:
+                        HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, (float)val, apply);
+                        break;
                     case ItemModType.MasteryRating:
                         ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                         break;

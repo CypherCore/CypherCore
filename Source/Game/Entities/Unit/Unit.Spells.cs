@@ -28,7 +28,7 @@ using System.Text;
 
 namespace Game.Entities
 {
-    public partial class Unit
+    public abstract partial class Unit
     {
         public virtual bool HasSpell(uint spellId) { return false; }
 
@@ -2001,10 +2001,10 @@ namespace Game.Entities
                         if (blocked)
                         {
                             // double blocked amount if block is critical
-                            float value = victim.GetBlockPercent(GetLevel());
+                            uint value = victim.GetShieldBlockValue();
                             if (victim.IsBlockCritical())
-                                value *= 2; // double blocked percent
-                            damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+                                value *= 2;
+                            damageInfo.blocked = value;
                             if (damage <= damageInfo.blocked)
                             {
                                 damageInfo.blocked = (uint)damage;

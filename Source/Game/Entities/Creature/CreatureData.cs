@@ -297,11 +297,19 @@ namespace Game.Entities
 
     public class CreatureBaseStats
     {
+        public uint[] BaseHealth = new uint[(int)Expansion.Max];
         public uint BaseMana;
+        public uint BaseArmor;
         public uint AttackPower;
         public uint RangedAttackPower;
+        public float[] BaseDamage = new float[(int)Expansion.Max];
 
         // Helpers
+        public uint GenerateHealth(CreatureTemplate info)
+        {
+            return (uint)Math.Ceiling(BaseHealth[info.HealthScalingExpansion] * info.ModHealth * info.ModHealthExtra);
+        }
+
         public uint GenerateMana(CreatureTemplate info)
         {
             // Mana can be 0.
@@ -309,6 +317,21 @@ namespace Game.Entities
                 return 0;
 
             return (uint)Math.Ceiling(BaseMana * info.ModMana * info.ModManaExtra);
+        }
+
+        public uint GenerateArmor(CreatureTemplate  info) 
+        {
+            return (uint)Math.Ceiling(BaseArmor* info.ModArmor);
+        }
+
+        public float GenerateBaseDamage(CreatureTemplate info)
+        {
+            return BaseDamage[info.HealthScalingExpansion];
+        }
+
+        public static CreatureBaseStats GetBaseStats(byte level, byte unitClass)
+        {
+            return Global.ObjectMgr.GetCreatureBaseStats(level, unitClass);
         }
     }
 

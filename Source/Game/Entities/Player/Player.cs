@@ -6291,6 +6291,9 @@ namespace Game.Entities
                 case BaseModGroup.OffhandCritPercentage:
                     UpdateCritPercentage(WeaponAttackType.OffAttack);
                     break;
+                case BaseModGroup.ShieldBlockValue:
+                    UpdateShieldBlockValue();
+                    break;
                 default:
                     break;
             }
@@ -6316,6 +6319,12 @@ namespace Game.Entities
             }
 
             return m_auraBaseFlatMod[(int)modGroup] * m_auraBasePctMod[(int)modGroup];
+        }
+
+        public override uint GetShieldBlockValue()
+        {
+            float value = Math.Max(0.0f, (m_auraBaseFlatMod[(int)BaseModGroup.ShieldBlockValue] + GetStat(Stats.Strength) * 0.5f - 10) * m_auraBasePctMod[(int)BaseModGroup.ShieldBlockValue]);
+            return (uint)value;
         }
 
         public byte GetDrunkValue() { return m_playerData.Inebriation; }

@@ -34,7 +34,7 @@ using System.Numerics;
 
 namespace Game.Entities
 {
-    public partial class Unit : WorldObject
+    public abstract partial class Unit : WorldObject
     {
         public Unit(bool isWorldObject) : base(isWorldObject)
         {
@@ -3714,6 +3714,12 @@ namespace Game.Entities
                 {
                     float arpPct = attacker.ToPlayer().GetRatingBonusValue(CombatRating.ArmorPenetration);
 
+                    Item weapon = attacker.ToPlayer().GetWeaponForAttack(attackType, true);
+                    arpPct += attacker.GetTotalAuraModifier(AuraType.ModArmorPenetrationPercent, bool (AuraEffect aurEff) => 
+                    {
+                        return aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon);
+                    });
+
                     // no more than 100%
                     MathFunctions.RoundToInterval(ref arpPct, 0.0f, 100.0f);
 
@@ -3733,20 +3739,15 @@ namespace Game.Entities
             if (MathFunctions.fuzzyLe(armor, 0.0f))
                 return damage;
 
-            Class attackerClass = Class.Warrior;
-            if (attacker != null)
-            {
-                attackerLevel = attacker.GetLevelForTarget(victim);
-                attackerClass = attacker.GetClass();
-            }
+            float levelModifier = attacker ? attacker.GetLevel() : attackerLevel;
+            if (levelModifier > 59.0f)
+                levelModifier = levelModifier + 4.5f * (levelModifier - 59.0f);
 
-            // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass);
-            if ((armor + armorConstant) == 0)
-                return damage;
+            float damageReduction = 0.1f * armor / (8.5f * levelModifier + 40.0f);
+            damageReduction /= (1.0f + damageReduction);
 
-            float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);
-            return (uint)Math.Max(damage * (1.0f - mitigation), 0.0f);
+            MathFunctions.RoundToInterval(ref damageReduction, 0.0f, 0.75f);
+            return (uint)Math.Ceiling(Math.Max(damage * (1.0f - damageReduction), 0.0f));
         }
 
         public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)

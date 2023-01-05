@@ -26,7 +26,7 @@ using System.Linq;
 
 namespace Game.Entities
 {
-    public partial class Unit
+    public abstract partial class Unit
     {
         public CharmInfo GetCharmInfo() { return m_charmInfo; }
 

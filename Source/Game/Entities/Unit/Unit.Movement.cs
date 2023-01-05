@@ -29,7 +29,7 @@ using System.Numerics;
 
 namespace Game.Entities
 {
-    public partial class Unit
+    public abstract partial class Unit
     {
         public bool IsGravityDisabled()
         {

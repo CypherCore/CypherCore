@@ -165,7 +165,7 @@ namespace Game.Entities
             }
 
             _duration = _lastLineEndTimes.Max();
-            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), (uint)_duration.TotalMilliseconds);
+            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), (int)_duration.TotalMilliseconds);
             SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Lines), lines);
 
             // conversations are despawned 5-20s after LastLineEndTime

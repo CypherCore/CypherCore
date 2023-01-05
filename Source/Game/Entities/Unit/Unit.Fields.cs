@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public partial class Unit
+    public abstract partial class Unit
     {
         //AI
         protected Stack<UnitAI> i_AIs = new();

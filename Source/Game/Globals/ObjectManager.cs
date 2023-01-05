@@ -2512,8 +2512,8 @@ namespace Game
 
             creatureBaseStatsStorage.Clear();
 
-            //                                         0      1      2         3            4
-            SQLResult result = DB.World.Query("SELECT level, class, basemana, attackpower, rangedattackpower FROM creature_classlevelstats");
+            //                                        0      1      2        3        4        5         6          7            8                  9            10           11
+            SQLResult result = DB.World.Query("SELECT level, class, basehp0, basehp1, basehp2, basemana, basearmor, attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2 FROM creature_classlevelstats");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature base stats. DB table `creature_classlevelstats` is empty.");
@@ -2531,9 +2531,28 @@ namespace Game
 
                 CreatureBaseStats stats = new();
 
-                stats.BaseMana = result.Read<uint>(2);
-                stats.AttackPower = result.Read<ushort>(3);
-                stats.RangedAttackPower = result.Read<ushort>(4);
+                for (int i = 0; i < (int)Expansion.Max; ++i)
+                {
+                    stats.BaseHealth[i] = result.Read<ushort>(2 + i);
+
+                    if (stats.BaseHealth[i] == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature base stats for class {_class}, level {Level} has invalid zero base HP[{i}] - set to 1");
+                        stats.BaseHealth[i] = 1;
+                    }
+
+                    stats.BaseDamage[i] = result.Read<float>(9 + i);
+                    if (stats.BaseDamage[i] < 0.0f)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature base stats for class {_class}, level {Level} has invalid negative base damage[{i}] - set to 0.0");
+                        stats.BaseDamage[i] = 0.0f;
+                    }
+                }
+
+                stats.BaseMana = result.Read<uint>(5);
+                stats.BaseArmor = result.Read<ushort>(6);
+                stats.AttackPower = result.Read<ushort>(7);
+                stats.RangedAttackPower = result.Read<ushort>(8);
 
                 creatureBaseStatsStorage.Add(MathFunctions.MakePair16(Level, _class), stats);
 
@@ -10516,23 +10535,11 @@ namespace Game
             switch (expansion)
             {
                 case Expansion.Classic:
-                    return 30;
-                case Expansion.BurningCrusade:
-                    return 30;
-                case Expansion.WrathOfTheLichKing:
-                    return 30;
-                case Expansion.Cataclysm:
-                    return 35;
-                case Expansion.MistsOfPandaria:
-                    return 35;
-                case Expansion.WarlordsOfDraenor:
-                    return 40;
-                case Expansion.Legion:
-                    return 45;
-                case Expansion.BattleForAzeroth:
-                    return 50;
-                case Expansion.ShadowLands:
                     return 60;
+                case Expansion.BurningCrusade:
+                    return 70;
+                case Expansion.WrathOfTheLichKing:
+                    return 80;
                 default:
                     break;
             }
@@ -12030,6 +12037,12 @@ namespace Game
     {
         public DefaultCreatureBaseStats()
         {
+            BaseArmor = 1;
+            for (int j = 0; j < (int)Expansion.Max; ++j)
+            {
+                BaseHealth[j] = 1;
+                BaseDamage[j] = 0.0f;
+            }
             BaseMana = 0;
             AttackPower = 0;
             RangedAttackPower = 0;
