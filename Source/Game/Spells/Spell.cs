@@ -5901,6 +5901,7 @@ namespace Game.Spells
                     switch (auraType)
                     {
                         case AuraType.ModStun:
+                        case AuraType.ModStunDisableGravity:
                             return SpellCastResult.Stunned;
                         case AuraType.ModFear:
                             return SpellCastResult.Fleeing;
@@ -5939,6 +5940,12 @@ namespace Game.Spells
                     SpellCastResult mechanicResult = mechanicCheck(AuraType.ModFear, ref param1);
                     if (mechanicResult != SpellCastResult.SpellCastOk)
                         result = mechanicResult;
+                    else
+                    {
+                        mechanicResult = mechanicCheck(AuraType.ModStunDisableGravity, ref param1);
+                        if (mechanicResult != SpellCastResult.SpellCastOk)
+                            result = mechanicResult;
+                    }
                 }
                 else if (!CheckSpellCancelsFear(ref param1))
                     result = SpellCastResult.Fleeing;

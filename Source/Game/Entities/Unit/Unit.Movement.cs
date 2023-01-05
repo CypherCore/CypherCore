@@ -1216,7 +1216,7 @@ namespace Game.Entities
                 switch (state)
                 {
                     case UnitState.Stunned:
-                        if (HasAuraType(AuraType.ModStun))
+                        if (HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
                             return;
 
                         ClearUnitState(state);
@@ -1255,7 +1255,7 @@ namespace Game.Entities
         void ApplyControlStatesIfNeeded()
         {
             // Unit States might have been already cleared but auras still present. I need to check with HasAuraType
-            if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun))
+            if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
                 SetStunned(true);
 
             if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))

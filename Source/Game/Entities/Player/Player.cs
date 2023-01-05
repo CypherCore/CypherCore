@@ -5240,7 +5240,7 @@ namespace Game.Entities
                     auraList.First().HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
             }
 
-            if (HasAuraType(AuraType.ModStun))
+            if (HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
                 SetRooted(true);
 
             MoveSetCompoundState setCompoundState = new();

@@ -2467,6 +2467,31 @@ namespace Game.Spells
             target.SetControlled(false, UnitState.Fleeing);
         }
 
+        [AuraEffectHandler(AuraType.ModStunDisableGravity)]
+        void HandleAuraModStunAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            target.SetControlled(apply, UnitState.Stunned);
+
+            if (apply)
+                target.GetThreatManager().EvaluateSuppressed();
+
+            // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
+            if (!apply
+                && (target.HasAuraType(GetAuraType())
+                    || target.HasAuraType(AuraType.ModStunDisableGravity)
+                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+                return;
+
+            if (target.SetDisableGravity(apply))
+                if (!apply && !target.IsFlying())
+                    target.GetMotionMaster().MoveFall();
+        }
+
         /***************************/
         /***        CHARM        ***/
         /***************************/
@@ -3245,7 +3270,7 @@ namespace Game.Spells
 
             aurApp.GetTarget().UpdateArmor();
         }
-        
+
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
         void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4646,7 +4671,7 @@ namespace Game.Spells
                 target.RemoveUnitFlag3(UnitFlags3.AlternativeDefaultLanguage);
             }
         }
-        
+
         [AuraEffectHandler(AuraType.Linked)]
         void HandleAuraLinked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5762,7 +5787,7 @@ namespace Game.Spells
                 }
             }
         }
-        
+
         [AuraEffectHandler(AuraType.SetFFAPvp)]
         void HandleSetFFAPvP(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
