@@ -39,7 +39,7 @@ namespace Game.Entities
                 if (pair.Value.State == SkillState.Deleted || skillInfoField.SkillRank[pair.Value.Pos] == 0)
                     continue;
 
-                uint pskill = pair.Key;
+                SkillType pskill = pair.Key;
                 SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(pskill, GetRace(), GetClass());
                 if (rcEntry == null)
                     continue;
@@ -76,7 +76,7 @@ namespace Game.Entities
             return (ushort)(result < 0 ? 0 : result);
         }
 
-        ushort GetMaxSkillValue(SkillType skill)
+        public ushort GetMaxSkillValue(SkillType skill)
         {
             if (skill == 0)
                 return 0;
@@ -367,23 +367,23 @@ namespace Game.Entities
             uint i = 0;
             foreach (SkillLineRecord skillLine in CliDB.SkillLineStorage.Values)
             {
-                SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillLine.Id, GetRace(), GetClass());
+                SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)skillLine.Id, GetRace(), GetClass());
                 if (rcEntry != null)
                 {
                     SetSkillLineId(i, (ushort)skillLine.Id);
                     SetSkillStartingRank(i, 1);
-                    mSkillStatus.Add(skillLine.Id, new SkillStatusData(i, SkillState.Unchanged));
+                    mSkillStatus.Add((SkillType)skillLine.Id, new SkillStatusData(i, SkillState.Unchanged));
                     if (++i >= SkillConst.MaxPlayerSkills)
                         break;
                 }
             }
         }
 
-        public bool UpdateSkillPro(SkillType skillId, int chance, uint step)
-        {
-            return UpdateSkillPro((uint)skillId, chance, step);
-        }
         public bool UpdateSkillPro(uint skillId, int chance, uint step)
+        {
+            return UpdateSkillPro((SkillType)skillId, chance, step);
+        }
+        public bool UpdateSkillPro(SkillType skillId, int chance, uint step)
         {
             // levels sync. with spell requirement for skill levels to learn
             // bonus abilities in sSkillLineAbilityStore
@@ -436,11 +436,11 @@ namespace Game.Entities
             }
 
             UpdateSkillEnchantments(skillId, value, new_value);
-            UpdateCriteria(CriteriaType.SkillRaised, skillId);
+            UpdateCriteria(CriteriaType.SkillRaised, (ulong)skillId);
             Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:F3}% taken", chance / 10.0f);
             return true;
         }
-        void UpdateSkillEnchantments(uint skill_id, ushort curr_value, ushort new_value)
+        void UpdateSkillEnchantments(SkillType skill_id, ushort curr_value, ushort new_value)
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {
@@ -456,7 +456,7 @@ namespace Game.Entities
                         if (Enchant == null)
                             return;
 
-                        if (Enchant.RequiredSkillID == skill_id)
+                        if (Enchant.RequiredSkillID == (ushort)skill_id)
                         {
                             // Checks if the enchantment needs to be applied or removed
                             if (curr_value < Enchant.RequiredSkillRank && new_value >= Enchant.RequiredSkillRank)
@@ -472,7 +472,7 @@ namespace Game.Entities
                         {
                             SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(m_items[i].GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
 
-                            if (pPrismaticEnchant != null && pPrismaticEnchant.RequiredSkillID == skill_id)
+                            if (pPrismaticEnchant != null && pPrismaticEnchant.RequiredSkillID == (ushort)skill_id)
                             {
                                 if (curr_value < pPrismaticEnchant.RequiredSkillRank && new_value >= pPrismaticEnchant.RequiredSkillRank)
                                     ApplyEnchantment(m_items[i], slot, true);
@@ -1092,11 +1092,13 @@ namespace Game.Entities
             var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
             return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
         }
-        public void SetSkill(SkillType skill, uint step, uint newVal, uint maxVal)
+
+        public void SetSkill(uint skill, uint step, uint newVal, uint maxVal)
         {
-            SetSkill((uint)skill, step, newVal, maxVal);
+            SetSkill((SkillType)skill, step, newVal, maxVal);
         }
-        public void SetSkill(uint id, uint step, uint newVal, uint maxVal)
+
+        public void SetSkill(SkillType id, uint step, uint newVal, uint maxVal)
         {
             if (id == 0)
                 return;
@@ -1128,12 +1130,12 @@ namespace Game.Entities
                     if (newVal > currVal)
                     {
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
-                        if (id == (uint)SkillType.Riding)
+                        if (id == SkillType.Riding)
                             UpdateMountCapability();
                     }
 
-                    UpdateCriteria(CriteriaType.SkillRaised, id);
-                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
+                    UpdateCriteria(CriteriaType.SkillRaised, (ulong)id);
+                    UpdateCriteria(CriteriaType.AchieveSkillStep, (ulong)id);
 
                     // update skill state
                     if (skillStatusData.State == SkillState.Unchanged)
@@ -1172,15 +1174,15 @@ namespace Game.Entities
                     {
                         foreach (SkillLineRecord childSkillLine in childSkillLines)
                         {
-                            if (childSkillLine.ParentSkillLineID == id)
+                            if ((SkillType)childSkillLine.ParentSkillLineID == id)
                                 SetSkill(childSkillLine.Id, 0, 0, 0);
                         }
                     }
 
                     // Clear profession lines
-                    if (m_activePlayerData.ProfessionSkillLine[0] == id)
+                    if ((SkillType)m_activePlayerData.ProfessionSkillLine[0] == id)
                         SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 0), 0);
-                    else if (m_activePlayerData.ProfessionSkillLine[1] == id)
+                    else if ((SkillType)m_activePlayerData.ProfessionSkillLine[1] == id)
                         SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 1), 0);
                 }
             }
@@ -1216,7 +1218,7 @@ namespace Game.Entities
                 {
                     if (skillEntry.ParentTierIndex > 0)
                     {
-                        SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
+                        SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)skillEntry.ParentSkillLineID, GetRace(), GetClass());
                         if (rcEntry != null)
                         {
                             SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
@@ -1265,22 +1267,22 @@ namespace Game.Entities
                 {
                     // temporary bonuses
                     foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill))
-                        if (auraEffect.GetMiscValue() == id)
+                        if ((SkillType)auraEffect.GetMiscValue() == id)
                             auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
                     foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill2))
-                        if (auraEffect.GetMiscValue() == id)
+                        if ((SkillType)auraEffect.GetMiscValue() == id)
                             auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
                     // permanent bonuses
                     foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkillTalent))
-                        if (auraEffect.GetMiscValue() == id)
+                        if ((SkillType)auraEffect.GetMiscValue() == id)
                             auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
                     // Learn all spells for skill
                     LearnSkillRewardedSpells(id, newVal, GetRace());
-                    UpdateCriteria(CriteriaType.SkillRaised, id);
-                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
+                    UpdateCriteria(CriteriaType.SkillRaised, (ulong)id);
+                    UpdateCriteria(CriteriaType.AchieveSkillStep, (ulong)id);
                 }
             }
         }
@@ -1623,13 +1625,18 @@ namespace Game.Entities
 
         public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
         {
+            LearnSkillRewardedSpells((SkillType)skillId, skillValue, race);
+        }
+            
+        public void LearnSkillRewardedSpells(SkillType skillId, uint skillValue, Race race)
+        {
             long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = GetClassMask();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
             foreach (var ability in skillLineAbilities)
             {
-                if (ability.SkillLine != skillId)
+                if ((SkillType)ability.SkillLine != skillId)
                     continue;
 
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.Spell, Difficulty.None);
@@ -1651,7 +1658,7 @@ namespace Game.Entities
                 }
 
                 // AcquireMethod == 2 && NumSkillUps == 1 -. automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
-                if (skillId == (uint)SkillType.Riding && (ability.AcquireMethod != AbilityLearnType.OnSkillLearn || ability.NumSkillUps != 1))
+                if (skillId == SkillType.Riding && (ability.AcquireMethod != AbilityLearnType.OnSkillLearn || ability.NumSkillUps != 1))
                     continue;
 
                 // Check race if set
@@ -1678,7 +1685,7 @@ namespace Game.Entities
             }
         }
 
-        int FindProfessionSlotFor(uint skillId)
+        int FindProfessionSlotFor(SkillType skillId)
         {
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillEntry == null)
@@ -2684,7 +2691,7 @@ namespace Game.Entities
                     if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill((SkillType)_spell_idx.SkillLine))
                         || ((_spell_idx.SkillLine == (int)SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
                     {
-                        SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass());
+                        SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)_spell_idx.SkillLine, GetRace(), GetClass());
                         if (rcInfo != null)
                             LearnDefaultSkill(rcInfo);
                     }

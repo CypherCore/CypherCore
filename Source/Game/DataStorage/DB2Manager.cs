@@ -1844,17 +1844,17 @@ namespace Game.DataStorage
             return _chrCustomizationChoicesForShapeshifts.LookupByKey(Tuple.Create((byte)race, (byte)gender, (byte)form));
         }
 
-        public List<SkillLineRecord> GetSkillLinesForParentSkill(uint parentSkillId)
+        public List<SkillLineRecord> GetSkillLinesForParentSkill(SkillType parentSkillId)
         {
             return _skillLinesByParentSkillLine.LookupByKey(parentSkillId);
         }
 
-        public List<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(uint skillId)
+        public List<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(SkillType skillId)
         {
             return _skillLineAbilitiesBySkillupSkill.LookupByKey(skillId);
         }
 
-        public SkillRaceClassInfoRecord GetSkillRaceClassInfo(uint skill, Race race, Class class_)
+        public SkillRaceClassInfoRecord GetSkillRaceClassInfo(SkillType skill, Race race, Class class_)
         {
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var record in bounds)

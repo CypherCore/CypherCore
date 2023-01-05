@@ -1493,8 +1493,24 @@ namespace Game.Entities
             // For melee/ranged based attack need update skills and set some Aura states if victim present
             if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
             {
+                // Update skills here for players
+                // only when you are not fighting other players or their pets/totems (pvp)
+                if (IsPlayer() && !procTarget.IsPlayer() &&
+                    !(procTarget.IsTotem() && procTarget.ToTotem().GetOwner().IsPlayer()) && !procTarget.IsPet())
+                {
+                    // On melee based hit/miss/resist need update skill (for victim and attacker)
+                    if ((hitMask & (ProcFlagsHit.Normal | ProcFlagsHit.Miss | ProcFlagsHit.FullResist)) != 0)
+                    {
+                        if (!procTarget.IsPlayer() && !procTarget.IsCritter())
+                            ToPlayer().UpdateCombatSkills(procTarget, attType, isVictim);
+                    }
+                    // Update defense if player is victim and parry/dodge/block
+                    else if (isVictim && ((hitMask & (ProcFlagsHit.Dodge | ProcFlagsHit.Parry | ProcFlagsHit.Block)) != 0))
+                        ToPlayer().UpdateCombatSkills(procTarget, attType, true);
+                }
+
                 // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
-                if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
+                if ((hitMask & (ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block)) != 0)
                 {
                     // for victim
                     if (isVictim)

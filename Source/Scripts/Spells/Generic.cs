@@ -942,7 +942,7 @@ namespace Scripts.Spells.Generic
             if (player == null)
                 return;
 
-            foreach (uint racialSkillId in RacialSkills)
+            foreach (SkillType racialSkillId in RacialSkills)
             {
                 if (Global.DB2Mgr.GetSkillRaceClassInfo(racialSkillId, oldRace, player.GetClass()) != null)
                 {

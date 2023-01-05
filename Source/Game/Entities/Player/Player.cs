@@ -39,6 +39,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -3424,7 +3425,7 @@ namespace Game.Entities
                     break;
                 }
             }
-        }
+        }        
 
         bool IsImmuneToEnvironmentalDamage()
         {
@@ -6779,7 +6780,7 @@ namespace Game.Entities
                     continue;
 
                 // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
-                if (Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass()) == null)
+                if (Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)_spell_idx.SkillLine, GetRace(), GetClass()) == null)
                     continue;
 
                 return true;

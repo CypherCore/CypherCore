@@ -329,7 +329,7 @@ namespace Game.Entities
         {
             Race race = GetRace();
             uint count = 0;
-            Dictionary<uint, uint> loadedSkillValues = new();
+            Dictionary<SkillType, uint> loadedSkillValues = new();
             if (!result.IsEmpty())
             {
                 do
@@ -340,7 +340,7 @@ namespace Game.Entities
                         break;
                     }
 
-                    var skill = result.Read<ushort>(0);
+                    var skill = (SkillType)result.Read<ushort>(0);
                     var value = result.Read<ushort>(1);
                     var max = result.Read<ushort>(2);
 
@@ -388,13 +388,13 @@ namespace Game.Entities
                             {
                                 int professionSlot = FindProfessionSlotFor(skill);
                                 if (professionSlot != -1)
-                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, professionSlot), (int)skill);
                             }
                         }
                     }
 
 
-                    SetSkillLineId(skillStatusData.Pos, skill);
+                    SetSkillLineId(skillStatusData.Pos, (ushort)skill);
                     SetSkillStep(skillStatusData.Pos, step);
                     SetSkillRank(skillStatusData.Pos, value);
                     SetSkillStartingRank(skillStatusData.Pos, 1);
@@ -422,7 +422,7 @@ namespace Game.Entities
                         {
                             SetSkillLineId(count, (ushort)childItr.Id);
                             SetSkillStartingRank(count, 1);
-                            mSkillStatus.Add(childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
+                            mSkillStatus.Add((SkillType)childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
                         }
                     }
                 }
@@ -1671,7 +1671,7 @@ namespace Game.Entities
                     case SkillState.Deleted:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL);
                         stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, pair.Key);
+                        stmt.AddValue(1, (ushort)pair.Key);
                         trans.Append(stmt);
                         break;
                     default:

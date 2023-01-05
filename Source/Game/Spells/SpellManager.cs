@@ -1799,7 +1799,7 @@ namespace Game.Entities
                     if (creatureFamily.SkillLine[j] == 0)
                         continue;
 
-                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill((uint)creatureFamily.SkillLine[j]);
+                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill((SkillType)creatureFamily.SkillLine[j]);
                     if (skillLineAbilities == null)
                         continue;
 

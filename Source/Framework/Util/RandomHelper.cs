@@ -74,13 +74,13 @@ public class RandomHelper
     }
 
     /// <summary>
-    /// Returns true if rand.Next less then i
+    /// Returns true if rand.Next less then chance
     /// </summary>
-    /// <param name="i"></param>
+    /// <param name="chance"></param>
     /// <returns></returns>
-    public static bool randChance(float i)
+    public static bool randChance(float chance)
     {
-        return i > randChance();
+        return chance > randChance();
     }
 
     public static double randChance()

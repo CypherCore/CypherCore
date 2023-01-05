@@ -115,7 +115,7 @@ namespace Game.Entities
 
         //Spell
         Dictionary<uint, PlayerSpell> m_spells = new();
-        Dictionary<uint, SkillStatusData> mSkillStatus = new();
+        Dictionary<SkillType, SkillStatusData> mSkillStatus = new();
         Dictionary<uint, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
         MultiMap<uint, uint> m_overrideSpells = new();

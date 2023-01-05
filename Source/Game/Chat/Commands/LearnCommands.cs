@@ -110,7 +110,7 @@ namespace Game.Chat.Commands
                 Player target = player.GetConnectedPlayer();
                 foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
                     if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink != 0) // only prof. with recipes have
-                        HandleLearnSkillRecipesHelper(target, skillInfo.Id);
+                        HandleLearnSkillRecipesHelper(target, (SkillType)skillInfo.Id);
 
                 handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
                 return true;
@@ -165,7 +165,7 @@ namespace Game.Chat.Commands
                     return false;
 
                 string name = "";
-                uint skillId = 0;
+                SkillType skillId = 0;
                 foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
                 {
                     if ((skillInfo.CategoryID != SkillCategory.Profession &&
@@ -194,7 +194,7 @@ namespace Game.Chat.Commands
 
                     if (locale < Locale.Total)
                     {
-                        skillId = skillInfo.Id;
+                        skillId = (SkillType)skillInfo.Id;
                         break;
                     }
                 }
@@ -258,7 +258,7 @@ namespace Game.Chat.Commands
             [Command("pettalents", CypherStrings.CommandLearnAllPettalentHelp, RBACPermissions.CommandLearnMyPetTalents)]
             static bool HandleLearnAllPetTalentsCommand(CommandHandler handler) { return true; }
 
-            static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
+            static void HandleLearnSkillRecipesHelper(Player player, SkillType skillId)
             {
                 uint classmask = player.GetClassMask();
 

@@ -1933,7 +1933,7 @@ namespace Game.Spells
             if (damage < 1)
                 return;
 
-            uint skillid = (uint)effectInfo.MiscValue;
+            SkillType skillid = (SkillType)effectInfo.MiscValue;
             SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, unitTarget.GetRace(), unitTarget.GetClass());
             if (rcEntry == null)
                 return;

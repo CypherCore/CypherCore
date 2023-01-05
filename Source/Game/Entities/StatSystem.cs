@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
@@ -23,6 +24,7 @@ using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -1021,6 +1023,21 @@ namespace Game.Entities
             return value;
         }
 
+        public ushort GetDefenseSkillValue(Unit target = null)
+        {
+            if (GetTypeId() == TypeId.Player)
+            {
+                // in PvP use full skill instead current skill value
+                ushort value = (target && target.GetTypeId() == TypeId.Player)
+                        ? ToPlayer().GetMaxSkillValue(SkillType.Defense)
+                        : ToPlayer().GetSkillValue(SkillType.Defense);
+                value += (ushort)ToPlayer().GetRatingBonusValue(CombatRating.DefenseSkill);
+                return value;
+            }
+            else
+                return GetMaxSkillValueForLevel(target);
+        }
+
         public int GetMechanicResistChance(SpellInfo spellInfo)
         {
             if (spellInfo == null)
@@ -1129,6 +1146,40 @@ namespace Game.Entities
             return true;
         }
 
+        //skill+step, checking for max value
+        bool UpdateSkill(SkillType skill_id, ushort step)
+        {
+            if (skill_id == SkillType.None)
+                return false;
+
+            var itr = mSkillStatus.LookupByKey(skill_id);
+            if (itr == null || itr.State == SkillState.Deleted)
+                return false;
+
+            ushort value = m_activePlayerData.Skill.GetValue().SkillRank[itr.Pos];
+            ushort max = m_activePlayerData.Skill.GetValue().SkillMaxRank[itr.Pos];
+
+            if ((max == 0) || (value == 0) || (value >= max))
+                return false;
+
+            if (value < max)
+            {
+                ushort new_value = (ushort)(value + step);
+                if (new_value > max)
+                    new_value = max;
+
+                SetSkillRank(itr.Pos, new_value);
+                if (itr.State != SkillState.New)
+                    itr.State = SkillState.Changed;
+
+                UpdateSkillEnchantments(skill_id, value, new_value);
+                UpdateCriteria(CriteriaType.SkillRaised, (ulong)skill_id);
+                return true;
+            }
+
+            return false;
+        }
+
         public override void UpdateResistances(SpellSchools school)
         {
             if (school > SpellSchools.Normal)
@@ -1142,6 +1193,111 @@ namespace Game.Entities
             else
                 UpdateArmor();
         }
+
+        public void UpdateDefense()
+        {
+            if (UpdateSkill(SkillType.Defense, (ushort)WorldConfig.GetIntValue(WorldCfg.SkillGainDefense)))
+                UpdateDefenseBonusesMod(); // update dependent from defense skill part
+        }
+
+        void UpdateWeaponSkill(Unit victim, WeaponAttackType attType)
+        {
+            if (IsInFeralForm())
+                return;                                             // always maximized SKILL_FERAL_COMBAT in fact
+
+            if (GetShapeshiftForm() == ShapeShiftForm.TreeOfLife)
+                return;                                             // use weapon but not skill up
+
+            if (victim.GetTypeId() == TypeId.Unit && (victim.ToCreature().GetCreatureTemplate().FlagsExtra & CreatureFlagsExtra.NoSkillGains) != 0)
+                return;
+
+            ushort weapon_skill_gain = (ushort)WorldConfig.GetUIntValue(WorldCfg.SkillGainWeapon);
+
+            Item tmpitem = GetWeaponForAttack(attType, true);
+            if (!tmpitem && attType == WeaponAttackType.BaseAttack)
+            {
+                // Keep unarmed & fist weapon skills in sync
+                UpdateSkill(SkillType.Unarmed, weapon_skill_gain);
+                UpdateSkill(SkillType.FistWeapons, weapon_skill_gain);
+            }
+            else if (tmpitem)
+            {
+                switch ((ItemSubClassWeapon)tmpitem.GetTemplate().GetSubClass())
+                {
+                    case ItemSubClassWeapon.FishingPole:
+                    case ItemSubClassWeapon.Fist:
+                    case ItemSubClassWeapon.Miscellaneous:
+                        UpdateSkill(SkillType.Unarmed, weapon_skill_gain);
+                        break;
+                    default:
+                        UpdateSkill(tmpitem.GetSkill(), weapon_skill_gain);
+                        break;
+                }
+            }
+
+            UpdateAllCritPercentages();
+        }
+
+        public void UpdateCombatSkills(Unit victim, WeaponAttackType attType, bool defense)
+        {
+            uint plevel = GetLevel();                              // if defense than victim == attacker
+            uint greylevel = Formulas.GetGrayLevel(plevel);
+            uint moblevel = victim.GetLevelForTarget(this);
+
+            if (moblevel > plevel + 5)
+                moblevel = plevel + 5;
+
+            uint lvldif = moblevel - greylevel;
+            if (lvldif < 3)
+                lvldif = 3;
+
+            uint skilldif = 5 * plevel - (defense ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
+            if (skilldif <= 0)
+                return;
+
+            float chance = (float)(3 * lvldif * skilldif) / plevel;
+            if (!defense)
+                if (GetClass() == Class.Warrior || GetClass() == Class.Rogue)
+                    chance += chance * 0.02f * GetStat(Stats.Intellect);
+
+            chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%
+
+            if (RandomHelper.randChance(chance))
+            {
+                if (defense)
+                    UpdateDefense();
+                else
+                    UpdateWeaponSkill(victim, attType);
+            }
+            else
+                return;
+        }
+
+        ushort GetBaseWeaponSkillValue(WeaponAttackType attType)
+        {
+            Item item = GetWeaponForAttack(attType, true);
+
+            // unarmed only with base attack
+            if (attType != WeaponAttackType.BaseAttack && item == null)
+                return 0;
+
+            // weapon skill or (unarmed for base attack)
+            SkillType skill = item ? item.GetSkill() : SkillType.Unarmed;
+            return GetBaseSkillValue(skill);
+        }
+
+        public ushort GetBaseDefenseSkillValue() 
+        { 
+            return GetBaseSkillValue(SkillType.Defense); 
+        }
+
+        void UpdateDefenseBonusesMod()
+        {
+            UpdateBlockPercentage();
+            UpdateParryPercentage();
+            UpdateDodgePercentage();
+        }
+
 
         public void ApplyModTargetResistance(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetResistance), mod, apply); }
         public void ApplyModTargetPhysicalResistance(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetPhysicalResistance), mod, apply); }
@@ -1717,6 +1873,9 @@ namespace Game.Entities
                 float nondiminishing = 5.0f;
                 // Parry from rating
                 float diminishing = GetRatingBonusValue(CombatRating.Parry);
+                // Modify value from defense skill (only bonus from defense rating diminishes)
+                nondiminishing += (GetSkillValue(SkillType.Defense) - GetMaxSkillValueForLevel()) * 0.04f;
+                diminishing += GetRatingBonusValue(CombatRating.DefenseSkill) * 0.04f;
                 // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
                 nondiminishing += GetTotalAuraModifier(AuraType.ModParryPercent);
 
@@ -1749,6 +1908,9 @@ namespace Game.Entities
         {
             float diminishing = 0.0f, nondiminishing = 0.0f;
             GetDodgeFromAgility(diminishing, nondiminishing);
+            // Modify value from defense skill (only bonus from defense rating diminishes)
+            nondiminishing += (GetSkillValue(SkillType.Defense) - GetMaxSkillValueForLevel()) * 0.04f;
+            diminishing += GetRatingBonusValue(CombatRating.DefenseSkill) * 0.04f;
             // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
             nondiminishing += GetTotalAuraModifier(AuraType.ModDodgePercent);
             // Dodge from rating
@@ -1770,6 +1932,8 @@ namespace Game.Entities
             {
                 // Base value
                 value = 5.0f;
+                // Modify value from defense skill
+                value += (GetDefenseSkillValue() - GetMaxSkillValueForLevel()) * 0.04f;
                 // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
                 value += GetTotalAuraModifier(AuraType.ModBlockPercent);
                 // Increase from rating

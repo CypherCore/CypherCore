@@ -23,7 +23,7 @@ namespace Framework.Constants
         public const uint MaxSkillStep = 15;
     }
 
-    public enum SkillType
+    public enum SkillType : ushort
     {
         None = 0,
 
