@@ -31,8 +31,8 @@ namespace Game.Misc
     public class GossipMenu
     {
         public uint AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, uint language,
-            GossipOptionFlags flags, int? gossipNpcOptionId, bool boxCoded, uint boxMoney, string boxText, int? spellId,
-            int? overrideIconId, uint sender, uint action)
+            GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, uint boxMoney,
+            string boxText, int? spellId, int? overrideIconId, uint sender, uint action)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
@@ -77,6 +77,8 @@ namespace Game.Misc
             menuItem.BoxText = boxText;
             menuItem.SpellID = spellId;
             menuItem.OverrideIconID = overrideIconId;
+            menuItem.ActionMenuID = actionMenuId;
+            menuItem.ActionPoiID = actionPoiId;
             menuItem.Sender = sender;
             menuItem.Action = action;
 
@@ -147,15 +149,8 @@ namespace Game.Misc
             }
 
             AddMenuItem(menuItem.GossipOptionID, (int)menuItem.OrderIndex, menuItem.OptionNpc, strOptionText, menuItem.Language, menuItem.Flags,
-                menuItem.GossipNpcOptionID, menuItem.BoxCoded, menuItem.BoxMoney, strBoxText, menuItem.SpellID, (int)menuItem.OverrideIconID, sender, action);
-            AddGossipMenuItemData(menuItem.OrderIndex, menuItem.ActionMenuID, menuItem.ActionPoiID);
-        }
-
-        public void AddGossipMenuItemData(uint menuItemId, uint gossipActionMenuId, uint gossipActionPoi)
-        {
-            GossipMenuItem menuItem = _menuItems[menuItemId];
-            menuItem.ActionMenuID = gossipActionMenuId;
-            menuItem.ActionPoiID = gossipActionPoi;
+                menuItem.GossipNpcOptionID, menuItem.ActionMenuID, menuItem.ActionPoiID, menuItem.BoxCoded, menuItem.BoxMoney, strBoxText,
+                menuItem.SpellID, menuItem.OverrideIconID, sender, action);
         }
 
         public GossipMenuItem GetItem(int gossipOptionId)

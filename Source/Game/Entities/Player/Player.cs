@@ -7365,11 +7365,11 @@ namespace Game.Entities
         //Helpers
         public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action) 
         {
-            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, false, 0, "", null, null, sender, action);
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
         public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded) 
         {
-            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, coded, popupMoney, popupText, null, null, sender, action);
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }
         public void AddGossipItem(uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
         {
