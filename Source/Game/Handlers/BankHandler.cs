@@ -31,7 +31,7 @@ namespace Game
         {
             if (!CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleAutoBankItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace Game
         {
             if (!CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleAutoBankItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -216,7 +216,7 @@ namespace Game
         {
             if (!CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankReagentOpcode - {m_currentBankerGUID} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankReagentOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -253,7 +253,7 @@ namespace Game
         {
             if (!CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankReagentOpcode - {m_currentBankerGUID} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAutoBankReagentOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -297,6 +297,8 @@ namespace Game
 
         public void SendShowBank(ObjectGuid guid)
         {
+            _player.PlayerTalkClass.GetInteractionData().Reset();
+            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
             NPCInteractionOpenResult npcInteraction = new();
             npcInteraction.Npc = guid;
             npcInteraction.InteractionType = PlayerInteractionType.Banker;

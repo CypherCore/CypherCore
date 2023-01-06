@@ -89,13 +89,13 @@ namespace Game
 
             if (Player.IsBankPos(InventorySlots.Bag0, swapInvItem.Slot1) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSwapInvItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
             if (Player.IsBankPos(InventorySlots.Bag0, swapInvItem.Slot2) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSwapInvItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -155,13 +155,13 @@ namespace Game
 
             if (Player.IsBankPos(swapItem.ContainerSlotA, swapItem.SlotA) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSwapInvItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
             if (Player.IsBankPos(swapItem.ContainerSlotB, swapItem.SlotB) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSwapInvItemOpcode - {0} not found or you can't interact with him.", m_currentBankerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -1039,9 +1039,9 @@ namespace Game
         {
             // bankerGUID parameter is optional, set to 0 by default.
             if (bankerGUID.IsEmpty())
-                bankerGUID = m_currentBankerGUID;
+                bankerGUID = _player.PlayerTalkClass.GetInteractionData().SourceGuid;
 
-            bool isUsingBankCommand = (bankerGUID == GetPlayer().GetGUID() && bankerGUID == m_currentBankerGUID);
+            bool isUsingBankCommand = bankerGUID == GetPlayer().GetGUID() && bankerGUID == _player.PlayerTalkClass.GetInteractionData().SourceGuid;
 
             if (!isUsingBankCommand)
             {

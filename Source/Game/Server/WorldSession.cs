@@ -56,7 +56,6 @@ namespace Game
             recruiterId = recruiter;
             isRecruiter = isARecruiter;
             expireTime = 60000; // 1 min after socket loss, session is deleted
-            m_currentBankerGUID = ObjectGuid.Empty;
             _battlePetMgr = new BattlePetMgr(this);
             _collectionMgr = new CollectionMgr(this);
 
@@ -994,8 +993,6 @@ namespace Game
 
         ConcurrentQueue<WorldPacket> _recvQueue = new();
         RBACData _RBACData;
-
-        ObjectGuid m_currentBankerGUID;
 
         CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
         long _timeSyncClockDelta;
