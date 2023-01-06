@@ -323,7 +323,7 @@ namespace Framework.Constants
         FFAPvP = 0x40
     }
 
-    public enum ActionButtonUpdateState
+    public enum ActionButtonUpdateState : uint
     {
         UnChanged = 0,
         Changed = 1,
@@ -331,7 +331,7 @@ namespace Framework.Constants
         Deleted = 3
     }
 
-    public enum ActionButtonType
+    public enum ActionButtonType : uint
     {
         Spell = 0x00,
         C = 0x01,                         // click?

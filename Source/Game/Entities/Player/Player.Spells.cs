@@ -1089,7 +1089,7 @@ namespace Game.Entities
 
             SkillInfo skillInfoField = m_activePlayerData.Skill;
 
-            var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
+            var skillStatusData = mSkillStatus.LookupByKey(skill);
             return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
         }
 

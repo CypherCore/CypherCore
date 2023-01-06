@@ -691,9 +691,11 @@ namespace Game.Entities
 
                 bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
                 bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+                bool HasActionButtons = player.IsLoading(); // ActionButtons in MovementUpdate is only sent on login
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);
+                data.WriteBit(HasActionButtons);
                 data.FlushBits();
 
                 if (HasSceneInstanceIDs)
@@ -713,6 +715,17 @@ namespace Game.Entities
                     data.WriteUInt32(maxRunes);
                     for (byte i = 0; i < maxRunes; ++i)
                         data.WriteUInt8((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255));
+                }
+
+                if (HasActionButtons)
+                {
+                    for (byte i = 0; i < PlayerConst.MaxActionButtons; ++i)
+                    {
+                        if (player.GetActionButton(i) is ActionButton button)
+                            data.WriteUInt32(button.GetAction());
+                        else
+                            data.WriteUInt32(0);
+                    }
                 }
             }
 

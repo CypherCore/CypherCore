@@ -413,13 +413,14 @@ namespace Game.Entities
             uState = ActionButtonUpdateState.New;
         }
 
-        public ActionButtonType GetButtonType() { return (ActionButtonType)((packedData & 0xFF00000000000000) >> 56); }
+        public ActionButtonType GetButtonType() { return (ActionButtonType)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packedData); }
 
-        public ulong GetAction() { return (packedData & 0x00FFFFFFFFFFFFFF); }
+        public uint GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
 
-        public void SetActionAndType(ulong action, ActionButtonType type)
+        public void SetActionAndType(uint action, ActionButtonType type)
         {
-            ulong newData = action | ((ulong)type << 56);
+            uint newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (uint)type);
+            
             if (newData != packedData || uState == ActionButtonUpdateState.Deleted)
             {
                 packedData = newData;
@@ -428,7 +429,7 @@ namespace Game.Entities
             }
         }
 
-        public ulong packedData;
+        public uint packedData;
         public ActionButtonUpdateState uState;
     }
 

@@ -657,7 +657,7 @@ namespace Game.Entities
                 do
                 {
                     byte button = result.Read<byte>(0);
-                    ulong action = result.Read<ulong>(1);
+                    uint action = (uint)result.Read<ulong>(1);
                     byte type = result.Read<byte>(2);
 
                     ActionButton ab = AddActionButton(button, action, type);

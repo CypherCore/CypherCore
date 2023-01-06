@@ -113,8 +113,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetActionButton)]
         void HandleSetActionButton(SetActionButton packet)
         {
-            ulong action = packet.GetButtonAction();
-            uint type = packet.GetButtonType();
+            uint action = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
+            uint type = UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packet.Action);
 
             if (packet.Action == 0)
                 GetPlayer().RemoveActionButton(packet.Index);

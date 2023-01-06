@@ -1353,7 +1353,7 @@ namespace Game.Entities
 
         public void SetMultiActionBars(byte mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MultiActionBars), mask); }
 
-        public ActionButton AddActionButton(byte button, ulong action, uint type)
+        public ActionButton AddActionButton(byte button, uint action, uint type)
         {
             if (!IsActionButtonDataValid(button, action, type))
                 return null;
