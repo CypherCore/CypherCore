@@ -468,6 +468,9 @@ namespace Game.Maps
                     data.areaInfo = new(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags);
                     // wmo found
                     var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.GroupId);
+                    if (wmoEntry == null)
+                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, -1);
+
                     data.outdoors = (wmoData.areaInfo.Value.MogpFlags & 0x8) != 0;
                     if (wmoEntry != null)
                     {
