@@ -3483,8 +3483,12 @@ namespace Game.AI
         }
         public struct Jump
         {
-            public uint speedxy;
-            public uint speedz;
+            public uint SpeedXY;
+            public uint SpeedZ;
+            public uint Gravity;
+            public uint UseDefaultGravity;
+            public uint PointId;
+            public uint ContactDistance;
         }
         public struct FleeAssist
         {

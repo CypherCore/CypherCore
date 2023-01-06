@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Maps;
 using Game.Misc;
+using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1824,12 +1825,28 @@ namespace Game.AI
                 }
                 case SmartActions.JumpToPos:
                 {
-                    foreach (var target in targets)
+                    WorldObject target = null;
+
+                    if (!targets.Empty())
+                        target = targets.SelectRandom();
+
+                    Position pos = new(e.Target.x, e.Target.y, e.Target.z);
+                    if (target)
                     {
-                        Creature creature = target.ToCreature();
-                        if (creature != null)
-                            creature.GetMotionMaster().MoveJump(e.Target.x, e.Target.y, e.Target.z, 0.0f, e.Action.jump.speedxy, e.Action.jump.speedz);
+                        float x, y, z;
+                        target.GetPosition(out x, out y, out z);
+                        if (e.Action.jump.ContactDistance > 0)
+                            target.GetContactPoint(_me, out x, out y, out z, e.Action.jump.ContactDistance);
+                        pos = new Position(x + e.Target.x, y + e.Target.y, z + e.Target.z);
                     }
+
+                    if (e.Action.jump.Gravity != 0 || e.Action.jump.UseDefaultGravity != 0)
+                    {
+                        float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.gravity : e.Action.jump.Gravity;
+                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId);
+                    }
+                    else
+                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId);
                     break;
                 }
                 case SmartActions.GoSetLootState:

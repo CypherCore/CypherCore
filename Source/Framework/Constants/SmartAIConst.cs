@@ -344,7 +344,7 @@ namespace Framework.Constants
         SetDynamicFlag = 94,     // UNUSED, DO NOT REUSE
         AddDynamicFlag = 95,     // UNUSED, DO NOT REUSE
         RemoveDynamicFlag = 96,     // UNUSED, DO NOT REUSE
-        JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
+        JumpToPos = 97,     // SpeedXY, SpeedZ, Gravity, UseDefaultGravity, PointId, ContactDistance
         SendGossipMenu = 98,     // Menuid, optionIndex
         GoSetLootState = 99,     // State
         SendTargetToTarget = 100,    // Id
