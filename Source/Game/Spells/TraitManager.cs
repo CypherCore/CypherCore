@@ -438,8 +438,15 @@ namespace Game
             if (condition.AchievementID != 0 && !player.HasAchieved(condition.AchievementID))
                 return false;
 
-            if (condition.SpecSetID != 0 && !Global.DB2Mgr.IsSpecSetMember(condition.SpecSetID, player.GetPrimarySpecialization()))
-                return false;
+            if (condition.SpecSetID != 0)
+            {
+                uint chrSpecializationId = player.GetPrimarySpecialization();
+                if (traitConfig.Type == TraitConfigType.Combat)
+                    chrSpecializationId = (uint)traitConfig.ChrSpecializationID;
+
+                if (!Global.DB2Mgr.IsSpecSetMember(condition.SpecSetID, chrSpecializationId))
+                    return false;
+            }
 
             if (condition.TraitCurrencyID != 0 && condition.SpentAmountRequired != 0)
             {
@@ -565,6 +572,23 @@ namespace Game
             Dictionary<int, int> spentCurrencies = new();
             FillSpentCurrenciesMap(traitConfig, spentCurrencies);
 
+            bool meetsConditions(List<TraitCondRecord> conditions)
+            {
+                bool hasConditions = false;
+                foreach (TraitCondRecord condition in conditions)
+                {
+                    if (condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
+                    {
+                        if (MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
+                            return true;
+
+                        hasConditions = true;
+                    }
+                }
+
+                return !hasConditions;
+            }
+
             foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
             {
                 if (!IsValidEntry(traitEntry))
@@ -576,21 +600,15 @@ namespace Game
                         return TalentLearnResult.FailedUnknown;
 
                 foreach (NodeEntry entry in node.Entries)
-                    foreach (TraitCondRecord condition in entry.Conditions)
-                        if ((condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
-                            && !MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
-                            return TalentLearnResult.FailedUnknown;
-
-                foreach (TraitCondRecord condition in node.Conditions)
-                    if ((condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
-                        && !MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
+                    if (!meetsConditions(entry.Conditions))
                         return TalentLearnResult.FailedUnknown;
 
+                if (!meetsConditions(node.Conditions))
+                    return TalentLearnResult.FailedUnknown;
+
                 foreach (NodeGroup group in node.Groups)
-                    foreach (TraitCondRecord condition in group.Conditions)
-                        if ((condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
-                            && !MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
-                            return TalentLearnResult.FailedUnknown;
+                    if (!meetsConditions(group.Conditions))
+                        return TalentLearnResult.FailedUnknown;
 
                 if (!node.ParentNodes.Empty())
                 {
@@ -697,7 +715,7 @@ namespace Game
                     newEntry.Rank = addedRanks;
 
                     if (!HasEnoughCurrency(newEntry, currencies))
-                        break;
+                        continue;
 
                     if (entryInConfig != null)
                         entryInConfig.Rank += addedRanks;
