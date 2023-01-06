@@ -192,6 +192,9 @@ namespace Game.Scenarios
         public override bool CanCompleteCriteriaTree(CriteriaTree tree)
         {
             ScenarioStepRecord step = tree.ScenarioStep;
+            if (step == null)
+                return false;
+
             ScenarioStepState state = GetStepState(step);
             if (state == ScenarioStepState.Done)
                 return false;

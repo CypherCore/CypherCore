@@ -206,7 +206,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition(); // save only in non-flight case
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -353,7 +353,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition(); // save only in non-flight case
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-            z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
             return true;
@@ -399,7 +399,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
                 TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-                z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+                z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
             }
 
             return DoTeleport(handler, new Position(x, y, z.Value, o.Value), mapId);
@@ -446,7 +446,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, zoneEntry.ContinentID, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, zoneEntry.ContinentID, x, y));
 
             player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;

@@ -564,10 +564,10 @@ namespace Game
             return obj.GetPhaseShift().CanSee(phaseShift);
         }
 
-        public static uint GetTerrainMapId(PhaseShift phaseShift, TerrainInfo terrain, float x, float y)
+        public static uint GetTerrainMapId(PhaseShift phaseShift, uint mapId, TerrainInfo terrain, float x, float y)
         {
             if (phaseShift.VisibleMapIds.Empty())
-                return terrain.GetId();
+                return mapId;
 
             if (phaseShift.VisibleMapIds.Count == 1)
                 return phaseShift.VisibleMapIds.First().Key;
@@ -580,7 +580,7 @@ namespace Game
                 if (terrain.HasChildTerrainGridFile(visibleMap.Key, gx, gy))
                     return visibleMap.Key;
 
-            return terrain.GetId();
+            return mapId;
         }
 
         public static void SetAlwaysVisible(WorldObject obj, bool apply, bool updateVisibility)

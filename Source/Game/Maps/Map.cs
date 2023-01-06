@@ -1530,52 +1530,52 @@ namespace Game.Maps
 
         public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            m_terrain.GetFullTerrainStatusForPosition(phaseShift, x, y, z, data, reqLiquidType, collisionHeight, _dynamicTree);
+            m_terrain.GetFullTerrainStatusForPosition(phaseShift, GetId(), x, y, z, data, reqLiquidType, collisionHeight, _dynamicTree);
         }
 
         public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, x, y, z, reqLiquidType, null, collisionHeight);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, null, collisionHeight);
         }
 
         public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, x, y, z, reqLiquidType, data, collisionHeight);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, data, collisionHeight);
         }
 
         private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint mogpflags, out int adtId, out int rootId, out int groupId)
         {
-            return m_terrain.GetAreaInfo(phaseShift, x, y, z, out mogpflags, out adtId, out rootId, out groupId, _dynamicTree);
+            return m_terrain.GetAreaInfo(phaseShift, GetId(), x, y, z, out mogpflags, out adtId, out rootId, out groupId, _dynamicTree);
         }
 
         public uint GetAreaId(PhaseShift phaseShift, Position pos)
         {
-            return m_terrain.GetAreaId(phaseShift, pos.posX, pos.posY, pos.posZ, _dynamicTree);
+            return m_terrain.GetAreaId(phaseShift, GetId(), pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
         public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
         {
-            return m_terrain.GetAreaId(phaseShift, x, y, z, _dynamicTree);
+            return m_terrain.GetAreaId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
 
         public uint GetZoneId(PhaseShift phaseShift, Position pos)
         {
-            return m_terrain.GetZoneId(phaseShift, pos.posX, pos.posY, pos.posZ, _dynamicTree);
+            return m_terrain.GetZoneId(phaseShift, GetId(), pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
         public uint GetZoneId(PhaseShift phaseShift, float x, float y, float z)
         {
-            return m_terrain.GetZoneId(phaseShift, x, y, z, _dynamicTree);
+            return m_terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos)
         {
-            m_terrain.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, pos.posX, pos.posY, pos.posZ, _dynamicTree);
+            m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
         {
-            m_terrain.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, x, y, z, _dynamicTree);
+            m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, x, y, z, _dynamicTree);
         }
 
         public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
@@ -1590,48 +1590,48 @@ namespace Game.Maps
 
         public float GetMinHeight(PhaseShift phaseShift, float x, float y)
         {
-            return m_terrain.GetMinHeight(phaseShift, x, y);
+            return m_terrain.GetMinHeight(phaseShift, GetId(), x, y);
         }
 
         public float GetGridHeight(PhaseShift phaseShift, float x, float y)
         {
-            return m_terrain.GetGridHeight(phaseShift, x, y);
+            return m_terrain.GetGridHeight(phaseShift, GetId(), x, y);
         }
 
         public float GetStaticHeight(PhaseShift phaseShift, float x, float y, float z, bool checkVMap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
-            return m_terrain.GetStaticHeight(phaseShift, x, y, z, checkVMap, maxSearchDist);
+            return m_terrain.GetStaticHeight(phaseShift, GetId(), x, y, z, checkVMap, maxSearchDist);
         }
 
         public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
         {
-            return m_terrain.GetWaterLevel(phaseShift, x, y);
+            return m_terrain.GetWaterLevel(phaseShift, GetId(), x, y);
         }
 
         public bool IsInWater(PhaseShift phaseShift, float x, float y, float z, LiquidData data)
         {
-            return m_terrain.IsInWater(phaseShift, x, y, z, data);
+            return m_terrain.IsInWater(phaseShift, GetId(), x, y, z, data);
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
         {
-            return m_terrain.IsUnderWater(phaseShift, x, y, z);
+            return m_terrain.IsUnderWater(phaseShift, GetId(), x, y, z);
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             float ground = 0;
-            return m_terrain.GetWaterOrGroundLevel(phaseShift, x, y, z, ref ground, false, collisionHeight, _dynamicTree);
+            return m_terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, false, collisionHeight, _dynamicTree);
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetWaterOrGroundLevel(phaseShift, x, y, z, ref ground, swim, collisionHeight, _dynamicTree);
+            return m_terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, swim, collisionHeight, _dynamicTree);
         }
 
         public bool IsInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, LineOfSightChecks checks, ModelIgnoreFlags ignoreFlags)
         {
-            if (checks.HasAnyFlag(LineOfSightChecks.Vmap) && !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, m_terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
+            if (checks.HasAnyFlag(LineOfSightChecks.Vmap) && !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, GetId(), m_terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
                 return false;
 
             if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos) && checks.HasAnyFlag(LineOfSightChecks.Gobject) && !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))

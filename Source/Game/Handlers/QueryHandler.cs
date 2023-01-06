@@ -247,7 +247,7 @@ namespace Game
                             mapID = (uint)corpseMapEntry.CorpseMapID;
                             x = corpseMapEntry.Corpse.X;
                             y = corpseMapEntry.Corpse.Y;
-                            z = entranceTerrain.GetStaticHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
+                            z = entranceTerrain.GetStaticHeight(player.GetPhaseShift(), mapID, x, y, MapConst.MaxHeight);
                         }
                     }
                 }
