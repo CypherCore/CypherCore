@@ -238,7 +238,7 @@ namespace Game.Networking.Packets
             public byte RaceId;
             public Class ClassId;
             public byte SexId;
-            public Array<ChrCustomizationChoice> Customizations = new(50);
+            public Array<ChrCustomizationChoice> Customizations = new(72);
             public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
@@ -580,7 +580,7 @@ namespace Game.Networking.Packets
             public string Name;
             public byte SexID;
             public byte RaceID;
-            public Array<ChrCustomizationChoice> Customizations = new(50);
+            public Array<ChrCustomizationChoice> Customizations = new(72);
         }
     }
 
@@ -892,7 +892,7 @@ namespace Game.Networking.Packets
         }
 
         public byte NewSex;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(72);
         public int CustomizedRace;
     }
 
@@ -1042,7 +1042,7 @@ namespace Game.Networking.Packets
         ObjectGuid CharGUID;
         string CharName = "";
         byte SexID;
-        Array<ChrCustomizationChoice> Customizations = new(50);
+        Array<ChrCustomizationChoice> Customizations = new(72);
     }
 
     class CharCustomizeFailure : ServerPacket
@@ -1104,7 +1104,7 @@ namespace Game.Networking.Packets
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(72);
         public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
@@ -1125,7 +1125,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(72);
     }
 
     public class CharRaceOrFactionChangeInfo
@@ -1136,7 +1136,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public bool FactionChange;
         public string Name;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(72);
     }
 
     public class CharacterUndeleteInfo

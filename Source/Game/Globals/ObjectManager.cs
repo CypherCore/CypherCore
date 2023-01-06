@@ -6503,6 +6503,9 @@ namespace Game
                         if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
                             continue;
 
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && _class == Class.Evoker)
+                            continue;
+
                         // fatal error if no level 1 data
                         if (playerInfo.levelInfo == null || playerInfo.levelInfo[0].stats[0] == 0)
                         {

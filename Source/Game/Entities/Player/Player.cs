@@ -1905,6 +1905,8 @@ namespace Game.Entities
             }
             else if (playerClass == Class.DemonHunter)
                 startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartDemonHunterPlayerLevel), startLevel);
+            else if (playerClass == CLASS_EVOKER)
+                startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartEvokerPlayerLevel), startLevel);
 
             if (characterTemplateId.HasValue)
             {

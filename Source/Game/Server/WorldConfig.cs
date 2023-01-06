@@ -462,6 +462,18 @@ namespace Game
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
+            Values[WorldCfg.StartEvokerPlayerLevel] = GetDefaultValue("StartEvokerPlayerLevel", 58);
+            if ((int)Values[WorldCfg.StartEvokerPlayerLevel] < 1)
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = 1;
+            }
+            else if ((int)Values[WorldCfg.StartEvokerPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
+            }
+
             Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
             if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
             {
