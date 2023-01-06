@@ -934,7 +934,7 @@ namespace Game.Maps
 
             // too far
             // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!u.IsWithinDistInMap(i_funit, i_range, true, false, false))
+            if (!u.IsWithinDist(i_funit, i_range, true, false, false))
                 return;
 
             // only if see assisted creature's enemy
@@ -1871,7 +1871,7 @@ namespace Game.Maps
 
         public bool Invoke(T u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) && u.GetMaxHealth() - u.GetHealth() > i_hp)
+            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.GetMaxHealth() - u.GetHealth() > i_hp)
             {
                 i_hp = (uint)(u.GetMaxHealth() - u.GetHealth());
                 return true;
@@ -1903,7 +1903,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !_obj.IsHostileTo(u) && _obj.IsWithinDistInMap(u, _range) && _minHpPct <= u.GetHealthPct() && u.GetHealthPct() <= _maxHpPct && u.GetHealthPct() < _hpPct)
+            if (u.IsAlive() && u.IsInCombat() && !_obj.IsHostileTo(u) && _obj.IsWithinDist(u, _range) && _minHpPct <= u.GetHealthPct() && u.GetHealthPct() <= _maxHpPct && u.GetHealthPct() < _hpPct)
             {
                 _hpPct = u.GetHealthPct();
                 return true;
@@ -1927,7 +1927,7 @@ namespace Game.Maps
         {
             if (i_excludeSelf && i_obj.GetGUID() == u.GetGUID())
                 return false;
-            if (u.GetEntry() == i_entry && u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) && u.HealthBelowPct(i_pct))
+            if (u.GetEntry() == i_entry && u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.HealthBelowPct(i_pct))
                 return true;
             return false;
         }
@@ -1949,7 +1949,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) &&
+            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
                 (u.IsFeared() || u.IsCharmed() || u.HasRootAura() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
                 return true;
             return false;
@@ -1970,7 +1970,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) &&
+            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
                 !(u.HasAura(i_spell)))
             {
                 return true;
@@ -1994,7 +1994,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && i_obj.IsWithinDistInMap(u, i_range) && !i_funit.IsFriendlyTo(u))
+            if (u.IsAlive() && i_obj.IsWithinDist(u, i_range) && !i_funit.IsFriendlyTo(u))
                 return true;
             else
                 return false;
@@ -2027,7 +2027,7 @@ namespace Game.Maps
             if (!u.IsTargetableForAttack(false))
                 return false;
 
-            if (!i_obj.IsWithinDistInMap(u, i_range) || i_obj.IsValidAttackTarget(u))
+            if (!i_obj.IsWithinDist(u, i_range) || i_obj.IsValidAttackTarget(u))
                 return false;
 
             i_range = i_obj.GetDistance(u);
@@ -2139,7 +2139,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && i_obj.IsWithinDistInMap(u, i_range, i_check3D))
+            if (u.IsAlive() && i_obj.IsWithinDist(u, i_range, i_check3D))
                 return true;
 
             return false;
@@ -2162,7 +2162,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (u.IsTargetableForAttack() && i_obj.IsWithinDistInMap(u, i_range) &&
+            if (u.IsTargetableForAttack() && i_obj.IsWithinDist(u, i_range) &&
                 (i_funit.IsInCombatWith(u) || i_funit.IsHostileTo(u)) && i_obj.CanSeeOrDetect(u))
             {
                 i_range = i_obj.GetDistance(u);        // use found unit range as new range limit for next check
@@ -2246,7 +2246,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (!me.IsWithinDistInMap(u, m_range))
+            if (!me.IsWithinDist(u, m_range))
                 return false;
 
             if (!me.IsValidAttackTarget(u))
@@ -2275,7 +2275,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (!me.IsWithinDistInMap(u, m_range))
+            if (!me.IsWithinDist(u, m_range))
                 return false;
 
             if (!me.CanSeeOrDetect(u))
@@ -2312,7 +2312,7 @@ namespace Game.Maps
             if (!u.IsHostileTo(_me))
                 return false;
 
-            if (!u.IsWithinDistInMap(_me, _me.GetAggroRange(u)))
+            if (!u.IsWithinDist(_me, _me.GetAggroRange(u)))
                 return false;
 
             if (!_me.IsValidAttackTarget(u))
@@ -2358,7 +2358,7 @@ namespace Game.Maps
 
             // too far
             // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!i_funit.IsWithinDistInMap(u, i_range, true, false, false))
+            if (!i_funit.IsWithinDist(u, i_range, true, false, false))
                 return false;
 
             // only if see assisted creature
@@ -2391,7 +2391,7 @@ namespace Game.Maps
                 return false;
 
             // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!i_obj.IsWithinDistInMap(u, i_range, true, false, false))
+            if (!i_obj.IsWithinDist(u, i_range, true, false, false))
                 return false;
 
             if (!i_obj.IsWithinLOSInMap(u))
@@ -2419,7 +2419,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && u.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(u, i_range) && u.CheckPrivateObjectOwnerVisibility(i_obj))
+            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && u.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDist(u, i_range) && u.CheckPrivateObjectOwnerVisibility(i_obj))
             {
                 i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                 return true;
@@ -2507,7 +2507,7 @@ namespace Game.Maps
             if (_reqAlive && !pl.IsAlive())
                 return false;
 
-            if (!_obj.IsWithinDistInMap(pl, _range))
+            if (!_obj.IsWithinDist(pl, _range))
                 return false;
 
             return true;
@@ -2554,7 +2554,7 @@ namespace Game.Maps
 
         public bool Invoke(Player pl)
         {
-            if (pl.IsAlive() && i_obj.IsWithinDistInMap(pl, i_range))
+            if (pl.IsAlive() && i_obj.IsWithinDist(pl, i_range))
             {
                 i_range = i_obj.GetDistance(pl);
                 return true;
@@ -2814,7 +2814,7 @@ namespace Game.Maps
                 return false;
 
             float dist = go.GetGoInfo().GetSpellFocusRadius();
-            return go.IsWithinDistInMap(_caster, dist);
+            return go.IsWithinDist(_caster, dist);
         }
 
         WorldObject _caster;
@@ -2832,7 +2832,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.IsSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, go.GetGoInfo().FishingHole.radius))
+            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.IsSpawned() && i_obj.IsWithinDist(go, i_range) && i_obj.IsWithinDist(go, go.GetGoInfo().FishingHole.radius))
             {
                 i_range = i_obj.GetDistance(go);
                 return true;
@@ -2854,7 +2854,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (i_obj.IsWithinDistInMap(go, i_range))
+            if (i_obj.IsWithinDist(go, i_range))
             {
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
@@ -2879,7 +2879,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if ((!_spawnedOnly || go.IsSpawned()) && go.GetEntry() == _entry && go.GetGUID() != _obj.GetGUID() && _obj.IsWithinDistInMap(go, _range))
+            if ((!_spawnedOnly || go.IsSpawned()) && go.GetEntry() == _entry && go.GetGUID() != _obj.GetGUID() && _obj.IsWithinDist(go, _range))
             {
                 _range = _obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
@@ -2909,7 +2909,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (!go.IsSpawned() && go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDistInMap(go, i_range))
+            if (!go.IsSpawned() && go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDist(go, i_range))
             {
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
@@ -2930,7 +2930,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetGoType() == i_type && i_obj.IsWithinDistInMap(go, i_range))
+            if (go.GetGoType() == i_type && i_obj.IsWithinDist(go, i_range))
             {
                 i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
                 return true;
@@ -2964,7 +2964,7 @@ namespace Game.Maps
 
         public override bool Test(WorldObject o)
         {
-            return i_obj.IsWithinDistInMap(o, i_range);
+            return i_obj.IsWithinDist(o, i_range);
         }
 
         public override void Update(WorldObject o)
