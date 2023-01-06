@@ -117,7 +117,7 @@ namespace Framework.Constants
         /// Smart AI Const
         /// </summary>
         public const int SmartEventParamCount = 4;
-        public const int SmartActionParamCount = 6;
+        public const int SmartActionParamCount = 7;
         public const uint SmartSummonCounter = 0xFFFFFF;
         public const uint SmartEscortTargets = 0xFFFFFF;
 
