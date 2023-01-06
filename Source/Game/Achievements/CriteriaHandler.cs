@@ -2880,11 +2880,11 @@ namespace Game.Achievements
                     if (pvpTier == null)
                         return false;
 
-                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.Size())
+                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket((byte)pvpTier.BracketID);
+                    if (pvpInfo == null)
                         return false;
 
-                    var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[pvpTier.BracketID];
-                    if (pvpTier.Id != pvpInfo.PvpTierID || pvpInfo.Disqualified)
+                    if (pvpTier.Id != pvpInfo.PvpTierID)
                         return false;
                     break;
                 }
@@ -2918,10 +2918,10 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerPvpTierInBracketEqualOrGreaterThan: // 239
                 {
-                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.Size())
+                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket((byte)secondaryAsset);
+                    if (pvpInfo == null)
                         return false;
 
-                    var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[secondaryAsset];
                     var pvpTier = CliDB.PvpTierStorage.LookupByKey(pvpInfo.PvpTierID);
                     if (pvpTier == null)
                         return false;
@@ -3475,21 +3475,21 @@ namespace Game.Achievements
                     if (pvpTier == null)
                         return false;
 
-                    if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.Size())
+                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket((byte)pvpTier.BracketID);
+                    if (pvpInfo == null)
                         return false;
 
-                    var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[pvpTier.BracketID];
-                    if (pvpTier.Id != pvpInfo.WeeklyBestWinPvpTierID || pvpInfo.Disqualified)
+                    if (pvpTier.Id != pvpInfo.WeeklyBestWinPvpTierID)
                         return false;
 
                     break;
                 }
                 case ModifierTreeType.PlayerBestWeeklyWinPvpTierInBracketEqualOrGreaterThan: // 325
                 {
-                    if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.Size())
+                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket((byte)secondaryAsset);
+                    if (pvpInfo == null)
                         return false;
 
-                    var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[secondaryAsset];
                     var pvpTier = CliDB.PvpTierStorage.LookupByKey(pvpInfo.WeeklyBestWinPvpTierID);
                     if (pvpTier == null)
                         return false;
