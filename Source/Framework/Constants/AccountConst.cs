@@ -32,12 +32,14 @@ namespace Framework.Constants
         GlobalFlaggedCache = 10,
         PerCharacterFlaggedCache = 11,
         PerCharacterClickBindingsCache = 12,
+        GlobalEditModeCache = 13,
+        PerCharacterEditModeCache = 14,
 
-        Max = 13,
+        Max = 15,
 
-        AllAccountDataCacheMask = 0x1FFF,
-        GlobalCacheMask = 0x515,
-        PerCharacterCacheMask = 0x1AEA
+        AllAccountDataCacheMask = 0x7FFF,
+        GlobalCacheMask = 0x2515,
+        PerCharacterCacheMask = 0x5AEA
     }
 
     public enum TutorialAction
