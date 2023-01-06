@@ -1224,11 +1224,13 @@ namespace Game.Entities
             {
                 switch ((ItemSubClassWeapon)tmpitem.GetTemplate().GetSubClass())
                 {
-                    case ItemSubClassWeapon.FishingPole:
                     case ItemSubClassWeapon.Fist:
+                        UpdateSkill(tmpitem.GetSkill(), weapon_skill_gain);
+                        goto case ItemSubClassWeapon.FishingPole;
+                    case ItemSubClassWeapon.FishingPole:
                     case ItemSubClassWeapon.Miscellaneous:
                         UpdateSkill(SkillType.Unarmed, weapon_skill_gain);
-                        break;
+                        break;                                             
                     default:
                         UpdateSkill(tmpitem.GetSkill(), weapon_skill_gain);
                         break;
