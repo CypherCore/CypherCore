@@ -1145,20 +1145,20 @@ namespace Game.Entities
         
         public override bool IsMovementPreventedByCasting()
         {
+            // Can always move when not casting
+            if (!HasUnitState(UnitState.Casting))
+                return false;
+
             // first check if currently a movement allowed channel is active and we're not casting
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
-                        if (HasUnitState(UnitState.Casting))
                             return true;
             }
 
             if (HasSpellFocus())
-                return true;
-
-            if (HasUnitState(UnitState.Casting))
                 return true;
 
             return false;
