@@ -539,12 +539,6 @@ namespace Game.Spells
                     cooldownEntry.CooldownEnd = cooldownEntry.CategoryEnd;
             }
 
-            if (cooldownEntry.CooldownEnd <= now)
-            {                
-                _categoryCooldowns.Remove(cooldownEntry.CategoryId);
-                _spellCooldowns.Remove(cooldownEntry.SpellId);
-            }
-
             Player playerOwner = GetPlayerOwner();
             if (playerOwner)
             {
@@ -554,6 +548,12 @@ namespace Game.Spells
                 modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
                 modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
                 playerOwner.SendPacket(modifyCooldown);
+            }
+
+            if (cooldownEntry.CooldownEnd <= now)
+            {                
+                _categoryCooldowns.Remove(cooldownEntry.CategoryId);
+                _spellCooldowns.Remove(cooldownEntry.SpellId);
             }
         }
 
