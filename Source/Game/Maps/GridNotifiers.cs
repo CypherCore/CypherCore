@@ -2460,7 +2460,7 @@ namespace Game.Maps
             if (i_args.CreatureId.HasValue && u.GetEntry() != i_args.CreatureId)
                 return false;
 
-            if (i_args.StringId != null && u.HasStringId(i_args.StringId))
+            if (i_args.StringId != null && !u.HasStringId(i_args.StringId))
                 return false;
 
             if (i_args.IsAlive.HasValue && u.IsAlive() != i_args.IsAlive)
