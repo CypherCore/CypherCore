@@ -4679,7 +4679,7 @@ namespace Game.Entities
         public bool IsPrimaryProfessionSkill(uint skill)
         {
             SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
-            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession;
+            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession && pSkill.ParentSkillLineID == 0;
         }
 
         public bool IsWeaponSkill(uint skill)
