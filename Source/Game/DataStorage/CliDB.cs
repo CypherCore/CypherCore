@@ -426,16 +426,16 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!CliDB.AreaTableStorage.ContainsKey(14618) ||               // last area added in 10.0.2 (46741)
-                !CliDB.CharTitlesStorage.ContainsKey(749) ||                // last char title added in 10.0.2 (46741)
-                !CliDB.GemPropertiesStorage.ContainsKey(4028) ||            // last gem property added in 10.0.2 (46741)
-                !CliDB.ItemStorage.ContainsKey(202712) ||                   // last item added in 10.0.2 (46741)
-                !CliDB.ItemExtendedCostStorage.ContainsKey(7862) ||         // last item extended cost added in 10.0.2 (46741)
-                !CliDB.MapStorage.ContainsKey(2582) ||                      // last map added in 10.0.2 (46741)
-                !CliDB.SpellNameStorage.ContainsKey(399311))                // last spell added in 10.0.2 (46741)
+            if (!AreaTableStorage.ContainsKey(14618) ||               // last area added in 10.0.2 (46741)
+                !CharTitlesStorage.ContainsKey(749) ||                // last char title added in 10.0.2 (46741)
+                !GemPropertiesStorage.ContainsKey(4028) ||            // last gem property added in 10.0.2 (46741)
+                !ItemStorage.ContainsKey(202712) ||                   // last item added in 10.0.2 (46741)
+                !ItemExtendedCostStorage.ContainsKey(7862) ||         // last item extended cost added in 10.0.2 (46741)
+                !MapStorage.ContainsKey(2582) ||                      // last map added in 10.0.2 (46741)
+                !SpellNameStorage.ContainsKey(399311))                // last spell added in 10.0.2 (46741)
             {
                 Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
-                Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
+                Environment.Exit(1);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));

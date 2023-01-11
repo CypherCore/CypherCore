@@ -88,7 +88,7 @@ namespace Game.Entities
             if (SpellEffectsHandlers.Count == 0)
             {
                 Log.outFatal(LogFilter.ServerLoading, "Could'nt find any SpellEffectHandlers. Dev needs to check this out.");
-                Global.WorldMgr.ShutdownServ(0, ShutdownMask.Force, ShutdownExitCode.Error);
+                Environment.Exit(1);
             }
         }
 
@@ -2724,6 +2724,9 @@ namespace Game.Entities
                             {
                                 uint enchantId = (uint)spellEffectInfo.MiscValue;
                                 var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+                                if (enchant == null)
+                                    break;
+
                                 for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
                                 {
                                     if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)

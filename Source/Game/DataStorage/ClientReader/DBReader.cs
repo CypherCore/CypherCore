@@ -152,11 +152,17 @@ namespace Game.DataStorage
                         // string data
                         stringsTable = new Dictionary<long, string>();
 
+                        long stringDataOffset = 0;
+                        if (sectionIndex == 0)
+                            stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
+                        else
+                            stringDataOffset = previousStringTableSize;
+
                         for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
                             long oldPos = reader.BaseStream.Position;
 
-                            stringsTable[i + previousStringTableSize] = reader.ReadCString();
+                            stringsTable[i + stringDataOffset] = reader.ReadCString();
 
                             i += (int)(reader.BaseStream.Position - oldPos);
                         }
@@ -200,8 +206,7 @@ namespace Game.DataStorage
                         refData.Entries = new Dictionary<int, int>();
                         ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
                         foreach (var entry in entries)
-                            if (!refData.Entries.ContainsKey(entry.Index))
-                                refData.Entries[entry.Index] = entry.Id;
+                            refData.Entries[entry.Index] = entry.Id;
                     }
                     else
                     {
@@ -243,9 +248,12 @@ namespace Game.DataStorage
 
                     foreach (var copyRow in copyData)
                     {
-                        var rec = _records[copyRow.Value].Clone();
-                        rec.Id = copyRow.Key;
-                        _records.Add(copyRow.Key, rec);
+                        if (copyRow.Key != 0)
+                        {
+                            var rec = _records[copyRow.Value].Clone();
+                            rec.Id = copyRow.Key;
+                            _records.Add(copyRow.Key, rec);
+                        }
                     }
 
                     previousStringTableSize += sections[sectionIndex].StringTableSize;

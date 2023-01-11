@@ -421,7 +421,8 @@ namespace Game
             Global.GameEventMgr.Initialize();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Cypher Strings...");
-            Global.ObjectMgr.LoadCypherStrings();
+            if (!Global.ObjectMgr.LoadCypherStrings())
+                Environment.Exit(1);
 
             // not send custom type REALM_FFA_PVP to realm list
             RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
@@ -507,11 +508,10 @@ namespace Game
             Global.LanguageMgr.LoadLanguagesWords();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
-            GameObjectModel.LoadGameObjectModelList();
             if (!GameObjectModel.LoadGameObjectModelList())
             {
                 Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models, objects using WMO models will crash the client - server shutting down!");                
-                ShutdownServ(0, ShutdownMask.Force, ShutdownExitCode.Shutdown);
+                Environment.Exit(1);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
