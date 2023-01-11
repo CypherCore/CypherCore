@@ -466,6 +466,11 @@ namespace Game.Misc
             packet.QuestFlags[2] = (uint)quest.FlagsEx2;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
+            // Is there a better way? what about game objects?
+            Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
+            if (creature != null)
+                packet.QuestGiverCreatureID = (int)creature.GetCreatureTemplate().Entry;
+
             // RewardSpell can teach multiple spells in trigger spell effects. But not all effects must be SPELL_EFFECT_LEARN_SPELL. See example spell 33950
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, Difficulty.None);
             if (spellInfo != null)
