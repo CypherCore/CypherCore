@@ -2082,11 +2082,11 @@ namespace Framework.Constants
         Unk28 = 0x10000000, // 28
         Unk29 = 0x20000000, // 29
         Unk30 = 0x40000000, // 30
-        Unk31 = 0x80000000  // 31
+        OnlyProcFromClassAbilities = 0x80000000  // 31 Only Proc From Class Abilities
     }
     public enum SpellAttr13 : uint
     {
-        Unk0 = 0x01, //  0
+        AllowClassAbilityProcs = 0x01, //  0 Allow Class Ability Procs
         Unk1 = 0x02, //  1
         PassiveIsUpgrade = 0x04, //  2 Displays "Upgrade" in spell tooltip instead of "Passive"
         Unk3 = 0x08, //  3

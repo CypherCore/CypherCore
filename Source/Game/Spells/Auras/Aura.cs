@@ -1747,6 +1747,9 @@ namespace Game.Spells
 
                 if (spell.GetSpellInfo().HasAttribute(SpellAttr4.SuppressWeaponProcs) && GetSpellInfo().HasAttribute(SpellAttr6.AuraIsWeaponProc))
                     return 0;
+
+                if (GetSpellInfo().HasAttribute(SpellAttr12.OnlyProcFromClassAbilities) && !spell.GetSpellInfo().HasAttribute(SpellAttr13.AllowClassAbilityProcs))
+                    return 0;
             }
 
             // check don't break stealth attr present
