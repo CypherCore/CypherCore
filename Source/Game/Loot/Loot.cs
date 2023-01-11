@@ -956,9 +956,13 @@ namespace Game.Loots
         {
             return LootItemInSlot(lootSlot, player, out _);
         }
+
         public LootItem LootItemInSlot(uint lootListId, Player player, out NotNormalLootItem ffaItem)
         {
             ffaItem = null;
+
+            if (lootListId >= items.Count)
+                return null;
 
             LootItem item = items[(int)lootListId];
             bool is_looted = item.is_looted;
