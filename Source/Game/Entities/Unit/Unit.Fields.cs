@@ -17,6 +17,7 @@
 
 using Framework.Collections;
 using Framework.Constants;
+using Framework.Util;
 using Game.AI;
 using Game.Combat;
 using Game.DataStorage;
@@ -138,6 +139,7 @@ namespace Game.Entities
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
+        public VariableStore VariableStorage { get; } = new VariableStore();
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {
