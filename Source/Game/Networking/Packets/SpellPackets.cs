@@ -1506,6 +1506,7 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
+            data.ResetBitPos();
             Flags = (SpellCastTargetFlags)data.ReadBits<uint>(28);
             if (data.HasBit())
                 SrcLocation = new();

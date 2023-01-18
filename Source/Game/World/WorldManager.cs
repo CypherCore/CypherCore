@@ -487,6 +487,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Totem models...");
             Global.SpellMgr.LoadSpellTotemModel();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Traits...");
+            TraitMgr.Load();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading languages...");
             Global.LanguageMgr.LoadLanguages();
 
