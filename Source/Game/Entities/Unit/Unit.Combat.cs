@@ -765,17 +765,17 @@ namespace Game.Entities
 
                     if (creature.GetMap().IsDungeon())
                     {
-                        Group group = !groups.Empty() ? groups.First() : null;
-                        Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
-
                         if (dungeonEncounter != null)
                         {
                             creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetCreatureTemplate().LootId,
                                 LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold,
                                 (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
                         }
-                        else
+                        else if (!tappers.Empty())
                         {
+                            Group group = !groups.Empty() ? groups.First() : null;
+                            Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
+
                             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
 
                             uint lootid = creature.GetCreatureTemplate().LootId;

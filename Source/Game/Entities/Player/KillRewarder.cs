@@ -105,14 +105,17 @@ namespace Game.Entities
                         instance.UpdateEncounterStateForKilledCreature(_victim.GetEntry(), _victim);
                 }
 
-                uint guildId = victim.GetMap().GetOwnerGuildId();
-                var guild = Global.GuildMgr.GetGuildById(guildId);
-                if (guild != null)
-                    guild.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killers.First());
+                if (!_killers.Empty())
+                {
+                    uint guildId = victim.GetMap().GetOwnerGuildId();
+                    var guild = Global.GuildMgr.GetGuildById(guildId);
+                    if (guild != null)
+                        guild.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killers.First());
 
-                Scenario scenario = victim.GetScenario();
-                if (scenario != null)
-                    scenario.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killers.First());
+                    Scenario scenario = victim.GetScenario();
+                    if (scenario != null)
+                        scenario.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killers.First());
+                }
             }
         }
 
