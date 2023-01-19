@@ -7424,10 +7424,10 @@ namespace Game.Spells
 
         void CallScriptOnPrecastHandler()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IOnPrecast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnPrecast);
-                script.OnPrecast();
+                ((IOnPrecast)script).OnPrecast();
                 script._FinishScriptCall();
             }
         }

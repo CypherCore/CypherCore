@@ -50,7 +50,6 @@ namespace Game.Scripting.Interfaces
         bool IsInEffectHook();
         bool IsInHitPhase();
         bool IsInTargetHook();
-        void OnPrecast();
         void PreventHitAura();
         void PreventHitDamage();
         void PreventHitDefaultEffect(uint effIndex);

@@ -460,8 +460,6 @@ namespace Game.Scripting
                 || m_currentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
 
-        public virtual void OnPrecast() { }
-
         Spell m_spell;
         uint m_hitPreventEffectMask;
         uint m_hitPreventDefaultEffectMask;
