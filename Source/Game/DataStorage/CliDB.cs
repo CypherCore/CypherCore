@@ -356,6 +356,7 @@ namespace Game.DataStorage
             WorldEffectStorage = ReadDB2<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
             WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
+            CharBaseInfoStorage = ReadDB2<CharBaseInfo>("CharBaseInfo.db2", HotfixStatements.SEL_CHAR_BASE_INFO);
 
             Global.DB2Mgr.LoadStores();
 
@@ -779,6 +780,7 @@ namespace Game.DataStorage
         public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
         public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage;
+        public static DB6Storage<CharBaseInfo> CharBaseInfoStorage;
         #endregion
 
         #region GameTables

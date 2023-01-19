@@ -1528,6 +1528,9 @@ namespace Framework.Database
 
             // WorldStateExpression.db2
             PrepareStatement(HotfixStatements.SEL_WORLD_STATE_EXPRESSION, "SELECT ID, Expression FROM world_state_expression WHERE (`VerifiedBuild` > 0) = ?");
+
+            PrepareStatement(HotfixStatements.SEL_CHAR_BASE_INFO, "SELECT `ID`, `RaceID`, `ClassID`, `FactionXferId` FROM `char_base_info`WHERE (`VerifiedBuild` > 0) = ?");
+
         }
     }
 
@@ -2265,6 +2268,7 @@ namespace Framework.Database
 
         SEL_WORLD_STATE_EXPRESSION,
 
+        SEL_CHAR_BASE_INFO,
         MAX_HOTFIXDATABASE_STATEMENTS
     }
 }
