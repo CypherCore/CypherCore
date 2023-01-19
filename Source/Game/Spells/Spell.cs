@@ -7831,13 +7831,14 @@ namespace Game.Spells
 
         List<SpellScript> m_loadedScripts = new();
         readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
+        static List<ISpellScript> dummy = new();
 
         public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
             if (m_spellScriptsByType.TryGetValue(typeof(T), out List<ISpellScript> scripts))
                 return scripts;
 
-            return new();
+            return dummy;
         }
 
         public SpellCastResult CheckMovement()
