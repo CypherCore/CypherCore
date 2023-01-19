@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Game.AI;
@@ -765,17 +751,17 @@ namespace Game.Entities
 
                     if (creature.GetMap().IsDungeon())
                     {
-                        Group group = !groups.Empty() ? groups.First() : null;
-                        Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
-
                         if (dungeonEncounter != null)
                         {
                             creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetCreatureTemplate().LootId,
                                 LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold,
                                 (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
                         }
-                        else
+                        else if (!tappers.Empty())
                         {
+                            Group group = !groups.Empty() ? groups.First() : null;
+                            Player looter = group ? Global.ObjAccessor.GetPlayer(creature, group.GetLooterGuid()) : tappers[0];
+
                             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
 
                             uint lootid = creature.GetCreatureTemplate().LootId;
