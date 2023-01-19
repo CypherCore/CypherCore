@@ -2402,6 +2402,12 @@ namespace Game.Entities
             return CastSpell(new CastSpellTargetArg(target), spellId, args);
         }
 
+        public SpellCastResult CastSpell(Position dest, uint spellId, bool triggered = false)
+        {
+            CastSpellExtraArgs args = new(triggered);
+            return CastSpell(new CastSpellTargetArg(dest), spellId, args);
+        }
+
         public SpellCastResult CastSpell(Position dest, uint spellId, CastSpellExtraArgs args)
         {
             return CastSpell(new CastSpellTargetArg(dest), spellId, args);

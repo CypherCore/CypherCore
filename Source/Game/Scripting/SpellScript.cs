@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Scripting.Interfaces;
 using Game.Spells;
 using System;
 using System.Collections.Generic;

@@ -443,6 +443,8 @@ namespace Game.AI
                 EngagementStart(who);
         }
 
+        public TaskScheduler Scheduler { get { return _scheduler; } }
+
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
         public virtual void JustEngagedWith(Unit who) { }
 

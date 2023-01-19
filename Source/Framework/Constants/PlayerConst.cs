@@ -149,7 +149,7 @@ namespace Framework.Constants
         Smashed = 3
     }
 
-    public enum TalentSpecialization // talent tabs
+    public enum TalentSpecialization : uint // talent tabs
     {
         MageArcane = 62,
         MageFire = 63,

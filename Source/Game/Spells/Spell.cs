@@ -14,6 +14,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7400,6 +7401,23 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
+
+                if (script is ISpellScript)
+                {
+                    foreach (var iFace in script.GetType().GetInterfaces())
+                    {
+                        if (iFace.Name == nameof(ISpellScript))
+                            continue;
+
+                        if (!m_spellScriptsByType.TryGetValue(iFace, out var spellScripts))
+                        {
+                            spellScripts = new List<ISpellScript>();
+                            m_spellScriptsByType[iFace] = spellScripts;
+                        }
+
+                        spellScripts.Add((ISpellScript)script);
+                    }
+                }
             }
         }
 
@@ -7812,6 +7830,15 @@ namespace Game.Spells
         }
 
         List<SpellScript> m_loadedScripts = new();
+        readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
+
+        public List<ISpellScript> GetSpellScripts<T>()
+        {
+            if (m_spellScriptsByType.TryGetValue(typeof(T), out List<ISpellScript> scripts))
+                return scripts;
+
+            return new();
+        }
 
         public SpellCastResult CheckMovement()
         {

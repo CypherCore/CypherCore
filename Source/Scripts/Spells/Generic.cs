@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -2783,6 +2784,11 @@ namespace Scripts.Spells.Generic
 
                     newPet.SetFullHealth();
                     newPet.SetFullPower(newPet.GetPowerType());
+
+                    var summonScript = GetSpell().GetSpellScripts<IOnSummon>();
+
+                    foreach (IOnSummon summon in summonScript)
+                        summon.HandleSummon(newPet);
 
                     switch (newPet.GetEntry())
                     {
