@@ -7832,7 +7832,7 @@ namespace Game.Spells
         List<SpellScript> m_loadedScripts = new();
         readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
 
-        public List<ISpellScript> GetSpellScripts<T>()
+        public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
             if (m_spellScriptsByType.TryGetValue(typeof(T), out List<ISpellScript> scripts))
                 return scripts;
