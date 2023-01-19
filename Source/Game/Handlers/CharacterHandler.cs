@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Collections;
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Game.Cache;
@@ -115,9 +116,10 @@ namespace Game
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
-                raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                raceUnlock.HasExpansion = ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpations", true) ? (byte)GetAccountExpansion() >= requirement.Value.Expansion : true;
                 raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);
+                
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
 

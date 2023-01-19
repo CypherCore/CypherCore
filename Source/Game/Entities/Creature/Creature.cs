@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
@@ -2608,10 +2609,16 @@ namespace Game.Entities
         {
             CreatureLevelScaling scaling = GetCreatureTemplate().GetLevelScaling(GetMap().GetDifficultyID());
             var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
+
             if (levels.HasValue)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
+            }
+            else if (ConfigMgr.GetDefaultValue("CreatureScaling.DefaultMaxLevel", false))
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), 1);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel));
             }
 
             int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);

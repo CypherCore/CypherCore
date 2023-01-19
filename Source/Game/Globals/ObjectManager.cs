@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Collections;
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
@@ -6496,22 +6497,25 @@ namespace Game
                         if (playerInfo == null)
                             continue;
 
-                        // skip expansion races if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == Race.BloodElf || race == Race.Draenei))
-                            continue;
+                        if (ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpations", true))
+                        {
+                            // skip expansion races if not playing with expansion
+                            if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == Race.BloodElf || race == Race.Draenei))
+                                continue;
 
-                        // skip expansion classes if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.Deathknight)
-                            continue;
+                            // skip expansion classes if not playing with expansion
+                            if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.Deathknight)
+                                continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
-                            continue;
+                            if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
+                                continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
-                            continue;
+                            if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
+                                continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && _class == Class.Evoker)
-                            continue;
+                            if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && _class == Class.Evoker)
+                                continue;
+                        }
 
                         // fatal error if no level 1 data
                         if (playerInfo.levelInfo == null || playerInfo.levelInfo[0].stats[0] == 0)

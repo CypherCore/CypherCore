@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
@@ -109,6 +110,11 @@ namespace Game.Entities
             _restMgr = new RestMgr(this);
 
             m_groupUpdateTimer = new(5000);
+
+            // Adds the extra bag slots for having an authenticator.
+            if (ConfigMgr.GetDefaultValue("player.enableExtaBagSlots" , false) && !HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured))
+                SetPlayerLocalFlag(PlayerLocalFlags.AccountSecured);
+
         }
 
         public override void Dispose()
@@ -323,6 +329,10 @@ namespace Game.Entities
             }
 
             GetThreatManager().Initialize();
+
+            // Adds the extra bag slots for having an authenticator.
+            if (ConfigMgr.GetDefaultValue("player.enableExtaBagSlots", false) && !HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured))
+                SetPlayerLocalFlag(PlayerLocalFlags.AccountSecured);
 
             return true;
         }
@@ -4957,7 +4967,8 @@ namespace Game.Entities
 
         public bool IsMaxLevel()
         {
-            return GetLevel() >= m_activePlayerData.MaxLevel;
+            return GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+           // return GetLevel() >= m_activePlayerData.MaxLevel;
         }
 
         public ChatFlags GetChatFlags()

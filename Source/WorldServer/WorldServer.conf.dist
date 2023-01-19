@@ -709,6 +709,30 @@ MinCharterName = 2
 MinPetName = 2
 
 #
+#	Enables the extra slots in the backpack reguardless if they have an authenticator setup.
+# 
+#		1 = Enabled
+#		0 = Disabled
+
+player.enableExtaBagSlots = 0
+
+#
+#	Players get only 10% xp for killing creatures of lower expansion levels than himself
+#
+#		1 = Enabled
+#		0 = Disabled
+
+player.lowerExpInLowerExpansions = 1
+
+#
+#	When enabled the client must have the proper client/server expation to use the class/races from that expation or lower
+#
+#		1 = Enabled
+#		0 = Disabled
+
+character.EnforceRaceAndClassExpations = 1
+
+#
 #    Guild.CharterCost
 #    ArenaTeam.CharterCost.2v2
 #    ArenaTeam.CharterCost.3v3
@@ -1654,6 +1678,14 @@ CreatureFamilyFleeDelay = 7000
 #        Default:     3
 
 WorldBossLevelDiff = 3
+
+#
+#	Creatures scale from 1-max level if not content tuning is defined. 
+#	WARNING: ADVACNED CONFIG
+#		1 = Enabled
+#		0 = Disabled
+
+CreatureScaling.DefaultMaxLevel = 0
 
 #
 #    Corpse.Decay.NORMAL

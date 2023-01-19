@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Collections;
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
@@ -712,7 +713,10 @@ namespace Game
 
         public bool CanAccessAlliedRaces()
         {
-            return GetAccountExpansion() >= Expansion.BattleForAzeroth;
+            if (ConfigMgr.GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false))
+                return true; 
+            else
+                return GetAccountExpansion() >= Expansion.BattleForAzeroth;
         }
 
         void InitWarden(BigInteger k)
