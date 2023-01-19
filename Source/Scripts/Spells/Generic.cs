@@ -543,18 +543,13 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_allow_cast_from_item_only : SpellScript
+    class spell_gen_allow_cast_from_item_only : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             if (!GetCastItem())
                 return SpellCastResult.CantDoThatRightNow;
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
         }
     }
 
@@ -751,14 +746,14 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_bandage : SpellScript
+    class spell_gen_bandage : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RecentlyBandaged);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit target = GetExplTargetUnit();
             if (target)
@@ -778,7 +773,6 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             AfterHit.Add(new HitHandler(HandleScript));
         }
     }
@@ -1120,14 +1114,14 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_cannibalize : SpellScript
+    class spell_gen_cannibalize : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CannibalizeTriggered);
         }
 
-        SpellCastResult CheckIfCorpseNear()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             float max_range = GetSpellInfo().GetMaxRange(false);
@@ -1150,7 +1144,6 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            OnCheckCast.Add(new CheckCastHandler(CheckIfCorpseNear));
         }
     }
 
@@ -2825,14 +2818,14 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_profession_research : SpellScript
+    class spell_gen_profession_research : SpellScript, ICheckCastHander
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             Player player = GetCaster().ToPlayer();
 
@@ -2869,7 +2862,6 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
@@ -3159,9 +3151,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_two_forms : SpellScript
+    class spell_gen_two_forms : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().IsInCombat())
             {
@@ -3191,7 +3183,6 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleTransform, 0, SpellEffectName.Dummy));
         }
     }
@@ -3288,14 +3279,14 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_summon_tournament_mount : SpellScript
+    class spell_gen_summon_tournament_mount : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LanceEquipped);
         }
 
-        SpellCastResult CheckIfLanceEquiped()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().IsInDisallowedMountForm())
                 GetCaster().RemoveAurasByType(AuraType.ModShapeshift);
@@ -3307,11 +3298,6 @@ namespace Scripts.Spells.Generic
             }
 
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckIfLanceEquiped));
         }
     }
 
@@ -3654,18 +3640,13 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_wg_water : SpellScript
+    class spell_gen_wg_water : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             if (!GetSpellInfo().CheckTargetCreatureType(GetCaster()))
                 return SpellCastResult.DontReport;
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 

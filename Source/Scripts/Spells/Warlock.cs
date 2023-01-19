@@ -887,14 +887,14 @@ namespace Scripts.Spells.Warlock
     }
 
     [SpellScript(86213)] // 86213 - Soul Swap Exhale
-    class spell_warl_soul_swap_exhale : SpellScript
+    class spell_warl_soul_swap_exhale : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SoulSwapModCost, SpellIds.SoulSwapOverride);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit currentTarget = GetExplTargetUnit();
             Unit swapTarget = null;
@@ -949,7 +949,6 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(onEffectHit, 0, SpellEffectName.SchoolDamage));
         }
     }

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 
@@ -17,14 +18,14 @@ namespace Scripts.Spells.Evoker
     }
 
     [Script] // 358733 - Glide (Racial)
-    class spell_evo_glide : SpellScript
+    class spell_evo_glide : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.Hover, SpellIds.SoarRacial);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
 
@@ -48,7 +49,6 @@ namespace Scripts.Spells.Evoker
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnCast.Add(new CastHandler(HandleCast));
         }
     }

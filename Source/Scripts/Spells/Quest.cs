@@ -6,6 +6,7 @@ using Game;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -915,20 +916,15 @@ namespace Scripts.Spells.Quest
 
     // 39844 - Skyguard Blasting Charge
     [Script] // 40160 - Throw Bomb
-    class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript
+    class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             // This spell will be cast only if caster has one of these auras
             if (!(caster.HasAuraType(AuraType.Fly) || caster.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed)))
                 return SpellCastResult.CantDoThatRightNow;
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
         }
     }
     

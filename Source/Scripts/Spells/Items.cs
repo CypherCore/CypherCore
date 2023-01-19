@@ -8,6 +8,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -2533,14 +2534,14 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_book_of_glyph_mastery : SpellScript
+    class spell_item_book_of_glyph_mastery : SpellScript, ICheckCastHander
     {
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             if (SkillDiscovery.HasDiscoveredAllSpells(GetSpellInfo().Id, GetCaster().ToPlayer()))
             {
@@ -2564,15 +2565,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_item_gift_of_the_harvester : SpellScript
+    class spell_item_gift_of_the_harvester : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             List<TempSummon> ghouls = new();
             GetCaster().GetAllMinionsByEntry(ghouls, CreatureIds.Ghoul);
@@ -2584,17 +2584,12 @@ namespace Scripts.Spells.Items
 
             return SpellCastResult.SpellCastOk;
         }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
-        }
     }
 
     [Script]
-    class spell_item_map_of_the_geyser_fields : SpellScript
+    class spell_item_map_of_the_geyser_fields : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckSinkholes()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             if (caster.FindNearestCreature(CreatureIds.SouthSinkhole, 30.0f, true) ||
@@ -2604,11 +2599,6 @@ namespace Scripts.Spells.Items
 
             SetCustomCastResultMessage(SpellCustomErrors.MustBeCloseToSinkhole);
             return SpellCastResult.CustomError;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckSinkholes));
         }
     }
 
@@ -2804,7 +2794,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_demon_broiled_surprise : SpellScript
+    class spell_item_demon_broiled_surprise : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -2824,7 +2814,7 @@ namespace Scripts.Spells.Items
             player.CastSpell(player, SpellIds.CreateDemonBroiledSurprise, false);
         }
 
-        SpellCastResult CheckRequirement()
+        public SpellCastResult CheckCast()
         {
             Player player = GetCaster().ToPlayer();
             if (player.GetQuestStatus(QuestIds.SuperHotStew) != QuestStatus.Incomplete)
@@ -2840,7 +2830,6 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
-            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
         }
     }
 
@@ -2986,7 +2975,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_rocket_boots : SpellScript
+    class spell_item_rocket_boots : SpellScript, ICheckCastHander
     {
         public override bool Load()
         {
@@ -3010,7 +2999,7 @@ namespace Scripts.Spells.Items
             caster.CastSpell(caster, SpellIds.RocketBootsProc, true);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().IsInWater())
                 return SpellCastResult.OnlyAbovewater;
@@ -3019,7 +3008,6 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }

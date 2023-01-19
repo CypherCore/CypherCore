@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -605,9 +606,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    class spell_dru_innervate : SpellScript
+    class spell_dru_innervate : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Player target = GetExplTargetUnit()?.ToPlayer();
             if (target == null)
@@ -636,7 +637,6 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnHit.Add(new HitHandler(HandleRank2));
         }
     }
@@ -835,20 +835,15 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 52610 - Savage Roar
-    class spell_dru_savage_roar : SpellScript
+    class spell_dru_savage_roar : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             if (caster.GetShapeshiftForm() != ShapeShiftForm.CatForm)
                 return SpellCastResult.OnlyShapeshift;
 
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 
@@ -1334,14 +1329,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 783 - Travel Form (dummy)
-    class spell_dru_travel_form_dummy : SpellScript
+    class spell_dru_travel_form_dummy : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.FormAquaticPassive, SpellIds.FormAquatic, SpellIds.FormStag);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Player player = GetCaster().ToPlayer();
             if (!player)
@@ -1351,11 +1346,6 @@ namespace Scripts.Spells.Druid
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 

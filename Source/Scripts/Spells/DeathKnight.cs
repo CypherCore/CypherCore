@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -162,7 +163,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 127517 - Army Transform
-    class spell_dk_army_transform : SpellScript
+    class spell_dk_army_transform : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -174,7 +175,7 @@ namespace Scripts.Spells.DeathKnight
             return GetCaster().IsGuardian();
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
             if (owner)
@@ -191,7 +192,6 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
@@ -331,9 +331,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 52751 - Death Gate
-    class spell_dk_death_gate : SpellScript
+    class spell_dk_death_gate : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckClass()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().GetClass() != Class.Deathknight)
             {
@@ -354,20 +354,19 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckClass));
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 49576 - Death Grip Initial
-    class spell_dk_death_grip_initial : SpellScript
+    class spell_dk_death_grip_initial : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathGripDummy, SpellIds.DeathGripJump, SpellIds.Blood, SpellIds.DeathGripTaunt);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             // Death Grip should not be castable while jumping/falling
@@ -387,7 +386,6 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
         }
     }
@@ -620,7 +618,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 121916 - Glyph of the Geist (Unholy)
-    class spell_dk_pet_geist_transform : SpellScript
+    class spell_dk_pet_geist_transform : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -632,7 +630,7 @@ namespace Scripts.Spells.DeathKnight
             return GetCaster().IsPet();
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
             if (owner)
@@ -641,22 +639,17 @@ namespace Scripts.Spells.DeathKnight
 
             return SpellCastResult.SpellUnavailable;
         }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
     }
 
     [Script] // 147157 Glyph of the Skeleton (Unholy)
-    class spell_dk_pet_skeleton_transform : SpellScript
+    class spell_dk_pet_skeleton_transform : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfTheSkeleton);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
             if (owner)
@@ -664,11 +657,6 @@ namespace Scripts.Spells.DeathKnight
                     return SpellCastResult.SpellCastOk;
 
             return SpellCastResult.SpellUnavailable;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 

@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -356,19 +357,14 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script]
-    class spell_rog_pickpocket : SpellScript
+    class spell_rog_pickpocket : SpellScript, ICheckCastHander
     {
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             if (!GetExplTargetUnit() || !GetCaster().IsValidAttackTarget(GetExplTargetUnit(), GetSpellInfo()))
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
     
@@ -536,7 +532,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 185438 - Shadowstrike
-    class spell_rog_shadowstrike : SpellScript
+    class spell_rog_shadowstrike : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -544,7 +540,7 @@ namespace Scripts.Spells.Rogue
             && Global.SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffects().Count > 0;
         }
 
-        SpellCastResult HandleCheckCast()
+        public SpellCastResult CheckCast()
         {
             // Because the premeditation aura is removed when we're out of stealth,
             // when we reach HandleEnergize the aura won't be there, even if it was when player launched the spell
@@ -579,7 +575,6 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(HandleCheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleEnergize, 1, SpellEffectName.Energize));
         }
 

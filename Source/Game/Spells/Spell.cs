@@ -15,6 +15,7 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7402,20 +7403,20 @@ namespace Game.Spells
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
 
-                if (script is ISpellScript)
+                if (script is IBaseSpellScript)
                 {
                     foreach (var iFace in script.GetType().GetInterfaces())
                     {
-                        if (iFace.Name == nameof(ISpellScript))
+                        if (iFace.Name == nameof(IBaseSpellScript))
                             continue;
 
                         if (!m_spellScriptsByType.TryGetValue(iFace, out var spellScripts))
                         {
-                            spellScripts = new List<ISpellScript>();
+                            spellScripts = new List<IBaseSpellScript>();
                             m_spellScriptsByType[iFace] = spellScripts;
                         }
 
-                        spellScripts.Add((ISpellScript)script);
+                        spellScripts.Add((IBaseSpellScript)script);
                     }
                 }
             }
@@ -7473,19 +7474,18 @@ namespace Game.Spells
         SpellCastResult CallScriptCheckCastHandlers()
         {
             SpellCastResult retVal = SpellCastResult.SpellCastOk;
-            foreach (var script in m_loadedScripts)
+
+            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CheckCast);
 
-                foreach (var hook in script.OnCheckCast)
-                {
-                    SpellCastResult tempResult = hook.Call();
-                    if (tempResult != SpellCastResult.SpellCastOk)
-                        retVal = tempResult;
-                }
+                var tempResult = ((ICheckCastHander)script).CheckCast();
+                if (tempResult != SpellCastResult.SpellCastOk)
+                    retVal = tempResult;
 
                 script._FinishScriptCall();
             }
+
             return retVal;
         }
 
@@ -7830,12 +7830,12 @@ namespace Game.Spells
         }
 
         List<SpellScript> m_loadedScripts = new();
-        readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
-        static List<ISpellScript> dummy = new();
+        readonly Dictionary<Type, List<IBaseSpellScript>> m_spellScriptsByType = new Dictionary<Type, List<IBaseSpellScript>>();
+        static List<IBaseSpellScript> dummy = new();
 
-        public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
+        public List<IBaseSpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
-            if (m_spellScriptsByType.TryGetValue(typeof(T), out List<ISpellScript> scripts))
+            if (m_spellScriptsByType.TryGetValue(typeof(T), out List<IBaseSpellScript> scripts))
                 return scripts;
 
             return dummy;

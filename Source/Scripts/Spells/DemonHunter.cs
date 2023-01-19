@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -327,14 +328,14 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    class spell_dh_glide : SpellScript
+    class spell_dh_glide : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.GlideDuration, SpellIds.VengefulRetreatTrigger, SpellIds.FelRush);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             if (caster.IsMounted() || caster.GetVehicleBase())
@@ -361,7 +362,6 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             BeforeCast.Add(new CastHandler(HandleCast));
         }
     }

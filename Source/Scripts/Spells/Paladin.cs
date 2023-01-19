@@ -10,6 +10,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
+using Game.Scripting.Interfaces.Spell;
 
 namespace Scripts.Spells.Paladin
 {
@@ -221,7 +222,7 @@ namespace Scripts.Spells.Paladin
     
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
-    class spell_pal_blessing_of_protection : SpellScript
+    class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -229,7 +230,7 @@ namespace Scripts.Spells.Paladin
                 && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
-        SpellCastResult CheckForbearance()
+        public SpellCastResult CheckCast()
         {
             Unit target = GetExplTargetUnit();
             if (!target || target.HasAura(SpellIds.Forbearance))
@@ -250,7 +251,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
             AfterHit.Add(new HitHandler(TriggerForbearance));
         }
     }
@@ -380,7 +380,7 @@ namespace Scripts.Spells.Paladin
     }
     
     [Script] // 642 - Divine Shield
-    class spell_pal_divine_shield : SpellScript
+    class spell_pal_divine_shield : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -388,7 +388,7 @@ namespace Scripts.Spells.Paladin
                     && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
-        SpellCastResult CheckForbearance()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().HasAura(SpellIds.Forbearance))
                 return SpellCastResult.TargetAurastate;
@@ -411,7 +411,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
             AfterCast.Add(new CastHandler(HandleFinalStand));
             AfterCast.Add(new CastHandler(TriggerForbearance));
         }
@@ -799,14 +798,14 @@ namespace Scripts.Spells.Paladin
     }
     
     [Script] // 20473 - Holy Shock
-    class spell_pal_holy_shock : SpellScript
+    class spell_pal_holy_shock : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, SpellIds.HolyShockDamage);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
@@ -842,7 +841,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
@@ -951,7 +949,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 633 - Lay on Hands
-    class spell_pal_lay_on_hands : SpellScript
+    class spell_pal_lay_on_hands : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -959,7 +957,7 @@ namespace Scripts.Spells.Paladin
                 && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
-        SpellCastResult CheckForbearance()
+        public SpellCastResult CheckCast()
         {
             Unit target = GetExplTargetUnit();
             if (!target || target.HasAura(SpellIds.Forbearance))
@@ -980,7 +978,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
             AfterHit.Add(new HitHandler(TriggerForbearance));
         }
     }

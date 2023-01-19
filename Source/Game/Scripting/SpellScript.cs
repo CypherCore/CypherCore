@@ -12,7 +12,7 @@ using System.Linq;
 namespace Game.Scripting
 {
     // helper class from which SpellScript and SpellAura derive, use these classes instead
-    public class BaseSpellScript
+    public class BaseSpellScript : IBaseSpellScript
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
@@ -82,27 +82,27 @@ namespace Game.Scripting
             public uint GetAffectedEffectsMask(SpellInfo spellEntry)
             {
                 uint mask = 0;
-                if ((_effIndex == SpellConst.EffectAll) || (_effIndex == SpellConst.EffectFirstFound))
+                if (_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound)
                 {
                     for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                     {
-                        if ((_effIndex == SpellConst.EffectFirstFound) && mask != 0)
+                        if (_effIndex == SpellConst.EffectFirstFound && mask != 0)
                             return mask;
                         if (CheckEffect(spellEntry, i))
-                            mask |= (1u << i);
+                            mask |= 1u << i;
                     }
                 }
                 else
                 {
                     if (CheckEffect(spellEntry, _effIndex))
-                        mask |= (1u << (int)_effIndex);
+                        mask |= 1u << (int)_effIndex;
                 }
                 return mask;
             }
 
             public bool IsEffectAffected(SpellInfo spellEntry, uint effIndex)
             {
-                return Convert.ToBoolean(GetAffectedEffectsMask(spellEntry) & (1 << (int)effIndex));
+                return Convert.ToBoolean(GetAffectedEffectsMask(spellEntry) & 1 << (int)effIndex);
             }
 
             public abstract bool CheckEffect(SpellInfo spellEntry, uint effIndex);
@@ -131,7 +131,7 @@ namespace Game.Scripting
         public virtual void Unload() { }
     }
 
-    public class SpellScript : BaseSpellScript
+    public class SpellScript : BaseSpellScript, ISpellScript
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
@@ -158,21 +158,6 @@ namespace Game.Scripting
             SpellCastFnType pCastHandlerScript;
         }
 
-        public class CheckCastHandler
-        {
-            public CheckCastHandler(SpellCheckCastFnType checkCastHandlerScript)
-            {
-                _checkCastHandlerScript = checkCastHandlerScript;
-            }
-
-            public SpellCastResult Call()
-            {
-                return _checkCastHandlerScript();
-            }
-
-            SpellCheckCastFnType _checkCastHandlerScript;
-        }
-
         public class OnCalculateResistAbsorbHandler
         {
             public OnCalculateResistAbsorbHandler(SpellOnResistAbsorbCalculateFnType onResistAbsorbCalculateHandlerScript)
@@ -187,7 +172,7 @@ namespace Game.Scripting
 
             SpellOnResistAbsorbCalculateFnType _onCalculateResistAbsorbHandlerScript;
         }
-        
+
         public class EffectHandler : EffectHook
         {
             public EffectHandler(SpellEffectFnType pEffectHandlerScript, uint effIndex, SpellEffectName effName) : base(effIndex)
@@ -206,7 +191,7 @@ namespace Game.Scripting
                     return true;
                 if (spellEffectInfo.Effect == 0)
                     return false;
-                return (_effName == SpellEffectName.Any) || (spellEffectInfo.Effect == _effName);
+                return _effName == SpellEffectName.Any || spellEffectInfo.Effect == _effName;
             }
 
             public void Call(uint effIndex)
@@ -424,8 +409,8 @@ namespace Game.Scripting
             m_hitPreventEffectMask = 0;
             m_hitPreventDefaultEffectMask = 0;
         }
-        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & (1 << (int)effIndex)); }
-        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << (int)effIndex)); }
+        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & 1 << (int)effIndex); }
+        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
             m_currentScriptState = (byte)hookType;
@@ -447,7 +432,7 @@ namespace Game.Scripting
                 || m_currentScriptState == (byte)SpellScriptHookType.AfterCast
                 || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance;
         }
-        
+
         public bool IsInTargetHook()
         {
             switch ((SpellScriptHookType)m_currentScriptState)
@@ -477,15 +462,15 @@ namespace Game.Scripting
             }
             return false;
         }
-        
+
         public bool IsInHitPhase()
         {
-            return (m_currentScriptState >= (byte)SpellScriptHookType.EffectHit && m_currentScriptState < (byte)SpellScriptHookType.AfterHit + 1);
+            return m_currentScriptState >= (byte)SpellScriptHookType.EffectHit && m_currentScriptState < (byte)SpellScriptHookType.AfterHit + 1;
         }
 
         public bool IsInEffectHook()
         {
-            return (m_currentScriptState >= (byte)SpellScriptHookType.Launch && m_currentScriptState <= (byte)SpellScriptHookType.EffectHitTarget)
+            return m_currentScriptState >= (byte)SpellScriptHookType.Launch && m_currentScriptState <= (byte)SpellScriptHookType.EffectHitTarget
                 || m_currentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
 
@@ -500,9 +485,6 @@ namespace Game.Scripting
         public List<CastHandler> BeforeCast = new();
         public List<CastHandler> OnCast = new();
         public List<CastHandler> AfterCast = new();
-
-        // where function is SpellCastResult function()
-        public List<CheckCastHandler> OnCheckCast = new();
 
         // example: int32 CalcCastTime(int32 castTime) override { return 1500; }
         public virtual int CalcCastTime(int castTime) { return castTime; }
@@ -729,7 +711,7 @@ namespace Game.Scripting
             }
             return m_spell.corpseTarget;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -858,7 +840,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
             }
-            m_hitPreventEffectMask |= (1u << (int)effIndex);
+            m_hitPreventEffectMask |= 1u << (int)effIndex;
             PreventHitDefaultEffect(effIndex);
         }
 
@@ -872,7 +854,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
             }
-            m_hitPreventDefaultEffectMask |= (1u << (int)effIndex);
+            m_hitPreventDefaultEffectMask |= 1u << (int)effIndex;
         }
 
         public SpellEffectInfo GetEffectInfo()
@@ -925,7 +907,7 @@ namespace Game.Scripting
 
             m_spell.variance = variance;
         }
-        
+
         // returns: cast item if present.
         public Item GetCastItem() { return m_spell.m_CastItem; }
 
@@ -1014,7 +996,7 @@ namespace Game.Scripting
         }
     }
 
-    public class AuraScript : BaseSpellScript
+    public class AuraScript : BaseSpellScript, IAuraScript
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
@@ -1076,7 +1058,7 @@ namespace Game.Scripting
                 if (spellEffectInfo.ApplyAuraName == 0)
                     return false;
 
-                return (effAurName == AuraType.Any) || (spellEffectInfo.ApplyAuraName == effAurName);
+                return effAurName == AuraType.Any || spellEffectInfo.ApplyAuraName == effAurName;
             }
 
             AuraType effAurName;
@@ -1292,7 +1274,7 @@ namespace Game.Scripting
         }
         public class EnterLeaveCombatHandler
         {
-            public EnterLeaveCombatHandler(AuraEnterLeaveCombatFnType handlerScript) 
+            public EnterLeaveCombatHandler(AuraEnterLeaveCombatFnType handlerScript)
             {
                 _handlerScript = handlerScript;
             }
@@ -1303,7 +1285,7 @@ namespace Game.Scripting
 
             AuraEnterLeaveCombatFnType _handlerScript;
         }
-        
+
         public AuraScript()
         {
             m_aura = null;

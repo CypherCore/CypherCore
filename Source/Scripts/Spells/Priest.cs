@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Movement;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -641,14 +642,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47540 - Penance
-    class spell_pri_penance : SpellScript
+    class spell_pri_penance : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
@@ -681,7 +682,6 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
@@ -863,14 +863,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    class spell_pri_power_word_shield : SpellScript
+    class spell_pri_power_word_shield : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.WeakenedSoul);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
@@ -893,7 +893,6 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             AfterHit.Add(new HitHandler(HandleEffectHit));
         }
     }

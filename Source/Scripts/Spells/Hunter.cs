@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -159,7 +160,7 @@ namespace Scripts.Spells.Hunter
 
     // 53271 - Masters Call
     [Script]
-    class spell_hun_masters_call : SpellScript
+    class spell_hun_masters_call : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -171,7 +172,7 @@ namespace Scripts.Spells.Hunter
             return GetCaster().IsPlayer();
         }
 
-        SpellCastResult DoCheckCast()
+        public SpellCastResult CheckCast()
         {
             Guardian pet = GetCaster().ToPlayer().GetGuardianPet();
             if (pet == null || !pet.IsPet() || !pet.IsAlive())
@@ -214,7 +215,6 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(DoCheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }
@@ -414,11 +414,11 @@ namespace Scripts.Spells.Hunter
 
     // 1515 - Tame Beast
     [Script]
-    class spell_hun_tame_beast : SpellScript
+    class spell_hun_tame_beast : SpellScript, ICheckCastHander
     {
         static uint[] CallPetSpellIds = { 883, 83242, 83243, 83244, 83245, };
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             Player caster = GetCaster().ToPlayer();
             if (caster == null)
@@ -471,11 +471,6 @@ namespace Scripts.Spells.Hunter
                 return SpellCastResult.BadImplicitTargets;
 
             return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 

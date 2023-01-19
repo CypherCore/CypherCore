@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -89,7 +90,7 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 115546 - Provoke
-    class spell_monk_provoke : SpellScript
+    class spell_monk_provoke : SpellScript, ICheckCastHander
     {
         const uint BlackOxStatusEntry = 61146;
 
@@ -100,7 +101,7 @@ namespace Scripts.Spells.Monk
             return ValidateSpellInfo(SpellIds.ProvokeSingleTarget, SpellIds.ProvokeAoe);
         }
 
-        SpellCastResult CheckExplicitTarget()
+        public SpellCastResult CheckCast()
         {
             if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
             {
@@ -126,20 +127,19 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckExplicitTarget));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script] // 109132 - Roll
-    class spell_monk_roll : SpellScript
+    class spell_monk_roll : SpellScript, ICheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RollBackward, SpellIds.RollForward, SpellIds.NoFeatherFall);
         }
 
-        SpellCastResult CheckCast()
+        public SpellCastResult CheckCast()
         {
             if (GetCaster().HasUnitState(UnitState.Root))
                 return SpellCastResult.Rooted;
@@ -155,7 +155,6 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
