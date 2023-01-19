@@ -747,6 +747,16 @@ Character.MaxLevelFor.BattleForAzeroth = 50
 Character.MaxLevelFor.ShadowLands = 60
 Character.MaxLevelFor.Dragonflight = 70
 
+
+#
+#	Max level a character can get is sometimes limited by other factors such as chromie time. This will ignore those factors
+#	and make the max level to the setting max level when enabled. Character.MaxLevelFor.SomeExpation still obayed reguardless of this setting.
+#
+#		1 = Enabled
+#		0 = Disabled
+
+character.MaxLevelDeterminedByConfig = 0
+
 #
 #    Guild.CharterCost
 #    ArenaTeam.CharterCost.2v2

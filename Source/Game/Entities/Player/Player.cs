@@ -4967,8 +4967,10 @@ namespace Game.Entities
 
         public bool IsMaxLevel()
         {
-            return GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
-           // return GetLevel() >= m_activePlayerData.MaxLevel;
+            if (ConfigMgr.GetDefaultValue("character.MaxLevelDeterminedByConfig", false))
+                return GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+
+            return GetLevel() >= m_activePlayerData.MaxLevel;
         }
 
         public ChatFlags GetChatFlags()
