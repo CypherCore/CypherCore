@@ -219,6 +219,12 @@ namespace Game.DataStorage
                 if (CreatureDisplayInfoId != 0)
                     Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
 
+                if (worldObject == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+                    return false;
+                }
+
                 worldObject.SpawnId = SpawnId;
                 return true;
             }

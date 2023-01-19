@@ -214,6 +214,7 @@ namespace Scripts.Spells.Warlock
         public const uint IMPENDING_DOOM_SUMMON = 196271;
         public const uint IMPLOSION_DAMAGE = 196278;
         public const uint IMPLOSION_JUMP = 205205;
+        public const uint IMPLOSION = 196277;
         public const uint DOOMGUARD_SHADOW_LOCK = 171138;
         public const uint NIGHTFALL_BUFF = 264571;
         public const uint IMPROVED_DREADSTALKERS = 196272;
@@ -640,7 +641,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 348 - Immolate
+    [SpellScript(348)] // 348 - Immolate
     class spell_warl_immolate : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -794,7 +795,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 686 - Shadow Bolt
+    [SpellScript(686)] // 686 - Shadow Bolt
     class spell_warl_shadow_bolt : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -885,7 +886,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 86213 - Soul Swap Exhale
+    [SpellScript(86213)] // 86213 - Soul Swap Exhale
     class spell_warl_soul_swap_exhale : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -953,7 +954,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 29858 - Soulshatter
+    [SpellScript(29858)] // 29858 - Soulshatter
     class spell_warl_soulshatter : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -976,8 +977,8 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script("spell_warl_t4_2p_bonus_shadow", SpellIds.Flameshadow)]// 37377 - Shadowflame
-    [Script("spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]// 39437 - Shadowflame Hellfire and RoF
+    [SpellScript(37377, "spell_warl_t4_2p_bonus_shadow", SpellIds.Flameshadow)]// 37377 - Shadowflame
+    [SpellScript(39437, "spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]// 39437 - Shadowflame Hellfire and RoF
     class spell_warl_t4_2p_bonus : AuraScript
     {
         public spell_warl_t4_2p_bonus(uint triggerSpell)
@@ -1005,7 +1006,7 @@ namespace Scripts.Spells.Warlock
         uint _triggerSpell;
     }
 
-    [Script] // 30108, 34438, 34439, 35183 - Unstable Affliction
+    [SpellScript(new uint[] { 30108, 34438, 34439, 35183 })] // 30108, 34438, 34439, 35183 - Unstable Affliction
     class spell_warl_unstable_affliction : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1035,7 +1036,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 5740 - Rain of Fire Updated 7.1.5
+    [SpellScript(5740)] // 5740 - Rain of Fire Updated 7.1.5
     class spell_warl_rain_of_fire : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
@@ -1065,7 +1066,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // Grimoire of Service - 108501
-    [Script]
+    [SpellScript(108501)]
     class spell_warl_grimoire_of_service_aura : AuraScript
     {
         public void Handlearn(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -1103,7 +1104,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // 205179
-    [Script]
+    [SpellScript(205179)]
     public class aura_warl_phantomatic_singularity : AuraScript
     {
         public void OnTick(AuraEffect UnnamedParameter)
@@ -1122,7 +1123,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // Demonic Calling - 205145
-    [Script]
+    [SpellScript(205145)]
     public class spell_warl_demonic_calling : AuraScriptLoader
     {
         public spell_warl_demonic_calling() : base("spell_warl_demonic_calling")
@@ -1164,7 +1165,7 @@ namespace Scripts.Spells.Warlock
 
 
     // Eye Laser - 205231
-    [Script]
+    [SpellScript(205231)]
     public class spell_warl_eye_laser : SpellScriptLoader
     {
         public spell_warl_eye_laser() : base("spell_warl_eye_laser")
@@ -1200,7 +1201,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // Grimoire of Synergy - 171975
-    [Script("spell_warl_grimoire_of_synergy")]
+    [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
     public class spell_warl_grimoire_of_synergy : SpellScriptLoader
     {
         public spell_warl_grimoire_of_synergy() : base("spell_warl_grimoire_of_synergy")
@@ -1245,7 +1246,7 @@ namespace Scripts.Spells.Warlock
 
 
     // Grimoire of Synergy - 171975
-    [Script("spell_warl_grimoire_of_synergy")]
+    [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
     public class aura_warl_grimoire_of_synergy : AuraScriptLoader
     {
         public aura_warl_grimoire_of_synergy() : base("spell_warl_grimoire_of_synergy")
@@ -1308,7 +1309,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // 196277 - Implosion
-    [Script]
+    [SpellScript(SpellIds.IMPLOSION)]
     public class spell_warl_implosion : SpellScriptLoader
     {
         public spell_warl_implosion() : base("spell_warl_implosion")
@@ -1386,11 +1387,16 @@ namespace Scripts.Spells.Warlock
 
 
     // Grimoire of Service summons - 111859, 111895, 111896, 111897, 111898
-    [Script]
+    [SpellScript(new uint[] { 111859, 111895, 111896, 111897, 111898 })]
     public class spell_warl_grimoire_of_service : SpellScriptLoader
     {
         public spell_warl_grimoire_of_service() : base("spell_warl_grimoire_of_service")
         {
+        }
+
+        public override bool IsDatabaseBound()
+        {
+            return false;
         }
 
         public class spell_warl_grimoire_of_service_SpellScript : SpellScript, IOnSummon

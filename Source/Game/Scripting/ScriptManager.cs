@@ -173,6 +173,11 @@ namespace Game.Scripting
                             name = attribute.Name;
 
                         Activator.CreateInstance(genericType, name, attribute.Args);
+
+                        if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
+                            foreach(var id in spellScript.SpellIds)
+                                Global.ObjectMgr.RegisterSpellScript(id, name);
+
                     }
                 }
             }
@@ -439,7 +444,7 @@ namespace Game.Scripting
                 if (tmpscript == null)
                     continue;
 
-                scriptDic.Add(tmpscript, id);
+                scriptDic[tmpscript] = id;
             }
 
             return scriptDic;
@@ -459,7 +464,7 @@ namespace Game.Scripting
                 if (tmpscript == null)
                     continue;
 
-                scriptDic.Add(tmpscript, id);
+                scriptDic[tmpscript] = id;
             }
 
             return scriptDic;
@@ -1327,5 +1332,26 @@ namespace Game.Scripting
 
         public string Name { get; private set; }
         public object[] Args { get; private set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class SpellScriptAttribute : ScriptAttribute
+    {
+        public SpellScriptAttribute(string name = "", params object[] args) : base (name, args)
+        {
+
+        }
+
+        public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
+        {
+            SpellIds = new[] { spellId };
+        }
+
+        public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)
+        {
+            SpellIds = spellId;
+        }
+
+        public uint[] SpellIds { get; private set; }
     }
 }

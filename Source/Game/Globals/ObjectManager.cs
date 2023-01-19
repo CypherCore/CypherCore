@@ -1574,6 +1574,56 @@ namespace Game
             foreach (var id in actionSet)
                 Log.outError(LogFilter.Sql, "There is no waypoint which links to the waypoint script {0}", id);
         }
+
+        public bool RegisterSpellScript(int spellId, string scriptName)
+        {
+            bool allRanks = false;
+
+            if (spellId < 0)
+            {
+                allRanks = true;
+                spellId = -spellId;
+            }
+
+            return RegisterSpellScript((uint)spellId, scriptName, allRanks);
+        }
+
+        public bool RegisterSpellScript(uint spellId, string scriptName, bool allRanks = false)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) does not exist.", scriptName, spellId);
+                return false;
+            }
+
+            if (allRanks)
+            {
+                if (!spellInfo.IsRanked())
+                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
+
+                if (spellInfo.GetFirstRankSpell().Id != spellId)
+                {
+                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is not first rank of spell.", scriptName, spellId);
+                    return false;
+                }
+                while (spellInfo != null)
+                {
+                    spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
+                    spellInfo = spellInfo.GetNextRankSpell();
+                }
+            }
+            else
+            {
+                if (spellInfo.IsRanked())
+                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
+
+                spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
+            }
+
+            return true;
+        }
+
         public void LoadSpellScriptNames()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1594,45 +1644,8 @@ namespace Game
                 int spellId = result.Read<int>(0);
                 string scriptName = result.Read<string>(1);
 
-                bool allRanks = false;
-                if (spellId < 0)
-                {
-                    allRanks = true;
-                    spellId = -spellId;
-                }
-
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellId, Difficulty.None);
-                if (spellInfo == null)
-                {
-                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) does not exist.", scriptName, spellId);
-                    continue;
-                }
-
-                if (allRanks)
-                {
-                    if (!spellInfo.IsRanked())
-                        Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
-
-                    if (spellInfo.GetFirstRankSpell().Id != spellId)
-                    {
-                        Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is not first rank of spell.", scriptName, spellId);
-                        continue;
-                    }
-                    while (spellInfo != null)
-                    {
-                        spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
-                        spellInfo = spellInfo.GetNextRankSpell();
-                    }
-                }
-                else
-                {
-                    if (spellInfo.IsRanked())
-                        Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
-
-                    spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
-                }
-
-                ++count;
+                if (RegisterSpellScript(spellId, scriptName))
+                    ++count;
             }
             while (result.NextRow());
 
@@ -1734,6 +1747,9 @@ namespace Game
         }
         public uint GetScriptId(string name, bool isDatabaseBound = true)
         {
+            if (string.IsNullOrEmpty(name))
+                return 0;
+
             return _scriptNamesStorage.Insert(name, isDatabaseBound);
         }
         public uint GetAreaTriggerScriptId(uint triggerid)
@@ -3590,7 +3606,12 @@ namespace Game
                 data.PhaseId = result.Read<uint>(24);
                 data.PhaseGroup = result.Read<uint>(25);
                 data.terrainSwapMap = result.Read<int>(26);
-                data.ScriptId = GetScriptId(result.Read<string>(27));
+
+                var scriptId = result.Read<string>(27);
+
+                if (string.IsNullOrEmpty(scriptId))
+                    data.ScriptId = GetScriptId(scriptId);
+
                 data.StringId = result.Read<string>(28);
                 data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.MapId) ? 1 : 0u]; // transport spawns default to compatibility group
 
@@ -9851,8 +9872,7 @@ namespace Game
 
                     int quantity = rewardItem.Read<int>(4);
 
-                    PlayerChoice choice = _playerChoices[choiceId];
-                    if (choice == null)
+                    if (!_playerChoices.TryGetValue(choiceId, out var choice) || choice == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
                         continue;
@@ -10119,14 +10139,20 @@ namespace Game
                         continue;
                     }
 
-                    PlayerChoiceResponseLocale data = playerChoiceLocale.Responses[responseId];
-                    AddLocaleString(result.Read<string>(3), locale, data.Answer);
-                    AddLocaleString(result.Read<string>(4), locale, data.Header);
-                    AddLocaleString(result.Read<string>(5), locale, data.SubHeader);
-                    AddLocaleString(result.Read<string>(6), locale, data.ButtonTooltip);
-                    AddLocaleString(result.Read<string>(7), locale, data.Description);
-                    AddLocaleString(result.Read<string>(8), locale, data.Confirmation);
-                    count++;
+                    if (playerChoiceLocale.Responses.TryGetValue(responseId, out var data))
+                    {
+                        AddLocaleString(result.Read<string>(3), locale, data.Answer);
+                        AddLocaleString(result.Read<string>(4), locale, data.Header);
+                        AddLocaleString(result.Read<string>(5), locale, data.SubHeader);
+                        AddLocaleString(result.Read<string>(6), locale, data.ButtonTooltip);
+                        AddLocaleString(result.Read<string>(7), locale, data.Description);
+                        AddLocaleString(result.Read<string>(8), locale, data.Confirmation);
+                        count++;
+                    }
+                    else
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing locale for ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                    }
                 } while (result.NextRow());
 
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");

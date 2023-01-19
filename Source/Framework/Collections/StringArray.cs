@@ -40,6 +40,9 @@ namespace Framework.Collections
 
         public IEnumerator GetEnumerator()
         {
+            if (_str == null)
+                _str = new string[0];
+
             return _str.GetEnumerator();
         }
 
