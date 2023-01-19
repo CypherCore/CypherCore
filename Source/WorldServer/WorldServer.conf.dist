@@ -733,6 +733,21 @@ player.lowerExpInLowerExpansions = 1
 character.EnforceRaceAndClassExpations = 1
 
 #
+#	Max level you can gain for each xpack
+#
+
+Character.MaxLevelFor.Classic = 30
+Character.MaxLevelFor.BurningCrusade = 30
+Character.MaxLevelFor.WrathOfTheLichKing = 30
+Character.MaxLevelFor.Cataclysm = 35
+Character.MaxLevelFor.MistsOfPandaria = 35
+Character.MaxLevelFor.WarlordsOfDraenor = 40
+Character.MaxLevelFor.Legion = 45
+Character.MaxLevelFor.BattleForAzeroth = 50
+Character.MaxLevelFor.ShadowLands = 60
+Character.MaxLevelFor.Dragonflight = 70
+
+#
 #    Guild.CharterCost
 #    ArenaTeam.CharterCost.2v2
 #    ArenaTeam.CharterCost.3v3

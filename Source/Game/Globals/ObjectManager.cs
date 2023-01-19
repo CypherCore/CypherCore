@@ -10453,23 +10453,25 @@ namespace Game
             switch (expansion)
             {
                 case Expansion.Classic:
-                    return 30;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.Classic", 30);
                 case Expansion.BurningCrusade:
-                    return 30;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.BurningCrusade", 30);
                 case Expansion.WrathOfTheLichKing:
-                    return 30;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.WrathOfTheLichKing", 30);
                 case Expansion.Cataclysm:
-                    return 35;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.Cataclysm", 35);
                 case Expansion.MistsOfPandaria:
-                    return 35;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.MistsOfPandaria", 35);
                 case Expansion.WarlordsOfDraenor:
-                    return 40;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.WarlordsOfDraenor", 40);
                 case Expansion.Legion:
-                    return 45;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.Legion", 45);
                 case Expansion.BattleForAzeroth:
-                    return 50;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.BattleForAzeroth", 50);
                 case Expansion.ShadowLands:
-                    return 60;
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.ShadowLands", 60);
+                case Expansion.Dragonflight:
+                    return ConfigMgr.GetDefaultValue<uint>("Character.MaxLevelFor.Dragonflight", 70);
                 default:
                     break;
             }
