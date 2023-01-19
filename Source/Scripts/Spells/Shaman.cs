@@ -7,6 +7,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -268,7 +269,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 187874 - Crash Lightning
-    class spell_sha_crash_lightning : SpellScript
+    class spell_sha_crash_lightning : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -280,7 +281,7 @@ namespace Scripts.Spells.Shaman
             _targetsHit = targets.Count;
         }
 
-        void TriggerCleaveBuff()
+        public void AfterCast()
         {
             if (_targetsHit >= 2)
                 GetCaster().CastSpell(GetCaster(), SpellIds.CrashLightningCleave, true);
@@ -297,14 +298,13 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
-            AfterCast.Add(new CastHandler(TriggerCleaveBuff));
         }
 
         int _targetsHit;
     }
 
     [Script] // 207778 - Downpour
-    class spell_sha_downpour : SpellScript
+    class spell_sha_downpour : SpellScript, IAfterCast
     {
         int _healedTargets = 0;
 
@@ -325,7 +325,7 @@ namespace Scripts.Spells.Shaman
                 ++_healedTargets;
         }
 
-        void HandleCooldown()
+        public void AfterCast()
         {
             var cooldown = TimeSpan.FromMilliseconds(GetSpellInfo().RecoveryTime) + TimeSpan.FromSeconds(GetEffectInfo(1).CalcValue() * _healedTargets);
             GetCaster().GetSpellHistory().StartCooldown(GetSpellInfo(), 0, GetSpell(), false, cooldown);
@@ -335,7 +335,6 @@ namespace Scripts.Spells.Shaman
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
             AfterHit.Add(new HitHandler(CountEffectivelyHealedTarget));
-            AfterCast.Add(new CastHandler(HandleCooldown));
         }
     }
 
@@ -521,7 +520,7 @@ namespace Scripts.Spells.Shaman
     
     // 117014 - Elemental Blast
     [Script] // 120588 - Elemental Blast Overload
-    class spell_sha_elemental_blast : SpellScript
+    class spell_sha_elemental_blast : SpellScript, IAfterCast
     {
         uint[] BuffSpells = { SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery };
 
@@ -539,7 +538,7 @@ namespace Scripts.Spells.Shaman
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
         }
 
-        void TriggerBuff()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
             uint spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId =>
@@ -553,7 +552,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnEffectLaunch.Add(new EffectHandler(HandleEnergize, 0, SpellEffectName.SchoolDamage));
-            AfterCast.Add(new CastHandler(TriggerBuff));
         }
     }
 
@@ -925,7 +923,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 51505 - Lava burst
-    class spell_sha_lava_burst : SpellScript
+    class spell_sha_lava_burst : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -942,7 +940,7 @@ namespace Scripts.Spells.Shaman
             }
         }
 
-        void EnsureLavaSurgeCanBeImmediatelyConsumed()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
 
@@ -963,7 +961,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TriggerMissile));
-            AfterCast.Add(new CastHandler(EnsureLavaSurgeCanBeImmediatelyConsumed));
         }
     }
 

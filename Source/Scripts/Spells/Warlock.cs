@@ -796,21 +796,16 @@ namespace Scripts.Spells.Warlock
     }
 
     [SpellScript(686)] // 686 - Shadow Bolt
-    class spell_warl_shadow_bolt : SpellScript
+    class spell_warl_shadow_bolt : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ShadowBoltEnergize);
         }
 
-        void HandleAfterCast()
+        public void AfterCast()
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.ShadowBoltEnergize, true);
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
 
@@ -1207,10 +1202,10 @@ namespace Scripts.Spells.Warlock
         {
         }
 
-        public class spell_warl_grimoire_of_synergy_SpellScript : SpellScript
+        public class spell_warl_grimoire_of_synergy_SpellScript : SpellScript, IOnCast
         {
 
-            public void HandleCast()
+            public void OnCast()
             {
                 Unit caster = GetCaster();
                 if (caster == null)
@@ -1229,11 +1224,6 @@ namespace Scripts.Spells.Warlock
                         player.AddAura(GetSpellInfo().Id, pet);
                 }
 
-            }
-
-            public override void Register()
-            {
-                OnCast.Add(new CastHandler(HandleCast));
             }
         }
 

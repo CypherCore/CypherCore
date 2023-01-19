@@ -1132,7 +1132,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47536 - Rapture
-    class spell_pri_rapture : SpellScript
+    class spell_pri_rapture : SpellScript, IAfterCast
     {
         ObjectGuid _raptureTarget;
 
@@ -1146,7 +1146,7 @@ namespace Scripts.Spells.Priest
             _raptureTarget = GetHitUnit().GetGUID();
         }
 
-        void HandleAfterCast()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
             Unit target = Global.ObjAccessor.GetUnit(caster, _raptureTarget);
@@ -1157,7 +1157,6 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
-            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
 

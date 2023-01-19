@@ -741,9 +741,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script] // 4336 - Jump Jets
-    class spell_q13280_13283_jump_jets : SpellScript
+    class spell_q13280_13283_jump_jets : SpellScript, IOnCast
     {
-        void HandleCast()
+        public void OnCast()
         {
             Unit caster = GetCaster();
             if (caster.IsVehicle())
@@ -752,11 +752,6 @@ namespace Scripts.Spells.Quest
                 if (rocketBunny != null)
                     rocketBunny.CastSpell(rocketBunny, SpellIds.JumpRocketBlast, true);
             }
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleCast));
         }
     }
 
@@ -1657,14 +1652,14 @@ namespace Scripts.Spells.Quest
     }
    
     [Script] // 93072 - Get Our Boys Back Dummy
-    class spell_q28813_get_our_boys_back_dummy : SpellScript
+    class spell_q28813_get_our_boys_back_dummy : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RenewedLife);
         }
 
-        void HandleDummyEffect()
+        public void OnCast()
         {
             Unit caster = GetCaster();
             Creature injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
@@ -1674,25 +1669,15 @@ namespace Scripts.Spells.Quest
                 injuredStormwindInfantry.CastSpell(injuredStormwindInfantry, SpellIds.RenewedLife, true);
             }
         }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleDummyEffect));
-        }
     }
 
     [Script] // 53034 - Set Health Random
-    class spell_q28813_set_health_random : SpellScript
+    class spell_q28813_set_health_random : SpellScript, IOnCast
     {
-        void HandleDummyEffect()
+        public void OnCast()
         {
             Unit caster = GetCaster();
             caster.SetHealth(caster.CountPctFromMaxHealth(RandomHelper.IRand(3, 5) * 10));
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleDummyEffect));
         }
     }
 

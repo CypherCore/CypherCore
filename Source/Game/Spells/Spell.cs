@@ -7434,12 +7434,11 @@ namespace Game.Spells
 
         void CallScriptBeforeCastHandlers()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IBeforeCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.BeforeCast);
 
-                foreach (var hook in script.BeforeCast)
-                    hook.Call();
+                ((IBeforeCast)script).BeforeCast();
 
                 script._FinishScriptCall();
             }
@@ -7447,12 +7446,11 @@ namespace Game.Spells
 
         void CallScriptOnCastHandlers()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IOnCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnCast);
 
-                foreach (var hook in script.OnCast)
-                    hook.Call();
+                ((IOnCast)script).OnCast();
 
                 script._FinishScriptCall();
             }
@@ -7460,12 +7458,11 @@ namespace Game.Spells
 
         void CallScriptAfterCastHandlers()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IAfterCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterCast);
 
-                foreach (var hook in script.AfterCast)
-                    hook.Call();
+                ((IAfterCast)script).AfterCast();
 
                 script._FinishScriptCall();
             }

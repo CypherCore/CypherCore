@@ -12,6 +12,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using Game.AI;
+using Game.Scripting.Interfaces.Spell;
 
 namespace Scripts.Spells.Mage
 {
@@ -143,7 +144,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44425 - Arcane Barrage
-    class spell_mage_arcane_barrage : SpellScript
+    class spell_mage_arcane_barrage : SpellScript, IAfterCast
     {
         ObjectGuid _primaryTarget;
 
@@ -152,7 +153,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && spellInfo.GetEffects().Count > 1;
         }
 
-        void ConsumeArcaneCharges()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
 
@@ -181,7 +182,6 @@ namespace Scripts.Spells.Mage
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
             OnEffectLaunchTarget.Add(new EffectHandler(MarkPrimaryTarget, 1, SpellEffectName.Dummy));
-            AfterCast.Add(new CastHandler(ConsumeArcaneCharges));
         }
     }
 

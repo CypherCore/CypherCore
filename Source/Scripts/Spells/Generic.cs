@@ -1028,53 +1028,53 @@ namespace Scripts.Spells.Generic
             switch (effIndex)
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
-                {
-                    uint spellId;
+                    {
+                        uint spellId;
 
-                    switch (GetSpellInfo().Id)
-                    {
-                        case SpellIds.BreakShieldTriggerUnk:
-                        case SpellIds.BreakShieldTriggerCampaingWarhorse:
-                            spellId = SpellIds.BreakShieldDamage10k;
-                            break;
-                        case SpellIds.BreakShieldTriggerFactionMounts:
-                            spellId = SpellIds.BreakShieldDamage2k;
-                            break;
-                        default:
-                            return;
-                    }
-                    Unit rider = GetCaster().GetCharmer();
-                    if (rider)
-                        rider.CastSpell(target, spellId, false);
-                    else
-                        GetCaster().CastSpell(target, spellId, false);
-                    break;
-                }
-                case 1: // On damaging spells, for removing a defend layer
-                {
-                    var auras = target.GetAppliedAuras();
-                    foreach (var pair in auras)
-                    {
-                        Aura aura = pair.Value.GetBase();
-                        if (aura != null)
+                        switch (GetSpellInfo().Id)
                         {
-                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
-                            {
-                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                // Remove dummys from rider (Necessary for updating visual shields)
-                                Unit rider = target.GetCharmer();
-                                if (rider)
-                                {
-                                    Aura defend = rider.GetAura(aura.GetId());
-                                    if (defend != null)
-                                        defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                }
+                            case SpellIds.BreakShieldTriggerUnk:
+                            case SpellIds.BreakShieldTriggerCampaingWarhorse:
+                                spellId = SpellIds.BreakShieldDamage10k;
                                 break;
+                            case SpellIds.BreakShieldTriggerFactionMounts:
+                                spellId = SpellIds.BreakShieldDamage2k;
+                                break;
+                            default:
+                                return;
+                        }
+                        Unit rider = GetCaster().GetCharmer();
+                        if (rider)
+                            rider.CastSpell(target, spellId, false);
+                        else
+                            GetCaster().CastSpell(target, spellId, false);
+                        break;
+                    }
+                case 1: // On damaging spells, for removing a defend layer
+                    {
+                        var auras = target.GetAppliedAuras();
+                        foreach (var pair in auras)
+                        {
+                            Aura aura = pair.Value.GetBase();
+                            if (aura != null)
+                            {
+                                if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                                {
+                                    aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                    // Remove dummys from rider (Necessary for updating visual shields)
+                                    Unit rider = target.GetCharmer();
+                                    if (rider)
+                                    {
+                                        Aura defend = rider.GetAura(aura.GetId());
+                                        if (defend != null)
+                                            defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                    }
+                                    break;
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
-                }
                 default:
                     break;
             }
@@ -1274,51 +1274,51 @@ namespace Scripts.Spells.Generic
                 case SpellIds.WeaponAura:
                 case SpellIds.Weapon2Aura:
                 case SpellIds.Weapon3Aura:
-                {
-                    prevItem = target.GetVirtualItemId(0);
-
-                    Player player = caster.ToPlayer();
-                    if (player)
                     {
-                        Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                        if (mainItem)
-                            target.SetVirtualItem(0, mainItem.GetEntry());
+                        prevItem = target.GetVirtualItemId(0);
+
+                        Player player = caster.ToPlayer();
+                        if (player)
+                        {
+                            Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                            if (mainItem)
+                                target.SetVirtualItem(0, mainItem.GetEntry());
+                        }
+                        else
+                            target.SetVirtualItem(0, caster.GetVirtualItemId(0));
+                        break;
                     }
-                    else
-                        target.SetVirtualItem(0, caster.GetVirtualItemId(0));
-                    break;
-                }
                 case SpellIds.OffhandAura:
                 case SpellIds.Offhand2Aura:
-                {
-                    prevItem = target.GetVirtualItemId(1);
-
-                    Player player = caster.ToPlayer();
-                    if (player)
                     {
-                        Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                        if (offItem)
-                            target.SetVirtualItem(1, offItem.GetEntry());
+                        prevItem = target.GetVirtualItemId(1);
+
+                        Player player = caster.ToPlayer();
+                        if (player)
+                        {
+                            Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                            if (offItem)
+                                target.SetVirtualItem(1, offItem.GetEntry());
+                        }
+                        else
+                            target.SetVirtualItem(1, caster.GetVirtualItemId(1));
+                        break;
                     }
-                    else
-                        target.SetVirtualItem(1, caster.GetVirtualItemId(1));
-                    break;
-                }
                 case SpellIds.RangedAura:
-                {
-                    prevItem = target.GetVirtualItemId(2);
-
-                    Player player = caster.ToPlayer();
-                    if (player)
                     {
-                        Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                        if (rangedItem)
-                            target.SetVirtualItem(2, rangedItem.GetEntry());
+                        prevItem = target.GetVirtualItemId(2);
+
+                        Player player = caster.ToPlayer();
+                        if (player)
+                        {
+                            Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                            if (rangedItem)
+                                target.SetVirtualItem(2, rangedItem.GetEntry());
+                        }
+                        else
+                            target.SetVirtualItem(2, caster.GetVirtualItemId(2));
+                        break;
                     }
-                    else
-                        target.SetVirtualItem(2, caster.GetVirtualItemId(2));
-                    break;
-                }
                 default:
                     break;
             }
@@ -2295,58 +2295,58 @@ namespace Scripts.Spells.Generic
             switch (effIndex)
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
-                {
-                    uint spellId;
-
-                    switch (GetSpellInfo().Id)
                     {
-                        case SpellIds.TriggerTrialChampion:
-                            spellId = SpellIds.Charging20k1;
-                            break;
-                        case SpellIds.TriggerFactionMounts:
-                            spellId = SpellIds.ChargingEffect8k5;
-                            break;
-                        default:
-                            return;
+                        uint spellId;
+
+                        switch (GetSpellInfo().Id)
+                        {
+                            case SpellIds.TriggerTrialChampion:
+                                spellId = SpellIds.Charging20k1;
+                                break;
+                            case SpellIds.TriggerFactionMounts:
+                                spellId = SpellIds.ChargingEffect8k5;
+                                break;
+                            default:
+                                return;
+                        }
+
+                        // If target isn't a training dummy there's a chance of failing the charge
+                        if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
+                            spellId = SpellIds.MissEffect;
+
+                        Unit vehicle = GetCaster().GetVehicleBase();
+                        if (vehicle)
+                            vehicle.CastSpell(target, spellId, false);
+                        else
+                            GetCaster().CastSpell(target, spellId, false);
+                        break;
                     }
-
-                    // If target isn't a training dummy there's a chance of failing the charge
-                    if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
-                        spellId = SpellIds.MissEffect;
-
-                    Unit vehicle = GetCaster().GetVehicleBase();
-                    if (vehicle)
-                        vehicle.CastSpell(target, spellId, false);
-                    else
-                        GetCaster().CastSpell(target, spellId, false);
-                    break;
-                }
                 case 1: // On damaging spells, for removing a defend layer
                 case 2:
-                {
-                    var auras = target.GetAppliedAuras();
-                    foreach (var pair in auras)
                     {
-                        Aura aura = pair.Value.GetBase();
-                        if (aura != null)
+                        var auras = target.GetAppliedAuras();
+                        foreach (var pair in auras)
                         {
-                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                            Aura aura = pair.Value.GetBase();
+                            if (aura != null)
                             {
-                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                // Remove dummys from rider (Necessary for updating visual shields)
-                                Unit rider = target.GetCharmer();
-                                if (rider)
+                                if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                                 {
-                                    Aura defend = rider.GetAura(aura.GetId());
-                                    if (defend != null)
-                                        defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                    aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                    // Remove dummys from rider (Necessary for updating visual shields)
+                                    Unit rider = target.GetCharmer();
+                                    if (rider)
+                                    {
+                                        Aura defend = rider.GetAura(aura.GetId());
+                                        if (defend != null)
+                                            defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
+                        break;
                     }
-                    break;
-                }
             }
         }
 
@@ -2867,9 +2867,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_pvp_trinket : SpellScript
+    class spell_gen_pvp_trinket : SpellScript, IAfterCast
     {
-        void TriggerAnimation()
+        public void AfterCast()
         {
             Player caster = GetCaster().ToPlayer();
 
@@ -2882,11 +2882,6 @@ namespace Scripts.Spells.Generic
                     caster.CastSpell(caster, SpellIds.PvpTrinketHorde, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
                     break;
             }
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(TriggerAnimation));
         }
     }
 
@@ -3188,16 +3183,11 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_darkflight : SpellScript
+    class spell_gen_darkflight : SpellScript, IAfterCast
     {
-        void TriggerTransform()
+        public void AfterCast()
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(TriggerTransform));
         }
     }
 
@@ -3398,23 +3388,19 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_trigger_exclude_caster_aura_spell : SpellScript
+    class spell_gen_trigger_exclude_caster_aura_spell : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(spellInfo.ExcludeCasterAuraSpell);
         }
 
-        void HandleTrigger()
+        public void AfterCast()
         {
             // Blizz seems to just apply aura without bothering to cast
             GetCaster().AddAura(GetSpellInfo().ExcludeCasterAuraSpell, GetCaster());
         }
 
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleTrigger));
-        }
     }
 
     [Script]
@@ -3441,7 +3427,7 @@ namespace Scripts.Spells.Generic
 
     [Script("spell_pvp_trinket_shared_cd", SpellIds.WillOfTheForsakenCooldownTrigger)]
     [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
-    class spell_pvp_trinket_wotf_shared_cd : SpellScript
+    class spell_pvp_trinket_wotf_shared_cd : SpellScript, IAfterCast
     {
         readonly uint _triggered;
 
@@ -3455,7 +3441,7 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(_triggered);
         }
 
-        void HandleScript()
+        public void AfterCast()
         {
             /*
              * @workaround: PendingCast flag normally means 'triggered' spell, however
@@ -3478,11 +3464,6 @@ namespace Scripts.Spells.Generic
 
             // Spell flags need further research, until then just cast not triggered
             GetCaster().CastSpell((Unit)null, _triggered, false);
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleScript));
         }
     }
 
@@ -4376,9 +4357,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // Used for some spells cast by vehicles or charmed creatures that do not send a cooldown event on their own
-    class spell_gen_charmed_unit_spell_cooldown : SpellScript
+    class spell_gen_charmed_unit_spell_cooldown : SpellScript, IOnCast
     {
-        void HandleCast()
+        public void OnCast()
         {
             Unit caster = GetCaster();
             Player owner = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -4390,11 +4371,6 @@ namespace Scripts.Spells.Generic
                 spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(GetSpellInfo().Id, GetSpellInfo().RecoveryTime));
                 owner.SendPacket(spellCooldown);
             }
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleCast));
         }
     }
 
@@ -4742,7 +4718,7 @@ namespace Scripts.Spells.Generic
             OnEffectApply.Add(new EffectApplyHandler(UpdateReviveBattlePetCooldown, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 45313 - Anchor Here
     class spell_gen_anchor_here : SpellScript
     {
@@ -4798,7 +4774,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
-    class spell_gen_ancestral_call : SpellScript
+    class spell_gen_ancestral_call : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -4807,17 +4783,12 @@ namespace Scripts.Spells.Generic
 
         static uint[] AncestralCallBuffs = { SpellIds.RictusOfTheLaughingSkull, SpellIds.ZealOfTheBurningBlade, SpellIds.FerocityOfTheFrostwolf, SpellIds.MightOfTheBlackrock };
 
-        void HandleOnCast()
+        public void OnCast()
         {
             Unit caster = GetCaster();
             uint spellId = AncestralCallBuffs.SelectRandom();
 
             caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleOnCast));
         }
     }
 

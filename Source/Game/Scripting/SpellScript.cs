@@ -135,28 +135,14 @@ namespace Game.Scripting
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
-        public delegate SpellCastResult SpellCheckCastFnType();
         public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
         public delegate void SpellEffectFnType(uint index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
         public delegate void SpellHitFnType();
         public delegate void SpellOnCalcCritChanceFnType(Unit victim, ref float chance);
-        public delegate void SpellCastFnType();
         public delegate void SpellObjectAreaTargetSelectFnType(List<WorldObject> targets);
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
         public delegate void SpellDestinationTargetSelectFnType(ref SpellDestination dest);
-
-        public class CastHandler
-        {
-            public CastHandler(SpellCastFnType _pCastHandlerScript) { pCastHandlerScript = _pCastHandlerScript; }
-
-            public void Call()
-            {
-                pCastHandlerScript();
-            }
-
-            SpellCastFnType pCastHandlerScript;
-        }
 
         public class OnCalculateResistAbsorbHandler
         {
@@ -479,12 +465,6 @@ namespace Game.Scripting
         Spell m_spell;
         uint m_hitPreventEffectMask;
         uint m_hitPreventDefaultEffectMask;
-
-        // SpellScript interface
-        // hooks to which you can attach your functions
-        public List<CastHandler> BeforeCast = new();
-        public List<CastHandler> OnCast = new();
-        public List<CastHandler> AfterCast = new();
 
         // example: int32 CalcCastTime(int32 castTime) override { return 1500; }
         public virtual int CalcCastTime(int castTime) { return castTime; }

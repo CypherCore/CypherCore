@@ -18,7 +18,7 @@ namespace Scripts.Spells.Evoker
     }
 
     [Script] // 358733 - Glide (Racial)
-    class spell_evo_glide : SpellScript, ICheckCastHander
+    class spell_evo_glide : SpellScript, ICheckCastHander, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -35,7 +35,7 @@ namespace Scripts.Spells.Evoker
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleCast()
+        public void OnCast()
         {
             Player caster = GetCaster().ToPlayer();
             if (caster == null)
@@ -45,11 +45,6 @@ namespace Scripts.Spells.Evoker
 
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleCast));
         }
     }
 }

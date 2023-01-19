@@ -3842,9 +3842,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]// 45051 - Mad Alchemist's Potion (34440)
-    class spell_item_mad_alchemists_potion : SpellScript
+    class spell_item_mad_alchemists_potion : SpellScript, IAfterCast
     {
-        void SecondaryEffect()
+        public void AfterCast()
         {
             List<uint> availableElixirs = new()
             {
@@ -3904,16 +3904,12 @@ namespace Scripts.Spells.Items
                 target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
         }
 
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(SecondaryEffect));
-        }
     }
 
     [Script]// 53750 - Crazy Alchemist's Potion (40077)
-    class spell_item_crazy_alchemists_potion : SpellScript
+    class spell_item_crazy_alchemists_potion : SpellScript, IAfterCast
     {
-        void SecondaryEffect()
+        public void AfterCast()
         {
             List<uint> availableElixirs = new()
             {
@@ -3940,11 +3936,6 @@ namespace Scripts.Spells.Items
             uint chosenElixir = availableElixirs.SelectRandom();
 
             target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(SecondaryEffect));
         }
     }
 

@@ -268,14 +268,14 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 43265 - Death and Decay
-    class spell_dk_death_and_decay_SpellScript : SpellScript
+    class spell_dk_death_and_decay_SpellScript : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TighteningGrasp, SpellIds.TighteningGraspSlow);
         }
 
-        void HandleDummy()
+        public void OnCast()
         {
             if (GetCaster().HasAura(SpellIds.TighteningGrasp))
             {
@@ -283,11 +283,6 @@ namespace Scripts.Spells.DeathKnight
                 if (pos != null)
                     GetCaster().CastSpell(pos, SpellIds.TighteningGraspSlow, new CastSpellExtraArgs(true));
             }
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleDummy));
         }
     }
 
@@ -407,7 +402,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 49998 - Death Strike
-    class spell_dk_death_strike : SpellScript
+    class spell_dk_death_strike : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -439,7 +434,7 @@ namespace Scripts.Spells.DeathKnight
             }
         }
 
-        void TriggerRecentlyUsedDeathStrike()
+        public void AfterCast()
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.RecentlyUsedDeathStrike, true);
         }
@@ -447,8 +442,8 @@ namespace Scripts.Spells.DeathKnight
         public override void Register()
         {
             OnEffectLaunch.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
-            AfterCast.Add(new CastHandler(TriggerRecentlyUsedDeathStrike));
         }
+
     }
 
     [Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER

@@ -240,23 +240,18 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 202168 - Impending Victory
-    class spell_warr_impending_victory : SpellScript
+    class spell_warr_impending_victory : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ImpendingVictoryHeal);
         }
 
-        void HandleAfterCast()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
             caster.CastSpell(caster, SpellIds.ImpendingVictoryHeal, true);
             caster.RemoveAurasDueToSpell(SpellIds.Victorious);
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
 
@@ -351,7 +346,7 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 46968 - Shockwave
-    class spell_warr_shockwave : SpellScript
+    class spell_warr_shockwave : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -373,7 +368,7 @@ namespace Scripts.Spells.Warrior
         }
 
         // Cooldown reduced by 20 sec if it strikes at least 3 targets.
-        void HandleAfterCast()
+        public void AfterCast()
         {
             if (_targetCount >= (uint)GetEffectInfo(0).CalcValue())
                 GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetEffectInfo(3).CalcValue()));
@@ -382,7 +377,6 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleStun, 0, SpellEffectName.Dummy));
-            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
 
         uint _targetCount;
@@ -544,24 +538,19 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 34428 - Victory Rush
-    class spell_warr_victory_rush : SpellScript
+    class spell_warr_victory_rush : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Victorious, SpellIds.VictoriousRushHeal);
         }
 
-        void HandleHeal()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
 
             caster.CastSpell(caster, SpellIds.VictoriousRushHeal, true);
             caster.RemoveAurasDueToSpell(SpellIds.Victorious);
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleHeal));
         }
     }
 }

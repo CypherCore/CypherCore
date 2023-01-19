@@ -99,23 +99,18 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 77758 - Berserk
-    class spell_dru_berserk : SpellScript
+    class spell_dru_berserk : SpellScript, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BearForm);
         }
 
-        void HandleOnCast()
+        public void BeforeCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
                 GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -585,23 +580,18 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 99 - Incapacitating Roar
-    class spell_dru_incapacitating_roar : SpellScript
+    class spell_dru_incapacitating_roar : SpellScript, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BearForm);
         }
 
-        void HandleOnCast()
+        public void BeforeCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
                 GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -777,23 +767,18 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 5215 - Prowl
-    class spell_dru_prowl : SpellScript
+    class spell_dru_prowl : SpellScript, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CatForm);
         }
 
-        void HandleOnCast()
+        public void BeforeCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
                 GetCaster().CastSpell(GetCaster(), SpellIds.CatForm, true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -894,23 +879,18 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 106898 - Stampeding Roar
-    class spell_dru_stampeding_roar : SpellScript
+    class spell_dru_stampeding_roar : SpellScript, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BearForm);
         }
 
-        void HandleOnCast()
+        public void BeforeCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
                 GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -1389,23 +1369,18 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 252216 - Tiger Dash
-    class spell_dru_tiger_dash : SpellScript
+    class spell_dru_tiger_dash : SpellScript, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CatForm);
         }
 
-        void HandleOnCast()
+        public void BeforeCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
                 GetCaster().CastSpell(GetCaster(), SpellIds.CatForm, true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 

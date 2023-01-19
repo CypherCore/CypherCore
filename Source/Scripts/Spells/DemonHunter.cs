@@ -328,7 +328,7 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    class spell_dh_glide : SpellScript, ICheckCastHander
+    class spell_dh_glide : SpellScript, ICheckCastHander, IBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -347,7 +347,7 @@ namespace Scripts.Spells.DemonHunter
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleCast()
+        public void BeforeCast()
         {
             Player caster = GetCaster().ToPlayer();
             if (!caster)
@@ -358,11 +358,6 @@ namespace Scripts.Spells.DemonHunter
 
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.VengefulRetreatTrigger, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.FelRush, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleCast));
         }
     }
 

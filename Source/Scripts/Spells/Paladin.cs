@@ -380,7 +380,7 @@ namespace Scripts.Spells.Paladin
     }
     
     [Script] // 642 - Divine Shield
-    class spell_pal_divine_shield : SpellScript, ICheckCastHander
+    class spell_pal_divine_shield : SpellScript, ICheckCastHander, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -396,35 +396,28 @@ namespace Scripts.Spells.Paladin
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleFinalStand()
-        {
-            if (GetCaster().HasAura(SpellIds.FinalStand))
-                GetCaster().CastSpell((Unit)null, SpellIds.FinalStandEffect, true);
-        }
-
-        void TriggerForbearance()
+        public void AfterCast()
         {
             Unit caster = GetCaster();
+
+            if (caster.HasAura(SpellIds.FinalStand))
+                caster.CastSpell((Unit)null, SpellIds.FinalStandEffect, true);
+   
+            
             caster.CastSpell(caster, SpellIds.Forbearance, true);
             caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleFinalStand));
-            AfterCast.Add(new CastHandler(TriggerForbearance));
         }
     }
 
     [Script] // 190784 - Divine Steed
-    class spell_pal_divine_steed : SpellScript
+    class spell_pal_divine_steed : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DivineSteedHuman, SpellIds.DivineSteedDwarf, SpellIds.DivineSteedDraenei, SpellIds.DivineSteedDarkIronDwarf, SpellIds.DivineSteedBloodelf, SpellIds.DivineSteedTauren, SpellIds.DivineSteedZandalariTroll);
         }
 
-        void HandleOnCast()
+        public void OnCast()
         {
             Unit caster = GetCaster();
 
@@ -459,29 +452,19 @@ namespace Scripts.Spells.Paladin
 
             caster.CastSpell(caster, spellId, true);
         }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleOnCast));
-        }
     }
 
     [Script] // 224239 - Divine Storm
-    class spell_pal_divine_storm : SpellScript
+    class spell_pal_divine_storm : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return CliDB.SpellVisualKitStorage.HasRecord(SpellVisualKit.DivineStorm);
         }
 
-        void HandleOnCast()
+        public void OnCast()
         {
             GetCaster().SendPlaySpellVisualKit(SpellVisualKit.DivineStorm, 0, 0);
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -1034,14 +1017,14 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 122773 - Light's Hammer
-    class spell_pal_light_hammer_init_summon : SpellScript
+    class spell_pal_light_hammer_init_summon : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightHammerCosmetic, SpellIds.LightHammerPeriodic);
         }
 
-        void InitSummon()
+        public void AfterCast()
         {
             foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
             {
@@ -1054,11 +1037,6 @@ namespace Scripts.Spells.Paladin
                         new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
                 }
             }
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(InitSummon));
         }
     }
 

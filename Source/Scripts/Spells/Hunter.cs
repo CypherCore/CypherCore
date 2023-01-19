@@ -305,25 +305,20 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 781 - Disengage
-    class spell_hun_posthaste : SpellScript
+    class spell_hun_posthaste : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PosthasteTalent, SpellIds.PosthasteIncreaseSpeed);
         }
 
-        void HandleAfterCast()
+        public void AfterCast()
         {
             if (GetCaster().HasAura(SpellIds.PosthasteTalent))
             {
                 GetCaster().RemoveMovementImpairingAuras(true);
                 GetCaster().CastSpell(GetCaster(), SpellIds.PosthasteIncreaseSpeed, GetSpell());
             }
-        }
-
-        public override void Register()
-        {
-            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
     
