@@ -2026,20 +2026,20 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(creatureId);
                 if (cInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`");
+                    Log.outDebug(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`");
                     continue;
                 }
 
                 CreatureDisplayInfoRecord displayEntry = CliDB.CreatureDisplayInfoStorage.LookupByKey(creatureDisplayId);
                 if (displayEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {creatureId}) lists non-existing CreatureDisplayID id ({creatureDisplayId}), this can crash the client.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {creatureId}) lists non-existing CreatureDisplayID id ({creatureDisplayId}), this can crash the client.");
                     continue;
                 }
 
                 CreatureModelInfo modelInfo = GetCreatureModelInfo(creatureDisplayId);
                 if (modelInfo == null)
-                    Log.outError(LogFilter.Sql, $"No model data exist for `CreatureDisplayID` = {creatureDisplayId} listed by creature (Entry: {creatureId}).");
+                    Log.outDebug(LogFilter.Sql, $"No model data exist for `CreatureDisplayID` = {creatureDisplayId} listed by creature (Entry: {creatureId}).");
 
                 if (displayScale <= 0.0f)
                     displayScale = 1.0f;
@@ -2068,7 +2068,7 @@ namespace Game
                 uint creatureId = result.Read<uint>(0);
                 if (GetCreatureTemplate(creatureId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {creatureId}, skipped");
+                    Log.outDebug(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {creatureId}, skipped");
                     continue;
                 }
 
@@ -2082,7 +2082,7 @@ namespace Game
                     summonedData.CreatureIDVisibleToSummoner = result.Read<uint>(1);
                     if (GetCreatureTemplate(summonedData.CreatureIDVisibleToSummoner.Value) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {summonedData.CreatureIDVisibleToSummoner.Value} in CreatureIDVisibleToSummoner for creature {creatureId}, set to 0");
+                        Log.outDebug(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {summonedData.CreatureIDVisibleToSummoner.Value} in CreatureIDVisibleToSummoner for creature {creatureId}, set to 0");
                         summonedData.CreatureIDVisibleToSummoner = null;
                     }
                 }
@@ -2092,7 +2092,7 @@ namespace Game
                     summonedData.GroundMountDisplayID = result.Read<uint>(2);
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.GroundMountDisplayID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.GroundMountDisplayID.Value} in GroundMountDisplayID for creature {creatureId}, set to 0");
+                        Log.outDebug(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.GroundMountDisplayID.Value} in GroundMountDisplayID for creature {creatureId}, set to 0");
                         summonedData.CreatureIDVisibleToSummoner = null;
                     }
                 }
@@ -2102,7 +2102,7 @@ namespace Game
                     summonedData.FlyingMountDisplayID = result.Read<uint>(3);
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.FlyingMountDisplayID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0");
+                        Log.outDebug(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0");
                         summonedData.GroundMountDisplayID = null;
                     }
                 }
@@ -2579,7 +2579,7 @@ namespace Game
                 var creatureDisplay = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
                 if (creatureDisplay == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_model_info` has a non-existent DisplayID (ID: {0}). Skipped.", displayId);
+                    Log.outDebug(LogFilter.Sql, "Table `creature_model_info` has a non-existent DisplayID (ID: {0}). Skipped.", displayId);
                     continue;
                 }
 
@@ -2595,7 +2595,7 @@ namespace Game
 
                 if (modelInfo.DisplayIdOtherGender != 0 && !CliDB.CreatureDisplayInfoStorage.ContainsKey(modelInfo.DisplayIdOtherGender))
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_model_info` has a non-existent DisplayID_Other_Gender (ID: {0}) being used by DisplayID (ID: {1}).", modelInfo.DisplayIdOtherGender, displayId);
+                    Log.outDebug(LogFilter.Sql, "Table `creature_model_info` has a non-existent DisplayID_Other_Gender (ID: {0}) being used by DisplayID (ID: {1}).", modelInfo.DisplayIdOtherGender, displayId);
                     modelInfo.DisplayIdOtherGender = 0;
                 }
 
@@ -2827,13 +2827,13 @@ namespace Game
 
             if (cInfo.MinGold > cInfo.MaxGold)
             {
-                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has `mingold` {cInfo.MinGold} which is greater than `maxgold` {cInfo.MaxGold}, setting `maxgold` to {cInfo.MinGold}.");
+                Log.outTrace(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has `mingold` {cInfo.MinGold} which is greater than `maxgold` {cInfo.MaxGold}, setting `maxgold` to {cInfo.MinGold}.");
                 cInfo.MaxGold = cInfo.MinGold;
             }
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(cInfo.Faction))
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing faction template ({1}). This can lead to crashes, set to faction 35", cInfo.Entry, cInfo.Faction);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has non-existing faction template ({1}). This can lead to crashes, set to faction 35", cInfo.Entry, cInfo.Faction);
                 cInfo.Faction = 35;
             }
 
@@ -2843,7 +2843,7 @@ namespace Game
                 {
                     if (GetCreatureTemplate(cInfo.KillCredit[k]) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) lists non-existing creature entry {1} in `KillCredit{2}`.", cInfo.Entry, cInfo.KillCredit[k], k + 1);
+                        Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) lists non-existing creature entry {1} in `KillCredit{2}`.", cInfo.Entry, cInfo.KillCredit[k], k + 1);
                         cInfo.KillCredit[k] = 0;
                     }
                 }
@@ -2854,13 +2854,13 @@ namespace Game
 
             if (cInfo.UnitClass == 0 || ((1 << ((int)cInfo.UnitClass - 1)) & (int)Class.ClassMaskAllCreatures) == 0)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid unit_class ({1}) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo.Entry, cInfo.UnitClass);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has invalid unit_class ({1}) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo.Entry, cInfo.UnitClass);
                 cInfo.UnitClass = (uint)Class.Warrior;
             }
 
             if (cInfo.DmgSchool >= (uint)SpellSchools.Max)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid spell school value ({1}) in `dmgschool`.", cInfo.Entry, cInfo.DmgSchool);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has invalid spell school value ({1}) in `dmgschool`.", cInfo.Entry, cInfo.DmgSchool);
                 cInfo.DmgSchool = (uint)SpellSchools.Normal;
             }
 
@@ -2872,25 +2872,25 @@ namespace Game
 
             if (cInfo.SpeedWalk == 0.0f)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in speed_walk, set to 1.", cInfo.Entry, cInfo.SpeedWalk);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in speed_walk, set to 1.", cInfo.Entry, cInfo.SpeedWalk);
                 cInfo.SpeedWalk = 1.0f;
             }
 
             if (cInfo.SpeedRun == 0.0f)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in speed_run, set to 1.14286.", cInfo.Entry, cInfo.SpeedRun);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in speed_run, set to 1.14286.", cInfo.Entry, cInfo.SpeedRun);
                 cInfo.SpeedRun = 1.14286f;
             }
 
             if (cInfo.CreatureType != 0 && !CliDB.CreatureTypeStorage.ContainsKey((uint)cInfo.CreatureType))
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature type ({1}) in `type`.", cInfo.Entry, cInfo.CreatureType);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature type ({1}) in `type`.", cInfo.Entry, cInfo.CreatureType);
                 cInfo.CreatureType = CreatureType.Humanoid;
             }
 
             if (cInfo.Family != 0 && !CliDB.CreatureFamilyStorage.ContainsKey(cInfo.Family))
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature family ({1}) in `family`.", cInfo.Entry, cInfo.Family);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature family ({1}) in `family`.", cInfo.Entry, cInfo.Family);
                 cInfo.Family = CreatureFamily.None;
             }
 
@@ -2898,7 +2898,7 @@ namespace Game
 
             if (cInfo.HoverHeight < 0.0f)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in `HoverHeight`", cInfo.Entry, cInfo.HoverHeight);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in `HoverHeight`", cInfo.Entry, cInfo.HoverHeight);
                 cInfo.HoverHeight = 1.0f;
             }
 
@@ -2906,7 +2906,7 @@ namespace Game
             {
                 if (!CliDB.VehicleStorage.ContainsKey(cInfo.VehicleId))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has a non-existing VehicleId ({1}). This *WILL* cause the client to freeze!", cInfo.Entry, cInfo.VehicleId);
+                    Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has a non-existing VehicleId ({1}). This *WILL* cause the client to freeze!", cInfo.Entry, cInfo.VehicleId);
                     cInfo.VehicleId = 0;
                 }
             }
@@ -2915,73 +2915,73 @@ namespace Game
             {
                 if (cInfo.Spells[j] != 0 && !Global.SpellMgr.HasSpellInfo(cInfo.Spells[j], Difficulty.None))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing Spell{1} ({2}), set to 0.", cInfo.Entry, j + 1, cInfo.Spells[j]);
+                    Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has non-existing Spell{1} ({2}), set to 0.", cInfo.Entry, j + 1, cInfo.Spells[j]);
                     cInfo.Spells[j] = 0;
                 }
             }
 
             if (cInfo.MovementType >= (uint)MovementGeneratorType.MaxDB)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong movement generator type ({1}), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
+                Log.outTrace(LogFilter.Sql, "Creature (Entry: {0}) has wrong movement generator type ({1}), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
                 cInfo.MovementType = (uint)MovementGeneratorType.Idle;
             }
 
             if (cInfo.HealthScalingExpansion < (int)Expansion.LevelCurrent || cInfo.HealthScalingExpansion >= (int)Expansion.Max)
             {
-                Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Id: {0}) with invalid `HealthScalingExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.HealthScalingExpansion);
+                Log.outTrace(LogFilter.Sql, "Table `creature_template` lists creature (Id: {0}) with invalid `HealthScalingExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.HealthScalingExpansion);
                 cInfo.HealthScalingExpansion = 0;
             }
 
             if (cInfo.RequiredExpansion > (int)Expansion.Max)
             {
-                Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with `RequiredExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.RequiredExpansion);
+                Log.outTrace(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with `RequiredExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.RequiredExpansion);
                 cInfo.RequiredExpansion = 0;
             }
 
             uint badFlags = (uint)(cInfo.FlagsExtra & ~CreatureFlagsExtra.DBAllowed);
             if (badFlags != 0)
             {
-                Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with disallowed `flags_extra` {1}, removing incorrect flag.", cInfo.Entry, badFlags);
+                Log.outTrace(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with disallowed `flags_extra` {1}, removing incorrect flag.", cInfo.Entry, badFlags);
                 cInfo.FlagsExtra &= CreatureFlagsExtra.DBAllowed;
             }
 
             uint disallowedUnitFlags = (uint)(cInfo.UnitFlags & ~UnitFlags.Allowed);
             if (disallowedUnitFlags != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
+                Log.outTrace(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
                 cInfo.UnitFlags &= UnitFlags.Allowed;
             }
 
             uint disallowedUnitFlags2 = (cInfo.UnitFlags2 & ~(uint)UnitFlags2.Allowed);
             if (disallowedUnitFlags2 != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
+                Log.outTrace(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
                 cInfo.UnitFlags2 &= (uint)UnitFlags2.Allowed;
             }
 
             uint disallowedUnitFlags3 = (cInfo.UnitFlags3 & ~(uint)UnitFlags3.Allowed);
             if (disallowedUnitFlags3 != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                Log.outTrace(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
                 cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
             }
 
             if (cInfo.DynamicFlags != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
+                Log.outTrace(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
                 cInfo.DynamicFlags = 0;
             }
 
             var levels = cInfo.GetMinMaxLevel();
             if (levels[0] < 1 || levels[0] > SharedConst.StrongMaxLevel)
             {
-                Log.outError(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated minLevel {cInfo.Minlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
+                Log.outTrace(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated minLevel {cInfo.Minlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
                 cInfo.Minlevel = (short)(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? 0 : 1);
             }
 
             if (levels[1] < 1 || levels[1] > SharedConst.StrongMaxLevel)
             {
-                Log.outError(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated maxLevel {cInfo.Maxlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
+                Log.outTrace(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated maxLevel {cInfo.Maxlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
                 cInfo.Maxlevel = (short)(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? 0 : 1);
             }
 
@@ -3240,7 +3240,7 @@ namespace Game
                     {
                         if (!CliDB.BroadcastTextStorage.ContainsKey(npcText.Data[i].BroadcastTextID))
                         {
-                            Log.outError(LogFilter.Sql, "NPCText (Id: {0}) has a non-existing BroadcastText (ID: {1}, Index: {2})", textID, npcText.Data[i].BroadcastTextID, i);
+                            Log.outDebug(LogFilter.Sql, "NPCText (Id: {0}) has a non-existing BroadcastText (ID: {1}, Index: {2})", textID, npcText.Data[i].BroadcastTextID, i);
                             npcText.Data[i].Probability = 0.0f;
                             npcText.Data[i].BroadcastTextID = 0;
                         }
@@ -3251,7 +3251,7 @@ namespace Game
                 {
                     if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0)
                     {
-                        Log.outError(LogFilter.Sql, "NPCText (ID: {0}) has a probability (Index: {1}) set, but no BroadcastTextID to go with it", textID, i);
+                        Log.outDebug(LogFilter.Sql, "NPCText (ID: {0}) has a probability (Index: {1}) set, but no BroadcastTextID to go with it", textID, i);
                         npcText.Data[i].Probability = 0;
                     }
                 }
@@ -3259,7 +3259,7 @@ namespace Game
                 float probabilitySum = npcText.Data.Aggregate(0f, (float sum, NpcTextData data) => { return sum + data.Probability; });
                 if (probabilitySum <= 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"NPCText (ID: {textID}) has a probability sum 0, no text can be selected from it, skipped.");
+                    Log.outDebug(LogFilter.Sql, $"NPCText (ID: {textID}) has a probability sum 0, no text can be selected from it, skipped.");
                     continue;
                 }
 
@@ -8067,9 +8067,12 @@ namespace Game
             {
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
-                    Log.outError(LogFilter.Sql, "Table `creature_queststarter` have data for not existed creature entry ({0}) and existed quest {1}", pair.Key, pair.Value);
+                    Log.outDebug(LogFilter.Sql, "Table `creature_queststarter` have data for not existed creature entry ({0}) and existed quest {1}", pair.Key, pair.Value);
                 else if (!Convert.ToBoolean(cInfo.Npcflag & (uint)NPCFlags.QuestGiver))
-                    Log.outError(LogFilter.Sql, "Table `creature_queststarter` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
+                {
+                     Log.outTrace(LogFilter.Sql, "Table `creature_queststarter` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
+                    cInfo.Npcflag &= (uint)NPCFlags.QuestGiver;
+                }
             }
         }
         public void LoadCreatureQuestEnders()
@@ -8082,7 +8085,10 @@ namespace Game
                 if (cInfo == null)
                     Log.outError(LogFilter.Sql, "Table `creature_questender` have data for not existed creature entry ({0}) and existed quest {1}", pair.Key, pair.Value);
                 else if (!Convert.ToBoolean(cInfo.Npcflag & (uint)NPCFlags.QuestGiver))
-                    Log.outError(LogFilter.Sql, "Table `creature_questender` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
+                {
+                    Log.outTrace(LogFilter.Sql, "Table `creature_questender` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
+                    cInfo.Npcflag &= (uint)NPCFlags.QuestGiver;
+                }
             }
         }
         void LoadQuestRelationsHelper(MultiMap<uint, uint> map, MultiMap<uint, uint> reverseMap, string table)
