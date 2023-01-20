@@ -1982,12 +1982,11 @@ namespace Game.Spells
 
         public void CallScriptDispel(DispelInfo dispelInfo)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraScript auraScript in GetSpellScripts<IOnAuraDispel>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.Dispel);
 
-                foreach (var hook in auraScript.OnDispel)
-                    hook.Call(dispelInfo);
+                ((IOnAuraDispel)auraScript).HandleDispel(dispelInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -1995,12 +1994,11 @@ namespace Game.Spells
 
         public void CallScriptAfterDispel(DispelInfo dispelInfo)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraScript auraScript in GetSpellScripts<IAfterAuraDispel>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.AfterDispel);
 
-                foreach (var hook in auraScript.AfterDispel)
-                    hook.Call(dispelInfo);
+                ((IAfterAuraDispel)auraScript).HandleDispel(dispelInfo);
 
                 auraScript._FinishScriptCall();
             }

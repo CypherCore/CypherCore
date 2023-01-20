@@ -13,7 +13,6 @@ namespace Game.Scripting
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
-        public delegate void AuraDispelDelegate(DispelInfo dispelInfo);
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
         public delegate void AuraEffectPeriodicDelegate(AuraEffect aura);
         public delegate void AuraEffectUpdatePeriodicDelegate(AuraEffect aura);
@@ -30,16 +29,7 @@ namespace Game.Scripting
         public delegate void AuraEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
         public delegate void AuraEnterLeaveCombatFnType(bool isNowInCombat);
 
-        public class AuraDispelHandler
-        {
-            public AuraDispelHandler(AuraDispelDelegate _pHandlerScript) { pHandlerScript = _pHandlerScript; }
-            public void Call(DispelInfo dispelInfo)
-            {
-                pHandlerScript(dispelInfo);
-            }
 
-            AuraDispelDelegate pHandlerScript;
-        }
         public class EffectBase : EffectHook
         {
             public EffectBase(uint _effIndex, AuraType _effName)
@@ -297,14 +287,6 @@ namespace Game.Scripting
 
         public override bool _Validate(SpellInfo entry)
         {
-            foreach (var _ in OnDispel)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `OnDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
-
-            foreach (var _ in AfterDispel)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `AfterDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
-
             foreach (var eff in OnEffectApply)
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectApply` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
@@ -453,17 +435,6 @@ namespace Game.Scripting
             }
         }
         Stack<ScriptStateStore> m_scriptStates = new();
-
-
-        // executed when aura is dispelled by a unit
-        // example: OnDispel += AuraDispelFn(class.function);
-        // where function is: void function (DispelInfo dispelInfo);
-        public List<AuraDispelHandler> OnDispel = new();
-
-        // executed after aura is dispelled by a unit
-        // example: AfterDispel += AuraDispelFn(class.function);
-        // where function is: void function (DispelInfo dispelInfo);
-        public List<AuraDispelHandler> AfterDispel = new();
 
         // executed when aura effect is applied with specified mode to target
         // should be used when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe

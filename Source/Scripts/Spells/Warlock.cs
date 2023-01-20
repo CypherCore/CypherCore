@@ -7,6 +7,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -996,14 +997,14 @@ namespace Scripts.Spells.Warlock
     }
 
     [SpellScript(new uint[] { 30108, 34438, 34439, 35183 })] // 30108, 34438, 34439, 35183 - Unstable Affliction
-    class spell_warl_unstable_affliction : AuraScript
+    class spell_warl_unstable_affliction : AuraScript, IAfterAuraDispel
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.UnstableAfflictionDispel);
         }
 
-        void HandleDispel(DispelInfo dispelInfo)
+        public void HandleDispel(DispelInfo dispelInfo)
         {
             Unit caster = GetCaster();
             if (caster)
@@ -1017,11 +1018,6 @@ namespace Scripts.Spells.Warlock
                     caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, args);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            AfterDispel.Add(new AuraDispelHandler(HandleDispel));
         }
     }
 

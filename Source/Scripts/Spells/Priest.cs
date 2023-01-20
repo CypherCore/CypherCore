@@ -9,6 +9,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -1448,14 +1449,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 34914 - Vampiric Touch
-    class spell_pri_vampiric_touch : AuraScript
+    class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricTouchDispel, SpellIds.GenReplenishment);
         }
 
-        void HandleDispel(DispelInfo dispelInfo)
+        public void HandleDispel(DispelInfo dispelInfo)
         {
             Unit caster = GetCaster();
             if (caster)
@@ -1488,7 +1489,6 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            AfterDispel.Add(new AuraDispelHandler(HandleDispel));
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 2, AuraType.Dummy));
         }
