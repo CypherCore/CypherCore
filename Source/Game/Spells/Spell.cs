@@ -7533,7 +7533,7 @@ namespace Game.Spells
 
         int CallScriptCalcCastTimeHandlers(int castTime)
         {
-            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
+            foreach (ISpellScript script in GetSpellScripts<ICalculateCastTime>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CalcCastTime);
                 castTime = ((ICalculateCastTime)script).CalcCastTime(castTime);
