@@ -9,6 +9,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -728,9 +729,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_av_drekthar_presence : AuraScript
+    class spell_gen_av_drekthar_presence : AuraScript, ICheckAreaTarget
     {
-        bool CheckAreaTarget(Unit target)
+        public bool CheckAreaTarget(Unit target)
         {
             return (target.GetEntry()) switch
             {
@@ -739,11 +740,6 @@ namespace Scripts.Spells.Generic
                 14762 or 14763 or 14764 or 14765 or 11948 or 14772 or 14776 or 14773 or 14777 or 11946 => true,
                 _ => false,
             };
-        }
-
-        public override void Register()
-        {
-            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
         }
     }
 

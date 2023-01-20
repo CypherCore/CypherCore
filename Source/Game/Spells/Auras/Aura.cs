@@ -8,6 +8,8 @@ using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1930,7 +1932,35 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, "Aura.LoadScripts: Script `{0}` for aura `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
+
+                if (script is IAuraScript)
+                {
+                    foreach (var iFace in script.GetType().GetInterfaces())
+                    {
+                        if (iFace.Name == nameof(IBaseSpellScript) || iFace.Name == nameof(IAuraScript))
+                            continue;
+
+                        if (!m_auraScriptsByType.TryGetValue(iFace, out var spellScripts))
+                        {
+                            spellScripts = new List<IAuraScript>();
+                            m_auraScriptsByType[iFace] = spellScripts;
+                        }
+
+                        spellScripts.Add(script);
+                    }
+                }
             }
+        }
+
+        static List<IAuraScript> _dummy = new();
+        readonly Dictionary<Type, List<IAuraScript>> m_auraScriptsByType = new Dictionary<Type, List<IAuraScript>>();
+
+        public List<IAuraScript> GetSpellScripts<T>() where T : IAuraScript
+        {
+            if (m_auraScriptsByType.TryGetValue(typeof(T), out List<IAuraScript> scripts))
+                return scripts;
+
+            return _dummy;
         }
 
         public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
@@ -1939,12 +1969,11 @@ namespace Game.Spells
         bool CallScriptCheckAreaTargetHandlers(Unit target)
         {
             bool result = true;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraScript auraScript in GetSpellScripts<ICheckAreaTarget>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.CheckAreaTarget);
 
-                foreach (var hook in auraScript.DoCheckAreaTarget)
-                    result &= hook.Call(target);
+                result &= ((ICheckAreaTarget)auraScript).CheckAreaTarget(target);
 
                 auraScript._FinishScriptCall();
             }

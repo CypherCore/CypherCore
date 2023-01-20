@@ -27,7 +27,7 @@ namespace Game.Scripting.Interfaces
         WorldObject GetExplTargetWorldObject();
         long GetGameObjectTargetCountForEffect(uint effect);
         GameObject GetGObjCaster();
-        Aura GetHitAura(bool dynObjAura = false);
+        Spells.Aura GetHitAura(bool dynObjAura = false);
         Corpse GetHitCorpse();
         Creature GetHitCreature();
         int GetHitDamage();

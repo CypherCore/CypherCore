@@ -7405,20 +7405,20 @@ namespace Game.Spells
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
 
-                if (script is IBaseSpellScript)
+                if (script is ISpellScript)
                 {
                     foreach (var iFace in script.GetType().GetInterfaces())
                     {
-                        if (iFace.Name == nameof(IBaseSpellScript))
+                        if (iFace.Name == nameof(ISpellScript) || iFace.Name == nameof(ISpellScript))
                             continue;
 
                         if (!m_spellScriptsByType.TryGetValue(iFace, out var spellScripts))
                         {
-                            spellScripts = new List<IBaseSpellScript>();
+                            spellScripts = new List<ISpellScript>();
                             m_spellScriptsByType[iFace] = spellScripts;
                         }
 
-                        spellScripts.Add((IBaseSpellScript)script);
+                        spellScripts.Add((ISpellScript)script);
                         RegisterSpellEffectHandler(script);
                     }
                 }
@@ -7945,14 +7945,14 @@ namespace Game.Spells
         }
 
         List<SpellScript> m_loadedScripts = new();
-        readonly Dictionary<Type, List<IBaseSpellScript>> m_spellScriptsByType = new Dictionary<Type, List<IBaseSpellScript>>();
-        static List<IBaseSpellScript> _dummy = new();
+        readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
+        static List<ISpellScript> _dummy = new();
         static List<(ISpellScript, ISpellEffect)> _dummySpellEffects = new();
         Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
 
-        public List<IBaseSpellScript> GetSpellScripts<T>() where T : ISpellScript
+        public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
-            if (m_spellScriptsByType.TryGetValue(typeof(T), out List<IBaseSpellScript> scripts))
+            if (m_spellScriptsByType.TryGetValue(typeof(T), out List<ISpellScript> scripts))
                 return scripts;
 
             return _dummy;

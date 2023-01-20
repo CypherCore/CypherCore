@@ -9,7 +9,7 @@ namespace Game.Scripting.Interfaces
 {
     public interface IAuraScript : IBaseSpellScript
     {
-        Aura GetAura();
+        Spells.Aura GetAura();
         Difficulty GetCastDifficulty();
         Unit GetCaster();
         ObjectGuid GetCasterGUID();
@@ -34,7 +34,7 @@ namespace Game.Scripting.Interfaces
         void SetMaxDuration(int duration);
         void _FinishScriptCall();
         bool _IsDefaultActionPrevented();
-        bool _Load(Aura aura);
+        bool _Load(Spells.Aura aura);
         void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null);
     }
 }

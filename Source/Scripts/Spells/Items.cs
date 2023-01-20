@@ -9,6 +9,7 @@ using Game.Entities;
 using Game.Loots;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -1943,14 +1944,14 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 45043 - Power Circle (Shifting Naaru Sliver)
-    class spell_item_power_circle : AuraScript
+    class spell_item_power_circle : AuraScript, ICheckAreaTarget
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LimitlessPower);
         }
 
-        bool CheckCaster(Unit target)
+        public bool CheckAreaTarget(Unit target)
         {
             return target.GetGUID() == GetCasterGUID();
         }
@@ -1970,7 +1971,6 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckCaster));
             AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
