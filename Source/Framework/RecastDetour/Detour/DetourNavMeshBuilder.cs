@@ -205,8 +205,8 @@ public static partial class Detour
 
             bytes.AddRange(BitConverter.GetBytes(vertBase));
             bytes.AddRange(BitConverter.GetBytes(triBase));
-            bytes.AddRange(BitConverter.GetBytes(vertCount));
-            bytes.AddRange(BitConverter.GetBytes(triCount));
+            bytes.Add(vertCount);
+            bytes.Add(triCount);
 
             return bytes.ToArray();
         }

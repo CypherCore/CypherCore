@@ -5,8 +5,8 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.21.6" />
-    <PackageReference Include="MySqlConnector" Version="2.1.12" />
+    <PackageReference Include="Google.Protobuf" Version="3.21.12" />
+    <PackageReference Include="MySqlConnector" Version="2.2.5" />
   </ItemGroup>
 
 </Project>
