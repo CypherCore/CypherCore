@@ -7,6 +7,7 @@ using Game;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 
@@ -81,8 +82,9 @@ namespace Scripts.Events.Brewfest
     }
 
     [Script] // 42924 - Giddyup!
-    class spell_brewfest_giddyup : AuraScript
+    class spell_brewfest_giddyup : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -129,9 +131,9 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
-            OnEffectRemove.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectRemove));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -140,8 +142,9 @@ namespace Scripts.Events.Brewfest
     // 42993 - Ram - Canter
     // 42994 - Ram - Gallop
     [Script]
-    class spell_brewfest_ram : AuraScript
+    class spell_brewfest_ram : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnPeriodic(AuraEffect aurEff)
         {
             Unit target = GetTarget();
@@ -191,13 +194,14 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 43052 - Ram Fatigue
-    class spell_brewfest_ram_fatigue : AuraScript
+    class spell_brewfest_ram_fatigue : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -216,13 +220,14 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
         }
     }
 
     [Script] // 43450 - Brewfest - apple trap - friendly DND
-    class spell_brewfest_apple_trap : AuraScript
+    class spell_brewfest_apple_trap : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAura(SpellIds.RamFatigue);
@@ -230,13 +235,14 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 
     [Script] // 43332 - Exhausted Ram
-    class spell_brewfest_exhausted_ram : AuraScript
+    class spell_brewfest_exhausted_ram : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -245,7 +251,7 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -309,8 +315,9 @@ namespace Scripts.Events.Brewfest
     // 43261 Brewfest  - Barker Bunny 3
     // 43262 Brewfest  - Barker Bunny 4
     [Script]
-    class spell_brewfest_barker_bunny : AuraScript
+    class spell_brewfest_barker_bunny : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Load()
         {
             return GetUnitOwner().IsTypeId(TypeId.Player);
@@ -344,7 +351,7 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 

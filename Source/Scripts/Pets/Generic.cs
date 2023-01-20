@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
@@ -111,14 +112,15 @@ namespace Scripts.Pets
         }
 
         [Script] // 69732 - Lich Pet Aura
-        class spell_gen_lich_pet_aura : AuraScript
+        class spell_gen_lich_pet_aura : AuraScript, IAuraCheckProc, IHasAuraEffects
         {
+            public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
             public override bool Validate(SpellInfo spellInfo)
             {
                 return ValidateSpellInfo(SpellIds.LichPetAuraOnkill);
             }
 
-            bool CheckProc(ProcEventInfo eventInfo)
+            public bool CheckProc(ProcEventInfo eventInfo)
             {
                 return eventInfo.GetProcTarget().IsPlayer();
             }
@@ -136,14 +138,14 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+                Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
             }
         }
 
         [Script] // 70050 - [DND] Lich Pet
-        class spell_pet_gen_lich_pet_periodic_emote : AuraScript
+        class spell_pet_gen_lich_pet_periodic_emote : AuraScript, IHasAuraEffects
         {
+            public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
             public override bool Validate(SpellInfo spellInfo)
             {
                 return ValidateSpellInfo(SpellIds.LichPetEmote);
@@ -164,13 +166,14 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+                Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
             }
         }
 
         [Script] // 70049 - [DND] Lich Pet
-        class spell_pet_gen_lich_pet_emote : AuraScript
+        class spell_pet_gen_lich_pet_emote : AuraScript, IHasAuraEffects
         {
+            public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
             void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
             {
                 GetTarget().HandleEmoteCommand(Emote.OneshotCustomSpell01);
@@ -178,7 +181,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real));
+                Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
             }
         }
 

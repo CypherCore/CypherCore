@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Movement;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -99,8 +100,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 126661 - Warrior Charge Drop Fire Periodic
-    class spell_warr_charge_drop_fire_periodic : AuraScript
+    class spell_warr_charge_drop_fire_periodic : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void DropFireVisual(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -117,7 +119,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -275,14 +277,14 @@ namespace Scripts.Spells.Warrior
 
     // 70844 - Item - Warrior T10 Protection 4P Bonus
     [Script] // 7.1.5
-    class spell_warr_item_t10_prot_4p_bonus : AuraScript
+    class spell_warr_item_t10_prot_4p_bonus : AuraScript, IAuraOnProc
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Stoicism) && spellInfo.GetEffects().Count > 1;
         }
 
-        void HandleProc(ProcEventInfo eventInfo)
+        public void OnProc(ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -293,10 +295,6 @@ namespace Scripts.Spells.Warrior
             target.CastSpell((Unit)null, SpellIds.Stoicism, args);
         }
 
-        public override void Register()
-        {
-            OnProc.Add(new AuraProcHandler(HandleProc));
-        }
     }
 
     [Script] // 12294 - Mortal Strike 7.1.5
@@ -409,8 +407,9 @@ namespace Scripts.Spells.Warrior
 
     // 52437 - Sudden Death
     [Script]
-    class spell_warr_sudden_death : AuraScript
+    class spell_warr_sudden_death : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmash);
@@ -426,20 +425,21 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real)); // correct?
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply)); // correct?
         }
     }
 
     // 12328, 18765, 35429 - Sweeping Strikes
     [Script]
-    class spell_warr_sweeping_strikes : AuraScript
+    class spell_warr_sweeping_strikes : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SweepingStrikesExtraAttack1, SpellIds.SweepingStrikesExtraAttack2);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             _procTarget = eventInfo.GetActor().SelectNearbyTarget(eventInfo.GetProcTarget());
             return _procTarget;
@@ -468,16 +468,16 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         Unit _procTarget;
     }
 
     [Script] // 215538 - Trauma
-    class spell_warr_trauma : AuraScript
+    class spell_warr_trauma : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TraumaEffect);
@@ -495,14 +495,14 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 28845 - Cheat Death
-    class spell_warr_t3_prot_8p_bonus : AuraScript
+    class spell_warr_t3_prot_8p_bonus : AuraScript, IAuraCheckProc
     {
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetActionTarget().HealthBelowPct(20))
                 return true;
@@ -514,16 +514,12 @@ namespace Scripts.Spells.Warrior
 
             return false;
         }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-        }
     }
 
     [Script] // 32215 - Victorious State
-    class spell_warr_victorious_state : AuraScript
+    class spell_warr_victorious_state : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ImpendingVictory);
@@ -539,7 +535,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 

@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
@@ -83,8 +84,9 @@ namespace Scripts.Events.HallowsEnd
     }
 
     [Script] // 24926 - Hallow's End Candy
-    class spell_hallow_end_candy_pirate_AuraScript : AuraScript
+    class spell_hallow_end_candy_pirate_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CandyFemaleDefiasPirate, SpellIds.CandyMaleDefiasPirate);
@@ -104,8 +106,8 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 

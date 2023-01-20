@@ -155,8 +155,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 26169 - Oracle Healing Bonus
-    class spell_pri_aq_3p_bonus : AuraScript
+    class spell_pri_aq_3p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.OracularHeal);
@@ -180,13 +181,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 81749 - Atonement
-    public class spell_pri_atonement : AuraScript
+    public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         List<ObjectGuid> _appliedAtonements = new();
 
         public override bool Validate(SpellInfo spellInfo)
@@ -196,7 +198,7 @@ namespace Scripts.Spells.Priest
             && Global.SpellMgr.GetSpellInfo(SpellIds.SinsOfTheMany, Difficulty.None).GetEffects().Count > 2;
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetDamageInfo() != null;
         }
@@ -222,8 +224,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public void AddAtonementTarget(ObjectGuid target)
@@ -254,8 +255,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 194384, 214206 - Atonement
-    class spell_pri_atonement_triggered : AuraScript
+    class spell_pri_atonement_triggered : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Atonement);
@@ -293,8 +295,8 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -441,8 +443,9 @@ namespace Scripts.Spells.Priest
     }
     
     [Script] // 47788 - Guardian Spirit
-    class spell_pri_guardian_spirit : AuraScript
+    class spell_pri_guardian_spirit : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         uint healPct;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -479,8 +482,8 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.SchoolAbsorb));
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(Absorb, 1));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectAbsorbHandler(Absorb, 1, false, AuraScriptHookType.EffectAbsorb));
         }
     }
 
@@ -503,8 +506,9 @@ namespace Scripts.Spells.Priest
     }
     
     [Script] // 63733 - Holy Words
-    class spell_pri_holy_words : AuraScript
+    class spell_pri_holy_words : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Heal, SpellIds.FlashHeal, SpellIds.PrayerOfHealing, SpellIds.Renew, SpellIds.Smite, SpellIds.HolyWordChastise, SpellIds.HolyWordSanctify, SpellIds.HolyWordSerenity)
@@ -553,13 +557,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 40438 - Priest Tier 6 Trinket
-    class spell_pri_item_t6_trinket : AuraScript
+    class spell_pri_item_t6_trinket : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DivineBlessing, SpellIds.DivineWrath);
@@ -578,7 +583,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -628,8 +633,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 205369 - Mind Bomb
-    class spell_pri_mind_bomb : AuraScript
+    class spell_pri_mind_bomb : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MindBombStun);
@@ -643,7 +649,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -694,8 +700,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47758 - Penance (Channel Damage), 47757 - Penance (Channel Healing)
-    class spell_pri_penance_channeled : AuraScript
+    class spell_pri_penance_channeled : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
@@ -710,13 +717,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
     [Script] // 198069 - Power of the Dark Side
-    class spell_pri_power_of_the_dark_side : AuraScript
+    class spell_pri_power_of_the_dark_side : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSideTint);
@@ -738,8 +746,8 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -903,8 +911,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield Aura
-    class spell_pri_power_word_shield_aura : AuraScript
+    class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BodyAndSoul, SpellIds.BodyAndSoulSpeed, SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.RenewedHope, SpellIds.RenewedHopeEffect,
@@ -970,9 +979,9 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            AfterEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.RealOrReapplyMask));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -1034,8 +1043,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 41635 - Prayer of Mending (Aura) - SPELL_PRIEST_PRAYER_OF_MENDING_AURA
-    class spell_pri_prayer_of_mending_AuraScript : AuraScript
+    class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingJump);
@@ -1068,7 +1078,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleHeal, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleHeal, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1170,8 +1180,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 280391 - Sins of the Many
-    class spell_pri_sins_of_the_many : AuraScript
+    class spell_pri_sins_of_the_many : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SinsOfTheMany);
@@ -1189,14 +1200,15 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleOnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
     
     [Script] // 20711 - Spirit of Redemption
-    class spell_pri_spirit_of_redemption : AuraScript
+    class spell_pri_spirit_of_redemption : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SpiritOfRedemption);
@@ -1213,7 +1225,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0, true));
+            Effects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, true, AuraScriptHookType.EffectAbsorb));
         }
     }
 
@@ -1253,8 +1265,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 187464 - Shadow Mend (Damage)
-    class spell_pri_shadow_mend_periodic_damage : AuraScript
+    class spell_pri_shadow_mend_periodic_damage : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ShadowMendDamage);
@@ -1269,7 +1282,7 @@ namespace Scripts.Spells.Priest
             GetTarget().CastSpell(GetTarget(), SpellIds.ShadowMendDamage, args);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetDamageInfo() != null;
         }
@@ -1285,15 +1298,15 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
     
     [Script] // 28809 - Greater Heal
-    class spell_pri_t3_4p_bonus : AuraScript
+    class spell_pri_t3_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ArmorOfFaith);
@@ -1307,19 +1320,20 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 37594 - Greater Heal Refund
-    class spell_pri_t5_heal_2p_bonus : AuraScript
+    class spell_pri_t5_heal_2p_bonus : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemEfficiency);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             HealInfo healInfo = eventInfo.GetHealInfo();
             if (healInfo != null)
@@ -1342,14 +1356,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 70770 - Item - Priest T10 Healer 2P Bonus
-    class spell_pri_t10_heal_2p_bonus : AuraScript
+    class spell_pri_t10_heal_2p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessedHealing);
@@ -1377,14 +1391,15 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     // 109142 - Twist of Fate (Shadow)
     [Script] // 265259 - Twist of Fate (Discipline)
-    class spell_pri_twist_of_fate : AuraScript
+    class spell_pri_twist_of_fate : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcTarget().GetHealthPct() < aurEff.GetAmount();
@@ -1392,19 +1407,20 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
     
     [Script] // 15286 - Vampiric Embrace
-    class spell_pri_vampiric_embrace : AuraScript
+    class spell_pri_vampiric_embrace : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricEmbraceHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             // Not proc from Mind Sear
             return !eventInfo.GetDamageInfo().GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x80000u);
@@ -1428,8 +1444,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1449,8 +1464,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 34914 - Vampiric Touch
-    class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel
+    class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricTouchDispel, SpellIds.GenReplenishment);
@@ -1476,7 +1492,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcTarget() == GetCaster();
         }
@@ -1489,8 +1505,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 2, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 }

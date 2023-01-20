@@ -5,8 +5,10 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Aura;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
 {
@@ -78,8 +80,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
     }
 
     [Script] // 19695 - Inferno
-    class spell_baron_geddon_inferno : AuraScript
+    class spell_baron_geddon_inferno : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+
         void OnPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -92,7 +96,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 }

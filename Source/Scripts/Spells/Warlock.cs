@@ -388,8 +388,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 77220 - Mastery: Chaotic Energies
-    class spell_warl_chaotic_energies : AuraScript
+    class spell_warl_chaotic_energies : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             AuraEffect auraEffect = GetEffect(1);
@@ -409,7 +410,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 2));
+            Effects.Add(new EffectAbsorbHandler(HandleAbsorb, 2, false, AuraScriptHookType.EffectAbsorb));
         }
     }
 
@@ -439,8 +440,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 48018 - Demonic Circle: Summon
-    class spell_warl_demonic_circle_summon : AuraScript
+    class spell_warl_demonic_circle_summon : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // If effect is Removed by expire Remove the summoned demonic circle too.
@@ -473,14 +475,15 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectRemove));
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 48020 - Demonic Circle: Teleport
-    class spell_warl_demonic_circle_teleport : AuraScript
+    class spell_warl_demonic_circle_teleport : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleTeleport(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Player player = GetTarget().ToPlayer();
@@ -497,7 +500,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 
@@ -532,8 +535,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 198590 - Drain Soul
-    class spell_warl_drain_soul : AuraScript
+    class spell_warl_drain_soul : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DrainSoulEnergize);
@@ -551,7 +555,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -571,8 +575,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 755 - Health Funnel
-    class spell_warl_health_funnel : AuraScript
+    class spell_warl_health_funnel : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void ApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
@@ -614,9 +619,9 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.ObsModHealth));
+            Effects.Add(new EffectApplyHandler(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.ObsModHealth));
         }
     }
 
@@ -697,8 +702,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 27243 - Seed of Corruption
-    class spell_warl_seed_of_corruption_dummy : AuraScript
+    class spell_warl_seed_of_corruption_dummy : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SeedOfCorruptionDamage);
@@ -739,8 +745,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy));
+            Effects.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -751,8 +757,9 @@ namespace Scripts.Spells.Warlock
     // 44141 - Seed of Corruption
     // 70388 - Seed of Corruption
     [Script] // Monster spells, triggered only on amount drop (not on death)
-    class spell_warl_seed_of_corruption_generic : AuraScript
+    class spell_warl_seed_of_corruption_generic : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SeedOfCorruptionGeneric);
@@ -783,7 +790,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -969,8 +976,9 @@ namespace Scripts.Spells.Warlock
 
     [SpellScript(37377, "spell_warl_t4_2p_bonus_shadow", SpellIds.Flameshadow)]// 37377 - Shadowflame
     [SpellScript(39437, "spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]// 39437 - Shadowflame Hellfire and RoF
-    class spell_warl_t4_2p_bonus : AuraScript
+    class spell_warl_t4_2p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public spell_warl_t4_2p_bonus(uint triggerSpell)
         {
             _triggerSpell = triggerSpell;
@@ -990,7 +998,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         uint _triggerSpell;
@@ -1022,8 +1030,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [SpellScript(5740)] // 5740 - Rain of Fire Updated 7.1.5
-    class spell_warl_rain_of_fire : AuraScript
+    class spell_warl_rain_of_fire : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleDummyTick(AuraEffect aurEff)
         {
             List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RainOfFire);
@@ -1046,14 +1055,15 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 3, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 3, AuraType.PeriodicDummy));
         }
     }
 
     // Grimoire of Service - 108501
     [SpellScript(108501)]
-    class spell_warl_grimoire_of_service_aura : AuraScript
+    class spell_warl_grimoire_of_service_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public void Handlearn(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
         {
             Player player = GetCaster().ToPlayer();
@@ -1083,15 +1093,16 @@ namespace Scripts.Spells.Warlock
         }
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(Handlearn, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(Handlearn, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
     // 205179
     [SpellScript(205179)]
-    public class aura_warl_phantomatic_singularity : AuraScript
+    public class aura_warl_phantomatic_singularity : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public void OnTick(AuraEffect UnnamedParameter)
         {
             Unit caster = GetCaster();
@@ -1103,13 +1114,13 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicLeech));
+            Effects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicLeech));
         }
     }
 
     // Demonic Calling - 205145
     [SpellScript(205145)]
-    public class spell_warl_demonic_calling_AuraScript : AuraScript
+    public class spell_warl_demonic_calling_AuraScript : AuraScript, IAuraCheckProc
     {
         public override bool Validate(SpellInfo UnnamedParameter)
         {
@@ -1128,11 +1139,6 @@ namespace Scripts.Spells.Warlock
                 caster.CastSpell(caster, SpellIds.DEMONIC_CALLING_TRIGGER, true);
             }
             return false;
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
 
@@ -1191,7 +1197,7 @@ namespace Scripts.Spells.Warlock
 
     // Grimoire of Synergy - 171975
     [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
-    public class spell_warl_grimoire_of_synergy_AuraScript : AuraScript
+    public class spell_warl_grimoire_of_synergy_AuraScript : AuraScript, IAuraCheckProc
     {
         public bool CheckProc(ProcEventInfo eventInfo)
         {
@@ -1232,10 +1238,6 @@ namespace Scripts.Spells.Warlock
             return false;
         }
 
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-        }
     }
 
 

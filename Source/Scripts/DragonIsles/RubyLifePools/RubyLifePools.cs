@@ -6,6 +6,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 
@@ -21,8 +22,9 @@ namespace Scripts.DragonIsles.RubyLifePools
     };
 
     // 371652 - Executed
-    class spell_ruby_life_pools_executed : AuraScript
+    class spell_ruby_life_pools_executed : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -33,13 +35,14 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 
     // 384933 - Ice Shield
-    class spell_ruby_life_pools_ice_shield : AuraScript
+    class spell_ruby_life_pools_ice_shield : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             Aura iceShield = GetTarget()?.GetAura(SpellIds.IceShield);
@@ -48,13 +51,14 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     // 372793 - Excavate
-    class spell_ruby_life_pools_excavate : AuraScript
+    class spell_ruby_life_pools_excavate : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             GetCaster()?.CastSpell(GetTarget(), SpellIds.Excavate, true);
@@ -62,7 +66,7 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 

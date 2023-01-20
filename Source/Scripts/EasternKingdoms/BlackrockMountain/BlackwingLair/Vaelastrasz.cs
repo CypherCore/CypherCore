@@ -5,8 +5,10 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Aura;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 {
@@ -181,8 +183,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 
     //Need to define an aurascript for EventBurningadrenaline's death effect.
     [Script] // 18173 - Burning Adrenaline
-    class spell_vael_burning_adrenaline : AuraScript
+    class spell_vael_burning_adrenaline : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnAuraRemoveHandler(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             //The tooltip says the on death the AoE occurs. According to information: http://qaliaresponse.stage.lithium.com/t5/WoW-Mayhem/Surviving-Burning-Adrenaline-For-tanks/td-p/48609
@@ -193,7 +196,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 }

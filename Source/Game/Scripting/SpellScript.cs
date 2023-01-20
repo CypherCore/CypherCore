@@ -70,46 +70,6 @@ namespace Game.Scripting
             return m_scriptName;
         }
 
-        public abstract class EffectHook
-        {
-            protected EffectHook(uint effIndex)
-            {
-                // effect index must be in range <0;2>, allow use of special effindexes
-                Cypher.Assert(_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound || _effIndex < SpellConst.MaxEffects);
-                _effIndex = effIndex;
-            }
-
-            public uint GetAffectedEffectsMask(SpellInfo spellEntry)
-            {
-                uint mask = 0;
-                if (_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound)
-                {
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                    {
-                        if (_effIndex == SpellConst.EffectFirstFound && mask != 0)
-                            return mask;
-                        if (CheckEffect(spellEntry, i))
-                            mask |= 1u << i;
-                    }
-                }
-                else
-                {
-                    if (CheckEffect(spellEntry, _effIndex))
-                        mask |= 1u << (int)_effIndex;
-                }
-                return mask;
-            }
-
-            public bool IsEffectAffected(SpellInfo spellEntry, uint effIndex)
-            {
-                return Convert.ToBoolean(GetAffectedEffectsMask(spellEntry) & 1 << (int)effIndex);
-            }
-
-            public abstract bool CheckEffect(SpellInfo spellEntry, uint effIndex);
-
-            uint _effIndex;
-        }
-
         public byte m_currentScriptState { get; set; }
         public string m_scriptName { get; set; }
         public uint m_scriptSpellId { get; set; }

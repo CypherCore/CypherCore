@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -63,8 +64,9 @@ namespace Scripts.Events.Midsummer
     }
 
     [Script] // 45724 - Braziers Hit!
-    class spell_midsummer_braziers_hit : AuraScript
+    class spell_midsummer_braziers_hit : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
@@ -88,7 +90,7 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply));
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
         }
     }
 
@@ -135,8 +137,9 @@ namespace Scripts.Events.Midsummer
     }
 
     [Script] // 29705, 29726, 29727 - Test Ribbon Pole Channel
-    class spell_midsummer_test_ribbon_pole_channel : AuraScript
+    class spell_midsummer_test_ribbon_pole_channel : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RibbonPolePeriodicVisual, SpellIds.BurningHotPoleDance, SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance);
@@ -167,14 +170,15 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 
     [Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
-    class spell_midsummer_ribbon_pole_periodic_visual : AuraScript
+    class spell_midsummer_ribbon_pole_periodic_visual : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TestRibbonPole1, SpellIds.TestRibbonPole2, SpellIds.TestRibbonPole3);
@@ -189,7 +193,7 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
 

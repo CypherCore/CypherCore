@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Framework.Constants;
 
-namespace Game.Scripting.Interfaces
+namespace Game.Scripting.Interfaces.Spell
 {
     public interface ISpellEffect
     {
@@ -22,7 +22,7 @@ namespace Game.Scripting.Interfaces
             HookType = hookType;
         }
 
-        public uint EffectIndex { get; private set;}
+        public uint EffectIndex { get; private set; }
 
         public SpellScriptHookType HookType { get; private set; }
 

@@ -7,6 +7,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -89,14 +90,15 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 13877, 33735, (check 51211, 65956) - Blade Flurry
-    class spell_rog_blade_flurry_AuraScript : AuraScript
+    class spell_rog_blade_flurry_AuraScript : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BladeFlurryExtraAttack);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             _procTarget = GetTarget().SelectNearbyTarget(eventInfo.GetProcTarget());
             return _procTarget != null && eventInfo.GetDamageInfo() != null;
@@ -117,11 +119,10 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
             if (m_scriptSpellId == SpellIds.BladeFlurry)
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModPowerRegenPercent));
+                Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModPowerRegenPercent, AuraScriptHookType.EffectProc));
             else
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModMeleeHaste));
+                Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModMeleeHaste, AuraScriptHookType.EffectProc));
         }
 
         Unit _procTarget = null;
@@ -208,14 +209,15 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 193358 - Grand Melee
-    class spell_rog_grand_melee : AuraScript
+    class spell_rog_grand_melee : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SliceAndDice);
         }
 
-        bool HandleCheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             Spell procSpell = eventInfo.GetProcSpell();
             return procSpell && procSpell.HasPowerTypeCost(PowerType.ComboPoints);
@@ -243,8 +245,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(HandleCheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -277,8 +278,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script]
-    class spell_rog_killing_spree_AuraScript : AuraScript
+    class spell_rog_killing_spree_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         List<ObjectGuid> _targets = new();
 
         public override bool Validate(SpellInfo spellInfo)
@@ -315,9 +317,9 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         public void AddTarget(Unit target)
@@ -327,14 +329,15 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 76806 - Mastery: Main Gauche
-    class spell_rog_mastery_main_gauche : AuraScript
+    class spell_rog_mastery_main_gauche : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MainGauche);
         }
 
-        bool HandleCheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetDamageInfo() != null && eventInfo.GetDamageInfo().GetVictim() != null;
         }
@@ -348,8 +351,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(HandleCheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -366,8 +368,9 @@ namespace Scripts.Spells.Rogue
     }
     
     [Script] // 79096 - Restless Blades
-    class spell_rog_restless_blades : AuraScript
+    class spell_rog_restless_blades : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         static uint[] Spells = { SpellIds.AdrenalineRush, SpellIds.BetweenTheEyes, SpellIds.Sprint, SpellIds.GrapplingHook, SpellIds.Vanish, SpellIds.KillingSpree, SpellIds.MarkedForDeath, SpellIds.DeathFromAbove };
 
         public override bool Validate(SpellInfo spellInfo)
@@ -390,7 +393,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -447,8 +450,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 1943 - Rupture
-    class spell_rog_rupture_AuraScript : AuraScript
+    class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VenomousWounds);
@@ -505,14 +509,15 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDummy));
-            OnEffectRemove.Add(new EffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
     [Script] // 14161 - Ruthlessness
-    class spell_rog_ruthlessness : AuraScript
+    class spell_rog_ruthlessness : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             Unit target = GetTarget();
@@ -525,7 +530,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -612,8 +617,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 1784 - Stealth
-    class spell_rog_stealth : AuraScript
+    class spell_rog_stealth : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MasterOfSubtletyPassive, SpellIds.MasterOfSubtletyDamagePercent, SpellIds.Sanctuary, SpellIds.ShadowFocus, SpellIds.ShadowFocusEffect, SpellIds.StealthStealthAura, SpellIds.StealthShapeshiftAura);
@@ -666,8 +672,8 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -725,8 +731,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 11327 - Vanish
-    class spell_rog_vanish_aura : AuraScript
+    class spell_rog_vanish_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Stealth);
@@ -739,13 +746,14 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
     [Script] // 57934 - Tricks of the Trade
-    class spell_rog_tricks_of_the_trade_aura : AuraScript
+    class spell_rog_tricks_of_the_trade_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TricksOfTheTradeProc);
@@ -769,8 +777,8 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         ObjectGuid _redirectTarget;
@@ -800,8 +808,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 59628 - Tricks of the Trade (Proc)
-    class spell_rog_tricks_of_the_trade_proc : AuraScript
+    class spell_rog_tricks_of_the_trade_proc : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.TricksOfTheTrade);
@@ -809,14 +818,15 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
     // 198031 - Honor Among Thieves
     [Script] /// 7.1.5
-    class spell_rog_honor_among_thieves_AuraScript : AuraScript
+    class spell_rog_honor_among_thieves_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HonorAmongThievesEnergize);
@@ -832,7 +842,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -889,8 +899,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 79134 - Venomous Wounds - SPELL_ROGUE_VENOMOUS_WOUNDS
-    class spell_rog_venomous_wounds : AuraScript
+    class spell_rog_venomous_wounds : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int extraEnergy = aurEff.GetAmount();
@@ -899,7 +910,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 }

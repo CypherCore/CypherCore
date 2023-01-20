@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
@@ -47,8 +48,9 @@ namespace Scripts.Events.LoveIsInTheAir
     }
 
     [Script] // 45102 Romantic Picnic
-    class spell_love_is_in_the_air_romantic_picnic : AuraScript
+    class spell_love_is_in_the_air_romantic_picnic : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BasketCheck, SpellIds.MealPeriodic, SpellIds.MealEatVisual, SpellIds.DrinkVisual, SpellIds.RomanticPicnicAchiev);
@@ -101,8 +103,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -156,8 +158,9 @@ namespace Scripts.Events.LoveIsInTheAir
     }
 
     [Script] // 71507 - Heavily Perfumed
-    class spell_love_is_in_the_air_heavily_perfumed : AuraScript
+    class spell_love_is_in_the_air_heavily_perfumed : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -170,13 +173,14 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
     [Script] // 71508 - Recently Analyzed
-    class spell_love_is_in_the_air_recently_analyzed : AuraScript
+    class spell_love_is_in_the_air_recently_analyzed : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HeavilyPerfumed);
@@ -189,13 +193,14 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
     [Script] // 69438 - Sample Satisfaction
-    class spell_love_is_in_the_air_sample_satisfaction : AuraScript
+    class spell_love_is_in_the_air_sample_satisfaction : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnPeriodic(AuraEffect aurEff)
         {
             if (RandomHelper.randChance(30))
@@ -204,13 +209,14 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 71450 - Crown Parcel Service Uniform
-    class spell_love_is_in_the_air_service_uniform : AuraScript
+    class spell_love_is_in_the_air_service_uniform : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -235,8 +241,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 

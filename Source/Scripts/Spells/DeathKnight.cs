@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -73,9 +74,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 70656 - Advantage (T10 4P Melee Bonus)
-    class spell_dk_advantage_t10_4p : AuraScript
+    class spell_dk_advantage_t10_4p : AuraScript, IAuraCheckProc
     {
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             Unit caster = eventInfo.GetActor();
             if (caster)
@@ -93,16 +94,12 @@ namespace Scripts.Spells.DeathKnight
 
             return false;
         }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-        }
     }
 
     [Script] // 48707 - Anti-Magic Shell
-    class spell_dk_anti_magic_shell : AuraScript
+    class spell_dk_anti_magic_shell : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         int absorbPct;
         ulong maxHealth;
         uint absorbedAmount;
@@ -157,9 +154,9 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            AfterEffectAbsorb.Add(new EffectAbsorbHandler(Trigger, 0));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectAbsorbHandler(Trigger, 0, false, AuraScriptHookType.EffectAfterAbsorb));
+            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -213,8 +210,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 49028 - Dancing Rune Weapon
-    class spell_dk_dancing_rune_weapon : AuraScript
+    class spell_dk_dancing_rune_weapon : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(CreatureIds.DancingRuneWeapon) == null)
@@ -260,7 +258,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -284,8 +282,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 43265 - Death and Decay
-    class spell_dk_death_and_decay_AuraScript : AuraScript
+    class spell_dk_death_and_decay_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleDummyTick(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
@@ -295,7 +294,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
     }
 
@@ -386,8 +385,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 48743 - Death Pact
-    class spell_dk_death_pact : AuraScript
+    class spell_dk_death_pact : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Unit caster = GetCaster();
@@ -397,7 +397,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
+            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
         }
     }
 
@@ -449,12 +449,13 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER
-    class spell_dk_death_strike_enabler : AuraScript
+    class spell_dk_death_strike_enabler : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         // Amount of seconds we calculate damage over
         uint[] _damagePerSecond = new uint[5];
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetDamageInfo() != null;
         }
@@ -479,10 +480,9 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
-            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy, AuraScriptHookType.EffectProc));
+            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
         }
     }
     
@@ -576,8 +576,9 @@ namespace Scripts.Spells.DeathKnight
     }
     
     [Script] // 206940 - Mark of Blood
-    class spell_dk_mark_of_blood : AuraScript
+    class spell_dk_mark_of_blood : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MarkOfBloodHeal);
@@ -593,13 +594,14 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 207346 - Necrosis
-    class spell_dk_necrosis : AuraScript
+    class spell_dk_necrosis : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.NecrosisEffect);
@@ -613,7 +615,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -661,14 +663,15 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 61257 - Runic Power Back on Snare/Root
-    class spell_dk_pvp_4p_bonus : AuraScript
+    class spell_dk_pvp_4p_bonus : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RunicReturn);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
@@ -685,8 +688,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -715,8 +717,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 59057 - Rime
-    class spell_dk_rime : AuraScript
+    class spell_dk_rime : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(SpellIds.FrostScythe);
@@ -733,13 +736,14 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
     
     [Script] // 55233 - Vampiric Blood
-    class spell_dk_vampiric_blood : AuraScript
+    class spell_dk_vampiric_blood : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             amount = (int)GetUnitOwner().CountPctFromMaxHealth(amount);
@@ -747,7 +751,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
         }
     }
 }

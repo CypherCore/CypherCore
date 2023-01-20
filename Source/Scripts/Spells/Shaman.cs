@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -104,8 +105,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 273221 - Aftershock
-    class spell_sha_aftershock : AuraScript
+    class spell_sha_aftershock : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.AftershockEnergize);
@@ -135,20 +137,21 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 108281 - Ancestral Guidance
-    class spell_sha_ancestral_guidance : AuraScript
+    class spell_sha_ancestral_guidance : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AncestralGuidanceHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetHealInfo().GetSpellInfo().Id == SpellIds.AncestralGuidanceHeal)
                 return false;
@@ -169,8 +172,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.PeriodicDummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -344,14 +346,15 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 204288 - Earth Shield
-    class spell_sha_earth_shield : AuraScript
+    class spell_sha_earth_shield : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthShieldHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetDamageInfo() == null || !HasEffect(1) || eventInfo.GetDamageInfo().GetDamage() < GetTarget().CountPctFromMaxHealth(GetEffect(1).GetAmount()))
                 return false;
@@ -367,20 +370,20 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 170374 - Earthen Rage (Passive)
-    public class spell_sha_earthen_rage_passive : AuraScript
+    public class spell_sha_earthen_rage_passive : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthenRagePeriodic, SpellIds.EarthenRageDamage);
         }
 
-        bool CheckProc(ProcEventInfo procInfo)
+        public bool CheckProc(ProcEventInfo procInfo)
         {
             return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().Id != SpellIds.EarthenRageDamage;
         }
@@ -394,8 +397,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public ObjectGuid GetProcTargetGuid()
@@ -407,8 +409,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 170377 - Earthen Rage (Proc Aura)
-    class spell_sha_earthen_rage_proc_aura : AuraScript
+    class spell_sha_earthen_rage_proc_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthenRagePassive, SpellIds.EarthenRageDamage);
@@ -433,7 +436,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -597,8 +600,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 319778 - Flametongue
-    class spell_sha_flametongue_weapon_AuraScript : AuraScript
+    class spell_sha_flametongue_weapon_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlametongueAttack);
@@ -616,7 +620,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -647,8 +651,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 73920 - Healing Rain (Aura)
-    class spell_sha_healing_rain_AuraScript : AuraScript
+    class spell_sha_healing_rain_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         ObjectGuid _visualDummy;
         float _x;
         float _y;
@@ -674,8 +679,8 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(HandleEffecRemoved, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(HandleEffecRemoved, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDummy));
         }
     }
 
@@ -740,8 +745,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 210714 - Icefury
-    class spell_sha_icefury : AuraScript
+    class spell_sha_icefury : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FrostShockEnergize);
@@ -756,13 +762,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 1, AuraType.AddPctModifier));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 1, AuraType.AddPctModifier, AuraScriptHookType.EffectProc));
         }
     }
     
     [Script] // 23551 - Lightning Shield T2 Bonus
-    class spell_sha_item_lightning_shield : AuraScript
+    class spell_sha_item_lightning_shield : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemLightningShield);
@@ -776,13 +783,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 23552 - Lightning Shield T2 Bonus
-    class spell_sha_item_lightning_shield_trigger : AuraScript
+    class spell_sha_item_lightning_shield_trigger : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemLightningShieldDamage);
@@ -796,19 +804,20 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 23572 - Mana Surge
-    class spell_sha_item_mana_surge : AuraScript
+    class spell_sha_item_mana_surge : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemManaSurge);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcSpell() != null;
         }
@@ -833,14 +842,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 40463 - Shaman Tier 6 Trinket
-    class spell_sha_item_t6_trinket : AuraScript
+    class spell_sha_item_t6_trinket : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EnergySurge, SpellIds.PowerSurge);
@@ -883,13 +892,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 70811 - Item - Shaman T10 Elemental 2P Bonus
-    class spell_sha_item_t10_elemental_2p_bonus : AuraScript
+    class spell_sha_item_t10_elemental_2p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ElementalMastery);
@@ -905,13 +915,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 189063 - Lightning Vortex (proc 185881 Item - Shaman T18 Elemental 4P Bonus)
-    class spell_sha_item_t18_elemental_4p_bonus : AuraScript
+    class spell_sha_item_t18_elemental_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void DiminishHaste(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -922,7 +933,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(DiminishHaste, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(DiminishHaste, 1, AuraType.PeriodicDummy));
         }
     }
 
@@ -992,8 +1003,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77756 - Lava Surge
-    class spell_sha_lava_surge : AuraScript
+    class spell_sha_lava_surge : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LavaSurge, SpellIds.IgneousPotential);
@@ -1017,8 +1029,8 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProcChance, 0, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckProcChance, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1124,8 +1136,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 168534 - Mastery: Elemental Overload (passive)
-    class spell_sha_mastery_elemental_overload : AuraScript
+    class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightningBolt, SpellIds.LightningBoltOverload, SpellIds.ElementalBlast, SpellIds.ElementalBlastOverload, SpellIds.Icefury, SpellIds.IcefuryOverload, SpellIds.LavaBurst, SpellIds.LavaBurstOverload,
@@ -1174,8 +1187,8 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         uint GetTriggeredSpellId(uint triggeringSpellId)
@@ -1229,8 +1242,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 30884 - Nature's Guardian
-    class spell_sha_natures_guardian : AuraScript
+    class spell_sha_natures_guardian : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount());
@@ -1238,7 +1252,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
@@ -1284,8 +1298,9 @@ namespace Scripts.Spells.Shaman
 
     // 2645 - Ghost Wolf
     [Script] // 260878 - Spirit Wolf
-    class spell_sha_spirit_wolf : AuraScript
+    class spell_sha_spirit_wolf : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GhostWolf, SpellIds.SpiritWolfTalent, SpellIds.SpiritWolfPeriodic, SpellIds.SpiritWolfAura);
@@ -1306,14 +1321,15 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Any, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Any, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
     [Script] // 51562 - Tidal Waves
-    class spell_sha_tidal_waves : AuraScript
+    class spell_sha_tidal_waves : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TidalWaves);
@@ -1331,13 +1347,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 28823 - Totemic Power
-    class spell_sha_t3_6p_bonus : AuraScript
+    class spell_sha_t3_6p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TotemicPowerArmor, SpellIds.TotemicPowerAttackPower, SpellIds.TotemicPowerSpellPower, SpellIds.TotemicPowerMp5);
@@ -1379,13 +1396,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 28820 - Lightning Shield
-    class spell_sha_t3_8p_bonus : AuraScript
+    class spell_sha_t3_8p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void PeriodicTick(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -1397,13 +1415,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 
     [Script] // 64928 - Item - Shaman T8 Elemental 4P Bonus
-    class spell_sha_t8_elemental_4p_bonus : AuraScript
+    class spell_sha_t8_elemental_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Electrified);
@@ -1431,13 +1450,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 67228 - Item - Shaman T9 Elemental 4P Bonus (Lava Burst)
-    class spell_sha_t9_elemental_4p_bonus : AuraScript
+    class spell_sha_t9_elemental_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LavaBurstBonusDamage);
@@ -1465,13 +1485,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 70817 - Item - Shaman T10 Elemental 4P Bonus
-    class spell_sha_t10_elemental_4p_bonus : AuraScript
+    class spell_sha_t10_elemental_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -1497,13 +1518,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 70808 - Item - Shaman T10 Restoration 4P Bonus
-    class spell_sha_t10_restoration_4p_bonus : AuraScript
+    class spell_sha_t10_restoration_4p_bonus : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainedHeal);
@@ -1531,13 +1553,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 260895 - Unlimited Power
-    class spell_sha_unlimited_power : AuraScript
+    class spell_sha_unlimited_power : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.UnlimitedPowerBuff);
@@ -1555,13 +1578,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 200071 - Undulation
-    class spell_sha_undulation_passive : AuraScript
+    class spell_sha_undulation_passive : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         byte _castCounter = 1; // first proc happens after two casts, then one every 3 casts
 
         public override bool Validate(SpellInfo spellInfo)
@@ -1580,7 +1604,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
     
@@ -1614,8 +1638,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 319773 - Windfury Weapon (proc)
-    class spell_sha_windfury_weapon_proc : AuraScript
+    class spell_sha_windfury_weapon_proc : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.WindfuryAttack);
@@ -1631,7 +1656,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 

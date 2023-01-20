@@ -67,5 +67,7 @@ namespace Framework.Constants
         AfterProc,
         //Apply,
         //Remove
+        EffectAbsorbHeal,
+        EffectAfterAbsorbHeal,
     }
 }

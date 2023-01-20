@@ -6,8 +6,10 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Aura;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 {
@@ -323,8 +325,9 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
     }
 
     [Script] // 37098 - Rain of Bones
-    class spell_rain_of_bones_AuraScript : AuraScript
+    class spell_rain_of_bones_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SummonSkeleton);
@@ -338,7 +341,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 

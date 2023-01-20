@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Game.AI;
 using Game.Scripting.Interfaces.Spell;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 
 namespace Scripts.Spells.Mage
 {
@@ -81,8 +82,9 @@ namespace Scripts.Spells.Mage
 
     // 110909 - Alter Time Aura
     [Script] // 342246 - Alter Time Aura
-    class spell_mage_alter_time_aura : AuraScript
+    class spell_mage_alter_time_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         ulong _health;
         Position _pos;
 
@@ -117,8 +119,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -254,8 +256,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235313 - Blazing Barrier
-    class spell_mage_blazing_barrier : AuraScript
+    class spell_mage_blazing_barrier : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlazingBarrierTrigger);
@@ -281,8 +284,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -333,9 +336,9 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] // 198063 - Burning Determination
-    class spell_mage_burning_determination : AuraScript
+    class spell_mage_burning_determination : AuraScript, IAuraCheckProc
     {
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo != null)
@@ -343,11 +346,6 @@ namespace Scripts.Spells.Mage
                     return true;
 
             return false;
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
 
@@ -367,8 +365,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script]
-    class spell_mage_cauterize_AuraScript : AuraScript
+    class spell_mage_cauterize_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffects().Count > 2 && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
@@ -394,7 +393,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0));
+            Effects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, false, AuraScriptHookType.EffectAbsorb));
         }
     }
 
@@ -545,8 +544,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 112965 - Fingers of Frost
-    class spell_mage_fingers_of_frost_AuraScript : AuraScript
+    class spell_mage_fingers_of_frost_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FingersOfFrost);
@@ -571,10 +571,10 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
-            AfterEffectProc.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy));
-            AfterEffectProc.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
+            Effects.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
         }
     }
 
@@ -597,8 +597,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 321712 - Pyroblast
-    class spell_mage_firestarter_dots : AuraScript
+    class spell_mage_firestarter_dots : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Firestarter);
@@ -614,13 +615,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoEffectCalcCritChance.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
+            Effects.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
         }
     }
 
     // 205029 - Flame On
-    class spell_mage_flame_on : AuraScript
+    class spell_mage_flame_on : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FireBlast)
@@ -636,7 +638,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
         }
     }
 
@@ -657,8 +659,9 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] // 11426 - Ice Barrier
-    class spell_mage_ice_barrier : AuraScript
+    class spell_mage_ice_barrier : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.Chilled);
@@ -683,8 +686,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.SchoolAbsorb, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -793,14 +796,15 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 11119 - Ignite
-    class spell_mage_ignite : AuraScript
+    class spell_mage_ignite : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Ignite);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcTarget();
         }
@@ -821,15 +825,15 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     // 37447 - Improved Mana Gems
     [Script] // 61062 - Improved Mana Gems
-    class spell_mage_imp_mana_gems : AuraScript
+    class spell_mage_imp_mana_gems : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ManaSurge);
@@ -843,13 +847,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     [Script] // 1463 - Incanter's Flow
-    class spell_mage_incanters_flow : AuraScript
+    class spell_mage_incanters_flow : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         sbyte modifier = 1;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -883,7 +888,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -936,8 +941,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 217694 - Living Bomb
-    class spell_mage_living_bomb_periodic : AuraScript
+    class spell_mage_living_bomb_periodic : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingBombExplosion);
@@ -955,7 +961,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 2, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 2, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -996,8 +1002,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235450 - Prismatic Barrier
-    class spell_mage_prismatic_barrier : AuraScript
+    class spell_mage_prismatic_barrier : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
@@ -1008,7 +1015,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
         }
     }
 
@@ -1029,8 +1036,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script]
-    class spell_mage_ray_of_frost_aura : AuraScript
+    class spell_mage_ray_of_frost_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RayOfFrostBonus, SpellIds.RayOfFrostFingersOfFrost);
@@ -1055,14 +1063,15 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDamage));
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDamage));
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
     
     [Script] // 136511 - Ring of Frost
-    class spell_mage_ring_of_frost : AuraScript
+    class spell_mage_ring_of_frost : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, Difficulty.None).GetEffects().Empty();
@@ -1101,8 +1110,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
-            OnEffectApply.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
         }
 
         TempSummon GetRingOfFrostMinion()
@@ -1148,8 +1157,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script]
-    class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript
+    class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RingOfFrostDummy);
@@ -1164,7 +1174,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -1219,8 +1229,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 210824 - Touch of the Magi (Aura)
-    class spell_mage_touch_of_the_magi_aura : AuraScript
+    class spell_mage_touch_of_the_magi_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TouchOfTheMagiExplode);
@@ -1253,8 +1264,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 

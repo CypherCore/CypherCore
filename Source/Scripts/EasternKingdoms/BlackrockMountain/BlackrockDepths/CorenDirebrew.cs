@@ -8,6 +8,7 @@ using Game.Groups;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -455,8 +456,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     }
 
     // 47369 - Send Mug Control Aura
-    class spell_send_mug_control_aura : AuraScript
+    class spell_send_mug_control_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SendMugTargetPicker);
@@ -469,13 +471,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
 
     // 50278 - Barreled Control Aura
-    class spell_barreled_control_aura : AuraScript
+    class spell_barreled_control_aura : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void PeriodicTick(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -484,13 +487,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     // 47407 - Direbrew's Disarm (precast)
-    class spell_direbrew_disarm : AuraScript
+    class spell_direbrew_disarm : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DirebrewDisarm, SpellIds.DirebrewDisarmGrow);
@@ -514,8 +518,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
-            OnEffectApply.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 }

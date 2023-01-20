@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -38,8 +39,9 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 131894 - A Murder of Crows
-    class spell_hun_a_murder_of_crows : AuraScript
+    class spell_hun_a_murder_of_crows : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AMurderOfCrowsDamage, SpellIds.AMurderOfCrowsVisual1, SpellIds.AMurderOfCrowsVisual2, SpellIds.AMurderOfCrowsVisual3);
@@ -70,14 +72,15 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
-            OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
     
     [Script] // 186257 - Aspect of the Cheetah
-    class spell_hun_aspect_cheetah : AuraScript
+    class spell_hun_aspect_cheetah : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AspectCheetahSlow);
@@ -91,7 +94,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -111,8 +114,9 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 212658 - Hunting Party
-    class spell_hun_hunting_party : AuraScript
+    class spell_hun_hunting_party : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Exhilaration, SpellIds.ExhilarationPet);
@@ -127,7 +131,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -220,8 +224,9 @@ namespace Scripts.Spells.Hunter
 
     // 34477 - Misdirection
     [Script]
-    class spell_hun_misdirection : AuraScript
+    class spell_hun_misdirection : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MisdirectionProc);
@@ -244,15 +249,16 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
     // 35079 - Misdirection (Proc)
     [Script]
-    class spell_hun_misdirection_proc : AuraScript
+    class spell_hun_misdirection_proc : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.Misdirection);
@@ -260,7 +266,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -322,8 +328,9 @@ namespace Scripts.Spells.Hunter
     }
     
     [Script] // 53480 - Roar of Sacrifice
-    class spell_hun_roar_of_sacrifice : AuraScript
+    class spell_hun_roar_of_sacrifice : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RoarOfSacrificeTriggered);
@@ -352,8 +359,8 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -465,14 +472,15 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 67151 - Item - Hunter T9 4P Bonus (Steady Shot)
-    class spell_hun_t9_4p_bonus : AuraScript
+    class spell_hun_t9_4p_bonus : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.T94PGreatness);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetActor().IsTypeId(TypeId.Player) && eventInfo.GetActor().ToPlayer().GetPet())
                 return true;
@@ -489,8 +497,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 }

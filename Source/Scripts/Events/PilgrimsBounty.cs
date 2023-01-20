@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
@@ -96,8 +97,9 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_gen_spice_bread_stuffing", SpellIds.WellFedHitTrigger)]
     [Script("spell_gen_pumpkin_pie", SpellIds.WellFedSpiritTrigger)]
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
-    class spell_pilgrims_bounty_buff_food : AuraScript
+    class spell_pilgrims_bounty_buff_food : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
@@ -116,7 +118,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
+            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
         readonly uint _triggeredSpellId;
@@ -425,8 +427,9 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_a_serving_of_stuffing", SpellIds.AServingOfStuffingPlate)]
     [Script("spell_pilgrims_bounty_a_serving_of_potatoes", SpellIds.AServingOfSweetPotatoesPlate)]
     [Script("spell_pilgrims_bounty_a_serving_of_pie", SpellIds.AServingOfPiePlate)]
-    class spell_pilgrims_bounty_a_serving_of_AuraScript : AuraScript
+    class spell_pilgrims_bounty_a_serving_of_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         uint _triggeredSpellId;
 
         public spell_pilgrims_bounty_a_serving_of_AuraScript(uint triggeredSpellId)
@@ -479,8 +482,8 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 }

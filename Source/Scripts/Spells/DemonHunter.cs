@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Aura;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -156,8 +157,9 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 197125 - Chaos Strike
-    class spell_dh_chaos_strike : AuraScript
+    class spell_dh_chaos_strike : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChaosStrikeEnergize);
@@ -174,7 +176,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -360,8 +362,9 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    class spell_dh_glide_AuraScript : AuraScript
+    class spell_dh_glide_AuraScript : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlideDuration);
@@ -374,13 +377,14 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
     [Script] // 197154 - Glide
-    class spell_dh_glide_timer : AuraScript
+    class spell_dh_glide_timer : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Glide);
@@ -393,7 +397,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 }

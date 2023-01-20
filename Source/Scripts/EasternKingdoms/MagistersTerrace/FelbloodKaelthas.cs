@@ -6,8 +6,10 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Aura;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 {
@@ -435,8 +437,9 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
     }
 
     [Script] // 44191 - Flame Strike
-    class spell_felblood_kaelthas_flame_strike : AuraScript
+    class spell_felblood_kaelthas_flame_strike : AuraScript, IHasAuraEffects
     {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlameStrikeDamage);
@@ -451,7 +454,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 }

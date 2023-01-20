@@ -10,9 +10,11 @@ using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Aura;
+using Game.Scripting.Interfaces.Spell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Spells
 {
@@ -1952,10 +1954,54 @@ namespace Game.Spells
             }
         }
 
-        static List<IAuraScript> _dummy = new();
-        readonly Dictionary<Type, List<IAuraScript>> m_auraScriptsByType = new Dictionary<Type, List<IAuraScript>>();
+        private void RegisterSpellEffectHandler(AuraScript script)
+        {
+            if (script is IHasAuraEffects hse)
+                foreach (var effect in hse.Effects)
+                    if (effect is IAuraEffectHandler se)
+                    {
+                        uint mask = 0;
+                        if (se.EffectIndex == SpellConst.EffectAll || se.EffectIndex == SpellConst.EffectFirstFound)
+                        {
+                            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                            {
+                                if (se.EffectIndex == SpellConst.EffectFirstFound && mask != 0)
+                                    break;
 
-        public List<IAuraScript> GetSpellScripts<T>() where T : IAuraScript
+                                if (CheckAuraEffectHandler(se, i))
+                                    AddAuraEffect(i, script, se);
+                            }
+                        }
+                        else
+                        {
+                            if (CheckAuraEffectHandler(se, se.EffectIndex))
+                                AddAuraEffect(se.EffectIndex, script, se);
+                        }
+
+                    }
+        }
+
+        private bool CheckAuraEffectHandler(IAuraEffectHandler ae, uint effIndex)
+        {
+            if (m_spellInfo.GetEffects().Count <= effIndex)
+                return false;
+
+            SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(effIndex);
+            if (spellEffectInfo.ApplyAuraName == 0 && ae.AuraType == 0)
+                return true;
+
+            if (spellEffectInfo.ApplyAuraName == 0)
+                return false;
+
+            return ae.AuraType == AuraType.Any || spellEffectInfo.ApplyAuraName == ae.AuraType;
+        }
+
+        static List<IAuraScript> _dummy = new();
+        static List<(IAuraScript, IAuraEffectHandler)> _dummyAuraEffects = new();
+        readonly Dictionary<Type, List<IAuraScript>> m_auraScriptsByType = new Dictionary<Type, List<IAuraScript>>();
+        Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>>();
+
+        public List<IAuraScript> GetAuraScripts<T>() where T : IAuraScript
         {
             if (m_auraScriptsByType.TryGetValue(typeof(T), out List<IAuraScript> scripts))
                 return scripts;
@@ -1963,17 +2009,45 @@ namespace Game.Spells
             return _dummy;
         }
 
+        private void AddAuraEffect(uint index, IAuraScript script, IAuraEffectHandler effect)
+        {
+            if (!_effectHandlers.TryGetValue(index, out var effecTypes))
+            {
+                effecTypes = new Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>();
+                _effectHandlers.Add(index, effecTypes);
+            }
+
+            if (!effecTypes.TryGetValue(effect.HookType, out var effects))
+            {
+                effects = new List<(IAuraScript, IAuraEffectHandler)>();
+                effecTypes.Add(effect.HookType, effects);
+            }
+
+            effects.Add((script, effect));
+        }
+
+        public List<(IAuraScript, IAuraEffectHandler)> GetEffectScripts(AuraScriptHookType h, uint index)
+        {
+            if (_effectHandlers.TryGetValue(index, out var effDict) &&
+                effDict.TryGetValue(h, out List<(IAuraScript, IAuraEffectHandler)> scripts))
+                return scripts;
+
+            return _dummyAuraEffects;
+        }
+
+
+
         public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
         #region CallScripts
 
         bool CallScriptCheckAreaTargetHandlers(Unit target)
         {
             bool result = true;
-            foreach (IAuraScript auraScript in GetSpellScripts<ICheckAreaTarget>())
+            foreach (IAuraCheckAreaTarget auraScript in GetAuraScripts<IAuraCheckAreaTarget>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.CheckAreaTarget);
 
-                result &= ((ICheckAreaTarget)auraScript).CheckAreaTarget(target);
+                result &= auraScript.CheckAreaTarget(target);
 
                 auraScript._FinishScriptCall();
             }
@@ -1982,11 +2056,11 @@ namespace Game.Spells
 
         public void CallScriptDispel(DispelInfo dispelInfo)
         {
-            foreach (IAuraScript auraScript in GetSpellScripts<IOnAuraDispel>())
+            foreach (IOnAuraDispel auraScript in GetAuraScripts<IOnAuraDispel>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.Dispel);
 
-                ((IOnAuraDispel)auraScript).HandleDispel(dispelInfo);
+                auraScript.HandleDispel(dispelInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -1994,11 +2068,11 @@ namespace Game.Spells
 
         public void CallScriptAfterDispel(DispelInfo dispelInfo)
         {
-            foreach (IAuraScript auraScript in GetSpellScripts<IAfterAuraDispel>())
+            foreach (IAfterAuraDispel auraScript in GetAuraScripts<IAfterAuraDispel>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.AfterDispel);
 
-                ((IAfterAuraDispel)auraScript).HandleDispel(dispelInfo);
+                auraScript.HandleDispel(dispelInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -2007,18 +2081,16 @@ namespace Game.Spells
         public bool CallScriptEffectApplyHandlers(AuraEffect aurEff, AuraApplication aurApp, AuraEffectHandleModes mode)
         {
             bool preventDefault = false;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectApply, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectApply, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectApply, aurApp);
 
-                foreach (var eff in auraScript.OnEffectApply)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, mode);
+                ((IAuraApplyHandler)auraScript.Item2).Apply(aurEff, mode);
 
                 if (!preventDefault)
-                    preventDefault = auraScript._IsDefaultActionPrevented();
+                    preventDefault = auraScript.Item1._IsDefaultActionPrevented();
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
 
             return preventDefault;
@@ -2027,65 +2099,57 @@ namespace Game.Spells
         public bool CallScriptEffectRemoveHandlers(AuraEffect aurEff, AuraApplication aurApp, AuraEffectHandleModes mode)
         {
             bool preventDefault = false;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectRemove, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectRemove, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectRemove, aurApp);
 
-                foreach (var eff in auraScript.OnEffectRemove)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, mode);
+                ((IAuraApplyHandler)auraScript.Item2).Apply(aurEff, mode);
 
                 if (!preventDefault)
-                    preventDefault = auraScript._IsDefaultActionPrevented();
+                    preventDefault = auraScript.Item1._IsDefaultActionPrevented();
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
             return preventDefault;
         }
 
         public void CallScriptAfterEffectApplyHandlers(AuraEffect aurEff, AuraApplication aurApp, AuraEffectHandleModes mode)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterApply, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterApply, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterApply, aurApp);
 
-                foreach (var eff in auraScript.AfterEffectApply)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, mode);
+                ((IAuraApplyHandler)auraScript.Item2).Apply(aurEff, mode);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptAfterEffectRemoveHandlers(AuraEffect aurEff, AuraApplication aurApp, AuraEffectHandleModes mode)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterRemove, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterRemove, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterRemove, aurApp);
 
-                foreach (var eff in auraScript.AfterEffectRemove)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, mode);
+                ((IAuraApplyHandler)auraScript.Item2).Apply(aurEff, mode);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public bool CallScriptEffectPeriodicHandlers(AuraEffect aurEff, AuraApplication aurApp)
         {
             bool preventDefault = false;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectPeriodic, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectPeriodic, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectPeriodic, aurApp);
 
-                foreach (var eff in auraScript.OnEffectPeriodic)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff);
+                ((IAuraPeriodic)auraScript.Item2).HandlePeriodic(aurEff);
 
                 if (!preventDefault)
-                    preventDefault = auraScript._IsDefaultActionPrevented();
+                    preventDefault = auraScript.Item1._IsDefaultActionPrevented();
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
 
             return preventDefault;
@@ -2093,180 +2157,157 @@ namespace Game.Spells
 
         public void CallScriptEffectUpdatePeriodicHandlers(AuraEffect aurEff)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectUpdatePeriodic, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectUpdatePeriodic);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectUpdatePeriodic);
 
-                foreach (var eff in auraScript.OnEffectUpdatePeriodic)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff);
+                ((IAuraUpdatePeriodic)auraScript.Item2).UpdatePeriodic(aurEff);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectCalcAmount, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectCalcAmount);
-                foreach (var eff in auraScript.DoEffectCalcAmount)
-                {
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, ref amount, ref canBeRecalculated);
-                }
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectCalcAmount);
 
-                auraScript._FinishScriptCall();
+                ((IAuraCalcAmount)auraScript.Item2).HandleCalcAmount(aurEff, ref amount, ref canBeRecalculated);
+
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectCalcPeriodicHandlers(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectCalcPeriodic, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectCalcPeriodic);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectCalcPeriodic);
 
-                foreach (var eff in auraScript.DoEffectCalcPeriodic)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, ref isPeriodic, ref amplitude);
+                ((IAuraCalcPeriodic)auraScript.Item2).CalcPeriodic(aurEff, ref isPeriodic, ref amplitude);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectCalcSpellModHandlers(AuraEffect aurEff, ref SpellModifier spellMod)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectCalcSpellmod, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectCalcSpellmod);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectCalcSpellmod);
 
-                foreach (var eff in auraScript.DoEffectCalcSpellMod)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, ref spellMod);
+                ((IAuraCalcSpellMod)auraScript.Item2).CalcSpellMod(aurEff, ref spellMod);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectCalcCritChanceHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref float critChance)
         {
-            foreach (AuraScript loadedScript in m_loadedScripts)
+            foreach (var loadedScript in GetEffectScripts(AuraScriptHookType.EffectCalcCritChance, aurEff.GetEffIndex()))
             {
-                loadedScript._PrepareScriptCall(AuraScriptHookType.EffectCalcCritChance, aurApp);
-                foreach (var hook in loadedScript.DoEffectCalcCritChance)
-                    if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        hook.Call(aurEff, victim, ref critChance);
+                loadedScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectCalcCritChance, aurApp);
 
-                loadedScript._FinishScriptCall();
+                ((IAuraCalcCritChance)loadedScript.Item2).CalcCritChance(aurEff, victim, ref critChance);
+
+                loadedScript.Item1._FinishScriptCall();
             }
         }
         
         public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorb, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
 
-                foreach (var eff in auraScript.OnEffectAbsorb)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
-                defaultPrevented = auraScript._IsDefaultActionPrevented();
-                auraScript._FinishScriptCall();
+                defaultPrevented = auraScript.Item1._IsDefaultActionPrevented();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
 
-                foreach (var eff in auraScript.AfterEffectAbsorb)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorbHeal, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
-                foreach (var eff in auraScript.OnEffectAbsorbHeal)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, healInfo, ref absorbAmount);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
 
-                defaultPrevented = auraScript._IsDefaultActionPrevented();
-                auraScript._FinishScriptCall();
+                ((IEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
+
+                defaultPrevented = auraScript.Item1._IsDefaultActionPrevented();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
-                foreach (var eff in auraScript.AfterEffectAbsorbHeal)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, healInfo, ref absorbAmount);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorbHeal, aurApp);
 
-                auraScript._FinishScriptCall();
+                ((IEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
+
+                auraScript.Item1._FinishScriptCall();
             }
         }
         
         public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectManaShield, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectManaShield, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectManaShield, aurApp);
 
-                foreach (var eff in auraScript.OnEffectManaShield)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterManaShield, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterManaShield, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterManaShield, aurApp);
 
-                foreach (var eff in auraScript.AfterEffectManaShield)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, dmgInfo, ref absorbAmount);
+                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, uint splitAmount)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectSplit, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectSplit, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectSplit, aurApp);
 
-                foreach (var eff in auraScript.OnEffectSplit)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, dmgInfo, splitAmount);
+                ((IAuraSplitHandler)auraScript.Item2).Split(aurEff, dmgInfo, splitAmount);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
         public void CallScriptEnterLeaveCombatHandlers(AuraApplication aurApp, bool isNowInCombat)
         {
-            foreach (var loadedScript in m_loadedScripts)
+            foreach (IAuraEnterLeaveCombat loadedScript in GetAuraScripts<IAuraEnterLeaveCombat>())
             {
                 loadedScript._PrepareScriptCall(AuraScriptHookType.EnterLeaveCombat, aurApp);
 
-                foreach (var hook in loadedScript.OnEnterLeaveCombat)
-                    hook.Call(isNowInCombat);
+                loadedScript.EnterLeaveCombat(isNowInCombat);
 
                 loadedScript._FinishScriptCall();
             }
@@ -2275,12 +2316,11 @@ namespace Game.Spells
         public bool CallScriptCheckProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool result = true;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraCheckProc auraScript in GetAuraScripts<IAuraCheckProc>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.CheckProc, aurApp);
 
-                foreach (var hook in auraScript.DoCheckProc)
-                    result &= hook.Call(eventInfo);
+                result &= auraScript.CheckProc(eventInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -2291,12 +2331,11 @@ namespace Game.Spells
         public bool CallScriptPrepareProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool prepare = true;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraPrepareProc auraScript in GetAuraScripts<IAuraPrepareProc>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.PrepareProc, aurApp);
 
-                foreach (var eff in auraScript.DoPrepareProc)
-                    eff.Call(eventInfo);
+                auraScript.DoPrepareProc(eventInfo);
 
                 if (prepare)
                     prepare = !auraScript._IsDefaultActionPrevented();
@@ -2310,12 +2349,11 @@ namespace Game.Spells
         public bool CallScriptProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool handled = false;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraOnProc auraScript in GetAuraScripts<IAuraOnProc>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.Proc, aurApp);
 
-                foreach (var hook in auraScript.OnProc)
-                    hook.Call(eventInfo);
+                auraScript.OnProc(eventInfo);
 
                 handled |= auraScript._IsDefaultActionPrevented();
                 auraScript._FinishScriptCall();
@@ -2326,12 +2364,11 @@ namespace Game.Spells
 
         public void CallScriptAfterProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (IAuraAfterProc auraScript in GetAuraScripts<IAuraAfterProc>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.AfterProc, aurApp);
 
-                foreach (var hook in auraScript.AfterProc)
-                    hook.Call(eventInfo);
+                auraScript.AfterProc(eventInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -2340,15 +2377,13 @@ namespace Game.Spells
         public bool CallScriptCheckEffectProcHandlers(AuraEffect aurEff, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool result = true;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.CheckEffectProc, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.CheckEffectProc, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.CheckEffectProc, aurApp);
 
-                foreach (var hook in auraScript.DoCheckEffectProc)
-                    if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        result &= hook.Call(aurEff, eventInfo);
+                result &= ((IAuraCheckEffectProc)auraScript.Item2).CheckProc(aurEff, eventInfo);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
 
             return result;
@@ -2357,33 +2392,29 @@ namespace Game.Spells
         public bool CallScriptEffectProcHandlers(AuraEffect aurEff, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool preventDefault = false;
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectProc, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectProc, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectProc, aurApp);
 
-                foreach (var eff in auraScript.OnEffectProc)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, eventInfo);
+                ((IAuraEffectProcHandler)auraScript.Item2).HandleProc(aurEff, eventInfo);
 
                 if (!preventDefault)
-                    preventDefault = auraScript._IsDefaultActionPrevented();
+                    preventDefault = auraScript.Item1._IsDefaultActionPrevented();
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
             return preventDefault;
         }
 
         public void CallScriptAfterEffectProcHandlers(AuraEffect aurEff, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            foreach (var auraScript in m_loadedScripts)
+            foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterProc, aurEff.GetEffIndex()))
             {
-                auraScript._PrepareScriptCall(AuraScriptHookType.EffectAfterProc, aurApp);
+                auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterProc, aurApp);
 
-                foreach (var eff in auraScript.AfterEffectProc)
-                    if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
-                        eff.Call(aurEff, eventInfo);
+                ((IAuraEffectProcHandler)auraScript.Item2).HandleProc(aurEff, eventInfo);
 
-                auraScript._FinishScriptCall();
+                auraScript.Item1._FinishScriptCall();
             }
         }
 
