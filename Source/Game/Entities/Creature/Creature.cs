@@ -1143,7 +1143,7 @@ namespace Game.Entities
             if (HasSpellFocus())
                 return true;
 
-            if (!HasUnitState(UnitState.Casting))
+            if (HasUnitState(UnitState.Casting))
                 return true;
 
             return false;
