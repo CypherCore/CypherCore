@@ -634,23 +634,18 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 116 - Frostbolt
-    class spell_mage_frostbolt : SpellScript
+    class spell_mage_frostbolt : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Chilled);
         }
 
-        void HandleChilled()
+        public void OnHit()
         {
             Unit target = GetHitUnit();
             if (target != null)
                 GetCaster().CastSpell(target, SpellIds.Chilled, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleChilled));
         }
     }
     
@@ -1005,23 +1000,18 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 205021 - Ray of Frost
-    class spell_mage_ray_of_frost : SpellScript
+    class spell_mage_ray_of_frost : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RayOfFrostFingersOfFrost);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             Unit caster = GetCaster();
             if (caster != null)
                 caster.CastSpell(caster, SpellIds.RayOfFrostFingersOfFrost, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -1184,7 +1174,7 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] // 80353 - Time Warp
-    class spell_mage_time_warp : SpellScript
+    class spell_mage_time_warp : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1199,7 +1189,7 @@ namespace Scripts.Spells.Mage
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.ShamanSated));
         }
 
-        void ApplyDebuff()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
@@ -1209,7 +1199,6 @@ namespace Scripts.Spells.Mage
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, SpellConst.EffectAll, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 
@@ -1254,25 +1243,20 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 33395 Water Elemental's Freeze
-    class spell_mage_water_elemental_freeze : SpellScript
+    class spell_mage_water_elemental_freeze : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FingersOfFrost);
         }
 
-        void HandleImprovedFreeze()
+        public void AfterHit()
         {
             Unit owner = GetCaster().GetOwner();
             if (!owner)
                 return;
 
             owner.CastSpell(owner, SpellIds.FingersOfFrost, true);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleImprovedFreeze));
         }
     }
 }

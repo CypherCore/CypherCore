@@ -746,7 +746,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_bandage : SpellScript, ICheckCastHander
+    class spell_gen_bandage : SpellScript, ICheckCastHander, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -764,16 +764,11 @@ namespace Scripts.Spells.Generic
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleScript()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.RecentlyBandaged, true);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleScript));
         }
     }
 
@@ -1358,7 +1353,7 @@ namespace Scripts.Spells.Generic
 
     [Script("spell_gen_default_count_pct_from_max_hp", 0)]
     [Script("spell_gen_50pct_count_pct_from_max_hp", 50)]
-    class spell_gen_count_pct_from_max_hp : SpellScript
+    class spell_gen_count_pct_from_max_hp : SpellScript, IOnHit
     {
         int _damagePct;
 
@@ -1367,17 +1362,12 @@ namespace Scripts.Spells.Generic
             _damagePct = damagePct;
         }
 
-        void RecalculateDamage()
+        public void OnHit()
         {
             if (_damagePct == 0)
                 _damagePct = GetHitDamage();
 
             SetHitDamage((int)GetHitUnit().CountPctFromMaxHealth(_damagePct));
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(RecalculateDamage));
         }
     }
 
@@ -1479,18 +1469,13 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 32065 - Fungal Decay
-    class spell_gen_decay_over_time_fungal_decay_SpellScript : SpellScript
+    class spell_gen_decay_over_time_fungal_decay_SpellScript : SpellScript, IAfterHit
     {
-        void ModAuraStack()
+        public void AfterHit()
         {
             Aura aur = GetHitAura();
             if (aur != null)
                 aur.SetStackAmount((byte)GetSpellInfo().StackAmount);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(ModAuraStack));
         }
     }
 
@@ -1527,18 +1512,13 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 36659 - Tail Sting
-    class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript
+    class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript, IAfterHit
     {
-        void ModAuraStack()
+        public void AfterHit()
         {
             Aura aur = GetHitAura();
             if (aur != null)
                 aur.SetStackAmount((byte)GetSpellInfo().StackAmount);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(ModAuraStack));
         }
     }
 
@@ -1667,7 +1647,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_dungeon_credit : SpellScript
+    class spell_gen_dungeon_credit : SpellScript, IAfterHit
     {
         public override bool Load()
         {
@@ -1675,7 +1655,7 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsTypeId(TypeId.Unit);
         }
 
-        void CreditEncounter()
+        public void AfterHit()
         {
             // This hook is executed for every target, make sure we only credit instance once
             if (_handled)
@@ -1686,11 +1666,6 @@ namespace Scripts.Spells.Generic
             InstanceScript instance = caster.GetInstanceScript();
             if (instance != null)
                 instance.UpdateEncounterStateForSpellCast(GetSpellInfo().Id, caster);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(CreditEncounter));
         }
 
         bool _handled;
@@ -3404,24 +3379,19 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_trigger_exclude_target_aura_spell : SpellScript
+    class spell_gen_trigger_exclude_target_aura_spell : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(spellInfo.ExcludeTargetAuraSpell);
         }
 
-        void HandleTrigger()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
                 // Blizz seems to just apply aura without bothering to cast
                 GetCaster().AddAura(GetSpellInfo().ExcludeTargetAuraSpell, target);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleTrigger));
         }
     }
 
@@ -3718,18 +3688,13 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_eject_all_passengers : SpellScript
+    class spell_gen_eject_all_passengers : SpellScript, IAfterHit
     {
-        void RemoveVehicleAuras()
+        public void AfterHit()
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle)
                 vehicle.RemoveAllPassengers();
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(RemoveVehicleAuras));
         }
     }
 

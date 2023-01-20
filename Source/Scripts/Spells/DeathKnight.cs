@@ -197,21 +197,16 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 50842 - Blood Boil
-    class spell_dk_blood_boil : SpellScript
+    class spell_dk_blood_boil : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BloodPlague);
         }
 
-        void HandleEffect()
+        public void OnHit()
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.BloodPlague, true);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleEffect));
         }
     }
 

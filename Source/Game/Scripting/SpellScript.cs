@@ -136,8 +136,6 @@ namespace Game.Scripting
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate void SpellEffectFnType(uint index);
-        public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
-        public delegate void SpellHitFnType();
         public delegate void SpellOnCalcCritChanceFnType(Unit victim, ref float chance);
         public delegate void SpellObjectAreaTargetSelectFnType(List<WorldObject> targets);
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
@@ -171,36 +169,6 @@ namespace Game.Scripting
 
             SpellEffectName _effName;
             SpellEffectFnType _pEffectHandlerScript;
-        }
-
-        public class BeforeHitHandler
-        {
-            public BeforeHitHandler(SpellBeforeHitFnType pBeforeHitHandlerScript)
-            {
-                _pBeforeHitHandlerScript = pBeforeHitHandlerScript;
-            }
-
-            public void Call(SpellMissInfo missInfo)
-            {
-                _pBeforeHitHandlerScript(missInfo);
-            }
-
-            SpellBeforeHitFnType _pBeforeHitHandlerScript;
-        }
-
-        public class HitHandler
-        {
-            public HitHandler(SpellHitFnType pHitHandlerScript)
-            {
-                _pHitHandlerScript = pHitHandlerScript;
-            }
-
-            public void Call()
-            {
-                _pHitHandlerScript();
-            }
-
-            SpellHitFnType _pHitHandlerScript;
         }
 
         public class OnCalcCritChanceHandler
@@ -456,9 +424,6 @@ namespace Game.Scripting
         public List<EffectHandler> OnEffectHitTarget = new();
         public List<EffectHandler> OnEffectSuccessfulDispel = new();
 
-        public List<BeforeHitHandler> BeforeHit = new();
-        public List<HitHandler> OnHit = new();
-        public List<HitHandler> AfterHit = new();
 
         // where function is void function(Unit victim, ref float critChance)
         public List<OnCalcCritChanceHandler> OnCalcCritChance = new();

@@ -143,23 +143,18 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 167105 - Colossus Smash 7.1.5
-    class spell_warr_colossus_smash_SpellScript : SpellScript
+    class spell_warr_colossus_smash_SpellScript : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmashEffect);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             Unit target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.ColossusSmashEffect, true);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 

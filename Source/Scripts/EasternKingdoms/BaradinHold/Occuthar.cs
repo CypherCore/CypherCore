@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -224,7 +225,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // Id - 96932 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript
+    class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript, IAfterHit
     {
         public override bool Load()
         {
@@ -235,7 +236,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
             return false;
         }
 
-        void HandleScript()
+        public void AfterHit()
         {
             Position pos = GetHitUnit().GetPosition();
 
@@ -246,11 +247,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
                 if (creature != null)
                     creature.CastSpell(GetHitUnit(), SpellIds.GazeOfOccuthar, false);
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleScript));
         }
     }
 

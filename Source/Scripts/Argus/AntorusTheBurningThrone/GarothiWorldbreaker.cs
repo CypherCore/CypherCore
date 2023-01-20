@@ -10,6 +10,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Framework.Constants;
 using System;
+using Game.Scripting.Interfaces.Spell;
 
 namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 {
@@ -737,9 +738,9 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     }
 
     [Script]
-    class spell_garothi_eradication : SpellScript
+    class spell_garothi_eradication : SpellScript, IOnHit
     {
-        void ChangeDamage()
+        public void OnHit()
         {
             Unit caster = GetCaster();
             if (caster)
@@ -747,11 +748,6 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 uint damageReduction = (uint)MathFunctions.CalculatePct(GetHitDamage(), GetHitUnit().GetDistance(caster));
                 SetHitDamage((int)(GetHitDamage() - damageReduction));
             }
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(ChangeDamage));
         }
     }
 

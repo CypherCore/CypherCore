@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -200,7 +201,7 @@ namespace Scripts.Events.HallowsEnd
     }
 
     [Script] // 24717, 24718, 24719, 24720, 24724, 24733, 24737, 24741
-    class spell_hallow_end_wand : SpellScript
+    class spell_hallow_end_wand : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellEntry)
         {
@@ -208,7 +209,7 @@ namespace Scripts.Events.HallowsEnd
                 SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
         }
 
-        void HandleScriptEffect()
+        public void OnHit()
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -237,11 +238,6 @@ namespace Scripts.Events.HallowsEnd
                     return;
             }
             caster.CastSpell(target, spellId, true);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleScriptEffect));
         }
     }
 }

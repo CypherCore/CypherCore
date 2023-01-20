@@ -342,9 +342,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 710 - Banish
-    class spell_warl_banish : SpellScript
+    class spell_warl_banish : SpellScript, IBeforeHit
     {
-        void HandleBanish(SpellMissInfo missInfo)
+        public void BeforeHit(SpellMissInfo missInfo)
         {
             if (missInfo != SpellMissInfo.Immune)
                 return;
@@ -357,11 +357,6 @@ namespace Scripts.Spells.Warlock
                 if (banishAura != null)
                     banishAura.Remove();
             }
-        }
-
-        public override void Register()
-        {
-            BeforeHit.Add(new BeforeHitHandler(HandleBanish));
         }
     }
 
@@ -557,9 +552,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 48181 - Haunt
-    class spell_warl_haunt : SpellScript
+    class spell_warl_haunt : SpellScript, IAfterHit
     {
-        void HandleAfterHit()
+        public void AfterHit()
         {
             Aura aura = GetHitAura();
             if (aura != null)
@@ -568,11 +563,6 @@ namespace Scripts.Spells.Warlock
                 if (aurEff != null)
                     aurEff.SetAmount(MathFunctions.CalculatePct(GetHitDamage(), aurEff.GetAmount()));
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleAfterHit));
         }
     }
 
@@ -627,17 +617,12 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 6262 - Healthstone
-    class spell_warl_healthstone_heal : SpellScript
+    class spell_warl_healthstone_heal : SpellScript, IOnHit
     {
-        void HandleOnHit()
+        public void OnHit()
         {
             int heal = (int)MathFunctions.CalculatePct(GetCaster().GetCreateHealth(), GetHitHeal());
             SetHitHeal(heal);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 

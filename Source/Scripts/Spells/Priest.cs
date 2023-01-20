@@ -863,7 +863,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    class spell_pri_power_word_shield : SpellScript, ICheckCastHander
+    class spell_pri_power_word_shield : SpellScript, ICheckCastHander, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -882,18 +882,13 @@ namespace Scripts.Spells.Priest
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleEffectHit()
+        public void AfterHit()
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
             if (target != null)
                 if (!caster.HasAura(SpellIds.Rapture))
                     caster.CastSpell(target, SpellIds.WeakenedSoul, true);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleEffectHit));
         }
     }
 
@@ -1209,14 +1204,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 186263 - Shadow Mend
-    class spell_pri_shadow_mend : SpellScript
+    class spell_pri_shadow_mend : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
         }
 
-        void HandleEffectHit()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -1240,11 +1235,6 @@ namespace Scripts.Spells.Priest
                     caster.CastSpell(target, SpellIds.ShadowMendPeriodicDummy, args);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleEffectHit));
         }
     }
 

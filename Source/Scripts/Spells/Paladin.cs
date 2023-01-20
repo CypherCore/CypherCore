@@ -222,7 +222,7 @@ namespace Scripts.Spells.Paladin
     
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
-    class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander
+    class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -239,7 +239,7 @@ namespace Scripts.Spells.Paladin
             return SpellCastResult.SpellCastOk;
         }
 
-        void TriggerForbearance()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
@@ -247,11 +247,6 @@ namespace Scripts.Spells.Paladin
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
                 GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(TriggerForbearance));
         }
     }
 
@@ -652,33 +647,28 @@ namespace Scripts.Spells.Paladin
     }
     
     [Script] // 327193 - Moment of Glory
-    class spell_pal_moment_of_glory : SpellScript
+    class spell_pal_moment_of_glory : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AvengersShield);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             GetCaster().GetSpellHistory().ResetCooldown(SpellIds.AvengersShield);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
     [Script] // 20271/275779/275773 - Judgement (Retribution/Protection/Holy)
-    class spell_pal_judgment : SpellScript
+    class spell_pal_judgment : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.JudgmentProtRetR3, SpellIds.JudgmentGainHolyPower, SpellIds.JudgmentHolyR3, SpellIds.JudgmentHolyR3Debuff);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             Unit caster = GetCaster();
             if (caster.HasSpell(SpellIds.JudgmentProtRetR3))
@@ -686,11 +676,6 @@ namespace Scripts.Spells.Paladin
 
             if (caster.HasSpell(SpellIds.JudgmentHolyR3))
                 caster.CastSpell(GetHitUnit(), SpellIds.JudgmentHolyR3Debuff, GetSpell());
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -829,7 +814,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 25912 - Holy Shock
-    class spell_pal_holy_shock_damage_visual : SpellScript
+    class spell_pal_holy_shock_damage_visual : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -837,19 +822,14 @@ namespace Scripts.Spells.Paladin
                 && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamageCrit);
         }
 
-        void PlayVisual()
+        public void AfterHit()
         {
             GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? SpellVisual.HolyShockDamageCrit : SpellVisual.HolyShockDamage, 0, 0, 0.0f, false);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(PlayVisual));
         }
     }
 
     [Script] // 25914 - Holy Shock
-    class spell_pal_holy_shock_heal_visual : SpellScript
+    class spell_pal_holy_shock_heal_visual : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -857,14 +837,9 @@ namespace Scripts.Spells.Paladin
                 && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHealCrit);
         }
 
-        void PlayVisual()
+        public void AfterHit()
         {
             GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? SpellVisual.HolyShockHealCrit : SpellVisual.HolyShockHeal, 0, 0, 0.0f, false);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(PlayVisual));
         }
     }
     
@@ -932,7 +907,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 633 - Lay on Hands
-    class spell_pal_lay_on_hands : SpellScript, ICheckCastHander
+    class spell_pal_lay_on_hands : SpellScript, ICheckCastHander, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -949,7 +924,7 @@ namespace Scripts.Spells.Paladin
             return SpellCastResult.SpellCastOk;
         }
 
-        void TriggerForbearance()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
@@ -957,11 +932,6 @@ namespace Scripts.Spells.Paladin
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
                 GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(TriggerForbearance));
         }
     }
 

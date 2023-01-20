@@ -596,7 +596,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    class spell_dru_innervate : SpellScript, ICheckCastHander
+    class spell_dru_innervate : SpellScript, ICheckCastHander, IOnHit
     {
         public SpellCastResult CheckCast()
         {
@@ -611,7 +611,7 @@ namespace Scripts.Spells.Druid
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleRank2()
+        public void OnHit()
         {
             Unit caster = GetCaster();
             if (caster != GetHitUnit())
@@ -623,11 +623,6 @@ namespace Scripts.Spells.Druid
                     .SetTriggeringSpell(GetSpell())
                     .AddSpellMod(SpellValueMod.BasePoint0, -innervateR2.GetAmount()));
             }
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleRank2));
         }
     }
 

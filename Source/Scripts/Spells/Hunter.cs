@@ -95,22 +95,17 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 109304 - Exhilaration
-    class spell_hun_exhilaration : SpellScript
+    class spell_hun_exhilaration : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ExhilarationR2, SpellIds.Lonewolf);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             if (GetCaster().HasAura(SpellIds.ExhilarationR2) && !GetCaster().HasAura(SpellIds.Lonewolf))
                 GetCaster().CastSpell((Unit)null, SpellIds.ExhilarationPet, true);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -384,7 +379,7 @@ namespace Scripts.Spells.Hunter
 
     // 56641 - Steady Shot
     [Script]
-    class spell_hun_steady_shot : SpellScript
+    class spell_hun_steady_shot : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -396,14 +391,9 @@ namespace Scripts.Spells.Hunter
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SteadyShotFocus, true);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 

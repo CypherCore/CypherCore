@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 
@@ -153,18 +154,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
     }
 
     [Script] // 19873 - Destroy Egg
-    class spell_egg_event : SpellScript
+    class spell_egg_event : SpellScript, IOnHit
     {
-        void HandleOnHit()
+        public void OnHit()
         {
             InstanceScript instance = GetCaster().GetInstanceScript();
             if (instance != null)
                 instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.Special);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 }

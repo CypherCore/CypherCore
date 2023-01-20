@@ -30,6 +30,7 @@ namespace Game.Entities
 
             return m_raidDifficulty;
         }
+
         public Difficulty GetDungeonDifficultyID() { return m_dungeonDifficulty; }
         public Difficulty GetRaidDifficultyID() { return m_raidDifficulty; }
         public Difficulty GetLegacyRaidDifficultyID() { return m_legacyRaidDifficulty; }

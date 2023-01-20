@@ -193,7 +193,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 2825 - Bloodlust
-    class spell_sha_bloodlust : SpellScript
+    class spell_sha_bloodlust : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -207,7 +207,7 @@ namespace Scripts.Spells.Shaman
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
         }
 
-        void ApplyDebuff()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
@@ -218,7 +218,6 @@ namespace Scripts.Spells.Shaman
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 
@@ -304,7 +303,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 207778 - Downpour
-    class spell_sha_downpour : SpellScript, IAfterCast
+    class spell_sha_downpour : SpellScript, IAfterCast, IAfterHit
     {
         int _healedTargets = 0;
 
@@ -318,7 +317,7 @@ namespace Scripts.Spells.Shaman
             SelectRandomInjuredTargets(targets, 6, true);
         }
 
-        void CountEffectivelyHealedTarget()
+        public void AfterHit()
         {
             // Cooldown increased for each target effectively healed
             if (GetHitHeal() != 0)
@@ -334,7 +333,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-            AfterHit.Add(new HitHandler(CountEffectivelyHealedTarget));
         }
     }
 
@@ -479,7 +477,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77478 - Earthquake tick
-    class spell_sha_earthquake_tick : SpellScript
+    class spell_sha_earthquake_tick : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -491,7 +489,7 @@ namespace Scripts.Spells.Shaman
             SetEffectValue((int)(GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.391f));
         }
 
-        void HandleOnHit()
+        public void OnHit()
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -514,7 +512,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
-            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
     
@@ -614,9 +611,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 73920 - Healing Rain
-    class spell_sha_healing_rain : SpellScript
+    class spell_sha_healing_rain : SpellScript, IAfterHit
     {
-        void InitializeVisualStalker()
+        public void AfterHit()
         {
             Aura aura = GetHitAura();
             if (aura != null)
@@ -636,11 +633,6 @@ namespace Scripts.Spells.Shaman
                         script.SetVisualDummy(summon);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(InitializeVisualStalker));
         }
     }
 
@@ -706,7 +698,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 32182 - Heroism
-    class spell_sha_heroism : SpellScript
+    class spell_sha_heroism : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -720,7 +712,7 @@ namespace Scripts.Spells.Shaman
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
         }
 
-        void ApplyDebuff()
+        public void AfterHit()
         {
             Unit target = GetHitUnit();
             if (target)
@@ -731,7 +723,6 @@ namespace Scripts.Spells.Shaman
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 
@@ -1023,7 +1014,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77762 - Lava Surge
-    class spell_sha_lava_surge_proc : SpellScript
+    class spell_sha_lava_surge_proc : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1035,14 +1026,9 @@ namespace Scripts.Spells.Shaman
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void ResetCooldown()
+        public void AfterHit()
         {
             GetCaster().GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurst, GetCastDifficulty()).ChargeCategoryId);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(ResetCooldown));
         }
     }
 

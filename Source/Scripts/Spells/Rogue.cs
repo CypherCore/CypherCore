@@ -126,7 +126,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 2818 - Deadly Poison
-    class spell_rog_deadly_poison_SpellScript : SpellScript
+    class spell_rog_deadly_poison_SpellScript : SpellScript, IBeforeHit, IAfterHit
     {
         public override bool Load()
         {
@@ -134,7 +134,7 @@ namespace Scripts.Spells.Rogue
             return GetCaster().IsPlayer() && GetCastItem();
         }
 
-        void HandleBeforeHit(SpellMissInfo missInfo)
+        public void BeforeHit(SpellMissInfo missInfo)
         {
             if (missInfo != SpellMissInfo.None)
                 return;
@@ -149,7 +149,7 @@ namespace Scripts.Spells.Rogue
             }
         }
 
-        void HandleAfterHit()
+        public void AfterHit()
         {
             if (_stackAmount < 5)
                 return;
@@ -200,12 +200,6 @@ namespace Scripts.Spells.Rogue
                     }
                 }
             }
-        }
-
-        public override void Register()
-        {
-            BeforeHit.Add(new BeforeHitHandler(HandleBeforeHit));
-            AfterHit.Add(new HitHandler(HandleAfterHit));
         }
 
         byte _stackAmount = 0;
@@ -777,9 +771,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 57934 - Tricks of the Trade
-    class spell_rog_tricks_of_the_trade : SpellScript
+    class spell_rog_tricks_of_the_trade : SpellScript, IAfterHit
     {
-        void DoAfterHit()
+        public void AfterHit()
         {
             Aura aura = GetHitAura();
             if (aura != null)
@@ -794,11 +788,6 @@ namespace Scripts.Spells.Rogue
                         script.SetRedirectTarget(ObjectGuid.Empty);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(DoAfterHit));
         }
     }
 

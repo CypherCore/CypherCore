@@ -7561,40 +7561,31 @@ namespace Game.Spells
 
         public void CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IBeforeHit>())
             {
                 script._InitHit();
                 script._PrepareScriptCall(SpellScriptHookType.BeforeHit);
-
-                foreach (var hook in script.BeforeHit)
-                    hook.Call(missInfo);
-
+                ((IBeforeHit)script).BeforeHit(missInfo);
                 script._FinishScriptCall();
             }
         }
 
         public void CallScriptOnHitHandlers()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IOnHit>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.Hit);
-
-                foreach (var hook in script.OnHit)
-                    hook.Call();
-
+                ((IOnHit)script).OnHit();
                 script._FinishScriptCall();
             }
         }
 
         public void CallScriptAfterHitHandlers()
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<IAfterHit>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterHit);
-
-                foreach (var hook in script.AfterHit)
-                    hook.Call();
-
+                ((IAfterHit)script).AfterHit();
                 script._FinishScriptCall();
             }
         }

@@ -235,14 +235,14 @@ namespace Scripts.Spells.DemonHunter
     // 200685 - Blade Dance
     // 210153 - Death Sweep
     [Script] // 210155 - Death Sweep
-    class spell_dh_blade_dance_damage : SpellScript
+    class spell_dh_blade_dance_damage : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FirstBlood);
         }
 
-        void HandleHitTarget()
+        public void OnHit()
         {
             int damage = GetHitDamage();
 
@@ -256,11 +256,6 @@ namespace Scripts.Spells.DemonHunter
             }
 
             SetHitDamage(damage);
-        }
-
-        public override void Register()
-        {
-            OnHit.Add(new HitHandler(HandleHitTarget));
         }
     }
 

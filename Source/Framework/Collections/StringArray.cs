@@ -34,7 +34,13 @@ namespace Framework.Collections
 
         public string this[int index]
         {
-            get { return _str[index]; }
+            get 
+            {
+                if (IsEmpty())
+                    return null;
+
+                return _str[index]; 
+            }
             set { _str[index] = value; }
         }
 

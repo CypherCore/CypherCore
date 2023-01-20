@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -89,7 +90,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
     }
 
     [Script] // 88942 / 95172 - Meteor Slash
-    class spell_argaloth_meteor_slash_SpellScript : SpellScript
+    class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit
     {
         int _targetCount;
 
@@ -98,7 +99,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
             _targetCount = targets.Count;
         }
 
-        void SplitDamage()
+        public void OnHit()
         {
             if (_targetCount == 0)
                 return;
@@ -109,7 +110,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
-            OnHit.Add(new HitHandler(SplitDamage));
         }
     }
 }
