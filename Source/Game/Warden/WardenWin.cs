@@ -81,7 +81,7 @@ namespace Game
             Request.Function1[1] = 0x000218C0;                      // 0x00400000 + 0x000218C0 SFileGetFileSize
             Request.Function1[2] = 0x00022530;                      // 0x00400000 + 0x00022530 SFileReadFile
             Request.Function1[3] = 0x00022910;                      // 0x00400000 + 0x00022910 SFileCloseFile
-            Request.CheckSumm1 = BuildChecksum(BitConverter.GetBytes(Request.Unk1), 20);
+            Request.CheckSumm1 = BuildChecksum(new byte[] { Request.Unk1 }, 20);
 
             Request.Command2 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size2 = 8;
@@ -90,7 +90,7 @@ namespace Game
             Request.String_library2 = 0;
             Request.Function2 = 0x00419D40;                         // 0x00400000 + 0x00419D40 FrameScript::GetText
             Request.Function2_set = 1;
-            Request.CheckSumm2 = BuildChecksum(BitConverter.GetBytes(Request.Unk2), 8);
+            Request.CheckSumm2 = BuildChecksum(new byte[] { Request.Unk2 }, 8);
 
             Request.Command3 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size3 = 8;
@@ -99,7 +99,7 @@ namespace Game
             Request.String_library3 = 0;
             Request.Function3 = 0x0046AE20;                         // 0x00400000 + 0x0046AE20 PerformanceCounter
             Request.Function3_set = 1;
-            Request.CheckSumm3 = BuildChecksum(BitConverter.GetBytes(Request.Unk5), 8);
+            Request.CheckSumm3 = BuildChecksum(new byte[] { Request.Unk5 }, 8);
 
             Warden3DataServer packet = new();
             packet.Data = EncryptData(Request);
