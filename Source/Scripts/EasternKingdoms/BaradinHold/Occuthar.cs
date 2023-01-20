@@ -173,8 +173,9 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // 96872 - Focused Fire
-    class spell_occuthar_focused_fire_SpellScript : SpellScript
+    class spell_occuthar_focused_fire_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Count < 2)
@@ -188,7 +189,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 
@@ -221,7 +222,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }

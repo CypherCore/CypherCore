@@ -175,8 +175,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 114911 - Ancestral Guidance Heal
-    class spell_sha_ancestral_guidance_heal : SpellScript
+    class spell_sha_ancestral_guidance_heal : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AncestralGuidance);
@@ -189,13 +190,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(ResizeTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(ResizeTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
     [Script] // 2825 - Bloodlust
-    class spell_sha_bloodlust : SpellScript, IAfterHit
+    class spell_sha_bloodlust : SpellScript, IAfterHit, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Sated, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
@@ -217,8 +219,8 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
         }
     }
 
@@ -271,8 +273,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 187874 - Crash Lightning
-    class spell_sha_crash_lightning : SpellScript, IAfterCast
+    class spell_sha_crash_lightning : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CrashLightningCleave);
@@ -299,15 +302,16 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
         }
 
         int _targetsHit;
     }
 
     [Script] // 207778 - Downpour
-    class spell_sha_downpour : SpellScript, IAfterCast, IAfterHit
+    class spell_sha_downpour : SpellScript, IAfterCast, IAfterHit, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         int _healedTargets = 0;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -335,7 +339,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
@@ -676,8 +680,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 73921 - Healing Rain
-    class spell_sha_healing_rain_target_limit : SpellScript
+    class spell_sha_healing_rain_target_limit : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SelectTargets(List<WorldObject> targets)
         {
             SelectRandomInjuredTargets(targets, 6, true);
@@ -685,13 +690,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
     [Script] // 52042 - Healing Stream Totem
-    class spell_sha_healing_stream_totem_heal : SpellScript
+    class spell_sha_healing_stream_totem_heal : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SelectTargets(List<WorldObject> targets)
         {
             SelectRandomInjuredTargets(targets, 1, true);
@@ -699,13 +705,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
     [Script] // 32182 - Heroism
-    class spell_sha_heroism : SpellScript, IAfterHit
+    class spell_sha_heroism : SpellScript, IAfterHit, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Exhaustion, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
@@ -727,8 +734,8 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
         }
     }
 
@@ -1111,7 +1118,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleTargetSelect, 0, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(HandleTargetSelect, 0, Targets.UnitDestAreaEnemy));
             SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
@@ -1270,7 +1277,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }

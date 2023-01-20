@@ -479,8 +479,9 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script] // 24778 - Sleep
-    class spell_dream_fog_sleep_SpellScript : SpellScript
+    class spell_dream_fog_sleep_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
@@ -494,7 +495,7 @@ namespace Scripts.World.EmeraldDragons
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
@@ -528,7 +529,7 @@ namespace Scripts.World.EmeraldDragons
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
             SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }

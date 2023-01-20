@@ -258,8 +258,9 @@ namespace Scripts.Spells.Warrior
 
     // 5246 - Intimidating Shout
     [Script]
-    class spell_warr_intimidating_shout : SpellScript
+    class spell_warr_intimidating_shout : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> unitList)
         {
             unitList.Remove(GetExplTargetWorldObject());
@@ -267,8 +268,8 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitSrcAreaEnemy));
         }
     }
 

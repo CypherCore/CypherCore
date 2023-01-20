@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -76,8 +77,9 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
     }
 
     [Script] // 88954 / 95173 - Consuming Darkness
-    class spell_argaloth_consuming_darkness_SpellScript : SpellScript
+    class spell_argaloth_consuming_darkness_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             targets.RandomResize(GetCaster().GetMap().Is25ManRaid() ? 8 : 3u);
@@ -85,13 +87,14 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 
     [Script] // 88942 / 95172 - Meteor Slash
-    class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit
+    class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         int _targetCount;
 
         void CountTargets(List<WorldObject> targets)
@@ -109,7 +112,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
         }
     }
 }

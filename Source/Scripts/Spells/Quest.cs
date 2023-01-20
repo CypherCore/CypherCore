@@ -967,8 +967,9 @@ namespace Scripts.Spells.Quest
     }
     
     [Script] // 55368 - Summon Stefan
-    class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript
+    class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
@@ -978,7 +979,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
         }
     }
 
@@ -1026,8 +1027,9 @@ namespace Scripts.Spells.Quest
     }
  
     [Script] // 59303 - Summon Frost Wyrm
-    class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript
+    class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
@@ -1037,13 +1039,14 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
         }
     }
     
     [Script] // 12601 - Second Chances: Summon Landgren's Soul Moveto Target Bunny
-    class spell_q12847_summon_soul_moveto_bunny : SpellScript
+    class spell_q12847_summon_soul_moveto_bunny : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
@@ -1053,7 +1056,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
         }
     }
 
@@ -1454,8 +1457,9 @@ namespace Scripts.Spells.Quest
     }
     
     [Script] // 48681 - Summon Silverbrook Worgen
-    class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
+    class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void ModDest(ref SpellDestination dest)
         {
             float dist = GetEffectInfo(0).CalcRadius(GetCaster());
@@ -1467,7 +1471,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(ModDest, 0, Targets.DestCasterSummon));
+            SpellEffects.Add(new DestinationTargetSelectHandler(ModDest, 0, Targets.DestCasterSummon));
         }
     }
     

@@ -10,19 +10,27 @@ namespace Game.Scripting.Interfaces.Spell
     public interface ISpellEffectHandler : ISpellEffect
     {
         SpellEffectName EffectName { get; }
-        SpellScriptHookType HookType { get; }
+
+        void CallEffect(uint effIndex);
     }
 
     public class EffectHandler : SpellEffect, ISpellEffectHandler
     {
-        public EffectHandler(SpellEffectFn callEffect, uint effectIndex, SpellEffectName spellEffectName, SpellScriptHookType hookType) : base(callEffect, effectIndex)
+        public delegate void SpellEffectFn(uint index);
+
+        public EffectHandler(SpellEffectFn callEffect, uint effectIndex, SpellEffectName spellEffectName, SpellScriptHookType hookType) : base(effectIndex, hookType)
         {
             EffectName = spellEffectName;
-            HookType = hookType;
+            _callEffect = callEffect;
         }
 
         public SpellEffectName EffectName { get; private set; }
 
-        public SpellScriptHookType HookType { get; private set; }
+        private readonly SpellEffectFn _callEffect;
+
+        public void CallEffect(uint effIndex)
+        {
+            _callEffect(EffectIndex);
+        }
     }
 }

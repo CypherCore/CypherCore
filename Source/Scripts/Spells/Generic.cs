@@ -585,8 +585,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 63471 -Spawn Blood Pool
-    class spell_spawn_blood_pool : SpellScript
+    class spell_spawn_blood_pool : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SetDest(ref SpellDestination dest)
         {
             Unit caster = GetCaster();
@@ -599,7 +600,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
         }
     }
 
@@ -3039,8 +3040,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_replenishment : SpellScript
+    class spell_gen_replenishment : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void RemoveInvalidTargets(List<WorldObject> targets)
         {
             // In arenas Replenishment may only affect the caster
@@ -3075,7 +3077,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 255, Targets.UnitCasterAreaRaid));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 255, Targets.UnitCasterAreaRaid));
         }
     }
 
@@ -4467,8 +4469,9 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_mark_of_kazrogal_hellfire : SpellScript
+    class spell_gen_mark_of_kazrogal_hellfire : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(target =>
@@ -4482,7 +4485,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 

@@ -191,8 +191,9 @@ namespace Scripts.Spells.DemonHunter
 
     // 188499 - Blade Dance
     [Script] // 210152 - Death Sweep
-    class spell_dh_blade_dance : SpellScript
+    class spell_dh_blade_dance : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FirstBlood);
@@ -228,7 +229,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 

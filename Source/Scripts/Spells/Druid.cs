@@ -923,7 +923,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
@@ -1099,8 +1099,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 70691 - Item T10 Restoration 4P Bonus
-    class spell_dru_t10_restoration_4p_bonus : SpellScript
+    class spell_dru_t10_restoration_4p_bonus : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
@@ -1136,7 +1137,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
@@ -1406,8 +1407,9 @@ namespace Scripts.Spells.Druid
     }
     
     [Script] // 48438 - Wild Growth
-    class spell_dru_wild_growth : SpellScript
+    class spell_dru_wild_growth : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         List<WorldObject> _targets;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -1447,8 +1449,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SetTargets, 1, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(SetTargets, 1, Targets.UnitDestAreaAlly));
         }
     }
 

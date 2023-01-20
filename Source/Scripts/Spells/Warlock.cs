@@ -680,8 +680,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 27285 - Seed of Corruption
-    class spell_warl_seed_of_corruption : SpellScript
+    class spell_warl_seed_of_corruption : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             if (GetExplTargetUnit())
@@ -690,7 +691,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
@@ -1112,240 +1113,179 @@ namespace Scripts.Spells.Warlock
 
     // Demonic Calling - 205145
     [SpellScript(205145)]
-    public class spell_warl_demonic_calling : AuraScriptLoader
+    public class spell_warl_demonic_calling_AuraScript : AuraScript
     {
-        public spell_warl_demonic_calling() : base("spell_warl_demonic_calling")
+        public override bool Validate(SpellInfo UnnamedParameter)
         {
+            return SpellManager.Instance.GetSpellInfo(SpellIds.DEMONIC_CALLING_TRIGGER, Difficulty.None) != null;
         }
 
-        public class spell_warl_demonic_calling_AuraScript : AuraScript
+        public bool CheckProc(ProcEventInfo eventInfo)
         {
-            public override bool Validate(SpellInfo UnnamedParameter)
+            Unit caster = GetCaster();
+            if (caster == null)
             {
-                return SpellManager.Instance.GetSpellInfo(SpellIds.DEMONIC_CALLING_TRIGGER, Difficulty.None) != null;
-            }
-
-            public bool CheckProc(ProcEventInfo eventInfo)
-            {
-                Unit caster = GetCaster();
-                if (caster == null)
-                {
-                    return false;
-                }
-                if (eventInfo.GetSpellInfo() != null && (eventInfo.GetSpellInfo().Id == SpellIds.DEMONBOLT || eventInfo.GetSpellInfo().Id == SpellIds.SHADOW_BOLT) && RandomHelper.randChance(20))
-                {
-                    caster.CastSpell(caster, SpellIds.DEMONIC_CALLING_TRIGGER, true);
-                }
                 return false;
             }
-
-            public override void Register()
+            if (eventInfo.GetSpellInfo() != null && (eventInfo.GetSpellInfo().Id == SpellIds.DEMONBOLT || eventInfo.GetSpellInfo().Id == SpellIds.SHADOW_BOLT) && RandomHelper.randChance(20))
             {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
+                caster.CastSpell(caster, SpellIds.DEMONIC_CALLING_TRIGGER, true);
             }
+            return false;
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_warl_demonic_calling_AuraScript();
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
-
 
     // Eye Laser - 205231
     [SpellScript(205231)]
-    public class spell_warl_eye_laser : SpellScriptLoader
+
+    public class spell_warl_eye_laser_SpellScript : SpellScript, IHasSpellEffects
     {
-        public spell_warl_eye_laser() : base("spell_warl_eye_laser")
-        {
-        }
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
 
-        public class spell_warl_eye_laser_SpellScript : SpellScript
+        public void HandleTargets(List<WorldObject> targets)
         {
-
-            public void HandleTargets(List<WorldObject> targets)
+            Unit caster = GetOriginalCaster();
+            if (caster == null)
             {
-                Unit caster = GetOriginalCaster();
-                if (caster == null)
-                {
-                    return;
-                }
-
-                targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, SpellIds.DOOM, caster.GetGUID()));
+                return;
             }
 
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleTargets, 0, Targets.UnitTargetEnemy));
-            }
+            targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, SpellIds.DOOM, caster.GetGUID()));
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: SpellScript* GetSpellScript() const override
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_warl_eye_laser_SpellScript();
-        }
-    }
-
-    // Grimoire of Synergy - 171975
-    [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
-    public class spell_warl_grimoire_of_synergy : SpellScriptLoader
-    {
-        public spell_warl_grimoire_of_synergy() : base("spell_warl_grimoire_of_synergy")
-        {
-        }
-
-        public class spell_warl_grimoire_of_synergy_SpellScript : SpellScript, IOnCast
-        {
-
-            public void OnCast()
-            {
-                Unit caster = GetCaster();
-                if (caster == null)
-                {
-                    return;
-                }
-
-                Player player = caster.ToPlayer();
-
-                if (caster.ToPlayer())
-                {
-                    Guardian pet = player.GetGuardianPet();
-                    player.AddAura(GetSpellInfo().Id, player);
-
-                    if (pet != null)
-                        player.AddAura(GetSpellInfo().Id, pet);
-                }
-
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_warl_grimoire_of_synergy_SpellScript();
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(HandleTargets, 0, Targets.UnitTargetEnemy));
         }
     }
 
 
     // Grimoire of Synergy - 171975
     [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
-    public class aura_warl_grimoire_of_synergy : AuraScriptLoader
+    public class spell_warl_grimoire_of_synergy_SpellScript : SpellScript, IOnCast
     {
-        public aura_warl_grimoire_of_synergy() : base("spell_warl_grimoire_of_synergy")
-        {
-        }
 
-        public class spell_warl_grimoire_of_synergy_AuraScript : AuraScript
+        public void OnCast()
         {
-            public bool CheckProc(ProcEventInfo eventInfo)
+            Unit caster = GetCaster();
+            if (caster == null)
             {
-                Unit actor = eventInfo.GetActor();
-                if (actor == null)
+                return;
+            }
+
+            Player player = caster.ToPlayer();
+
+            if (caster.ToPlayer())
+            {
+                Guardian pet = player.GetGuardianPet();
+                player.AddAura(GetSpellInfo().Id, player);
+
+                if (pet != null)
+                    player.AddAura(GetSpellInfo().Id, pet);
+            }
+
+        }
+    }
+
+
+    // Grimoire of Synergy - 171975
+    [SpellScript(171975, "spell_warl_grimoire_of_synergy")]
+    public class spell_warl_grimoire_of_synergy_AuraScript : AuraScript
+    {
+        public bool CheckProc(ProcEventInfo eventInfo)
+        {
+            Unit actor = eventInfo.GetActor();
+            if (actor == null)
+            {
+                return false;
+            }
+            if (actor.IsPet() || actor.IsGuardian())
+            {
+                Unit owner = actor.GetOwner();
+                if (owner == null)
                 {
                     return false;
                 }
-                if (actor.IsPet() || actor.IsGuardian())
+                if (RandomHelper.randChance(10))
                 {
-                    Unit owner = actor.GetOwner();
-                    if (owner == null)
-                    {
-                        return false;
-                    }
-                    if (RandomHelper.randChance(10))
-                    {
-                        owner.CastSpell(owner, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
-                    }
-                    return true;
+                    owner.CastSpell(owner, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
                 }
-
-                Player player = actor.ToPlayer();
-
-                if (actor.ToPlayer())
-                {
-                    Guardian guardian = player.GetGuardianPet();
-                    if (guardian == null)
-                    {
-                        return false;
-                    }
-                    if (RandomHelper.randChance(10))
-                    {
-                        player.CastSpell(guardian, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
-                    }
-                    return true;
-                }
-                return false;
+                return true;
             }
 
-            public override void Register()
+            Player player = actor.ToPlayer();
+
+            if (actor.ToPlayer())
             {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
+                Guardian guardian = player.GetGuardianPet();
+                if (guardian == null)
+                {
+                    return false;
+                }
+                if (RandomHelper.randChance(10))
+                {
+                    player.CastSpell(guardian, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
+                }
+                return true;
             }
+            return false;
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: AuraScript* GetAuraScript() const override
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_warl_grimoire_of_synergy_AuraScript();
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
+
+
 
     // 196277 - Implosion
     [SpellScript(SpellIds.IMPLOSION)]
-    public class spell_warl_implosion : SpellScriptLoader
+    public class spell_warl_implosion_SpellScript : SpellScript, IHasSpellEffects
     {
-        public spell_warl_implosion() : base("spell_warl_implosion")
-        {
-        }
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
 
-        public class spell_warl_implosion_SpellScript : SpellScript, IHasSpellEffects
+        public void HandleHit(uint UnnamedParameter)
         {
-            public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-
-            public void HandleHit(uint UnnamedParameter)
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
             {
-                Unit caster = GetCaster();
-                Unit target = GetHitUnit();
-                if (caster == null || target == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                List<Creature> imps = caster.GetCreatureListWithEntryInGrid(55659); // Wild Imps
-                foreach (Creature imp in imps)
+            List<Creature> imps = caster.GetCreatureListWithEntryInGrid(55659); // Wild Imps
+            foreach (Creature imp in imps)
+            {
+                if (imp.ToTempSummon().GetSummoner() == caster)
                 {
-                    if (imp.ToTempSummon().GetSummoner() == caster)
+                    imp.InterruptNonMeleeSpells(false);
+                    imp.VariableStorage.Set("controlled", true);
+                    imp.VariableStorage.Set("ForceUpdateTimers", true);
+                    imp.CastSpell(target, SpellIds.IMPLOSION_JUMP, true);
+                    imp.GetMotionMaster().MoveJump(target, 300.0f, 1.0f, EventId.Jump);
+                    ObjectGuid casterGuid = caster.GetGUID();
+
+                    imp.GetAI().Scheduler.Schedule(TimeSpan.FromMilliseconds(500), task =>
                     {
-                        imp.InterruptNonMeleeSpells(false);
-                        imp.VariableStorage.Set("controlled", true);
-                        imp.VariableStorage.Set("ForceUpdateTimers", true);
-                        imp.CastSpell(target, SpellIds.IMPLOSION_JUMP, true);
-                        imp.GetMotionMaster().MoveJump(target, 300.0f, 1.0f, EventId.Jump);
-                        ObjectGuid casterGuid = caster.GetGUID();
-                       
-                        imp.GetAI().Scheduler.Schedule(TimeSpan.FromMilliseconds(500), task =>
-                        {
-                            imp.CastSpell(imp, SpellIds.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
-                            imp.DisappearAndDie();
-                        });
-                    }
+                        imp.CastSpell(imp, SpellIds.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
+                        imp.DisappearAndDie();
+                    });
                 }
-            }
-
-            public override void Register()
-            {
-                SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
             }
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: SpellScript* GetSpellScript() const override
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_warl_implosion_SpellScript();
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
+
 
 
     public class ImplosionDamageEvent : BasicEvent
@@ -1372,70 +1312,54 @@ namespace Scripts.Spells.Warlock
 
     // Grimoire of Service summons - 111859, 111895, 111896, 111897, 111898
     [SpellScript(new uint[] { 111859, 111895, 111896, 111897, 111898 })]
-    public class spell_warl_grimoire_of_service : SpellScriptLoader
+
+    public class spell_warl_grimoire_of_service_SpellScript : SpellScript, IOnSummon
     {
-        public spell_warl_grimoire_of_service() : base("spell_warl_grimoire_of_service")
+        public enum eServiceSpells
         {
+            SPELL_IMP_SINGE_MAGIC = 89808,
+            SPELL_VOIDWALKER_SUFFERING = 17735,
+            SPELL_SUCCUBUS_SEDUCTION = 6358,
+            SPELL_FELHUNTER_SPELL_LOCK = 19647,
+            SPELL_FELGUARD_AXE_TOSS = 89766
         }
 
-        public override bool IsDatabaseBound()
+        public override bool Validate(SpellInfo UnnamedParameter)
         {
-            return false;
+            return SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, Difficulty.None) != null ||
+                    SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, Difficulty.None) != null ||
+                    SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, Difficulty.None) != null ||
+                    SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, Difficulty.None) != null ||
+                    SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, Difficulty.None) != null;
         }
 
-        public class spell_warl_grimoire_of_service_SpellScript : SpellScript, IOnSummon
+        public void HandleSummon(Creature creature)
         {
-            public enum eServiceSpells
+            Unit caster = GetCaster();
+            Unit target = GetExplTargetUnit();
+            if (caster == null || creature == null || target == null)
             {
-                SPELL_IMP_SINGE_MAGIC = 89808,
-                SPELL_VOIDWALKER_SUFFERING = 17735,
-                SPELL_SUCCUBUS_SEDUCTION = 6358,
-                SPELL_FELHUNTER_SPELL_LOCK = 19647,
-                SPELL_FELGUARD_AXE_TOSS = 89766
+                return;
             }
 
-            public override bool Validate(SpellInfo UnnamedParameter)
+            switch (GetSpellInfo().Id)
             {
-                return SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, Difficulty.None) != null ||
-                        SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, Difficulty.None) != null ||
-                        SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, Difficulty.None) != null ||
-                        SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, Difficulty.None) != null ||
-                        SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, Difficulty.None) != null;
+                case SpellIds.GRIMOIRE_IMP: // Imp
+                    creature.CastSpell(caster, (uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, true);
+                    break;
+                case SpellIds.GRIMOIRE_VOIDWALKER: // Voidwalker
+                    creature.CastSpell(target, (uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, true);
+                    break;
+                case SpellIds.GRIMOIRE_SUCCUBUS: // Succubus
+                    creature.CastSpell(target, (uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, true);
+                    break;
+                case SpellIds.GRIMOIRE_FELHUNTER: // Felhunter
+                    creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, true);
+                    break;
+                case SpellIds.GRIMOIRE_FELGUARD: // Felguard
+                    creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, true);
+                    break;
             }
-
-            public void HandleSummon(Creature creature)
-            {
-                Unit caster = GetCaster();
-                Unit target = GetExplTargetUnit();
-                if (caster == null || creature == null || target == null)
-                {
-                    return;
-                }
-
-                switch (GetSpellInfo().Id)
-                {
-                    case SpellIds.GRIMOIRE_IMP: // Imp
-                        creature.CastSpell(caster, (uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, true);
-                        break;
-                    case SpellIds.GRIMOIRE_VOIDWALKER: // Voidwalker
-                        creature.CastSpell(target, (uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, true);
-                        break;
-                    case SpellIds.GRIMOIRE_SUCCUBUS: // Succubus
-                        creature.CastSpell(target, (uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, true);
-                        break;
-                    case SpellIds.GRIMOIRE_FELHUNTER: // Felhunter
-                        creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, true);
-                        break;
-                    case SpellIds.GRIMOIRE_FELGUARD: // Felguard
-                        creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, true);
-                        break;
-                }
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_warl_grimoire_of_service_SpellScript();
         }
     }
 

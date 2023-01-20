@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
+using Game.Arenas;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Conditions;
@@ -7449,6 +7450,26 @@ namespace Game.Spells
                     }
 
                 }
+                else if (effect is ITargetHookHandler th)
+                {
+                    uint mask = 0;
+                    if (th.EffectIndex == SpellConst.EffectAll || th.EffectIndex == SpellConst.EffectFirstFound)
+                    {
+                        for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                        {
+                            if (th.EffectIndex == SpellConst.EffectFirstFound && mask != 0)
+                                break;
+
+                            if (CheckTargetHookEffect(th, i))
+                                AddSpellEffect(i, script, th);
+                        }
+                    }
+                    else
+                    {
+                        if (CheckTargetHookEffect(th, th.EffectIndex))
+                            AddSpellEffect(th.EffectIndex, script, th);
+                    }
+                }
         }
 
         private bool CheckSpellEffectHandler(ISpellEffectHandler se, uint effIndex)
@@ -7464,6 +7485,59 @@ namespace Game.Spells
                     return false;
 
             return se.EffectName == SpellEffectName.Any || spellEffectInfo.Effect == se.EffectName;
+        }
+
+        public bool CheckTargetHookEffect(ITargetHookHandler th, uint effIndexToCheck)
+        {
+            if (th.TargetType == 0)
+                return false;
+
+            if (m_spellInfo.GetEffects().Count <= effIndexToCheck)
+                return false;
+
+            SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(effIndexToCheck);
+            if (spellEffectInfo.TargetA.GetTarget() != th.TargetType && spellEffectInfo.TargetB.GetTarget() != th.TargetType)
+                return false;
+
+            SpellImplicitTargetInfo targetInfo = new(th.TargetType);
+            switch (targetInfo.GetSelectionCategory())
+            {
+                case SpellTargetSelectionCategories.Channel: // SINGLE
+                    return !th.Area;
+                case SpellTargetSelectionCategories.Nearby: // BOTH
+                    return true;
+                case SpellTargetSelectionCategories.Cone: // AREA
+                case SpellTargetSelectionCategories.Line: // AREA
+                    return th.Area;
+                case SpellTargetSelectionCategories.Area: // AREA
+                    if (targetInfo.GetObjectType() == SpellTargetObjectTypes.UnitAndDest)
+                        return th.Area || th.Dest;
+                    return th.Area;
+                case SpellTargetSelectionCategories.Default:
+                    switch (targetInfo.GetObjectType())
+                    {
+                        case SpellTargetObjectTypes.Src: // EMPTY
+                            return false;
+                        case SpellTargetObjectTypes.Dest: // Dest
+                            return th.Dest;
+                        default:
+                            switch (targetInfo.GetReferenceType())
+                            {
+                                case SpellTargetReferenceTypes.Caster: // SINGLE
+                                    return !th.Area;
+                                case SpellTargetReferenceTypes.Target: // BOTH
+                                    return true;
+                                default:
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return false;
         }
 
 
@@ -7588,7 +7662,8 @@ namespace Game.Spells
             script._PrepareScriptCall(hookType);
 
             if (!script._IsEffectPrevented(effIndex))
-                effect.CallEffect(effIndex);
+                if (effect is ISpellEffectHandler seh)
+                    seh.CallEffect(effIndex);
 
             if (!preventDefault)
                 preventDefault = script._IsDefaultEffectPrevented(effIndex);
@@ -7599,14 +7674,14 @@ namespace Game.Spells
 
         void CallScriptSuccessfulDispel(uint effIndex)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (var script in GetEffectScripts(SpellScriptHookType.EffectSuccessfulDispel, effIndex))
             {
-                script._PrepareScriptCall(SpellScriptHookType.EffectSuccessfulDispel);
+                script.Item1._PrepareScriptCall(SpellScriptHookType.EffectSuccessfulDispel);
 
-                foreach (var hook in GetEffectScripts(SpellScriptHookType.EffectSuccessfulDispel, effIndex))
-                    hook.Item2.CallEffect(effIndex);
+                if (script.Item2 is ISpellEffectHandler seh)
+                    seh.CallEffect(effIndex);
 
-                script._FinishScriptCall();
+                script.Item1._FinishScriptCall();
             }
         }
 
@@ -7655,43 +7730,43 @@ namespace Game.Spells
 
         void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectAreaTargetSelect, effIndex))
             {
-                script._PrepareScriptCall(SpellScriptHookType.ObjectAreaTargetSelect);
+                script.Item1._PrepareScriptCall(SpellScriptHookType.ObjectAreaTargetSelect);
 
-                foreach (var hook in script.OnObjectAreaTargetSelect)
-                    if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                        hook.Call(targets);
+                if (script.Item2 is IObjectAreaTargetSelect oas)
+                    if (targetType.GetTarget() == oas.TargetType)
+                        oas.FilterTargets(targets);
 
-                script._FinishScriptCall();
+                script.Item1._FinishScriptCall();
             }
         }
 
         void CallScriptObjectTargetSelectHandlers(ref WorldObject target, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectTargetSelect, effIndex))
             {
-                script._PrepareScriptCall(SpellScriptHookType.ObjectTargetSelect);
+                script.Item1._PrepareScriptCall(SpellScriptHookType.ObjectTargetSelect);
 
-                foreach (var hook in script.OnObjectTargetSelect)
-                    if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                        hook.Call(ref target);
+                if (script.Item2 is IObjectTargetSelectHandler ots)
+                    if (targetType.GetTarget() == ots.TargetType)
+                        ots.TargetSelect(ref target);
 
-                script._FinishScriptCall();
+                script.Item1._FinishScriptCall();
             }
         }
 
         void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (var script in GetEffectScripts(SpellScriptHookType.DestinationTargetSelect, effIndex))
             {
-                script._PrepareScriptCall(SpellScriptHookType.DestinationTargetSelect);
+                script.Item1._PrepareScriptCall(SpellScriptHookType.DestinationTargetSelect);
 
-                foreach (var hook in script.OnDestinationTargetSelect)
-                    if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                        hook.Call(ref target);
+                if (script.Item2 is IDestinationTargetSelectHandler dts)
+                    if (targetType.GetTarget() == dts.TargetType)
+                        dts.SetDest(ref target);
 
-                script._FinishScriptCall();
+                script.Item1._FinishScriptCall();
             }
         }
 
@@ -7713,18 +7788,20 @@ namespace Game.Spells
             if (m_loadedScripts.Empty())
                 return true;
 
-            foreach (var script in m_loadedScripts)
-            {
-                foreach (var hook in script.OnObjectTargetSelect)
-                    if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                        (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                        return false;
+            var otsTargetEffIndex = GetEffectScripts(SpellScriptHookType.ObjectTargetSelect, effIndex).Count > 0;
+            var otsEffIndexCheck = GetEffectScripts(SpellScriptHookType.ObjectTargetSelect, effIndexToCheck).Count > 0;
 
-                foreach (var hook in script.OnObjectAreaTargetSelect)
-                    if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                        (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                        return false;
-            }
+            var oatsTargetEffIndex = GetEffectScripts(SpellScriptHookType.ObjectAreaTargetSelect, effIndex).Count > 0;
+            var oatsEffIndexCheck = GetEffectScripts(SpellScriptHookType.ObjectAreaTargetSelect, effIndexToCheck).Count > 0;
+
+            if ((otsTargetEffIndex && !otsEffIndexCheck) ||
+                (!otsTargetEffIndex && otsEffIndexCheck))
+                return false;
+
+            if ((oatsTargetEffIndex && !oatsEffIndexCheck) ||
+                (!oatsTargetEffIndex && oatsEffIndexCheck))
+                return false;
+
             return true;
         }
 
@@ -7890,8 +7967,8 @@ namespace Game.Spells
             return _dummySpellEffects;
         }
 
-
-        private void AddSpellEffect(uint index, ISpellScript script, ISpellEffectHandler effect)
+  
+        private void AddSpellEffect(uint index, ISpellScript script, ISpellEffect effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
             {

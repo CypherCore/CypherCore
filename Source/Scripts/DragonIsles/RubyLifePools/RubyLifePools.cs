@@ -1,9 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 
 namespace Scripts.DragonIsles.RubyLifePools
@@ -64,8 +67,9 @@ namespace Scripts.DragonIsles.RubyLifePools
     }
 
     // 395029 - Storm Infusion
-    class spell_ruby_life_pools_storm_infusion : SpellScript
+    class spell_ruby_life_pools_storm_infusion : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SetDest(ref SpellDestination dest)
         {
             dest.RelocateOffset(new Position(9.0f, 0.0f, 4.0f, 0.0f));
@@ -73,7 +77,7 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         public override void Register()
         {
-            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 1, Targets.DestDest));
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 1, Targets.DestDest));
         }
     }
 }

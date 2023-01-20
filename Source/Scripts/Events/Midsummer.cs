@@ -377,8 +377,9 @@ namespace Scripts.Events.Midsummer
     }
 
     [Script] // 45676 - Juggle Torch (Quest, Missed)
-    class spell_midsummer_fling_torch_missed : SpellScript
+    class spell_midsummer_fling_torch_missed : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             // This spell only hits the caster
@@ -387,8 +388,8 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEntry));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitDestAreaEntry));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEntry));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitDestAreaEntry));
         }
     }
 }

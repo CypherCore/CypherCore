@@ -298,8 +298,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 64844 - Divine Hymn
-    class spell_pri_divine_hymn : SpellScript
+    class spell_pri_divine_hymn : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
@@ -322,7 +323,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
         }
     }
 
@@ -846,7 +847,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 1, Targets.UnitDestAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 1, Targets.UnitDestAreaAlly));
             SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 1, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
         }
 
@@ -1132,7 +1133,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
             SpellEffects.Add(new EffectHandler(HandleJump, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
@@ -1432,8 +1433,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 15290 - Vampiric Embrace (heal)
-    class spell_pri_vampiric_embrace_target : SpellScript
+    class spell_pri_vampiric_embrace_target : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> unitList)
         {
             unitList.Remove(GetCaster());
@@ -1441,7 +1443,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaParty));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaParty));
         }
     }
 

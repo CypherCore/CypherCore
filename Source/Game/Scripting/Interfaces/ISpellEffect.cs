@@ -11,26 +11,21 @@ namespace Game.Scripting.Interfaces
     {
         uint EffectIndex { get; }
 
-        void CallEffect(uint effIndex);
+        SpellScriptHookType HookType { get; }
     }
 
     public class SpellEffect : ISpellEffect
     {
-        public delegate void SpellEffectFn(uint index);
-
-        public SpellEffect(SpellEffectFn callEffect, uint effectIndex)
+        public SpellEffect(uint effectIndex, SpellScriptHookType hookType)
         {
             EffectIndex = effectIndex;
-            _callEffect = callEffect;
+            HookType = hookType;
         }
 
         public uint EffectIndex { get; private set;}
 
-        private readonly SpellEffectFn _callEffect;
+        public SpellScriptHookType HookType { get; private set; }
 
-        public void CallEffect(uint effIndex)
-        {
-            _callEffect(EffectIndex);
-        }
+
     }
 }
