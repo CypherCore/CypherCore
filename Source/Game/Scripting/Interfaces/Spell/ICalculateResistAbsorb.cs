@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Game.Entities;
+
+namespace Game.Scripting.Interfaces.Spell
+{
+    public interface ICalculateResistAbsorb
+    {
+        void CalculateResistAbsorb(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
+    }
+}

@@ -7655,12 +7655,11 @@ namespace Game.Spells
 
         public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnResistAbsorbCalculation);
 
-                foreach (var hook in script.OnCalculateResistAbsorb)
-                    hook.Call(damageInfo, ref resistAmount, ref absorbAmount);
+                ((ICalculateResistAbsorb)script).CalculateResistAbsorb(damageInfo, ref resistAmount, ref absorbAmount);
 
                 script._FinishScriptCall();
             }
