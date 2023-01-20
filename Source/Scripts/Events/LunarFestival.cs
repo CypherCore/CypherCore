@@ -5,8 +5,11 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Scripts.Events.LunarFestival
@@ -415,8 +418,9 @@ namespace Scripts.Events.LunarFestival
     }
 
     [Script] // 26374 - Elune's Candle
-    class spell_lunar_festival_elune_candle : SpellScript
+    class spell_lunar_festival_elune_candle : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EluneCandleOmenHead, SpellIds.EluneCandleOmenChest, SpellIds.EluneCandleOmenHandR, SpellIds.EluneCandleOmenHandL, SpellIds.EluneCandleNormal);
@@ -452,7 +456,7 @@ namespace Scripts.Events.LunarFestival
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

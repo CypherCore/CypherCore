@@ -5,8 +5,11 @@ using Framework.Constants;
 using Game;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.DragonIsles
 {
@@ -37,8 +40,9 @@ namespace Scripts.DragonIsles
     }
 
     [Script] // 369728 - Dracthyr Login
-    class spell_dracthyr_login : SpellScript
+    class spell_dracthyr_login : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DracthyrMovieRoom01, SpellIds.DracthyrMovieRoom02, SpellIds.DracthyrMovieRoom03, SpellIds.DracthyrMovieRoom04);
@@ -58,7 +62,7 @@ namespace Scripts.DragonIsles
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.TeleportUnits));
+            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 

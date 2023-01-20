@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -283,8 +284,9 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 208673 - Sigil of Chains
-    class spell_dh_sigil_of_chains : SpellScript
+    class spell_dh_sigil_of_chains : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SigilOfChainsSlow, SpellIds.SigilOfChainsGrip);
@@ -302,7 +304,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

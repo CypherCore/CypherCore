@@ -7,6 +7,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -222,8 +223,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 188443 - Chain Lightning
-    class spell_sha_chain_lightning : SpellScript
+    class spell_sha_chain_lightning : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainLightningEnergize, SpellIds.MaelstromController)
@@ -240,13 +242,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
         }
     }
 
     [Script] // 45297 - Chain Lightning Overload
-    class spell_sha_chain_lightning_overload : SpellScript
+    class spell_sha_chain_lightning_overload : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainLightningOverloadEnergize, SpellIds.MaelstromController)
@@ -263,7 +266,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
         }
     }
 
@@ -477,8 +480,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77478 - Earthquake tick
-    class spell_sha_earthquake_tick : SpellScript, IOnHit
+    class spell_sha_earthquake_tick : SpellScript, IOnHit, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthquakeKnockingDown) && spellInfo.GetEffects().Count > 1;
@@ -511,14 +515,15 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
         }
     }
     
     // 117014 - Elemental Blast
     [Script] // 120588 - Elemental Blast Overload
-    class spell_sha_elemental_blast : SpellScript, IAfterCast
+    class spell_sha_elemental_blast : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint[] BuffSpells = { SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery };
 
         public override bool Validate(SpellInfo spellInfo)
@@ -548,13 +553,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleEnergize, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleEnergize, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
         }
     }
 
     [Script] // 318038 - Flametongue Weapon
-    class spell_sha_flametongue_weapon : SpellScript
+    class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlametongueWeaponEnchant);
@@ -582,7 +588,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -914,8 +920,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 51505 - Lava burst
-    class spell_sha_lava_burst : SpellScript, IAfterCast
+    class spell_sha_lava_burst : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PathOfFlamesTalent, SpellIds.PathOfFlamesSpread, SpellIds.LavaSurge);
@@ -951,20 +958,20 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TriggerMissile));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // 285452 - Lava Burst damage
     [Script] // 285466 - Lava Burst Overload damage
-    class spell_sha_lava_crit_chance : SpellScript
+    class spell_sha_lava_crit_chance : SpellScript, ICalcCritChance
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LavaBurstRank2, SpellIds.FlameShock);
         }
 
-        void CalcCritChance(Unit victim, ref float chance)
+        public void CalcCritChance(Unit victim, ref float critChance)
         {
             Unit caster = GetCaster();
 
@@ -973,12 +980,7 @@ namespace Scripts.Spells.Shaman
 
             if (caster.HasAura(SpellIds.LavaBurstRank2) && victim.HasAura(SpellIds.FlameShock, caster.GetGUID()))
                 if (victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
-                    chance = 100.0f;
-        }
-
-        public override void Register()
-        {
-            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+                    critChance = 100.0f;
         }
     }
 
@@ -1033,8 +1035,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 188196 - Lightning Bolt
-    class spell_sha_lightning_bolt : SpellScript
+    class spell_sha_lightning_bolt : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightningBoltEnergize, SpellIds.MaelstromController)
@@ -1051,13 +1054,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
         }
     }
 
     [Script] // 45284 - Lightning Bolt Overload
-    class spell_sha_lightning_bolt_overload : SpellScript
+    class spell_sha_lightning_bolt_overload : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightningBoltOverloadEnergize, SpellIds.MaelstromController)
@@ -1074,13 +1078,14 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
         }
     }
 
     [Script] // 192223 - Liquid Magma Totem (erupting hit spell)
-    class spell_sha_liquid_magma_totem : SpellScript
+    class spell_sha_liquid_magma_totem : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LiquidMagmaHit);
@@ -1107,7 +1112,7 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleTargetSelect, 0, Targets.UnitDestAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1195,8 +1200,9 @@ namespace Scripts.Spells.Shaman
     // 120588 - Elemental Blast Overload
     // 219271 - Icefury Overload
     [Script] // 285466 - Lava Burst Overload
-    class spell_sha_mastery_elemental_overload_proc : SpellScript
+    class spell_sha_mastery_elemental_overload_proc : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MasteryElementalOverload);
@@ -1211,7 +1217,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(ApplyDamageModifier, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(ApplyDamageModifier, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1230,8 +1236,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 210621 - Path of Flames Spread
-    class spell_sha_path_of_flames_spread : SpellScript
+    class spell_sha_path_of_flames_spread : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlameShock);
@@ -1264,7 +1271,7 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1571,8 +1578,9 @@ namespace Scripts.Spells.Shaman
     }
     
     [Script] // 33757 - Windfury Weapon
-    class spell_sha_windfury_weapon : SpellScript
+    class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.WindfuryEnchantment);
@@ -1594,7 +1602,7 @@ namespace Scripts.Spells.Shaman
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

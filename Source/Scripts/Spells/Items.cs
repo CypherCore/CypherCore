@@ -8,6 +8,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -532,8 +533,9 @@ namespace Scripts.Spells.Items
     [Script("spell_item_gnomish_battle_chicken", SpellIds.BattleChicken)]
     [Script("spell_item_mechanical_dragonling", SpellIds.MechanicalDragonling)]
     [Script("spell_item_mithril_mechanical_dragonling", SpellIds.MithrilMechanicalDragonling)]
-    class spell_item_trigger_spell : SpellScript
+    class spell_item_trigger_spell : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public spell_item_trigger_spell(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
@@ -554,7 +556,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         uint _triggeredSpellId;
@@ -606,8 +608,9 @@ namespace Scripts.Spells.Items
     }
 
     // 37877 - Blessing of Faith
-    class spell_item_blessing_of_faith : SpellScript
+    class spell_item_blessing_of_faith : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessingOfLowerCityDruid, SpellIds.BlessingOfLowerCityPaladin, SpellIds.BlessingOfLowerCityPriest, SpellIds.BlessingOfLowerCityShaman);
@@ -644,7 +647,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -842,8 +845,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]// 24590 - Brittle Armor
-    class spell_item_brittle_armor : SpellScript
+    class spell_item_brittle_armor : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BrittleArmor);
@@ -856,7 +860,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -936,8 +940,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 71563 - Deadly Precision Dummy
-    class spell_item_deadly_precision_dummy : SpellScript
+    class spell_item_deadly_precision_dummy : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeadlyPrecision);
@@ -953,7 +958,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1033,8 +1038,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 47770 - Roll Dice
-    class spell_item_decahedral_dwarven_dice : SpellScript
+    class spell_item_decahedral_dwarven_dice : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             if (!CliDB.BroadcastTextStorage.ContainsKey(TextIds.DecahedralDwarvenDice))
@@ -1059,13 +1065,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 23134 - Goblin Bomb
-    class spell_item_goblin_bomb_dispenser : SpellScript
+    class spell_item_goblin_bomb_dispenser : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.SummonGoblinBomb, SpellIds.MalfunctionExplosion);
@@ -1080,13 +1087,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
     
     [Script] // 46203 - Goblin Weather Machine
-    class spell_item_goblin_weather_machine : SpellScript
+    class spell_item_goblin_weather_machine : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
@@ -1097,7 +1105,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1107,8 +1115,9 @@ namespace Scripts.Spells.Items
     [Script("spell_item_goblin_jumper_cables", 33u, SpellIds.GoblinJumperCablesFail)]
     [Script("spell_item_goblin_jumper_cables_xl", 50u, SpellIds.GoblinJumperCablesXlFail)]
     [Script("spell_item_gnomish_army_knife", 67u, 0u)]
-    class spell_item_defibrillate : SpellScript
+    class spell_item_defibrillate : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public spell_item_defibrillate(uint chance, uint failSpell)
         {
             _chance = chance;
@@ -1134,7 +1143,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect, SpellScriptHookType.EffectHitTarget));
         }
 
         uint _chance;
@@ -1163,8 +1172,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=6522 Deviate Fish
     [Script] // 8063 Deviate Fish
-    class spell_item_deviate_fish : SpellScript
+    class spell_item_deviate_fish : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -1184,7 +1194,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1355,8 +1365,9 @@ namespace Scripts.Spells.Items
     [Script("spell_item_gigantic_feast", TextIds.TextGiganticFeast)]
     [Script("spell_item_small_feast", TextIds.SmallFeast)]
     [Script("spell_item_bountiful_feast", TextIds.BountifulFeast)]
-    class spell_item_feast : SpellScript
+    class spell_item_feast : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint _text;
 
         public spell_item_feast(uint text)
@@ -1377,14 +1388,15 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
     }
     
     // http://www.wowhead.com/item=47499 Flask of the North
     [Script] // 67019 Flask of the North
-    class spell_item_flask_of_the_north : SpellScript
+    class spell_item_flask_of_the_north : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlaskOfTheNorthSp, SpellIds.FlaskOfTheNorthAp, SpellIds.FlaskOfTheNorthStr);
@@ -1431,7 +1443,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1465,8 +1477,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=10645 Gnomish Death Ray
     [Script] // 13280 Gnomish Death Ray
-    class spell_item_gnomish_death_ray : SpellScript
+    class spell_item_gnomish_death_ray : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GnomishDeathRaySelf, SpellIds.GnomishDeathRayTarget);
@@ -1487,7 +1500,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1553,8 +1566,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 23645 - Hourglass Sand
-    class spell_item_hourglass_sand : SpellScript
+    class spell_item_hourglass_sand : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BroodAfflictionBronze);
@@ -1567,7 +1581,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
     
@@ -1602,8 +1616,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=27388 Mr. Pinchy
     [Script] // 33060 Make a Wish
-    class spell_item_make_a_wish : SpellScript
+    class spell_item_make_a_wish : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -1638,7 +1653,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1670,8 +1685,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]// 26465 - Mercurial Shield
-    class spell_item_mercurial_shield : SpellScript
+    class spell_item_mercurial_shield : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MercurialShield);
@@ -1684,14 +1700,15 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // http://www.wowhead.com/item=32686 Mingo's Fortune Giblets
     [Script] // 40802 Mingo's Fortune Generator
-    class spell_item_mingos_fortune_generator : SpellScript
+    class spell_item_mingos_fortune_generator : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint[] CreateFortuneSpells =
         {
             SpellIds.CreateFortune1, SpellIds.CreateFortune2, SpellIds.CreateFortune3, SpellIds.CreateFortune4, SpellIds.CreateFortune5,
@@ -1712,7 +1729,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1750,8 +1767,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=10720 Gnomish Net-o-Matic Projector
     [Script] // 13120 Net-o-Matic
-    class spell_item_net_o_matic : SpellScript
+    class spell_item_net_o_matic : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.NetOMaticTriggered1, SpellIds.NetOMaticTriggered2, SpellIds.NetOMaticTriggered3);
@@ -1775,14 +1793,15 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // http://www.wowhead.com/item=8529 Noggenfogger Elixir
     [Script] // 16589 Noggenfogger Elixir
-    class spell_item_noggenfogger_elixir : SpellScript
+    class spell_item_noggenfogger_elixir : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -1812,7 +1831,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1905,8 +1924,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 17512 - Piccolo of the Flaming Fire
-    class spell_item_piccolo_of_the_flaming_fire : SpellScript
+    class spell_item_piccolo_of_the_flaming_fire : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -1917,7 +1937,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1957,8 +1977,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=6657 Savory Deviate Delight
     [Script] // 8213 Savory Deviate Delight
-    class spell_item_savory_deviate_delight : SpellScript
+    class spell_item_savory_deviate_delight : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -1985,15 +2006,16 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     // 48129 - Scroll of Recall
     // 60320 - Scroll of Recall II
     [Script] // 60321 - Scroll of Recall III
-    class spell_item_scroll_of_recall : SpellScript
+    class spell_item_scroll_of_recall : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -2035,13 +2057,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 23442 - Dimensional Ripper - Everlook
-    class spell_item_dimensional_ripper_everlook : SpellScript
+    class spell_item_dimensional_ripper_everlook : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TransporterMalfunctionFire, SpellIds.EvilTwin);
@@ -2068,13 +2091,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 36941 - Ultrasafe Transporter: Toshley's Station
-    class spell_item_ultrasafe_transporter : SpellScript
+    class spell_item_ultrasafe_transporter : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TransporterMalfunctionSmaller, SpellIds.TransporterMalfunctionBigger, SpellIds.SoulSplitEvil, SpellIds.SoulSplitGood, SpellIds.TransformHorde, SpellIds.TransformAlliance, SpellIds.TransporterMalfunctionChicken, SpellIds.EvilTwin);
@@ -2126,13 +2150,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 36890 - Dimensional Ripper - Area 52
-    class spell_item_dimensional_ripper_area52 : SpellScript
+    class spell_item_dimensional_ripper_area52 : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TransporterMalfunctionBigger, SpellIds.SoulSplitEvil, SpellIds.SoulSplitGood, SpellIds.TransformHorde, SpellIds.TransformAlliance);
@@ -2175,7 +2200,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2312,8 +2337,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=7734 Six Demon Bag
     [Script] // 14537 Six Demon Bag
-    class spell_item_six_demon_bag : SpellScript
+    class spell_item_six_demon_bag : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Frostbolt, SpellIds.Polymorph, SpellIds.SummonFelhoundMinion, SpellIds.Fireball, SpellIds.ChainLightning, SpellIds.EnvelopingWinds);
@@ -2353,7 +2379,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2399,8 +2425,9 @@ namespace Scripts.Spells.Items
 
     // http://www.wowhead.com/item=44012 Underbelly Elixir
     [Script] // 59640 Underbelly Elixir
-    class spell_item_underbelly_elixir : SpellScript
+    class spell_item_underbelly_elixir : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -2429,13 +2456,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 126755 - Wormhole: Pandaria
-    class spell_item_wormhole_pandaria : SpellScript
+    class spell_item_wormhole_pandaria : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint[] WormholeTargetLocations =
         {
             SpellIds.Wormholepandariaisleofreckoning,
@@ -2463,13 +2491,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 47776 - Roll 'dem Bones
-    class spell_item_worn_troll_dice : SpellScript
+    class spell_item_worn_troll_dice : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             if (!CliDB.BroadcastTextStorage.ContainsKey(TextIds.WornTrollDice))
@@ -2496,13 +2525,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_red_rider_air_rifle : SpellScript
+    class spell_item_red_rider_air_rifle : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.AirRifleHoldVisual, SpellIds.AirRifleShoot, SpellIds.AirRifleShootSelf);
@@ -2529,13 +2559,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_book_of_glyph_mastery : SpellScript, ICheckCastHander
+    class spell_item_book_of_glyph_mastery : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -2565,7 +2596,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2603,8 +2634,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_vanquished_clutches : SpellScript
+    class spell_item_vanquished_clutches : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
@@ -2619,13 +2651,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script]
-    class spell_item_ashbringer : SpellScript
+    class spell_item_ashbringer : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -2646,7 +2679,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(OnDummyEffect, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(OnDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -2687,8 +2720,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_purify_helboar_meat : SpellScript
+    class spell_item_purify_helboar_meat : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -2707,13 +2741,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_nigh_invulnerability : SpellScript
+    class spell_item_nigh_invulnerability : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.NighInvulnerability, SpellIds.CompleteVulnerability);
@@ -2734,13 +2769,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_poultryizer : SpellScript
+    class spell_item_poultryizer : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.PoultryizerSuccess, SpellIds.PoultryizerBackfire);
@@ -2754,13 +2790,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_socrethars_stone : SpellScript
+    class spell_item_socrethars_stone : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return (GetCaster().GetAreaId() == 3900 || GetCaster().GetAreaId() == 3742);
@@ -2789,13 +2826,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_demon_broiled_surprise : SpellScript, ICheckCastHander
+    class spell_item_demon_broiled_surprise : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return Global.ObjectMgr.GetCreatureTemplate(CreatureIds.AbyssalFlamebringer) != null
@@ -2829,13 +2867,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_complete_raptor_capture : SpellScript
+    class spell_item_complete_raptor_capture : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.RaptorCaptureCredit);
@@ -2855,13 +2894,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_impale_leviroth : SpellScript
+    class spell_item_impale_leviroth : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(CreatureIds.Leviroth) == null)
@@ -2882,13 +2922,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 23725 - Gift of Life
-    class spell_item_lifegiving_gem : SpellScript
+    class spell_item_lifegiving_gem : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GiftOfLife1, SpellIds.GiftOfLife2);
@@ -2903,13 +2944,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
     
     [Script]
-    class spell_item_nitro_boosts : SpellScript
+    class spell_item_nitro_boosts : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             if (!GetCastItem())
@@ -2934,7 +2976,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2975,8 +3017,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_rocket_boots : SpellScript, ICheckCastHander
+    class spell_item_rocket_boots : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -3008,13 +3051,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 67489 - Runic Healing Injector
-    class spell_item_runic_healing_injector : SpellScript
+    class spell_item_runic_healing_injector : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().IsPlayer();
@@ -3030,13 +3074,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal));
+            SpellEffects.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_pygmy_oil : SpellScript
+    class spell_item_pygmy_oil : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.PygmyOilPygmyAura, SpellIds.PygmyOilSmallerAura);
@@ -3063,13 +3108,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_unusual_compass : SpellScript
+    class spell_item_unusual_compass : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -3078,13 +3124,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_chicken_cover : SpellScript
+    class spell_item_chicken_cover : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
@@ -3113,13 +3160,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_muisek_vessel : SpellScript
+    class spell_item_muisek_vessel : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDummy(uint effIndex)
         {
             Creature target = GetHitCreature();
@@ -3130,13 +3178,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_greatmothers_soulcatcher : SpellScript
+    class spell_item_greatmothers_soulcatcher : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDummy(uint effIndex)
         {
             if (GetHitUnit())
@@ -3145,7 +3194,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3280,8 +3329,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    class spell_item_toy_train_set_pulse : SpellScript
+    class spell_item_toy_train_set_pulse : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDummy(uint index)
         {
             Player target = GetHitUnit().ToPlayer();
@@ -3301,7 +3351,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
         }
     }
@@ -3487,8 +3537,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 51640 - Taunt Flag Targeting
-    class spell_item_taunt_flag_targeting : SpellScript
+    class spell_item_taunt_flag_targeting : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return CliDB.BroadcastTextStorage.ContainsKey(TextIds.EmotePlantsFlag) && ValidateSpellInfo(SpellIds.TauntFlag);
@@ -3519,13 +3570,14 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.CorpseSrcAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 29830 - Mirren's Drinking Hat
-    class spell_item_mirrens_drinking_hat : SpellScript
+    class spell_item_mirrens_drinking_hat : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleScriptEffect(uint effIndex)
         {
             uint spellId = 0;
@@ -3553,13 +3605,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 13180 - Gnomish Mind Control Cap
-    class spell_item_mind_control_cap_SpellScript : SpellScript
+    class spell_item_mind_control_cap_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             if (!GetCastItem())
@@ -3587,13 +3640,14 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 8344 - Universal Remote (Gnomish Universal Remote)
-    class spell_item_universal_remote_SpellScript : SpellScript
+    class spell_item_universal_remote_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             if (!GetCastItem())
@@ -3623,7 +3677,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3940,8 +3994,9 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 21149 - Egg Nog
-    class spell_item_eggnog : SpellScript
+    class spell_item_eggnog : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EggNogReindeer, SpellIds.EggNogSnowman);
@@ -3955,7 +4010,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate));
+            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

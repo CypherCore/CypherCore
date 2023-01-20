@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Movement;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -87,8 +88,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 121536 - Angelic Feather talent
-    class spell_pri_angelic_feather_trigger : SpellScript
+    class spell_pri_angelic_feather_trigger : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AngelicFeatherAreatrigger);
@@ -114,7 +116,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -579,8 +581,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 92833 - Leap of Faith
-    class spell_pri_leap_of_faith_effect_trigger : SpellScript
+    class spell_pri_leap_of_faith_effect_trigger : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LeapOfFaithEffect);
@@ -598,13 +601,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 1706 - Levitate
-    class spell_pri_levitate : SpellScript
+    class spell_pri_levitate : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LevitateEffect);
@@ -617,7 +621,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -642,8 +646,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47540 - Penance
-    class spell_pri_penance : SpellScript, ICheckCastHander
+    class spell_pri_penance : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing);
@@ -682,7 +687,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -737,8 +742,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47666 - Penance (Damage)
-    class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript
+    class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
@@ -761,13 +767,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
         }
     }
 
     [Script] // 47750 - Penance (Healing)
-    class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript
+    class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
@@ -790,13 +797,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Heal));
+            SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Heal, SpellScriptHookType.LaunchTarget));
         }
     }
     
     [Script] // 194509 - Power Word: Radiance
-    class spell_pri_power_word_radiance : SpellScript
+    class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity) && spellInfo.GetEffects().Count > 3;
@@ -839,7 +847,7 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 1, Targets.UnitDestAreaAlly));
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 1, SpellEffectName.Heal));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 1, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
         }
 
         Tuple<bool, bool> MakeSortTuple(WorldObject obj)
@@ -967,8 +975,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 129250 - Power Word: Solace
-    class spell_pri_power_word_solace : SpellScript
+    class spell_pri_power_word_solace : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PowerWordSolaceEnergize);
@@ -983,13 +992,14 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(RestoreMana, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(RestoreMana, 1, SpellEffectName.Dummy, SpellScriptHookType.Launch));
         }
     }
     
     [Script] // 33076 - Prayer of Mending
-    class spell_pri_prayer_of_mending : SpellScript
+    class spell_pri_prayer_of_mending : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         SpellInfo _spellInfoHeal;
         SpellEffectInfo _healEffectDummy;
 
@@ -1017,7 +1027,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1061,8 +1071,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 155793 - prayer of mending (Jump) - SPELL_PRIEST_PRAYER_OF_MENDING_JUMP
-    class spell_pri_prayer_of_mending_jump : SpellScript
+    class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         SpellInfo _spellInfoHeal;
         SpellEffectInfo _healEffectDummy;
 
@@ -1122,13 +1133,14 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
-            OnEffectHitTarget.Add(new EffectHandler(HandleJump, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleJump, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 47536 - Rapture
-    class spell_pri_rapture : SpellScript, IAfterCast
+    class spell_pri_rapture : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         ObjectGuid _raptureTarget;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -1151,7 +1163,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using Game.AI;
 using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces;
 
 namespace Scripts.Spells.Mage
 {
@@ -123,8 +124,9 @@ namespace Scripts.Spells.Mage
 
     // 127140 - Alter Time Active
     [Script] // 342247 - Alter Time Active
-    class spell_mage_alter_time_active : SpellScript
+    class spell_mage_alter_time_active : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AlterTimeAura, SpellIds.ArcaneAlterTimeAura);
@@ -139,13 +141,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(RemoveAlterTimeAura, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(RemoveAlterTimeAura, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 44425 - Arcane Barrage
-    class spell_mage_arcane_barrage : SpellScript, IAfterCast
+    class spell_mage_arcane_barrage : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         ObjectGuid _primaryTarget;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -180,14 +183,15 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
-            OnEffectLaunchTarget.Add(new EffectHandler(MarkPrimaryTarget, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(MarkPrimaryTarget, 1, SpellEffectName.Dummy, SpellScriptHookType.LaunchTarget));
         }
     }
 
     [Script] // 195302 - Arcane Charge
-    class spell_mage_arcane_charge_clear : SpellScript
+    class spell_mage_arcane_charge_clear : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ArcaneCharge);
@@ -200,13 +204,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(RemoveArcaneCharge, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(RemoveArcaneCharge, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 1449 - Arcane Explosion
-    class spell_mage_arcane_explosion : SpellScript
+    class spell_mage_arcane_explosion : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             if (!ValidateSpellInfo(SpellIds.ArcaneMage, SpellIds.Reverberate))
@@ -243,8 +248,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(CheckRequiredAuraForBaselineEnergize, 0, SpellEffectName.Energize));
-            OnEffectHitTarget.Add(new EffectHandler(HandleReverberate, 2, SpellEffectName.Energize));
+            SpellEffects.Add(new EffectHandler(CheckRequiredAuraForBaselineEnergize, 0, SpellEffectName.Energize, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleReverberate, 2, SpellEffectName.Energize, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -308,8 +313,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 190357 - Blizzard (Damage)
-    class spell_mage_blizzard_damage : SpellScript
+    class spell_mage_blizzard_damage : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlizzardSlow);
@@ -322,7 +328,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
     
@@ -346,8 +352,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 86949 - Cauterize
-    class spell_mage_cauterize : SpellScript
+    class spell_mage_cauterize : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void SuppressSpeedBuff(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -355,7 +362,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(SuppressSpeedBuff, 2, SpellEffectName.TriggerSpell));
+            SpellEffects.Add(new EffectHandler(SuppressSpeedBuff, 2, SpellEffectName.TriggerSpell, SpellScriptHookType.Launch));
         }
     }
 
@@ -392,8 +399,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235219 - Cold Snap
-    class spell_mage_cold_snap : SpellScript
+    class spell_mage_cold_snap : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         static uint[] SpellsToReset =
         {
             SpellIds.ConeOfCold,
@@ -416,7 +424,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -449,8 +457,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 153595 - Comet Storm (launch)
-    class spell_mage_comet_storm : SpellScript
+    class spell_mage_comet_storm : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CometStormVisual);
@@ -463,13 +472,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(EffectHit, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(EffectHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 228601 - Comet Storm (damage)
-    class spell_mage_comet_storm_damage : SpellScript
+    class spell_mage_comet_storm_damage : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CometStormDamage);
@@ -482,13 +492,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
     
     [Script] // 120 - Cone of Cold
-    class spell_mage_cone_of_cold : SpellScript
+    class spell_mage_cone_of_cold : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConeOfColdSlow);
@@ -501,13 +512,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 190336 - Conjure Refreshment
-    class spell_mage_conjure_refreshment : SpellScript
+    class spell_mage_conjure_refreshment : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConjureRefreshment, SpellIds.ConjureRefreshmentTable);
@@ -528,7 +540,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -568,24 +580,19 @@ namespace Scripts.Spells.Mage
 
     // 133 - Fireball
     [Script] // 11366 - Pyroblast
-    class spell_mage_firestarter : SpellScript
+    class spell_mage_firestarter : SpellScript, ICalcCritChance
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Firestarter);
         }
 
-        void CalcCritChance(Unit victim, ref float critChance)
+        public void CalcCritChance(Unit victim, ref float critChance)
         {
             AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.Firestarter, 0);
             if (aurEff != null)
                 if (victim.GetHealthPct() >= aurEff.GetAmount())
                     critChance = 100.0f;
-        }
-
-        public override void Register()
-        {
-            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
         }
     }
 
@@ -710,8 +717,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // Ice Lance - 30455
-    class spell_mage_ice_lance : SpellScript
+    class spell_mage_ice_lance : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         List<ObjectGuid> _orderedTargets = new();
 
         public override bool Validate(SpellInfo spellInfo)
@@ -756,14 +764,15 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(IndexTarget, 0, SpellEffectName.ScriptEffect));
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(IndexTarget, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.LaunchTarget));
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 228598 - Ice Lance
-    class spell_mage_ice_lance_damage : SpellScript
+    class spell_mage_ice_lance_damage : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void ApplyDamageMultiplier(uint effIndex)
         {
             SpellValue spellValue = GetSpellValue();
@@ -778,7 +787,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -878,8 +887,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44457 - Living Bomb
-    class spell_mage_living_bomb : SpellScript
+    class spell_mage_living_bomb : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingBombPeriodic);
@@ -893,13 +903,14 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 44461 - Living Bomb
-    class spell_mage_living_bomb_explosion : SpellScript
+    class spell_mage_living_bomb_explosion : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.NeedsExplicitUnitTarget() && ValidateSpellInfo(SpellIds.LivingBombPeriodic);
@@ -919,7 +930,7 @@ namespace Scripts.Spells.Mage
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleSpread, 1, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleSpread, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -949,8 +960,9 @@ namespace Scripts.Spells.Mage
 
     // @todo move out of here and rename - not a mage spell
     [Script] // 32826 - Polymorph (Visual)
-    class spell_mage_polymorph_visual : SpellScript
+    class spell_mage_polymorph_visual : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(PolymorhForms);
@@ -967,7 +979,7 @@ namespace Scripts.Spells.Mage
         public override void Register()
         {
             // add dummy effect spell handler to Polymorph visual
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         const uint NPC_AUROSALIA = 18744;
@@ -1155,8 +1167,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 157980 - Supernova
-    class spell_mage_supernova : SpellScript
+    class spell_mage_supernova : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDamage(uint effIndex)
         {
             if (GetExplTargetUnit() == GetHitUnit())
@@ -1169,7 +1182,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
     

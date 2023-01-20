@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -68,8 +70,9 @@ namespace Scripts.Pets
         }
 
         [Script] // 69735 - Lich Pet OnSummon
-        class spell_gen_lich_pet_onsummon : SpellScript
+        class spell_gen_lich_pet_onsummon : SpellScript, IHasSpellEffects
         {
+            public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
             public override bool Validate(SpellInfo spellInfo)
             {
                 return ValidateSpellInfo(SpellIds.LichPetAura);
@@ -83,13 +86,14 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+                SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
         }
 
         [Script] // 69736 - Lich Pet Aura Remove
-        class spell_gen_lich_pet_aura_remove : SpellScript
+        class spell_gen_lich_pet_aura_remove : SpellScript, IHasSpellEffects
         {
+            public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
             public override bool Validate(SpellInfo spellInfo)
             {
                 return ValidateSpellInfo(SpellIds.LichPetAura);
@@ -102,7 +106,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+                SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
         }
 
@@ -179,8 +183,9 @@ namespace Scripts.Pets
         }
 
         [Script] // 69682 - Lil' K.T. Focus
-        class spell_pet_gen_lich_pet_focus : SpellScript
+        class spell_pet_gen_lich_pet_focus : SpellScript, IHasSpellEffects
         {
+            public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
             public override bool Validate(SpellInfo spellInfo)
             {
                 return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -193,7 +198,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
         }
     }

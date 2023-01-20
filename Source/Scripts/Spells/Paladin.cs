@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
 using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces;
 
 namespace Scripts.Spells.Paladin
 {
@@ -251,8 +252,9 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 115750 - Blinding Light
-    class spell_pal_blinding_light : SpellScript
+    class spell_pal_blinding_light : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlindingLightEffect);
@@ -267,7 +269,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -559,8 +561,9 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 53595 - Hammer of the Righteous
-    class spell_pal_hammer_of_the_righteous : SpellScript
+    class spell_pal_hammer_of_the_righteous : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, SpellIds.HammerOfTheRighteousAoe);
@@ -574,7 +577,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -680,8 +683,9 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 114165 - Holy Prism
-    class spell_pal_holy_prism : SpellScript
+    class spell_pal_holy_prism : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetEnemy, SpellIds.HolyPrismTargetBeamVisual);
@@ -699,14 +703,15 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // 114852 - Holy Prism (Damage)
     [Script] // 114871 - Holy Prism (Heal)
-    class spell_pal_holy_prism_selector : SpellScript
+    class spell_pal_holy_prism_selector : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         List<WorldObject> _sharedTargets = new();
         ObjectGuid _targetGUID;
 
@@ -760,14 +765,15 @@ namespace Scripts.Spells.Paladin
 
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(ShareTargets, 2, Targets.UnitDestAreaEntry));
 
-            OnEffectHitTarget.Add(new EffectHandler(SaveTargetGuid, 0, SpellEffectName.Any));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(SaveTargetGuid, 0, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
     
     [Script] // 20473 - Holy Shock
-    class spell_pal_holy_shock : SpellScript, ICheckCastHander
+    class spell_pal_holy_shock : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, SpellIds.HolyShockDamage);
@@ -809,7 +815,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1109,8 +1115,9 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 85256 - Templar's Verdict
-    class spell_pal_templar_s_verdict : SpellScript
+    class spell_pal_templar_s_verdict : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.TemplarVerdictDamage);
@@ -1123,7 +1130,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -163,8 +164,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 127517 - Army Transform
-    class spell_dk_army_transform : SpellScript, ICheckCastHander
+    class spell_dk_army_transform : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfFoulMenagerie);
@@ -192,7 +194,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -298,8 +300,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 47541 - Death Coil
-    class spell_dk_death_coil : SpellScript
+    class spell_dk_death_coil : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.DeathCoilDamage, SpellIds.Unholy, SpellIds.UnholyVigor);
@@ -316,13 +319,14 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 52751 - Death Gate
-    class spell_dk_death_gate : SpellScript, ICheckCastHander
+    class spell_dk_death_gate : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public SpellCastResult CheckCast()
         {
             if (GetCaster().GetClass() != Class.Deathknight)
@@ -344,13 +348,14 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 49576 - Death Grip Initial
-    class spell_dk_death_grip_initial : SpellScript, ICheckCastHander
+    class spell_dk_death_grip_initial : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathGripDummy, SpellIds.DeathGripJump, SpellIds.Blood, SpellIds.DeathGripTaunt);
@@ -376,7 +381,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -397,8 +402,10 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 49998 - Death Strike
-    class spell_dk_death_strike : SpellScript, IAfterCast
+    class spell_dk_death_strike : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
@@ -436,7 +443,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.Launch));
         }
 
     }
@@ -480,8 +487,9 @@ namespace Scripts.Spells.DeathKnight
     }
     
     [Script] // 85948 - Festering Strike
-    class spell_dk_festering_strike : SpellScript
+    class spell_dk_festering_strike : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FesteringWound);
@@ -494,13 +502,14 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 47496 - Explode, Ghoul spell for Corpse Explosion
-    class spell_dk_ghoul_explode : SpellScript
+    class spell_dk_ghoul_explode : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && spellInfo.GetEffects().Count > 2;
@@ -523,14 +532,15 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.SchoolDamage));
-            OnEffectHitTarget.Add(new EffectHandler(Suicide, 1, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(Suicide, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 69961 - Glyph of Scourge Strike
-    class spell_dk_glyph_of_scourge_strike_script : SpellScript
+    class spell_dk_glyph_of_scourge_strike_script : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleScriptEffect(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -561,7 +571,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
     
@@ -681,8 +691,9 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 46584 - Raise Dead
-    class spell_dk_raise_dead : SpellScript
+    class spell_dk_raise_dead : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RaiseDeadSummon, SpellIds.SludgeBelcher, SpellIds.SludgeBelcherSummon);
@@ -699,7 +710,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

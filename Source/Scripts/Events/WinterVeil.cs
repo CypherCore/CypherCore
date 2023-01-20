@@ -1,9 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 
 namespace Scripts.Events.WinterVeil
@@ -30,8 +33,9 @@ namespace Scripts.Events.WinterVeil
     }
 
     [Script] // 26218 - Mistletoe
-    class spell_winter_veil_mistletoe : SpellScript
+    class spell_winter_veil_mistletoe : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
@@ -49,13 +53,14 @@ namespace Scripts.Events.WinterVeil
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 26275 - PX-238 Winter Wondervolt TRAP
-    class spell_winter_veil_px_238_winter_wondervolt : SpellScript
-    {     
+    class spell_winter_veil_px_238_winter_wondervolt : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         static uint[] spells =
         {
             SpellIds.Px238WinterWondervoltTransform1,
@@ -87,13 +92,14 @@ namespace Scripts.Events.WinterVeil
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script]
-    class spell_item_reindeer_transformation : SpellScript
+    class spell_item_reindeer_transformation : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.FlyingReindeer310, SpellIds.FlyingReindeer280, SpellIds.FlyingReindeer60, SpellIds.Reindeer100, SpellIds.Reindeer60);
@@ -130,7 +136,7 @@ namespace Scripts.Events.WinterVeil
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -132,8 +133,9 @@ namespace Scripts.Spells.Hunter
 
     // 53478 - Last Stand Pet
     [Script]
-    class spell_hun_last_stand_pet : SpellScript
+    class spell_hun_last_stand_pet : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PetLastStandTriggered);
@@ -149,14 +151,15 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // 53271 - Masters Call
     [Script]
-    class spell_hun_masters_call : SpellScript, ICheckCastHander
+    class spell_hun_masters_call : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
@@ -210,8 +213,8 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -263,8 +266,9 @@ namespace Scripts.Spells.Hunter
 
     // 55709 - Pet Heart of the Phoenix
     [Script]
-    class spell_hun_pet_heart_of_the_phoenix : SpellScript
+    class spell_hun_pet_heart_of_the_phoenix : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             if (!GetCaster().IsPet())
@@ -295,7 +299,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -355,8 +359,9 @@ namespace Scripts.Spells.Hunter
 
     // 37506 - Scatter Shot
     [Script]
-    class spell_hun_scatter_shot : SpellScript
+    class spell_hun_scatter_shot : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
@@ -373,7 +378,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -58,8 +59,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 53 - Backstab
-    class spell_rog_backstab : SpellScript
+    class spell_rog_backstab : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffects().Count > 3;
@@ -82,7 +84,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -247,8 +249,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 51690 - Killing Spree
-    class spell_rog_killing_spree_SpellScript : SpellScript
+    class spell_rog_killing_spree_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty() || GetCaster().GetVehicleBase())
@@ -269,7 +272,7 @@ namespace Scripts.Spells.Rogue
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -392,8 +395,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 315508 - Roll the Bones
-    class spell_rog_roll_the_bones : SpellScript
+    class spell_rog_roll_the_bones : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         static uint[] Spells = { SpellIds.SkullAndCrossbones, SpellIds.GrandMelee, SpellIds.RuthlessPrecision, SpellIds.TrueBearing, SpellIds.BuriedTreasure, SpellIds.Broadside };
 
         public override bool Validate(SpellInfo spellInfo)
@@ -438,7 +442,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -526,8 +530,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 185438 - Shadowstrike
-    class spell_rog_shadowstrike : SpellScript, ICheckCastHander
+    class spell_rog_shadowstrike : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PremeditationAura, SpellIds.SliceAndDice, SpellIds.PremeditationPassive)
@@ -569,15 +574,16 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEnergize, 1, SpellEffectName.Energize));
+            SpellEffects.Add(new EffectHandler(HandleEnergize, 1, SpellEffectName.Energize, SpellScriptHookType.EffectHitTarget));
         }
 
         bool _hasPremeditationAura = false;
     }
 
     [Script] // 193315 - Sinister Strike
-    class spell_rog_sinister_strike : SpellScript
+    class spell_rog_sinister_strike : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.T52pSetBonus);
@@ -601,7 +607,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -666,8 +672,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 212283 - Symbols of Death
-    class spell_rog_symbols_of_death : SpellScript
+    class spell_rog_symbols_of_death : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SymbolsOfDeathRank2, SpellIds.SymbolsOfDeathCritAura);
@@ -681,13 +688,14 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 1856 - Vanish - SPELL_ROGUE_VANISH
-    class spell_rog_vanish : SpellScript
+    class spell_rog_vanish : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VanishAura, SpellIds.StealthShapeshiftAura);
@@ -712,7 +720,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell));
+            SpellEffects.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell, SpellScriptHookType.LaunchTarget));
         }
     }
 
@@ -829,8 +837,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 196819 - Eviscerate
-    class spell_rog_eviscerate_SpellScript : SpellScript
+    class spell_rog_eviscerate_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void CalculateDamage(uint effIndex)
         {
             int damagePerCombo = GetHitDamage();
@@ -849,13 +858,14 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 32645 - Envenom
-    class spell_rog_envenom_SpellScript : SpellScript
+    class spell_rog_envenom_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void CalculateDamage(uint effIndex)
         {
             int damagePerCombo = GetHitDamage();
@@ -874,7 +884,7 @@ namespace Scripts.Spells.Rogue
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 

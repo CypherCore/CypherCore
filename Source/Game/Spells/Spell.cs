@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Game.Spells
 {
@@ -7417,10 +7418,54 @@ namespace Game.Spells
                         }
 
                         spellScripts.Add((IBaseSpellScript)script);
+                        RegisterSpellEffectHandler(script);
                     }
                 }
             }
         }
+
+        private void RegisterSpellEffectHandler(SpellScript script)
+        {
+            if (script is IHasSpellEffects hse)
+             foreach (var effect in hse.SpellEffects)
+                if (effect is ISpellEffectHandler se)
+                {
+                    uint mask = 0;
+                    if (se.EffectIndex == SpellConst.EffectAll || se.EffectIndex == SpellConst.EffectFirstFound)
+                    {
+                        for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                        {
+                            if (se.EffectIndex == SpellConst.EffectFirstFound && mask != 0)
+                                break;
+
+                            if (CheckSpellEffectHandler(se, i))
+                                AddSpellEffect(i, script, se);
+                        }
+                    }
+                    else
+                    {
+                        if (CheckSpellEffectHandler(se, se.EffectIndex))
+                            AddSpellEffect(se.EffectIndex, script, se);
+                    }
+
+                }
+        }
+
+        private bool CheckSpellEffectHandler(ISpellEffectHandler se, uint effIndex)
+        {
+            if (m_spellInfo.GetEffects().Count <= effIndex)
+                return false;
+
+            SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(effIndex);
+            if (spellEffectInfo.Effect == 0 && se.EffectName == 0)
+                return true;
+
+                if (spellEffectInfo.Effect == 0)
+                    return false;
+
+            return se.EffectName == SpellEffectName.Any || spellEffectInfo.Effect == se.EffectName;
+        }
+
 
         void CallScriptOnPrecastHandler()
         {
@@ -7502,47 +7547,53 @@ namespace Game.Spells
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
 
-            foreach (var script in m_loadedScripts)
+            switch (mode)
             {
-                script._InitHit();
+                case SpellEffectHandleMode.Launch:
 
-                SpellScriptHookType hookType;
-                List<SpellScript.EffectHandler> effList;
-                switch (mode)
-                {
-                    case SpellEffectHandleMode.Launch:
-                        effList = script.OnEffectLaunch;
-                        hookType = SpellScriptHookType.Launch;
-                        break;
-                    case SpellEffectHandleMode.LaunchTarget:
-                        effList = script.OnEffectLaunchTarget;
-                        hookType = SpellScriptHookType.LaunchTarget;
-                        break;
-                    case SpellEffectHandleMode.Hit:
-                        effList = script.OnEffectHit;
-                        hookType = SpellScriptHookType.EffectHit;
-                        break;
-                    case SpellEffectHandleMode.HitTarget:
-                        effList = script.OnEffectHitTarget;
-                        hookType = SpellScriptHookType.EffectHitTarget;
-                        break;
-                    default:
-                        Cypher.Assert(false);
-                        return false;
-                }
-                script._PrepareScriptCall(hookType);
-                foreach (var eff in effList)
-                {
-                    // effect execution can be prevented
-                    if (!script._IsEffectPrevented(effIndex) && eff.IsEffectAffected(m_spellInfo, effIndex))
-                        eff.Call(effIndex);
-                }
+                    foreach (var script in GetEffectScripts(SpellScriptHookType.Launch, effIndex))
+                        preventDefault = ProcessScript(effIndex, preventDefault, script.Item1, script.Item2, SpellScriptHookType.Launch);
 
-                if (!preventDefault)
-                    preventDefault = script._IsDefaultEffectPrevented(effIndex);
+                    break;
+                case SpellEffectHandleMode.LaunchTarget:
 
-                script._FinishScriptCall();
+                    foreach (var script in GetEffectScripts(SpellScriptHookType.LaunchTarget, effIndex))
+                        preventDefault = ProcessScript(effIndex, preventDefault, script.Item1, script.Item2, SpellScriptHookType.LaunchTarget);
+
+                    break;
+                case SpellEffectHandleMode.Hit:
+
+                    foreach (var script in GetEffectScripts(SpellScriptHookType.Hit, effIndex))
+                        preventDefault = ProcessScript(effIndex, preventDefault, script.Item1, script.Item2, SpellScriptHookType.Hit);
+
+                    break;
+                case SpellEffectHandleMode.HitTarget:
+
+                    foreach (var script in GetEffectScripts(SpellScriptHookType.EffectHitTarget, effIndex))
+                        preventDefault = ProcessScript(effIndex, preventDefault, script.Item1, script.Item2, SpellScriptHookType.EffectHitTarget);
+
+                    break;
+                default:
+                    Cypher.Assert(false);
+                    return false;
             }
+
+            return preventDefault;
+        }
+
+        private static bool ProcessScript(uint effIndex, bool preventDefault, ISpellScript script, ISpellEffect effect, SpellScriptHookType hookType)
+        {
+            script._InitHit();
+
+            script._PrepareScriptCall(hookType);
+
+            if (!script._IsEffectPrevented(effIndex))
+                effect.CallEffect(effIndex);
+
+            if (!preventDefault)
+                preventDefault = script._IsDefaultEffectPrevented(effIndex);
+
+            script._FinishScriptCall();
             return preventDefault;
         }
 
@@ -7552,8 +7603,8 @@ namespace Game.Spells
             {
                 script._PrepareScriptCall(SpellScriptHookType.EffectSuccessfulDispel);
 
-                foreach (var hook in script.OnEffectSuccessfulDispel)
-                    hook.Call(effIndex);
+                foreach (var hook in GetEffectScripts(SpellScriptHookType.EffectSuccessfulDispel, effIndex))
+                    hook.Item2.CallEffect(effIndex);
 
                 script._FinishScriptCall();
             }
@@ -7592,11 +7643,11 @@ namespace Game.Spells
 
         public void CallScriptCalcCritChanceHandlers(Unit victim, ref float critChance)
         {
-            foreach (var loadedScript in m_loadedScripts)
+            foreach (ISpellScript loadedScript in GetSpellScripts<ICalcCritChance>())
             {
                 loadedScript._PrepareScriptCall(SpellScriptHookType.CalcCritChance);
-                foreach (var hook in loadedScript.OnCalcCritChance)
-                    hook.Call(victim, ref critChance);
+       
+                ((ICalcCritChance)loadedScript).CalcCritChance(victim, ref critChance);
 
                 loadedScript._FinishScriptCall();
             }
@@ -7818,15 +7869,46 @@ namespace Game.Spells
 
         List<SpellScript> m_loadedScripts = new();
         readonly Dictionary<Type, List<IBaseSpellScript>> m_spellScriptsByType = new Dictionary<Type, List<IBaseSpellScript>>();
-        static List<IBaseSpellScript> dummy = new();
+        static List<IBaseSpellScript> _dummy = new();
+        static List<(ISpellScript, ISpellEffect)> _dummySpellEffects = new();
+        Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
 
         public List<IBaseSpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
             if (m_spellScriptsByType.TryGetValue(typeof(T), out List<IBaseSpellScript> scripts))
                 return scripts;
 
-            return dummy;
+            return _dummy;
         }
+
+        public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, uint index)
+        {
+            if (_effectHandlers.TryGetValue(index, out var effDict) &&
+                effDict.TryGetValue(h, out List<(ISpellScript, ISpellEffect)> scripts))
+                return scripts;
+
+            return _dummySpellEffects;
+        }
+
+
+        private void AddSpellEffect(uint index, ISpellScript script, ISpellEffectHandler effect)
+        {
+            if (!_effectHandlers.TryGetValue(index, out var effecTypes))
+            {
+                effecTypes = new Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>();
+                _effectHandlers.Add(index, effecTypes);
+            }
+
+            if (!effecTypes.TryGetValue(effect.HookType, out var effects))
+            {
+                effects = new List<(ISpellScript, ISpellEffect)>();
+                effecTypes.Add(effect.HookType, effects);
+            }
+
+            effects.Add((script, effect));
+        }
+
+
 
         public SpellCastResult CheckMovement()
         {

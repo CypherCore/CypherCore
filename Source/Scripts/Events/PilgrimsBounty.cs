@@ -4,6 +4,8 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -128,8 +130,9 @@ namespace Scripts.Events.PilgrimsBounty
      * 61787 - Feast On Pie
      * 61788 - Feast On Stuffing */
     [Script]
-    class spell_pilgrims_bounty_feast_on_SpellScript : SpellScript
+    class spell_pilgrims_bounty_feast_on_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty()
@@ -190,13 +193,14 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 62014 - Turkey Tracker
-    class spell_pilgrims_bounty_turkey_tracker_SpellScript : SpellScript
+    class spell_pilgrims_bounty_turkey_tracker_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.KillCounterVisual, SpellIds.KillCounterVisualMax);
@@ -241,7 +245,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -250,8 +254,9 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_well_fed_stuffing", SpellIds.WellFedHitTrigger)]
     [Script("spell_pilgrims_bounty_well_fed_sweet_potatoes", SpellIds.WellFedHasteTrigger)]
     [Script("spell_pilgrims_bounty_well_fed_pie", SpellIds.WellFedSpiritTrigger)]
-    class spell_pilgrims_bounty_well_fed_SpellScript : SpellScript
+    class spell_pilgrims_bounty_well_fed_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint _triggeredSpellId;
 
         public spell_pilgrims_bounty_well_fed_SpellScript(uint triggeredSpellId)
@@ -298,7 +303,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -307,8 +312,9 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_on_plate_stuffing", SpellIds.OnPlateStuffing, SpellIds.PassTheStuffing, SpellIds.OnPlateVisualStuffing, SpellIds.AServingOfStuffingChair)]
     [Script("spell_pilgrims_bounty_on_plate_sweet_potatoes", SpellIds.OnPlateSweetPotatoes, SpellIds.PassTheSweetPotatoes, SpellIds.OnPlateVisualPotatoes, SpellIds.AServingOfSweetPotatoesChair)]
     [Script("spell_pilgrims_bounty_on_plate_pie", SpellIds.OnPlatePie, SpellIds.PassThePie, SpellIds.OnPlateVisualPie, SpellIds.AServingOfPieChair)]
-    class spell_pilgrims_bounty_on_plate_SpellScript : SpellScript
+    class spell_pilgrims_bounty_on_plate_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint _triggeredSpellId1;
         uint _triggeredSpellId2;
         uint _triggeredSpellId3;
@@ -410,7 +416,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

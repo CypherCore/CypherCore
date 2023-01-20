@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
@@ -53,8 +54,10 @@ namespace Scripts.Events.HallowsEnd
 
 
     [Script] // 24930 - Hallow's End Candy
-    class spell_hallow_end_candy_SpellScript : SpellScript
+    class spell_hallow_end_candy_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+
         uint[] spells =
         {
             SpellIds.CandyOrangeGiant,
@@ -75,7 +78,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.Hit));
         }
     }
 
@@ -107,8 +110,9 @@ namespace Scripts.Events.HallowsEnd
     }
 
     [Script] // 24750 Trick
-    class spell_hallow_end_trick : SpellScript
+    class spell_hallow_end_trick : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
@@ -150,13 +154,14 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 24751 Trick or Treat
-    class spell_hallow_end_trick_or_treat : SpellScript
+    class spell_hallow_end_trick_or_treat : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Trick, SpellIds.Treat, SpellIds.TrickedOrTreated);
@@ -175,13 +180,14 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 44436 - Tricky Treat
-    class spell_hallow_end_tricky_treat : SpellScript
+    class spell_hallow_end_tricky_treat : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.TrickyTreatSpeed, SpellIds.TrickyTreatTrigger, SpellIds.UpsetTummy);
@@ -196,7 +202,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 

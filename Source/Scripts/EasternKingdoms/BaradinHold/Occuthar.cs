@@ -6,6 +6,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -192,8 +193,9 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // Id - 96931 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_SpellScript : SpellScript
+    class spell_occuthar_eyes_of_occuthar_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -220,7 +222,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -497,8 +499,9 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script] // 25042 - Triggerspell - Mark of Nature
-    class spell_mark_of_nature_SpellScript : SpellScript
+    class spell_mark_of_nature_SpellScript : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MarkOfNature, SpellIds.AuraOfNature);
@@ -526,7 +529,7 @@ namespace Scripts.World.EmeraldDragons
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

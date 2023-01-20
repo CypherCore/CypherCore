@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -105,8 +107,9 @@ namespace Scripts.Events.LoveIsInTheAir
     }
 
     [Script] // 26678 - Create Heart Candy
-    class spell_love_is_in_the_air_create_heart_candy : SpellScript
+    class spell_love_is_in_the_air_create_heart_candy : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         uint[] CreateHeartCandySpells =
         {
             SpellIds.CreateHeartCandy1, SpellIds.CreateHeartCandy2, SpellIds.CreateHeartCandy3, SpellIds.CreateHeartCandy4,
@@ -128,13 +131,14 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 70192 - Fragrant Air Analysis
-    class spell_love_is_in_the_air_fragrant_air_analysis : SpellScript
+    class spell_love_is_in_the_air_fragrant_air_analysis : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -147,7 +151,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -238,8 +242,9 @@ namespace Scripts.Events.LoveIsInTheAir
 
     // 71522 - Crown Chemical Co. Supplies
     [Script] // 71539 - Crown Chemical Co. Supplies
-    class spell_love_is_in_the_air_cancel_service_uniform : SpellScript
+    class spell_love_is_in_the_air_cancel_service_uniform : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ServiceUniform);
@@ -252,14 +257,15 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     // 68529 - Perfume Immune
     [Script] // 68530 - Cologne Immune
-    class spell_love_is_in_the_air_perfume_cologne_immune : SpellScript
+    class spell_love_is_in_the_air_perfume_cologne_immune : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), (uint)spellInfo.GetEffect(1).CalcValue());
@@ -272,8 +278,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            OnEffectHit.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
     }
 }

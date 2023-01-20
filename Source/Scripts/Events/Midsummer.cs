@@ -4,6 +4,8 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -91,8 +93,9 @@ namespace Scripts.Events.Midsummer
     }
 
     [Script] // 45907 - Torch Target Picker
-    class spell_midsummer_torch_target_picker : SpellScript
+    class spell_midsummer_torch_target_picker : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TargetIndicatorCosmetic, SpellIds.TargetIndicator);
@@ -107,13 +110,14 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 46054 - Torch Toss (land)
-    class spell_midsummer_torch_toss_land : SpellScript
+    class spell_midsummer_torch_toss_land : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BraziersHit);
@@ -126,7 +130,7 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -190,8 +194,9 @@ namespace Scripts.Events.Midsummer
     }
 
     [Script] // 45819 - Throw Torch
-    class spell_midsummer_juggle_torch : SpellScript
+    class spell_midsummer_juggle_torch : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.JuggleTorchSlow, SpellIds.JuggleTorchMedium, SpellIds.JuggleTorchFast, SpellIds.JuggleTorchSelf,
@@ -237,13 +242,14 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 45644 - Juggle Torch (Catch)
-    class spell_midsummer_torch_catch : SpellScript
+    class spell_midsummer_torch_catch : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GiveTorch);
@@ -261,13 +267,14 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 46747 - Fling torch
-    class spell_midsummer_fling_torch : SpellScript
+    class spell_midsummer_fling_torch : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.FlingTorchShadow);
@@ -282,13 +289,14 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 45669 - Fling Torch
-    class spell_midsummer_fling_torch_triggered : SpellScript
+    class spell_midsummer_fling_torch_triggered : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.JuggleTorchMissed);
@@ -310,13 +318,14 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile));
+            SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 45671 - Juggle Torch (Catch, Quest)
-    class spell_midsummer_fling_torch_catch : SpellScript
+    class spell_midsummer_fling_torch_catch : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.TorchCatchingSuccessAlliance, SpellIds.TorchCatchingSuccessHorde, SpellIds.TorchCatchingRemoveTorches, SpellIds.FlingTorchShadow);
@@ -363,7 +372,7 @@ namespace Scripts.Events.Midsummer
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -1,10 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 
 namespace Scripts.Events.Brewfest
@@ -247,8 +250,9 @@ namespace Scripts.Events.Brewfest
     }
 
     [Script] // 43714 - Brewfest - Relay Race - Intro - Force - Player to throw- DND
-    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
+    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleForceCast(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -259,13 +263,14 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast));
+            SpellEffects.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 43755 - Brewfest - Daily - Relay Race - Player - Increase Mount Duration - DND
-    class spell_brewfest_relay_race_turn_in : SpellScript
+    class spell_brewfest_relay_race_turn_in : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -280,13 +285,14 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 43876 - Dismount Ram
-    class spell_brewfest_dismount_ram : SpellScript
+    class spell_brewfest_dismount_ram : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleScript(uint effIndex)
         {
             GetCaster().RemoveAura(SpellIds.RentalRacingRam);
@@ -294,7 +300,7 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -343,8 +349,9 @@ namespace Scripts.Events.Brewfest
     }
 
     [Script]
-    class spell_item_brewfest_mount_transformation : SpellScript
+    class spell_item_brewfest_mount_transformation : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.MountRam100, SpellIds.MountRam60, SpellIds.MountKodo100, SpellIds.MountKodo60);
@@ -381,7 +388,7 @@ namespace Scripts.Events.Brewfest
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

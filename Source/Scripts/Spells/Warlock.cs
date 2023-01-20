@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -361,8 +362,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 116858 - Chaos Bolt
-    class spell_warl_chaos_bolt : SpellScript
+    class spell_warl_chaos_bolt : SpellScript, IHasSpellEffects, ICalcCritChance
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Load()
         {
             return GetCaster().IsPlayer();
@@ -373,15 +375,14 @@ namespace Scripts.Spells.Warlock
             SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
         }
 
-        void CalcCritChance(Unit victim, ref float critChance)
+        public void CalcCritChance(Unit victim, ref float critChance)
         {
             critChance = 100.0f;
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.SchoolDamage));
-            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -412,8 +413,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 6201 - Create Healthstone
-    class spell_warl_create_healthstone : SpellScript
+    class spell_warl_create_healthstone : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CreateHealthstone);
@@ -431,7 +433,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -499,8 +501,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 67518, 19505 - Devour Magic
-    class spell_warl_devour_magic : SpellScript
+    class spell_warl_devour_magic : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal) && spellInfo.GetEffects().Count > 1;
@@ -523,7 +526,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectSuccessfulDispel.Add(new EffectHandler(OnSuccessfulDispel, 0, SpellEffectName.Dispel));
+            SpellEffects.Add(new EffectHandler(OnSuccessfulDispel, 0, SpellEffectName.Dispel, SpellScriptHookType.EffectSuccessfulDispel));
         }
     }
 
@@ -627,8 +630,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [SpellScript(348)] // 348 - Immolate
-    class spell_warl_immolate : SpellScript
+    class spell_warl_immolate : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ImmolatePeriodic);
@@ -641,13 +645,14 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 6358 - Seduction (Special Ability)
-    class spell_warl_seduction : SpellScript
+    class spell_warl_seduction : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfSuccubus, SpellIds.PriestShadowWordDeath);
@@ -670,7 +675,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ApplyAura));
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -795,8 +800,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 86121 - Soul Swap
-    class spell_warl_soul_swap : SpellScript
+    class spell_warl_soul_swap : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfSoulSwap, SpellIds.SoulSwapCdMarker, SpellIds.SoulSwapOverride);
@@ -810,7 +816,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -829,8 +835,9 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] //! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.
-    class spell_warl_soul_swap_dot_marker : SpellScript
+    class spell_warl_soul_swap_dot_marker : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleHit(uint effIndex)
         {
             Unit swapVictim = GetCaster();
@@ -862,13 +869,14 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [SpellScript(86213)] // 86213 - Soul Swap Exhale
-    class spell_warl_soul_swap_exhale : SpellScript, ICheckCastHander
+    class spell_warl_soul_swap_exhale : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SoulSwapModCost, SpellIds.SoulSwapOverride);
@@ -929,13 +937,14 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(onEffectHit, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(onEffectHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [SpellScript(29858)] // 29858 - Soulshatter
-    class spell_warl_soulshatter : SpellScript
+    class spell_warl_soulshatter : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Soulshatter);
@@ -952,7 +961,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1290,8 +1299,9 @@ namespace Scripts.Spells.Warlock
         {
         }
 
-        public class spell_warl_implosion_SpellScript : SpellScript
+        public class spell_warl_implosion_SpellScript : SpellScript, IHasSpellEffects
         {
+            public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
 
             public void HandleHit(uint UnnamedParameter)
             {
@@ -1325,7 +1335,7 @@ namespace Scripts.Spells.Warlock
 
             public override void Register()
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy));
+                SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
             }
         }
 

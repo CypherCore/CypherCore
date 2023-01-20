@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -54,8 +55,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 23881 - Bloodthirst
-    class spell_warr_bloodthirst : SpellScript
+    class spell_warr_bloodthirst : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BloodthirstHeal);
@@ -68,13 +70,14 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 3, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 3, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // 100 - Charge
-    class spell_warr_charge : SpellScript
+    class spell_warr_charge : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
@@ -91,7 +94,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -120,8 +123,9 @@ namespace Scripts.Spells.Warrior
 
     // 198337 - Charge Effect (dropping Blazing Trail)
     [Script] // 218104 - Charge Effect
-    class spell_warr_charge_effect : SpellScript
+    class spell_warr_charge_effect : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
@@ -138,7 +142,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge));
+            SpellEffects.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge, SpellScriptHookType.LaunchTarget));
         }
     }
 
@@ -159,8 +163,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 6544 Heroic leap
-    class spell_warr_heroic_leap : SpellScript, ICheckCastHander
+    class spell_warr_heroic_leap : SpellScript, ICheckCastHander, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HeroicLeapJump);
@@ -205,13 +210,14 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
     [Script] // Heroic Leap (triggered by Heroic Leap (6544)) - 178368
-    class spell_warr_heroic_leap_jump : SpellScript
+    class spell_warr_heroic_leap_jump : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfHeroicLeap,
@@ -230,7 +236,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(AfterJump, 1, SpellEffectName.JumpDest));
+            SpellEffects.Add(new EffectHandler(AfterJump, 1, SpellEffectName.JumpDest, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -293,8 +299,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 12294 - Mortal Strike 7.1.5
-    class spell_warr_mortal_strike : SpellScript
+    class spell_warr_mortal_strike : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MortalWounds);
@@ -309,13 +316,14 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 97462 - Rallying Cry
-    class spell_warr_rallying_cry : SpellScript
+    class spell_warr_rallying_cry : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RallyingCry);
@@ -336,13 +344,14 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] // 46968 - Shockwave
-    class spell_warr_shockwave : SpellScript, IAfterCast
+    class spell_warr_shockwave : SpellScript, IAfterCast, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             if (!ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun))
@@ -371,15 +380,16 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleStun, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleStun, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         uint _targetCount;
     }
 
     [Script] // 107570 - Storm Bolt
-    class spell_warr_storm_bolt : SpellScript
+    class spell_warr_storm_bolt : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StormBoltStun);
@@ -392,7 +402,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnHit, 1, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

@@ -135,55 +135,10 @@ namespace Game.Scripting
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
-        public delegate void SpellEffectFnType(uint index);
-        public delegate void SpellOnCalcCritChanceFnType(Unit victim, ref float chance);
         public delegate void SpellObjectAreaTargetSelectFnType(List<WorldObject> targets);
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
         public delegate void SpellDestinationTargetSelectFnType(ref SpellDestination dest);
 
-        public class EffectHandler : EffectHook
-        {
-            public EffectHandler(SpellEffectFnType pEffectHandlerScript, uint effIndex, SpellEffectName effName) : base(effIndex)
-            {
-                _pEffectHandlerScript = pEffectHandlerScript;
-                _effName = effName;
-            }
-
-            public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
-            {
-                if (spellEntry.GetEffects().Count <= effIndex)
-                    return false;
-
-                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndex);
-                if (spellEffectInfo.Effect == 0 && _effName == 0)
-                    return true;
-                if (spellEffectInfo.Effect == 0)
-                    return false;
-                return _effName == SpellEffectName.Any || spellEffectInfo.Effect == _effName;
-            }
-
-            public void Call(uint effIndex)
-            {
-                _pEffectHandlerScript(effIndex);
-            }
-
-            SpellEffectName _effName;
-            SpellEffectFnType _pEffectHandlerScript;
-        }
-
-        public class OnCalcCritChanceHandler
-        {
-            public OnCalcCritChanceHandler(SpellOnCalcCritChanceFnType onCalcCritChanceHandlerScript)
-            {
-                _onCalcCritChanceHandlerScript = onCalcCritChanceHandlerScript;
-            }
-            public void Call(Unit victim, ref float critChance)
-            {
-                _onCalcCritChanceHandlerScript(victim, ref critChance);
-            }
-
-            SpellOnCalcCritChanceFnType _onCalcCritChanceHandlerScript;
-        }
 
         public class TargetHook : EffectHook
         {
@@ -304,26 +259,6 @@ namespace Game.Scripting
 
         public override bool _Validate(SpellInfo entry)
         {
-            foreach (var eff in OnEffectLaunch)
-                if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectLaunch` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
-
-            foreach (var eff in OnEffectLaunchTarget)
-                if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectLaunchTarget` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
-
-            foreach (var eff in OnEffectHit)
-                if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectHit` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
-
-            foreach (var eff in OnEffectHitTarget)
-                if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectHitTarget` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
-
-            foreach (var eff in OnEffectSuccessfulDispel)
-                if (eff.GetAffectedEffectsMask(entry) == 0)
-                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectSuccessfulDispel` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
-
             foreach (var eff in OnObjectAreaTargetSelect)
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnObjectAreaTargetSelect` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
@@ -415,18 +350,6 @@ namespace Game.Scripting
         Spell m_spell;
         uint m_hitPreventEffectMask;
         uint m_hitPreventDefaultEffectMask;
-
-
-        // where function is void function(uint effIndex)
-        public List<EffectHandler> OnEffectLaunch = new();
-        public List<EffectHandler> OnEffectLaunchTarget = new();
-        public List<EffectHandler> OnEffectHit = new();
-        public List<EffectHandler> OnEffectHitTarget = new();
-        public List<EffectHandler> OnEffectSuccessfulDispel = new();
-
-
-        // where function is void function(Unit victim, ref float critChance)
-        public List<OnCalcCritChanceHandler> OnCalcCritChance = new();
 
         // where function is void function(List<WorldObject> targets)
         public List<ObjectAreaTargetSelectHandler> OnObjectAreaTargetSelect = new();

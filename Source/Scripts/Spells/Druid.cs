@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
@@ -383,8 +384,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 22568 - Ferocious Bite
-    class spell_dru_ferocious_bite : SpellScript
+    class spell_dru_ferocious_bite : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         float _damageMultiplier = 0.0f;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -424,9 +426,9 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 1, SpellEffectName.PowerBurn));
-            OnEffectHitTarget.Add(new EffectHandler(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn));
-            OnEffectHitTarget.Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 1, SpellEffectName.PowerBurn, SpellScriptHookType.LaunchTarget));
+            SpellEffects.Add(new EffectHandler(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -722,8 +724,9 @@ namespace Scripts.Spells.Druid
     }
     
     [Script] //  8921 - Moonfire
-    class spell_dru_moonfire : SpellScript
+    class spell_dru_moonfire : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MoonfireDamage);
@@ -736,7 +739,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -854,8 +857,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 106839 - Skull Bash
-    class spell_dru_skull_bash : SpellScript
+    class spell_dru_skull_bash : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SkullBashCharge, SpellIds.SkullBashInterrupt);
@@ -869,7 +873,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -890,8 +894,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 50286 - Starfall (Dummy)
-    class spell_dru_starfall_dummy : SpellScript
+    class spell_dru_starfall_dummy : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void FilterTargets(List<WorldObject> targets)
         {
             targets.Resize(2);
@@ -919,13 +924,14 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
     [Script] //  93402 - Sunfire
-    class spell_dru_sunfire : SpellScript
+    class spell_dru_sunfire : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         void HandleOnHit(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SunfireDamage, true);
@@ -933,7 +939,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1177,8 +1183,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 77758 - Thrash
-    class spell_dru_thrash : SpellScript
+    class spell_dru_thrash : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ThrashBearAura);
@@ -1197,7 +1204,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage));
+            SpellEffects.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 

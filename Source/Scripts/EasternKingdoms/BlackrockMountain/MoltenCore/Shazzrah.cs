@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.Spell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -103,8 +105,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
     }
 
     [Script] // 23138 - Gate of Shazzrah
-    class spell_shazzrah_gate_dummy : SpellScript
+    class spell_shazzrah_gate_dummy : SpellScript, IHasSpellEffects
     {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ShazzrahGate);
@@ -135,7 +138,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }
