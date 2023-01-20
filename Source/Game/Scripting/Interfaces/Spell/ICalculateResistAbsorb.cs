@@ -7,7 +7,7 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.Spell
 {
-    public interface ICalculateResistAbsorb
+    public interface ICalculateResistAbsorb : ISpellScript
     {
         void CalculateResistAbsorb(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
     }

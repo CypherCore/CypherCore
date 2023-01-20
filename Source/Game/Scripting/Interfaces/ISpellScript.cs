@@ -10,7 +10,6 @@ namespace Game.Scripting.Interfaces
 {
     public interface ISpellScript : IBaseSpellScript
     {
-        int CalcCastTime(int castTime);
         void CreateItem(uint itemId, ItemContext context);
         void FinishCast(SpellCastResult result, int? param1 = null, int? param2 = null);
         Difficulty GetCastDifficulty();

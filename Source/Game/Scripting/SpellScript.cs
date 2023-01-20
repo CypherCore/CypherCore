@@ -448,9 +448,6 @@ namespace Game.Scripting
         uint m_hitPreventEffectMask;
         uint m_hitPreventDefaultEffectMask;
 
-        // example: int32 CalcCastTime(int32 castTime) override { return 1500; }
-        public virtual int CalcCastTime(int castTime) { return castTime; }
-
 
         // where function is void function(uint effIndex)
         public List<EffectHandler> OnEffectLaunch = new();

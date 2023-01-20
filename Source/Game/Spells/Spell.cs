@@ -7488,10 +7488,10 @@ namespace Game.Spells
 
         int CallScriptCalcCastTimeHandlers(int castTime)
         {
-            foreach (var script in m_loadedScripts)
+            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CalcCastTime);
-                castTime = script.CalcCastTime(castTime);
+                castTime = ((ICalculateCastTime)script).CalcCastTime(castTime);
                 script._FinishScriptCall();
             }
             return castTime;
