@@ -3,7 +3,7 @@
 
 using Game.Entities;
 
-namespace Game.Scripting.Interfaces.Quest
+namespace Game.Scripting.Interfaces.IQuest
 {
     public interface IQuestOnAckAutoAccept : IScriptObject
     {

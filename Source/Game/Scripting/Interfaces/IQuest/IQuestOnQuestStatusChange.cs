@@ -5,7 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting.Interfaces;
 
-namespace Game.Scripting
+namespace Game.Scripting.Interfaces.IQuest
 {
     public interface IQuestOnQuestStatusChange : IScriptObject
     {
