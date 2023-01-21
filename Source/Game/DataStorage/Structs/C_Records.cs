@@ -558,7 +558,7 @@ namespace Game.DataStorage
 
     public sealed class CharBaseInfo
     {
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public byte RaceId { get; set; }
         public byte ClassId { get; set; }
         public int FactionXferId { get; set; }
