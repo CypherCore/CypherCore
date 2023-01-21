@@ -16,7 +16,7 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
-using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces.ISpell;
 using System;
 using System.Collections.Generic;
 using System.Linq;

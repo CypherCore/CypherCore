@@ -12,9 +12,9 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using Game.AI;
-using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting.Interfaces;
-using Game.Scripting.Interfaces.Aura;
+using Game.Scripting.Interfaces.IAura;
 
 namespace Scripts.Spells.Mage
 {

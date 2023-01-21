@@ -10,9 +10,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Framework.Constants;
 using System;
-using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting.Interfaces;
-using Game.Scripting.Interfaces.Aura;
+using Game.Scripting.Interfaces.IAura;
 
 namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 {
