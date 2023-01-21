@@ -13,13 +13,21 @@ using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
 using Game.PvP;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IAreaTriggerEntity;
+using Game.Scripting.Interfaces.IConversation;
+using Game.Scripting.Interfaces.IGroup;
+using Game.Scripting.Interfaces.IGuild;
+using Game.Scripting.Interfaces.IQuest;
+using Game.Scripting.Interfaces.IScene;
+using Game.Scripting.Interfaces.IWorldState;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 
 namespace Game.Scripting
 {
-    public class ScriptObject
+    public class ScriptObject : IScriptObject
     {
         public ScriptObject(string name)
         {
@@ -688,7 +696,7 @@ namespace Game.Scripting
         public virtual void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId) { }
     }
 
-    public class GuildScript : ScriptObject
+    public class GuildScript : ScriptObject, IGuildOnAddMember, IGuildOnBankEvent, IGuildOnCreate, IGuildOnDisband, IGuildOnEvent, IGuildOnInfoChanged, IGuildOnItemMove, IGuildOnMemberDepositMoney, IGuildOnMemberWithDrawMoney, IGuildOnMOTDChanged, IGuildOnRemoveMember
     {
         public GuildScript(string name) : base(name)
         {
@@ -729,7 +737,7 @@ namespace Game.Scripting
         public virtual void OnBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId) { }
     }
 
-    public class GroupScript : ScriptObject
+    public class GroupScript : ScriptObject, IGroupOnAddMember, IGroupOnChangeLeader, IGroupOnDisband, IGroupOnInviteMember, IGroupOnRemoveMember
     {
         public GroupScript(string name) : base(name)
         {
@@ -754,7 +762,7 @@ namespace Game.Scripting
         public virtual void OnDisband(Group group) { }
     }
 
-    public class AreaTriggerEntityScript : ScriptObject
+    public class AreaTriggerEntityScript : ScriptObject, IAreaTriggerEntityGetAI
     {
         public AreaTriggerEntityScript(string name) : base(name)
         {
@@ -767,7 +775,7 @@ namespace Game.Scripting
         public virtual AreaTriggerAI GetAI(AreaTrigger at) { return null; }
     }
 
-    public class ConversationScript : ScriptObject
+    public class ConversationScript : ScriptObject, IConversationOnConversationCreate, IConversationOnConversationLineStarted
     {
         public ConversationScript(string name) : base(name)
         {
@@ -783,7 +791,7 @@ namespace Game.Scripting
         public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
     }
 
-    public class SceneScript : ScriptObject
+    public class SceneScript : ScriptObject, ISceneOnSceneChancel, ISceneOnSceneComplete, ISceneOnSceneStart, ISceneOnSceneTrigger
     {
         public SceneScript(string name) : base(name)
         {
@@ -805,7 +813,7 @@ namespace Game.Scripting
         public virtual void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
     }
 
-    public class QuestScript : ScriptObject
+    public class QuestScript : ScriptObject, IQuestOnAckAutoAccept, IQuestOnQuestObjectiveChange, IQuestOnQuestStatusChange
     {
         public QuestScript(string name) : base(name)
         {
@@ -824,7 +832,7 @@ namespace Game.Scripting
         public virtual void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount) { }
     }
 
-    public class WorldStateScript : ScriptObject
+    public class WorldStateScript : ScriptObject, IWorldStateOnValueChange
     {
         public WorldStateScript(string name) : base(name)
         {

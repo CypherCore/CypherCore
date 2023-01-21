@@ -7,8 +7,8 @@ using Game;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
-using Game.Scripting.Interfaces.Aura;
-using Game.Scripting.Interfaces.Spell;
+using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
 namespace Scripts.Events.Brewfest

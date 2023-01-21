@@ -5,7 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using Game.Scripting.Interfaces.Aura;
+using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
 using System;
 using System.Collections.Generic;

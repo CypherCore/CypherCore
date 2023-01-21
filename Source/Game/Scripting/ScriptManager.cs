@@ -16,6 +16,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.PvP;
 using Game.Spells;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Threading;
 
 namespace Game.Scripting
 {
@@ -363,9 +365,9 @@ namespace Game.Scripting
         //Unloading
         public void Unload()
         {
-            foreach (DictionaryEntry entry in ScriptStorage)
+            foreach (var entry in ScriptStorage)
             {
-                IScriptRegistry scriptRegistry = (IScriptRegistry)entry.Value;
+                ScriptRegistry scriptRegistry = entry.Value;
                 scriptRegistry.Unload();
             }
 
@@ -384,7 +386,7 @@ namespace Game.Scripting
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById(id);
+                var tmpscript = reg.GetScriptById<SpellScriptLoader>(id);
                 if (tmpscript == null)
                     continue;
 
@@ -412,7 +414,7 @@ namespace Game.Scripting
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById(id);
+                var tmpscript = reg.GetScriptById<AuraScriptLoader>(id);
                 if (tmpscript == null)
                     continue;
 
@@ -440,7 +442,7 @@ namespace Game.Scripting
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById(id);
+                var tmpscript = reg.GetScriptById<SpellScriptLoader>(id);
                 if (tmpscript == null)
                     continue;
 
@@ -460,7 +462,7 @@ namespace Game.Scripting
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById(id);
+                var tmpscript = reg.GetScriptById<AuraScriptLoader>(id);
                 if (tmpscript == null)
                     continue;
 
@@ -1171,12 +1173,9 @@ namespace Game.Scripting
         
         public void ForEach<T>(Action<T> a) where T : ScriptObject
         {
-            var reg = GetScriptRegistry<T>();
-            if (reg == null || reg.Empty())
-                return;
-
-            foreach (var script in reg.GetStorage())
-                a.Invoke(script);
+            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+                foreach (T s in scriptReg.GetStorage())
+                    a.Invoke(s);
         }
         public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : ScriptObject
         {
@@ -1184,11 +1183,7 @@ namespace Game.Scripting
         }
         public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : ScriptObject
         {
-            var reg = GetScriptRegistry<T>();
-            if (reg == null || reg.Empty())
-                return ret;
-
-            var script = reg.GetScriptById(id);
+            var script = GetScript<T>(id);
             if (script == null)
                 return ret;
 
@@ -1196,11 +1191,7 @@ namespace Game.Scripting
         }
         public void RunScript<T>(Action<T> a, uint id) where T : ScriptObject
         {
-            var reg = GetScriptRegistry<T>();
-            if (reg == null || reg.Empty())
-                return;
-
-            var script = reg.GetScriptById(id);
+            var script = GetScript<T>(id);
             if (script != null)
                 a.Invoke(script);
         }
@@ -1208,23 +1199,33 @@ namespace Game.Scripting
         {
             Cypher.Assert(script != null);
 
-            if (!ScriptStorage.ContainsKey(typeof(T)))
-                ScriptStorage[typeof(T)] = new ScriptRegistry<T>();
+            if (!ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            {
+                scriptReg = new ScriptRegistry();
+                ScriptStorage[typeof(T)] = scriptReg;
+            }
 
-            GetScriptRegistry<T>().AddScript(script);
+            scriptReg.AddScript(script);
         }
 
-        ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
+        public ScriptRegistry GetScriptRegistry<T>()
         {
-            if (ScriptStorage.ContainsKey(typeof(T)))
-                return (ScriptRegistry<T>)ScriptStorage[typeof(T)];
+            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+                return scriptReg;
+
+            return null;
+        }
+
+        public T GetScript<T>(uint id) where T : ScriptObject
+        {
+            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+                return scriptReg.GetScriptById<T>(id);
 
             return null;
         }
 
         uint _ScriptCount;
-        public Dictionary<uint, SpellSummary> spellSummaryStorage = new();
-        Hashtable ScriptStorage = new();
+        Dictionary<System.Type, ScriptRegistry> ScriptStorage = new();
 
         Dictionary<uint, WaypointPath> _waypointStore = new();
         
@@ -1232,21 +1233,16 @@ namespace Game.Scripting
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
     }
 
-    public interface IScriptRegistry
+    public class ScriptRegistry
     {
-        void Unload();
-    }
-
-    public class ScriptRegistry<TValue> : IScriptRegistry where TValue : ScriptObject
-    {
-        public void AddScript(TValue script)
+        public void AddScript(ScriptObject script)
         {
             Cypher.Assert(script != null);
 
             if (!script.IsDatabaseBound())
             {
                 // We're dealing with a code-only script; just add it.
-                ScriptMap[_scriptIdCounter++] = script;
+                _scriptMap[Interlocked.Increment(ref _scriptIdCounter)] = script;
                 Global.ScriptMgr.IncrementScriptCount();
                 return;
             }
@@ -1258,19 +1254,22 @@ namespace Game.Scripting
             {
                 // Try to find an existing script.
                 bool existing = false;
-                foreach (var it in ScriptMap)
-                {
-                    if (it.Value.GetName() == script.GetName())
+
+                lock (_scriptMap)
+                    foreach (var it in _scriptMap)
                     {
-                        existing = true;
-                        break;
+                        if (it.Value.GetName() == script.GetName())
+                        {
+                            existing = true;
+                            break;
+                        }
                     }
-                }
 
                 // If the script isn't assigned . assign it!
                 if (!existing)
                 {
-                    ScriptMap[id] = script;
+                    lock (_scriptMap)
+                        _scriptMap[id] = script;
                     Global.ScriptMgr.IncrementScriptCount();
                 }
                 else
@@ -1290,36 +1289,34 @@ namespace Game.Scripting
         }
 
         // Gets a script by its ID (assigned by ObjectMgr).
-        public TValue GetScriptById(uint id)
+        public T GetScriptById<T>(uint id) where T : ScriptObject
         {
-            return ScriptMap.LookupByKey(id);
+            lock (_scriptMap)
+                return _scriptMap.LookupByKey(id) as T;
         }
 
         public bool Empty()
         {
-            return ScriptMap.Empty();
+            lock(_scriptMap)
+                return _scriptMap.Empty();
         }
 
-        public List<TValue> GetStorage()
+        public IEnumerable<ScriptObject> GetStorage()
         {
-            return ScriptMap.Values.ToList();
+            return _scriptMap.Values;
         }
 
         public void Unload()
         {
-            ScriptMap.Clear();
+            lock(_scriptMap)
+                _scriptMap.Clear();
         }
 
         // Counter used for code-only scripts.
         uint _scriptIdCounter;
-        Dictionary<uint, TValue> ScriptMap = new();
+        Dictionary<uint, ScriptObject> _scriptMap = new();
     }
 
-    public class SpellSummary
-    {
-        public byte Targets;                                          // set of enum SelectTarget
-        public byte Effects;                                          // set of enum SelectEffect
-    }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
