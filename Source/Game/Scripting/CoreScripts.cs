@@ -14,12 +14,32 @@ using Game.Guilds;
 using Game.Maps;
 using Game.PvP;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IAchievement;
+using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.IAreaTriggerEntity;
+using Game.Scripting.Interfaces.IAuctionHouse;
+using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.IBattlefield;
+using Game.Scripting.Interfaces.IBattleground;
+using Game.Scripting.Interfaces.ICondition;
 using Game.Scripting.Interfaces.IConversation;
+using Game.Scripting.Interfaces.ICreature;
+using Game.Scripting.Interfaces.IDynamicObject;
+using Game.Scripting.Interfaces.IFormula;
+using Game.Scripting.Interfaces.IGameObject;
 using Game.Scripting.Interfaces.IGroup;
 using Game.Scripting.Interfaces.IGuild;
+using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IMap;
+using Game.Scripting.Interfaces.IOutdoorPvP;
 using Game.Scripting.Interfaces.IQuest;
 using Game.Scripting.Interfaces.IScene;
+using Game.Scripting.Interfaces.ISpell;
+using Game.Scripting.Interfaces.ITransport;
+using Game.Scripting.Interfaces.IUnit;
+using Game.Scripting.Interfaces.IVehicle;
+using Game.Scripting.Interfaces.IWeather;
+using Game.Scripting.Interfaces.IWorld;
 using Game.Scripting.Interfaces.IWorldState;
 using Game.Spells;
 using System;
@@ -96,7 +116,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class SpellScriptLoader : ScriptObject
+    public class SpellScriptLoader : ScriptObject, ISpellScriptLoaderGetSpellScript
     {
         public SpellScriptLoader(string name) : base(name)
         {
@@ -109,7 +129,7 @@ namespace Game.Scripting
         public virtual SpellScript GetSpellScript() { return null; }
     }
 
-    public class AuraScriptLoader : ScriptObject
+    public class AuraScriptLoader : ScriptObject, IAuraScriptLoaderGetAuraScript
     {
         public AuraScriptLoader(string name) : base(name)
         {
@@ -122,7 +142,7 @@ namespace Game.Scripting
         public virtual AuraScript GetAuraScript() { return null; }
     }
 
-    public class WorldScript : ScriptObject
+    public class WorldScript : ScriptObject, IWorldOnConfigLoad, IWorldOnMotdChange, IWorldOnOpenStateChange, IWorldOnShutdown, IWorldOnShutdownCancel, IWorldOnShutdownInitiate, IWorldOnStartup, IWorldOnUpdate
     {
         protected WorldScript(string name) : base(name)
         {
@@ -154,7 +174,7 @@ namespace Game.Scripting
         public virtual void OnShutdown() { }
     }
 
-    public class FormulaScript : ScriptObject
+    public class FormulaScript : ScriptObject, IFormulaOnBaseGainCalculation, IFormulaOnColorCodeCaclculation, IFormulaOnGainCalculation, IFormulaOnGrayLevelCalculation, IFormulaOnGroupRateCaclulation, IFormulaOnHonorCalculation, IFormulaOnZeroDifference
     {
         public FormulaScript(string name) : base(name) { }
 
@@ -180,7 +200,7 @@ namespace Game.Scripting
         public virtual void OnGroupRateCalculation(float rate, uint count, bool isRaid) { }
     }
 
-    public class MapScript<T> : ScriptObject where T : Map
+    public class MapScript<T> : ScriptObject, IMapOnCreate<T>, IMapOnDestroy<T>, IMapOnPlayerEnter<T>, IMapOnPlayerLeave<T>, IMapOnUpdate<T> where T : Map
     {
         public MapScript(string name, uint mapId) : base(name)
         {
@@ -221,7 +241,7 @@ namespace Game.Scripting
         }
     }
 
-    public class InstanceMapScript : MapScript<InstanceMap>
+    public class InstanceMapScript : MapScript<InstanceMap>, IInstanceMapGetInstanceScript
     {
         public InstanceMapScript(string name, uint mapId) : base(name, mapId)
         {
@@ -248,7 +268,7 @@ namespace Game.Scripting
         }
     }
 
-    public class ItemScript : ScriptObject
+    public class ItemScript : ScriptObject, IItemOnCastItemCombatSpell, IItemOnExpire, IItemOnQuestAccept, IItemOnRemove, IItemOnUse
     {
         public ItemScript(string name) : base(name)
         {
@@ -273,7 +293,7 @@ namespace Game.Scripting
         public virtual bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item) { return true; }
     }
 
-    public class UnitScript : ScriptObject
+    public class UnitScript : ScriptObject, IUnitModifyMeleeDamage, IUnitModifyPeriodicDamageAurasTick, IUnitModifySpellDamageTaken, IUnitOnDamage, IUnitOnHeal
     {
         public UnitScript(string name) : base(name)
         {
@@ -312,7 +332,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class CreatureScript : ScriptObject
+    public class CreatureScript : ScriptObject, ICreatureGetAI
     {
         public CreatureScript(string name) : base(name)
         {
@@ -343,7 +363,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class GameObjectScript : ScriptObject
+    public class GameObjectScript : ScriptObject, IGameObjectGetAI
     {
         public GameObjectScript(string name) : base(name)
         {
@@ -374,7 +394,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class AreaTriggerScript : ScriptObject
+    public class AreaTriggerScript : ScriptObject, IAreaTriggerOnExit, IAreaTriggerOnTrigger
     {
         public AreaTriggerScript(string name) : base(name)
         {
@@ -390,7 +410,7 @@ namespace Game.Scripting
         public virtual bool OnExit(Player player, AreaTriggerRecord trigger) { return false; }
     }
 
-    public class OnlyOnceAreaTriggerScript : AreaTriggerScript
+    public class OnlyOnceAreaTriggerScript : AreaTriggerScript, IAreaTriggerTryHandleOnlyOnce
     {
         public OnlyOnceAreaTriggerScript(string name) : base(name) { }
 
@@ -422,7 +442,7 @@ namespace Game.Scripting
         }
     }
 
-    public class BattlefieldScript : ScriptObject
+    public class BattlefieldScript : ScriptObject, IBattlefieldGetBattlefield
     {
         public BattlefieldScript(string name) : base(name)
         {
@@ -433,8 +453,8 @@ namespace Game.Scripting
 
         public virtual BattleField GetBattlefield(Map map) { return null; }
     }
-    
-    public class BattlegroundScript : ScriptObject
+
+    public class BattlegroundScript : ScriptObject, IBattlegroundGetBattleground
     {
         public BattlegroundScript(string name) : base(name)
         {
@@ -447,7 +467,7 @@ namespace Game.Scripting
         public virtual Battleground GetBattleground() { return null; }
     }
 
-    public class OutdoorPvPScript : ScriptObject
+    public class OutdoorPvPScript : ScriptObject, IOutdoorPvPGetOutdoorPvP
     {
         public OutdoorPvPScript(string name) : base(name)
         {
@@ -460,7 +480,7 @@ namespace Game.Scripting
         public virtual OutdoorPvP GetOutdoorPvP(Map map) { return null; }
     }
 
-    public class WeatherScript : ScriptObject
+    public class WeatherScript : ScriptObject, IWeatherOnChange, IWeatherOnUpdate
     {
         public WeatherScript(string name) : base(name)
         {
@@ -475,7 +495,7 @@ namespace Game.Scripting
         public virtual void OnUpdate(Weather obj, uint diff) { }
     }
 
-    public class AuctionHouseScript : ScriptObject
+    public class AuctionHouseScript : ScriptObject, IAuctionHouseOnAuctionAdd, IAuctionHouseOnAuctionExpire, IAuctionHouseOnAcutionRemove, IAuctionHouseOnAuctionSuccessful
     {
         public AuctionHouseScript(string name) : base(name)
         {
@@ -495,7 +515,7 @@ namespace Game.Scripting
         public virtual void OnAuctionExpire(AuctionHouseObject ah, AuctionPosting auction) { }
     }
 
-    public class ConditionScript : ScriptObject
+    public class ConditionScript : ScriptObject, IConditionCheck
     {
         public ConditionScript(string name) : base(name)
         {
@@ -508,7 +528,7 @@ namespace Game.Scripting
         public virtual bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo) { return true; }
     }
 
-    public class VehicleScript : ScriptObject
+    public class VehicleScript : ScriptObject, IVehicleOnInstall, IVehicleOnInstallAccessory, IVehicleOnRemovePassenger, IVehicleOnReset, IVehicleOnUninstall
     {
         public VehicleScript(string name) : base(name)
         {
@@ -534,7 +554,7 @@ namespace Game.Scripting
         public virtual void OnRemovePassenger(Vehicle veh, Unit passenger) { }
     }
 
-    public class DynamicObjectScript : ScriptObject
+    public class DynamicObjectScript : ScriptObject, IDynamicObjectOnUpdate
     {
         public DynamicObjectScript(string name) : base(name)
         {
@@ -544,7 +564,7 @@ namespace Game.Scripting
         public virtual void OnUpdate(DynamicObject obj, uint diff) { }
     }
 
-    public class TransportScript : ScriptObject
+    public class TransportScript : ScriptObject, ITransportOnAddCreaturePassenger, ITransportOnAddPassenger, ITransportOnRelocate, ITransportOnRemovePassenger, ITransportOnUpdate
     {
         public TransportScript(string name) : base(name)
         {
@@ -568,7 +588,7 @@ namespace Game.Scripting
         public virtual void OnUpdate(Transport obj, uint diff) { }
     }
 
-    public class AchievementScript : ScriptObject
+    public class AchievementScript : ScriptObject, IAchievementScript
     {
         public AchievementScript(string name) : base(name)
         {
@@ -580,8 +600,8 @@ namespace Game.Scripting
         // Called when an achievement is completed.
         public virtual void OnCompleted(Player player, AchievementRecord achievement) { }
     }
-    
-    public class AchievementCriteriaScript : ScriptObject
+
+    public class AchievementCriteriaScript : ScriptObject, IAchievementCriteriaScript
     {
         public AchievementCriteriaScript(string name) : base(name)
         {
