@@ -457,12 +457,38 @@ namespace Game.AI
                 {
                     if (e.Target.unitGUID.entry != 0 && !IsCreatureValid(e, e.Target.unitGUID.entry))
                         return false;
+
+                    ulong guid = e.Target.unitGUID.dbGuid;
+                    CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
+                    if (data == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature guid {guid} as target_param1, skipped.");
+                        return false;
+                    }
+                    else if (e.Target.unitGUID.entry != 0 && e.Target.unitGUID.entry != data.Id)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature entry {e.Target.unitGUID.entry} (expected {data.Id}) for guid {guid} as target_param1, skipped.");
+                        return false;
+                    }
                     break;
                 }
                 case SmartTargets.GameobjectGuid:
                 {
                     if (e.Target.goGUID.entry != 0 && !IsGameObjectValid(e, e.Target.goGUID.entry))
                         return false;
+
+                    ulong guid = e.Target.goGUID.dbGuid;
+                    GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
+                    if (data == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject guid {guid} as target_param1, skipped.");
+                        return false;
+                    }
+                    else if (e.Target.goGUID.entry != 0 && e.Target.goGUID.entry != data.Id)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject entry {e.Target.goGUID.entry} (expected {data.Id}) for guid {guid} as target_param1, skipped.");
+                        return false;
+                    }
                     break;
                 }
                 case SmartTargets.PlayerDistance:
@@ -1449,6 +1475,32 @@ namespace Game.AI
                 {
                     if (!IsSpellValid(e, e.Action.crossCast.spell))
                         return false;
+
+                    SmartTargets targetType = (SmartTargets)e.Action.crossCast.targetType;
+                    if (targetType == SmartTargets.CreatureGuid || targetType == SmartTargets.GameobjectGuid)
+                    {
+                        if (e.Action.crossCast.targetParam2 != 0)
+                        {
+                            if (targetType == SmartTargets.CreatureGuid && !IsCreatureValid(e, e.Action.crossCast.targetParam2))
+                                return false;
+                            else if (targetType == SmartTargets.GameobjectGuid && !IsGameObjectValid(e, e.Action.crossCast.targetParam2))
+                                return false;
+                        }
+
+                        ulong guid = e.Action.crossCast.targetParam1;
+                        SpawnObjectType spawnType = targetType == SmartTargets.CreatureGuid ? SpawnObjectType.Creature : SpawnObjectType.GameObject;
+                        var data = Global.ObjectMgr.GetSpawnData(spawnType, guid);
+                        if (data == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid CasterTargetType guid ({spawnType},{guid})");
+                            return false;
+                        }
+                        else if (e.Action.crossCast.targetParam2 != 0 && e.Action.crossCast.targetParam2 != data.Id)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid entry {e.Action.crossCast.targetParam2} (expected {data.Id}) for CasterTargetType guid ({spawnType},{guid})");
+                            return false;
+                        }
+                    }
                     break;
                 }
                 case SmartActions.InvokerCast:
