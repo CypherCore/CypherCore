@@ -1295,7 +1295,7 @@ namespace Game.Entities
             if (base.IsNeverVisibleFor(seer))
                 return true;
 
-            if (GetGoType() == GameObjectTypes.SpellFocus && GetGoInfo().SpellFocus.serverOnly == 1)
+            if (GetGoInfo().GetServerOnly() != 0)
                 return true;
 
             if (GetDisplayId() == 0)
