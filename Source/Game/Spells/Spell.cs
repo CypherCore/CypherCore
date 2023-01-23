@@ -2312,7 +2312,7 @@ namespace Game.Spells
 
             // trigger linked auras remove/apply
             // @todo remove/cleanup this, as this table is not documented and people are doing stupid things with it
-            var spellTriggered = Global.SpellMgr.GetSpellLinked((int)m_spellInfo.Id + (int)SpellLinkedType.Hit);
+            var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Hit, m_spellInfo.Id);
             if (spellTriggered != null)
             {
                 foreach (var id in spellTriggered)
@@ -2894,7 +2894,7 @@ namespace Game.Spells
 
             CallScriptAfterCastHandlers();
 
-            var spell_triggered = Global.SpellMgr.GetSpellLinked((int)m_spellInfo.Id);
+            var spell_triggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Cast, m_spellInfo.Id);
             if (spell_triggered != null)
             {
                 foreach (var spellId in spell_triggered)

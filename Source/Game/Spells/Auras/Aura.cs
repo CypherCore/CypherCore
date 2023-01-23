@@ -1238,7 +1238,7 @@ namespace Game.Spells
                 // apply linked auras
                 if (apply)
                 {
-                    var spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);
+                    var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
                     if (spellTriggered != null)
                     {
                         foreach (var spell in spellTriggered)
@@ -1253,7 +1253,7 @@ namespace Game.Spells
                 else
                 {
                     // remove linked auras
-                    var spellTriggered = Global.SpellMgr.GetSpellLinked(-(int)GetId());
+                    var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Remove, GetId());
                     if (spellTriggered != null)
                     {
                         foreach (var spell in spellTriggered)
@@ -1266,7 +1266,7 @@ namespace Game.Spells
                                     .SetOriginalCastId(GetCastId()));
                         }
                     }
-                    spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);
+                    spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
                     if (spellTriggered != null)
                     {
                         foreach (var id in spellTriggered)
@@ -1282,7 +1282,7 @@ namespace Game.Spells
             else if (apply)
             {
                 // modify stack amount of linked auras
-                var spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);
+                var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
                 if (spellTriggered != null)
                 {
                     foreach (var id in spellTriggered)
