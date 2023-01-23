@@ -2097,7 +2097,7 @@ namespace Game
         public void LoadCreatureTemplateAddons()
         {
             var time = Time.GetMSTime();
-            //                                         0      1        2      3           4         5         6            7         8      9          10               11            12
+            //                                         0      1        2      3           4         5         6            7         8      9          10               11            12                      13
             SQLResult result = DB.World.Query("SELECT entry, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
 
             if (result.IsEmpty())
@@ -2130,7 +2130,7 @@ namespace Game
                 creatureAddon.meleeAnimKit = result.Read<ushort>(11);
                 creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(12);
 
-                var tokens = new StringArray(result.Read<string>(10), ' ');
+                var tokens = new StringArray(result.Read<string>(13), ' ');
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
@@ -2173,19 +2173,19 @@ namespace Game
 
                 if (creatureAddon.standState >= (int)UnitStandStateType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.standState = 0;
                 }
 
                 if (creatureAddon.animTier >= (int)AnimTier.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.animTier = 0;
                 }
 
                 if (creatureAddon.sheathState >= (int)SheathState.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.sheathState = 0;
                 }
 
@@ -2230,7 +2230,7 @@ namespace Game
         public void LoadCreatureAddons()
         {
             var time = Time.GetMSTime();
-            //                                         0     1        2      3           4         5         6            7         8      9          10               11            12
+            //                                         0     1        2      3           4         5         6            7         8      9          10               11            12                      13
             SQLResult result = DB.World.Query("SELECT guid, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
 
             if (result.IsEmpty())
@@ -2265,13 +2265,13 @@ namespace Game
                 creatureAddon.visFlags = result.Read<byte>(5);
                 creatureAddon.sheathState = result.Read<byte>(6);
                 creatureAddon.pvpFlags = result.Read<byte>(7);
-                creatureAddon.emote = result.Read<uint>(5);
-                creatureAddon.aiAnimKit = result.Read<ushort>(6);
-                creatureAddon.movementAnimKit = result.Read<ushort>(7);
-                creatureAddon.meleeAnimKit = result.Read<ushort>(8);
-                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
+                creatureAddon.emote = result.Read<uint>(8);
+                creatureAddon.aiAnimKit = result.Read<ushort>(9);
+                creatureAddon.movementAnimKit = result.Read<ushort>(10);
+                creatureAddon.meleeAnimKit = result.Read<ushort>(11);
+                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(12);
 
-                var tokens = new StringArray(result.Read<string>(10), ' ');
+                var tokens = new StringArray(result.Read<string>(13), ' ');
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
