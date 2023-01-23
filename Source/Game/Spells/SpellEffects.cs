@@ -302,6 +302,8 @@ namespace Game.Spells
 
             m_caster.m_Events.AddEventAtOffset(() =>
             {
+                targets.Update(caster); // refresh pointers stored in targets
+
                 // original caster guid only for GO cast
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.SetOriginalCaster(originalCaster);
