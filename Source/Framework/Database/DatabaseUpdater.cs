@@ -24,9 +24,6 @@ namespace Framework.Database
             if (!result.IsEmpty() && !result.IsEmpty())
                 return true;
 
-            if (!DBUpdaterUtil.CheckExecutable())
-                return false;
-
             Log.outInfo(LogFilter.SqlUpdates, $"Database {_database.GetDatabaseName()} is empty, auto populating it...");
 
             string path = GetSourceDirectory();
@@ -71,9 +68,6 @@ namespace Framework.Database
 
         public bool Update()
         {
-            if (!DBUpdaterUtil.CheckExecutable())
-                return false;
-
             Log.outInfo(LogFilter.SqlUpdates, $"Updating {_database.GetDatabaseName()} database...");
 
             string sourceDirectory = GetSourceDirectory();
@@ -464,29 +458,5 @@ namespace Framework.Database
     {
         Apply,
         Rehash
-    }
-
-    static class DBUpdaterUtil
-    {
-        static string mysqlExecutablePath;
-
-        public static string GetMySQLExecutable()
-        {
-            return mysqlExecutablePath;
-        }
-
-        public static bool CheckExecutable()
-        {
-            string mysqlExePath = ConfigMgr.GetDefaultValue("MySQLExecutable", "");
-            if (mysqlExePath.IsEmpty() || !File.Exists(mysqlExePath))
-            {
-                Log.outFatal(LogFilter.SqlUpdates, $"Didn't find any executable MySQL binary at \'{mysqlExePath}\' or in path, correct the path in the *.conf (\"MySQLExecutable\").");
-                return false;
-            }
-
-            // Correct the path to the cli
-            mysqlExecutablePath = mysqlExePath;
-            return true;
-        }
     }
 }
