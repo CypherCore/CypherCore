@@ -408,8 +408,11 @@ namespace Game.Entities
     {
         public uint path_id;
         public uint mount;
-        public uint bytes1;
-        public uint bytes2;
+        public byte standState;
+        public byte animTier;
+        public byte sheathState;
+        public byte pvpFlags;
+        public byte visFlags;
         public uint emote;
         public ushort aiAnimKit;
         public ushort movementAnimKit;

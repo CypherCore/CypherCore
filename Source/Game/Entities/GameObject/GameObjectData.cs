@@ -677,6 +677,15 @@ namespace Game.Entities
             }
         }
 
+        public uint GetServerOnly() => type switch
+        {
+            GameObjectTypes.Generic => Generic.serverOnly,
+            GameObjectTypes.Trap => Trap.serverOnly,
+            GameObjectTypes.SpellFocus => SpellFocus.serverOnly,
+            GameObjectTypes.AuraGenerator => AuraGenerator.serverOnly,
+            _ => 0,
+        };
+        
         public uint GetSpellFocusType()
         {
             switch (type)

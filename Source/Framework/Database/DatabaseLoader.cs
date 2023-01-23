@@ -101,8 +101,8 @@ namespace Framework.Database
             // Create temporary query to use external MySQL CLi
             try
             {
-                using BinaryWriter binaryWriter = new(File.Open(temp, FileMode.Create, FileAccess.Write));
-                binaryWriter.Write($"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                using StreamWriter streamWriter = new(File.Open(temp, FileMode.Create, FileAccess.Write));
+                streamWriter.Write($"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             }
             catch (Exception)
             {
@@ -130,6 +130,9 @@ namespace Framework.Database
         {
             if (_updateFlags == 0)
                 Log.outInfo(LogFilter.SqlUpdates, "Automatic database updates are disabled for all databases!");
+
+            if (_updateFlags != 0 && !DBExecutableUtil.CheckExecutable())
+                return false;
 
             if (!OpenDatabases())
                 return false;

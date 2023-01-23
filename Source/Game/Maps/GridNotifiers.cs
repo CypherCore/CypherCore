@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.Chat;
 using Game.Entities;
@@ -394,8 +395,9 @@ namespace Game.Maps
         float i_distSq;
         Team team;
         Player skipped_receiver;
+        bool required3dDist;
 
-        public MessageDistDeliverer(WorldObject src, T packetSender, float dist, bool own_team_only = false, Player skipped = null)
+        public MessageDistDeliverer(WorldObject src, T packetSender, float dist, bool own_team_only = false, Player skipped = null, bool req3dDist = false)
         {
             i_source = src;
             i_packetSender = packetSender;
@@ -405,6 +407,7 @@ namespace Game.Maps
                 team = src.ToPlayer().GetEffectiveTeam();
 
             skipped_receiver = skipped;
+            required3dDist = req3dDist;
         }
 
         public override void Visit(IList<Player> objs)
@@ -415,7 +418,7 @@ namespace Game.Maps
                 if (!player.InSamePhase(i_phaseShift))
                     continue;
 
-                if (player.GetExactDist2dSq(i_source.GetPosition()) > i_distSq)
+                if ((!required3dDist ? player.GetExactDist2dSq(i_source) : player.GetExactDistSq(i_source)) > i_distSq)
                     continue;
 
                 // Send packet to all who are sharing the player's vision
@@ -439,7 +442,7 @@ namespace Game.Maps
                 if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
-                if (creature.GetExactDist2dSq(i_source.GetPosition()) > i_distSq)
+                if ((!required3dDist ? creature.GetExactDist2dSq(i_source) : creature.GetExactDistSq(i_source)) > i_distSq)
                     continue;
 
                 // Send packet to all who are sharing the creature's vision
@@ -460,7 +463,7 @@ namespace Game.Maps
                 if (!dynamicObject.InSamePhase(i_phaseShift))
                     continue;
 
-                if (dynamicObject.GetExactDist2dSq(i_source.GetPosition()) > i_distSq)
+                if ((!required3dDist ? dynamicObject.GetExactDist2dSq(i_source) : dynamicObject.GetExactDistSq(i_source)) > i_distSq)
                     continue;
 
                 // Send packet back to the caster if the caster has vision of dynamic object

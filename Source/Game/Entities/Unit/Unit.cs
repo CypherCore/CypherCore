@@ -127,6 +127,8 @@ namespace Game.Entities
 
             _UpdateSpells(diff);
 
+            base.Update(diff);
+
             // If this is set during update SetCantProc(false) call is missing somewhere in the code
             // Having this would prevent spells from being proced, so let's crash
             Cypher.Assert(m_procDeep == 0);

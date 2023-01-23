@@ -39,10 +39,10 @@ namespace Framework.Constants
 
     public enum SpellLinkedType
     {
-        Cast = 0,            // +: cast; -: remove
-        Hit = 1 * 200000,
-        Aura = 2 * 200000,   // +: aura; -: immune
-        Remove = 0
+        Cast = 0,   // +: cast; -: remove
+        Hit = 1,
+        Aura = 2,   // +: aura; -: immune
+        Remove = 3
     }
 
     //Spell targets used by SelectSpell

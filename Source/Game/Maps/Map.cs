@@ -1474,7 +1474,7 @@ namespace Game.Maps
             }
         }
 
-        public virtual void UnloadAll()
+        public void UnloadAll()
         {
             // clear all delayed moves, useless anyway do this moves before map unload.
             creaturesToMove.Clear();
