@@ -2352,64 +2352,50 @@ namespace Game.Entities
 
         public bool LoadCreaturesAddon()
         {
-            CreatureAddon cainfo = GetCreatureAddon();
-            if (cainfo == null)
+            CreatureAddon creatureAddon = GetCreatureAddon();
+            if (creatureAddon == null)
                 return false;
 
-            if (cainfo.mount != 0)
-                Mount(cainfo.mount);
+            if (creatureAddon.mount != 0)
+                Mount(creatureAddon.mount);
 
-            if (cainfo.bytes1 != 0)
-            {
-                // 0 StandState
-                // 1 FreeTalentPoints   Pet only, so always 0 for default creature
-                // 2 StandFlags
-                // 3 StandMiscFlags
+            SetStandState((UnitStandStateType)creatureAddon.standState);
+            ReplaceAllVisFlags((UnitVisFlags)creatureAddon.visFlags);
+            SetAnimTier((AnimTier)creatureAddon.animTier, false);
 
-                SetStandState((UnitStandStateType)(cainfo.bytes1 & 0xFF));
-                ReplaceAllVisFlags((UnitVisFlags)((cainfo.bytes1 >> 16) & 0xFF));
-                SetAnimTier((AnimTier)((cainfo.bytes1 >> 24) & 0xFF), false);
+            //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
+            //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
+            //! Check using InhabitType as movement flags are assigned dynamically
+            //! basing on whether the creature is in air or not
+            //! Set MovementFlag_Hover. Otherwise do nothing.
+            if (CanHover())
+                AddUnitMovementFlag(MovementFlag.Hover);
 
-                //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
-                //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
-                //! Check using InhabitType as movement flags are assigned dynamically
-                //! basing on whether the creature is in air or not
-                //! Set MovementFlag_Hover. Otherwise do nothing.
-                if (CanHover())
-                    AddUnitMovementFlag(MovementFlag.Hover);
-            }
+            SetSheath((SheathState)creatureAddon.sheathState);
+            ReplaceAllPvpFlags((UnitPVPStateFlags)creatureAddon.pvpFlags);
 
-            if (cainfo.bytes2 != 0)
-            {
-                // 0 SheathState
-                // 1 PvpFlags
-                // 2 PetFlags           Pet only, so always 0 for default creature
-                // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
+            // These fields must only be handled by core internals and must not be modified via scripts/DB dat
+            ReplaceAllPetFlags(UnitPetFlags.None);
+            SetShapeshiftForm(ShapeShiftForm.None);
 
-                SetSheath((SheathState)(cainfo.bytes2 & 0xFF));
-                ReplaceAllPvpFlags((UnitPVPStateFlags)((cainfo.bytes2 >> 8) & 0xFF));
-                ReplaceAllPetFlags(UnitPetFlags.None);
-                SetShapeshiftForm(ShapeShiftForm.None);
-            }
+            if (creatureAddon.emote != 0)
+                SetEmoteState((Emote)creatureAddon.emote);
 
-            if (cainfo.emote != 0)
-                SetEmoteState((Emote)cainfo.emote);
-
-            SetAIAnimKitId(cainfo.aiAnimKit);
-            SetMovementAnimKitId(cainfo.movementAnimKit);
-            SetMeleeAnimKitId(cainfo.meleeAnimKit);
+            SetAIAnimKitId(creatureAddon.aiAnimKit);
+            SetMovementAnimKitId(creatureAddon.movementAnimKit);
+            SetMeleeAnimKitId(creatureAddon.meleeAnimKit);
 
             // Check if visibility distance different
-            if (cainfo.visibilityDistanceType != VisibilityDistanceType.Normal)
-                SetVisibilityDistanceOverride(cainfo.visibilityDistanceType);
+            if (creatureAddon.visibilityDistanceType != VisibilityDistanceType.Normal)
+                SetVisibilityDistanceOverride(creatureAddon.visibilityDistanceType);
 
             //Load Path
-            if (cainfo.path_id != 0)
-                _waypointPathId = cainfo.path_id;
+            if (creatureAddon.path_id != 0)
+                _waypointPathId = creatureAddon.path_id;
 
-            if (cainfo.auras != null)
+            if (creatureAddon.auras != null)
             {
-                foreach (var id in cainfo.auras)
+                foreach (var id in creatureAddon.auras)
                 {
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(id, GetMap().GetDifficultyID());
                     if (AdditionalSpellInfo == null)
