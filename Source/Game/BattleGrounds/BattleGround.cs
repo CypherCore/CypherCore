@@ -54,7 +54,14 @@ namespace Game.BattleGrounds
             Global.BattlegroundMgr.RemoveBattleground(GetTypeID(), GetInstanceID());
             // unload map
             if (m_Map)
-                m_Map.SetUnload();
+            {
+                m_Map.UnloadAll(); // unload all objects (they may hold a reference to bg in their ZoneScript pointer)
+                m_Map.SetUnload(); // mark for deletion by MapManager
+
+                //unlink to prevent crash, always unlink all pointer reference before destruction
+                m_Map.SetBG(null);
+                m_Map = null;
+            }
 
             // remove from bg free slot queue
             RemoveFromBGFreeSlotQueue();
