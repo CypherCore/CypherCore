@@ -12,6 +12,9 @@ using Game.Groups;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
+using Game.Scripting.Interfaces.IWorldState;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -63,12 +66,12 @@ namespace Game.Maps
             Global.OutdoorPvPMgr.CreateOutdoorPvPForMap(this);
             Global.BattleFieldMgr.CreateBattlefieldsForMap(this);
 
-            Global.ScriptMgr.OnCreateMap(this);
+            OnCreateMap(this);
         }
 
         public void Dispose()
         {
-            Global.ScriptMgr.OnDestroyMap(this);
+            OnDestroyMap(this);
 
             // Delete all waiting spawns
             // This doesn't delete from database.
@@ -90,6 +93,83 @@ namespace Game.Maps
 
             Global.MMapMgr.UnloadMapInstance(GetId(), i_InstanceId);
         }
+        #region Script Updates
+        //MapScript
+        public static void OnCreateMap(Map map)
+        {
+            Cypher.Assert(map != null);
+            var record = map.GetEntry();
+
+            if (record != null && record.IsWorldMap())
+                Global.ScriptMgr.ForEach<IMapOnCreate<Map>>(p => p.OnCreate(map));
+
+            if (record != null && record.IsDungeon())
+                Global.ScriptMgr.ForEach<IMapOnCreate<InstanceMap>>(p => p.OnCreate(map.ToInstanceMap()));
+
+            if (record != null && record.IsBattleground())
+                Global.ScriptMgr.ForEach<IMapOnCreate<BattlegroundMap>>(p => p.OnCreate(map.ToBattlegroundMap()));
+        }
+        public static void OnDestroyMap(Map map)
+        {
+            Cypher.Assert(map != null);
+            var record = map.GetEntry();
+
+            if (record != null && record.IsWorldMap())
+                Global.ScriptMgr.ForEach<IMapOnDestroy<Map>>(p => p.OnDestroy(map));
+
+            if (record != null && record.IsDungeon())
+                Global.ScriptMgr.ForEach<IMapOnDestroy<InstanceMap>>(p => p.OnDestroy(map.ToInstanceMap()));
+
+            if (record != null && record.IsBattleground())
+                Global.ScriptMgr.ForEach<IMapOnDestroy<BattlegroundMap>>(p => p.OnDestroy(map.ToBattlegroundMap()));
+        }
+        public static void OnPlayerEnterMap(Map map, Player player)
+        {
+            Cypher.Assert(map != null);
+            Cypher.Assert(player != null);
+
+            Global.ScriptMgr.ForEach<PlayerScript>(p => p.OnMapChanged(player));
+
+            var record = map.GetEntry();
+
+            if (record != null && record.IsWorldMap())
+                Global.ScriptMgr.ForEach<IMapOnPlayerEnter<Map>>(p => p.OnPlayerEnter(map, player));
+
+            if (record != null && record.IsDungeon())
+                Global.ScriptMgr.ForEach<IMapOnPlayerEnter<InstanceMap>>(p => p.OnPlayerEnter(map.ToInstanceMap(), player));
+
+            if (record != null && record.IsBattleground())
+                Global.ScriptMgr.ForEach<IMapOnPlayerEnter<BattlegroundMap>>(p => p.OnPlayerEnter(map.ToBattlegroundMap(), player));
+        }
+        public static void OnPlayerLeaveMap(Map map, Player player)
+        {
+            Cypher.Assert(map != null);
+            var record = map.GetEntry();
+
+            if (record != null && record.IsWorldMap())
+                Global.ScriptMgr.ForEach<IMapOnPlayerLeave<Map>>(p => p.OnPlayerLeave(map, player));
+
+            if (record != null && record.IsDungeon())
+                Global.ScriptMgr.ForEach<IMapOnPlayerLeave<InstanceMap>>(p => p.OnPlayerLeave(map.ToInstanceMap(), player));
+
+            if (record != null && record.IsBattleground())
+                Global.ScriptMgr.ForEach<IMapOnPlayerLeave<BattlegroundMap>>(p => p.OnPlayerLeave(map.ToBattlegroundMap(), player));
+        }
+        public static void OnMapUpdate(Map map, uint diff)
+        {
+            Cypher.Assert(map != null);
+            var record = map.GetEntry();
+
+            if (record != null && record.IsWorldMap())
+                Global.ScriptMgr.ForEach<IMapOnUpdate<Map>>(p => p.OnUpdate(map, diff));
+
+            if (record != null && record.IsDungeon())
+                Global.ScriptMgr.ForEach<IMapOnUpdate<InstanceMap>>(p => p.OnUpdate(map.ToInstanceMap(), diff));
+
+            if (record != null && record.IsBattleground())
+                Global.ScriptMgr.ForEach<IMapOnUpdate<BattlegroundMap>>(p => p.OnUpdate(map.ToBattlegroundMap(), diff));
+        }
+        #endregion
 
         public void LoadAllCells()
         {
@@ -342,7 +422,7 @@ namespace Game.Maps
 
             m_activePlayers.Add(player);
 
-            Global.ScriptMgr.OnPlayerEnterMap(this, player);
+            OnPlayerEnterMap(this, player);
             return true;
         }
 
@@ -373,7 +453,7 @@ namespace Game.Maps
 
             WorldStateTemplate worldStateTemplate = Global.WorldStateMgr.GetWorldStateTemplate(worldStateId);
             if (worldStateTemplate != null)
-                Global.ScriptMgr.OnWorldStateValueChange(worldStateTemplate, oldValue, value, this);
+                Global.ScriptMgr.RunScript<IWorldStateOnValueChange>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, value, this), worldStateTemplate.ScriptId);
 
             // Broadcast update to all players on the map
             UpdateWorldState updateWorldState = new();
@@ -689,7 +769,7 @@ namespace Game.Maps
             if (!m_activePlayers.Empty() || !m_activeNonPlayers.Empty())
                 ProcessRelocationNotifies(diff);
 
-            Global.ScriptMgr.OnMapUpdate(this, diff);
+            OnMapUpdate(this, diff);
         }
 
         void ProcessRelocationNotifies(uint diff)
@@ -787,7 +867,7 @@ namespace Game.Maps
         {
             // Before leaving map, update zone/area for stats
             player.UpdateZone(MapConst.InvalidZone, 0);
-            Global.ScriptMgr.OnPlayerLeaveMap(this, player);
+            OnPlayerLeaveMap(this, player);
 
             GetMultiPersonalPhaseTracker().MarkAllPhasesForDeletion(player.GetGUID());
 
@@ -4876,7 +4956,7 @@ namespace Game.Maps
             if (mInstance != null)
             {
                 i_script_id = mInstance.ScriptId;
-                i_data = Global.ScriptMgr.CreateInstanceData(this);
+                i_data = Global.ScriptMgr.RunScriptRet<IInstanceMapGetInstanceScript, InstanceScript>(p => p.GetInstanceScript(this), GetScriptId(), null);
             }
 
             if (i_data == null)

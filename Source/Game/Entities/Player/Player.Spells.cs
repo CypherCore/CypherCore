@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -3391,8 +3392,8 @@ namespace Game.Entities
                         }
                         else if (chance > 100.0f)
                             chance = GetWeaponProcChance();
-
-                        if (RandomHelper.randChance(chance) && Global.ScriptMgr.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item))
+                        
+                        if (RandomHelper.randChance(chance) && Global.ScriptMgr.RunScriptRet<IItemOnCastItemCombatSpell>(tmpscript => tmpscript.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item), item.GetScriptId()))
                             CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
                     }
                 }

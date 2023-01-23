@@ -14,12 +14,14 @@ using Game.Entities;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IWorld;
 using Game.Spells;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.Networking.Packets.SetupCurrency;
 
 namespace Game
 {
@@ -73,7 +75,7 @@ namespace Game
         public void SetClosed(bool val)
         {
             m_isClosed = val;
-            Global.ScriptMgr.OnOpenStateChange(!val);
+            Global.ScriptMgr.ForEach<IWorldOnOpenStateChange>(p => p.OnOpenStateChange(!val));
         }
 
         public void LoadDBAllowedSecurityLevel()
@@ -97,7 +99,7 @@ namespace Game
 
         public void SetMotd(string motd)
         {
-            Global.ScriptMgr.OnMotdChange(motd);
+            Global.ScriptMgr.ForEach<IWorldOnMotdChange>(p => p.OnMotdChange(motd));
 
             m_motd.Clear();
             m_motd.AddRange(motd.Split('@'));
@@ -972,7 +974,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Initializing Scripts...");
             Global.ScriptMgr.Initialize();
-            Global.ScriptMgr.OnConfigLoad(false);                                // must be done after the ScriptMgr has been properly initialized
+            Global.ScriptMgr.ForEach<IWorldOnConfigLoad>(p => p.OnConfigLoad(false));                               // must be done after the ScriptMgr has been properly initialized
 
             Log.outInfo(LogFilter.ServerLoading, "Validating spell scripts...");
             Global.ObjectMgr.ValidateSpellScripts();
@@ -1497,7 +1499,7 @@ namespace Game
                     SendGuidWarning();
             }
 
-            Global.ScriptMgr.OnWorldUpdate(diff);
+            Global.ScriptMgr.ForEach<IWorldOnUpdate>(p => p.OnUpdate(diff));
         }
 
         public void ForceGameEventUpdate()
@@ -1848,7 +1850,7 @@ namespace Game
                 ShutdownMsg(true, null, reason);
             }
 
-            Global.ScriptMgr.OnShutdownInitiate(exitcode, options);
+            Global.ScriptMgr.ForEach<IWorldOnShutdownInitiate>(p => p.OnShutdownInitiate(exitcode, options));
         }
 
         public void ShutdownMsg(bool show = false, Player player = null, string reason = "")
@@ -1892,7 +1894,7 @@ namespace Game
 
             Log.outDebug(LogFilter.Server, "Server {0} cancelled.", (m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shutdown"));
 
-            Global.ScriptMgr.OnShutdownCancel();
+            Global.ScriptMgr.ForEach<IWorldOnShutdownCancel>(p => p.OnShutdownCancel());
             return oldTimer;
         }
 

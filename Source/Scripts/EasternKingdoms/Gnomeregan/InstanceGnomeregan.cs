@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.Gnomeregan
 {
@@ -50,7 +51,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
         public const uint NpcBastmasterEmiShortfuse = 2;
     }
 
-    class instance_gnomeregan : InstanceMapScript
+    class instance_gnomeregan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public instance_gnomeregan() : base(nameof(instance_gnomeregan), 90) { }
 
@@ -124,7 +125,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_gnomeregan_InstanceMapScript(map);
         }

@@ -6,6 +6,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
@@ -94,7 +95,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         public const uint TombOfSevenBossNum = 7;
     }
 
-    class instance_blackrock_depths : InstanceMapScript
+    class instance_blackrock_depths : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public instance_blackrock_depths() : base(nameof(instance_blackrock_depths), 230) { }
 
@@ -404,7 +405,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackrock_depths_InstanceMapScript(map);
         }

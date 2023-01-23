@@ -12,11 +12,13 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
@@ -5538,8 +5540,7 @@ namespace Game.Entities
 
                 ApplyItemObtainSpells(pItem, false);
                 ApplyItemLootedSpell(pItem, false);
-
-                Global.ScriptMgr.OnItemRemove(this, pItem);
+                Global.ScriptMgr.RunScriptRet<IItemOnRemove>(tmpscript => tmpscript.OnRemove(this, pItem), pItem.GetScriptId());
 
                 Bag pBag;
                 ItemTemplate pProto = pItem.GetTemplate();

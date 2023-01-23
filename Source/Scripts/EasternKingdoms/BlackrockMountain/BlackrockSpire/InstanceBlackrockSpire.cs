@@ -6,6 +6,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 using System.Collections.Generic;
 
@@ -138,7 +139,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class instance_blackrock_spire : InstanceMapScript
+    class instance_blackrock_spire : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229) { }
 
@@ -623,7 +624,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
             List<ObjectGuid> _incarceratorList = new();
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackrock_spireMapScript(map);
         }

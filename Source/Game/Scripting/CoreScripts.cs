@@ -47,7 +47,7 @@ using System.Collections.Generic;
 
 namespace Game.Scripting
 {
-    public class ScriptObject : IScriptObject
+    public abstract class ScriptObject : IScriptObject
     {
         public ScriptObject(string name)
         {
@@ -92,7 +92,7 @@ namespace Game.Scripting
         string _name;
     }
 
-    class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
+    abstract class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
     {
         public GenericSpellScriptLoader(string name, object[] args) : base(name)
         {
@@ -104,7 +104,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
+    abstract class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
     {
         public GenericAuraScriptLoader(string name, object[] args) : base(name)
         {
@@ -116,7 +116,7 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class SpellScriptLoader : ScriptObject, ISpellScriptLoaderGetSpellScript
+    public abstract class SpellScriptLoader : ScriptObject, ISpellScriptLoaderGetSpellScript
     {
         public SpellScriptLoader(string name) : base(name)
         {
@@ -129,7 +129,7 @@ namespace Game.Scripting
         public virtual SpellScript GetSpellScript() { return null; }
     }
 
-    public class AuraScriptLoader : ScriptObject, IAuraScriptLoaderGetAuraScript
+    public abstract class AuraScriptLoader : ScriptObject, IAuraScriptLoaderGetAuraScript
     {
         public AuraScriptLoader(string name) : base(name)
         {
@@ -142,65 +142,16 @@ namespace Game.Scripting
         public virtual AuraScript GetAuraScript() { return null; }
     }
 
-    public class WorldScript : ScriptObject, IWorldOnConfigLoad, IWorldOnMotdChange, IWorldOnOpenStateChange, IWorldOnShutdown, IWorldOnShutdownCancel, IWorldOnShutdownInitiate, IWorldOnStartup, IWorldOnUpdate
+    public abstract class ScriptObjectAutoAdd : ScriptObject
     {
-        protected WorldScript(string name) : base(name)
+        protected ScriptObjectAutoAdd(string name) : base(name)
         {
             Global.ScriptMgr.AddScript(this);
         }
-
-        // Called when the open/closed state of the world changes.
-        public virtual void OnOpenStateChange(bool open) { }
-
-        // Called after the world configuration is (re)loaded.
-        public virtual void OnConfigLoad(bool reload) { }
-
-        // Called before the message of the day is changed.
-        public virtual void OnMotdChange(string newMotd) { }
-
-        // Called when a world shutdown is initiated.
-        public virtual void OnShutdownInitiate(ShutdownExitCode code, ShutdownMask mask) { }
-
-        // Called when a world shutdown is cancelled.
-        public virtual void OnShutdownCancel() { }
-
-        // Called on every world tick (don't execute too heavy code here).
-        public virtual void OnUpdate(uint diff) { }
-
-        // Called when the world is started.
-        public virtual void OnStartup() { }
-
-        // Called when the world is actually shut down.
-        public virtual void OnShutdown() { }
     }
 
-    public class FormulaScript : ScriptObject, IFormulaOnBaseGainCalculation, IFormulaOnColorCodeCaclculation, IFormulaOnGainCalculation, IFormulaOnGrayLevelCalculation, IFormulaOnGroupRateCaclulation, IFormulaOnHonorCalculation, IFormulaOnZeroDifference
-    {
-        public FormulaScript(string name) : base(name) { }
-
-        // Called after calculating honor.
-        public virtual void OnHonorCalculation(float honor, uint level, float multiplier) { }
-
-        // Called after gray level calculation.
-        public virtual void OnGrayLevelCalculation(uint grayLevel, uint playerLevel) { }
-
-        // Called after calculating experience color.
-        public virtual void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel) { }
-
-        // Called after calculating zero difference.
-        public virtual void OnZeroDifferenceCalculation(uint diff, uint playerLevel) { }
-
-        // Called after calculating base experience gain.
-        public virtual void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel) { }
-
-        // Called after calculating experience gain.
-        public virtual void OnGainCalculation(uint gain, Player player, Unit unit) { }
-
-        // Called when calculating the experience rate for group experience.
-        public virtual void OnGroupRateCalculation(float rate, uint count, bool isRaid) { }
-    }
-
-    public class MapScript<T> : ScriptObject, IMapOnCreate<T>, IMapOnDestroy<T>, IMapOnPlayerEnter<T>, IMapOnPlayerLeave<T>, IMapOnUpdate<T> where T : Map
+    #region Map Script Base types
+    public abstract class MapScript<T> : ScriptObject where T : Map
     {
         public MapScript(string name, uint mapId) : base(name)
         {
@@ -213,24 +164,10 @@ namespace Game.Scripting
         // Gets the MapEntry structure associated with this script. Can return NULL.
         public MapRecord GetEntry() { return _mapEntry; }
 
-        // Called when the map is created.
-        public virtual void OnCreate(T map) { }
-
-        // Called just before the map is destroyed.
-        public virtual void OnDestroy(T map) { }
-
-        // Called when a player enters the map.
-        public virtual void OnPlayerEnter(T map, Player player) { }
-
-        // Called when a player leaves the map.
-        public virtual void OnPlayerLeave(T map, Player player) { }
-
-        public virtual void OnUpdate(T obj, uint diff) { }
-
         MapRecord _mapEntry;
     }
 
-    public class WorldMapScript : MapScript<Map>
+    public abstract class WorldMapScript : MapScript<Map>
     {
         public WorldMapScript(string name, uint mapId) : base(name, mapId)
         {
@@ -241,7 +178,7 @@ namespace Game.Scripting
         }
     }
 
-    public class InstanceMapScript : MapScript<InstanceMap>, IInstanceMapGetInstanceScript
+    public abstract class InstanceMapScript : MapScript<InstanceMap>
     {
         public InstanceMapScript(string name, uint mapId) : base(name, mapId)
         {
@@ -252,12 +189,9 @@ namespace Game.Scripting
         }
 
         public override bool IsDatabaseBound() { return true; }
-
-        // Gets an InstanceScript object for this instance.
-        public virtual InstanceScript GetInstanceScript(InstanceMap map) { return null; }
     }
 
-    public class BattlegroundMapScript : MapScript<BattlegroundMap>
+    public abstract class BattlegroundMapScript : MapScript<BattlegroundMap>
     {
         public BattlegroundMapScript(string name, uint mapId) : base(name, mapId)
         {
@@ -267,31 +201,7 @@ namespace Game.Scripting
             Global.ScriptMgr.AddScript(this);
         }
     }
-
-    public class ItemScript : ScriptObject, IItemOnCastItemCombatSpell, IItemOnExpire, IItemOnQuestAccept, IItemOnRemove, IItemOnUse
-    {
-        public ItemScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when a player accepts a quest from the item.
-        public virtual bool OnQuestAccept(Player player, Item item, Quest quest) { return false; }
-
-        // Called when a player uses the item.
-        public virtual bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId) { return false; }
-
-        // Called when the item expires (is destroyed).
-        public virtual bool OnExpire(Player player, ItemTemplate proto) { return false; }
-
-        // Called when the item is destroyed.
-        public virtual bool OnRemove(Player player, Item item) { return false; }
-
-        // Called before casting a combat spell from this item (chance on hit spells of item template, can be used to prevent cast if returning false)
-        public virtual bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item) { return true; }
-    }
+    #endregion
 
     public class UnitScript : ScriptObject, IUnitModifyMeleeDamage, IUnitModifyPeriodicDamageAurasTick, IUnitModifySpellDamageTaken, IUnitOnDamage, IUnitOnHeal
     {
@@ -314,85 +224,6 @@ namespace Game.Scripting
         public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo) { }
     }
 
-    public class GenericCreatureScript<AI> : CreatureScript where AI : CreatureAI
-    {
-        public GenericCreatureScript(string name, object[] args) : base(name)
-        {
-            _args = args;
-        }
-
-        public override CreatureAI GetAI(Creature me)
-        {
-            if (me.GetInstanceScript() != null)
-                return GetInstanceAI<AI>(me);
-            else
-                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
-        }
-
-        object[] _args;
-    }
-
-    public class CreatureScript : ScriptObject, ICreatureGetAI
-    {
-        public CreatureScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript<CreatureScript>(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when a CreatureAI object is needed for the creature.
-        public virtual CreatureAI GetAI(Creature creature) { return null; }
-    }
-
-    public class GenericGameObjectScript<AI> : GameObjectScript where AI : GameObjectAI
-    {
-        public GenericGameObjectScript(string name, object[] args) : base(name)
-        {
-            _args = args;
-        }
-
-        public override GameObjectAI GetAI(GameObject me)
-        {
-            if (me.GetInstanceScript() != null)
-                return GetInstanceAI<AI>(me);
-            else
-                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
-        }
-
-        object[] _args;
-    }
-
-    public class GameObjectScript : ScriptObject, IGameObjectGetAI
-    {
-        public GameObjectScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when a GameObjectAI object is needed for the gameobject.
-        public virtual GameObjectAI GetAI(GameObject go) { return null; }
-    }
-
-    public class GenericAreaTriggerScript<AI> : AreaTriggerEntityScript where AI : AreaTriggerAI
-    {
-        public GenericAreaTriggerScript(string name, object[] args) : base(name)
-        {
-            _args = args;
-        }
-
-        public override AreaTriggerAI GetAI(AreaTrigger me)
-        {
-            if (me.GetInstanceScript() != null)
-                return GetInstanceAI<AI>(me);
-            else
-                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
-        }
-
-        object[] _args;
-    }
 
     public class AreaTriggerScript : ScriptObject, IAreaTriggerOnExit, IAreaTriggerOnTrigger
     {
@@ -852,16 +683,4 @@ namespace Game.Scripting
         public virtual void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount) { }
     }
 
-    public class WorldStateScript : ScriptObject, IWorldStateOnValueChange
-    {
-        public WorldStateScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when worldstate changes value, map is optional
-        public virtual void OnValueChange(int worldStateId, int oldValue, int newValue, Map map) { }
-    }
 }

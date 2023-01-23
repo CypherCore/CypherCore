@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 
 namespace Scripts.EasternKingdoms.Karazhan
@@ -90,7 +91,7 @@ namespace Scripts.EasternKingdoms.Karazhan
     }
 
     [Script]
-    class instance_karazhan : InstanceMapScript
+    class instance_karazhan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public static Position[] OptionalSpawn =
         {
@@ -385,7 +386,7 @@ namespace Scripts.EasternKingdoms.Karazhan
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_karazhan_InstanceMapScript(map);
         }

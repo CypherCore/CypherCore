@@ -5,6 +5,7 @@ using Game.Maps;
 using Game.Scripting;
 using Game.Entities;
 using Framework.Constants;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.Argus.AntorusTheBurningThrone
 {
@@ -51,7 +52,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone
     }
 
     [Script]
-    class instance_antorus_the_burning_throne : InstanceMapScript
+    class instance_antorus_the_burning_throne : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static ObjectData[] creatureData =
         {
@@ -111,7 +112,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_antorus_the_burning_throne_InstanceMapScript(map);
         }

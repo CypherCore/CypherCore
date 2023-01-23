@@ -11,10 +11,12 @@ using Game.Mails;
 using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -704,9 +706,9 @@ namespace Game.Entities
                 case TypeId.Container:
                 case TypeId.AzeriteItem:
                 case TypeId.AzeriteEmpoweredItem:
-                {
+                    {
                     Item item = (Item)questGiver;
-                    Global.ScriptMgr.OnQuestAccept(this, item, quest);
+                    Global.ScriptMgr.RunScriptRet<IItemOnQuestAccept>(p => p.OnQuestAccept(this, item, quest), item.GetScriptId());
 
                     // There are two cases where the source item is not destroyed when the quest is accepted:
                     // - It is required to finish the quest, and is an unique item

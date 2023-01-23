@@ -8,6 +8,7 @@ using System;
 using Game.Maps;
 using System.Collections.Generic;
 using Framework.Constants;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
 {
@@ -122,7 +123,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
     }
 
     [Script]
-    class instance_blackwing_lair : InstanceMapScript
+    class instance_blackwing_lair : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static DungeonEncounterData[] encounters =
         {
@@ -363,7 +364,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackwing_lair_InstanceMapScript(map);
         }

@@ -10,11 +10,13 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Game.Garrisons.Garrison;
 
 namespace Game.Chat
 {
@@ -553,8 +555,8 @@ namespace Game.Chat
                 return false;
 
             handler.GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
-            Global.ScriptMgr.OnItemExpire(handler.GetPlayer(), item.GetTemplate());
-
+            var itemTemplate = item.GetTemplate();
+            Global.ScriptMgr.RunScriptRet<IItemOnExpire>(p => p.OnExpire(handler.GetPlayer(), itemTemplate), itemTemplate.ScriptId);
             return true;
         }
 

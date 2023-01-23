@@ -9,6 +9,7 @@ using Game.Garrisons;
 using Game.Groups;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -488,11 +489,11 @@ namespace Game.Entities
     }
 
     // hack to allow conditions to access what faction owns the map (these worldstates should not be set on these maps)
-    class SplitByFactionMapScript : WorldMapScript
+    class SplitByFactionMapScript : WorldMapScript, IMapOnCreate<Map>
     {
         public SplitByFactionMapScript(string name, uint mapId) : base(name, mapId) { }
 
-        public override void OnCreate(Map map)
+        public void OnCreate(Map map)
         {
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, map.GetInstanceId() == TeamId.Alliance ? 1 : 0, false, map);
             Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, map.GetInstanceId() == TeamId.Horde ? 1 : 0, false, map);

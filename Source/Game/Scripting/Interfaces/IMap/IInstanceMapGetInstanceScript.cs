@@ -5,7 +5,7 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-    public interface IInstanceMapGetInstanceScript
+    public interface IInstanceMapGetInstanceScript : IScriptObject
     {
         InstanceScript GetInstanceScript(InstanceMap map);
     }

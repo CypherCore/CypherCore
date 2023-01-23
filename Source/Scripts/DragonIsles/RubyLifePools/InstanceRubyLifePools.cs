@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.DragonIsles.RubyLifePools
 {
@@ -29,7 +30,7 @@ namespace Scripts.DragonIsles.RubyLifePools
     }
 
     [Script]
-    class instance_ruby_life_pools : InstanceMapScript
+    class instance_ruby_life_pools : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public static ObjectData[] creatureData =
         {
@@ -64,7 +65,7 @@ namespace Scripts.DragonIsles.RubyLifePools
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_ruby_life_pools_InstanceMapScript(map);
         }

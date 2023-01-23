@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 
 namespace Scripts.EasternKingdoms.Deadmines
@@ -53,7 +54,7 @@ namespace Scripts.EasternKingdoms.Deadmines
         public const uint DataPiratesDelayTimer = 1000;
     }
 
-    class instance_deadmines : InstanceMapScript
+    class instance_deadmines : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public instance_deadmines() : base(nameof(instance_deadmines), 36) { }
 
@@ -248,7 +249,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_deadmines_InstanceMapScript(map);
         }

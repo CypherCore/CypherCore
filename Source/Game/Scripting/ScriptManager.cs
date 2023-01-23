@@ -15,6 +15,13 @@ using Game.Guilds;
 using Game.Maps;
 using Game.Movement;
 using Game.PvP;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ICreature;
+using Game.Scripting.Interfaces.IFormula;
+using Game.Scripting.Interfaces.IGameObject;
+using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IWorld;
+using Game.Scripting.Interfaces.IWorldState;
 using Game.Spells;
 using Google.Protobuf.WellKnownTypes;
 using System;
@@ -53,6 +60,7 @@ namespace Game.Scripting
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        #region Loading and Unloading
         public void LoadScripts()
         {
             if (!File.Exists(AppContext.BaseDirectory + "Scripts.dll"))
@@ -87,6 +95,7 @@ namespace Game.Scripting
 
                         bool validArgs = true;
                         int i = 0;
+
                         foreach (var constructor in constructors)
                         {
                             var parameters = constructor.GetParameters();
@@ -112,69 +121,16 @@ namespace Game.Scripting
                             continue;
                         }
 
-                        switch (type.BaseType.Name)
-                        {
-                            case nameof(SpellScript):
-                                genericType = typeof(GenericSpellScriptLoader<>).MakeGenericType(type);
-                                name = name.Replace("_SpellScript", "");
-                                break;
-                            case nameof(AuraScript):
-                                genericType = typeof(GenericAuraScriptLoader<>).MakeGenericType(type);
-                                name = name.Replace("_AuraScript", "");
-                                break;
-                            case nameof(GameObjectAI):
-                                genericType = typeof(GenericGameObjectScript<>).MakeGenericType(type);
-                                break;
-                            case nameof(AreaTriggerAI):
-                                genericType = typeof(GenericAreaTriggerScript<>).MakeGenericType(type);
-                                break;
-                            case "SpellScriptLoader":
-                            case "AuraScriptLoader":
-                            case "WorldScript":
-                            case "FormulaScript":
-                            case "WorldMapScript":
-                            case "InstanceMapScript":
-                            case "BattlegroundMapScript":
-                            case "ItemScript":
-                            case "UnitScript":
-                            case "CreatureScript":
-                            case "GameObjectScript":
-                            case "AreaTriggerScript":
-                            case "OutdoorPvPScript":
-                            case "WeatherScript":
-                            case "AuctionHouseScript":
-                            case "ConditionScript":
-                            case "VehicleScript":
-                            case "DynamicObjectScript":
-                            case "TransportScript":
-                            case "AchievementCriteriaScript":
-                            case "PlayerScript":
-                            case "GuildScript":
-                            case "GroupScript":
-                            case "AreaTriggerEntityScript":
-                            case "OnlyOnceAreaTriggerScript":
-                            case "SceneScript":
-                            case "QuestScript":
-                            case "ConversationScript":
-                            case "AchievementScript":
-                            case "BattlefieldScript":
-                                if (!attribute.Name.IsEmpty())
-                                    name = attribute.Name;
-
-                                if (attribute.Args.Empty())
-                                    Activator.CreateInstance(genericType);
-                                else
-                                    Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
-                                continue;
-                            default:
-                                genericType = typeof(GenericCreatureScript<>).MakeGenericType(type);
-                                break;
-                        }
-
                         if (!attribute.Name.IsEmpty())
                             name = attribute.Name;
 
-                        Activator.CreateInstance(genericType, name, attribute.Args);
+                        name = name.Replace("_SpellScript", "");
+                        name = name.Replace("_AuraScript", "");
+
+                        if (attribute.Args.Empty())
+                            Activator.CreateInstance(genericType);
+                        else
+                            Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
 
                         if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
                             foreach(var id in spellScript.SpellIds)
@@ -365,15 +321,17 @@ namespace Game.Scripting
         //Unloading
         public void Unload()
         {
-            foreach (var entry in ScriptStorage)
+            foreach (var entry in _scriptStorage)
             {
                 ScriptRegistry scriptRegistry = entry.Value;
                 scriptRegistry.Unload();
             }
 
-            ScriptStorage.Clear();
+            _scriptStorage.Clear();
         }
+        #endregion
 
+        #region Spells and Auras
         //SpellScriptLoader
         public List<SpellScript> CreateSpellScripts(uint spellId, Spell invoker)
         {
@@ -471,204 +429,7 @@ namespace Game.Scripting
 
             return scriptDic;
         }
-
-        //WorldScript
-        public void OnOpenStateChange(bool open)
-        {
-            ForEach<WorldScript>(p => p.OnOpenStateChange(open));
-        }
-        public void OnConfigLoad(bool reload)
-        {
-            ForEach<WorldScript>(p => p.OnConfigLoad(reload));
-        }
-        public void OnMotdChange(string newMotd)
-        {
-            ForEach<WorldScript>(p => p.OnMotdChange(newMotd));
-        }
-        public void OnShutdownInitiate(ShutdownExitCode code, ShutdownMask mask)
-        {
-            ForEach<WorldScript>(p => p.OnShutdownInitiate(code, mask));
-        }
-        public void OnShutdownCancel()
-        {
-            ForEach<WorldScript>(p => p.OnShutdownCancel());
-        }
-        public void OnWorldUpdate(uint diff)
-        {
-            ForEach<WorldScript>(p => p.OnUpdate(diff));
-        }
-
-        //FormulaScript
-        public void OnHonorCalculation(float honor, uint level, float multiplier)
-        {
-            ForEach<FormulaScript>(p => p.OnHonorCalculation(honor, level, multiplier));
-        }
-        public void OnGrayLevelCalculation(uint grayLevel, uint playerLevel)
-        {
-            ForEach<FormulaScript>(p => p.OnGrayLevelCalculation(grayLevel, playerLevel));
-        }
-        public void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel)
-        {
-            ForEach<FormulaScript>(p => p.OnColorCodeCalculation(color, playerLevel, mobLevel));
-        }
-        public void OnZeroDifferenceCalculation(uint diff, uint playerLevel)
-        {
-            ForEach<FormulaScript>(p => p.OnZeroDifferenceCalculation(diff, playerLevel));
-        }
-        public void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel)
-        {
-            ForEach<FormulaScript>(p => p.OnBaseGainCalculation(gain, playerLevel, mobLevel));
-        }
-        public void OnGainCalculation(uint gain, Player player, Unit unit)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(unit != null);
-
-            ForEach<FormulaScript>(p => p.OnGainCalculation(gain, player, unit));
-        }
-        public void OnGroupRateCalculation(float rate, uint count, bool isRaid)
-        {
-            ForEach<FormulaScript>(p => p.OnGroupRateCalculation(rate, count, isRaid));
-        }
-
-        //MapScript
-        public void OnCreateMap(Map map)
-        {
-            Cypher.Assert(map != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnCreate(map));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnCreate(map.ToInstanceMap()));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnCreate(map.ToBattlegroundMap()));
-        }
-        public void OnDestroyMap(Map map)
-        {
-            Cypher.Assert(map != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnDestroy(map));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnDestroy(map.ToInstanceMap()));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnDestroy(map.ToBattlegroundMap()));
-        }
-        public void OnPlayerEnterMap(Map map, Player player)
-        {
-            Cypher.Assert(map != null);
-            Cypher.Assert(player != null);
-
-            ForEach<PlayerScript>(p => p.OnMapChanged(player));
-
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnPlayerEnter(map, player));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnPlayerEnter(map.ToInstanceMap(), player));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnPlayerEnter(map.ToBattlegroundMap(), player));
-        }
-        public void OnPlayerLeaveMap(Map map, Player player)
-        {
-            Cypher.Assert(map != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnPlayerLeave(map, player));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnPlayerLeave(map.ToInstanceMap(), player));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnPlayerLeave(map.ToBattlegroundMap(), player));
-        }
-        public void OnMapUpdate(Map map, uint diff)
-        {
-            Cypher.Assert(map != null);
-            var record = map.GetEntry();
-
-            if (record != null && record.IsWorldMap())
-                ForEach<WorldMapScript>(p => p.OnUpdate(map, diff));
-
-            if (record != null && record.IsDungeon())
-                ForEach<InstanceMapScript>(p => p.OnUpdate(map.ToInstanceMap(), diff));
-
-            if (record != null && record.IsBattleground())
-                ForEach<BattlegroundMapScript>(p => p.OnUpdate(map.ToBattlegroundMap(), diff));
-        }
-
-        //InstanceMapScript
-        public InstanceScript CreateInstanceData(InstanceMap map)
-        {
-            Cypher.Assert(map != null);
-
-            return RunScriptRet<InstanceMapScript, InstanceScript>(p => p.GetInstanceScript(map), map.GetScriptId(), null);
-        }
-
-        //ItemScript
-        public bool OnQuestAccept(Player player, Item item, Quest quest)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(item != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<ItemScript>(p => p.OnQuestAccept(player, item, quest), item.GetScriptId());
-        }
-        public bool OnItemUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(item);
-
-            return RunScriptRet<ItemScript>(p => p.OnUse(player, item, targets, castId), item.GetScriptId());
-        }
-        public bool OnItemExpire(Player player, ItemTemplate proto)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(proto != null);
-
-            return RunScriptRet<ItemScript>(p => p.OnExpire(player, proto), proto.ScriptId);
-        }
-        public bool OnItemRemove(Player player, Item item)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(item != null);
-
-            return RunScriptRet<ItemScript>(tmpscript => tmpscript.OnRemove(player, item), item.GetScriptId());
-        }
-        public bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(victim != null);
-            Cypher.Assert(spellInfo != null);
-            Cypher.Assert(item != null);
-
-            return RunScriptRet<ItemScript>(tmpscript => tmpscript.OnCastItemCombatSpell(player, victim, spellInfo, item), item.GetScriptId());
-        }
-
-        public CreatureAI GetCreatureAI(Creature creature)
-        {
-            Cypher.Assert(creature != null);
-
-            return RunScriptRet<CreatureScript, CreatureAI>(p => p.GetAI(creature), creature.GetScriptId());
-        }
-
-        //GameObjectScript
-        public GameObjectAI GetGameObjectAI(GameObject go)
-        {
-            Cypher.Assert(go != null);
-
-            return RunScriptRet<GameObjectScript, GameObjectAI>(p => p.GetAI(go), go.GetScriptId());
-        }
+        #endregion
 
         //AreaTriggerScript
         public bool OnAreaTrigger(Player player, AreaTriggerRecord trigger, bool entered)
@@ -1162,26 +923,18 @@ namespace Game.Scripting
 
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
         }
-
-        // WorldState
-        public void OnWorldStateValueChange(WorldStateTemplate worldStateTemplate, int oldValue, int newValue, Map map)
-        {
-            Cypher.Assert(worldStateTemplate != null);
-
-            RunScript<WorldStateScript>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, newValue, map), worldStateTemplate.ScriptId);
-        }
         
-        public void ForEach<T>(Action<T> a) where T : ScriptObject
+        public void ForEach<T>(Action<T> a) where T : IScriptObject
         {
-            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
-                foreach (T s in scriptReg.GetStorage())
+            if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
+                foreach (T s in ifaceImp)
                     a.Invoke(s);
         }
-        public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : ScriptObject
+        public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : IScriptObject
         {
             return RunScriptRet<T, bool>(func, id, ret);
         }
-        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : ScriptObject
+        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : IScriptObject
         {
             var script = GetScript<T>(id);
             if (script == null)
@@ -1189,44 +942,60 @@ namespace Game.Scripting
 
             return func.Invoke(script);
         }
-        public void RunScript<T>(Action<T> a, uint id) where T : ScriptObject
+        public void RunScript<T>(Action<T> a, uint id) where T : IScriptObject
         {
             var script = GetScript<T>(id);
             if (script != null)
                 a.Invoke(script);
         }
-        public void AddScript<T>(T script) where T : ScriptObject
+
+        public void AddScript<T>(T script) where T : IScriptObject
         {
             Cypher.Assert(script != null);
 
-            if (!ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            if (!_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
             {
                 scriptReg = new ScriptRegistry();
-                ScriptStorage[typeof(T)] = scriptReg;
+                _scriptStorage[typeof(T)] = scriptReg;
             }
 
             scriptReg.AddScript(script);
+
+            foreach (var iface in typeof(T).GetInterfaces())
+            {
+                if (iface.Name == nameof(IScriptObject))
+                    continue;
+
+                if (!_scriptByType.TryGetValue(iface, out var loadedTypes))
+                {
+                    loadedTypes = new List<IScriptObject>();
+                    _scriptByType[iface] = loadedTypes;
+                }
+
+                loadedTypes.Add(script);
+            }
         }
 
         public ScriptRegistry GetScriptRegistry<T>()
         {
-            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
                 return scriptReg;
 
             return null;
         }
 
-        public T GetScript<T>(uint id) where T : ScriptObject
+        public T GetScript<T>(uint id) where T : IScriptObject
         {
-            if (ScriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
                 return scriptReg.GetScriptById<T>(id);
 
-            return null;
+            return default(T);
         }
 
         uint _ScriptCount;
-        Dictionary<System.Type, ScriptRegistry> ScriptStorage = new();
+        Dictionary<System.Type, ScriptRegistry> _scriptStorage = new();
 
+        Dictionary<System.Type, List<IScriptObject>> _scriptByType = new();
         Dictionary<uint, WaypointPath> _waypointStore = new();
         
         // creature entry + chain ID
@@ -1235,7 +1004,7 @@ namespace Game.Scripting
 
     public class ScriptRegistry
     {
-        public void AddScript(ScriptObject script)
+        public void AddScript(IScriptObject script)
         {
             Cypher.Assert(script != null);
 
@@ -1289,21 +1058,16 @@ namespace Game.Scripting
         }
 
         // Gets a script by its ID (assigned by ObjectMgr).
-        public T GetScriptById<T>(uint id) where T : ScriptObject
+        public T GetScriptById<T>(uint id) where T : IScriptObject
         {
             lock (_scriptMap)
-                return _scriptMap.LookupByKey(id) as T;
+                return (T)_scriptMap.LookupByKey(id);
         }
 
         public bool Empty()
         {
             lock(_scriptMap)
                 return _scriptMap.Empty();
-        }
-
-        public IEnumerable<ScriptObject> GetStorage()
-        {
-            return _scriptMap.Values;
         }
 
         public void Unload()
@@ -1314,7 +1078,7 @@ namespace Game.Scripting
 
         // Counter used for code-only scripts.
         uint _scriptIdCounter;
-        Dictionary<uint, ScriptObject> _scriptMap = new();
+        Dictionary<uint, IScriptObject> _scriptMap = new();
     }
 
 

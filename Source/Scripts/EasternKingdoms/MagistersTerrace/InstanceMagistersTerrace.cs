@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IMap;
 using System;
 using System.Collections.Generic;
 
@@ -103,7 +104,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
     }
 
     [Script]
-    class instance_magisters_terrace : InstanceMapScript
+    class instance_magisters_terrace : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static DungeonEncounterData[] encounters =
         {
@@ -268,7 +269,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_magisters_terrace_InstanceMapScript(map);
         }
