@@ -4,6 +4,8 @@
 using Framework.Constants;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IDynamicObject;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -148,7 +150,7 @@ namespace Game.Entities
             if (expired)
                 Remove();
             else
-                Global.ScriptMgr.OnDynamicObjectUpdate(this, diff);
+                Global.ScriptMgr.ForEach<IDynamicObjectOnUpdate>(p => p.OnUpdate(this, diff));
         }
 
         public void Remove()

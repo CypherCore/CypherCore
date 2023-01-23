@@ -9,6 +9,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Mails;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAuctionHouse;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -669,7 +671,7 @@ namespace Game
                 auctionIndex = ~auctionIndex;
             bucket.Auctions.Insert(auctionIndex, auction);
 
-            Global.ScriptMgr.OnAuctionAdd(this, auction);
+            Global.ScriptMgr.ForEach<IAuctionHouseOnAuctionAdd>(p => p.OnAuctionAdd(this, auction));
         }
 
         public void RemoveAuction(SQLTransaction trans, AuctionPosting auction, AuctionPosting auctionPosting = null)
@@ -745,7 +747,7 @@ namespace Game
             foreach (Item item in auction.Items)
                 Global.AuctionHouseMgr.RemoveAItem(item.GetGUID());
 
-            Global.ScriptMgr.OnAuctionRemove(this, auction);
+            Global.ScriptMgr.ForEach<IAuctionHouseOnAcutionRemove>(p => p.OnAuctionRemove(this, auction));
 
             _playerOwnedAuctions.Remove(auction.Owner, auction.Id);
             foreach (ObjectGuid bidder in auction.BidderHistory)
@@ -784,7 +786,7 @@ namespace Game
                 if (auction.Bidder.IsEmpty())
                 {
                     SendAuctionExpired(auction, trans);
-                    Global.ScriptMgr.OnAuctionExpire(this, auction);
+                    Global.ScriptMgr.ForEach<IAuctionHouseOnAuctionExpire>(p => p.OnAuctionExpire(this, auction));
                 }
                 ///- Or perform the transaction
                 else
@@ -794,7 +796,7 @@ namespace Game
                     //we send the money to the seller
                     SendAuctionWon(auction, null, trans);
                     SendAuctionSold(auction, null, trans);
-                    Global.ScriptMgr.OnAuctionSuccessful(this, auction);
+                    Global.ScriptMgr.ForEach<IAuctionHouseOnAuctionSuccessful>(p => p.OnAuctionSuccessful(this, auction));
                 }
 
                 ///- In any case clear the auction

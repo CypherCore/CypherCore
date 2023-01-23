@@ -7,6 +7,8 @@ using Game.AI;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Movement;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IVehicle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +62,7 @@ namespace Game.Entities
         {
             _status = Status.Installed;
             if (GetBase().IsTypeId(TypeId.Unit))
-                Global.ScriptMgr.OnInstall(this);
+                Global.ScriptMgr.RunScript<IVehicleOnInstall>(p => p.OnInstall(this), GetBase().ToCreature().GetScriptId());
         }
 
         public void InstallAllAccessories(bool evading)
@@ -92,7 +94,7 @@ namespace Game.Entities
             RemoveAllPassengers();
 
             if (GetBase().IsTypeId(TypeId.Unit))
-                Global.ScriptMgr.OnUninstall(this);
+                Global.ScriptMgr.RunScript<IVehicleOnUninstall>(p => p.OnUninstall(this), GetBase().ToCreature().GetScriptId());
         }
 
         public void Reset(bool evading = false)
@@ -106,7 +108,7 @@ namespace Game.Entities
             if (GetBase().IsAlive())
                 InstallAllAccessories(evading);
 
-            Global.ScriptMgr.OnReset(this);
+            Global.ScriptMgr.RunScript<IVehicleOnReset>(p => p.OnReset(this), GetBase().ToCreature().GetScriptId());
         }
 
         void ApplyAllImmunities()
@@ -383,7 +385,7 @@ namespace Game.Entities
                 _me.ToCreature().GetAI().PassengerBoarded(unit, seat.Key, false);
 
             if (GetBase().IsTypeId(TypeId.Unit))
-               Global.ScriptMgr.OnRemovePassenger(this, unit);
+               Global.ScriptMgr.RunScript<IVehicleOnRemovePassenger>(p => p.OnRemovePassenger(this, unit), GetBase().ToCreature().GetScriptId());
 
             unit.SetVehicle(null);
             return this;
@@ -724,12 +726,12 @@ namespace Game.Entities
                 CreatureAI ai = creature.GetAI();
                 if (ai != null)
                     ai.PassengerBoarded(Passenger, Seat.Key, true);
-
-                Global.ScriptMgr.OnAddPassenger(Target, Passenger, Seat.Key);
+                
+                Global.ScriptMgr.RunScript<IVehicleOnAddPassenger>(p => p.OnAddPassenger(Target, Passenger, Seat.Key), Target.GetBase().ToCreature().GetScriptId());
 
                 // Actually quite a redundant hook. Could just use OnAddPassenger and check for unit typemask inside script.
                 if (Passenger.HasUnitTypeMask(UnitTypeMask.Accessory))
-                    Global.ScriptMgr.OnInstallAccessory(Target, Passenger.ToCreature());
+                    Global.ScriptMgr.RunScript<IVehicleOnInstallAccessory>(p => p.OnInstallAccessory(Target, Passenger.ToCreature()), Target.GetBase().ToCreature().GetScriptId());
             }
 
             return true;

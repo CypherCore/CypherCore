@@ -21,6 +21,7 @@ using Game.Scripting.Interfaces.ICreature;
 using Game.Scripting.Interfaces.IFormula;
 using Game.Scripting.Interfaces.IGameObject;
 using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IVehicle;
 using Game.Scripting.Interfaces.IWorld;
 using Game.Scripting.Interfaces.IWorldState;
 using Game.Spells;
@@ -32,13 +33,21 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Threading;
 
 namespace Game.Scripting
 {
     // Manages registration, loading, and execution of Scripts.
     public class ScriptManager : Singleton<ScriptManager>
     {
+        uint _ScriptCount;
+        Dictionary<System.Type, ScriptRegistry> _scriptStorage = new();
+
+        Dictionary<System.Type, List<IScriptObject>> _scriptByType = new();
+        Dictionary<uint, WaypointPath> _waypointStore = new();
+
+        // creature entry + chain ID
+        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
+
         ScriptManager() { }
 
         //Initialization
@@ -60,6 +69,80 @@ namespace Game.Scripting
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
+        #region Main Script API
+
+
+        public void ForEach<T>(Action<T> a) where T : IScriptObject
+        {
+            if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
+                foreach (T s in ifaceImp)
+                    a.Invoke(s);
+        }
+        public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : IScriptObject
+        {
+            return RunScriptRet<T, bool>(func, id, ret);
+        }
+        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : IScriptObject
+        {
+            var script = GetScript<T>(id);
+            if (script == null)
+                return ret;
+
+            return func.Invoke(script);
+        }
+        public void RunScript<T>(Action<T> a, uint id) where T : IScriptObject
+        {
+            var script = GetScript<T>(id);
+            if (script != null)
+                a.Invoke(script);
+        }
+
+        public void AddScript<T>(T script) where T : IScriptObject
+        {
+            Cypher.Assert(script != null);
+
+            if (!_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            {
+                scriptReg = new ScriptRegistry();
+                _scriptStorage[typeof(T)] = scriptReg;
+            }
+
+            scriptReg.AddScript(script);
+
+            foreach (var iface in typeof(T).GetInterfaces())
+            {
+                if (iface.Name == nameof(IScriptObject))
+                    continue;
+
+                if (!_scriptByType.TryGetValue(iface, out var loadedTypes))
+                {
+                    loadedTypes = new List<IScriptObject>();
+                    _scriptByType[iface] = loadedTypes;
+                }
+
+                loadedTypes.Add(script);
+            }
+        }
+
+        public ScriptRegistry GetScriptRegistry<T>()
+        {
+            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
+                return scriptReg;
+
+            return null;
+        }
+
+        public T GetScript<T>(uint id) where T : IScriptObject
+        {
+            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
+                return scriptReg.GetScriptById<T>(id);
+
+            return default(T);
+        }
+
+
+        #endregion
 
         #region Loading and Unloading
         public void LoadScripts()
@@ -316,7 +399,8 @@ namespace Game.Scripting
         //Reloading
         public void Reload()
         {
-
+            Unload();
+            LoadScripts();
         }
 
         //Unloading
@@ -329,6 +413,8 @@ namespace Game.Scripting
             }
 
             _scriptStorage.Clear();
+            _scriptByType.Clear();
+
         }
         #endregion
 
@@ -444,94 +530,6 @@ namespace Game.Scripting
                 return RunScriptRet<IAreaTriggerOnExit>(p => p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
 
-        // AuctionHouseScript
-        public void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction)
-        {
-            Cypher.Assert(ah != null);
-            Cypher.Assert(auction != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionAdd(ah, auction));
-        }
-        public void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction)
-        {
-            Cypher.Assert(ah != null);
-            Cypher.Assert(auction != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionRemove(ah, auction));
-        }
-        public void OnAuctionSuccessful(AuctionHouseObject ah, AuctionPosting auction)
-        {
-            Cypher.Assert(ah != null);
-            Cypher.Assert(auction != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionSuccessful(ah, auction));
-        }
-        public void OnAuctionExpire(AuctionHouseObject ah, AuctionPosting auction)
-        {
-            Cypher.Assert(ah != null);
-            Cypher.Assert(auction != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionExpire(ah, auction));
-        }
-
-        // ConditionScript
-        public bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo)
-        {
-            Cypher.Assert(condition != null);
-
-            return RunScriptRet<ConditionScript>(p => p.OnConditionCheck(condition, sourceInfo), condition.ScriptId, true);
-        }
-
-        // VehicleScript
-        public void OnInstall(Vehicle veh)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-
-            RunScript<VehicleScript>(p => p.OnInstall(veh), veh.GetBase().ToCreature().GetScriptId());
-        }
-        public void OnUninstall(Vehicle veh)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-
-            RunScript<VehicleScript>(p => p.OnUninstall(veh), veh.GetBase().ToCreature().GetScriptId());
-        }
-        public void OnReset(Vehicle veh)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-
-            RunScript<VehicleScript>(p => p.OnReset(veh), veh.GetBase().ToCreature().GetScriptId());
-        }
-        public void OnInstallAccessory(Vehicle veh, Creature accessory)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Cypher.Assert(accessory != null);
-
-            RunScript<VehicleScript>(p => p.OnInstallAccessory(veh, accessory), veh.GetBase().ToCreature().GetScriptId());
-        }
-        public void OnAddPassenger(Vehicle veh, Unit passenger, sbyte seatId)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Cypher.Assert(passenger != null);
-
-            RunScript<VehicleScript>(p => p.OnAddPassenger(veh, passenger, seatId), veh.GetBase().ToCreature().GetScriptId());
-        }
-        public void OnRemovePassenger(Vehicle veh, Unit passenger)
-        {
-            Cypher.Assert(veh != null);
-            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Cypher.Assert(passenger != null);
-
-            RunScript<VehicleScript>(p => p.OnRemovePassenger(veh, passenger), veh.GetBase().ToCreature().GetScriptId());
-        }
-
-        // DynamicObjectScript
-        public void OnDynamicObjectUpdate(DynamicObject dynobj, uint diff)
-        {
-            Cypher.Assert(dynobj != null);
-
-            ForEach<DynamicObjectScript>(p => p.OnUpdate(dynobj, diff));
-        }
 
         // TransportScript
         public void OnAddPassenger(Transport transport, Player player)
@@ -864,195 +862,6 @@ namespace Game.Scripting
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
         }
         
-        public void ForEach<T>(Action<T> a) where T : IScriptObject
-        {
-            if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
-                foreach (T s in ifaceImp)
-                    a.Invoke(s);
-        }
-        public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : IScriptObject
-        {
-            return RunScriptRet<T, bool>(func, id, ret);
-        }
-        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : IScriptObject
-        {
-            var script = GetScript<T>(id);
-            if (script == null)
-                return ret;
 
-            return func.Invoke(script);
-        }
-        public void RunScript<T>(Action<T> a, uint id) where T : IScriptObject
-        {
-            var script = GetScript<T>(id);
-            if (script != null)
-                a.Invoke(script);
-        }
-
-        public void AddScript<T>(T script) where T : IScriptObject
-        {
-            Cypher.Assert(script != null);
-
-            if (!_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
-            {
-                scriptReg = new ScriptRegistry();
-                _scriptStorage[typeof(T)] = scriptReg;
-            }
-
-            scriptReg.AddScript(script);
-
-            foreach (var iface in typeof(T).GetInterfaces())
-            {
-                if (iface.Name == nameof(IScriptObject))
-                    continue;
-
-                if (!_scriptByType.TryGetValue(iface, out var loadedTypes))
-                {
-                    loadedTypes = new List<IScriptObject>();
-                    _scriptByType[iface] = loadedTypes;
-                }
-
-                loadedTypes.Add(script);
-            }
-        }
-
-        public ScriptRegistry GetScriptRegistry<T>()
-        {
-            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
-                return scriptReg;
-
-            return null;
-        }
-
-        public T GetScript<T>(uint id) where T : IScriptObject
-        {
-            if (_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
-                return scriptReg.GetScriptById<T>(id);
-
-            return default(T);
-        }
-
-        uint _ScriptCount;
-        Dictionary<System.Type, ScriptRegistry> _scriptStorage = new();
-
-        Dictionary<System.Type, List<IScriptObject>> _scriptByType = new();
-        Dictionary<uint, WaypointPath> _waypointStore = new();
-        
-        // creature entry + chain ID
-        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
-    }
-
-    public class ScriptRegistry
-    {
-        public void AddScript(IScriptObject script)
-        {
-            Cypher.Assert(script != null);
-
-            if (!script.IsDatabaseBound())
-            {
-                // We're dealing with a code-only script; just add it.
-                _scriptMap[Interlocked.Increment(ref _scriptIdCounter)] = script;
-                Global.ScriptMgr.IncrementScriptCount();
-                return;
-            }
-
-            // Get an ID for the script. An ID only exists if it's a script that is assigned in the database
-            // through a script name (or similar).
-            uint id = Global.ObjectMgr.GetScriptId(script.GetName());
-            if (id != 0)
-            {
-                // Try to find an existing script.
-                bool existing = false;
-
-                lock (_scriptMap)
-                    foreach (var it in _scriptMap)
-                    {
-                        if (it.Value.GetName() == script.GetName())
-                        {
-                            existing = true;
-                            break;
-                        }
-                    }
-
-                // If the script isn't assigned . assign it!
-                if (!existing)
-                {
-                    lock (_scriptMap)
-                        _scriptMap[id] = script;
-                    Global.ScriptMgr.IncrementScriptCount();
-                }
-                else
-                {
-                    // If the script is already assigned . delete it!
-                    Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script name, so the script can't work.", script.GetName());
-
-                    Cypher.Assert(false); // Error that should be fixed ASAP.
-                }
-            }
-            else
-            {
-                // The script uses a script name from database, but isn't assigned to anything.
-                Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script name assigned in database.", script.GetName());
-                return;
-            }
-        }
-
-        // Gets a script by its ID (assigned by ObjectMgr).
-        public T GetScriptById<T>(uint id) where T : IScriptObject
-        {
-            lock (_scriptMap)
-                return (T)_scriptMap.LookupByKey(id);
-        }
-
-        public bool Empty()
-        {
-            lock(_scriptMap)
-                return _scriptMap.Empty();
-        }
-
-        public void Unload()
-        {
-            lock(_scriptMap)
-                _scriptMap.Clear();
-        }
-
-        // Counter used for code-only scripts.
-        uint _scriptIdCounter;
-        Dictionary<uint, IScriptObject> _scriptMap = new();
-    }
-
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class ScriptAttribute : Attribute
-    {
-        public ScriptAttribute(string name = "", params object[] args)
-        {
-            Name = name;
-            Args = args;
-        }
-
-        public string Name { get; private set; }
-        public object[] Args { get; private set; }
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class SpellScriptAttribute : ScriptAttribute
-    {
-        public SpellScriptAttribute(string name = "", params object[] args) : base (name, args)
-        {
-
-        }
-
-        public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
-        {
-            SpellIds = new[] { spellId };
-        }
-
-        public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)
-        {
-            SpellIds = spellId;
-        }
-
-        public uint[] SpellIds { get; private set; }
     }
 }

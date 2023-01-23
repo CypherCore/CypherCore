@@ -216,64 +216,6 @@ namespace Game.Scripting
     }
     #endregion
 
-    public class AuctionHouseScript : ScriptObject, IAuctionHouseOnAuctionAdd, IAuctionHouseOnAuctionExpire, IAuctionHouseOnAcutionRemove, IAuctionHouseOnAuctionSuccessful
-    {
-        public AuctionHouseScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        // Called when an auction is added to an auction house.
-        public virtual void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction) { }
-
-        // Called when an auction is removed from an auction house.
-        public virtual void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction) { }
-
-        // Called when an auction was succesfully completed.
-        public virtual void OnAuctionSuccessful(AuctionHouseObject ah, AuctionPosting auction) { }
-
-        // Called when an auction expires.
-        public virtual void OnAuctionExpire(AuctionHouseObject ah, AuctionPosting auction) { }
-    }
-
-    public class ConditionScript : ScriptObject, IConditionCheck
-    {
-        public ConditionScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when a single condition is checked for a player.
-        public virtual bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo) { return true; }
-    }
-
-    public class VehicleScript : ScriptObject, IVehicleOnInstall, IVehicleOnInstallAccessory, IVehicleOnRemovePassenger, IVehicleOnReset, IVehicleOnUninstall
-    {
-        public VehicleScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        // Called after a vehicle is installed.
-        public virtual void OnInstall(Vehicle veh) { }
-
-        // Called after a vehicle is uninstalled.
-        public virtual void OnUninstall(Vehicle veh) { }
-
-        // Called when a vehicle resets.
-        public virtual void OnReset(Vehicle veh) { }
-
-        // Called after an accessory is installed in a vehicle.
-        public virtual void OnInstallAccessory(Vehicle veh, Creature accessory) { }
-
-        // Called after a passenger is added to a vehicle.
-        public virtual void OnAddPassenger(Vehicle veh, Unit passenger, sbyte seatId) { }
-
-        // Called after a passenger is removed from a vehicle.
-        public virtual void OnRemovePassenger(Vehicle veh, Unit passenger) { }
-    }
 
     public class DynamicObjectScript : ScriptObject, IDynamicObjectOnUpdate
     {
