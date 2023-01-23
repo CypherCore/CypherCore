@@ -393,6 +393,8 @@ namespace Game.Entities
         {
             m_Events.Update(diff);
 
+            base.Update(diff);
+
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
             else if (!AIM_Initialize())
