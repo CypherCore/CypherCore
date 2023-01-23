@@ -252,7 +252,9 @@ namespace Framework.Constants
         SitHighChair = 6,
         Dead = 7,
         Kneel = 8,
-        Submerged = 9
+        Submerged = 9,
+
+        Max
     }
 
     public enum UnitVisFlags
@@ -271,7 +273,9 @@ namespace Framework.Constants
         Swim = 1, // falls back to ground tier animations, not handled by the client, should never appear in sniffs, will prevent tier change animations from playing correctly if used
         Hover = 2, // plays flying tier animations or falls back to ground tier animations, automatically enables hover clientside when entering visibility with this value
         Fly = 3, // plays flying tier animations
-        Submerged = 4
+        Submerged = 4,
+
+        Max
     }
 
     public enum UnitPVPStateFlags
@@ -543,6 +547,7 @@ namespace Framework.Constants
         Unarmed = 0,                            // non prepared weapon
         Melee = 1,                              // prepared melee weapon
         Ranged = 2,                             // prepared ranged weapon
+
         Max = 3
     }
     public enum MeleeHitOutcome

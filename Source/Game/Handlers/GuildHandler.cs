@@ -59,6 +59,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildDeclineInvitation)]
         void HandleGuildDeclineInvitation(GuildDeclineInvitation packet)
         {
+            if (GetPlayer().GetGuildId() != 0)
+                return;
+
             GetPlayer().SetGuildIdInvited(0);
             GetPlayer().SetInGuild(0);
         }

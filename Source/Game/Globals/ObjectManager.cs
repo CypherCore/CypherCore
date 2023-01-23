@@ -2114,8 +2114,8 @@ namespace Game
         public void LoadCreatureTemplateAddons()
         {
             var time = Time.GetMSTime();
-            //                                        0       1        2      3       4       5      6          7                8             9                       10
-            SQLResult result = DB.World.Query("SELECT entry, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
+            //                                         0      1        2      3           4         5         6            7         8      9          10               11            12                      13
+            SQLResult result = DB.World.Query("SELECT entry, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
 
             if (result.IsEmpty())
             {
@@ -2129,22 +2129,25 @@ namespace Game
                 uint entry = result.Read<uint>(0);
                 if (GetCreatureTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Creature template (Entry: {0}) does not exist but has a record in `creature_template_addon`", entry);
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_addon`");
                     continue;
                 }
 
                 CreatureAddon creatureAddon = new();
                 creatureAddon.path_id = result.Read<uint>(1);
                 creatureAddon.mount = result.Read<uint>(2);
-                creatureAddon.bytes1 = result.Read<uint>(3);
-                creatureAddon.bytes2 = result.Read<uint>(4);
-                creatureAddon.emote = result.Read<uint>(5);
-                creatureAddon.aiAnimKit = result.Read<ushort>(6);
-                creatureAddon.movementAnimKit = result.Read<ushort>(7);
-                creatureAddon.meleeAnimKit = result.Read<ushort>(8);
-                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
+                creatureAddon.standState = result.Read<byte>(3);
+                creatureAddon.animTier = result.Read<byte>(4);
+                creatureAddon.visFlags = result.Read<byte>(5);
+                creatureAddon.sheathState = result.Read<byte>(6);
+                creatureAddon.pvpFlags = result.Read<byte>(7);
+                creatureAddon.emote = result.Read<uint>(8);
+                creatureAddon.aiAnimKit = result.Read<ushort>(9);
+                creatureAddon.movementAnimKit = result.Read<ushort>(10);
+                creatureAddon.meleeAnimKit = result.Read<ushort>(11);
+                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(12);
 
-                var tokens = new StringArray(result.Read<string>(10), ' ');
+                var tokens = new StringArray(result.Read<string>(13), ' ');
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
@@ -2154,16 +2157,16 @@ namespace Game
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (AdditionalSpellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong spell {1} defined in `auras` field in `creature_template_addon`.", entry, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has wrong spell {spellId} defined in `auras` field in `creature_template_addon`.");
                         continue;
                     }
 
                     if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has SPELL_AURA_CONTROL_VEHICLE aura {1} defined in `auras` field in `creature_template_addon`.", entry, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_template_addon`.");
 
                     if (creatureAddon.auras.Contains(spellId))
                     {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has duplicate aura (spell {1}) in `auras` field in `creature_template_addon`.", entry, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has duplicate aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
                         continue;
                     }
 
@@ -2180,32 +2183,52 @@ namespace Game
                 {
                     if (CliDB.CreatureDisplayInfoStorage.LookupByKey(creatureAddon.mount) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid displayInfoId ({1}) for mount defined in `creature_template_addon`", entry, creatureAddon.mount);
+                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creature_template_addon`");
                         creatureAddon.mount = 0;
                     }
                 }
 
+                if (creatureAddon.standState >= (int)UnitStandStateType.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
+                    creatureAddon.standState = 0;
+                }
+
+                if (creatureAddon.animTier >= (int)AnimTier.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
+                    creatureAddon.animTier = 0;
+                }
+
+                if (creatureAddon.sheathState >= (int)SheathState.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
+                    creatureAddon.sheathState = 0;
+                }
+
+                // PvPFlags don't need any checking for the time being since they cover the entire range of a byte
+
                 if (!CliDB.EmotesStorage.ContainsKey(creatureAddon.emote))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid emote ({1}) defined in `creatureaddon`.", entry, creatureAddon.emote);
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid emote ({creatureAddon.emote}) defined in `creatureaddon`.");
                     creatureAddon.emote = 0;
                 }
 
                 if (creatureAddon.aiAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.aiAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid aiAnimKit ({1}) defined in `creature_template_addon`.", entry, creatureAddon.aiAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid aiAnimKit ({creatureAddon.aiAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.aiAnimKit = 0;
                 }
 
                 if (creatureAddon.movementAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.movementAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid movementAnimKit ({1}) defined in `creature_template_addon`.", entry, creatureAddon.movementAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid movementAnimKit ({creatureAddon.movementAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.movementAnimKit = 0;
                 }
 
                 if (creatureAddon.meleeAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.meleeAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid meleeAnimKit ({1}) defined in `creature_template_addon`.", entry, creatureAddon.meleeAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid meleeAnimKit ({creatureAddon.meleeAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.meleeAnimKit = 0;
                 }
 
@@ -2219,13 +2242,13 @@ namespace Game
                 count++;
             }
             while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature template addons in {1} ms", count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template addons in {Time.GetMSTimeDiffToNow(time)} ms");
         }
         public void LoadCreatureAddons()
         {
             var time = Time.GetMSTime();
-            //                                        0       1       2      3       4       5        6             7              8          9                       10
-            SQLResult result = DB.World.Query("SELECT guid, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
+            //                                         0     1        2      3           4         5         6            7         8      9          10               11            12                      13
+            SQLResult result = DB.World.Query("SELECT guid, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
 
             if (result.IsEmpty())
             {
@@ -2240,7 +2263,7 @@ namespace Game
                 CreatureData creData = GetCreatureData(guid);
                 if (creData == null)
                 {
-                    Log.outError(LogFilter.Sql, "Creature (GUID: {0}) does not exist but has a record in `creatureaddon`", guid);
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) does not exist but has a record in `creatureaddon`");
                     continue;
                 }
 
@@ -2250,19 +2273,22 @@ namespace Game
                 if (creData.movementType == (byte)MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
                 {
                     creData.movementType = (byte)MovementGeneratorType.Idle;
-                    Log.outError(LogFilter.Sql, "Creature (GUID {0}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned", guid);
+                    Log.outError(LogFilter.Sql, $"Creature (GUID {guid}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned");
                 }
 
                 creatureAddon.mount = result.Read<uint>(2);
-                creatureAddon.bytes1 = result.Read<uint>(3);
-                creatureAddon.bytes2 = result.Read<uint>(4);
-                creatureAddon.emote = result.Read<uint>(5);
-                creatureAddon.aiAnimKit = result.Read<ushort>(6);
-                creatureAddon.movementAnimKit = result.Read<ushort>(7);
-                creatureAddon.meleeAnimKit = result.Read<ushort>(8);
-                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
+                creatureAddon.standState = result.Read<byte>(3);
+                creatureAddon.animTier = result.Read<byte>(4);
+                creatureAddon.visFlags = result.Read<byte>(5);
+                creatureAddon.sheathState = result.Read<byte>(6);
+                creatureAddon.pvpFlags = result.Read<byte>(7);
+                creatureAddon.emote = result.Read<uint>(8);
+                creatureAddon.aiAnimKit = result.Read<ushort>(9);
+                creatureAddon.movementAnimKit = result.Read<ushort>(10);
+                creatureAddon.meleeAnimKit = result.Read<ushort>(11);
+                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(12);
 
-                var tokens = new StringArray(result.Read<string>(10), ' ');
+                var tokens = new StringArray(result.Read<string>(13), ' ');
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
@@ -2272,16 +2298,16 @@ namespace Game
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (AdditionalSpellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has wrong spell {1} defined in `auras` field in `creatureaddon`.", guid, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has wrong spell {spellId} defined in `auras` field in `creatureaddon`.");
                         continue;
                     }
 
                     if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
-                        Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has SPELL_AURA_CONTROL_VEHICLE aura {1} defined in `auras` field in `creature_addon`.", guid, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_addon`.");
 
                     if (creatureAddon.auras.Contains(spellId))
                     {
-                        Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has duplicate aura (spell {1}) in `auras` field in `creature_addon`.", guid, spellId);
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has duplicate aura (spell {spellId}) in `auras` field in `creature_addon`.");
                         continue;
                     }
 
@@ -2298,33 +2324,53 @@ namespace Game
                 {
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(creatureAddon.mount))
                     {
-                        Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has invalid displayInfoId ({1}) for mount defined in `creatureaddon`", guid, creatureAddon.mount);
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creatureaddon`");
                         creatureAddon.mount = 0;
                     }
                 }
 
+                if (creatureAddon.standState >= (int)UnitStandStateType.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_addon`. Truncated to 0.");
+                    creatureAddon.standState = 0;
+                }
+
+                if (creatureAddon.animTier >= (int)AnimTier.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_addon`. Truncated to 0.");
+                    creatureAddon.animTier = 0;
+                }
+
+                if (creatureAddon.sheathState >= (int)SheathState.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_addon`. Truncated to 0.");
+                    creatureAddon.sheathState = 0;
+                }
+
+                // PvPFlags don't need any checking for the time being since they cover the entire range of a byte
+
                 if (!CliDB.EmotesStorage.ContainsKey(creatureAddon.emote))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has invalid emote ({1}) defined in `creatureaddon`.", guid, creatureAddon.emote);
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid emote ({creatureAddon.emote}) defined in `creatureaddon`.");
                     creatureAddon.emote = 0;
                 }
 
 
                 if (creatureAddon.aiAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.aiAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Guid: {0}) has invalid aiAnimKit ({1}) defined in `creature_addon`.", guid, creatureAddon.aiAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Guid: {guid}) has invalid aiAnimKit ({creatureAddon.aiAnimKit}) defined in `creature_addon`.");
                     creatureAddon.aiAnimKit = 0;
                 }
 
                 if (creatureAddon.movementAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.movementAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Guid: {0}) has invalid movementAnimKit ({1}) defined in `creature_addon`.", guid, creatureAddon.movementAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Guid: {guid}) has invalid movementAnimKit ({creatureAddon.movementAnimKit}) defined in `creature_addon`.");
                     creatureAddon.movementAnimKit = 0;
                 }
 
                 if (creatureAddon.meleeAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.meleeAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Guid: {0}) has invalid meleeAnimKit ({1}) defined in `creature_addon`.", guid, creatureAddon.meleeAnimKit);
+                    Log.outError(LogFilter.Sql, $"Creature (Guid: {guid}) has invalid meleeAnimKit ({creatureAddon.meleeAnimKit}) defined in `creature_addon`.");
                     creatureAddon.meleeAnimKit = 0;
                 }
 
@@ -2338,7 +2384,7 @@ namespace Game
                 count++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature addons in {1} ms", count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature addons in {Time.GetMSTimeDiffToNow(time)} ms");
         }
         public void LoadCreatureQuestItems()
         {
