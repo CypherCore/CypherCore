@@ -150,6 +150,19 @@ namespace Game.Scripting
         }
     }
 
+    public abstract class ScriptObjectAutoAddDBBound : ScriptObject
+    {
+        protected ScriptObjectAutoAddDBBound(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound()
+        {
+            return true;
+        }
+    }
+
     #region Map Script Base types
     public abstract class MapScript<T> : ScriptObject where T : Map
     {
@@ -202,129 +215,6 @@ namespace Game.Scripting
         }
     }
     #endregion
-
-    public class UnitScript : ScriptObject, IUnitModifyMeleeDamage, IUnitModifyPeriodicDamageAurasTick, IUnitModifySpellDamageTaken, IUnitOnDamage, IUnitOnHeal
-    {
-        public UnitScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public virtual void OnHeal(Unit healer, Unit reciever, ref uint gain) { }
-
-        public virtual void OnDamage(Unit attacker, Unit victim, ref uint damage) { }
-
-        // Called when DoT's Tick Damage is being Dealt
-        public virtual void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref uint damage) { }
-
-        // Called when Melee Damage is being Dealt
-        public virtual void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage) { }
-
-        // Called when Spell Damage is being Dealt
-        public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo) { }
-    }
-
-
-    public class AreaTriggerScript : ScriptObject, IAreaTriggerOnExit, IAreaTriggerOnTrigger
-    {
-        public AreaTriggerScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when the area trigger is activated by a player.
-        public virtual bool OnTrigger(Player player, AreaTriggerRecord trigger) { return false; }
-
-        // Called when the area trigger is left by a player.
-        public virtual bool OnExit(Player player, AreaTriggerRecord trigger) { return false; }
-    }
-
-    public class OnlyOnceAreaTriggerScript : AreaTriggerScript, IAreaTriggerTryHandleOnlyOnce
-    {
-        public OnlyOnceAreaTriggerScript(string name) : base(name) { }
-
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
-        {
-            InstanceScript instance = player.GetInstanceScript();
-            if (instance != null && instance.IsAreaTriggerDone(trigger.Id))
-                return true;
-
-            if (TryHandleOnce(player, trigger) && instance != null)
-                instance.MarkAreaTriggerDone(trigger.Id);
-
-            return true;
-        }
-
-        // returns true if the trigger was successfully handled, false if we should try again next time
-        public virtual bool TryHandleOnce(Player player, AreaTriggerRecord trigger) { return false; }
-
-        void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
-        {
-            script.ResetAreaTriggerDone(triggerId);
-        }
-
-        void ResetAreaTriggerDone(Player player, AreaTriggerRecord trigger)
-        {
-            InstanceScript instance = player.GetInstanceScript();
-            if (instance != null)
-                ResetAreaTriggerDone(instance, trigger.Id);
-        }
-    }
-
-    public class BattlefieldScript : ScriptObject, IBattlefieldGetBattlefield
-    {
-        public BattlefieldScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        public virtual BattleField GetBattlefield(Map map) { return null; }
-    }
-
-    public class BattlegroundScript : ScriptObject, IBattlegroundGetBattleground
-    {
-        public BattlegroundScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Should return a fully valid Battlegroundobject for the type ID.
-        public virtual Battleground GetBattleground() { return null; }
-    }
-
-    public class OutdoorPvPScript : ScriptObject, IOutdoorPvPGetOutdoorPvP
-    {
-        public OutdoorPvPScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Should return a fully valid OutdoorPvP object for the type ID.
-        public virtual OutdoorPvP GetOutdoorPvP(Map map) { return null; }
-    }
-
-    public class WeatherScript : ScriptObject, IWeatherOnChange, IWeatherOnUpdate
-    {
-        public WeatherScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Called when the weather changes in the zone this script is associated with.
-        public virtual void OnChange(Weather weather, WeatherState state, float grade) { }
-
-        public virtual void OnUpdate(Weather obj, uint diff) { }
-    }
 
     public class AuctionHouseScript : ScriptObject, IAuctionHouseOnAuctionAdd, IAuctionHouseOnAuctionExpire, IAuctionHouseOnAcutionRemove, IAuctionHouseOnAuctionSuccessful
     {

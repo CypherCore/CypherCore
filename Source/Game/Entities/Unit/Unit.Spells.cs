@@ -6,6 +6,8 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1839,7 +1841,7 @@ namespace Game.Entities
 
             // Hook for OnHeal Event
             uint tempGain = (uint)gain;
-            Global.ScriptMgr.OnHeal(healer, victim, ref tempGain);
+            Global.ScriptMgr.ForEach<IUnitOnHeal>(p => p.OnHeal(healer, victim, ref tempGain));
             gain = (int)tempGain;
 
             Unit unit = healer;
@@ -2031,8 +2033,8 @@ namespace Game.Entities
             }
 
             // Script Hook For CalculateSpellDamageTaken -- Allow scripts to change the Damage post class mitigation calculations
-            Global.ScriptMgr.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo);
-
+            Global.ScriptMgr.ForEach<IUnitModifySpellDamageTaken>(p => p.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo));
+            
             // Calculate absorb resist
             if (damage < 0)
                 damage = 0;

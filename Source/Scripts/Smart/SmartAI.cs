@@ -7,15 +7,16 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.DataStorage;
+using Game.Scripting.Interfaces.IAreaTrigger;
 
 namespace Scripts.Smart
 {
     [Script]
-    class SmartTrigger : AreaTriggerScript
+    class SmartTrigger : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public SmartTrigger() : base("SmartTrigger") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             if (!player.IsAlive())
                 return false;

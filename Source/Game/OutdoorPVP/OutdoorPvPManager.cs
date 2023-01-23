@@ -7,6 +7,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Misc;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IOutdoorPvP;
 using System.Collections.Generic;
 
 namespace Game.PvP
@@ -63,8 +65,8 @@ namespace Game.PvP
                     Log.outError(LogFilter.Sql, "Could not initialize OutdoorPvP object for type ID {0}; no entry in database.", outdoorPvpType);
                     continue;
                 }
-
-                OutdoorPvP pvp = Global.ScriptMgr.CreateOutdoorPvP(m_OutdoorPvPDatas[outdoorPvpType], map);
+                
+                OutdoorPvP pvp = Global.ScriptMgr.RunScriptRet<IOutdoorPvPGetOutdoorPvP, OutdoorPvP>(p => p.GetOutdoorPvP(map), m_OutdoorPvPDatas[outdoorPvpType], null);
                 if (pvp == null)
                 {
                     Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for type ID {0}; got NULL pointer from script.", outdoorPvpType);

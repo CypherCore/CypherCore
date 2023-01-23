@@ -4,6 +4,8 @@
 using Framework.Database;
 using Game.Entities;
 using Game.Maps;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IBattlefield;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,8 +54,9 @@ namespace Game.BattleFields
 
                 if (BattlefieldIdToMapId[i] != map.GetId())
                     continue;
-
-                BattleField bf = Global.ScriptMgr.CreateBattlefield(BattlefieldIdToScriptId[i], map);
+                
+                BattleField bf = Global.ScriptMgr.RunScriptRet<IBattlefieldGetBattlefield, BattleField>(p => p.GetBattlefield(map), BattlefieldIdToScriptId[i], null);
+                
                 if (bf == null)
                     continue;
 

@@ -19,7 +19,7 @@ namespace Scripts.Pets
     {
         [Script]
         // Doomguard - 11859, Terrorguard - 59000
-        public class npc_warlock_doomguard : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_warlock_doomguard : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_doomguard() : base("npc_warlock_doomguard")
             {
@@ -95,7 +95,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        public class npc_warl_demonic_gateway : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
             {
@@ -215,7 +215,7 @@ namespace Scripts.Pets
 
         // Dreadstalker - 98035
         [Script]
-        public class npc_warlock_dreadstalker : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_warlock_dreadstalker : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
             {
@@ -267,7 +267,7 @@ namespace Scripts.Pets
 
         [Script]
         // Darkglare - 103673
-        public class npc_pet_warlock_darkglare : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_pet_warlock_darkglare : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
             {
@@ -305,7 +305,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        public class npc_warlock_infernal : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_warlock_infernal : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_infernal() : base("npc_warlock_infernal")
             {
@@ -393,7 +393,7 @@ namespace Scripts.Pets
 
         // 107024 - Fel Lord
         [Script]
-        public class npc_warl_fel_lord : ScriptObjectAutoAdd, ICreatureGetAI
+        public class npc_warl_fel_lord : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warl_fel_lord() : base("npc_warl_fel_lord")
             {

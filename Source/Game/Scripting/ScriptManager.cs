@@ -16,6 +16,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.PvP;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.ICreature;
 using Game.Scripting.Interfaces.IFormula;
 using Game.Scripting.Interfaces.IGameObject;
@@ -437,39 +438,10 @@ namespace Game.Scripting
             Cypher.Assert(player != null);
             Cypher.Assert(trigger != null);
 
-            return RunScriptRet<AreaTriggerScript>(p => entered ? p.OnTrigger(player, trigger) : p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
-        }
-
-        //BattlefieldScript
-        public BattleField CreateBattlefield(uint scriptId, Map map)
-        {
-            return RunScriptRet<BattlefieldScript, BattleField>(p => p.GetBattlefield(map), scriptId, null);
-        }
-
-        //BattlegroundScript
-        public Battleground CreateBattleground(BattlegroundTypeId typeId)
-        {
-            // @todo Implement script-side Battlegrounds.
-            Cypher.Assert(false);
-            return null;
-        }
-
-        // OutdoorPvPScript
-        public OutdoorPvP CreateOutdoorPvP(uint scriptId, Map map)
-        {
-            return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(map), scriptId, null);
-        }
-
-        // WeatherScript
-        public void OnWeatherChange(Weather weather, WeatherState state, float grade)
-        {
-            Cypher.Assert(weather != null);
-            RunScript<WeatherScript>(p => p.OnChange(weather, state, grade), weather.GetScriptId());
-        }
-        public void OnWeatherUpdate(Weather weather, uint diff)
-        {
-            Cypher.Assert(weather != null);
-            RunScript<WeatherScript>(p => p.OnUpdate(weather, diff), weather.GetScriptId());
+            if (entered)
+                return RunScriptRet<IAreaTriggerOnTrigger>(a => a.OnTrigger(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
+            else
+                return RunScriptRet<IAreaTriggerOnExit>(p => p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
 
         // AuctionHouseScript
@@ -813,38 +785,6 @@ namespace Game.Scripting
         {
             Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnDisband(group));
-        }
-
-        // UnitScript
-        public void OnHeal(Unit healer, Unit reciever, ref uint gain)
-        {
-            uint dmg = gain;
-            ForEach<UnitScript>(p => p.OnHeal(healer, reciever, ref dmg));
-            gain = dmg;
-        }
-        public void OnDamage(Unit attacker, Unit victim, ref uint damage)
-        {
-            uint dmg = damage;
-            ForEach<UnitScript>(p => p.OnDamage(attacker, victim, ref dmg));
-            damage = dmg;
-        }
-        public void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref uint damage)
-        {
-            uint dmg = damage;
-            ForEach<UnitScript>(p => p.ModifyPeriodicDamageAurasTick(target, attacker, ref dmg));
-            damage = dmg;
-        }
-        public void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage)
-        {
-            uint dmg = damage;
-            ForEach<UnitScript>(p => p.ModifyMeleeDamage(target, attacker, ref dmg));
-            damage = dmg;
-        }
-        public void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo)
-        {
-            int dmg = damage;
-            ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
-            damage = dmg;
         }
 
         // AreaTriggerEntityScript

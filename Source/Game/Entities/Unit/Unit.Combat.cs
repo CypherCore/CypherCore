@@ -12,6 +12,8 @@ using Game.Loots;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1076,7 +1078,9 @@ namespace Game.Entities
             damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
-            Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);
+            var t = damageInfo.Target;
+            var a = damageInfo.Attacker;
+            Global.ScriptMgr.ForEach<IUnitModifyMeleeDamage>(p => p.ModifyMeleeDamage(t, a, ref damage));
 
             // Calculate armor reduction
             if (IsDamageReducedByArmor((SpellSchoolMask)damageInfo.DamageSchoolMask))

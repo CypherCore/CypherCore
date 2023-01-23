@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 
 namespace Game.Spells
 {
@@ -5020,7 +5022,7 @@ namespace Game.Spells
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
             // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
-            Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
+            Global.ScriptMgr.ForEach<IUnitModifyPeriodicDamageAurasTick>(p => p.ModifyPeriodicDamageAurasTick(target, caster, ref damage));
 
             switch (GetAuraType())
             {

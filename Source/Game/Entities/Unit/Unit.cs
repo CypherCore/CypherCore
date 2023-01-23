@@ -12,6 +12,8 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -2417,7 +2419,7 @@ namespace Game.Entities
                 attackerAI.DamageDealt(victim, ref damage, damagetype);
 
             // Hook for OnDamage Event
-            Global.ScriptMgr.OnDamage(attacker, victim, ref damage);
+            Global.ScriptMgr.ForEach<IUnitOnDamage>(p => p.OnDamage(attacker, victim, ref damage));
 
             // Signal to pets that their owner was attacked - except when DOT.
             if (attacker != victim && damagetype != DamageEffectType.DOT)

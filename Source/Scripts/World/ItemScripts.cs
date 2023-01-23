@@ -65,7 +65,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_only_for_flight : ScriptObjectAutoAdd, IItemOnUse
+    class item_only_for_flight : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_only_for_flight() : base("item_only_for_flight") { }
 
@@ -103,7 +103,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_gor_dreks_ointment : ScriptObjectAutoAdd, IItemOnUse
+    class item_gor_dreks_ointment : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_gor_dreks_ointment() : base("item_gor_dreks_ointment") { }
 
@@ -119,7 +119,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_mysterious_egg : ScriptObjectAutoAdd, IItemOnExpire
+    class item_mysterious_egg : ScriptObjectAutoAddDBBound, IItemOnExpire
     {
         public item_mysterious_egg() : base("item_mysterious_egg") { }
 
@@ -135,7 +135,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_disgusting_jar : ScriptObjectAutoAdd, IItemOnExpire
+    class item_disgusting_jar : ScriptObjectAutoAddDBBound, IItemOnExpire
     {
         public item_disgusting_jar() : base("item_disgusting_jar") { }
 
@@ -151,7 +151,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_petrov_cluster_bombs : ScriptObjectAutoAdd, IItemOnUse
+    class item_petrov_cluster_bombs : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
@@ -174,7 +174,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_captured_frog : ScriptObjectAutoAdd, IItemOnUse
+    class item_captured_frog : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_captured_frog() : base("item_captured_frog") { }
 
@@ -195,7 +195,7 @@ namespace Scripts.World.ItemScripts
 
     [Script] // Only used currently for
     // 19169: Nightfall
-    class item_generic_limit_chance_above_60 : ScriptObjectAutoAdd, IItemOnCastItemCombatSpell
+    class item_generic_limit_chance_above_60 : ScriptObjectAutoAddDBBound, IItemOnCastItemCombatSpell
     {
         public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
 
