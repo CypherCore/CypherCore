@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Framework.Constants;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraEffectHandler
     {

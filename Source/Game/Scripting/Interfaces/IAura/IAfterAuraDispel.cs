@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Game.Entities;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAfterAuraDispel : IAuraScript
     {

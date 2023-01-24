@@ -7,7 +7,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
 
-namespace Game.Scripting.Interfaces.Spell
+namespace Game.Scripting.Interfaces.ISpell
 {
     public interface IDestinationTargetSelectHandler : ITargetHookHandler
     {

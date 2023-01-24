@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IHasAuraEffects
     {

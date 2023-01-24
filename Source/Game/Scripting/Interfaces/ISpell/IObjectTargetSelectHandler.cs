@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Framework.Constants;
 using Game.Entities;
 
-namespace Game.Scripting.Interfaces.Spell
+namespace Game.Scripting.Interfaces.ISpell
 {
     public interface IObjectTargetSelectHandler : ITargetHookHandler
     {

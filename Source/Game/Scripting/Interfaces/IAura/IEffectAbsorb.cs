@@ -8,7 +8,7 @@ using Game.Entities;
 using Game.Spells;
 using static Game.ScriptInfo;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IEffectAbsorb : IAuraEffectHandler
     {
