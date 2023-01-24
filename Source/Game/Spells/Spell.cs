@@ -16,12 +16,14 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -2673,7 +2675,7 @@ namespace Game.Spells
             {
                 // now that we've done the basic check, now run the scripts
                 // should be done before the spell is actually executed
-                Global.ScriptMgr.OnPlayerSpellCast(playerCaster, this, skipCheck);
+                Global.ScriptMgr.ForEach<IPlayerOnSpellCast>(p => p.OnSpellCast(playerCaster, this, skipCheck));
 
                 // As of 3.0.2 pets begin attacking their owner's target immediately
                 // Let any pets know we've attacked something. Check DmgClass for harmful spells only

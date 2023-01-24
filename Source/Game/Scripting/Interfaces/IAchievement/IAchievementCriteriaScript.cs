@@ -6,7 +6,7 @@ using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-    public interface IAchievementCriteriaScript : IScriptObject
+    public interface IAchievementCriteriaOnCheck : IScriptObject
     {
         bool OnCheck(Player source, Unit target);
     }

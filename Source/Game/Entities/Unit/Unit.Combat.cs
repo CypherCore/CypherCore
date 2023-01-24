@@ -13,6 +13,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using Game.PvP;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
@@ -976,12 +977,12 @@ namespace Game.Entities
                 {
                     Player killedPlr = victim.ToPlayer();
                     if (killedPlr != null)
-                        Global.ScriptMgr.OnPVPKill(killerPlr, killedPlr);
+                        Global.ScriptMgr.ForEach<IPlayerOnPVPKill>(p => p.OnPVPKill(killerPlr, killedPlr));
                     else
                     {
                         Creature killedCre = victim.ToCreature();
                         if (killedCre != null)
-                            Global.ScriptMgr.OnCreatureKill(killerPlr, killedCre);
+                            Global.ScriptMgr.ForEach<IPlayerOnCreatureKill>(p => p.OnCreatureKill(killerPlr, killedCre));
                     }
                 }
                 else
@@ -991,7 +992,7 @@ namespace Game.Entities
                     {
                         Player killed = victim.ToPlayer();
                         if (killed != null)
-                            Global.ScriptMgr.OnPlayerKilledByCreature(killerCre, killed);
+                            Global.ScriptMgr.ForEach<IPlayerOnPlayerKilledByCreature>(p => p.OnPlayerKilledByCreature(killerCre, killed));
                     }
                 }
             }

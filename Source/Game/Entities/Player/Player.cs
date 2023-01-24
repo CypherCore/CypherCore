@@ -23,10 +23,12 @@ using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -543,7 +545,7 @@ namespace Game.Entities
                 if (diff >= m_nextSave)
                 {
                     // m_nextSave reset in SaveToDB call
-                    Global.ScriptMgr.OnPlayerSave(this);
+                    Global.ScriptMgr.ForEach<IPlayerOnSave>(p => p.OnSave(this));
                     SaveToDB();
                     Log.outDebug(LogFilter.Player, "Player '{0}' (GUID: {1}) saved", GetName(), GetGUID().ToString());
                 }
@@ -3653,7 +3655,7 @@ namespace Game.Entities
             StopMirrorTimers();                                     //disable timers(bars)
 
             // OnPlayerRepop hook
-            Global.ScriptMgr.OnPlayerRepop(this);
+            Global.ScriptMgr.ForEach<IPlayerOnPlayerRepop>(p => p.OnPlayerRepop(this));
         }
 
         public void StopMirrorTimers()
@@ -4749,7 +4751,7 @@ namespace Game.Entities
             if (amount == 0)
                 return true;
 
-            Global.ScriptMgr.OnPlayerMoneyChanged(this, amount);
+            Global.ScriptMgr.ForEach<IPlayerOnMoneyChanged>(p => p.OnMoneyChanged(this, amount));
 
             if (amount < 0)
                 SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
@@ -4932,7 +4934,7 @@ namespace Game.Entities
 
             PushQuests();
 
-            Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
+            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(this, (byte)oldLevel));
         }
 
         public bool CanParry()
@@ -6206,10 +6208,9 @@ namespace Game.Entities
 
             if (victim != null && victim.IsTypeId(TypeId.Unit) && !victim.ToCreature().HasLootRecipient())
                 return;
-
             uint level = GetLevel();
 
-            Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
+            Global.ScriptMgr.ForEach<IPlayerOnGiveXP>(p => p.OnGiveXP(this, ref xp, victim));
 
             // XP to money conversion processed in Player.RewardQuest
             if (IsMaxLevel())

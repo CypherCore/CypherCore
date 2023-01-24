@@ -7,6 +7,7 @@ using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
 using Game.Accounts;
+using Game.AI;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Chat;
@@ -15,6 +16,7 @@ using Game.Guilds;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -188,7 +190,7 @@ namespace Game
                 _player.RemoveSocial();
 
                 //! Call script hook before deletion
-                Global.ScriptMgr.OnPlayerLogout(GetPlayer());
+                Global.ScriptMgr.ForEach<IPlayerOnLogout>(p => p.OnLogout(_player));
 
                 //! Remove the player from the world
                 // the player may not be in the world when logging out

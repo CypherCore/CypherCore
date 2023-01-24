@@ -7,15 +7,16 @@ using Game.Groups;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
 
 namespace Game.DungeonFinding
 {
-    class LFGPlayerScript : PlayerScript
+    class LFGPlayerScript : ScriptObjectAutoAdd, IPlayerOnLogout, IPlayerOnLogin, IPlayerOnMapChanged
     {
         public LFGPlayerScript() : base("LFGPlayerScript") { }
 
         // Player Hooks
-        public override void OnLogout(Player player)
+        public void OnLogout(Player player)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -26,7 +27,7 @@ namespace Game.DungeonFinding
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
         }
 
-        public override void OnLogin(Player player)
+        public void OnLogin(Player player)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -50,7 +51,7 @@ namespace Game.DungeonFinding
             // @todo - Restore LfgPlayerData and send proper status to player if it was in a group
         }
 
-        public override void OnMapChanged(Player player)
+        public void OnMapChanged(Player player)
         {
             Map map = player.GetMap();
 

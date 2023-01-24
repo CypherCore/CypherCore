@@ -16,11 +16,14 @@ using Game.Maps;
 using Game.Movement;
 using Game.PvP;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IAchievement;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.ICreature;
 using Game.Scripting.Interfaces.IFormula;
 using Game.Scripting.Interfaces.IGameObject;
 using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.ITransport;
 using Game.Scripting.Interfaces.IVehicle;
 using Game.Scripting.Interfaces.IWorld;
 using Game.Scripting.Interfaces.IWorldState;
@@ -530,187 +533,30 @@ namespace Game.Scripting
                 return RunScriptRet<IAreaTriggerOnExit>(p => p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
 
+        #region Player Chat
 
-        // TransportScript
-        public void OnAddPassenger(Transport transport, Player player)
-        {
-            Cypher.Assert(transport != null);
-            Cypher.Assert(player != null);
-
-            RunScript<TransportScript>(p => p.OnAddPassenger(transport, player), transport.GetScriptId());
-        }
-        public void OnAddCreaturePassenger(Transport transport, Creature creature)
-        {
-            Cypher.Assert(transport != null);
-            Cypher.Assert(creature != null);
-
-            RunScript<TransportScript>(p => p.OnAddCreaturePassenger(transport, creature), transport.GetScriptId());
-        }
-        public void OnRemovePassenger(Transport transport, Player player)
-        {
-            Cypher.Assert(transport != null);
-            Cypher.Assert(player != null);
-
-            RunScript<TransportScript>(p => p.OnRemovePassenger(transport, player), transport.GetScriptId());
-        }
-        public void OnTransportUpdate(Transport transport, uint diff)
-        {
-            Cypher.Assert(transport != null);
-
-            RunScript<TransportScript>(p => p.OnUpdate(transport, diff), transport.GetScriptId());
-        }
-        public void OnRelocate(Transport transport, uint mapId, float x, float y, float z)
-        {
-            RunScript<TransportScript>(p => p.OnRelocate(transport, mapId, x, y, z), transport.GetScriptId());
-        }
-
-        // Achievement
-        public void OnAchievementCompleted(Player player, AchievementRecord achievement)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(achievement != null);
-
-            RunScript<AchievementScript>(p => p.OnCompleted(player, achievement), Global.AchievementMgr.GetAchievementScriptId(achievement.Id));
-        }
-        
-        // AchievementCriteriaScript
-        public bool OnCriteriaCheck(uint ScriptId, Player source, Unit target)
-        {
-            Cypher.Assert(source != null);
-            // target can be NULL.
-
-            return RunScriptRet<AchievementCriteriaScript>(p => p.OnCheck(source, target), ScriptId);
-        }
-
-        // PlayerScript
-        public void OnPVPKill(Player killer, Player killed)
-        {
-            ForEach<PlayerScript>(p => p.OnPVPKill(killer, killed));
-        }
-        public void OnCreatureKill(Player killer, Creature killed)
-        {
-            ForEach<PlayerScript>(p => p.OnCreatureKill(killer, killed));
-        }
-        public void OnPlayerKilledByCreature(Creature killer, Player killed)
-        {
-            ForEach<PlayerScript>(p => p.OnPlayerKilledByCreature(killer, killed));
-        }
-        public void OnPlayerLevelChanged(Player player, byte oldLevel)
-        {
-            ForEach<PlayerScript>(p => p.OnLevelChanged(player, oldLevel));
-        }
-        public void OnPlayerFreeTalentPointsChanged(Player player, uint newPoints)
-        {
-            ForEach<PlayerScript>(p => p.OnFreeTalentPointsChanged(player, newPoints));
-        }
-        public void OnPlayerTalentsReset(Player player, bool noCost)
-        {
-            ForEach<PlayerScript>(p => p.OnTalentsReset(player, noCost));
-        }
-        public void OnPlayerMoneyChanged(Player player, long amount)
-        {
-            ForEach<PlayerScript>(p => p.OnMoneyChanged(player, amount));
-        }
-        public void OnGivePlayerXP(Player player, uint amount, Unit victim)
-        {
-            ForEach<PlayerScript>(p => p.OnGiveXP(player, amount, victim));
-        }
-        public void OnPlayerReputationChange(Player player, uint factionID, int standing, bool incremental)
-        {
-            ForEach<PlayerScript>(p => p.OnReputationChange(player, factionID, standing, incremental));
-        }
-        public void OnPlayerDuelRequest(Player target, Player challenger)
-        {
-            ForEach<PlayerScript>(p => p.OnDuelRequest(target, challenger));
-        }
-        public void OnPlayerDuelStart(Player player1, Player player2)
-        {
-            ForEach<PlayerScript>(p => p.OnDuelStart(player1, player2));
-        }
-        public void OnPlayerDuelEnd(Player winner, Player loser, DuelCompleteType type)
-        {
-            ForEach<PlayerScript>(p => p.OnDuelEnd(winner, loser, type));
-        }
         public void OnPlayerChat(Player player, ChatMsg type, Language lang, string msg)
         {
-            ForEach<PlayerScript>(p => p.OnChat(player, type, lang, msg));
+            ForEach<IPlayerOnChat>(p => p.OnChat(player, type, lang, msg));
         }
         public void OnPlayerChat(Player player, ChatMsg type, Language lang, string msg, Player receiver)
         {
-            ForEach<PlayerScript>(p => p.OnChat(player, type, lang, msg, receiver));
+            ForEach<IPlayerOnChatWhisper>(p => p.OnChat(player, type, lang, msg, receiver));
         }
         public void OnPlayerChat(Player player, ChatMsg type, Language lang, string msg, Group group)
         {
-            ForEach<PlayerScript>(p => p.OnChat(player, type, lang, msg, group));
+            ForEach<IPlayerOnChatGroup>(p => p.OnChat(player, type, lang, msg, group));
         }
         public void OnPlayerChat(Player player, ChatMsg type, Language lang, string msg, Guild guild)
         {
-            ForEach<PlayerScript>(p => p.OnChat(player, type, lang, msg, guild));
+            ForEach<IPlayerOnChatGuild>(p => p.OnChat(player, type, lang, msg, guild));
         }
         public void OnPlayerChat(Player player, ChatMsg type, Language lang, string msg, Channel channel)
         {
-            ForEach<PlayerScript>(p => p.OnChat(player, type, lang, msg, channel));
+            ForEach<IPlayerOnChatChannel>(p => p.OnChat(player, type, lang, msg, channel));
         }
-        public void OnPlayerClearEmote(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnClearEmote(player));
-        }
-        public void OnPlayerTextEmote(Player player, uint textEmote, uint emoteNum, ObjectGuid guid)
-        {
-            ForEach<PlayerScript>(p => p.OnTextEmote(player, textEmote, emoteNum, guid));
-        }
-        public void OnPlayerSpellCast(Player player, Spell spell, bool skipCheck)
-        {
-            ForEach<PlayerScript>(p => p.OnSpellCast(player, spell, skipCheck));
-        }
-        public void OnPlayerLogin(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnLogin(player));
-        }
-        public void OnPlayerLogout(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnLogout(player));
-        }
-        public void OnPlayerCreate(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnCreate(player));
-        }
-        public void OnPlayerDelete(ObjectGuid guid, uint accountId)
-        {
-            ForEach<PlayerScript>(p => p.OnDelete(guid, accountId));
-        }
-        public void OnPlayerFailedDelete(ObjectGuid guid, uint accountId)
-        {
-            ForEach<PlayerScript>(p => p.OnFailedDelete(guid, accountId));
-        }
-        public void OnPlayerSave(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnSave(player));
-        }
-        public void OnPlayerBindToInstance(Player player, Difficulty difficulty, uint mapid, bool permanent, byte extendState)
-        {
-            ForEach<PlayerScript>(p => p.OnBindToInstance(player, difficulty, mapid, permanent, extendState));
-        }
-        public void OnPlayerUpdateZone(Player player, uint newZone, uint newArea)
-        {
-            ForEach<PlayerScript>(p => p.OnUpdateZone(player, newZone, newArea));
-        }
-        public void OnPlayerRepop(Player player)
-        {
-            ForEach<PlayerScript>(p => p.OnPlayerRepop(player));
-        }
-        public void OnQuestStatusChange(Player player, uint questId)
-        {
-            ForEach<PlayerScript>(p => p.OnQuestStatusChange(player, questId));
-        }
-        public void OnMovieComplete(Player player, uint movieId)
-        {
-            ForEach<PlayerScript>(p => p.OnMovieComplete(player, movieId));
-        }
-        public void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId)
-        {
-            ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceId, responseId));
-        }
+
+        #endregion
 
         // GuildScript
         public void OnGuildAddMember(Guild guild, Player player, byte plRank)

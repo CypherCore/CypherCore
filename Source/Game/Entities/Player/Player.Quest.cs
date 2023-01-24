@@ -12,6 +12,7 @@ using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -827,7 +828,7 @@ namespace Game.Entities
 
             SendQuestUpdate(questId);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, questId);
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
         }
 
@@ -1190,7 +1191,7 @@ namespace Game.Entities
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, questId);
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
         }
 
@@ -1826,7 +1827,7 @@ namespace Game.Entities
                 if (!quest.IsAutoComplete())
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
 
-                Global.ScriptMgr.OnQuestStatusChange(this, questId);
+                Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
                 Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
             }
 

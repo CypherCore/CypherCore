@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -315,7 +316,7 @@ namespace Game
         
         public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental, bool spillOverOnly, bool noSpillover)
         {
-            Global.ScriptMgr.OnPlayerReputationChange(_player, factionEntry.Id, standing, incremental);
+            Global.ScriptMgr.ForEach<IPlayerOnReputationChange>(p => p.OnReputationChange(_player, factionEntry.Id, standing, incremental));
             bool res = false;
             if (!noSpillover)
             {

@@ -12,6 +12,7 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
+using Game.Scripting.Interfaces.IAchievement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -4487,8 +4488,8 @@ namespace Game.Achievements
                     Unit unitTarget = null;
                     if (target)
                         unitTarget = target.ToUnit();
-                    return Global.ScriptMgr.OnCriteriaCheck(ScriptId, source.ToPlayer(), unitTarget.ToUnit());
-                }
+                    return Global.ScriptMgr.RunScriptRet<IAchievementCriteriaOnCheck>(p => p.OnCheck(source.ToPlayer(), unitTarget.ToUnit()), ScriptId);
+                    }
                 case CriteriaDataType.MapPlayerCount:
                     return source.GetMap().GetPlayersCountExceptGMs() <= MapPlayers.MaxCount;
                 case CriteriaDataType.TTeam:

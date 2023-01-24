@@ -7,7 +7,7 @@ using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-    public interface IAchievementScript : IScriptObject
+    public interface IAchievementOnCompleted : IScriptObject
     {
         void OnCompleted(Player player, AchievementRecord achievement);
     }

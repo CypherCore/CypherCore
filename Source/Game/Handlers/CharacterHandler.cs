@@ -13,6 +13,7 @@ using Game.Guilds;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -610,7 +611,7 @@ namespace Game
                         if (success)
                         {
                             Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
-                            Global.ScriptMgr.OnPlayerCreate(newChar);
+                            Global.ScriptMgr.ForEach<IPlayerOnCreate>(p => p.OnCreate(newChar));
                             Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeGender(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
                             SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
@@ -644,14 +645,14 @@ namespace Game
             // can't delete loaded character
             if (Global.ObjAccessor.FindPlayer(charDelete.Guid))
             {
-                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.ForEach<IPlayerOnFailedDelete>(p => p.OnFailedDelete(charDelete.Guid, initAccountId));
                 return;
             }
 
             // is guild leader
             if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid))
             {
-                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.ForEach<IPlayerOnFailedDelete>(p => p.OnFailedDelete(charDelete.Guid, initAccountId));
                 SendCharDelete(ResponseCodes.CharDeleteFailedGuildLeader);
                 return;
             }
@@ -659,7 +660,7 @@ namespace Game
             // is arena team captain
             if (Global.ArenaTeamMgr.GetArenaTeamByCaptain(charDelete.Guid) != null)
             {
-                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.ForEach<IPlayerOnFailedDelete>(p => p.OnFailedDelete(charDelete.Guid, initAccountId));
                 SendCharDelete(ResponseCodes.CharDeleteFailedArenaCaptain);
                 return;
             }
@@ -667,7 +668,7 @@ namespace Game
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(charDelete.Guid);
             if (characterInfo == null)
             {
-                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.ForEach<IPlayerOnFailedDelete>(p => p.OnFailedDelete(charDelete.Guid, initAccountId));
                 return;
             }
 
@@ -678,7 +679,7 @@ namespace Game
             // prevent deleting other players' characters using cheating tools
             if (accountId != GetAccountId())
             {
-                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.ForEach<IPlayerOnFailedDelete>(p => p.OnFailedDelete(charDelete.Guid, initAccountId));
                 return;
             }
 
@@ -686,7 +687,8 @@ namespace Game
             Log.outInfo(LogFilter.Player, "Account: {0}, IP: {1} deleted character: {2}, {3}, Level: {4}", accountId, IP_str, name, charDelete.Guid.ToString(), level);
 
             // To prevent hook failure, place hook before removing reference from DB
-            Global.ScriptMgr.OnPlayerDelete(charDelete.Guid, initAccountId); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
+            Global.ScriptMgr.ForEach<IPlayerOnDelete>(p => p.OnDelete(charDelete.Guid, initAccountId)); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
+
             // Shouldn't interfere with character deletion though
 
             Global.CalendarMgr.RemoveAllPlayerEventsAndInvites(charDelete.Guid);
@@ -1087,7 +1089,7 @@ namespace Game
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
-            Global.ScriptMgr.OnPlayerLogin(pCurrChar);
+            Global.ScriptMgr.ForEach<IPlayerOnLogin>(p => p.OnLogin(pCurrChar));
         }
 
         public void AbortLogin(LoginFailureReason reason)

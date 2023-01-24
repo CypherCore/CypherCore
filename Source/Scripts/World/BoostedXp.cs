@@ -5,14 +5,15 @@ using Framework.Constants;
 using Game;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
 
 namespace Scripts.World
 {
-    class xp_boost_PlayerScript : PlayerScript
+    class xp_boost_PlayerScript : ScriptObjectAutoAdd, IPlayerOnGiveXP
     {
         public xp_boost_PlayerScript() : base("xp_boost_PlayerScript") { }
 
-        void OnGiveXP(Player player, ref uint amount, Unit unit)
+        public void OnGiveXP(Player player, ref uint amount, Unit victim)
         {
             if (IsXPBoostActive())
                 amount *= (uint)WorldConfig.GetFloatValue(WorldCfg.RateXpBoost);

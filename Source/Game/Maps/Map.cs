@@ -14,6 +14,7 @@ using Game.Networking.Packets;
 using Game.Scenarios;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IMap;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IWorldState;
 using System;
 using System.Collections;
@@ -128,7 +129,7 @@ namespace Game.Maps
             Cypher.Assert(map != null);
             Cypher.Assert(player != null);
 
-            Global.ScriptMgr.ForEach<PlayerScript>(p => p.OnMapChanged(player));
+            Global.ScriptMgr.ForEach<IPlayerOnMapChanged>(p => p.OnMapChanged(player));
 
             var record = map.GetEntry();
 
