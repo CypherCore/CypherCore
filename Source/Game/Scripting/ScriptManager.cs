@@ -20,6 +20,7 @@ using Game.Scripting.Interfaces.IAchievement;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.ICreature;
 using Game.Scripting.Interfaces.IFormula;
+using Game.Scripting.Interfaces.IGuild;
 using Game.Scripting.Interfaces.IGameObject;
 using Game.Scripting.Interfaces.IItem;
 using Game.Scripting.Interfaces.IPlayer;
@@ -36,6 +37,11 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using Game.Scripting.Interfaces.IGroup;
+using Game.Scripting.Interfaces.IAreaTriggerEntity;
+using Game.Scripting.Interfaces.IConversation;
+using Game.Scripting.Interfaces.IScene;
+using Game.Scripting.Interfaces.IQuest;
 
 namespace Game.Scripting
 {
@@ -47,6 +53,7 @@ namespace Game.Scripting
 
         Dictionary<System.Type, List<IScriptObject>> _scriptByType = new();
         Dictionary<uint, WaypointPath> _waypointStore = new();
+        List<IScriptObject> _blankList = new();
 
         // creature entry + chain ID
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
@@ -75,6 +82,13 @@ namespace Game.Scripting
 
         #region Main Script API
 
+        public IEnumerable<T> GetInterfaces<T>() where T : IScriptObject
+        {
+            if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
+                return ifaceImp.Cast<T>();
+
+            return _blankList.Cast<T>(); // we dont return null as they might be looping. Empty list is best here.
+        }
 
         public void ForEach<T>(Action<T> a) where T : IScriptObject
         {
@@ -558,155 +572,6 @@ namespace Game.Scripting
 
         #endregion
 
-        // GuildScript
-        public void OnGuildAddMember(Guild guild, Player player, byte plRank)
-        {
-            ForEach<GuildScript>(p => p.OnAddMember(guild, player, plRank));
-        }
-        public void OnGuildRemoveMember(Guild guild, Player player, bool isDisbanding, bool isKicked)
-        {
-            ForEach<GuildScript>(p => p.OnRemoveMember(guild, player, isDisbanding, isKicked));
-        }
-        public void OnGuildMOTDChanged(Guild guild, string newMotd)
-        {
-            ForEach<GuildScript>(p => p.OnMOTDChanged(guild, newMotd));
-        }
-        public void OnGuildInfoChanged(Guild guild, string newInfo)
-        {
-            ForEach<GuildScript>(p => p.OnInfoChanged(guild, newInfo));
-        }
-        public void OnGuildCreate(Guild guild, Player leader, string name)
-        {
-            ForEach<GuildScript>(p => p.OnCreate(guild, leader, name));
-        }
-        public void OnGuildDisband(Guild guild)
-        {
-            ForEach<GuildScript>(p => p.OnDisband(guild));
-        }
-        public void OnGuildMemberWitdrawMoney(Guild guild, Player player, ulong amount, bool isRepair)
-        {
-            ForEach<GuildScript>(p => p.OnMemberWitdrawMoney(guild, player, amount, isRepair));
-        }
-        public void OnGuildMemberDepositMoney(Guild guild, Player player, ulong amount)
-        {
-            ForEach<GuildScript>(p => p.OnMemberDepositMoney(guild, player, amount));
-        }
-        public void OnGuildItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, byte srcContainer, byte srcSlotId, bool isDestBank, byte destContainer, byte destSlotId)
-        {
-            ForEach<GuildScript>(p => p.OnItemMove(guild, player, pItem, isSrcBank, srcContainer, srcSlotId, isDestBank, destContainer, destSlotId));
-        }
-        public void OnGuildEvent(Guild guild, byte eventType, ulong playerGuid1, ulong playerGuid2, byte newRank)
-        {
-            ForEach<GuildScript>(p => p.OnEvent(guild, eventType, playerGuid1, playerGuid2, newRank));
-        }
-        public void OnGuildBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId)
-        {
-            ForEach<GuildScript>(p => p.OnBankEvent(guild, eventType, tabId, playerGuid, itemOrMoney, itemStackCount, destTabId));
-        }
-
-        // GroupScript
-        public void OnGroupAddMember(Group group, ObjectGuid guid)
-        {
-            Cypher.Assert(group);
-            ForEach<GroupScript>(p => p.OnAddMember(group, guid));
-        }
-        public void OnGroupInviteMember(Group group, ObjectGuid guid)
-        {
-            Cypher.Assert(group);
-            ForEach<GroupScript>(p => p.OnInviteMember(group, guid));
-        }
-        public void OnGroupRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
-        {
-            Cypher.Assert(group);
-            ForEach<GroupScript>(p => p.OnRemoveMember(group, guid, method, kicker, reason));
-        }
-        public void OnGroupChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
-        {
-            Cypher.Assert(group);
-            ForEach<GroupScript>(p => p.OnChangeLeader(group, newLeaderGuid, oldLeaderGuid));
-        }
-        public void OnGroupDisband(Group group)
-        {
-            Cypher.Assert(group);
-            ForEach<GroupScript>(p => p.OnDisband(group));
-        }
-
-        // AreaTriggerEntityScript
-        public AreaTriggerAI GetAreaTriggerAI(AreaTrigger areaTrigger)
-        {
-            Cypher.Assert(areaTrigger);
-
-            return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
-        }
-
-        // ConversationScript
-        public void OnConversationCreate(Conversation conversation, Unit creator)
-        {
-            Cypher.Assert(conversation != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
-        }
-
-        public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
-        {
-            Cypher.Assert(conversation != null);
-            Cypher.Assert(sender != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
-        }
-
-        //SceneScript
-        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(sceneTemplate != null);
-
-            RunScript<SceneScript>(script => script.OnSceneStart(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
-        }
-        public void OnSceneTrigger(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(sceneTemplate != null);
-
-            RunScript<SceneScript>(script => script.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName), sceneTemplate.ScriptId);
-        }
-        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(sceneTemplate != null);
-
-            RunScript<SceneScript>(script => script.OnSceneCancel(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
-        }
-        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(sceneTemplate != null);
-
-            RunScript<SceneScript>(script => script.OnSceneComplete(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
-        }
-
-        //QuestScript
-        public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(quest != null);
-
-            RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
-        }
-        public void OnQuestAcknowledgeAutoAccept(Player player, Quest quest)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(quest != null);
-
-            RunScript<QuestScript>(script => script.OnAcknowledgeAutoAccept(player, quest), quest.ScriptId);
-        }
-        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(quest != null);
-
-            RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
-        }
         
 
     }

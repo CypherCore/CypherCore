@@ -16,6 +16,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -3705,7 +3706,7 @@ namespace Game.Spells
             player.RemoveRewardedQuest(quest_id);
 
             Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(player, quest_id));
-            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
         }
 
         [SpellEffectHandler(SpellEffectName.SendTaxi)]

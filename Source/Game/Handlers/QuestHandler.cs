@@ -10,6 +10,7 @@ using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 
 namespace Game
 {
@@ -464,7 +465,7 @@ namespace Game
                     Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(_player, questId));
 
                     if (quest != null)
-                        Global.ScriptMgr.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None);
+                        Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
                 }
 
                 _player.UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);
@@ -575,7 +576,7 @@ namespace Game
             if (quest == null)
                 return;
 
-            Global.ScriptMgr.OnQuestAcknowledgeAutoAccept(_player, quest);
+            Global.ScriptMgr.RunScript<IQuestOnAckAutoAccept>(script => script.OnAcknowledgeAutoAccept(_player, quest), quest.ScriptId);
         }
 
         [WorldPacketHandler(ClientOpcodes.PushQuestToParty)]

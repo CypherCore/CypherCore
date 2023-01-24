@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnBankEvent : IScriptObject
     {
-        void OnAddMember(Guilds.Guild guild, Player player, byte plRank);
+        void OnBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId);
     }
 }

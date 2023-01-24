@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -110,7 +111,7 @@ namespace Game.Chat
                 player.RemoveRewardedQuest(quest.Id);
 
                 Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(player, quest.Id));
-                Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
+                Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
 
                 handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
                 return true;

@@ -7,10 +7,12 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Guilds;
 using Game.Loots;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IGroup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -316,7 +318,7 @@ namespace Game.Groups
 
             player.SetGroupInvite(this);
 
-            Global.ScriptMgr.OnGroupInviteMember(this, player.GetGUID());
+            Global.ScriptMgr.ForEach<IGroupOnInviteMember>(p => p.OnInviteMember(this, player.GetGUID()));
 
             return true;
         }
@@ -442,7 +444,7 @@ namespace Game.Groups
             }
 
             SendUpdate();
-            Global.ScriptMgr.OnGroupAddMember(this, player.GetGUID());
+            Global.ScriptMgr.ForEach<IGroupOnAddMember>(p => p.OnAddMember(this, player.GetGUID()));
 
             if (!IsLeader(player.GetGUID()) && !IsBGGroup() && !IsBFGroup())
             {
@@ -518,7 +520,7 @@ namespace Game.Groups
         {
             BroadcastGroupUpdate();
 
-            Global.ScriptMgr.OnGroupRemoveMember(this, guid, method, kicker, reason);
+            Global.ScriptMgr.ForEach<IGroupOnRemoveMember>(p => p.OnRemoveMember(this, guid, method, kicker, reason));
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
             if (player)
@@ -643,7 +645,7 @@ namespace Game.Groups
             if (newLeader == null)
                 return;
 
-            Global.ScriptMgr.OnGroupChangeLeader(this, newLeaderGuid, m_leaderGuid);
+            Global.ScriptMgr.ForEach<IGroupOnChangeLeader>(p => p.OnChangeLeader(this, newLeaderGuid, m_leaderGuid));
 
             if (!IsBGGroup() && !IsBFGroup())
             {
@@ -679,7 +681,7 @@ namespace Game.Groups
 
         public void Disband(bool hideDestroy = false)
         {
-            Global.ScriptMgr.OnGroupDisband(this);
+            Global.ScriptMgr.ForEach<IGroupOnDisband>(p => p.OnDisband(this));
 
             Player player;
             foreach (var member in m_memberSlots)

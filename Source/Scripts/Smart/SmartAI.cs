@@ -8,6 +8,8 @@ using Game.Entities;
 using Game.Scripting;
 using Game.DataStorage;
 using Game.Scripting.Interfaces.IAreaTrigger;
+using Game.Scripting.Interfaces.IAreaTriggerEntity;
+using Game.Scripting.Interfaces.IScene;
 
 namespace Scripts.Smart
 {
@@ -30,43 +32,43 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartAreaTriggerEntityScript : AreaTriggerEntityScript
+    class SmartAreaTriggerEntityScript : ScriptObjectAutoAddDBBound, IAreaTriggerEntityGetAI
     {
         public SmartAreaTriggerEntityScript() : base("SmartAreaTriggerAI") { }
 
-        public override AreaTriggerAI GetAI(AreaTrigger areaTrigger)
+        public AreaTriggerAI GetAI(AreaTrigger areaTrigger)
         {
             return new SmartAreaTriggerAI(areaTrigger);
         }
     }
 
     [Script]
-    class SmartScene : SceneScript
+    class SmartScene : ScriptObjectAutoAddDBBound, ISceneOnSceneStart, ISceneOnSceneTrigger, ISceneOnSceneChancel, ISceneOnSceneComplete
     {
         public SmartScene() : base("SmartScene") { }
 
-        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);

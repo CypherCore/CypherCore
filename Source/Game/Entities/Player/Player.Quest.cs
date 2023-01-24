@@ -13,6 +13,7 @@ using Game.Misc;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -829,7 +830,7 @@ namespace Game.Entities
             SendQuestUpdate(questId);
 
             Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
-            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status), quest.ScriptId);
         }
 
         public void CompleteQuest(uint quest_id)
@@ -1192,7 +1193,7 @@ namespace Game.Entities
             SetCanDelayTeleport(false);
 
             Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
-            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded), quest.ScriptId);
         }
 
         public void SetRewardedQuest(uint quest_id)
@@ -1828,7 +1829,7 @@ namespace Game.Entities
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
 
                 Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
-                Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
+                Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, status), quest.ScriptId);
             }
 
             if (update)
@@ -2577,7 +2578,7 @@ namespace Game.Entities
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
             if (quest != null)
-                Global.ScriptMgr.OnQuestObjectiveChange(this, quest, objective, oldData, data);
+                Global.ScriptMgr.RunScript<IQuestOnQuestObjectiveChange>(script => script.OnQuestObjectiveChange(this, quest, objective, oldData, data), quest.ScriptId);
 
             // Add to save
             m_QuestStatusSave[objective.QuestID] = QuestSaveType.Default;

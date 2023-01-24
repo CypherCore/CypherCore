@@ -12,6 +12,7 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting.Interfaces.IConversation;
 using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Generic;
@@ -462,7 +463,7 @@ namespace Game
         {
             Entities.Conversation convo = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
             if (convo != null)
-                Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
+                Global.ScriptMgr.RunScript<IConversationOnConversationLineStarted>(script => script.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player), convo.GetScriptId());
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestLatestSplashScreen)]

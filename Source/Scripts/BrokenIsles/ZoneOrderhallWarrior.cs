@@ -7,6 +7,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Movement;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IScene;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -1120,11 +1121,11 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
     }
 
     [Script]
-    class scene_odyn_intro : SceneScript
+    class scene_odyn_intro : ScriptObjectAutoAddDBBound, ISceneOnSceneStart, ISceneOnSceneChancel, ISceneOnSceneComplete
     {
         public scene_odyn_intro() : base("scene_odyn_intro") { }
 
-        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             PhasingHandler.RemovePhase(player, PhaseIds.Danica, false);
             PhasingHandler.RemovePhase(player, PhaseIds.Odyn, true);
@@ -1132,13 +1133,13 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
         }
 
         // Called when a scene is canceled
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             Finish(player);
         }
 
         // Called when a scene is completed
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             Finish(player);
         }
