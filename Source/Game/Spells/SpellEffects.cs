@@ -4729,7 +4729,7 @@ namespace Game.Spells
             if (!CliDB.CurrencyTypesStorage.ContainsKey(effectInfo.MiscValue))
                 return;
 
-            unitTarget.ToPlayer().ModifyCurrency((CurrencyTypes)effectInfo.MiscValue, damage);
+            unitTarget.ToPlayer().ModifyCurrency((uint)effectInfo.MiscValue, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.CastButton)]
