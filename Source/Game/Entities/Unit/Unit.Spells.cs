@@ -2928,6 +2928,7 @@ namespace Game.Entities
 
         public void RemoveAurasWithMechanic(ulong mechanicMaskToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default, uint exceptSpellId = 0, bool withEffectMechanics = false)
         {
+            List<Aura> aurasToUpdateTargets = new();
             RemoveAppliedAuras(aurApp =>
             {
                 Aura aura = aurApp.GetBase();
@@ -2943,9 +2944,12 @@ namespace Game.Entities
                     return true;
 
                 // effect mechanic matches required mask for removal - don't remove, only update targets
-                aura.UpdateTargetMap(aura.GetCaster());
+                aurasToUpdateTargets.Add(aura);
                 return false;
             }, removeMode);
+
+            foreach (Aura aura in aurasToUpdateTargets)
+                aura.UpdateTargetMap(aura.GetCaster());
         }
         public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {

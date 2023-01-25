@@ -2439,15 +2439,19 @@ namespace Game.Spells
                         target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id);
                     else
                     {
+                        List<Aura> aurasToUpdateTargets = new();
                         target.RemoveAppliedAuras(aurApp =>
                         {
                             Aura aura = aurApp.GetBase();
                             if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & mechanicImmunity) != 0)
-                                aura.UpdateTargetMap(aura.GetCaster());
+                                aurasToUpdateTargets.Add(aura);
 
                             // only update targets, don't remove anything
                             return false;
                         });
+
+                        foreach (Aura aura in aurasToUpdateTargets)
+                            aura.UpdateTargetMap(aura.GetCaster());
                     }
                 }
             }
