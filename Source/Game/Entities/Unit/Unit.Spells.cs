@@ -2949,7 +2949,13 @@ namespace Game.Entities
             }, removeMode);
 
             foreach (Aura aura in aurasToUpdateTargets)
+            {
                 aura.UpdateTargetMap(aura.GetCaster());
+
+                // Fully remove the aura if all effects were removed
+                if (!aura.IsPassive() && aura.GetOwner() == this && aura.GetApplicationOfTarget(GetGUID()) == null)
+                    aura.Remove(removeMode);
+            }
         }
         public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {
