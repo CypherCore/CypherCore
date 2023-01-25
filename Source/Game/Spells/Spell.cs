@@ -4505,7 +4505,7 @@ namespace Game.Spells
             }
 
             foreach (var reagentsCurrency in m_spellInfo.ReagentsCurrency)
-                p_caster.ModifyCurrency((CurrencyTypes)reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, false, true);
+                p_caster.ModifyCurrency(reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, false, true);
         }
 
         void HandleThreatSpells()
