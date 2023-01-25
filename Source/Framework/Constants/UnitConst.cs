@@ -120,11 +120,13 @@ namespace Framework.Constants
         NoDamage = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
         Self = 5
     }
+
     public enum WeaponDamageRange
     {
         MinDamage,
         MaxDamage
     }
+
     public enum UnitMods
     {
         StatStrength, // STAT_STRENGTH..UNIT_MOD_STAT_INTELLECT must be in existed order, it's accessed by index values of Stats enum.

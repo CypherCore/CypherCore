@@ -1044,7 +1044,7 @@ namespace Game.Entities
                             ModifyMoney(-amount);
                             break;
                         case TraitCurrencyType.CurrencyTypesBased:
-                            ModifyCurrency((CurrencyTypes)traitCurrency.CurrencyTypesID, -amount);
+                            ModifyCurrency((uint)traitCurrency.CurrencyTypesID, -amount);
                             break;
                         default:
                             break;

@@ -972,7 +972,7 @@ namespace Game.Entities
                         DestroyItemCount((uint)obj.ObjectID, (uint)obj.Amount, true);
                         break;
                     case QuestObjectiveType.Currency:
-                        ModifyCurrency((CurrencyTypes)obj.ObjectID, -obj.Amount, false, true);
+                        ModifyCurrency((uint)obj.ObjectID, -obj.Amount, false, true);
                         break;
                 }
             }
@@ -1040,7 +1040,7 @@ namespace Game.Entities
                     {
                         for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == rewardId)
-                                ModifyCurrency((CurrencyTypes)quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
+                                ModifyCurrency(quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
                     }
                     break;
             }
@@ -1048,7 +1048,7 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 if (quest.RewardCurrencyId[i] != 0)
-                    ModifyCurrency((CurrencyTypes)quest.RewardCurrencyId[i], (int)quest.RewardCurrencyCount[i]);
+                    ModifyCurrency(quest.RewardCurrencyId[i], (int)quest.RewardCurrencyCount[i]);
             }
 
             uint skill = quest.RewardSkillId;

@@ -651,7 +651,7 @@ namespace Game.Chat
             if (amount == 0)
                 return false;
 
-            target.ModifyCurrency((CurrencyTypes)currencyId, (int)amount, true, true);
+            target.ModifyCurrency(currencyId, (int)amount, true, true);
 
             return true;
         }

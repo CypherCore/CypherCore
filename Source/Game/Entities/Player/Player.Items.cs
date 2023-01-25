@@ -124,7 +124,7 @@ namespace Game.Entities
                 uint count = iece.CurrencyCount[i];
                 uint currencyid = iece.CurrencyID[i];
                 if (count != 0 && currencyid != 0)
-                    ModifyCurrency((CurrencyTypes)currencyid, (int)count, true, true);
+                    ModifyCurrency(currencyid, (int)count, true, true);
             }
 
             // Grant back money
@@ -2454,7 +2454,7 @@ namespace Game.Entities
                         continue;
 
                     if (iece.CurrencyID[i] != 0)
-                        ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), true, true);
+                        ModifyCurrency(iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), true, true);
                 }
             }
 
@@ -3180,7 +3180,7 @@ namespace Game.Entities
                 return false;
             }
 
-            ModifyCurrency((CurrencyTypes)currency, (int)count, true, true);
+            ModifyCurrency(currency, (int)count, true, true);
             if (iece != null)
             {
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
@@ -3199,7 +3199,7 @@ namespace Game.Entities
                     if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), false, true);
+                    ModifyCurrency(iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), false, true);
                 }
             }
 

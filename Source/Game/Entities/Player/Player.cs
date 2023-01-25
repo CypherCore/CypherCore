@@ -1110,6 +1110,7 @@ namespace Game.Entities
                 _currencyStorage[(uint)id] = cur;
             }
         }
+
         public uint GetCurrency(uint id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
@@ -1118,7 +1119,8 @@ namespace Game.Entities
 
             return playerCurrency.Quantity;
         }
-        public void ModifyCurrency(CurrencyTypes id, int count, bool printLog = true, bool ignoreMultipliers = false)
+
+        public void ModifyCurrency(uint id, int count, bool printLog = true, bool ignoreMultipliers = false)
         {
             if (count == 0)
                 return;
@@ -1139,7 +1141,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (id == CurrencyTypes.Azerite)
+            if (id == (uint)CurrencyTypes.Azerite)
             {
                 if (count > 0)
                 {
@@ -1163,7 +1165,7 @@ namespace Game.Entities
                 cur.WeeklyQuantity = 0;
                 cur.TrackedQuantity = 0;
                 cur.Flags = 0;
-                _currencyStorage[(uint)id] = cur;
+                _currencyStorage[id] = cur;
                 playerCurrency = _currencyStorage.LookupByKey(id);
             }
             else
@@ -1215,19 +1217,19 @@ namespace Game.Entities
                 if (playerCurrency.state != PlayerCurrencyState.New)
                     playerCurrency.state = PlayerCurrencyState.Changed;
 
-                CurrencyChanged((uint)id, count);
+                CurrencyChanged(id, count);
 
                 playerCurrency.Quantity = (uint)newTotalCount;
                 playerCurrency.WeeklyQuantity = (uint)newWeekCount;
                 playerCurrency.TrackedQuantity = (uint)newTrackedCount;
 
                 if (count > 0)
-                    UpdateCriteria(CriteriaType.CurrencyGained, (uint)id, (uint)count);
+                    UpdateCriteria(CriteriaType.CurrencyGained, id, (uint)count);
 
-                _currencyStorage[(uint)id] = playerCurrency;
+                _currencyStorage[id] = playerCurrency;
 
                 SetCurrency packet = new();
-                packet.Type = (uint)id;
+                packet.Type = id;
                 packet.Quantity = newTotalCount;
                 packet.SuppressChatLog = !printLog;
                 packet.WeeklyQuantity = newWeekCount;
@@ -1238,6 +1240,7 @@ namespace Game.Entities
                 SendPacket(packet);
             }
         }
+
         public bool HasCurrency(uint id, uint count)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
