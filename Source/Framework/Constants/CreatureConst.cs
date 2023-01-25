@@ -153,7 +153,7 @@ namespace Framework.Constants
         Unk21 = 0x200000,
         DontFadeOut = 0x400000,
         Unk23 = 0x800000,
-        Unk24 = 0x1000000,
+        ForceHideNameplate = 0x1000000,
         Unk25 = 0x2000000,
         Unk26 = 0x4000000,
         Unk27 = 0x8000000,
@@ -168,7 +168,7 @@ namespace Framework.Constants
                                                                    Unk12 | /* FakeDead | */ /* NoFacingOnInteractAndFastFacingChase | */ /* UntargetableFromUi | */
                                                                    /* NoFacingOnInteractWhileFakeDead | */ AlreadySkinned | /* SuppressAllNpcSounds | */ /* SuppressNpcSounds | */
                                                                    Unk20 | Unk21 | /* DontFadeOut | */ Unk23 |
-                                                                   Unk24 | Unk25 | Unk26 | Unk27 |
+                                                                   ForceHideNameplate | Unk25 | Unk26 | Unk27 |
                                                                    Unk28 | Unk29 | Unk30 | Unk31), // Skip
         Allowed = (0xffffffff & ~Disallowed) // Skip
     }
