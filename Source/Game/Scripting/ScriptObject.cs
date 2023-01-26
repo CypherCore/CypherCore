@@ -2,41 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.BattleFields;
-using Game.BattleGrounds;
-using Game.Chat;
-using Game.Conditions;
 using Game.Entities;
-using Game.Groups;
-using Game.Guilds;
 using Game.Maps;
-using Game.PvP;
 using Game.Scripting.Interfaces;
-using Game.Scripting.Interfaces.IAchievement;
-using Game.Scripting.Interfaces.IAreaTrigger;
-using Game.Scripting.Interfaces.IAreaTriggerEntity;
-using Game.Scripting.Interfaces.IAuctionHouse;
-using Game.Scripting.Interfaces.IBattlefield;
-using Game.Scripting.Interfaces.IBattleground;
-using Game.Scripting.Interfaces.ICondition;
-using Game.Scripting.Interfaces.IConversation;
-using Game.Scripting.Interfaces.IDynamicObject;
-using Game.Scripting.Interfaces.IFormula;
-using Game.Scripting.Interfaces.IGameObject;
-using Game.Scripting.Interfaces.IGroup;
-using Game.Scripting.Interfaces.IGuild;
-using Game.Scripting.Interfaces.IItem;
-using Game.Scripting.Interfaces.IMap;
-using Game.Scripting.Interfaces.IOutdoorPvP;
-using Game.Scripting.Interfaces.IQuest;
-using Game.Scripting.Interfaces.IScene;
-using Game.Scripting.Interfaces.ITransport;
-using Game.Scripting.Interfaces.IUnit;
-using Game.Scripting.Interfaces.IVehicle;
-using Game.Scripting.Interfaces.IWeather;
-using Game.Scripting.Interfaces.IWorld;
-using Game.Scripting.Interfaces.IWorldState;
-using Game.Spells;
 using System;
 
 namespace Game.Scripting
