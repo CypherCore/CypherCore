@@ -15,6 +15,7 @@ using Game.Maps;
 using Game.Misc;
 using Game.Movement;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
 using Game.Spells;
 using System;
 using System.Collections.Generic;

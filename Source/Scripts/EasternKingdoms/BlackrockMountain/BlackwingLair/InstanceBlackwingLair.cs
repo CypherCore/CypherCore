@@ -9,6 +9,7 @@ using Game.Maps;
 using System.Collections.Generic;
 using Framework.Constants;
 using Game.Scripting.Interfaces.IMap;
+using Game.Scripting.BaseScripts;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
 {

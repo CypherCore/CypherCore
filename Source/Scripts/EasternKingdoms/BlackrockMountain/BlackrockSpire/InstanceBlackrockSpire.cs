@@ -6,6 +6,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.IMap;
 using System;

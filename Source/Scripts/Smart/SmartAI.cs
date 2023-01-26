@@ -10,6 +10,7 @@ using Game.DataStorage;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.IAreaTriggerEntity;
 using Game.Scripting.Interfaces.IScene;
+using Game.Scripting.Interfaces.IQuest;
 
 namespace Scripts.Smart
 {
@@ -77,12 +78,12 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartQuest : QuestScript
+    class SmartQuest : ScriptObjectAutoAddDBBound, IQuestOnQuestStatusChange, IQuestOnQuestObjectiveChange
     {
         public SmartQuest() : base("SmartQuest") { }
 
         // Called when a quest status change
-        public override void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
+        public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, null, quest);
@@ -107,7 +108,7 @@ namespace Scripts.Smart
         }
 
         // Called when a quest objective data change
-        public override void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
+        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             ushort slot = player.FindQuestSlot(quest.Id);
             if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))

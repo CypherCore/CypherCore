@@ -6,6 +6,7 @@ using Game.Scripting;
 using Game.Entities;
 using Framework.Constants;
 using Game.Scripting.Interfaces.IMap;
+using Game.Scripting.BaseScripts;
 
 namespace Scripts.Argus.AntorusTheBurningThrone
 {

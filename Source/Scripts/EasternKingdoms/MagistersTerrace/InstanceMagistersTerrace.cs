@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IMap;
 using System;
 using System.Collections.Generic;

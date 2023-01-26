@@ -42,6 +42,8 @@ using Game.Scripting.Interfaces.IAreaTriggerEntity;
 using Game.Scripting.Interfaces.IConversation;
 using Game.Scripting.Interfaces.IScene;
 using Game.Scripting.Interfaces.IQuest;
+using Game.Scripting.Activators;
+using Game.Scripting.BaseScripts;
 
 namespace Game.Scripting
 {
@@ -177,12 +179,22 @@ namespace Game.Scripting
                 return;
             }
 
+            Dictionary<string, IScriptActivator> activators = new();
+
+            foreach (var type in typeof(IScriptActivator).Assembly.GetTypes()) // check game
+                RegisterActivators(activators, type);
+
+            foreach (var type in assembly.GetTypes()) // check scripts
+                RegisterActivators(activators, type);
+
             foreach (var type in assembly.GetTypes())
             {
                 var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();
                 if (!attributes.Empty())
                 {
                     var constructors = type.GetConstructors();
+                    int numArgsMin = 99;
+
                     if (constructors.Length == 0)
                     {
                         Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
@@ -191,19 +203,29 @@ namespace Game.Scripting
 
                     foreach (var attribute in attributes)
                     {
-                        var genericType = type;
                         string name = type.Name;
-
+                        System.Type paramType = null;
                         bool validArgs = true;
                         int i = 0;
 
                         foreach (var constructor in constructors)
                         {
                             var parameters = constructor.GetParameters();
+
+                            if (parameters.Length < numArgsMin)
+                            {
+                                numArgsMin = parameters.Length;
+
+                                if (numArgsMin == 1)
+                                {
+                                    paramType = parameters.FirstOrDefault().ParameterType;
+                                }
+                            }
+
                             if (parameters.Length != attribute.Args.Length)
                                 continue;
 
-                            foreach (var arg in constructor.GetParameters())
+                            foreach (var arg in parameters)
                             {
                                 if (arg.ParameterType != attribute.Args[i++].GetType())
                                 {
@@ -225,13 +247,26 @@ namespace Game.Scripting
                         if (!attribute.Name.IsEmpty())
                             name = attribute.Name;
 
-                        name = name.Replace("_SpellScript", "");
-                        name = name.Replace("_AuraScript", "");
+                        if (!string.IsNullOrEmpty(type?.BaseType?.Name) && activators.TryGetValue(type.BaseType.Name, out var scriptActivator))
+                        {
+                            scriptActivator.Activate(type, name, attribute);
+                            continue;
+                        }
 
                         if (attribute.Args.Empty())
-                            Activator.CreateInstance(genericType);
+                        {
+                            if (numArgsMin == 0)
+                                Activator.CreateInstance(type);
+                            else if (numArgsMin == 1 && paramType != null && paramType == typeof(string))
+                                Activator.CreateInstance(type, name);
+                        }
                         else
-                            Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
+                        {
+                            if (numArgsMin == 1 && paramType != null && paramType != typeof(string))
+                                Activator.CreateInstance(type, attribute.Args);
+                            else
+                                Activator.CreateInstance(type, new object[] { name }.Combine(attribute.Args));
+                        }
 
                         if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
                             foreach(var id in spellScript.SpellIds)
@@ -240,6 +275,28 @@ namespace Game.Scripting
                     }
                 }
             }
+        }
+
+        private static void RegisterActivators(Dictionary<string, IScriptActivator> activators, System.Type type)
+        {
+            if (DoesTypeSupportInterface(type, typeof(IScriptActivator)))
+            {
+                var asa = (IScriptActivator)Activator.CreateInstance(type);
+
+                foreach (var t in asa.ScriptBaseTypes)
+                    activators[t] = asa;
+            }
+        }
+
+        public static bool DoesTypeSupportInterface(System.Type type, System.Type inter)
+        {
+            if (type == inter) return false;
+
+            if (inter.IsAssignableFrom(type))
+                return true;
+            if (type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == inter))
+                return true;
+            return false;
         }
 
         public void LoadDatabase()
